@@ -74,6 +74,44 @@ function osoul_opt( $key ) {
 }
 
 /**
+ * One-time brand migration.
+ *
+ * osoul_opt() lets a value SAVED in the admin (the `osoul_settings` DB option)
+ * win over the code default. So editing the defaults for logos / VAT / CR /
+ * bank accounts has no visible effect on a site that already saved those
+ * fields. This routine force-writes the current brand values into the DB option
+ * exactly once per marker version, leaving every other saved setting (phone,
+ * email, Google keys, …) untouched. Admins can still edit these fields
+ * afterwards — the migration never runs again for the same marker.
+ */
+add_action( 'init', 'osoul_apply_brand_migration', 1 );
+if ( ! function_exists( 'osoul_apply_brand_migration' ) ) {
+	function osoul_apply_brand_migration() {
+		$marker = '2.19.1-brand';
+		if ( get_option( 'osoul_brand_migration' ) === $marker ) {
+			return; // already applied
+		}
+		$defaults = osoul_default_options();
+		$opts     = get_option( 'osoul_settings', array() );
+		if ( ! is_array( $opts ) ) {
+			$opts = array();
+		}
+		// Only the brand fields whose defaults must override stale saved values.
+		$force = array(
+			'logo', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login',
+			'vat_number', 'cr_number', 'bank_accounts', 'bank_accounts_en',
+		);
+		foreach ( $force as $k ) {
+			if ( isset( $defaults[ $k ] ) ) {
+				$opts[ $k ] = $defaults[ $k ];
+			}
+		}
+		update_option( 'osoul_settings', $opts );
+		update_option( 'osoul_brand_migration', $marker );
+	}
+}
+
+/**
  * Convert a display phone number into a `tel:` href value (digits + leading +).
  *
  * @param string $display
