@@ -127,13 +127,19 @@ body.lang-en .osf-heading::after{background:linear-gradient(270deg,rgba(124,182,
    external CSS can never strip it. clip-path cuts the slant INSIDE the box (no
    overflow / no clipped text); both filled so no border is cut; the old skew
    ::before is force-disabled so a stale cached stylesheet can't interfere. ===== */
+.opp-card-quote::before,.opp-card-detail::before{display:none!important} /* kill any cached skew layer everywhere */
+/* Slant ONLY inside the product-listing card actions */
 .opp-card-actions{gap:10px!important;flex-wrap:wrap!important}
-.opp-card-quote::before,.opp-card-detail::before{display:none!important}
-.opp-card-quote,.opp-card-detail{position:relative!important;border:none!important;overflow:visible!important;transform:none!important;white-space:nowrap!important;min-height:36px!important;border-radius:0!important;clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important;-webkit-clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important}
-.opp-card-quote{flex:1 1 130px!important;background:#0074A4!important;color:#fff!important;padding:9px 16px!important}
-.opp-card-quote:hover{background:#0089BE!important}
-.opp-card-detail{flex:0 0 auto!important;background:#e9f1f7!important;color:#00344F!important;padding:9px 18px!important}
-.opp-card-detail:hover{background:#00344F!important;color:#fff!important}
+.opp-card-actions .opp-card-quote,.opp-card-actions .opp-card-detail{position:relative!important;border:none!important;overflow:visible!important;transform:none!important;white-space:nowrap!important;min-height:36px!important;border-radius:0!important;clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important;-webkit-clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important}
+.opp-card-actions .opp-card-quote{flex:1 1 130px!important;background:#0074A4!important;color:#fff!important;padding:9px 16px!important}
+.opp-card-actions .opp-card-quote:hover{background:#0089BE!important}
+.opp-card-actions .opp-card-detail{flex:0 0 auto!important;background:#e9f1f7!important;color:#00344F!important;padding:9px 18px!important}
+.opp-card-actions .opp-card-detail:hover{background:#00344F!important;color:#fff!important}
+/* Detail-page CTA + related-products button: keep STRAIGHT (undo any cached slant/transparent) */
+.opdtl-cta-p{clip-path:none!important;-webkit-clip-path:none!important;transform:none!important;background:#0074A4!important;color:#fff!important;border-radius:3px!important;width:100%!important;padding:12px 22px!important;min-height:42px!important}
+.opdtl-cta-p:hover{background:#0089BE!important}
+.opdtl-rel-quote{clip-path:none!important;-webkit-clip-path:none!important;transform:none!important;background:#0074A4!important;color:#fff!important;border-radius:4px!important;width:100%!important}
+.opdtl-rel-quote:hover{background:#0089BE!important}
 </style>
 		<?php
 	}
