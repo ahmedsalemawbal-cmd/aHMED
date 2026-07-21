@@ -123,17 +123,17 @@ body.lang-en .osf-heading::after{background:linear-gradient(270deg,rgba(124,182,
 /* ===== Primary CTAs keep the bright accent blue. Floating lang active → primary ===== */
 .olf-btn.active,.osh-lang-btn.active,.osh-mob-lang-btn.active{background:#005784!important}
 
-/* ===== Parallelogram product buttons (inline so an optimizer/CDN cache of the
-   external CSS can never strip the slant). The skew is on a ::before layer and
-   the labels are lifted with position:relative so the text stays upright. ===== */
-.opp-card-quote,.opp-card-detail{position:relative!important;background:transparent!important;border:none!important;overflow:visible!important}
-.opp-card-quote::before,.opp-card-detail::before{content:''!important;position:absolute!important;inset:0!important;transform:skewX(-11deg)!important;border-radius:3px!important;transition:all .2s!important}
-.opp-card-quote::before{background:#0074A4!important;border:none!important}
-.opp-card-quote:hover::before{background:#0089BE!important}
-.opp-card-detail::before{background:transparent!important;border:1.5px solid rgba(0,52,79,.2)!important}
-.opp-card-detail:hover::before{background:#00344F!important;border-color:#00344F!important}
-.opp-card-detail:hover{color:#fff!important}
-.opp-card-quote>span,.opp-card-detail>span{position:relative!important}
+/* ===== Parallelogram product buttons — inline so an optimizer/CDN cache of the
+   external CSS can never strip it. clip-path cuts the slant INSIDE the box (no
+   overflow / no clipped text); both filled so no border is cut; the old skew
+   ::before is force-disabled so a stale cached stylesheet can't interfere. ===== */
+.opp-card-actions{gap:10px!important;flex-wrap:wrap!important}
+.opp-card-quote::before,.opp-card-detail::before{display:none!important}
+.opp-card-quote,.opp-card-detail{position:relative!important;border:none!important;overflow:visible!important;transform:none!important;white-space:nowrap!important;min-height:36px!important;border-radius:0!important;clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important;-webkit-clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)!important}
+.opp-card-quote{flex:1 1 130px!important;background:#0074A4!important;color:#fff!important;padding:9px 16px!important}
+.opp-card-quote:hover{background:#0089BE!important}
+.opp-card-detail{flex:0 0 auto!important;background:#e9f1f7!important;color:#00344F!important;padding:9px 18px!important}
+.opp-card-detail:hover{background:#00344F!important;color:#fff!important}
 </style>
 		<?php
 	}
