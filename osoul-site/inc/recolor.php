@@ -122,6 +122,18 @@ body.lang-en .osf-heading::after{background:linear-gradient(270deg,rgba(124,182,
 
 /* ===== Primary CTAs keep the bright accent blue. Floating lang active → primary ===== */
 .olf-btn.active,.osh-lang-btn.active,.osh-mob-lang-btn.active{background:#005784!important}
+
+/* ===== Parallelogram product buttons (inline so an optimizer/CDN cache of the
+   external CSS can never strip the slant). The skew is on a ::before layer and
+   the labels are lifted with position:relative so the text stays upright. ===== */
+.opp-card-quote,.opp-card-detail{position:relative!important;background:transparent!important;border:none!important;overflow:visible!important}
+.opp-card-quote::before,.opp-card-detail::before{content:''!important;position:absolute!important;inset:0!important;transform:skewX(-11deg)!important;border-radius:3px!important;transition:all .2s!important}
+.opp-card-quote::before{background:#0074A4!important;border:none!important}
+.opp-card-quote:hover::before{background:#0089BE!important}
+.opp-card-detail::before{background:transparent!important;border:1.5px solid rgba(0,52,79,.2)!important}
+.opp-card-detail:hover::before{background:#00344F!important;border-color:#00344F!important}
+.opp-card-detail:hover{color:#fff!important}
+.opp-card-quote>span,.opp-card-detail>span{position:relative!important}
 </style>
 		<?php
 	}
