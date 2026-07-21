@@ -3,7 +3,7 @@
  * Plugin Name:       Osoul Albinaa Site
  * Plugin URI:        https://osoulalbinaa.com
  * Description:        Front-end, bilingual (AR/EN) site layer for Osoul Albinaa Industrial Co. — header, footer, pages, product catalog, quote list and a real server-side quote/contact backend. Refactored from a single WPCode snippet into a maintainable, performance-oriented plugin.
- * Version:           2.18.0
+ * Version:           2.19.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Osoul Albinaa
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // Guard against double-load (kept from the original WPCode protection).
 if ( defined( 'OSOUL_VERSION' ) ) { return; }
 
-define( 'OSOUL_VERSION', '2.18.0' );
+define( 'OSOUL_VERSION', '2.19.0' );
 define( 'OSOUL_FILE', __FILE__ );
 define( 'OSOUL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OSOUL_URL', plugin_dir_url( __FILE__ ) );
@@ -59,7 +59,7 @@ $osoul_modules = array(
 	'inc/header.php',         // site header markup
 	'inc/footer.php',         // site footer + floating widgets
 	'inc/templates.php',      // page-template renderers (home, about, products, …)
-	'inc/recolor.php',        // palette refinement: navy-led, red only on CTAs
+	'inc/recolor.php',        // palette hierarchy: blue tiers (decorative vs CTA)
 );
 
 foreach ( $osoul_modules as $osoul_module ) {

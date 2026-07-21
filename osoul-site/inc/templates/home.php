@@ -41,7 +41,7 @@ body.lang-en #ohero{direction:ltr}
 #ohero .st{padding:0 0 0 24px;border-left:1px solid rgba(0,116,164,.2)}
 body.lang-en #ohero .st{padding:0 24px 0 0;border-left:none;border-right:1px solid rgba(0,116,164,.2)}
 #ohero .st:last-child{border-left:none;border-right:none;padding-left:0;padding-right:0}
-#ohero .sn{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:36px;font-weight:700;color:#0074A4;line-height:1;background:linear-gradient(135deg,#0074A4,#ff5858);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#ohero .sn{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:36px;font-weight:700;color:#0074A4;line-height:1;background:linear-gradient(135deg,#0074A4,#0089BE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 #ohero .sl{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:1.5px;text-transform:uppercase}
 @media(max-width:1024px){#ohero .body{padding:0 28px 44px}#ohero .stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){#ohero h1{letter-spacing:-1px}#ohero .btns{flex-direction:column;align-items:stretch}#ohero .bp,#ohero .bs{justify-content:center;width:100%}#ohero .sn{font-size:28px}#ohero .body{padding-bottom:56px}}
@@ -199,7 +199,7 @@ body.lang-en .ohp{direction:ltr}
 .ohp-client-logo{flex-shrink:0;height:64px;display:flex;align-items:center;justify-content:center}
 .ohp-client-logo img{max-height:100%;max-width:140px;object-fit:contain;filter:grayscale(1) opacity(.55);transition:filter var(--t-med),transform var(--t-fast);pointer-events:none}
 .ohp-client-logo:hover img{filter:grayscale(0) opacity(1);transform:scale(1.06)}
-.ohp-cta{padding:80px 60px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#005784 0%,#0074A4 40%,#c41015 70%,#a80d11 100%)}
+.ohp-cta{padding:80px 60px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#005784 0%,#0074A4 40%,#0089BE 70%,#005784 100%)}
 .ohp-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(0,0,0,.12) 0%,transparent 50%),repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.03) 40px,rgba(255,255,255,.03) 41px);pointer-events:none}
 .ohp-cta-tag{font-size:11px;letter-spacing:5px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:700;margin-bottom:16px;position:relative}
 .ohp-cta h2{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(28px,4.5vw,50px);font-weight:700;color:#fff;line-height:1.2;margin-bottom:14px;position:relative}

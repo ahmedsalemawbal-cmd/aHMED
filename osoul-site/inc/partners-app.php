@@ -255,7 +255,7 @@ function osoul_partner_auth_css() {
 function osoul_partner_render_register( $errors = array(), $old = array() ) {
 	$v = static function ( $k ) use ( $old ) { return esc_attr( $old[ $k ] ?? '' ); };
 	osoul_partner_page_head( 'التسجيل كشريك' );
-	$osoul_logo = osoul_opt( 'logo_url' ) ?: osoul_opt( 'logo_icon' );
+	$osoul_logo = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_url' ) ?: osoul_opt( 'logo_icon' ) );
 	echo '<style>' . osoul_partner_auth_css() . '</style>'; // phpcs:ignore — static CSS.
 	?>
 	<div class="ppreg-wrap">
@@ -310,7 +310,7 @@ function osoul_partner_render_register( $errors = array(), $old = array() ) {
 
 function osoul_partner_render_reg_done() {
 	osoul_partner_page_head( 'تم استلام الطلب' );
-	$osoul_logo = osoul_opt( 'logo_url' ) ?: osoul_opt( 'logo_icon' );
+	$osoul_logo = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_url' ) ?: osoul_opt( 'logo_icon' ) );
 	echo '<style>' . osoul_partner_auth_css() . '</style>'; // phpcs:ignore — static CSS.
 	?>
 	<div class="ppreg-wrap">

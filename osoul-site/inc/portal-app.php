@@ -287,7 +287,7 @@ function osoul_portal_foot() {
 
 function osoul_portal_render_login( $error = '', $note = '' ) {
 	osoul_portal_head( 'تسجيل الدخول' );
-	$logo = osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' );
+	$logo = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' ) );
 	?>
 	<div class="osp-auth">
 		<div class="osp-auth-card">
@@ -316,7 +316,7 @@ function osoul_portal_render_login( $error = '', $note = '' ) {
 function osoul_portal_render_invite( $user, $error = '' ) {
 	if ( isset( $GLOBALS['osoul_setpw_error'] ) ) { $error = $GLOBALS['osoul_setpw_error']; }
 	osoul_portal_head( 'تفعيل الحساب' );
-	$logo  = osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' );
+	$logo  = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' ) );
 	$token = get_user_meta( $user->ID, '_osoul_invite', true );
 	$role  = osoul_portal_role( $user );
 	?>

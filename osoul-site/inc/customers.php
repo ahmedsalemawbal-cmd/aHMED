@@ -498,7 +498,7 @@ function osoul_rest_customers( WP_REST_Request $req ) {
 /** Login + register (+ Google) page for a not-logged-in visitor. */
 function osoul_customer_auth_page( $err = '' ) {
 	osoul_app_head( 'دخول العملاء — ' . osoul_opt( 'company_name_ar' ), osoul_portal_lang() );
-	$logo    = osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' );
+	$logo    = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' ) );
 	$nonce   = wp_create_nonce( 'osoul_customer' );
 	$act     = osoul_customer_url();
 	$reg_tab = ( 'register' === ( $_GET['tab'] ?? '' ) ) || ! empty( $_POST['name'] );

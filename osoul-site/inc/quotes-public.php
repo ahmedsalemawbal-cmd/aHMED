@@ -76,7 +76,7 @@ function osoul_render_public_quote( $token ) {
 		$logo    = $ar ? osoul_opt( 'logo_url' ) : ( osoul_opt( 'logo_url_en' ) ?: osoul_opt( 'logo_url' ) );
 		$vat_no  = osoul_opt( 'vat_number' );
 		$cr_no   = osoul_opt( 'cr_number' );
-		$bank    = osoul_opt( 'bank_accounts' );
+		$bank    = $ar ? osoul_opt( 'bank_accounts' ) : ( osoul_opt( 'bank_accounts_en' ) ?: osoul_opt( 'bank_accounts' ) );
 	}
 	// Brand colours: a partner quote is themed with the partner's colours
 	// (snapshotted at issue time); Osoul quotes keep the house navy/red.

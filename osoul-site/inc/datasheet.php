@@ -46,7 +46,7 @@ function osoul_catalog_url( $partner_id, $items, $lang ) {
 }
 
 /** Resolve the brand (partner or Osoul) for the catalog document. */
-function osoul_catalog_brand( $partner_id ) {
+function osoul_catalog_brand( $partner_id, $lang = 'ar' ) {
 	$hex = function ( $v, $d ) { return ( is_string( $v ) && preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $v ) ) ? $v : $d; };
 	if ( $partner_id && function_exists( 'osoul_partner_brand_snapshot' ) ) {
 		$b = osoul_partner_brand_snapshot( $partner_id );
@@ -65,7 +65,7 @@ function osoul_catalog_brand( $partner_id ) {
 	return array(
 		'company_ar' => osoul_opt( 'company_name_ar' ),
 		'company_en' => osoul_opt( 'company_name_en' ),
-		'logo'       => osoul_opt( 'logo_url' ),
+		'logo'       => ( 'en' === $lang ) ? ( osoul_opt( 'logo_url_en' ) ?: osoul_opt( 'logo_url' ) ) : osoul_opt( 'logo_url' ),
 		'phone'      => osoul_opt( 'phone_primary' ),
 		'email'      => osoul_opt( 'email' ),
 		'address_ar' => osoul_opt( 'national_address_ar' ) ?: osoul_opt( 'address_ar' ),
@@ -124,7 +124,7 @@ add_action( 'template_redirect', function () {
 		$products = $catalog;
 	}
 
-	osoul_catalog_render( $products, osoul_catalog_brand( $brand_pid ), $lang );
+	osoul_catalog_render( $products, osoul_catalog_brand( $brand_pid, $lang ), $lang );
 	exit;
 }, 0 );
 

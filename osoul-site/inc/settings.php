@@ -31,20 +31,22 @@ function osoul_default_options() {
 		'twitter'         => 'https://x.com/',
 		'maps_embed'      => 'https://www.google.com/maps?q=21.1401875,39.3309375&hl=ar&z=16&output=embed',
 		'favicon'         => '', // Site icon shown in Google results + browser tabs (square PNG, ASCII filename). Empty => WP Site Icon / logo_icon.
-		'logo'            => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/مُلصق_عبوة_مياه_نمط_كحلي_بسيط__3_-removebg-preview.png', // Header/footer brand lockup — light/white version sized for the dark chrome (#00344F). Falls back to an inline SVG if empty.
+		'logo'            => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/OSOUL-LOGO-01-1.ai_.png', // Header/footer brand lockup (light version for the dark chrome #00344F). Falls back to an inline SVG if empty.
 
 		/* ── Quote document (placeholders — edit later) ── */
 		'company_name_ar'    => 'شركة أصول البناء للصناعة',
 		'company_name_en'    => 'Osoul Albinaa Industrial Co.',
-		'logo_url'           => 'https://osoulalbinaa.com/wp-content/uploads/2026/06/تصميم-بدون-عنوان-20.png',
-		'logo_url_en'        => 'https://osoulalbinaa.com/wp-content/uploads/2026/06/تصميم-بدون-عنوان-22.png',
-		'logo_icon'          => 'https://osoulalbinaa.com/wp-content/uploads/2026/06/شعار-اصول.ai_.png',
+		'logo_url'           => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/1.png',  // Document logo (quote + datasheet) — Arabic.
+		'logo_url_en'        => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/2.png',  // Document logo (quote + datasheet) — English.
+		'logo_icon'          => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/تصميم-بدون-عنوان-26.png', // Customer/partner dashboards (after login) + favicon fallback.
+		'logo_login'         => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/تصميم-بدون-عنوان-24.png', // Login / sign-in / register screens.
 		'login_video_url'    => 'https://osoulalbinaa.com/wp-content/uploads/2026/06/تغطية-المصنع3.mp4',
-		'vat_number'         => '300000000000003',
-		'cr_number'          => '4030000000',
+		'vat_number'         => '311325076500003',
+		'cr_number'          => '4030495019',
 		'national_address_ar'=> 'جدة — المدينة الصناعية الثالثة، المملكة العربية السعودية',
 		'national_address_en'=> 'Jeddah — 3rd Industrial City, Saudi Arabia',
-		'bank_accounts'      => "البنك الأهلي السعودي | اسم الحساب: شركة أصول البناء للصناعة | آيبان: SA0000000000000000000000",
+		'bank_accounts'      => "البنك الراجحي | رقم الحساب: 153608010098791 | آيبان: SA1280000153608010098791\nالبنك الأهلي | رقم الحساب: 0550000465300 | آيبان: SA3210000005500000465300\nيتم تحويل المبالغ المستحقة للحسابات التابعة للشركة فقط.",
+		'bank_accounts_en'   => "Al Rajhi Bank | Account: 153608010098791 | IBAN: SA1280000153608010098791\nAl Ahli Bank (SNB) | Account: 0550000465300 | IBAN: SA3210000005500000465300\nPayments are made only to the company's official bank accounts.",
 		'terms_ar'           => "• الأسعار بالريال السعودي ولا تشمل ضريبة القيمة المضافة (تُضاف 15%).\n• هذا العرض ساري لمدة المدة الموضحة أعلاه.\n• التسليم والتركيب حسب الاتفاق.",
 		'terms_en'           => "• Prices are in SAR and exclude VAT (15% added).\n• This quotation is valid for the period shown above.\n• Delivery and installation as agreed.",
 		'validity_days'      => '30',
@@ -118,8 +120,8 @@ add_action( 'admin_init', function () {
 function osoul_sanitize_settings( $input ) {
 	$out  = array();
 	$keys = array_keys( osoul_default_options() );
-	$url_fields      = array( 'instagram', 'linkedin', 'twitter', 'maps_embed', 'favicon', 'logo_url', 'logo_url_en', 'logo_icon' );
-	$textarea_fields = array( 'bank_accounts', 'terms_ar', 'terms_en', 'national_address_ar', 'national_address_en' );
+	$url_fields      = array( 'instagram', 'linkedin', 'twitter', 'maps_embed', 'favicon', 'logo', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login' );
+	$textarea_fields = array( 'bank_accounts', 'bank_accounts_en', 'terms_ar', 'terms_en', 'national_address_ar', 'national_address_en' );
 	foreach ( $keys as $k ) {
 		$val = isset( $input[ $k ] ) ? wp_unslash( $input[ $k ] ) : '';
 		if ( in_array( $k, $url_fields, true ) ) {
@@ -170,18 +172,21 @@ function osoul_render_settings_page() {
 		'twitter'         => __( 'Twitter / X URL', 'osoul' ),
 		'maps_embed'      => __( 'Google Maps embed URL (the src of the iframe)', 'osoul' ),
 		'favicon'         => __( 'أيقونة الموقع في جوجل (Favicon)', 'osoul' ),
+		'logo'            => __( 'شعار الهيدر والفوتر (Header/Footer logo — light version for the dark bar)', 'osoul' ),
 		'__quote'             => '— ' . __( 'بيانات عرض السعر (Quote document)', 'osoul' ) . ' —',
 		'company_name_ar'     => __( 'اسم الشركة (عربي)', 'osoul' ),
 		'company_name_en'     => __( 'اسم الشركة (إنجليزي)', 'osoul' ),
-		'logo_url'            => __( 'رابط الشعار (Logo URL)', 'osoul' ),
-		'logo_url_en'         => __( 'شعار العرض الإنجليزي (English quote logo)', 'osoul' ),
-		'logo_icon'           => __( 'أيقونة صفحة الدخول (Login icon)', 'osoul' ),
+		'logo_url'            => __( 'شعار المستندات — عربي (Document logo AR: quote + datasheet)', 'osoul' ),
+		'logo_url_en'         => __( 'شعار المستندات — إنجليزي (Document logo EN)', 'osoul' ),
+		'logo_icon'           => __( 'شعار اللوحات + أيقونة الموقع (Dashboards + favicon)', 'osoul' ),
+		'logo_login'          => __( 'شعار صفحة تسجيل الدخول (Login screen logo)', 'osoul' ),
 		'login_video_url'     => __( 'فيديو خلفية صفحة الدخول (Login background video)', 'osoul' ),
 		'vat_number'          => __( 'الرقم الضريبي (VAT number)', 'osoul' ),
 		'cr_number'           => __( 'السجل التجاري (CR number)', 'osoul' ),
 		'national_address_ar' => __( 'العنوان الوطني (عربي)', 'osoul' ),
 		'national_address_en' => __( 'العنوان الوطني (إنجليزي)', 'osoul' ),
-		'bank_accounts'       => __( 'الحسابات البنكية (كل حساب في سطر)', 'osoul' ),
+		'bank_accounts'       => __( 'الحسابات البنكية — عربي (كل حساب في سطر)', 'osoul' ),
+		'bank_accounts_en'    => __( 'الحسابات البنكية — إنجليزي (Bank accounts EN, one per line)', 'osoul' ),
 		'terms_ar'            => __( 'الشروط والأحكام (عربي)', 'osoul' ),
 		'terms_en'            => __( 'الشروط والأحكام (إنجليزي)', 'osoul' ),
 		'validity_days'       => __( 'مدة صلاحية العرض (أيام)', 'osoul' ),
@@ -190,7 +195,7 @@ function osoul_render_settings_page() {
 		'google_client_id'     => __( 'Google Client ID', 'osoul' ),
 		'google_client_secret' => __( 'Google Client Secret', 'osoul' ),
 	);
-	$textarea_keys = array( 'maps_embed', 'bank_accounts', 'terms_ar', 'terms_en', 'national_address_ar', 'national_address_en' );
+	$textarea_keys = array( 'maps_embed', 'bank_accounts', 'bank_accounts_en', 'terms_ar', 'terms_en', 'national_address_ar', 'national_address_en' );
 	$descriptions  = array(
 		'favicon' => __( 'الأيقونة التي تظهر بجانب الموقع في نتائج جوجل وفي تبويب المتصفح. الأفضل: صورة PNG مربّعة 512×512 بكسل باسم إنجليزي (مثل favicon.png) — تجنّب الأسماء العربية. اتركه فارغاً لاستخدام «أيقونة الموقع» في ووردبريس. Square PNG (512×512), ASCII filename.', 'osoul' ),
 		'login_video_url' => __( 'رابط فيديو MP4 يظهر كخلفية متحركة في صفحة دخول العملاء (مثل الهيرو سيكشن). اتركه فارغاً لاستخدام الخلفية الافتراضية. Direct MP4 URL — muted autoplay loop.', 'osoul' ),
