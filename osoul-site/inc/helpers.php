@@ -111,12 +111,20 @@ function osoul_bilingual( $ar, $en ) {
 function osoul_brand_logo( $context = 'header' ) {
 	$class = 'osoul-logo osoul-logo--' . ( 'footer' === $context ? 'footer' : 'header' );
 
-	$url = function_exists( 'osoul_opt' ) ? (string) osoul_opt( 'logo' ) : '';
+	$ar_url = function_exists( 'osoul_opt' ) ? (string) osoul_opt( 'logo' ) : '';
+	$en_url = function_exists( 'osoul_opt' ) ? (string) osoul_opt( 'logo_en' ) : '';
 	/** Filterable so the official artwork can be wired without touching markup. */
-	$url = (string) apply_filters( 'osoul_logo_url', $url, $context );
-	if ( '' !== $url ) {
-		return '<span class="' . esc_attr( $class ) . '"><img src="' . esc_url( $url )
-			. '" alt="أصول البناء للصناعة"></span>';
+	$ar_url = (string) apply_filters( 'osoul_logo_url', $ar_url, $context );
+	if ( '' === $en_url ) {
+		$en_url = $ar_url; // fall back to the Arabic logo when no English one is set
+	}
+	if ( '' !== $ar_url ) {
+		// Two language-tagged images; the [data-lang] CSS shows the right one and
+		// swaps it live with the AR/EN switcher (no page reload).
+		return '<span class="' . esc_attr( $class ) . '">'
+			. '<img data-lang="ar" src="' . esc_url( $ar_url ) . '" alt="أصول البناء للصناعة">'
+			. '<img data-lang="en" src="' . esc_url( $en_url ) . '" alt="Osoul Albinaa Industrial Co.">'
+			. '</span>';
 	}
 
 	// Inline SVG fallback — interlocking blocks mark + wordmark, on-dark palette.

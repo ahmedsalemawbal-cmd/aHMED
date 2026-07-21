@@ -142,6 +142,11 @@ body.lang-en #osoul-header{direction:ltr}
 .osh-logo:hover img{transform:scale(1.04);filter:brightness(1.1)}
 /* Brand logo lockup (inline SVG fallback — used until an official logo URL is set) */
 .osoul-logo{display:inline-flex;align-items:center;gap:11px;text-decoration:none;direction:rtl}
+/* Bilingual logo: show AR or EN image per active language (live-swappable) */
+.osoul-logo img[data-lang="en"]{display:none!important}
+.osoul-logo img[data-lang="ar"]{display:block!important}
+body.lang-en .osoul-logo img[data-lang="ar"]{display:none!important}
+body.lang-en .osoul-logo img[data-lang="en"]{display:block!important}
 .osoul-logo__mark{flex-shrink:0;display:block;transition:transform var(--t-fast)}
 .osoul-logo__mark svg{display:block}
 .osoul-logo__txt{display:flex;flex-direction:column;line-height:1.05;text-align:right}
@@ -266,12 +271,17 @@ body.lang-en #osoul-footer{direction:ltr}
 /* ─────────────────────────────────────────
    6. Products — shared card styles (used across portal/archive/detail)
 ───────────────────────────────────────────*/
-.opp-card-actions{display:flex;gap:8px}
-.opp-card-quote{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#0074A4;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;padding:7px 14px;border-radius:6px;border:none;cursor:pointer;transition:background .2s;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;min-height:33px}
-.opp-card-quote:hover{background:#0089BE}
+.opp-card-actions{display:flex;gap:14px}
+/* Parallelogram buttons (slanted like the logo). The skew lives on a ::before
+   layer so the label stays upright and the outline border stays crisp. */
+.opp-card-quote{flex:1;position:relative;z-index:0;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:transparent;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;padding:8px 16px;border:none;cursor:pointer;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;min-height:34px}
+.opp-card-quote::before{content:'';position:absolute;inset:0;z-index:-1;background:#0074A4;transform:skewX(-11deg);border-radius:3px;transition:background .2s}
+.opp-card-quote:hover::before{background:#0089BE}
 .opp-card-quote:active{transform:scale(.97)}
-.opp-card-detail{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:transparent;color:#00344F;font-size:11px;font-weight:600;padding:7px 14px;border-radius:6px;border:1px solid rgba(0,52,79,.15);cursor:pointer;transition:all .2s;text-decoration:none;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;min-height:33px}
-.opp-card-detail:hover{background:#00344F;color:#fff;border-color:#00344F}
+.opp-card-detail{position:relative;z-index:0;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:transparent;color:#00344F;font-size:11px;font-weight:600;padding:8px 16px;border:none;cursor:pointer;transition:color .2s;text-decoration:none;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;min-height:34px}
+.opp-card-detail::before{content:'';position:absolute;inset:0;z-index:-1;background:transparent;border:1.5px solid rgba(0,52,79,.2);transform:skewX(-11deg);border-radius:3px;transition:all .2s}
+.opp-card-detail:hover{color:#fff}
+.opp-card-detail:hover::before{background:#00344F;border-color:#00344F}
 .opp-card-badge{position:absolute;top:10px;right:10px;background:#0074A4;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px}
 /* Add-to-quote button label uses classes (not data-lang) to avoid !important conflicts */
 .oql-btn-en{display:none}

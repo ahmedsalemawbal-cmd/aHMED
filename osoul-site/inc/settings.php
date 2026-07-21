@@ -31,7 +31,8 @@ function osoul_default_options() {
 		'twitter'         => 'https://x.com/',
 		'maps_embed'      => 'https://www.google.com/maps?q=21.1401875,39.3309375&hl=ar&z=16&output=embed',
 		'favicon'         => '', // Site icon shown in Google results + browser tabs (square PNG, ASCII filename). Empty => WP Site Icon / logo_icon.
-		'logo'            => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/OSOUL-LOGO-01-1.ai_.png', // Header/footer brand lockup (light version for the dark chrome #00344F). Falls back to an inline SVG if empty.
+		'logo'            => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/1-2.png', // Header/footer logo — Arabic (light version for the dark chrome #00344F). Falls back to an inline SVG if empty.
+		'logo_en'         => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/2-1.png', // Header/footer logo — English.
 
 		/* ── Quote document (placeholders — edit later) ── */
 		'company_name_ar'    => 'شركة أصول البناء للصناعة',
@@ -87,7 +88,7 @@ function osoul_opt( $key ) {
 add_action( 'init', 'osoul_apply_brand_migration', 1 );
 if ( ! function_exists( 'osoul_apply_brand_migration' ) ) {
 	function osoul_apply_brand_migration() {
-		$marker = '2.19.1-brand';
+		$marker = '2.19.2-brand';
 		if ( get_option( 'osoul_brand_migration' ) === $marker ) {
 			return; // already applied
 		}
@@ -98,7 +99,7 @@ if ( ! function_exists( 'osoul_apply_brand_migration' ) ) {
 		}
 		// Only the brand fields whose defaults must override stale saved values.
 		$force = array(
-			'logo', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login',
+			'logo', 'logo_en', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login',
 			'vat_number', 'cr_number', 'bank_accounts', 'bank_accounts_en',
 		);
 		foreach ( $force as $k ) {
@@ -158,7 +159,7 @@ add_action( 'admin_init', function () {
 function osoul_sanitize_settings( $input ) {
 	$out  = array();
 	$keys = array_keys( osoul_default_options() );
-	$url_fields      = array( 'instagram', 'linkedin', 'twitter', 'maps_embed', 'favicon', 'logo', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login' );
+	$url_fields      = array( 'instagram', 'linkedin', 'twitter', 'maps_embed', 'favicon', 'logo', 'logo_en', 'logo_url', 'logo_url_en', 'logo_icon', 'logo_login' );
 	$textarea_fields = array( 'bank_accounts', 'bank_accounts_en', 'terms_ar', 'terms_en', 'national_address_ar', 'national_address_en' );
 	foreach ( $keys as $k ) {
 		$val = isset( $input[ $k ] ) ? wp_unslash( $input[ $k ] ) : '';
@@ -210,7 +211,8 @@ function osoul_render_settings_page() {
 		'twitter'         => __( 'Twitter / X URL', 'osoul' ),
 		'maps_embed'      => __( 'Google Maps embed URL (the src of the iframe)', 'osoul' ),
 		'favicon'         => __( 'أيقونة الموقع في جوجل (Favicon)', 'osoul' ),
-		'logo'            => __( 'شعار الهيدر والفوتر (Header/Footer logo — light version for the dark bar)', 'osoul' ),
+		'logo'            => __( 'شعار الهيدر/الفوتر — عربي (Header/Footer logo AR — light version)', 'osoul' ),
+		'logo_en'         => __( 'شعار الهيدر/الفوتر — إنجليزي (Header/Footer logo EN)', 'osoul' ),
 		'__quote'             => '— ' . __( 'بيانات عرض السعر (Quote document)', 'osoul' ) . ' —',
 		'company_name_ar'     => __( 'اسم الشركة (عربي)', 'osoul' ),
 		'company_name_en'     => __( 'اسم الشركة (إنجليزي)', 'osoul' ),
