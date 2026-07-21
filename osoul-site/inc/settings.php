@@ -31,6 +31,7 @@ function osoul_default_options() {
 		'twitter'         => 'https://x.com/',
 		'maps_embed'      => 'https://www.google.com/maps?q=21.1401875,39.3309375&hl=ar&z=16&output=embed',
 		'favicon'         => '', // Site icon shown in Google results + browser tabs (square PNG, ASCII filename). Empty => WP Site Icon / logo_icon.
+		'logo'            => 'https://osoulalbinaa.com/wp-content/uploads/2026/07/مُلصق_عبوة_مياه_نمط_كحلي_بسيط__3_-removebg-preview.png', // Header/footer brand lockup — light/white version sized for the dark chrome (#00344F). Falls back to an inline SVG if empty.
 
 		/* ── Quote document (placeholders — edit later) ── */
 		'company_name_ar'    => 'شركة أصول البناء للصناعة',
