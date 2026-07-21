@@ -17,105 +17,105 @@ if ( ! function_exists( 'osoul_about_output' ) ) {
 		$base = 'https://osoulalbinaa.com/wp-content/uploads/2026/06/';
 		?>
 <style id="osoul-about-css">
-.oab{font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;direction:rtl;background:#f5f2ee;overflow-x:hidden;display:block!important}
-.oab-hero{background:#0d1f3c;padding:80px 60px 64px;position:relative;overflow:hidden}
-.oab-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#D21217}
+.oab{font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;direction:rtl;background:#E9F2F8;overflow-x:hidden;display:block!important}
+.oab-hero{background:#00344F;padding:80px 60px 64px;position:relative;overflow:hidden}
+.oab-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#0074A4}
 .oab-hero::after{content:'';position:absolute;inset:0;background:url('<?php echo esc_url( $base ); ?>DSC_2478-scaled.jpg') center/cover;opacity:.1;pointer-events:none}
 .oab-hero-inner{position:relative;z-index:1;max-width:860px}
-.oab-tag{font-size:11px;letter-spacing:5px;color:#D21217;text-transform:uppercase;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.oab-tag::before{content:'';width:28px;height:1px;background:#D21217}
+.oab-tag{font-size:11px;letter-spacing:5px;color:#0074A4;text-transform:uppercase;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.oab-tag::before{content:'';width:28px;height:1px;background:#0074A4}
 .oab-h1{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(30px,4.5vw,52px);font-weight:700;color:#fff;line-height:1.15;margin-bottom:14px}
-.oab-h1 em{font-style:italic;color:#D21217}
+.oab-h1 em{font-style:italic;color:#0074A4}
 .oab-sub{font-size:15px;color:rgba(255,255,255,.55);max-width:560px;line-height:1.65;font-weight:300;margin-bottom:28px}
 .oab-hero-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;max-width:760px}
 .oab-meta-i{background:rgba(255,255,255,.04);padding:10px 14px}
-.oab-meta-l{font-size:8px;color:#D21217;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.oab-meta-l{font-size:8px;color:#0074A4;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
 .oab-meta-v{font-size:12px;color:#fff;font-weight:600}
 .oab-hero-btns{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap}
-.oab-btn-p{display:inline-flex;align-items:center;gap:7px;background:#D21217;color:#fff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:11px 24px;border-radius:2px;text-decoration:none;min-height:44px}
+.oab-btn-p{display:inline-flex;align-items:center;gap:7px;background:#0074A4;color:#fff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:11px 24px;border-radius:2px;text-decoration:none;min-height:44px}
 .oab-btn-s{display:inline-flex;align-items:center;gap:7px;background:transparent;color:rgba(255,255,255,.75);font-size:11px;font-weight:600;padding:11px 18px;border-radius:2px;border:1.5px solid rgba(255,255,255,.2);text-decoration:none;min-height:44px}
 .oab-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:rgba(255,255,255,.2)}
-.oab-stat{background:#D21217;padding:20px 24px;text-align:center}
+.oab-stat{background:#0074A4;padding:20px 24px;text-align:center}
 .oab-stat-n{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1}
 .oab-stat-l{font-size:10px;color:rgba(255,255,255,.7);margin-top:5px;letter-spacing:1.5px;text-transform:uppercase}
 .oab-whowe{background:#fff;padding:60px}
 .oab-whowe-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:start;max-width:1200px;margin:0 auto}
-.oab-sec-tag{font-size:9px;letter-spacing:4px;color:#D21217;text-transform:uppercase;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.oab-sec-tag::before{content:'';width:20px;height:1px;background:#D21217}
-.oab-sec-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(22px,2.5vw,28px);font-weight:700;color:#0d1f3c;line-height:1.3;margin-bottom:16px}
-.oab-sec-h em{color:#D21217;font-style:italic}
-.oab-body-txt{font-size:13px;color:rgba(13,31,60,.65);line-height:1.8;font-weight:300;margin-bottom:14px}
-.oab-body-txt strong{color:#0d1f3c;font-weight:600}
-.oab-lines-label{font-size:8px;letter-spacing:2px;color:#D21217;font-weight:700;text-transform:uppercase;margin-bottom:10px;padding-top:16px;border-top:1px solid rgba(13,31,60,.08)}
+.oab-sec-tag{font-size:9px;letter-spacing:4px;color:#0074A4;text-transform:uppercase;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.oab-sec-tag::before{content:'';width:20px;height:1px;background:#0074A4}
+.oab-sec-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(22px,2.5vw,28px);font-weight:700;color:#00344F;line-height:1.3;margin-bottom:16px}
+.oab-sec-h em{color:#0074A4;font-style:italic}
+.oab-body-txt{font-size:13px;color:rgba(0,52,79,.65);line-height:1.8;font-weight:300;margin-bottom:14px}
+.oab-body-txt strong{color:#00344F;font-weight:600}
+.oab-lines-label{font-size:8px;letter-spacing:2px;color:#0074A4;font-weight:700;text-transform:uppercase;margin-bottom:10px;padding-top:16px;border-top:1px solid rgba(0,52,79,.08)}
 .oab-lines-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.oab-line-item{font-size:11.5px;color:rgba(13,31,60,.7);padding:6px 0;border-bottom:.5px solid rgba(13,31,60,.06);font-weight:300}
+.oab-line-item{font-size:11.5px;color:rgba(0,52,79,.7);padding:6px 0;border-bottom:.5px solid rgba(0,52,79,.06);font-weight:300}
 .oab-vm-cards{display:flex;flex-direction:column;gap:14px}
-.oab-v-card{background:#f5f2ee;border-radius:6px;padding:24px 22px;border-top:3px solid #D21217}
-.oab-m-card{background:#f5f2ee;border-radius:6px;padding:24px 22px;border-top:3px solid #0d1f3c}
+.oab-v-card{background:#E9F2F8;border-radius:6px;padding:24px 22px;border-top:3px solid #0074A4}
+.oab-m-card{background:#E9F2F8;border-radius:6px;padding:24px 22px;border-top:3px solid #00344F}
 .oab-card-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
-.oab-card-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:16px;font-weight:700;color:#0d1f3c;margin-bottom:8px}
-.oab-card-txt{font-size:11.5px;color:rgba(13,31,60,.6);line-height:1.65;font-weight:300}
-.oab-2030{background:#0d1f3c;border-radius:6px;padding:16px 22px;display:flex;align-items:center;gap:14px}
+.oab-card-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:16px;font-weight:700;color:#00344F;margin-bottom:8px}
+.oab-card-txt{font-size:11.5px;color:rgba(0,52,79,.6);line-height:1.65;font-weight:300}
+.oab-2030{background:#00344F;border-radius:6px;padding:16px 22px;display:flex;align-items:center;gap:14px}
 .oab-2030-txt strong{font-size:12px;font-weight:700;color:#fff;display:block}
 .oab-2030-txt span{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;display:block}
-.oab-ceo{background:#0d1f3c;position:relative;overflow:hidden}
+.oab-ceo{background:#00344F;position:relative;overflow:hidden}
 .oab-ceo::before{content:'';position:absolute;inset:0;background:url('<?php echo esc_url( $base ); ?>DSC_2461-scaled.jpg') center/cover;opacity:.08;pointer-events:none}
-.oab-ceo::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#D21217;pointer-events:none}
+.oab-ceo::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#0074A4;pointer-events:none}
 .oab-ceo-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.15fr 1fr;max-width:100%}
 .oab-ceo-txt{padding:56px 52px;border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;justify-content:center}
-.oab-ceo-tag{font-size:8px;letter-spacing:4px;color:#D21217;text-transform:uppercase;font-weight:700;margin-bottom:18px}
-.oab-ceo-q-open{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:90px;color:rgba(210,18,23,.2);line-height:.7;font-style:italic}
+.oab-ceo-tag{font-size:8px;letter-spacing:4px;color:#0074A4;text-transform:uppercase;font-weight:700;margin-bottom:18px}
+.oab-ceo-q-open{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:90px;color:rgba(0,116,164,.2);line-height:.7;font-style:italic}
 .oab-ceo-q{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:18.5px;font-weight:700;color:#fff;line-height:1.55;font-style:italic;margin:6px 0 5px}
-.oab-ceo-q-close{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:90px;color:rgba(210,18,23,.2);line-height:.5;text-align:left;font-style:italic;margin-bottom:24px}
+.oab-ceo-q-close{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:90px;color:rgba(0,116,164,.2);line-height:.5;text-align:left;font-style:italic;margin-bottom:24px}
 .oab-ceo-body{font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.8;font-weight:300;max-width:420px;margin-bottom:26px}
 .oab-ceo-sig{border-top:1px solid rgba(255,255,255,.09);padding-top:20px}
 .oab-ceo-name{font-size:18px;font-weight:700;color:#fff;margin-bottom:5px}
-.oab-ceo-title{font-size:8px;color:#D21217;letter-spacing:2px;font-weight:700;margin-bottom:4px}
+.oab-ceo-title{font-size:8px;color:#0074A4;letter-spacing:2px;font-weight:700;margin-bottom:4px}
 .oab-ceo-photo{background:#061524;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:460px;position:relative;overflow:hidden}
 .oab-ceo-circle-wrap{position:relative;z-index:1;text-align:center}
-.oab-ceo-circle-outer{width:180px;height:180px;border-radius:50%;border:1px solid rgba(210,18,23,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-.oab-ceo-circle-mid{width:150px;height:150px;border-radius:50%;border:2px solid rgba(210,18,23,.4);display:flex;align-items:center;justify-content:center;background:rgba(210,18,23,.08)}
-.oab-ceo-circle-in{width:120px;height:120px;border-radius:50%;background:url('<?php echo esc_url( $base ); ?>تصميم-بدون-عنوان-19.png') center top/cover;border:2px solid rgba(210,18,23,.5);overflow:hidden}
+.oab-ceo-circle-outer{width:180px;height:180px;border-radius:50%;border:1px solid rgba(0,116,164,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.oab-ceo-circle-mid{width:150px;height:150px;border-radius:50%;border:2px solid rgba(0,116,164,.4);display:flex;align-items:center;justify-content:center;background:rgba(0,116,164,.08)}
+.oab-ceo-circle-in{width:120px;height:120px;border-radius:50%;background:url('<?php echo esc_url( $base ); ?>تصميم-بدون-عنوان-19.png') center top/cover;border:2px solid rgba(0,116,164,.5);overflow:hidden}
 .oab-ceo-cname{font-size:16px;font-weight:700;color:#fff;margin-bottom:5px}
-.oab-ceo-ctitle{font-size:8px;color:#D21217;letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase}
-.oab-ceo-divider{width:40px;height:1px;background:rgba(210,18,23,.4);margin:14px auto 0}
-.oab-ceo-corner-tl{position:absolute;top:18px;left:18px;width:44px;height:44px;border-top:2px solid rgba(210,18,23,.5);border-left:2px solid rgba(210,18,23,.5)}
-.oab-ceo-corner-br{position:absolute;bottom:18px;right:18px;width:44px;height:44px;border-bottom:2px solid rgba(210,18,23,.45);border-right:2px solid rgba(210,18,23,.45)}
-.oab-ceo-red-line{position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(to bottom,transparent,rgba(210,18,23,.65) 50%,transparent)}
-.oab-how{background:#f5f2ee;padding:60px}
+.oab-ceo-ctitle{font-size:8px;color:#0074A4;letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase}
+.oab-ceo-divider{width:40px;height:1px;background:rgba(0,116,164,.4);margin:14px auto 0}
+.oab-ceo-corner-tl{position:absolute;top:18px;left:18px;width:44px;height:44px;border-top:2px solid rgba(0,116,164,.5);border-left:2px solid rgba(0,116,164,.5)}
+.oab-ceo-corner-br{position:absolute;bottom:18px;right:18px;width:44px;height:44px;border-bottom:2px solid rgba(0,116,164,.45);border-right:2px solid rgba(0,116,164,.45)}
+.oab-ceo-red-line{position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(to bottom,transparent,rgba(0,116,164,.65) 50%,transparent)}
+.oab-how{background:#E9F2F8;padding:60px}
 .oab-how-inner{max-width:1200px;margin:0 auto}
 .oab-how-hd{text-align:center;margin-bottom:36px}
 .oab-how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
 .oab-step{background:#fff;padding:24px 18px;border-radius:2px;position:relative}
-.oab-step::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:#D21217}
-.oab-step:last-child::before{background:#0d1f3c}
-.oab-step-n{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:34px;color:rgba(210,18,23,.12);font-weight:700;margin-bottom:10px}
-.oab-step:last-child .oab-step-n{color:rgba(13,31,60,.1)}
-.oab-step-icon{width:36px;height:36px;border:1px solid rgba(210,18,23,.3);border-radius:7px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:16px;color:#D21217}
-.oab-step:last-child .oab-step-icon{color:#0d1f3c;border-color:rgba(13,31,60,.2)}
-.oab-step-h{font-size:13px;font-weight:700;color:#0d1f3c;margin-bottom:6px}
-.oab-step-d{font-size:11px;color:rgba(13,31,60,.5);line-height:1.6;font-weight:300}
+.oab-step::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:#0074A4}
+.oab-step:last-child::before{background:#00344F}
+.oab-step-n{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:34px;color:rgba(0,116,164,.12);font-weight:700;margin-bottom:10px}
+.oab-step:last-child .oab-step-n{color:rgba(0,52,79,.1)}
+.oab-step-icon{width:36px;height:36px;border:1px solid rgba(0,116,164,.3);border-radius:7px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:16px;color:#0074A4}
+.oab-step:last-child .oab-step-icon{color:#00344F;border-color:rgba(0,52,79,.2)}
+.oab-step-h{font-size:13px;font-weight:700;color:#00344F;margin-bottom:6px}
+.oab-step-d{font-size:11px;color:rgba(0,52,79,.5);line-height:1.6;font-weight:300}
 .oab-gallery{background:#fff;padding:60px}
 .oab-gallery-inner{max-width:1200px;margin:0 auto}
 .oab-gallery-hd{text-align:center;margin-bottom:32px}
 .oab-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.oab-gallery-item{position:relative;border-radius:5px;overflow:hidden;background:#0d1f3c}
+.oab-gallery-item{position:relative;border-radius:5px;overflow:hidden;background:#00344F}
 .oab-gallery-img{width:100%;height:180px;object-fit:cover;display:block;opacity:.82;transition:opacity .3s,transform .4s}
 .oab-gallery-item:hover .oab-gallery-img{opacity:1;transform:scale(1.04)}
-.oab-gallery-badge{position:absolute;bottom:8px;right:8px;background:#D21217;color:#fff;font-size:8px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:1px;text-transform:uppercase}
-.oab-gallery-caption{font-size:12px;font-weight:700;color:#0d1f3c;margin-top:7px}
-.oab-certs{background:#f5f2ee;padding:56px 60px}
+.oab-gallery-badge{position:absolute;bottom:8px;right:8px;background:#0074A4;color:#fff;font-size:8px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:1px;text-transform:uppercase}
+.oab-gallery-caption{font-size:12px;font-weight:700;color:#00344F;margin-top:7px}
+.oab-certs{background:#E9F2F8;padding:56px 60px}
 .oab-certs-inner{max-width:1200px;margin:0 auto}
 .oab-certs-hd{text-align:center;margin-bottom:32px}
 .oab-certs-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:24px}
 .oab-cert-card{width:145px;text-align:center}
-.oab-cert-frame{height:190px;background:#fff;border-radius:6px;overflow:hidden;border:.5px solid rgba(13,31,60,.08);display:flex;align-items:center;justify-content:center;margin-bottom:10px;padding:8px}
+.oab-cert-frame{height:190px;background:#fff;border-radius:6px;overflow:hidden;border:.5px solid rgba(0,52,79,.08);display:flex;align-items:center;justify-content:center;margin-bottom:10px;padding:8px}
 .oab-cert-frame img{width:100%;height:100%;object-fit:contain}
-.oab-cert-name{font-size:12px;font-weight:700;color:#0d1f3c;margin-bottom:2px}
-.oab-cert-sub{font-size:8px;color:rgba(13,31,60,.45);letter-spacing:1px;text-transform:uppercase}
+.oab-cert-name{font-size:12px;font-weight:700;color:#00344F;margin-bottom:2px}
+.oab-cert-sub{font-size:8px;color:rgba(0,52,79,.45);letter-spacing:1px;text-transform:uppercase}
 .oab-tags-row{display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
-.oab-badge{background:#fff;color:#0d1f3c;font-size:9px;font-weight:600;padding:4px 12px;border-radius:20px;border:.5px solid rgba(13,31,60,.12)}
-.oab-cta{background:#D21217;padding:52px 60px;text-align:center;position:relative;overflow:hidden}
+.oab-badge{background:#fff;color:#00344F;font-size:9px;font-weight:600;padding:4px 12px;border-radius:20px;border:.5px solid rgba(0,52,79,.12)}
+.oab-cta{background:#0074A4;padding:52px 60px;text-align:center;position:relative;overflow:hidden}
 .oab-cta::before{content:'';position:absolute;inset:0;background:url('<?php echo esc_url( $base ); ?>DSC_2466-scaled.jpg') center/cover;opacity:.1;pointer-events:none}
 .oab-cta-inner{position:relative;z-index:1}
 .oab-cta-sup{font-size:8px;letter-spacing:4px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:10px}
@@ -123,7 +123,7 @@ if ( ! function_exists( 'osoul_about_output' ) ) {
 .oab-cta-h em{font-style:italic}
 .oab-cta-sub{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:26px;font-weight:300}
 .oab-cta-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-.oab-cta-btn-p{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#D21217;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:12px 26px;border-radius:2px;text-decoration:none;min-height:44px}
+.oab-cta-btn-p{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#0074A4;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:12px 26px;border-radius:2px;text-decoration:none;min-height:44px}
 .oab-cta-btn-s{display:inline-flex;align-items:center;gap:7px;border:1.5px solid rgba(255,255,255,.4);color:#fff;font-size:11px;font-weight:600;padding:12px 20px;border-radius:2px;text-decoration:none;min-height:44px}
 @media(max-width:1024px){.oab-whowe-grid{grid-template-columns:1fr}.oab-ceo-grid{grid-template-columns:1fr}.oab-ceo-photo{min-height:320px}.oab-how-grid{grid-template-columns:1fr 1fr}.oab-gallery-grid{grid-template-columns:1fr 1fr}.oab-stats{grid-template-columns:repeat(2,1fr)}.oab-whowe,.oab-how,.oab-gallery,.oab-certs,.oab-cta{padding:44px 28px}.oab-ceo-txt{padding:44px 28px}.oab-hero{padding:56px 28px 44px}.oab-hero-meta{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.oab-how-grid{grid-template-columns:1fr}.oab-gallery-grid{grid-template-columns:1fr}.oab-stats{grid-template-columns:1fr 1fr}.oab-certs-row{gap:12px}.oab-cert-card{width:120px}.oab-cert-frame{height:155px}}
@@ -179,17 +179,17 @@ if ( ! function_exists( 'osoul_about_output' ) ) {
 		</div>
 		<div class="oab-vm-cards">
 			<div class="oab-v-card">
-				<div class="oab-card-label" style="color:#D21217"><?php osoul_bilingual( 'الرؤية', 'Vision' ); ?></div>
+				<div class="oab-card-label" style="color:#0074A4"><?php osoul_bilingual( 'الرؤية', 'Vision' ); ?></div>
 				<div class="oab-card-h"><?php osoul_bilingual( 'الشريك الوطني الأكثر موثوقية', 'The Most Trusted National Partner' ); ?></div>
 				<p class="oab-card-txt"><?php osoul_bilingual( 'أن نكون الشريك الوطني الأكثر موثوقية والأقوى أثراً في المشاركة في صياغة مستقبل النهضة الصناعية والعمرانية في المملكة العربية السعودية، من خلال تقديم حلول هندسية وصناعية متكاملة فائقة الجودة.', "To be the most trusted and impactful national partner in shaping Saudi Arabia's industrial and urban renaissance, through delivering comprehensive, premium-quality engineering and industrial solutions." ); ?></p>
 			</div>
 			<div class="oab-m-card">
-				<div class="oab-card-label" style="color:#0d1f3c"><?php osoul_bilingual( 'الرسالة', 'Mission' ); ?></div>
+				<div class="oab-card-label" style="color:#00344F"><?php osoul_bilingual( 'الرسالة', 'Mission' ); ?></div>
 				<div class="oab-card-h"><?php osoul_bilingual( 'معايير هندسية لا تقبل المساومة', 'Engineering Standards That Speak for Themselves' ); ?></div>
 				<p class="oab-card-txt"><?php osoul_bilingual( 'نلتزم في "أصول البناء" بتوفير منتجات حديدية ومعدنية متطورة بأعلى معايير الكفاءة الهندسية، ملتزمين بالدقة المتناهية ومستندين إلى بنية تحتية تقنية متطورة تلبي تطلعات شركائنا في القطاعين الحكومي والخاص.', 'At Osoul Albinaa, we are committed to providing advanced metal products at the highest engineering standards, with meticulous precision and cutting-edge infrastructure to meet the ambitions of our government and private sector partners.' ); ?></p>
 			</div>
 			<div class="oab-2030">
-				<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D21217" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+				<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0074A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
 				<div class="oab-2030-txt"><strong><?php osoul_bilingual( 'نساهم في رؤية 2030', 'Contributing to Vision 2030' ); ?></strong><span><?php osoul_bilingual( 'نهضة صناعية وطنية مستدامة', 'A Sustainable National Industrial Renaissance' ); ?></span></div>
 			</div>
 		</div>
@@ -238,7 +238,7 @@ if ( ! function_exists( 'osoul_about_output' ) ) {
 			foreach ( $steps as $st ) : ?>
 			<div class="oab-step">
 				<div class="oab-step-n"><?php echo esc_html( $st['n'] ); ?></div>
-				<div class="oab-step-icon"<?php echo ! empty( $st['last'] ) ? ' style="color:#0d1f3c;border-color:rgba(13,31,60,.2)"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><?php echo $st['svg']; // phpcs:ignore WordPress.Security.EscapeOutput — static SVG ?></svg></div>
+				<div class="oab-step-icon"<?php echo ! empty( $st['last'] ) ? ' style="color:#00344F;border-color:rgba(0,52,79,.2)"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><?php echo $st['svg']; // phpcs:ignore WordPress.Security.EscapeOutput — static SVG ?></svg></div>
 				<div class="oab-step-h"><?php osoul_bilingual( $st['h'], $st['h_en'] ); ?></div>
 				<div class="oab-step-d"><?php osoul_bilingual( $st['d'], $st['d_en'] ); ?></div>
 			</div>

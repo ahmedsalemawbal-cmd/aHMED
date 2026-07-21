@@ -504,28 +504,28 @@ function osoul_customer_auth_page( $err = '' ) {
 	$reg_tab = ( 'register' === ( $_GET['tab'] ?? '' ) ) || ! empty( $_POST['name'] );
 	?>
 	<style>
-	body{background:radial-gradient(1100px 620px at 50% -12%,#173563 0%,#0d1f3c 46%,#081221 100%)!important;min-height:100vh}
+	body{background:radial-gradient(1100px 620px at 50% -12%,#173563 0%,#00344F 46%,#081221 100%)!important;min-height:100vh}
 	.osc-video-bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;border:0;pointer-events:none}
-	.osc-video-ov{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,18,33,.66) 0%,rgba(13,31,60,.74) 52%,rgba(8,18,33,.92) 100%)}
+	.osc-video-ov{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,18,33,.66) 0%,rgba(0,52,79,.74) 52%,rgba(8,18,33,.92) 100%)}
 	.osc-shell{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 16px}
 	.osc-card{width:100%;max-width:450px;background:#fff;border-radius:22px;box-shadow:0 32px 80px rgba(0,0,0,.4);padding:36px 32px;animation:oscIn .4s ease}
 	@keyframes oscIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 	.osc-logo{display:block;height:78px;width:auto;margin:0 auto 10px}
 	.osc-head{text-align:center;color:#6b7280;font-size:12.5px;margin-bottom:22px;line-height:1.7}
-	.osc-head b{display:block;color:#0d1f3c;font-size:18px;font-weight:800;margin-bottom:3px}
+	.osc-head b{display:block;color:#00344F;font-size:18px;font-weight:800;margin-bottom:3px}
 	.osc-g{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1.5px solid #e3e7ee;border-radius:12px;padding:12px 14px;font-weight:700;font-size:14.5px;color:#1f2937;text-decoration:none;transition:.18s;cursor:pointer}
-	.osc-g:hover{background:#f7f9fc;border-color:#c9d2df;box-shadow:0 4px 14px rgba(13,31,60,.08)}
+	.osc-g:hover{background:#f7f9fc;border-color:#c9d2df;box-shadow:0 4px 14px rgba(0,52,79,.08)}
 	.osc-or{display:flex;align-items:center;gap:12px;color:#9aa3b2;font-size:12px;font-weight:600;margin:16px 0}
 	.osc-or:before,.osc-or:after{content:"";flex:1;height:1px;background:#e7ebf1}
 	.osc-tabs{display:flex;background:#eef1f5;border-radius:13px;padding:4px;margin-bottom:20px}
 	.osc-tab{flex:1;text-align:center;padding:11px;border-radius:10px;font-weight:800;font-size:14px;color:#6b7280;cursor:pointer;border:none;background:none;font-family:inherit;transition:.18s}
-	.osc-tab.on{background:#fff;color:#0d1f3c;box-shadow:0 2px 7px rgba(13,31,60,.12)}
+	.osc-tab.on{background:#fff;color:#00344F;box-shadow:0 2px 7px rgba(0,52,79,.12)}
 	.osc-f{margin-bottom:13px}
 	.osc-f label{display:block;font-size:12px;color:#6b7280;margin-bottom:6px;font-weight:600}
-	.osc-f input{width:100%;border:1.5px solid #e3e7ee;border-radius:12px;padding:12px 14px;font-size:14.5px;font-family:inherit;color:#0d1f3c;outline:none;transition:.15s;background:#fbfcfe}
-	.osc-f input:focus{border-color:#D21217;background:#fff;box-shadow:0 0 0 3px rgba(210,18,23,.09)}
+	.osc-f input{width:100%;border:1.5px solid #e3e7ee;border-radius:12px;padding:12px 14px;font-size:14.5px;font-family:inherit;color:#00344F;outline:none;transition:.15s;background:#fbfcfe}
+	.osc-f input:focus{border-color:#0074A4;background:#fff;box-shadow:0 0 0 3px rgba(0,116,164,.09)}
 	.osc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-	.osc-btn{width:100%;background:linear-gradient(135deg,#e8464b,#D21217);color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:.18s;margin-top:8px;box-shadow:0 10px 22px rgba(210,18,23,.26)}
+	.osc-btn{width:100%;background:linear-gradient(135deg,#0089BE,#0074A4);color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:.18s;margin-top:8px;box-shadow:0 10px 22px rgba(0,116,164,.26)}
 	.osc-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
 	.osc-err{background:#fdeaea;color:#b32d2e;border:1px solid #f3c2c2;border-radius:11px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:18px;text-align:center}
 	.osc-back{display:block;text-align:center;color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;margin-top:20px}
@@ -612,30 +612,30 @@ function osoul_customer_account_page() {
 	?>
 	<style>
 	body{background:#eef1f5!important}
-	.osq-top{background:linear-gradient(135deg,#12305e,#0d1f3c);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+	.osq-top{background:linear-gradient(135deg,#12305e,#00344F);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 	.osq-top .b{display:flex;align-items:center;gap:11px;font-weight:800;font-size:15px;text-decoration:none;color:#fff}
 	.osq-top .b img{height:38px;width:auto;background:#fff;border-radius:9px;padding:4px}
 	.osq-top a.out{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:600}
 	.osq-top a.out:hover{color:#fff}
 	.osq-wrap{max-width:780px;margin:0 auto;padding:24px 16px}
-	.osq-card{background:#fff;border:1px solid #e7ebf1;border-radius:18px;padding:26px 26px;margin-bottom:18px;box-shadow:0 8px 26px rgba(13,31,60,.06)}
-	.osq-hi{font-size:21px;font-weight:800;color:#0d1f3c;margin-bottom:6px}
+	.osq-card{background:#fff;border:1px solid #e7ebf1;border-radius:18px;padding:26px 26px;margin-bottom:18px;box-shadow:0 8px 26px rgba(0,52,79,.06)}
+	.osq-hi{font-size:21px;font-weight:800;color:#00344F;margin-bottom:6px}
 	.osq-sub{color:#6b7280;font-size:14px}
 	.osq-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
 	.osq-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:12px;font-weight:800;font-size:14.5px;text-decoration:none;cursor:pointer;border:none;font-family:inherit;transition:.18s}
-	.osq-btn.p{background:linear-gradient(135deg,#e8464b,#D21217);color:#fff;box-shadow:0 10px 22px rgba(210,18,23,.24)}
+	.osq-btn.p{background:linear-gradient(135deg,#0089BE,#0074A4);color:#fff;box-shadow:0 10px 22px rgba(0,116,164,.24)}
 	.osq-btn.p:hover{transform:translateY(-1px);filter:brightness(1.05)}
-	.osq-btn.s{background:#eef1f5;color:#0d1f3c}
+	.osq-btn.s{background:#eef1f5;color:#00344F}
 	.osq-btn.s:hover{background:#e3e8ef}
-	.osq-h{font-size:16px;font-weight:800;color:#0d1f3c;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+	.osq-h{font-size:16px;font-weight:800;color:#00344F;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 	.osq-ok{background:#e7f7ee;color:#1a7e42;border:1px solid #b6e7c9;border-radius:11px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:14px}
 	.osq-thread{max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:9px;margin-bottom:14px;padding:4px}
 	.osq-bub{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6}
-	.osq-bub.me{align-self:flex-start;background:#eef1f5;color:#0d1f3c;border-bottom-right-radius:5px}
-	.osq-bub.adm{align-self:flex-end;background:linear-gradient(135deg,#12305e,#0d1f3c);color:#fff;border-bottom-left-radius:5px}
+	.osq-bub.me{align-self:flex-start;background:#eef1f5;color:#00344F;border-bottom-right-radius:5px}
+	.osq-bub.adm{align-self:flex-end;background:linear-gradient(135deg,#12305e,#00344F);color:#fff;border-bottom-left-radius:5px}
 	.osq-bub .t{font-size:10.5px;opacity:.65;margin-top:4px}
-	.osq-ta{width:100%;border:1.5px solid #e3e7ee;border-radius:12px;padding:12px 14px;font-size:14.5px;font-family:inherit;color:#0d1f3c;outline:none;background:#fbfcfe;resize:vertical}
-	.osq-ta:focus{border-color:#D21217;background:#fff;box-shadow:0 0 0 3px rgba(210,18,23,.08)}
+	.osq-ta{width:100%;border:1.5px solid #e3e7ee;border-radius:12px;padding:12px 14px;font-size:14.5px;font-family:inherit;color:#00344F;outline:none;background:#fbfcfe;resize:vertical}
+	.osq-ta:focus{border-color:#0074A4;background:#fff;box-shadow:0 0 0 3px rgba(0,116,164,.08)}
 	</style>
 	<div class="osq-top">
 		<a class="b" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php if ( $logo ) : ?><img src="<?php echo esc_url( $logo ); ?>" alt=""><?php endif; ?><span><?php echo esc_html( osoul_opt( 'company_name_ar' ) ); ?></span></a>
@@ -668,13 +668,13 @@ function osoul_customer_account_page() {
 					<tbody>
 					<?php foreach ( $orders as $o ) : ?>
 						<tr>
-							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6;font-weight:700;color:#0d1f3c"><?php echo esc_html( $o['number'] ); ?></td>
+							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6;font-weight:700;color:#00344F"><?php echo esc_html( $o['number'] ); ?></td>
 							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6"><?php echo (int) $o['items']; ?></td>
 							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6"><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;background:<?php echo esc_attr( $o['color'] ); ?>"><?php echo osoul_bi( $o['stage'], $o['stage_en'] ); ?></span></td>
 							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6;font-weight:700"><?php echo $o['total'] ? esc_html( $o['total'] ) . ' ' . osoul_bi( 'ر.س', 'SAR' ) : '—'; ?></td>
 							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6;color:#6b7280"><?php echo esc_html( $o['date'] ); ?></td>
 							<td style="padding:11px 10px;border-bottom:1px solid #f0f2f6;text-align:left">
-								<?php if ( $o['url'] ) : ?><a href="<?php echo esc_url( $o['url'] ); ?>" target="_blank" style="color:#D21217;font-weight:700;text-decoration:none;white-space:nowrap"><?php echo osoul_bi( 'عرض السعر + PDF ←', 'Quote + PDF ←' ); ?></a>
+								<?php if ( $o['url'] ) : ?><a href="<?php echo esc_url( $o['url'] ); ?>" target="_blank" style="color:#0074A4;font-weight:700;text-decoration:none;white-space:nowrap"><?php echo osoul_bi( 'عرض السعر + PDF ←', 'Quote + PDF ←' ); ?></a>
 								<?php else : ?><span style="color:#9aa3b2;font-size:12.5px"><?php echo osoul_bi( 'بانتظار التسعير', 'Awaiting pricing' ); ?></span><?php endif; ?>
 							</td>
 						</tr>

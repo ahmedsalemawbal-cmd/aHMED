@@ -50,7 +50,7 @@ function osoul_app_head( $title, $lang = 'ar' ) {
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--n:#0d1f3c;--n2:#0a1628;--o:#D21217;--o2:#e8464b;--bg:#f4f6f9;--card:#fff;--line:#e6e9ef;--muted:#6b7280}
+:root{--n:#00344F;--n2:#00263B;--o:#0074A4;--o2:#0089BE;--bg:#f4f6f9;--card:#fff;--line:#e6e9ef;--muted:#6b7280}
 body{font-family:'Cairo','IBM Plex Sans',sans-serif;background:var(--bg);color:#1f2937;direction:<?php echo esc_attr( $dir ); ?>;line-height:1.6}
 html[lang="en"] body{font-family:'IBM Plex Sans','Cairo',sans-serif} /* English → IBM Plex Sans */
 a{color:inherit}
@@ -60,7 +60,7 @@ a{color:inherit}
 .osa-top a{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px}
 .osa-top a:hover{color:#fff}
 .osa-wrap{max-width:1100px;margin:0 auto;padding:24px}
-.osa-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(13,31,60,.05)}
+.osa-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,52,79,.05)}
 .osa-h{font-size:18px;font-weight:700;color:var(--n);margin-bottom:14px}
 .osa-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--o);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:background .2s;min-height:42px}
 .osa-btn:hover{background:var(--o2)}

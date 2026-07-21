@@ -81,8 +81,8 @@ function osoul_render_public_quote( $token ) {
 	// Brand colours: a partner quote is themed with the partner's colours
 	// (snapshotted at issue time); Osoul quotes keep the house navy/red.
 	$hex       = function ( $v, $d ) { return ( is_string( $v ) && preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $v ) ) ? $v : $d; };
-	$c_primary = $hex( is_array( $brand ) ? ( $brand['color'] ?? '' ) : '', '#0d1f3c' );
-	$c_accent  = $hex( is_array( $brand ) ? ( $brand['accent'] ?? '' ) : '', '#D21217' );
+	$c_primary = $hex( is_array( $brand ) ? ( $brand['color'] ?? '' ) : '', '#00344F' );
+	$c_accent  = $hex( is_array( $brand ) ? ( $brand['accent'] ?? '' ) : '', '#0074A4' );
 	$dir         = $ar ? 'rtl' : 'ltr';
 	$decided     = in_array( $stage, array( 'won', 'lost' ), true );
 	$cur         = $t( 'ر.س', 'SAR' );
@@ -105,7 +105,7 @@ body{font-family:<?php echo $ar ? "'Cairo'" : "'IBM Plex Sans','Cairo'"; ?>,sans
 .qbtn.green{background:#16a34a}.qbtn.red{background:#dc2626}
 .qlang a{color:var(--n);text-decoration:none;font-weight:700;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:#fff}
 .qlang a.on{background:var(--n);color:#fff}
-.sheet{max-width:800px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:38px 40px;box-shadow:0 6px 24px rgba(13,31,60,.08);position:relative;overflow:hidden}
+.sheet{max-width:800px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:38px 40px;box-shadow:0 6px 24px rgba(0,52,79,.08);position:relative;overflow:hidden}
 .sheet::after{content:'';position:absolute;inset:0;background:url('<?php echo esc_url( $logo ); ?>') center/55% no-repeat;opacity:.04;pointer-events:none}
 .qhead{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:3px solid var(--n);padding-bottom:16px;margin-bottom:6px;position:relative}
 .qhead img{height:74px;width:auto}

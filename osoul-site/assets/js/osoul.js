@@ -456,8 +456,8 @@
       if (!muted) { vid.volume = 0.15; }
       if (iconMuted) iconMuted.style.display = muted ? 'block' : 'none';
       if (iconSound) iconSound.style.display = muted ? 'none' : 'block';
-      btn.style.borderColor = muted ? 'rgba(255,255,255,.25)' : 'rgba(210,18,23,.7)';
-      btn.style.background = muted ? 'rgba(13,31,60,.7)' : 'rgba(210,18,23,.25)';
+      btn.style.borderColor = muted ? 'rgba(255,255,255,.25)' : 'rgba(0,116,164,.7)';
+      btn.style.background = muted ? 'rgba(0,52,79,.7)' : 'rgba(0,116,164,.25)';
     };
   }
 

@@ -58,8 +58,8 @@ function osoul_catalog_brand( $partner_id ) {
 			'email'      => $b['email'],
 			'address_ar' => $b['address_ar'],
 			'address_en' => $b['address_en'] ?: $b['address_ar'],
-			'color'      => $hex( $b['color'], '#0d1f3c' ),
-			'accent'     => $hex( $b['accent'], '#D21217' ),
+			'color'      => $hex( $b['color'], '#00344F' ),
+			'accent'     => $hex( $b['accent'], '#0074A4' ),
 		);
 	}
 	return array(
@@ -70,8 +70,8 @@ function osoul_catalog_brand( $partner_id ) {
 		'email'      => osoul_opt( 'email' ),
 		'address_ar' => osoul_opt( 'national_address_ar' ) ?: osoul_opt( 'address_ar' ),
 		'address_en' => osoul_opt( 'national_address_en' ) ?: osoul_opt( 'address_en' ),
-		'color'      => '#0d1f3c',
-		'accent'     => '#D21217',
+		'color'      => '#00344F',
+		'accent'     => '#0074A4',
 	);
 }
 
@@ -167,7 +167,7 @@ body{font-family:<?php echo $ar ? "'Cairo'" : "'IBM Plex Sans','Cairo'"; ?>,sans
 .bar{max-width:820px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:8px;padding:11px 18px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;color:#fff;background:var(--o)}
 .lang a{color:var(--n);text-decoration:none;font-weight:700;font-size:13px;padding:6px 11px;border:1px solid var(--line);border-radius:6px;background:#fff}
-.sheet{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:34px 38px;box-shadow:0 6px 24px rgba(13,31,60,.08)}
+.sheet{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:34px 38px;box-shadow:0 6px 24px rgba(0,52,79,.08)}
 .head{display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:3px solid var(--n);padding-bottom:16px;margin-bottom:8px}
 .head img{height:64px;width:auto}
 .co{font-size:12.5px;color:var(--muted);text-align:<?php echo $ar ? 'left' : 'right'; ?>}

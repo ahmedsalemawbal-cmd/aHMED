@@ -29,7 +29,7 @@ if ( ! function_exists( 'osoul_footer_output' ) ) {
 	'شركة سعودية متخصصة في تصنيع الأبواب المعدنية المقاومة للحريق، وأنظمة الجبس بورد، وإكسسوارات التكييف — لدعم المشاريع الحكومية والتجارية والتعليمية بجودة عالية.',
 	'A Saudi specialized company manufacturing fire-resistant metal doors, gypsum board systems, and HVAC accessories — supporting government, commercial and educational projects with high quality.'
 ); ?></p>
-<div class="osf-logo-footer"><img src="https://osoulalbinaa.com/wp-content/uploads/2026/06/تصميم-بدون-عنوان-20.png" alt="أصول البناء للصناعة"></div>
+<div class="osf-logo-footer"><?php echo osoul_brand_logo( 'footer' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built with esc_* internally ?></div>
 </div>
 <div>
 <div class="osf-heading"><?php osoul_bilingual( 'روابط سريعة', 'Quick Links' ); ?></div>
@@ -145,12 +145,12 @@ if ( ! function_exists( 'osoul_quote_list_output' ) ) {
 		</div>
 		<!-- Quote request form (primary). Inline styles guarantee rendering even if the cached stylesheet is stale. -->
 		<div class="oql-rfq" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-			<input type="text" id="oql-name" placeholder="<?php echo esc_attr__( 'الاسم', 'osoul' ); ?>" autocomplete="name" style="border:1.5px solid rgba(13,31,60,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#0d1f3c;width:100%;min-height:44px;outline:none;background:#fff">
-			<input type="tel" id="oql-phone" placeholder="<?php echo esc_attr__( 'رقم الجوال', 'osoul' ); ?>" autocomplete="tel" style="border:1.5px solid rgba(13,31,60,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#0d1f3c;width:100%;min-height:44px;outline:none;background:#fff">
-			<input type="email" id="oql-email" placeholder="<?php echo esc_attr__( 'البريد الإلكتروني', 'osoul' ); ?>" autocomplete="email" style="border:1.5px solid rgba(13,31,60,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#0d1f3c;width:100%;min-height:44px;outline:none;background:#fff">
+			<input type="text" id="oql-name" placeholder="<?php echo esc_attr__( 'الاسم', 'osoul' ); ?>" autocomplete="name" style="border:1.5px solid rgba(0,52,79,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#00344F;width:100%;min-height:44px;outline:none;background:#fff">
+			<input type="tel" id="oql-phone" placeholder="<?php echo esc_attr__( 'رقم الجوال', 'osoul' ); ?>" autocomplete="tel" style="border:1.5px solid rgba(0,52,79,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#00344F;width:100%;min-height:44px;outline:none;background:#fff">
+			<input type="email" id="oql-email" placeholder="<?php echo esc_attr__( 'البريد الإلكتروني', 'osoul' ); ?>" autocomplete="email" style="border:1.5px solid rgba(0,52,79,.18);border-radius:6px;padding:11px 14px;font-size:14px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;color:#00344F;width:100%;min-height:44px;outline:none;background:#fff">
 			<input type="text" id="oql-website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
 			<div id="oql-status" class="oql-status" role="status" aria-live="polite" style="display:none"></div>
-			<button class="oql-submit-btn" onclick="oqlSubmitRequest()" style="display:flex;align-items:center;justify-content:center;background:#D21217;color:#fff;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;font-size:14px;font-weight:700;padding:14px 20px;border:none;border-radius:6px;cursor:pointer;width:100%;min-height:46px"><?php osoul_bilingual( 'أرسل طلب عرض السعر', 'Send Quote Request' ); ?></button>
+			<button class="oql-submit-btn" onclick="oqlSubmitRequest()" style="display:flex;align-items:center;justify-content:center;background:#0074A4;color:#fff;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;font-size:14px;font-weight:700;padding:14px 20px;border:none;border-radius:6px;cursor:pointer;width:100%;min-height:46px"><?php osoul_bilingual( 'أرسل طلب عرض السعر', 'Send Quote Request' ); ?></button>
 		</div>
 		<button class="oql-clear-btn" onclick="oqlClearAll()">
 			<?php osoul_bilingual( 'مسح القائمة', 'Clear List' ); ?>
@@ -179,7 +179,7 @@ if ( ! function_exists( 'osoul_quote_list_output' ) ) {
 			status.style.padding = '10px 14px'; status.style.borderRadius = '6px';
 			status.style.fontSize = '13px'; status.style.fontWeight = '600'; status.style.marginTop = '4px';
 			if (type === 'ok') { status.style.background = 'rgba(37,211,102,.12)'; status.style.color = '#1a7e42'; }
-			else { status.style.background = 'rgba(210,18,23,.08)'; status.style.color = '#b50f13'; }
+			else { status.style.background = 'rgba(0,116,164,.08)'; status.style.color = '#005784'; }
 			status.textContent = text;
 		}
 		var items = list();
@@ -265,7 +265,7 @@ if ( ! function_exists( 'osoul_quote_list_output' ) ) {
 					'<div class="oql-item-name">' + (L === 'en' ? (p.name_en || p.name) : p.name) + '</div>' +
 					'<div class="oql-item-qty">' +
 						'<button class="oql-qty-btn" onclick="oqlQty(' + i + ',-1)">−</button>' +
-						'<input class="oql-qty-input" type="number" min="1" value="' + p.qty + '" onchange="oqlSetQty(' + i + ',this.value)" onfocus="this.select()" style="width:70px;text-align:center;border:1px solid rgba(13,31,60,.18);border-radius:5px;padding:5px;font-family:\'IBM Plex Sans\',\'IBM Plex Sans Arabic\',sans-serif;font-weight:700;font-size:14px;min-height:32px">' +
+						'<input class="oql-qty-input" type="number" min="1" value="' + p.qty + '" onchange="oqlSetQty(' + i + ',this.value)" onfocus="this.select()" style="width:70px;text-align:center;border:1px solid rgba(0,52,79,.18);border-radius:5px;padding:5px;font-family:\'IBM Plex Sans\',\'IBM Plex Sans Arabic\',sans-serif;font-weight:700;font-size:14px;min-height:32px">' +
 						'<button class="oql-qty-btn" onclick="oqlQty(' + i + ',1)">+</button>' +
 					'</div>' +
 				'</div>' +

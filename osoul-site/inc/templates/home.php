@@ -22,33 +22,33 @@ add_action( 'wp_footer', function () {
 	?>
 <style id="osoul-hero-css">
 #ohero,#ohero *{box-sizing:border-box;margin:0;padding:0}
-#ohero{position:relative;width:100%;height:100vh;min-height:560px;overflow:hidden;background:#061020;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;direction:rtl}
+#ohero{position:relative;width:100%;height:100vh;min-height:560px;overflow:hidden;background:#001624;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;direction:rtl}
 body.lang-en #ohero{direction:ltr}
 #ohero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
-#ohero .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,16,32,.97) 0%,rgba(13,31,60,.8) 45%,rgba(13,31,60,.15) 100%);z-index:1}
+#ohero .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,16,32,.97) 0%,rgba(0,52,79,.8) 45%,rgba(0,52,79,.15) 100%);z-index:1}
 #ohero .body{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:0 64px 56px}
-#ohero .tag{font-size:11px;letter-spacing:5px;color:#D21217;text-transform:uppercase;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-#ohero .tag::before{content:'';width:32px;height:1px;background:#D21217}
+#ohero .tag{font-size:11px;letter-spacing:5px;color:#0074A4;text-transform:uppercase;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+#ohero .tag::before{content:'';width:32px;height:1px;background:#0074A4}
 #ohero h1{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(48px,8vw,96px);font-weight:700;color:#fff;line-height:1.0;letter-spacing:-2px;margin-bottom:18px}
-#ohero h1 i{font-style:italic;color:#D21217}
+#ohero h1 i{font-style:italic;color:#0074A4}
 #ohero .sub{font-size:16px;color:rgba(255,255,255,.65);line-height:1.65;font-weight:300;max-width:580px;margin-bottom:32px}
 #ohero .btns{display:flex;align-items:center;gap:14px;margin-bottom:44px;flex-wrap:wrap}
-#ohero .bp{display:inline-flex;align-items:center;gap:8px;background:#D21217;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;text-decoration:none;border:2px solid #D21217;transition:all .25s;min-height:44px;position:relative;z-index:10;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif}
-#ohero .bp:hover{background:#e8464b;border-color:#e8464b}
+#ohero .bp{display:inline-flex;align-items:center;gap:8px;background:#0074A4;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;text-decoration:none;border:2px solid #0074A4;transition:all .25s;min-height:44px;position:relative;z-index:10;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif}
+#ohero .bp:hover{background:#0089BE;border-color:#0089BE}
 #ohero .bs{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,.75);font-size:13px;font-weight:600;letter-spacing:1px;padding:14px 28px;text-decoration:none;border:1.5px solid rgba(255,255,255,.25);transition:all .25s;min-height:44px;position:relative;z-index:10;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif}
 #ohero .bs:hover{border-color:rgba(255,255,255,.7)}
 #ohero .stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.07);padding-top:28px}
-#ohero .st{padding:0 0 0 24px;border-left:1px solid rgba(210,18,23,.2)}
-body.lang-en #ohero .st{padding:0 24px 0 0;border-left:none;border-right:1px solid rgba(210,18,23,.2)}
+#ohero .st{padding:0 0 0 24px;border-left:1px solid rgba(0,116,164,.2)}
+body.lang-en #ohero .st{padding:0 24px 0 0;border-left:none;border-right:1px solid rgba(0,116,164,.2)}
 #ohero .st:last-child{border-left:none;border-right:none;padding-left:0;padding-right:0}
-#ohero .sn{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:36px;font-weight:700;color:#D21217;line-height:1;background:linear-gradient(135deg,#D21217,#ff5858);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#ohero .sn{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:36px;font-weight:700;color:#0074A4;line-height:1;background:linear-gradient(135deg,#0074A4,#ff5858);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 #ohero .sl{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:1.5px;text-transform:uppercase}
 @media(max-width:1024px){#ohero .body{padding:0 28px 44px}#ohero .stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){#ohero h1{letter-spacing:-1px}#ohero .btns{flex-direction:column;align-items:stretch}#ohero .bp,#ohero .bs{justify-content:center;width:100%}#ohero .sn{font-size:28px}#ohero .body{padding-bottom:56px}}
 </style>
 <div id="ohero">
 <video id="ohero-video" autoplay muted loop playsinline preload="auto"><source src="<?php echo esc_url( $video ); ?>" type="video/mp4"></video>
-<button id="ohero-sound-btn" onclick="oheroToggleSound()" aria-label="تشغيل الصوت" style="position:absolute;bottom:28px;right:28px;z-index:10;width:42px;height:42px;border-radius:50%;background:rgba(13,31,60,.7);border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px)">
+<button id="ohero-sound-btn" onclick="oheroToggleSound()" aria-label="تشغيل الصوت" style="position:absolute;bottom:28px;right:28px;z-index:10;width:42px;height:42px;border-radius:50%;background:rgba(0,52,79,.7);border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px)">
 	<svg id="ohero-icon-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
 	<svg id="ohero-icon-sound" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
 </button>
@@ -99,9 +99,9 @@ body.lang-en .ohp{direction:ltr}
 .ohp-about-img:hover img{transform:scale(1.04)}
 .ohp-about-badge{position:absolute;bottom:28px;right:28px;background:var(--o);color:#fff;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;border-radius:var(--r-md);direction:rtl;pointer-events:none;box-shadow:var(--sh-red)}
 .ohp-about-txt{background:#fff;padding:72px 56px;display:flex;flex-direction:column;justify-content:center;direction:rtl;position:relative}
-.ohp-about-txt::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(to bottom,var(--o),rgba(210,18,23,0));pointer-events:none}
+.ohp-about-txt::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(to bottom,var(--o),rgba(0,116,164,0));pointer-events:none}
 .ohp-sec-tag{font-size:11px;letter-spacing:5px;color:var(--o);text-transform:uppercase;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:12px}
-.ohp-sec-tag::after{content:'';flex:1;height:1px;background:rgba(210,18,23,.25)}
+.ohp-sec-tag::after{content:'';flex:1;height:1px;background:rgba(0,116,164,.25)}
 .ohp-about-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(26px,3vw,38px);font-weight:700;color:var(--n);line-height:1.25;margin-bottom:18px}
 .ohp-about-h i{font-style:italic;color:var(--o)}
 .ohp-about-d{font-size:15px;color:rgba(26,23,20,.65);line-height:1.65;font-weight:300;margin-bottom:28px}
@@ -122,25 +122,25 @@ body.lang-en .ohp{direction:ltr}
 .ohp-ind-bg{position:absolute;inset:0;z-index:0;background:var(--n2)}
 .ohp-ind-bg img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.32) saturate(.85);transition:transform 6s ease,filter .4s}
 .ohp-ind-card:hover .ohp-ind-bg img{transform:scale(1.06);filter:brightness(.4) saturate(1)}
-.ohp-ind-ov{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(6,16,32,.97) 0%,rgba(13,31,60,.75) 45%,rgba(13,31,60,.35) 100%);transition:background .4s}
-.ohp-ind-card:hover .ohp-ind-ov{background:linear-gradient(to top,rgba(6,16,32,.98) 0%,rgba(13,31,60,.85) 45%,rgba(13,31,60,.45) 100%)}
+.ohp-ind-ov{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(6,16,32,.97) 0%,rgba(0,52,79,.75) 45%,rgba(0,52,79,.35) 100%);transition:background .4s}
+.ohp-ind-card:hover .ohp-ind-ov{background:linear-gradient(to top,rgba(6,16,32,.98) 0%,rgba(0,52,79,.85) 45%,rgba(0,52,79,.45) 100%)}
 .ohp-ind-body{position:relative;z-index:2;padding:32px}
-.ohp-ind-num{position:absolute;top:24px;right:24px;font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:72px;font-weight:700;color:rgba(210,18,23,.08);line-height:1;pointer-events:none;transition:opacity var(--t-med)}
+.ohp-ind-num{position:absolute;top:24px;right:24px;font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:72px;font-weight:700;color:rgba(0,116,164,.08);line-height:1;pointer-events:none;transition:opacity var(--t-med)}
 .ohp-ind-card:hover .ohp-ind-num{opacity:.15}
-.ohp-ind-tag{display:inline-block;font-size:10px;letter-spacing:2.5px;color:var(--o);text-transform:uppercase;font-weight:700;margin-bottom:14px;border:1px solid rgba(210,18,23,.4);padding:4px 12px;border-radius:20px}
-.ohp-ind-ic{width:46px;height:46px;background:rgba(210,18,23,.1);border:1.5px solid rgba(210,18,23,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:all .3s}
+.ohp-ind-tag{display:inline-block;font-size:10px;letter-spacing:2.5px;color:var(--o);text-transform:uppercase;font-weight:700;margin-bottom:14px;border:1px solid rgba(0,116,164,.4);padding:4px 12px;border-radius:20px}
+.ohp-ind-ic{width:46px;height:46px;background:rgba(0,116,164,.1);border:1.5px solid rgba(0,116,164,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:all .3s}
 .ohp-ind-card:hover .ohp-ind-ic{background:var(--o);border-color:var(--o);transform:scale(1.1);box-shadow:var(--sh-red)}
-.ohp-ind-ic svg{width:22px;height:22px;stroke:#D21217;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s}
+.ohp-ind-ic svg{width:22px;height:22px;stroke:#0074A4;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s}
 .ohp-ind-card:hover .ohp-ind-ic svg{stroke:#fff}
 .ohp-ind-h{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:20px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:12px}
 .ohp-ind-d{font-size:13px;color:rgba(255,255,255,.6);line-height:1.7;font-weight:300;margin-bottom:20px}
-.ohp-ind-link{display:inline-flex;align-items:center;gap:7px;border:1.5px solid rgba(210,18,23,.5);color:var(--o);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;text-decoration:none;border-radius:2px;transition:all .25s}
+.ohp-ind-link{display:inline-flex;align-items:center;gap:7px;border:1.5px solid rgba(0,116,164,.5);color:var(--o);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;text-decoration:none;border-radius:2px;transition:all .25s}
 .ohp-ind-link:hover{background:var(--o);color:#fff;border-color:var(--o)}
 .ohp-ind-link svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:1024px){.ohp-ind-grid{grid-template-columns:1fr}.ohp-ind-card{min-height:320px}}
 .ohp-projects{background:#fff;padding:88px 60px}
 .ohp-proj-featured{display:grid;grid-template-columns:1.3fr 1fr;background:var(--n);border-radius:12px;overflow:hidden;direction:ltr;margin-bottom:32px;box-shadow:var(--sh-4);transition:box-shadow var(--t-med)}
-.ohp-proj-featured:hover{box-shadow:0 24px 72px rgba(13,31,60,.22),0 8px 24px rgba(13,31,60,.1)}
+.ohp-proj-featured:hover{box-shadow:0 24px 72px rgba(0,52,79,.22),0 8px 24px rgba(0,52,79,.1)}
 .ohp-pf-img{position:relative;overflow:hidden;min-height:380px}
 .ohp-pf-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 6s ease}
 .ohp-proj-featured:hover .ohp-pf-img img{transform:scale(1.04)}
@@ -172,14 +172,14 @@ body.lang-en .ohp{direction:ltr}
 .ohp-proj-more a:hover{background:var(--n);color:#fff}
 .ohp-proj-more a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .ohp-why{background:var(--n);padding:88px 60px;position:relative;overflow:hidden}
-.ohp-why::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(210,18,23,.04) 59px,rgba(210,18,23,.04) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(210,18,23,.04) 59px,rgba(210,18,23,.04) 60px);pointer-events:none}
+.ohp-why::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(0,116,164,.04) 59px,rgba(0,116,164,.04) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(0,116,164,.04) 59px,rgba(0,116,164,.04) 60px);pointer-events:none}
 .ohp-why::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--o),transparent);pointer-events:none}
 .ohp-why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;position:relative}
 .ohp-why-item{padding:36px 28px;border-right:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);transition:background var(--t-med),border-color var(--t-med)}
-.ohp-why-item:hover{background:rgba(210,18,23,.06)}
+.ohp-why-item:hover{background:rgba(0,116,164,.06)}
 .ohp-why-item:last-child{border-right:none}
-.ohp-why-icon{width:56px;height:56px;border:1.5px solid rgba(210,18,23,.6);background:rgba(210,18,23,.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;pointer-events:none;transition:all var(--t-med)}
-.ohp-why-item:hover .ohp-why-icon{background:var(--o);border-color:var(--o);transform:scale(1.08);box-shadow:0 0 24px rgba(210,18,23,.35)}
+.ohp-why-icon{width:56px;height:56px;border:1.5px solid rgba(0,116,164,.6);background:rgba(0,116,164,.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;pointer-events:none;transition:all var(--t-med)}
+.ohp-why-item:hover .ohp-why-icon{background:var(--o);border-color:var(--o);transform:scale(1.08);box-shadow:0 0 24px rgba(0,116,164,.35)}
 .ohp-why-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .ohp-why-h{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px}
 .ohp-why-h{font-size:17px}
@@ -199,7 +199,7 @@ body.lang-en .ohp{direction:ltr}
 .ohp-client-logo{flex-shrink:0;height:64px;display:flex;align-items:center;justify-content:center}
 .ohp-client-logo img{max-height:100%;max-width:140px;object-fit:contain;filter:grayscale(1) opacity(.55);transition:filter var(--t-med),transform var(--t-fast);pointer-events:none}
 .ohp-client-logo:hover img{filter:grayscale(0) opacity(1);transform:scale(1.06)}
-.ohp-cta{padding:80px 60px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#b50f13 0%,#D21217 40%,#c41015 70%,#a80d11 100%)}
+.ohp-cta{padding:80px 60px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#005784 0%,#0074A4 40%,#c41015 70%,#a80d11 100%)}
 .ohp-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(0,0,0,.12) 0%,transparent 50%),repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.03) 40px,rgba(255,255,255,.03) 41px);pointer-events:none}
 .ohp-cta-tag{font-size:11px;letter-spacing:5px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:700;margin-bottom:16px;position:relative}
 .ohp-cta h2{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',sans-serif;font-size:clamp(28px,4.5vw,50px);font-weight:700;color:#fff;line-height:1.2;margin-bottom:14px;position:relative}

@@ -91,7 +91,7 @@ if ( ! function_exists( 'osoul_favicon_head' ) ) {
 		echo '<link rel="apple-touch-icon" sizes="180x180" href="' . $icon . '">' . "\n";
 		echo '<link rel="shortcut icon" href="' . $icon . '">' . "\n";
 		echo '<meta name="msapplication-TileImage" content="' . $icon . '">' . "\n";
-		echo '<meta name="theme-color" content="#0d1f3c">' . "\n";
+		echo '<meta name="theme-color" content="#00344F">' . "\n";
 	}
 }
 

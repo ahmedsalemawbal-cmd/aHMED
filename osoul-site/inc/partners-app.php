@@ -27,19 +27,19 @@ function osoul_partner_page_head( $title ) {
 
 /** Inline colour theme for the logged-in partner (drives --pp-primary / --pp-accent). */
 function osoul_partner_theme_style( $pid ) {
-	$pcol = osoul_partner_sanitize_hex( osoul_partner_get( $pid, 'color' ), '#0d1f3c' );
-	$pacc = osoul_partner_sanitize_hex( osoul_partner_get( $pid, 'accent' ), '#D21217' );
+	$pcol = osoul_partner_sanitize_hex( osoul_partner_get( $pid, 'color' ), '#00344F' );
+	$pacc = osoul_partner_sanitize_hex( osoul_partner_get( $pid, 'accent' ), '#0074A4' );
 	echo '<style>:root{--pp-primary:' . $pcol . ';--pp-accent:' . $pacc . '}</style>';
 }
 
 /** Scoped CSS for the partner surfaces. */
 function osoul_partner_css() {
 	return '
-:root,.osp-body{--pp-primary:#0d1f3c;--pp-accent:#D21217}
+:root,.osp-body{--pp-primary:#00344F;--pp-accent:#0074A4}
 *{box-sizing:border-box}
 .osp-body{background:linear-gradient(180deg,#eef2f7,#e7ecf3);min-height:100vh;margin:0}
 .pp{max-width:1060px;margin:0 auto;padding:0 16px 64px;font-family:"Cairo","IBM Plex Sans Arabic",sans-serif;color:#1f2a3d}
-.pp-top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;margin:0 -16px 22px;padding:12px 20px;box-shadow:0 2px 16px rgba(13,31,60,.08);border-bottom:3px solid var(--pp-accent)}
+.pp-top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;margin:0 -16px 22px;padding:12px 20px;box-shadow:0 2px 16px rgba(0,52,79,.08);border-bottom:3px solid var(--pp-accent)}
 .pp-brand{display:flex;align-items:center;gap:12px}
 .pp-brand .lg{width:48px;height:48px;border-radius:12px;object-fit:contain;background:#f3f5f9;border:1px solid #e6eaf0;padding:4px}
 .pp-brand b{color:var(--pp-primary);font-size:17px;font-weight:800;line-height:1.2;display:block}
@@ -54,7 +54,7 @@ function osoul_partner_css() {
 .pp-hero h1{font-size:22px;font-weight:800;margin:0 0 5px;position:relative}
 .pp-hero p{opacity:.86;font-size:14px;margin:0;position:relative}
 .pp-hero .cta{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;position:relative}
-.pp-card{background:#fff;border:1px solid #e6eaf1;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 22px rgba(13,31,60,.06)}
+.pp-card{background:#fff;border:1px solid #e6eaf1;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 22px rgba(0,52,79,.06)}
 .pp-card h2{font-size:16px;color:var(--pp-primary);margin:0 0 4px;font-weight:800;display:flex;align-items:center;gap:9px}
 .pp-card h2:before{content:"";width:4px;height:18px;border-radius:3px;background:var(--pp-accent);display:inline-block}
 .pp-card p.sub{color:#7a8699;font-size:13px;margin:0 0 16px}
@@ -198,11 +198,11 @@ function osoul_partner_reg_route() {
 /** Scoped, premium styling for the public partner auth pages (register + done). */
 function osoul_partner_auth_css() {
 	return '
-.ppreg-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 16px;background:radial-gradient(1200px 700px at 50% -10%,#173563 0%,#0d1f3c 48%,#081221 100%)}
+.ppreg-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 16px;background:radial-gradient(1200px 700px at 50% -10%,#173563 0%,#00344F 48%,#081221 100%)}
 .ppreg-card{width:100%;max-width:1000px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.45);display:grid;grid-template-columns:.82fr 1.18fr;animation:ppregIn .45s ease}
 @keyframes ppregIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.ppreg-aside{background:linear-gradient(160deg,#0d1f3c 0%,#17356a 55%,#0d1f3c 100%);color:#fff;padding:44px 38px;position:relative;overflow:hidden;display:flex;flex-direction:column}
-.ppreg-aside:before{content:"";position:absolute;inset-inline-end:-70px;top:-70px;width:230px;height:230px;background:#D21217;opacity:.16;border-radius:50%}
+.ppreg-aside{background:linear-gradient(160deg,#00344F 0%,#17356a 55%,#00344F 100%);color:#fff;padding:44px 38px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.ppreg-aside:before{content:"";position:absolute;inset-inline-end:-70px;top:-70px;width:230px;height:230px;background:#0074A4;opacity:.16;border-radius:50%}
 .ppreg-aside:after{content:"";position:absolute;inset-inline-start:-50px;bottom:-60px;width:180px;height:180px;background:#fff;opacity:.05;border-radius:50%}
 .ppreg-logochip{display:inline-flex;align-items:center;background:#fff;border-radius:14px;padding:9px 13px;box-shadow:0 8px 22px rgba(0,0,0,.25);position:relative}
 .ppreg-logochip img{height:40px;width:auto;display:block}
@@ -210,37 +210,37 @@ function osoul_partner_auth_css() {
 .ppreg-lead{font-size:14.5px;line-height:1.75;color:rgba(255,255,255,.82);margin:0 0 26px;position:relative}
 .ppreg-benefits{list-style:none;margin:0;padding:0;position:relative;display:flex;flex-direction:column;gap:15px}
 .ppreg-benefits li{position:relative;padding-inline-start:34px;font-size:14px;line-height:1.55;color:#eef3fb}
-.ppreg-benefits li:before{content:"";position:absolute;inset-inline-start:0;top:1px;width:22px;height:22px;border-radius:50%;background:rgba(210,18,23,.92);box-shadow:0 4px 10px rgba(210,18,23,.35)}
+.ppreg-benefits li:before{content:"";position:absolute;inset-inline-start:0;top:1px;width:22px;height:22px;border-radius:50%;background:rgba(0,116,164,.92);box-shadow:0 4px 10px rgba(0,116,164,.35)}
 .ppreg-benefits li:after{content:"";position:absolute;inset-inline-start:8px;top:6px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 .ppreg-aside-foot{margin-top:auto;padding-top:28px;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.6);position:relative}
 .ppreg-form{padding:44px 42px;display:flex;flex-direction:column}
-.ppreg-form-h h2{font-size:22px;font-weight:800;color:#0d1f3c;margin:0 0 6px}
+.ppreg-form-h h2{font-size:22px;font-weight:800;color:#00344F;margin:0 0 6px}
 .ppreg-form-h p{font-size:13px;color:#6b7280;line-height:1.65;margin:0 0 22px}
 .ppreg-alert{background:#fdeaea;color:#b32d2e;border:1px solid #f3c2c2;border-radius:11px;padding:11px 14px;font-size:13.5px;font-weight:600;margin-bottom:16px}
-.ppreg-sec{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#D21217;margin:8px 0 13px;display:flex;align-items:center;gap:9px}
-.ppreg-sec:before{content:"";width:16px;height:2px;background:#D21217;border-radius:2px}
+.ppreg-sec{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#0074A4;margin:8px 0 13px;display:flex;align-items:center;gap:9px}
+.ppreg-sec:before{content:"";width:16px;height:2px;background:#0074A4;border-radius:2px}
 .ppreg-sec.first{margin-top:0}
 .ppreg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
 .ppreg-f{display:block;margin-bottom:14px}
 .ppreg-f span{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:#374151;margin-bottom:6px;min-height:18px}
-.ppreg-f i{color:#D21217;font-style:normal;flex:none}
-.ppreg-f input,.ppreg-f textarea{width:100%;padding:12px 14px;border:1.5px solid #e0e5ee;border-radius:8px;font-family:inherit;font-size:14px;color:#0d1f3c;background:#fbfcfe;transition:.15s;resize:vertical}
-.ppreg-f input:focus,.ppreg-f textarea:focus{outline:none;border-color:#D21217;background:#fff;box-shadow:0 0 0 3px rgba(210,18,23,.1)}
-.ppreg-btn{width:100%;margin-top:10px;background:linear-gradient(135deg,#e8464b,#D21217);color:#fff;border:none;border-radius:12px;padding:15px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:.18s;box-shadow:0 12px 26px rgba(210,18,23,.28)}
+.ppreg-f i{color:#0074A4;font-style:normal;flex:none}
+.ppreg-f input,.ppreg-f textarea{width:100%;padding:12px 14px;border:1.5px solid #e0e5ee;border-radius:8px;font-family:inherit;font-size:14px;color:#00344F;background:#fbfcfe;transition:.15s;resize:vertical}
+.ppreg-f input:focus,.ppreg-f textarea:focus{outline:none;border-color:#0074A4;background:#fff;box-shadow:0 0 0 3px rgba(0,116,164,.1)}
+.ppreg-btn{width:100%;margin-top:10px;background:linear-gradient(135deg,#0089BE,#0074A4);color:#fff;border:none;border-radius:12px;padding:15px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:.18s;box-shadow:0 12px 26px rgba(0,116,164,.28)}
 .ppreg-btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
 .ppreg-signin{text-align:center;font-size:13px;color:#6b7280;margin:16px 0 0}
-.ppreg-signin a{color:#D21217;font-weight:800;text-decoration:none}
+.ppreg-signin a{color:#0074A4;font-weight:800;text-decoration:none}
 .ppreg-signin a:hover{text-decoration:underline}
 .ppreg-done{text-align:center;max-width:150px}
 .ppreg-check{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#12833c);display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 14px 30px rgba(22,163,74,.32)}
 .ppreg-check:after{content:"";width:20px;height:38px;border:solid #fff;border-width:0 5px 5px 0;transform:rotate(45deg);margin-top:-6px}
 .ppreg-steps{list-style:none;counter-reset:s;margin:18px 0 8px;padding:0;text-align:start;display:flex;flex-direction:column;gap:12px}
 .ppreg-steps li{counter-increment:s;position:relative;padding-inline-start:40px;font-size:13.5px;color:#374151;line-height:1.6;min-height:28px;display:flex;align-items:center}
-.ppreg-steps li:before{content:counter(s);position:absolute;inset-inline-start:0;top:0;width:28px;height:28px;border-radius:50%;background:#0d1f3c;color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center}
+.ppreg-steps li:before{content:counter(s);position:absolute;inset-inline-start:0;top:0;width:28px;height:28px;border-radius:50%;background:#00344F;color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center}
 .ppreg-done-btns{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .ppreg-b2{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:11px;font-family:inherit;font-size:14px;font-weight:800;text-decoration:none;transition:.15s}
-.ppreg-b2.primary{background:linear-gradient(135deg,#e8464b,#D21217);color:#fff;box-shadow:0 10px 22px rgba(210,18,23,.26)}
-.ppreg-b2.ghost{background:#fff;color:#0d1f3c;border:1.5px solid #dfe4ec}
+.ppreg-b2.primary{background:linear-gradient(135deg,#0089BE,#0074A4);color:#fff;box-shadow:0 10px 22px rgba(0,116,164,.26)}
+.ppreg-b2.ghost{background:#fff;color:#00344F;border:1.5px solid #dfe4ec}
 .ppreg-b2.ghost:hover{background:#f6f8fb}
 @media(max-width:800px){
 .ppreg-card{grid-template-columns:1fr;max-width:520px}
@@ -316,9 +316,9 @@ function osoul_partner_render_reg_done() {
 	<div class="ppreg-wrap">
 		<div class="ppreg-card" style="grid-template-columns:1fr;max-width:520px">
 			<div class="ppreg-form" style="text-align:center;align-items:center">
-				<?php if ( $osoul_logo ) : ?><span class="ppreg-logochip" style="box-shadow:0 6px 16px rgba(13,31,60,.12)"><img src="<?php echo esc_url( $osoul_logo ); ?>" alt="أصول البناء"></span><?php endif; ?>
+				<?php if ( $osoul_logo ) : ?><span class="ppreg-logochip" style="box-shadow:0 6px 16px rgba(0,52,79,.12)"><img src="<?php echo esc_url( $osoul_logo ); ?>" alt="أصول البناء"></span><?php endif; ?>
 				<div class="ppreg-check" style="margin-top:22px"></div>
-				<h2 style="font-size:22px;font-weight:800;color:#0d1f3c;margin:0 0 6px"><?php echo osoul_bi( 'تم استلام طلب الانضمام', 'Your join request was received' ); ?></h2>
+				<h2 style="font-size:22px;font-weight:800;color:#00344F;margin:0 0 6px"><?php echo osoul_bi( 'تم استلام طلب الانضمام', 'Your join request was received' ); ?></h2>
 				<p style="font-size:13px;color:#6b7280;margin:0"><?php echo osoul_bi( 'خطواتك التالية:', 'Your next steps:', true ); ?></p>
 				<ol class="ppreg-steps">
 					<li><?php echo osoul_bi( 'تراجع الإدارة بياناتك وتعتمد حسابك.', 'Management reviews your details and approves your account.', true ); ?></li>
@@ -741,8 +741,8 @@ function osoul_partner_view_quotes( $pid ) {
 function osoul_partner_view_profile( $pid ) {
 	$p = osoul_partner_profile( $pid );
 	$g = static function ( $k ) use ( $p ) { return esc_attr( $p[ $k ] ?? '' ); };
-	$color  = osoul_partner_sanitize_hex( $p['color'] ?? '', '#0d1f3c' );
-	$accent = osoul_partner_sanitize_hex( $p['accent'] ?? '', '#D21217' );
+	$color  = osoul_partner_sanitize_hex( $p['color'] ?? '', '#00344F' );
+	$accent = osoul_partner_sanitize_hex( $p['accent'] ?? '', '#0074A4' );
 	?>
 	<div class="pp-card">
 		<h2><?php esc_html_e( 'هويّة شركتي', 'osoul' ); ?></h2>

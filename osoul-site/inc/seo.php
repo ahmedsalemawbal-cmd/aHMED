@@ -58,7 +58,8 @@ if ( ! function_exists( 'osoul_seo_meta' ) ) {
 	function osoul_seo_meta() {
 		global $post;
 		$home = home_url( '/' );
-		$logo = 'https://osoulalbinaa.com/wp-content/uploads/2026/06/تصميم-بدون-عنوان-20.png';
+		// Single source of truth: the "logo_url" setting (see inc/settings.php).
+		$logo = (string) osoul_opt( 'logo_url' );
 
 		$descs = array(
 			''                    => 'أصول البناء للصناعة — شركة سعودية متخصصة في تصنيع الأبواب المعدنية المقاومة للحريق وأنظمة الجبسوم بورد وإكسسوارات التثبيت في جدة.',

@@ -204,7 +204,7 @@ function osoul_render_settings_page() {
 			<table class="form-table" role="presentation"><tbody>
 			<?php foreach ( $fields as $key => $label ) : ?>
 				<?php if ( 0 === strpos( (string) $key, '__' ) ) : ?>
-					<tr><th colspan="2" style="padding-top:24px"><h2 style="margin:0;font-size:15px;color:#0d1f3c"><?php echo esc_html( $label ); ?></h2></th></tr>
+					<tr><th colspan="2" style="padding-top:24px"><h2 style="margin:0;font-size:15px;color:#00344F"><?php echo esc_html( $label ); ?></h2></th></tr>
 					<?php continue; ?>
 				<?php endif; ?>
 				<?php $val = osoul_opt( $key ); ?>

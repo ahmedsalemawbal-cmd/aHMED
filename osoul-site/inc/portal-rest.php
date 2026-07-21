@@ -383,8 +383,8 @@ function osoul_rest_bootstrap( WP_REST_Request $req ) {
 		$out['partner'] = array(
 			'company' => osoul_partner_get( $user->ID, 'company_ar' ) ?: $user->display_name,
 			'logo'    => osoul_partner_get( $user->ID, 'logo' ),
-			'color'   => osoul_partner_sanitize_hex( osoul_partner_get( $user->ID, 'color' ), '#0d1f3c' ),
-			'accent'  => osoul_partner_sanitize_hex( osoul_partner_get( $user->ID, 'accent' ), '#D21217' ),
+			'color'   => osoul_partner_sanitize_hex( osoul_partner_get( $user->ID, 'color' ), '#00344F' ),
+			'accent'  => osoul_partner_sanitize_hex( osoul_partner_get( $user->ID, 'accent' ), '#0074A4' ),
 		);
 	}
 	return rest_ensure_response( $out );

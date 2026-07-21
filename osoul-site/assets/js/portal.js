@@ -1715,8 +1715,8 @@
   function applyPartnerTheme(p) {
     if (!p) return;
     var r = document.documentElement.style;
-    r.setProperty('--n', p.color || '#0d1f3c');
-    r.setProperty('--o', p.accent || '#D21217');
+    r.setProperty('--n', p.color || '#00344F');
+    r.setProperty('--o', p.accent || '#0074A4');
   }
 
   function renderPartnerView() {
@@ -1956,8 +1956,8 @@
             '<span class="osp-ava" id="p-logo" style="width:74px;height:74px;background:#f3f5f9' + (p.logo ? ";background-image:url('" + esc(p.logo) + "');background-size:cover;background-position:center" : '') + '"></span>' +
             '<div><button class="osp-btn ghost sm" id="p-logo-btn">' + I.cam + ' ' + t('رفع شعار') + '</button>' +
             '<input type="file" id="p-logo-file" accept="image/png,image/jpeg" style="display:none"></div>' +
-            '<div class="osp-field"><label>' + t('اللون الأساسي') + '</label><input type="color" id="p-color" value="' + esc(p.color || '#0d1f3c') + '" style="width:58px;height:40px;border:1px solid var(--line);border-radius:8px;padding:2px;cursor:pointer"></div>' +
-            '<div class="osp-field"><label>' + t('لون التمييز') + '</label><input type="color" id="p-accent" value="' + esc(p.accent || '#D21217') + '" style="width:58px;height:40px;border:1px solid var(--line);border-radius:8px;padding:2px;cursor:pointer"></div>' +
+            '<div class="osp-field"><label>' + t('اللون الأساسي') + '</label><input type="color" id="p-color" value="' + esc(p.color || '#00344F') + '" style="width:58px;height:40px;border:1px solid var(--line);border-radius:8px;padding:2px;cursor:pointer"></div>' +
+            '<div class="osp-field"><label>' + t('لون التمييز') + '</label><input type="color" id="p-accent" value="' + esc(p.accent || '#0074A4') + '" style="width:58px;height:40px;border:1px solid var(--line);border-radius:8px;padding:2px;cursor:pointer"></div>' +
           '</div>' +
           '<div class="osp-card-h">' + t('بيانات الشركة (تظهر على عرض السعر)') + '</div>' +
           '<div class="osp-grid2"><div class="osp-field"><label>' + t('الاسم (عربي)') + '</label><input class="osp-input" id="p-co-ar" value="' + esc(p.company_ar || '') + '"></div>' +

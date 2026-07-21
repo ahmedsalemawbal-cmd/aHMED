@@ -15,7 +15,6 @@ add_action( 'wp_footer', 'osoul_header_output', 1 );
 if ( ! function_exists( 'osoul_header_output' ) ) {
 	function osoul_header_output() {
 		$home   = home_url( '/' );
-		$logo   = 'https://osoulalbinaa.com/wp-content/uploads/2026/06/تصميم-بدون-عنوان-20.png';
 		$phone1 = osoul_opt( 'phone_primary' );
 		$email  = osoul_opt( 'email' );
 		$wa     = osoul_wa_url();
@@ -78,7 +77,7 @@ if ( ! function_exists( 'osoul_header_output' ) ) {
 </div>
 </div>
 <div class="osh-main">
-<a href="<?php echo esc_url( $home ); ?>" class="osh-logo"><img src="<?php echo esc_url( $logo ); ?>" alt="أصول البناء للصناعة"></a>
+<a href="<?php echo esc_url( $home ); ?>" class="osh-logo"><?php echo osoul_brand_logo( 'header' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built with esc_* internally ?></a>
 <ul class="osh-nav">
 <?php foreach ( $nav as $item ) : ?>
 <li<?php echo ! empty( $item['sub'] ) ? ' class="has-sub"' : ''; ?>>
@@ -97,10 +96,10 @@ if ( ! function_exists( 'osoul_header_output' ) ) {
 <?php endforeach; ?>
 </ul>
 <div class="osh-actions">
-<button id="oql-trigger" onclick="oqlOpenDrawer()" aria-label="قائمة العرض" style="background:#eceef0;color:#0d1f3c;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;padding:8px 16px;border-radius:20px;border:1.5px solid #D21217;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;margin-left:8px">
-    <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#0d1f3c;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M9 2L3 7v13a1 1 0 001 1h16a1 1 0 001-1V7l-6-5"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+<button id="oql-trigger" onclick="oqlOpenDrawer()" aria-label="قائمة العرض" style="background:#eceef0;color:#00344F;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;padding:8px 16px;border-radius:20px;border:1.5px solid #0074A4;cursor:pointer;display:inline-flex;align-items:center;gap:7px;position:relative;margin-left:8px">
+    <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#00344F;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M9 2L3 7v13a1 1 0 001 1h16a1 1 0 001-1V7l-6-5"/><path d="M16 10a4 4 0 01-8 0"/></svg>
     <?php osoul_bilingual( 'قائمة العرض', 'Quote List' ); ?>
-    <span id="oql-header-badge" style="display:none;position:absolute;top:-7px;left:-7px;background:#D21217;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;line-height:1">0</span>
+    <span id="oql-header-badge" style="display:none;position:absolute;top:-7px;left:-7px;background:#0074A4;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;line-height:1">0</span>
 </button>
 <?php if ( function_exists( 'osoul_is_customer' ) && osoul_is_customer() ) :
 	$osh_first = trim( explode( ' ', (string) wp_get_current_user()->display_name )[0] );

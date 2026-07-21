@@ -94,6 +94,44 @@ function osoul_bilingual( $ar, $en ) {
 }
 
 /**
+ * Brand logo lockup (single source of truth for header + footer).
+ *
+ * If a logo image URL is configured in Site Settings ("logo"), that image is
+ * used. Otherwise it falls back to a self-contained inline SVG lockup in the
+ * new blue identity (geometric mark + bilingual wordmark) so the site never
+ * shows a stale/clashing asset. To use the official artwork, upload it and set
+ * the "logo" option (or filter `osoul_logo_url`) — no code change needed.
+ *
+ * Both placements sit on the dark chrome (#00344F), so the lockup is styled
+ * for dark backgrounds (light text + light-blue mark).
+ *
+ * @param string $context 'header' or 'footer' (drives sizing class only).
+ * @return string Ready-to-print HTML.
+ */
+function osoul_brand_logo( $context = 'header' ) {
+	$class = 'osoul-logo osoul-logo--' . ( 'footer' === $context ? 'footer' : 'header' );
+
+	$url = function_exists( 'osoul_opt' ) ? (string) osoul_opt( 'logo' ) : '';
+	/** Filterable so the official artwork can be wired without touching markup. */
+	$url = (string) apply_filters( 'osoul_logo_url', $url, $context );
+	if ( '' !== $url ) {
+		return '<span class="' . esc_attr( $class ) . '"><img src="' . esc_url( $url )
+			. '" alt="أصول البناء للصناعة"></span>';
+	}
+
+	// Inline SVG fallback — interlocking blocks mark + wordmark, on-dark palette.
+	$mark = '<span class="osoul-logo__mark" aria-hidden="true">'
+		. '<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">'
+		. '<path d="M10 10 H38 V20 H20 V46 H10 Z" fill="#7CB6D6"/>'
+		. '<path d="M46 46 H20 V36 H38 V10 H46 Z" fill="#0089BE"/>'
+		. '</svg></span>';
+	$word = '<span class="osoul-logo__txt"><b>أصول البناء</b><i>OSOUL AL-BINAA</i></span>';
+
+	return '<span class="' . esc_attr( $class ) . '" role="img" aria-label="أصول البناء — Osoul Al-Binaa">'
+		. $mark . $word . '</span>';
+}
+
+/**
  * Atomically increment a numeric option and return the NEW value.
  *
  * The old pattern — read with get_option(), add 1, write with update_option() —

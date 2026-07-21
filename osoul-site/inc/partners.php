@@ -45,8 +45,8 @@ function osoul_partner_fields() {
 		'email'      => '',
 		'terms_ar'   => '',
 		'terms_en'   => '',
-		'color'      => '#0d1f3c',
-		'accent'     => '#D21217',
+		'color'      => '#00344F',
+		'accent'     => '#0074A4',
 		'prefix'     => '',
 		'margin_min' => '0',
 	);
@@ -158,8 +158,8 @@ function osoul_partner_brand_snapshot( $partner_id ) {
 		'bank'       => $p['bank'],
 		'phone'      => $p['phone'],
 		'email'      => $p['email'],
-		'color'      => osoul_partner_sanitize_hex( $p['color'], '#0d1f3c' ),
-		'accent'     => osoul_partner_sanitize_hex( $p['accent'], '#D21217' ),
+		'color'      => osoul_partner_sanitize_hex( $p['color'], '#00344F' ),
+		'accent'     => osoul_partner_sanitize_hex( $p['accent'], '#0074A4' ),
 	);
 }
 

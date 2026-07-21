@@ -248,7 +248,7 @@ function osoul_portal_lang_select() {
 			<?php endforeach; ?>
 		</select>
 	</span>
-	<style>.osp-langsel select{border:1px solid #d8dee9;background:#fff;color:#0d1f3c;border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}</style>
+	<style>.osp-langsel select{border:1px solid #d8dee9;background:#fff;color:#00344F;border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}</style>
 	<?php echo osoul_portal_lang_switcher_js(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline script ?>
 	<?php
 	return ob_get_clean();
