@@ -139,3 +139,65 @@ if ( ! function_exists( 'osoul_prevent_product_404' ) ) {
 		status_header( 200 );
 	}
 }
+
+/* =========================================================================
+ *  Anti user-enumeration + login hardening
+ *
+ *  Closes a reported information-disclosure hole: the site leaked the
+ *  administrator's login name through two public channels —
+ *    • the REST users endpoint   /wp-json/wp/v2/users
+ *    • the author archive         ?author=1  →  /author/<login>/
+ *  Both are silenced for the public; logged-in administrators keep full access.
+ * ====================================================================== */
+
+/** Hide the REST "users" endpoints from anyone who cannot already list users. */
+add_filter( 'rest_endpoints', function ( $endpoints ) {
+	if ( current_user_can( 'list_users' ) ) {
+		return $endpoints;
+	}
+	foreach ( array( '/wp/v2/users', '/wp/v2/users/(?P<id>[\d]+)' ) as $route ) {
+		unset( $endpoints[ $route ] );
+	}
+	return $endpoints;
+} );
+
+/** Block ?author=N probes before WP can reveal the pretty /author/<login>/ URL. */
+add_action( 'init', function () {
+	if ( is_admin() || current_user_can( 'list_users' ) ) {
+		return;
+	}
+	if ( isset( $_GET['author'] ) && preg_match( '/^\d+$/', (string) wp_unslash( $_GET['author'] ) ) ) {
+		wp_safe_redirect( home_url( '/' ), 301 );
+		exit;
+	}
+} );
+
+/** Never serve an author archive page to the public. */
+add_action( 'template_redirect', function () {
+	if ( is_author() && ! current_user_can( 'list_users' ) ) {
+		wp_safe_redirect( home_url( '/' ), 301 );
+		exit;
+	}
+}, 0 );
+
+/** Generic wp-login error — never reveal whether a username/email exists. */
+add_filter( 'login_errors', function () {
+	return 'بيانات الدخول غير صحيحة. — Incorrect login details.';
+} );
+
+/**
+ * Send WordPress's built-in "lost password" flow to our own recovery screen.
+ *
+ * Password reset is intentionally NOT self-service: a user who forgets their
+ * password contacts the company, and we reset it and hand it over directly.
+ * Intercepting at login_init catches both the GET (form display) and the POST
+ * (submit) for the lostpassword / retrievepassword actions, so WordPress's reset
+ * form — which previously confirmed the account's e-mail address — never loads.
+ */
+add_action( 'login_init', function () {
+	$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+	if ( in_array( $action, array( 'lostpassword', 'retrievepassword' ), true ) ) {
+		wp_safe_redirect( home_url( '/dashboard/?recover=1' ) );
+		exit;
+	}
+} );

@@ -44,6 +44,12 @@ function osoul_portal_route() {
 		exit;
 	}
 
+	// Password recovery: no self-service reset — the user contacts the company.
+	if ( isset( $_GET['recover'] ) ) {
+		osoul_portal_render_recover();
+		return;
+	}
+
 	// ── Accept an invite (set password) ──
 	if ( isset( $_POST['osoul_setpw'] ) ) {
 		osoul_portal_handle_setpw(); // exits on success
@@ -204,6 +210,11 @@ function osoul_ur_dict() {
 		'بعدها تدخل لوحتك في أي وقت من صفحة الدخول.' => 'اس کے بعد آپ کسی بھی وقت لاگ اِن صفحے سے اپنے ڈیش بورڈ میں داخل ہو سکتے ہیں۔',
 		'لم يصلك البريد بعد الاعتماد؟ تواصل مع الإدارة لتزويدك برابط التفعيل مباشرة.' => 'منظوری کے بعد ای میل نہیں ملی؟ فعال کرنے کا لنک براہِ راست حاصل کرنے کے لیے انتظامیہ سے رابطہ کریں۔',
 		'صفحة الدخول' => 'لاگ اِن صفحہ', 'العودة للموقع' => 'ویب سائٹ پر واپس',
+		// password recovery
+		'استعادة كلمة المرور' => 'پاس ورڈ کی بازیابی',
+		'لأسباب أمنية لا تتم إعادة تعيين كلمة المرور عبر الموقع. تواصل مع الإدارة وسنعيد ضبط كلمة مرورك ونزوّدك بها مباشرة.' => 'سیکیورٹی وجوہات کی بنا پر پاس ورڈ ویب سائٹ کے ذریعے ری سیٹ نہیں ہوتا۔ انتظامیہ سے رابطہ کریں، ہم آپ کا پاس ورڈ ری سیٹ کر کے براہِ راست آپ کو فراہم کریں گے۔',
+		'اتصال بالإدارة' => 'انتظامیہ کو کال کریں', 'تواصل عبر واتساب' => 'واٹس ایپ پر رابطہ کریں',
+		'→ العودة لتسجيل الدخول' => '→ لاگ اِن پر واپس',
 	);
 	return $d;
 }
@@ -305,10 +316,52 @@ function osoul_portal_render_login( $error = '', $note = '' ) {
 				</label>
 				<button class="osp-btn primary block" type="submit" name="osoul_login" value="1"><?php echo osoul_bi( 'دخول', 'Sign in' ); ?></button>
 			</form>
-			<a class="osp-auth-link" href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php echo osoul_bi( 'نسيت كلمة المرور؟', 'Forgot your password?' ); ?></a>
+			<a class="osp-auth-link" href="<?php echo esc_url( home_url( '/dashboard/?recover=1' ) ); ?>"><?php echo osoul_bi( 'نسيت كلمة المرور؟', 'Forgot your password?' ); ?></a>
 			<a class="osp-auth-link" href="<?php echo esc_url( home_url( '/partner-register/' ) ); ?>"><?php echo osoul_bi( 'تسجيل شركة كشريك جديد', 'Register a company as a new partner' ); ?></a>
 		</div>
 	</div>
+	<?php
+	osoul_portal_foot();
+}
+
+/**
+ * Password-recovery screen — shown instead of WordPress's self-service reset
+ * (which confirmed the account's e-mail address). Passwords are reset by the
+ * company: the user contacts us and we set a new password and hand it over.
+ */
+function osoul_portal_render_recover() {
+	osoul_portal_head( 'استعادة كلمة المرور' );
+	$logo   = osoul_opt( 'logo_login' ) ?: ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo_url' ) );
+	$phone  = osoul_opt( 'phone_primary' );
+	$tel    = osoul_tel( $phone );
+	$email  = osoul_opt( 'email' );
+	$wa_num = preg_replace( '/\D/', '', (string) osoul_opt( 'whatsapp' ) );
+	$wa_url = $wa_num ? 'https://wa.me/' . $wa_num . '?text=' . rawurlencode( 'السلام عليكم، نسيت كلمة مرور حسابي في بوابة أصول البناء وأرجو إعادة تعيينها.' ) : '';
+	?>
+	<div class="osp-auth">
+		<div class="osp-auth-card">
+			<?php if ( $logo ) : ?><img class="osp-auth-logo" src="<?php echo esc_url( $logo ); ?>" alt="أصول البناء"><?php endif; ?>
+			<h1 class="osp-auth-title"><?php echo osoul_bi( 'استعادة كلمة المرور', 'Password recovery' ); ?></h1>
+			<p class="osp-auth-sub"><?php echo osoul_bi(
+				'لأسباب أمنية لا تتم إعادة تعيين كلمة المرور عبر الموقع. تواصل مع الإدارة وسنعيد ضبط كلمة مرورك ونزوّدك بها مباشرة.',
+				'For security, password resets are not done through the website. Contact us and we will reset your password and hand it to you directly.',
+				true
+			); ?></p>
+			<div class="osp-recover">
+				<?php if ( $tel ) : ?>
+					<a class="osp-btn primary block" href="tel:<?php echo esc_attr( $tel ); ?>"><?php echo osoul_bi( 'اتصال بالإدارة', 'Call us' ); ?> <bdi dir="ltr"><?php echo esc_html( $phone ); ?></bdi></a>
+				<?php endif; ?>
+				<?php if ( $wa_url ) : ?>
+					<a class="osp-btn wa block" href="<?php echo esc_url( $wa_url ); ?>" target="_blank" rel="noopener"><?php echo osoul_bi( 'تواصل عبر واتساب', 'Message on WhatsApp' ); ?></a>
+				<?php endif; ?>
+				<?php if ( $email ) : ?>
+					<a class="osp-btn ghost block" href="mailto:<?php echo esc_attr( $email ); ?>?subject=<?php echo rawurlencode( 'استعادة كلمة المرور' ); ?>"><?php echo osoul_bi( 'البريد الإلكتروني', 'Email' ); ?> <bdi dir="ltr"><?php echo esc_html( $email ); ?></bdi></a>
+				<?php endif; ?>
+			</div>
+			<a class="osp-auth-link" href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>"><?php echo osoul_bi( '→ العودة لتسجيل الدخول', '→ Back to sign in' ); ?></a>
+		</div>
+	</div>
+	<style>.osp-recover{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}.osp-recover .osp-btn{flex-wrap:wrap;text-align:center}</style>
 	<?php
 	osoul_portal_foot();
 }
