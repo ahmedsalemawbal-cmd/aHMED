@@ -392,8 +392,10 @@ a{color:inherit}
    9. نموذج التسجيل
 ───────────────────────────────────────────*/
 .fk-enroll{padding:70px 0;background:var(--c-soft)}
-.fk-enroll-grid{max-width:1080px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:1fr 1.3fr;gap:40px;align-items:start}
-@media(max-width:860px){.fk-enroll-grid{grid-template-columns:1fr;gap:32px}}
+.fk-enroll-grid{max-width:1080px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:start}
+.fk-enroll-grid #falak-enroll-form{grid-column:1;grid-row:1} /* الفورم يمين (RTL) */
+.fk-enroll-grid .fk-enroll-aside{grid-column:2;grid-row:1}   /* الخطوات يسار */
+@media(max-width:860px){.fk-enroll-grid{grid-template-columns:1fr;gap:32px}.fk-enroll-grid #falak-enroll-form,.fk-enroll-grid .fk-enroll-aside{grid-column:auto;grid-row:auto}}
 .fk-enroll-aside{background:linear-gradient(160deg,var(--c-green-deep),var(--c-green-deep-2));border-radius:var(--r-lg);padding:38px 32px;color:#fff;position:relative;overflow:hidden}
 .fk-enroll-aside::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:52px;opacity:.4}
 .fk-enroll-aside h3{position:relative;font-family:var(--font-q);font-size:24px;margin-bottom:14px}
