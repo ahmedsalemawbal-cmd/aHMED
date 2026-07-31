@@ -20,6 +20,8 @@ function falak_required_pages() {
 		'faq'      => 'الأسئلة الشائعة',
 		'contact'  => 'تواصل معنا',
 		'enroll'   => 'التسجيل',
+		'review'   => 'أضف تقييمك',
+		'dashboard'=> 'لوحة التحكم',
 	);
 }
 

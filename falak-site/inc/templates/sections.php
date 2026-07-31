@@ -13,16 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 function falak_tpl_teachers() {
 	falak_page_head( 'المعلمون والمعلمات', 'كادرٌ تعليميٌّ مؤهّل ومتخصّص في مختلف المواد' );
 
-	$teachers = array(
-		array( 'أ. / أحمد العتيبي', 'مدير المدرسة', 'إدارة تربوية' ),
-		array( 'أ. / عبدالرحمن', 'مشرف قسم البنين', 'خبرة تربوية' ),
-		array( 'أ. / خالد', 'معلم رياضيات', 'بكالوريوس رياضيات' ),
-		array( 'أ. / يوسف', 'معلم لغة عربية', 'بكالوريوس لغة عربية' ),
-		array( 'أ. / فاطمة', 'مشرفة قسم البنات', 'خبرة تربوية' ),
-		array( 'أ. / مريم', 'معلمة علوم', 'بكالوريوس علوم' ),
-		array( 'أ. / نورة', 'معلمة لغة إنجليزية', 'بكالوريوس لغات' ),
-		array( 'أ. / سارة', 'معلمة رياض أطفال', 'تخصّص طفولة مبكّرة' ),
-	);
+	$teachers = falak_get_teachers();
 	?>
 	<section class="fk-teachers" style="background:#fff">
 		<div class="fk-sec-head fk-reveal">
@@ -33,11 +24,17 @@ function falak_tpl_teachers() {
 		<div class="fk-teach-grid">
 			<?php foreach ( $teachers as $t ) : ?>
 				<article class="fk-teach-card fk-reveal">
-					<div class="fk-teach-photo"><span class="ph"><?php falak_icon( 'user', 42 ); ?></span></div>
+					<div class="fk-teach-photo">
+						<?php if ( ! empty( $t['img'] ) ) : ?>
+							<img src="<?php echo esc_url( $t['img'] ); ?>" alt="<?php echo esc_attr( $t['name'] ); ?>" loading="lazy">
+						<?php else : ?>
+							<span class="ph"><?php falak_icon( 'user', 42 ); ?></span>
+						<?php endif; ?>
+					</div>
 					<div class="fk-teach-body">
-						<h3><?php echo esc_html( $t[0] ); ?></h3>
-						<div class="role"><?php echo esc_html( $t[1] ); ?></div>
-						<span class="ijaza"><?php falak_icon( 'award', 13 ); ?> <?php echo esc_html( $t[2] ); ?></span>
+						<h3><?php echo esc_html( $t['name'] ); ?></h3>
+						<?php if ( ! empty( $t['role'] ) ) : ?><div class="role"><?php echo esc_html( $t['role'] ); ?></div><?php endif; ?>
+						<?php if ( ! empty( $t['note'] ) ) : ?><span class="ijaza"><?php falak_icon( 'award', 13 ); ?> <?php echo esc_html( $t['note'] ); ?></span><?php endif; ?>
 					</div>
 				</article>
 			<?php endforeach; ?>
@@ -53,21 +50,46 @@ function falak_tpl_teachers() {
 function falak_tpl_gallery() {
 	falak_page_head( 'معرض الصور', 'لقطات من فصولنا وأنشطتنا وفعالياتنا المدرسية' );
 
-	$caps = array(
-		'الفصول الذكية', 'المختبرات العلمية', 'الأنشطة الرياضية', 'أنشطة قسم البنين',
-		'أنشطة قسم البنات', 'مرحلة رياض الأطفال', 'الرحلات المدرسية', 'المعارض والمواهب', 'تكريم المتفوّقين',
-	);
+	$photos = falak_get_photos();
+	// حالة فارغة: صور نائبة لعرض شكل السلايدر قبل رفع الصور من الداش بورد.
+	$is_placeholder = empty( $photos );
+	if ( $is_placeholder ) {
+		$caps = array( 'الفصول الذكية', 'المختبرات العلمية', 'الأنشطة الرياضية', 'أنشطة قسم البنين', 'أنشطة قسم البنات', 'الرحلات المدرسية' );
+		$photos = array();
+		foreach ( $caps as $c ) {
+			$photos[] = array( 'img' => '', 'caption' => $c );
+		}
+	}
 	?>
 	<section class="fk-gallery">
-		<div class="fk-gal-grid">
-			<?php foreach ( $caps as $c ) : ?>
-				<div class="fk-gal-item fk-reveal">
-					<span class="ph"><?php falak_icon( 'image', 46 ); ?></span>
-					<span class="cap"><?php echo esc_html( $c ); ?></span>
-				</div>
-			<?php endforeach; ?>
+		<div class="fk-sec-head fk-reveal">
+			<span class="fk-eyebrow center">معرضنا</span>
+			<h2 class="fk-h2">لقطات من <span>حياتنا المدرسية</span></h2>
+			<p class="fk-lead">مرّر الصور يمينًا ويسارًا لاستعراض أنشطتنا وفعالياتنا.</p>
 		</div>
-		<p style="text-align:center;color:var(--c-muted);margin-top:32px;padding:0 24px">تُستبدل هذه المربّعات بصور المدرسة الحقيقية من لوحة التحكم لاحقًا.</p>
+
+		<div class="fk-slider gallery fk-reveal" data-slider>
+			<button class="fk-sl-btn fk-sl-prev" type="button" aria-label="السابق"><?php falak_icon( 'chevron', 22 ); ?></button>
+			<div class="fk-sl-track">
+				<?php foreach ( $photos as $ph ) : ?>
+					<div class="fk-slide">
+						<div class="fk-gal-item">
+							<?php if ( ! empty( $ph['img'] ) ) : ?>
+								<img src="<?php echo esc_url( $ph['img'] ); ?>" alt="<?php echo esc_attr( $ph['caption'] ); ?>" loading="lazy">
+							<?php else : ?>
+								<span class="ph"><?php falak_icon( 'image', 46 ); ?></span>
+							<?php endif; ?>
+							<?php if ( ! empty( $ph['caption'] ) ) : ?><span class="cap"><?php echo esc_html( $ph['caption'] ); ?></span><?php endif; ?>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<button class="fk-sl-btn fk-sl-next" type="button" aria-label="التالي"><?php falak_icon( 'chevron', 22 ); ?></button>
+		</div>
+
+		<?php if ( $is_placeholder ) : ?>
+			<p style="text-align:center;color:var(--c-muted);margin-top:22px;padding:0 24px">تُضاف صور المدرسة الحقيقية من لوحة التحكم لتظهر هنا.</p>
+		<?php endif; ?>
 	</section>
 	<?php
 	falak_cta_band();
@@ -172,9 +194,6 @@ function falak_tpl_contact() {
 ───────────────────────────────────────────*/
 function falak_tpl_enroll() {
 	falak_page_head( 'التسجيل', 'عبّئ النموذج وسيتواصل معك فريقنا لاستكمال التسجيل' );
-
-	$programs = falak_get_programs();
-	$grades   = falak_grades();
 	?>
 	<section class="fk-enroll">
 		<div class="fk-enroll-grid">
@@ -185,89 +204,59 @@ function falak_tpl_enroll() {
 					<li><span class="num">1</span><span><b>عبّئ النموذج</b><small>بيانات الطالب وولي الأمر</small></span></li>
 					<li><span class="num">2</span><span><b>تواصل الفريق</b><small>نتّصل بك لتأكيد البيانات</small></span></li>
 					<li><span class="num">3</span><span><b>تحديد المرحلة</b><small>نحدّد المرحلة والصف المناسب</small></span></li>
-					<li><span class="num">4</span><span><b>ابدأ الرحلة</b><small>ينضم الطالب إلى حلقته</small></span></li>
+					<li><span class="num">4</span><span><b>ابدأ الرحلة</b><small>ينضم الطالب إلى مدرسته</small></span></li>
 				</ol>
 			</aside>
 
 			<form id="falak-enroll-form" class="fk-form fk-reveal" novalidate>
 				<div class="fk-form-msg" role="alert"></div>
 
-				<div class="fk-form-row">
-					<div class="fk-field">
-						<label>اسم الطالب/ة <span class="req">*</span></label>
-						<input type="text" name="student_name" required autocomplete="name">
+				<div class="fk-field fk-field-full">
+					<label>نوع الطالب <span class="req">*</span></label>
+					<div class="fk-seg" role="radiogroup" aria-label="نوع الطالب">
+						<label class="fk-seg-opt">
+							<input type="radio" name="section" value="بنين" required>
+							<span><?php falak_icon( 'boy', 20 ); ?> ولد</span>
+						</label>
+						<label class="fk-seg-opt">
+							<input type="radio" name="section" value="بنات" required>
+							<span><?php falak_icon( 'girl', 20 ); ?> بنت</span>
+						</label>
 					</div>
-					<div class="fk-field">
-						<label>العمر</label>
-						<input type="number" name="student_age" min="3" max="60" inputmode="numeric">
-					</div>
+					<small class="fk-hint">حدّد النوع لتظهر المراحل الدراسية المناسبة.</small>
 				</div>
 
 				<div class="fk-form-row">
 					<div class="fk-field">
-						<label>القسم <span class="req">*</span></label>
-						<select name="section" required>
-							<option value="">اختر القسم</option>
-							<option value="بنين">قسم البنين (حضانة – سادس ابتدائي)</option>
-							<option value="بنات">قسم البنات (حضانة – ثالث ثانوي)</option>
-						</select>
+						<label>اسم الطالب <span class="req">*</span></label>
+						<input type="text" name="student_name" required autocomplete="name" placeholder="الاسم الكامل">
 					</div>
 					<div class="fk-field">
-						<label>المرحلة الدراسية</label>
-						<select name="grade">
-							<option value="">اختر المرحلة</option>
-							<?php foreach ( $grades as $g ) : ?>
-								<option value="<?php echo esc_attr( $g ); ?>"><?php echo esc_html( $g ); ?></option>
-							<?php endforeach; ?>
+						<label>المرحلة الدراسية <span class="req">*</span></label>
+						<select name="grade" id="falak-grade" required disabled>
+							<option value="">اختر نوع الطالب أولًا</option>
 						</select>
 					</div>
 				</div>
 
 				<div class="fk-form-row">
 					<div class="fk-field">
-						<label>البرنامج المطلوب</label>
-						<select name="program">
-							<option value="">اختر البرنامج</option>
-							<?php foreach ( $programs as $p ) : ?>
-								<option value="<?php echo esc_attr( $p['title'] ); ?>"><?php echo esc_html( $p['title'] ); ?></option>
-							<?php endforeach; ?>
-						</select>
+						<label>اسم ولي الأمر <span class="req">*</span></label>
+						<input type="text" name="guardian_name" required autocomplete="name">
 					</div>
 					<div class="fk-field">
-						<label>المدرسة السابقة</label>
-						<input type="text" name="current_level" placeholder="اسم المدرسة السابقة (إن وُجدت)">
-					</div>
-				</div>
-
-				<div class="fk-form-row">
-					<div class="fk-field">
-						<label>اسم ولي الأمر</label>
-						<input type="text" name="guardian_name" autocomplete="name">
-					</div>
-					<div class="fk-field">
-						<label>رقم الجوال <span class="req">*</span></label>
+						<label>جوال ولي الأمر <span class="req">*</span></label>
 						<input type="tel" name="guardian_phone" required inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel">
 					</div>
 				</div>
 
-				<div class="fk-form-row">
-					<div class="fk-field">
-						<label>البريد الإلكتروني</label>
-						<input type="email" name="guardian_email" dir="ltr" autocomplete="email">
-					</div>
-					<div class="fk-field">
-						<label>الوقت المفضّل</label>
-						<select name="preferred_time">
-							<option value="">غير محدد</option>
-							<option value="صباحي">صباحي</option>
-							<option value="مسائي">مسائي</option>
-							<option value="نهاية الأسبوع">نهاية الأسبوع</option>
-						</select>
-					</div>
+				<div class="fk-field fk-field-full">
+					<label>البريد الإلكتروني <small class="fk-opt">(اختياري)</small></label>
+					<input type="email" name="guardian_email" dir="ltr" autocomplete="email" placeholder="example@email.com">
 				</div>
 
-				<div class="fk-field">
-					<label>ملاحظات إضافية</label>
+				<div class="fk-field fk-field-full">
+					<label>ملاحظات <small class="fk-opt">(اختياري)</small></label>
 					<textarea name="notes" placeholder="أي معلومة تودّ إضافتها"></textarea>
 				</div>
 

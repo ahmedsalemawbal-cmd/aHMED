@@ -49,9 +49,28 @@ function falak_render_page() {
 		case 'enroll':
 			falak_tpl_enroll();
 			break;
+		case 'review':
+			falak_tpl_review();
+			break;
+		case 'dashboard':
+			falak_tpl_dashboard();
+			break;
 	}
 	echo '</main>';
 }
+
+/**
+ * فئة body لصفحة الداش بورد (لإخفاء الترويسة/التذييل وإظهار واجهة التطبيق).
+ */
+add_filter( 'body_class', function ( $classes ) {
+	$key = falak_current_page_key();
+	if ( 'dashboard' === $key ) {
+		$classes[] = 'falak-dashboard';
+	} elseif ( '' !== $key ) {
+		$classes[] = 'falak-page-' . $key;
+	}
+	return $classes;
+} );
 
 /* ─────────────────────────────────────────
    أجزاء مشتركة

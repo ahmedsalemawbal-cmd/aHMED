@@ -15,6 +15,11 @@
     initFaq();
     initEnrollForm();
     initScrollTop();
+    initSliders();
+    initDynamicGrades();
+    initRate();
+    initReviewForm();
+    initDashboard();
   });
 
   /* ترتيب الصفحة: نقل ترويستنا/محتوانا/تذييلنا لتكون أبناءً مباشرين للـ body،
@@ -208,9 +213,13 @@
       var payload = {};
       fd.forEach(function (v, k) { payload[k] = v; });
 
-      // تحقّق مبسّط.
-      if (!payload.student_name || !payload.guardian_phone) {
-        showMsg('err', 'الرجاء تعبئة اسم الطالب ورقم الجوال على الأقل.');
+      // تحقّق.
+      if (!payload.section) {
+        showMsg('err', 'الرجاء تحديد نوع الطالب (ولد / بنت).');
+        return;
+      }
+      if (!payload.student_name || !payload.grade || !payload.guardian_name || !payload.guardian_phone) {
+        showMsg('err', 'الرجاء تعبئة جميع الحقول المطلوبة (المميّزة بـ *).');
         return;
       }
 
@@ -250,11 +259,146 @@
     function buildWaText(p) {
       return 'طلب تسجيل جديد:\n' +
         'الطالب: ' + (p.student_name || '') + '\n' +
+        'النوع: ' + (p.section || '') + '\n' +
         'المرحلة: ' + (p.grade || '') + '\n' +
-        'القسم: ' + (p.section || '') + '\n' +
         'ولي الأمر: ' + (p.guardian_name || '') + '\n' +
-        'الجوال: ' + (p.guardian_phone || '') + '\n' +
-        'البرنامج: ' + (p.program || '');
+        'الجوال: ' + (p.guardian_phone || '');
+    }
+  }
+
+  /* ملء قائمة المراحل حسب النوع (ولد/بنت) */
+  function fillGrades(select, section) {
+    if (!select) return;
+    var grades = (window.falakData && falakData.grades && falakData.grades[section]) || [];
+    select.innerHTML = '';
+    if (!grades.length) {
+      select.innerHTML = '<option value="">—</option>';
+      select.disabled = true;
+      return;
+    }
+    grades.forEach(function (g) {
+      var o = document.createElement('option');
+      o.value = g; o.textContent = g;
+      select.appendChild(o);
+    });
+    select.disabled = false;
+  }
+
+  /* المراحل الديناميكية في نموذج التسجيل العام */
+  function initDynamicGrades() {
+    var form = document.getElementById('falak-enroll-form');
+    if (!form) return;
+    var grade = document.getElementById('falak-grade');
+    var radios = form.querySelectorAll('input[name="section"]');
+    radios.forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (r.checked) fillGrades(grade, r.value);
+      });
+    });
+  }
+
+  /* السلايدرات (تقليب يدوي: أزرار + سحب) */
+  function initSliders() {
+    document.querySelectorAll('.fk-slider').forEach(function (slider) {
+      var track = slider.querySelector('.fk-sl-track');
+      if (!track) return;
+      var prev = slider.querySelector('.fk-sl-prev');
+      var next = slider.querySelector('.fk-sl-next');
+      var rtl = getComputedStyle(track).direction === 'rtl';
+      var move = function (dir) { // dir: +1 التالي، -1 السابق
+        var slide = track.querySelector('.fk-slide');
+        var gap = parseFloat(getComputedStyle(track).gap) || 20;
+        var amount = (slide ? slide.getBoundingClientRect().width : 300) + gap;
+        track.scrollBy({ left: dir * amount * (rtl ? -1 : 1), behavior: 'smooth' });
+      };
+      if (prev) prev.addEventListener('click', function () { move(-1); });
+      if (next) next.addEventListener('click', function () { move(1); });
+    });
+  }
+
+  /* نجوم التقييم */
+  function initRate() {
+    document.querySelectorAll('[data-rate]').forEach(function (rate) {
+      var input = rate.querySelector('input[name="rating"]');
+      var stars = [].slice.call(rate.querySelectorAll('.fk-star'));
+      var paint = function (v) { stars.forEach(function (s) { s.classList.toggle('on', (+s.dataset.v) <= v); }); };
+      stars.forEach(function (s) {
+        s.addEventListener('click', function () { var v = +s.dataset.v; if (input) input.value = v; paint(v); });
+      });
+      paint(input ? (+input.value || 5) : 5);
+    });
+  }
+
+  /* إرسال نموذج التقييم */
+  function initReviewForm() {
+    var form = document.getElementById('falak-review-form');
+    if (!form) return;
+    var msg = form.querySelector('.fk-form-msg');
+    var btn = form.querySelector('.fk-form-submit');
+    var data = window.falakData || {};
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (msg) { msg.className = 'fk-form-msg'; msg.textContent = ''; }
+      var hp = form.querySelector('[name="fk_website"]');
+      if (hp && hp.value) return;
+
+      var fd = new FormData(form), payload = {};
+      fd.forEach(function (v, k) { payload[k] = v; });
+      if (!payload.name || !payload.text) {
+        show('err', 'الرجاء كتابة الاسم والتقييم.');
+        return;
+      }
+      if (!data.review) { show('err', 'تعذّر الإرسال حاليًا.'); return; }
+
+      var t = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = 'جارٍ الإرسال…'; }
+      fetch(data.review, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': data.nonce || '' },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        if (btn) { btn.disabled = false; btn.innerHTML = t; }
+        if (r.ok) { show('ok', 'شكرًا لك! تم استلام تقييمك وسيظهر بعد اعتماده. 🌟'); form.reset(); initRate(); }
+        else { show('err', 'تعذّر إرسال التقييم، حاول لاحقًا.'); }
+      }).catch(function () {
+        if (btn) { btn.disabled = false; btn.innerHTML = t; }
+        show('err', 'تعذّر الاتصال، حاول لاحقًا.');
+      });
+    });
+
+    function show(type, text) {
+      if (!msg) { alert(text); return; }
+      msg.className = 'fk-form-msg ' + type;
+      msg.textContent = text;
+      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  /* تفاعلات الداش بورد: فتح النماذج، نسخ الرابط، مراحل ديناميكية */
+  function initDashboard() {
+    document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var t = document.getElementById(btn.getAttribute('data-toggle'));
+        if (t) t.hidden = !t.hidden;
+      });
+    });
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var t = document.querySelector(btn.getAttribute('data-copy'));
+        if (!t) return;
+        t.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        if (navigator.clipboard) { navigator.clipboard.writeText(t.value).catch(function () {}); }
+        var o = btn.innerHTML;
+        btn.innerHTML = 'تم النسخ ✓';
+        setTimeout(function () { btn.innerHTML = o; }, 1500);
+      });
+    });
+    var ds = document.getElementById('dash-section');
+    var dg = document.getElementById('dash-grade');
+    if (ds && dg) {
+      ds.addEventListener('change', function () { fillGrades(dg, ds.value); });
     }
   }
 

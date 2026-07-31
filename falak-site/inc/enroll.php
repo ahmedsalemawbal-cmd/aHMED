@@ -14,17 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 function falak_enroll_fields() {
 	return array(
-		'student_name'   => 'اسم الطالب/ة',
-		'student_age'    => 'العمر',
-		'gender'         => 'الجنس',
-		'section'        => 'القسم',
+		'section'        => 'نوع الطالب',       // بنين / بنات
+		'student_name'   => 'اسم الطالب',
 		'grade'          => 'المرحلة الدراسية',
-		'program'        => 'المرحلة/البرنامج المطلوب',
-		'current_level'  => 'المدرسة السابقة',
 		'guardian_name'  => 'اسم ولي الأمر',
 		'guardian_phone' => 'رقم الجوال',
 		'guardian_email' => 'البريد الإلكتروني',
-		'preferred_time' => 'الوقت المفضّل',
 		'notes'          => 'ملاحظات',
 	);
 }
@@ -211,8 +206,8 @@ add_filter( 'manage_falak_enroll_posts_columns', function ( $cols ) {
 		'cb'         => isset( $cols['cb'] ) ? $cols['cb'] : '',
 		'title'      => 'الطالب',
 		'fk_phone'   => 'الجوال',
-		'fk_section' => 'القسم',
-		'fk_program' => 'البرنامج',
+		'fk_section' => 'النوع',
+		'fk_grade'   => 'المرحلة',
 		'fk_status'  => 'الحالة',
 		'date'       => 'التاريخ',
 	);
@@ -226,8 +221,8 @@ add_action( 'manage_falak_enroll_posts_custom_column', function ( $col, $post_id
 		case 'fk_section':
 			echo esc_html( get_post_meta( $post_id, '_falak_section', true ) );
 			break;
-		case 'fk_program':
-			echo esc_html( get_post_meta( $post_id, '_falak_program', true ) );
+		case 'fk_grade':
+			echo esc_html( get_post_meta( $post_id, '_falak_grade', true ) );
 			break;
 		case 'fk_status':
 			$st  = get_post_meta( $post_id, '_falak_status', true ) ?: 'new';

@@ -44,14 +44,19 @@ function falak_enqueue_assets() {
 		true
 	);
 
-	// بيانات للجافاسكربت (endpoint التسجيل + nonce + واتساب).
+	// بيانات للجافاسكربت (endpoints + nonce + واتساب + المراحل حسب النوع).
 	wp_localize_script(
 		'falak-main',
 		'falakData',
 		array(
 			'rest'     => esc_url_raw( rest_url( 'falak/v1/enroll' ) ),
+			'review'   => esc_url_raw( rest_url( 'falak/v1/review' ) ),
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
 			'whatsapp' => falak_wa_number(),
+			'grades'   => array(
+				'بنين' => falak_grades_boys(),
+				'بنات' => falak_grades_girls(),
+			),
 		)
 	);
 }

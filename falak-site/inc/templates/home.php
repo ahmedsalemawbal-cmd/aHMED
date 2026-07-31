@@ -129,31 +129,16 @@ function falak_tpl_home() {
 	<!-- الإحصائيات -->
 	<?php falak_stats_band(); ?>
 
-	<!-- شهادات أولياء الأمور -->
+	<!-- شهادات أولياء الأمور (سلايدر) -->
 	<section class="fk-testi">
 		<div class="fk-sec-head fk-reveal">
 			<span class="fk-eyebrow center">قالوا عنا</span>
 			<h2 class="fk-h2">ثقةُ <span>أولياء الأمور</span></h2>
+			<p class="fk-lead">مرّر يمينًا ويسارًا لاستعراض آراء أولياء أمور طلابنا.</p>
 		</div>
-		<div class="fk-testi-grid">
-			<?php
-			$testis = array(
-				array( 'أم عبدالله', 'ولية أمر', 'تحسّن مستوى ابني الدراسي بشكلٍ ملحوظ، ولمستُ اهتمامًا حقيقيًّا من المعلمين والإدارة. مدرسةٌ نثق بها.' ),
-				array( 'أبو سارة', 'ولي أمر', 'المتابعة الفردية والتقارير الدورية طمأنتني كثيرًا. بيئةٌ راقيةٌ ومعاملةٌ تربويةٌ رائعة لبناتنا.' ),
-				array( 'أم يوسف', 'ولية أمر', 'مرحلة رياض الأطفال ممتازة؛ ابنتي أحبّت مدرستها وصارت تنتظر يومها الدراسي بشغف. شكرًا للفلك المنير.' ),
-			);
-			foreach ( $testis as $t ) :
-				$initial = mb_substr( $t[0], 0, 1 );
-				?>
-				<article class="fk-testi-card fk-reveal">
-					<span class="quote">”</span>
-					<p><?php echo esc_html( $t[2] ); ?></p>
-					<div class="fk-testi-who">
-						<span class="fk-testi-av"><?php echo esc_html( $initial ); ?></span>
-						<span><b><?php echo esc_html( $t[0] ); ?></b><small><?php echo esc_html( $t[1] ); ?></small></span>
-					</div>
-				</article>
-			<?php endforeach; ?>
+		<?php falak_render_testimonials(); ?>
+		<div style="text-align:center;margin-top:34px" class="fk-reveal">
+			<a href="<?php echo esc_url( $home . 'review/' ); ?>" class="fk-btn fk-btn-o"><?php falak_icon( 'star', 18 ); ?> أضف تقييمك</a>
 		</div>
 	</section>
 

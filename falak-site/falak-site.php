@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       مدرسة الفلك المنير — Al-Falak Al-Munir Quran School
  * Plugin URI:        https://alfalak-almunir.com
- * Description:        طبقة الواجهة العربية (RTL) لموقع «مدرسة الفلك المنير لتحفيظ القرآن الكريم» — هيدر، فوتر، صفحات (الرئيسية، من نحن، البرامج، المعلمون، المعرض، الأسئلة، تواصل)، إدارة البرامج، ونظام تسجيل طلاب حقيقي بحفظ في قاعدة البيانات + إشعار بريد. مبنية على نمط إضافة «أصول البناء».
- * Version:           1.0.0
+ * Description:        موقع «مدرسة الفلك المنير» (مدرسة عامة) — واجهة عربية RTL كاملة + داش بورد مستقلة ببوابة دخول لإدارة التسجيلات والمعرض والمعلمين والتقييمات، ونظام تسجيل طلاب احترافي بمراحل ديناميكية حسب النوع، وسلايدرات معرض وتقييمات. مبنية على نمط إضافة «أصول البناء».
+ * Version:           2.0.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            مدرسة الفلك المنير
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // حماية من التحميل المزدوج.
 if ( defined( 'FALAK_VERSION' ) ) { return; }
 
-define( 'FALAK_VERSION', '1.0.0' );
+define( 'FALAK_VERSION', '2.0.0' );
 define( 'FALAK_FILE', __FILE__ );
 define( 'FALAK_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FALAK_URL', plugin_dir_url( __FILE__ ) );
@@ -33,7 +33,10 @@ $falak_modules = array(
 	'inc/settings.php',      // معلومات التواصل + صفحة إعدادات في الأدمن
 	'inc/security.php',      // تحصين الطلبات، إزالة بصمات النسخة، رؤوس أمان
 	'inc/programs.php',      // المراحل والبرامج (بيانات افتراضية + CPT قابل للإدارة)
-	'inc/enroll.php',        // نظام التسجيل: REST + حفظ + بريد + لوحة الطلبات
+	'inc/content.php',       // أنواع المحتوى: المعرض + المعلمون + التقييمات
+	'inc/enroll.php',        // نظام التسجيل: REST + حفظ + بريد
+	'inc/reviews.php',       // التقييمات: صفحة عامة + REST + عرض الشهادات
+	'inc/dashboard.php',     // الداش بورد المستقلة + بوابة الدخول
 	'inc/pages.php',         // إنشاء صفحات ووردبريس المطلوبة
 	'inc/performance.php',   // تحميل الأصول + تلميحات الموارد + تنظيف
 	'inc/seo.php',           // ميتا، canonical، schema.org
@@ -54,22 +57,33 @@ unset( $falak_modules, $falak_module, $falak_path );
 /**
  * التفعيل: إنشاء الصفحات، زرع البرامج، وتحديث قواعد الروابط.
  */
-register_activation_hook( __FILE__, function () {
-	if ( function_exists( 'falak_register_program_cpt' ) ) {
-		falak_register_program_cpt();
-	}
-	if ( function_exists( 'falak_register_enroll_cpt' ) ) {
-		falak_register_enroll_cpt();
-	}
-	if ( function_exists( 'falak_seed_programs' ) ) {
-		falak_seed_programs();
-	}
-	if ( function_exists( 'falak_create_missing_pages' ) ) {
-		falak_create_missing_pages( true );
-	}
+register_activation_hook( __FILE__, 'falak_activate' );
+function falak_activate() {
+	if ( function_exists( 'falak_register_program_cpt' ) ) { falak_register_program_cpt(); }
+	if ( function_exists( 'falak_register_enroll_cpt' ) ) { falak_register_enroll_cpt(); }
+	if ( function_exists( 'falak_register_content_cpts' ) ) { falak_register_content_cpts(); }
+	if ( function_exists( 'falak_seed_programs' ) ) { falak_seed_programs(); }
+	if ( function_exists( 'falak_create_roles' ) ) { falak_create_roles(); }
+	if ( function_exists( 'falak_create_missing_pages' ) ) { falak_create_missing_pages( true ); }
+	update_option( 'falak_ver', FALAK_VERSION );
 	flush_rewrite_rules();
-} );
+}
 
 register_deactivation_hook( __FILE__, function () {
 	flush_rewrite_rules();
 } );
+
+/**
+ * ترقية تلقائية للمواقع المفعّلة سابقًا (تُنشئ الصفحات/الأدوار الجديدة دون إعادة تفعيل).
+ */
+add_action( 'init', 'falak_maybe_upgrade', 99 );
+function falak_maybe_upgrade() {
+	if ( get_option( 'falak_ver' ) === FALAK_VERSION ) {
+		return;
+	}
+	if ( function_exists( 'falak_create_roles' ) ) { falak_create_roles(); }
+	if ( function_exists( 'falak_create_missing_pages' ) ) { falak_create_missing_pages( true ); }
+	if ( function_exists( 'falak_seed_programs' ) ) { falak_seed_programs(); }
+	update_option( 'falak_ver', FALAK_VERSION );
+	flush_rewrite_rules();
+}

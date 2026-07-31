@@ -28,9 +28,14 @@ function falak_nav_items() {
  */
 function falak_logo_mark( $class = 'fkh-logo' ) {
 	$logo = falak_opt( 'logo' );
-	echo '<span class="' . esc_attr( $class ) . '">';
+	$cls  = $logo ? $class . ' has-img' : $class;
+	echo '<span class="' . esc_attr( $cls ) . '">';
 	if ( $logo ) {
-		echo '<img src="' . esc_url( $logo ) . '" alt="' . esc_attr( falak_opt( 'school_name' ) ) . '">';
+		// صورة الشعار مع رجوع تلقائي للأيقونة إن تعذّر تحميلها.
+		echo '<img src="' . esc_url( $logo ) . '" alt="' . esc_attr( falak_opt( 'school_name' ) ) . '" loading="eager" decoding="async" onerror="var s=this.closest(&quot;span&quot;);s.classList.remove(&quot;has-img&quot;);s.classList.add(&quot;noimg&quot;);this.remove();">';
+		echo '<span class="fk-logo-ic">';
+		falak_icon( 'quran', 30 );
+		echo '</span>';
 	} else {
 		falak_icon( 'quran', 30 );
 	}
