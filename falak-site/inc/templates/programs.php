@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function falak_tpl_programs() {
 	$sections = falak_sections();
-	falak_page_head( 'البرامج والحلقات', 'برامج تحفيظ وتجويد تناسب جميع الأعمار والمستويات' );
+	falak_page_head( 'المراحل والبرامج', 'مراحل دراسية وبرامج تعليمية متكاملة تناسب جميع الأعمار' );
 	?>
 	<section class="fk-programs" style="background:#fff">
 		<?php falak_programs_cards( 0 ); ?>
@@ -38,5 +38,5 @@ function falak_tpl_programs() {
 	</section>
 
 	<?php
-	falak_cta_band( 'اختر البرنامج المناسب <span>لابنك أو ابنتك</span>', 'فريقنا مستعد لمساعدتك في اختيار البرنامج والمستوى الأنسب. سجّل الآن أو تواصل معنا.' );
+	falak_cta_band( 'اختر المرحلة المناسبة <span>لابنك أو ابنتك</span>', 'فريقنا مستعد لمساعدتك في اختيار المرحلة والبرنامج الأنسب. سجّل الآن أو تواصل معنا.' );
 }

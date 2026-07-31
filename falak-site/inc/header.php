@@ -15,7 +15,7 @@ function falak_nav_items() {
 	return array(
 		array( 'label' => 'الرئيسية', 'url' => $home, 'icon' => 'compass' ),
 		array( 'label' => 'من نحن', 'url' => $home . 'about/', 'icon' => 'book' ),
-		array( 'label' => 'البرامج', 'url' => $home . 'programs/', 'icon' => 'quran' ),
+		array( 'label' => 'المراحل والبرامج', 'url' => $home . 'programs/', 'icon' => 'book' ),
 		array( 'label' => 'المعلمون', 'url' => $home . 'teachers/', 'icon' => 'users' ),
 		array( 'label' => 'المعرض', 'url' => $home . 'gallery/', 'icon' => 'image' ),
 		array( 'label' => 'الأسئلة الشائعة', 'url' => $home . 'faq/', 'icon' => 'sparkle' ),

@@ -20,15 +20,15 @@ function falak_tpl_home() {
 			<?php if ( $ayah ) : ?>
 				<span class="fk-hero-ayah fk-reveal">﴿ <?php echo esc_html( $ayah ); ?> ﴾</span>
 			<?php endif; ?>
-			<h1 class="fk-reveal">نُحفّظ أبناءكم <span>كتاب الله</span><br>حفظًا مُتقنًا وتربيةً قرآنية</h1>
-			<p class="fk-hero-sub fk-reveal">في «مدرسة الفلك المنير» نأخذ بيد الطالب من أول حرف حتى يُتمّ حفظ القرآن الكريم، على أيدي معلّمين مُجازين، وبمنهجٍ متدرّج وبيئة تربوية آمنة لأبنائنا وبناتنا.</p>
+			<h1 class="fk-reveal">نبني جيلًا <span>متعلّمًا</span><br>واثقًا بنفسه، معتزًّا بقيمه</h1>
+			<p class="fk-hero-sub fk-reveal">في «مدرسة الفلك المنير» نُقدّم تعليمًا نوعيًّا وفق مناهج وزارة التعليم، بكادرٍ مؤهّل وبيئةٍ تربويةٍ آمنة ومرافقَ حديثة — لأبنائنا وبناتنا من رياض الأطفال حتى المرحلة الثانوية.</p>
 			<div class="fk-hero-btns fk-reveal">
 				<a href="<?php echo esc_url( $home . 'enroll/' ); ?>" class="fk-btn fk-btn-g"><?php falak_icon( 'sparkle', 18 ); ?> سجّل الآن</a>
 				<a href="<?php echo esc_url( $home . 'programs/' ); ?>" class="fk-btn fk-btn-ghost">تعرّف على برامجنا <?php falak_icon( 'arrow-l', 18 ); ?></a>
 			</div>
 			<div class="fk-hero-stats fk-reveal">
 				<div class="fk-stat"><div class="n"><?php echo esc_html( falak_opt( 'stat_students' ) ); ?></div><div class="l">طالب وطالبة</div></div>
-				<div class="fk-stat"><div class="n"><?php echo esc_html( falak_opt( 'stat_grads' ) ); ?></div><div class="l">حافظ متخرّج</div></div>
+				<div class="fk-stat"><div class="n"><?php echo esc_html( falak_opt( 'stat_grads' ) ); ?></div><div class="l">خريج ومتخرّجة</div></div>
 				<div class="fk-stat"><div class="n"><?php echo esc_html( falak_opt( 'stat_teachers' ) ); ?></div><div class="l">معلم ومعلمة</div></div>
 				<div class="fk-stat nostar"><div class="n"><?php echo esc_html( falak_opt( 'stat_years' ) ); ?></div><div class="l">سنة من العطاء</div></div>
 			</div>
@@ -40,20 +40,20 @@ function falak_tpl_home() {
 		<div class="fk-about-grid">
 			<div class="fk-about-media fk-reveal">
 				<div class="fk-about-frame"></div>
-				<img class="main" src="<?php echo esc_url( falak_pattern_placeholder( 'مدرسة الفلك المنير', 'quran' ) ); ?>" alt="مدرسة الفلك المنير لتحفيظ القرآن الكريم">
-				<div class="fk-about-badge"><b><?php echo esc_html( falak_opt( 'stat_years' ) ); ?>+</b><small>سنة في خدمة القرآن</small></div>
+				<img class="main" src="<?php echo esc_url( falak_pattern_placeholder( 'مدرسة الفلك المنير', 'book' ) ); ?>" alt="مدرسة الفلك المنير">
+				<div class="fk-about-badge"><b><?php echo esc_html( falak_opt( 'stat_years' ) ); ?>+</b><small>سنة من التميّز</small></div>
 			</div>
 			<div class="fk-about-text fk-reveal">
 				<span class="fk-eyebrow">من نحن</span>
-				<h2 class="fk-h2">مدرسةٌ تبني <span>جيلًا قرآنيًا</span> واعيًا</h2>
-				<p class="fk-lead">«مدرسة الفلك المنير لتحفيظ القرآن الكريم» صرحٌ تعليمي تربوي يُعنى بتحفيظ كتاب الله وتجويده لأبنائنا وبناتنا، في بيئة إيمانية آمنة تجمع بين إتقان الحفظ وحسن التربية وبناء الشخصية القرآنية.</p>
+				<h2 class="fk-h2">مدرسةٌ تبني <span>الإنسان</span> والمعرفة</h2>
+				<p class="fk-lead">«مدرسة الفلك المنير» صرحٌ تعليميٌّ تربويٌّ يُقدّم تعليمًا نوعيًّا وفق مناهج وزارة التعليم، ويجمع بين التميّز الأكاديمي وحُسن التربية وبناء الشخصية المتوازنة، في بيئةٍ آمنةٍ ومحفّزة لأبنائنا وبناتنا.</p>
 				<div class="fk-about-pts">
 					<?php
 					$pts = array(
-						'معلّمون ومعلمات مُجازون بأسانيد متّصلة إلى النبي ﷺ',
-						'منهج متدرّج ومتابعة فردية دقيقة لكل طالب',
-						'قسمان مستقلّان للبنين والبنات ببيئة تربوية آمنة',
-						'حوافز ومسابقات تُشجّع على الحفظ والإتقان',
+						'مناهج وزارة التعليم المعتمدة مع إثراءٍ وأنشطةٍ حديثة',
+						'كادرٌ تعليميٌّ مؤهّل ومتابعةٌ فرديةٌ دقيقة لكل طالب',
+						'قسمان مستقلّان للبنين والبنات ببيئةٍ تربويةٍ آمنة',
+						'مرافق حديثة: فصولٌ ذكية، ومختبرات، وملاعبُ وأنشطة',
 					);
 					foreach ( $pts as $pt ) : ?>
 						<div class="fk-about-pt"><span class="ic"><?php falak_icon( 'check', 16 ); ?></span><span><?php echo esc_html( $pt ); ?></span></div>
@@ -67,9 +67,9 @@ function falak_tpl_home() {
 	<!-- البرامج -->
 	<section class="fk-programs">
 		<div class="fk-sec-head fk-reveal">
-			<span class="fk-eyebrow center">برامجنا</span>
-			<h2 class="fk-h2">برامج تناسب <span>كل مستوى وعُمر</span></h2>
-			<p class="fk-lead">من التأسيس للصغار حتى الإجازة بالسند — نرافق الطالب في كل مرحلة من رحلته مع القرآن.</p>
+			<span class="fk-eyebrow center">مراحلنا وبرامجنا</span>
+			<h2 class="fk-h2">مراحل دراسية <span>متكاملة</span></h2>
+			<p class="fk-lead">من رياض الأطفال حتى المرحلة الثانوية — نرافق الطالب في كل مرحلة من رحلته التعليمية.</p>
 		</div>
 		<?php falak_programs_cards( 6 ); ?>
 		<div style="text-align:center;margin-top:44px" class="fk-reveal">
@@ -105,15 +105,15 @@ function falak_tpl_home() {
 		<div class="fk-why-inner">
 			<div class="fk-sec-head fk-reveal">
 				<span class="fk-eyebrow center">لماذا الفلك المنير</span>
-				<h2 class="fk-h2">أكثر من مجرّد <span>حفظ</span></h2>
+				<h2 class="fk-h2">أكثر من مجرّد <span>دراسة</span></h2>
 			</div>
 			<div class="fk-why-grid">
 				<?php
 				$whys = array(
-					array( 'award', 'معلّمون مُجازون', 'كادرٌ مؤهّل يحمل إجازات بأسانيد متّصلة، يتقن التلقين والتصحيح.' ),
-					array( 'target', 'منهج وإتقان', 'خطة حفظ متدرّجة ومراجعة منظّمة تضمن رسوخ المحفوظ وإتقانه.' ),
-					array( 'shield', 'بيئة آمنة', 'أجواء تربوية إيمانية آمنة تُراعي كل فئة عمرية بقسمها المستقل.' ),
-					array( 'heart', 'متابعة ورعاية', 'تواصل مستمر مع أولياء الأمور وتقارير دورية عن مستوى الطالب.' ),
+					array( 'award', 'كادرٌ تعليميٌّ مؤهّل', 'معلمون ومعلمات أكْفاء في مختلف التخصصات، يجمعون بين العلم والخبرة التربوية.' ),
+					array( 'target', 'مناهج وتقنية حديثة', 'مناهج وزارة التعليم مع وسائلَ وتقنياتٍ تعليميةٍ حديثة تُثري تجربة التعلّم.' ),
+					array( 'shield', 'بيئة آمنة ومحفّزة', 'أجواء تربوية آمنة ومرافق مجهّزة تُراعي كل فئة عمرية بقسمها المستقل.' ),
+					array( 'heart', 'متابعة ورعاية', 'تواصلٌ مستمر مع أولياء الأمور وتقاريرُ دوريةٌ عن مستوى الطالب.' ),
 				);
 				foreach ( $whys as $w ) : ?>
 					<div class="fk-why-item fk-reveal">
@@ -138,9 +138,9 @@ function falak_tpl_home() {
 		<div class="fk-testi-grid">
 			<?php
 			$testis = array(
-				array( 'أم عبدالله', 'ولية أمر', 'ختم ابني ثلاثة أجزاء في فصل واحد، ولمست تغيّرًا في أخلاقه وتعلّقه بالقرآن. جزى الله المعلمين خيرًا.' ),
-				array( 'أبو سارة', 'ولي أمر', 'المتابعة الفردية والتقارير الدورية طمأنتني كثيرًا. بيئة راقية ومعاملة تربوية رائعة لبناتنا.' ),
-				array( 'أم يوسف', 'ولية أمر', 'برنامج التأسيس للأطفال ممتاز؛ ابنتي أحبّت الحلقة وصارت تنتظرها كل يوم. شكرًا للفلك المنير.' ),
+				array( 'أم عبدالله', 'ولية أمر', 'تحسّن مستوى ابني الدراسي بشكلٍ ملحوظ، ولمستُ اهتمامًا حقيقيًّا من المعلمين والإدارة. مدرسةٌ نثق بها.' ),
+				array( 'أبو سارة', 'ولي أمر', 'المتابعة الفردية والتقارير الدورية طمأنتني كثيرًا. بيئةٌ راقيةٌ ومعاملةٌ تربويةٌ رائعة لبناتنا.' ),
+				array( 'أم يوسف', 'ولية أمر', 'مرحلة رياض الأطفال ممتازة؛ ابنتي أحبّت مدرستها وصارت تنتظر يومها الدراسي بشغف. شكرًا للفلك المنير.' ),
 			);
 			foreach ( $testis as $t ) :
 				$initial = mb_substr( $t[0], 0, 1 );

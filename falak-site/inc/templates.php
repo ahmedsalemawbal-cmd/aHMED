@@ -82,8 +82,8 @@ function falak_page_head( $title, $subtitle = '' ) {
  */
 function falak_cta_band( $title = null, $text = null ) {
 	$home  = home_url( '/' );
-	$title = $title ?: 'ابدأ رحلة أبنائك مع <span>كتاب الله</span> اليوم';
-	$text  = $text ?: 'سجّل الآن وانضم إلى أسرة مدرسة الفلك المنير — مقاعد محدودة لكل حلقة لضمان جودة المتابعة.';
+	$title = $title ?: 'ابدأ رحلة أبنائك <span>التعليمية</span> معنا';
+	$text  = $text ?: 'سجّل الآن وانضم إلى أسرة مدرسة الفلك المنير — المقاعد محدودة لكل مرحلة لضمان جودة التعليم والمتابعة.';
 	?>
 	<section class="fk-cta">
 		<div class="fk-cta-inner fk-reveal">
@@ -104,9 +104,9 @@ function falak_cta_band( $title = null, $text = null ) {
 function falak_stats_band() {
 	$stats = array(
 		array( falak_opt( 'stat_students' ), 'طالب وطالبة' ),
-		array( falak_opt( 'stat_grads' ), 'حافظ متخرّج' ),
+		array( falak_opt( 'stat_grads' ), 'خريج ومتخرّجة' ),
 		array( falak_opt( 'stat_teachers' ), 'معلم ومعلمة' ),
-		array( falak_opt( 'stat_years' ), 'سنة في خدمة القرآن' ),
+		array( falak_opt( 'stat_years' ), 'سنة من العطاء التعليمي' ),
 	);
 	?>
 	<section class="fk-numbers">
