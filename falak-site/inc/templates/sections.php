@@ -216,11 +216,11 @@ function falak_tpl_enroll() {
 					<div class="fk-seg" role="radiogroup" aria-label="نوع الطالب">
 						<label class="fk-seg-opt">
 							<input type="radio" name="section" value="بنين" required>
-							<span><?php falak_icon( 'boy', 20 ); ?> ولد</span>
+							<span><?php falak_icon( 'boy', 20 ); ?> طالب</span>
 						</label>
 						<label class="fk-seg-opt">
 							<input type="radio" name="section" value="بنات" required>
-							<span><?php falak_icon( 'girl', 20 ); ?> بنت</span>
+							<span><?php falak_icon( 'girl', 20 ); ?> طالبة</span>
 						</label>
 					</div>
 					<small class="fk-hint">حدّد النوع لتظهر المراحل الدراسية المناسبة.</small>

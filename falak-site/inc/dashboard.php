@@ -445,7 +445,7 @@ function falak_dash_tab_students() {
 		<div class="fk-form-row">
 			<div class="fk-field"><label>نوع الطالب</label>
 				<select name="section" id="dash-section" data-grades='<?php echo esc_attr( $grades_boys ); ?>'>
-					<option value="بنين">ولد</option><option value="بنات">بنت</option>
+					<option value="بنين">طالب</option><option value="بنات">طالبة</option>
 				</select>
 			</div>
 			<div class="fk-field"><label>اسم الطالب *</label><input type="text" name="student_name" required></div>
