@@ -51,10 +51,10 @@ function falak_tpl_gallery() {
 	falak_page_head( 'معرض الصور', 'لقطات من فصولنا وأنشطتنا وفعالياتنا المدرسية' );
 
 	$photos = falak_get_photos();
-	// حالة فارغة: صور نائبة لعرض شكل السلايدر قبل رفع الصور من الداش بورد.
+	// حالة فارغة: صور نائبة قبل رفع الصور الحقيقية من الداش بورد.
 	$is_placeholder = empty( $photos );
 	if ( $is_placeholder ) {
-		$caps = array( 'الفصول الذكية', 'المختبرات العلمية', 'الأنشطة الرياضية', 'أنشطة قسم البنين', 'أنشطة قسم البنات', 'الرحلات المدرسية' );
+		$caps = array( 'الفصول الذكية', 'المختبرات العلمية', 'الأنشطة الرياضية', 'أنشطة قسم البنين', 'أنشطة قسم البنات', 'مرحلة رياض الأطفال', 'الرحلات المدرسية', 'المعارض والمواهب', 'تكريم المتفوّقين' );
 		$photos = array();
 		foreach ( $caps as $c ) {
 			$photos[] = array( 'img' => '', 'caption' => $c );
@@ -65,30 +65,24 @@ function falak_tpl_gallery() {
 		<div class="fk-sec-head fk-reveal">
 			<span class="fk-eyebrow center">معرضنا</span>
 			<h2 class="fk-h2">لقطات من <span>حياتنا المدرسية</span></h2>
-			<p class="fk-lead">مرّر الصور يمينًا ويسارًا لاستعراض أنشطتنا وفعالياتنا.</p>
+			<p class="fk-lead">صورٌ من أنشطتنا وفعالياتنا ومرافقنا المدرسية.</p>
 		</div>
 
-		<div class="fk-slider gallery fk-reveal" data-slider>
-			<button class="fk-sl-btn fk-sl-prev" type="button" aria-label="السابق"><?php falak_icon( 'chevron', 22 ); ?></button>
-			<div class="fk-sl-track">
-				<?php foreach ( $photos as $ph ) : ?>
-					<div class="fk-slide">
-						<div class="fk-gal-item">
-							<?php if ( ! empty( $ph['img'] ) ) : ?>
-								<img src="<?php echo esc_url( $ph['img'] ); ?>" alt="<?php echo esc_attr( $ph['caption'] ); ?>" loading="lazy">
-							<?php else : ?>
-								<span class="ph"><?php falak_icon( 'image', 46 ); ?></span>
-							<?php endif; ?>
-							<?php if ( ! empty( $ph['caption'] ) ) : ?><span class="cap"><?php echo esc_html( $ph['caption'] ); ?></span><?php endif; ?>
-						</div>
-					</div>
-				<?php endforeach; ?>
-			</div>
-			<button class="fk-sl-btn fk-sl-next" type="button" aria-label="التالي"><?php falak_icon( 'chevron', 22 ); ?></button>
+		<div class="fk-gal-grid">
+			<?php foreach ( $photos as $ph ) : ?>
+				<div class="fk-gal-item fk-reveal">
+					<?php if ( ! empty( $ph['img'] ) ) : ?>
+						<img src="<?php echo esc_url( $ph['img'] ); ?>" alt="<?php echo esc_attr( $ph['caption'] ); ?>" loading="lazy">
+					<?php else : ?>
+						<span class="ph"><?php falak_icon( 'image', 46 ); ?></span>
+					<?php endif; ?>
+					<?php if ( ! empty( $ph['caption'] ) ) : ?><span class="cap"><?php echo esc_html( $ph['caption'] ); ?></span><?php endif; ?>
+				</div>
+			<?php endforeach; ?>
 		</div>
 
 		<?php if ( $is_placeholder ) : ?>
-			<p style="text-align:center;color:var(--c-muted);margin-top:22px;padding:0 24px">تُضاف صور المدرسة الحقيقية من لوحة التحكم لتظهر هنا.</p>
+			<p style="text-align:center;color:var(--c-muted);margin-top:28px;padding:0 24px">تُضاف صور المدرسة الحقيقية من لوحة التحكم لتظهر هنا.</p>
 		<?php endif; ?>
 	</section>
 	<?php
