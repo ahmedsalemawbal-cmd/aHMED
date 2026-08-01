@@ -33,6 +33,8 @@ function falak_enqueue_assets() {
 		. '--fk-pattern:url("' . falak_pattern_data_uri( '1F9D5A', '0.5' ) . '");'
 		. '--fk-pattern-gold:url("' . falak_pattern_data_uri( 'C6A15B', '1' ) . '");'
 		. '--fk-pattern-light:url("' . falak_pattern_data_uri( 'FFFFFF', '1' ) . '");'
+		. '--fk-pattern-hero:url("' . falak_pattern_hero( 'C6A15B', '0.55' ) . '");'
+		. '--fk-pattern-hero-w:url("' . falak_pattern_hero( 'FFFFFF', '0.7' ) . '");'
 		. '}';
 	wp_add_inline_style( 'falak-main', $vars );
 
@@ -70,14 +72,34 @@ function falak_font_preconnect() {
 }
 
 /**
- * إزالة الحشو غير الضروري (إيموجي، ?ver من موارد جوجل).
+ * إزالة الحشو غير الضروري (إيموجي، embeds، أنماط البلوكات غير المستخدمة) — أداء أنظف وأسرع.
  */
 add_action( 'init', function () {
 	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 	remove_action( 'wp_print_styles', 'print_emoji_styles' );
 	remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 	remove_action( 'admin_print_styles', 'print_emoji_styles' );
+	remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+	remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+	remove_action( 'wp_head', 'rest_output_link_wp_head' );
 } );
+
+/**
+ * إلغاء تحميل أنماط/سكربتات ووردبريس غير المستخدمة في واجهتنا المخصّصة (تسريع التحميل).
+ */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( is_admin() ) {
+		return;
+	}
+	foreach ( array( 'wp-block-library', 'wp-block-library-theme', 'wc-blocks-style', 'classic-theme-styles', 'global-styles' ) as $handle ) {
+		wp_dequeue_style( $handle );
+	}
+	wp_dequeue_script( 'wp-embed' );
+}, 100 );
+
+// إزالة أنماط SVG المكرّرة (duotone) التي يحقنها ووردبريس.
+remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
 
 /**
  * إبقاء ?ver على أصولنا (للـ cache-busting) وإزالته من روابط جوجل فقط ليس ضروريًا؛

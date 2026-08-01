@@ -102,7 +102,7 @@ a{color:inherit}
 .fkh-name{display:flex;flex-direction:column;line-height:1.25}
 .fkh-name b{font-family:var(--font-q);font-size:19px;font-weight:700;color:var(--c-ink)}
 .fkh-name small{font-size:11.5px;color:var(--c-gold-2);font-weight:600;letter-spacing:.3px}
-@media(max-width:520px){.fkh-name b{font-size:15px}.fkh-name small{display:none}}
+@media(max-width:520px){.fkh-name b{font-size:15px}.fkh-name small{display:block;font-size:10px}}
 
 .fkh-nav{display:flex;align-items:center;gap:4px;list-style:none}
 @media(max-width:1024px){.fkh-nav{display:none}}
@@ -160,10 +160,10 @@ a{color:inherit}
 .fkf-ayah{font-family:var(--font-q);color:var(--c-gold);font-size:16px;line-height:2;border-right:2px solid var(--c-gold);padding-right:14px}
 .fkf-col h4{color:#fff;font-size:16px;font-weight:700;margin-bottom:18px;position:relative;padding-bottom:10px}
 .fkf-col h4::after{content:'';position:absolute;bottom:0;right:0;width:32px;height:2px;background:var(--c-gold)}
-.fkf-col ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.fkf-col ul{list-style:none;display:flex;flex-direction:column;gap:7px}
 .fkf-col ul a{color:rgba(255,255,255,.72);text-decoration:none;font-size:14.5px;transition:color var(--t-fast),padding var(--t-fast)}
 .fkf-col ul a:hover{color:var(--c-gold);padding-right:5px}
-.fkf-contact li{display:flex;align-items:flex-start;gap:11px;font-size:14px;margin-bottom:13px;line-height:1.6}
+.fkf-contact li{display:flex;align-items:flex-start;gap:11px;font-size:14px;margin-bottom:9px;line-height:1.55}
 .fkf-contact li svg{width:18px;height:18px;color:var(--c-gold);flex-shrink:0;margin-top:2px}
 .fkf-contact a{color:inherit;text-decoration:none}
 .fkf-social{display:flex;gap:10px;margin-top:18px}
@@ -205,7 +205,7 @@ a{color:inherit}
 ───────────────────────────────────────────*/
 .fk-hero{position:relative;min-height:calc(100vh - 96px);display:flex;align-items:center;background:linear-gradient(135deg,var(--c-green-deep) 0%,var(--c-green-deep-2) 55%,#06281b 100%);overflow:hidden;padding:60px 0}
 @media(max-width:1024px){.fk-hero{min-height:auto;padding:70px 0}}
-.fk-hero::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:64px;opacity:.5;pointer-events:none}
+.fk-hero::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-hero);background-size:132px;opacity:.5;pointer-events:none}
 .fk-hero::after{content:'';position:absolute;top:-30%;left:-10%;width:60%;height:120%;background:radial-gradient(ellipse,rgba(31,157,90,.35),transparent 70%);pointer-events:none}
 .fk-hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 28px;width:100%}
 .fk-hero-ayah{display:inline-block;font-family:var(--font-q);color:var(--c-gold);font-size:clamp(15px,2vw,19px);line-height:2;margin-bottom:26px;padding:8px 22px;border:1px solid rgba(198,161,91,.35);border-radius:100px;background:rgba(198,161,91,.07)}
@@ -250,7 +250,7 @@ a{color:inherit}
 .fk-prog-card{background:#fff;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-2);border:1px solid var(--c-line);transition:transform var(--t-med),box-shadow var(--t-med);display:flex;flex-direction:column}
 .fk-prog-card:hover{transform:translateY(-8px);box-shadow:var(--sh-4)}
 .fk-prog-top{position:relative;height:150px;background:linear-gradient(135deg,var(--c-green),var(--c-green-deep));display:flex;align-items:center;justify-content:center;overflow:hidden}
-.fk-prog-top::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:44px;opacity:.6}
+.fk-prog-top::before{display:none} /* بلا باترن */
 .fk-prog-ic{position:relative;width:70px;height:70px;border-radius:20px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff}
 .fk-prog-ic svg{width:34px;height:34px}
 .fk-prog-badge{position:absolute;top:14px;right:14px;background:var(--c-gold);color:#3a2e10;font-size:11.5px;font-weight:800;padding:5px 12px;border-radius:100px}
@@ -271,7 +271,7 @@ a{color:inherit}
 .fk-sec-card:hover{transform:translateY(-6px)}
 .fk-sec-card.boys{background:linear-gradient(135deg,var(--c-green),var(--c-green-deep))}
 .fk-sec-card.girls{background:linear-gradient(135deg,#C6A15B,#8a6a2c)}
-.fk-sec-card::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-light);background-size:56px;opacity:.4}
+.fk-sec-card::before{display:none} /* بلا باترن */
 .fk-sec-card .ic{position:absolute;top:28px;left:28px;width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center}
 .fk-sec-card .ic svg{width:30px;height:30px}
 .fk-sec-card h3{position:relative;font-family:var(--font-q);font-size:28px;font-weight:700;margin-bottom:8px}
@@ -280,7 +280,7 @@ a{color:inherit}
 
 /* قسم «لماذا نحن» (داكن) */
 .fk-why{padding:90px 0;background:linear-gradient(160deg,var(--c-green-deep),var(--c-green-deep-2));position:relative;overflow:hidden}
-.fk-why::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:60px;opacity:.4;pointer-events:none}
+.fk-why::before{display:none} /* بلا باترن */
 .fk-why-inner{position:relative;max-width:1200px;margin:0 auto;padding:0 28px}
 .fk-why .fk-eyebrow{color:var(--c-gold)}
 .fk-why .fk-h2{color:#fff}
@@ -304,12 +304,12 @@ a{color:inherit}
 .fk-num .l{font-size:14.5px;color:var(--c-muted);margin-top:10px;font-weight:600}
 
 /* قسم CTA */
-.fk-cta{padding:80px 0;background:linear-gradient(135deg,var(--c-green),var(--c-green-deep) 70%);position:relative;overflow:hidden;text-align:center}
-.fk-cta::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-light);background-size:60px;opacity:.4}
+.fk-cta{padding:76px 0;background:#fff;position:relative;overflow:hidden;text-align:center;border-top:1px solid var(--c-line);border-bottom:1px solid var(--c-line)}
+.fk-cta::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-hero);background-size:132px;opacity:.5;pointer-events:none}
 .fk-cta-inner{position:relative;max-width:720px;margin:0 auto;padding:0 28px}
-.fk-cta h2{font-family:var(--font-q);font-size:clamp(28px,4.5vw,46px);font-weight:700;color:#fff;line-height:1.35;margin-bottom:16px}
-.fk-cta h2 span{color:var(--c-gold)}
-.fk-cta p{color:rgba(255,255,255,.8);font-size:17px;line-height:1.8;margin-bottom:32px}
+.fk-cta h2{font-family:var(--font-q);font-size:clamp(28px,4.5vw,46px);font-weight:700;color:var(--c-ink);line-height:1.35;margin-bottom:16px}
+.fk-cta h2 span{color:var(--c-green)}
+.fk-cta p{color:var(--c-muted);font-size:17px;line-height:1.8;margin-bottom:32px}
 .fk-cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 @media(max-width:520px){.fk-cta-btns{flex-direction:column}.fk-cta-btns .fk-btn{justify-content:center}}
 
@@ -360,7 +360,7 @@ a{color:inherit}
    8. رأس الصفحات الداخلية (page hero)
 ───────────────────────────────────────────*/
 .fk-phead{position:relative;background:linear-gradient(135deg,var(--c-green-deep),var(--c-green-deep-2));color:#fff;padding:64px 0;overflow:hidden;text-align:center}
-.fk-phead::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:56px;opacity:.45}
+.fk-phead::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-hero);background-size:132px;opacity:.5}
 .fk-phead-inner{position:relative;max-width:800px;margin:0 auto;padding:0 28px}
 .fk-phead h1{font-family:var(--font-q);font-size:clamp(30px,4.5vw,48px);font-weight:700;margin-bottom:14px}
 .fk-phead p{color:rgba(255,255,255,.72);font-size:16.5px;line-height:1.8}
@@ -397,7 +397,7 @@ a{color:inherit}
 .fk-enroll-grid .fk-enroll-aside{grid-column:2;grid-row:1}   /* الخطوات يسار */
 @media(max-width:860px){.fk-enroll-grid{grid-template-columns:1fr;gap:32px}.fk-enroll-grid #falak-enroll-form{grid-column:auto;grid-row:auto;order:1}.fk-enroll-grid .fk-enroll-aside{grid-column:auto;grid-row:auto;order:2}}
 .fk-enroll-aside{background:linear-gradient(160deg,var(--c-green-deep),var(--c-green-deep-2));border-radius:var(--r-lg);padding:38px 32px;color:#fff;position:relative;overflow:hidden}
-.fk-enroll-aside::before{content:'';position:absolute;inset:0;background-image:var(--fk-pattern-gold);background-size:52px;opacity:.4}
+.fk-enroll-aside::before{display:none} /* بلا باترن */
 .fk-enroll-aside h3{position:relative;font-family:var(--font-q);font-size:24px;margin-bottom:14px}
 .fk-enroll-aside p{position:relative;color:rgba(255,255,255,.75);font-size:14.5px;line-height:1.9;margin-bottom:24px}
 .fk-enroll-steps{position:relative;list-style:none;display:flex;flex-direction:column;gap:16px}

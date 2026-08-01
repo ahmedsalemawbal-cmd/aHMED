@@ -110,7 +110,7 @@ function falak_cta_band( $title = null, $text = null ) {
 			<p><?php echo esc_html( $text ); ?></p>
 			<div class="fk-cta-btns">
 				<a href="<?php echo esc_url( $home . 'enroll/' ); ?>" class="fk-btn fk-btn-g"><?php falak_icon( 'sparkle', 18 ); ?> سجّل الآن</a>
-				<a href="<?php echo esc_url( falak_wa_url( 'السلام عليكم، أرغب في التسجيل بمدرسة الفلك المنير' ) ); ?>" class="fk-btn fk-btn-ghost" target="_blank" rel="noopener"><?php falak_icon( 'whatsapp', 18 ); ?> تواصل واتساب</a>
+				<a href="<?php echo esc_url( falak_wa_url( 'السلام عليكم، أرغب في التسجيل بمدرسة الفلك المنير' ) ); ?>" class="fk-btn fk-btn-p" target="_blank" rel="noopener"><?php falak_icon( 'whatsapp', 18 ); ?> تواصل واتساب</a>
 			</div>
 		</div>
 	</section>

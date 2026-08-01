@@ -186,3 +186,19 @@ function falak_pattern_data_uri( $color = '1F9D5A', $opacity = '0.06' ) {
 		. '</g></svg>';
 	return 'data:image/svg+xml;utf8,' . rawurlencode( $svg );
 }
+
+/**
+ * علامة مائية أنيقة للهيرو — نجمة ثمانية (خَتم) متباعدة وراقية بدل النقش الكثيف.
+ *
+ * @param string $color لون الخط (hex بدون #).
+ * @param string $opacity شفافية الخط داخل الـ SVG.
+ */
+function falak_pattern_hero( $color = 'C6A15B', $opacity = '0.55' ) {
+	$svg = '<svg xmlns="http://www.w3.org/2000/svg" width="132" height="132" viewBox="0 0 132 132">'
+		. '<g fill="none" stroke="#' . $color . '" stroke-opacity="' . $opacity . '" stroke-width="1" stroke-linejoin="round">'
+		. '<rect x="34" y="34" width="64" height="64" rx="3"/>'
+		. '<rect x="34" y="34" width="64" height="64" rx="3" transform="rotate(45 66 66)"/>'
+		. '<circle cx="66" cy="66" r="12"/>'
+		. '</g></svg>';
+	return 'data:image/svg+xml;utf8,' . rawurlencode( $svg );
+}

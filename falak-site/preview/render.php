@@ -121,6 +121,9 @@ switch ( $PAGE ) {
 	case 'gallery':   falak_tpl_gallery(); break;
 	case 'teachers':  falak_tpl_teachers(); break;
 	case 'programs':  falak_tpl_programs(); break;
+	case 'contact':   falak_tpl_contact(); break;
+	case 'about':     falak_tpl_about(); break;
+	case 'faq':       falak_tpl_faq(); break;
 	case 'dashboard': falak_tpl_dashboard(); break;
 	default:          falak_tpl_home();
 }
