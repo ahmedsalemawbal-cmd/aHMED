@@ -40,7 +40,8 @@ function falak_tpl_home() {
 		<div class="fk-about-grid">
 			<div class="fk-about-media fk-reveal">
 				<div class="fk-about-frame"></div>
-				<img class="main" src="<?php echo esc_url( falak_pattern_placeholder( 'مدرسة الفلك المنير', 'book' ) ); ?>" alt="مدرسة الفلك المنير">
+				<?php $fk_about_img = falak_opt( 'about_image' ) ? falak_opt( 'about_image' ) : falak_pattern_placeholder( 'مدرسة الفلك المنير', 'book' ); ?>
+				<img class="main" src="<?php echo esc_url( $fk_about_img ); ?>" alt="مدرسة الفلك المنير" loading="lazy">
 				<div class="fk-about-badge"><b><?php echo esc_html( falak_opt( 'stat_years' ) ); ?>+</b><small>سنة من التميّز</small></div>
 			</div>
 			<div class="fk-about-text fk-reveal">

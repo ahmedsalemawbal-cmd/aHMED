@@ -512,10 +512,11 @@ a{color:inherit}
 .fk-slide .fk-gal-item{aspect-ratio:4/3}
 @media(max-width:900px){.fk-slider.gallery .fk-slide,.fk-slider.testi .fk-slide{width:calc(50% - 10px)}}
 @media(max-width:600px){
-  .fk-slider{padding:0 16px;gap:0}
-  .fk-slider .fk-sl-btn{display:none} /* على الجوال: تمرير باللمس */
+  /* على الجوال: البطاقة بعرض كامل، والأسهم أسفلها في المنتصف */
+  .fk-slider{flex-wrap:wrap;justify-content:center;gap:12px;padding:0 16px}
+  .fk-slider .fk-sl-track{order:0;flex:0 0 100%;width:100%;gap:14px;padding-bottom:14px}
+  .fk-slider .fk-sl-btn{display:flex;order:1;width:46px;height:46px}
   .fk-slider.testi .fk-slide{width:100%}
-  .fk-slider .fk-sl-track{gap:14px;padding-bottom:20px}
   .fk-slide .fk-testi-card{padding:28px 24px}
   .fk-testi-card p{font-size:15.5px;line-height:2}
 }

@@ -31,6 +31,7 @@ function falak_default_opts() {
 		'tiktok'        => '',
 		'logo'          => 'https://ahmedawbal.com/wp-content/uploads/2026/07/%D8%AA%D8%B5%D9%85%D9%8A%D9%85-%D8%A8%D8%AF%D9%88%D9%86-%D8%B9%D9%86%D9%88%D8%A7%D9%86-89.png',
 		'favicon'       => '',
+		'about_image'   => 'https://alfalakalmuneer.com/wp-content/uploads/2026/08/doha24net-1755349731.jpg',
 		// إحصائيات الواجهة الرئيسية.
 		'stat_students' => '850',
 		'stat_grads'    => '320',
@@ -106,7 +107,7 @@ function falak_settings_register() {
 function falak_sanitize_opts( $input ) {
 	$clean    = array();
 	$defaults = falak_default_opts();
-	$urls     = array( 'map_embed', 'twitter', 'instagram', 'youtube', 'snapchat', 'telegram', 'tiktok', 'logo', 'favicon' );
+	$urls     = array( 'twitter', 'instagram', 'youtube', 'snapchat', 'telegram', 'tiktok', 'logo', 'favicon', 'about_image' );
 	foreach ( $defaults as $key => $default ) {
 		$val = isset( $input[ $key ] ) ? $input[ $key ] : '';
 		if ( 'email' === $key ) {
@@ -139,6 +140,7 @@ function falak_settings_page() {
 			'ayah'         => array( 'الآية المعروضة في الترويسة', 'text' ),
 			'logo'         => array( 'رابط الشعار (PNG مربّع)', 'text' ),
 			'favicon'      => array( 'رابط أيقونة الموقع (favicon)', 'text' ),
+			'about_image'  => array( 'رابط صورة قسم «من نحن»', 'text' ),
 		),
 		'التواصل' => array(
 			'phone'    => array( 'رقم الهاتف', 'text' ),
