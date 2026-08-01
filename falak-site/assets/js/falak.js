@@ -46,9 +46,14 @@
       });
       // رتّب عناصرنا في نهاية body بالترتيب الصحيح.
       [page, footer].forEach(function (el) { if (el) body.appendChild(el); });
-      body.style.setProperty('padding-top', '96px', 'important');
-      var mq = window.matchMedia('(max-width:1024px)');
-      if (mq.matches) body.style.setProperty('padding-top', '70px', 'important');
+      // صفحة الداش بورد بلا ترويسة → بلا حشو علوي (يمنع الفراغ الأبيض).
+      if (body.classList.contains('falak-dashboard')) {
+        body.style.setProperty('padding-top', '0', 'important');
+      } else {
+        body.style.setProperty('padding-top', '96px', 'important');
+        var mq = window.matchMedia('(max-width:1024px)');
+        if (mq.matches) body.style.setProperty('padding-top', '70px', 'important');
+      }
     }
 
     // تأكد أن الترويسة والتذييل والعائمات أبناء مباشرون للـ body.
