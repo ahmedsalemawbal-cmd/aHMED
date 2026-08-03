@@ -414,11 +414,33 @@ class Osoul_IMAP {
 		return 'OK' === $r['status'];
 	}
 
-	/** APPEND a raw message into a folder with the given flags (e.g. \Seen). */
+	/**
+	 * APPEND a raw message into a folder with the given flags (e.g. \Seen).
+	 *
+	 * Exception-safe: when the folder does not exist the server answers the
+	 * command line with a tagged NO [TRYCREATE] instead of the "+" continuation,
+	 * which surfaces here as an exception. We swallow it and return false so the
+	 * caller can try another folder name on the same (still-clean) connection —
+	 * the literal was never sent, so the stream is not desynced.
+	 */
 	public function append( $folder, $raw, $flags = '\\Seen' ) {
-		$raw = preg_replace( '/\r?\n/', "\r\n", (string) $raw );
-		$r   = $this->run( array( ' APPEND ' . $this->quote( $folder ) . ' (' . $flags . ') ', array( 'lit' => $raw ) ) );
-		return 'OK' === $r['status'];
+		try {
+			$raw = preg_replace( '/\r?\n/', "\r\n", (string) $raw );
+			$r   = $this->run( array( ' APPEND ' . $this->quote( $folder ) . ' (' . $flags . ') ', array( 'lit' => $raw ) ) );
+			return 'OK' === $r['status'];
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+
+	/** Create (and subscribe) a mailbox folder. Returns true if it exists after. */
+	public function create_folder( $name ) {
+		$r = $this->run( array( ' CREATE ' . $this->quote( $name ) ) );
+		$this->run( array( ' SUBSCRIBE ' . $this->quote( $name ) ) );
+		if ( 'OK' === $r['status'] ) { return true; }
+		// NO because it already exists still counts as "present".
+		$tagged = isset( $r['tagged'] ) ? strtoupper( implode( ' ', array_map( 'strval', (array) $r['tagged'] ) ) ) : '';
+		return false !== strpos( $tagged, 'ALREADYEXISTS' ) || false !== strpos( $tagged, 'EXISTS' );
 	}
 
 	/* ---- IMAP protocol core ---- */
@@ -1033,13 +1055,47 @@ function osoul_mail_send( $user_id, $args ) {
 	}
 
 	// File a copy into Sent (best effort; failure doesn't fail the send).
-	$imap = osoul_mail_open( $user_id );
+	$filed = '';
+	$imap  = osoul_mail_open( $user_id );
 	if ( ! is_wp_error( $imap ) ) {
-		$sent = osoul_mail_special_folder( $imap, 'sent' );
-		if ( $sent ) { $imap->append( $sent, $raw, '\\Seen' ); }
+		$filed = osoul_mail_file_copy( $imap, 'sent', $raw );
 		$imap->logout();
 	}
-	return array( 'ok' => true, 'message_id' => $mid );
+	return array( 'ok' => true, 'message_id' => $mid, 'filed' => $filed );
+}
+
+/**
+ * File a raw message into a special folder (sent/drafts), trying the detected
+ * folder first and then the common Hostinger/Dovecot names, creating the folder
+ * as a last resort. Returns the folder used, or '' if none worked.
+ *
+ * @param Osoul_IMAP $imap
+ * @param string     $special  'sent' | 'drafts'
+ * @param string     $raw      RFC822 message
+ * @param string     $flags    IMAP flags to stamp (default \Seen)
+ * @return string
+ */
+function osoul_mail_file_copy( Osoul_IMAP $imap, $special, $raw, $flags = '\\Seen' ) {
+	$detected = osoul_mail_special_folder( $imap, $special );
+	$common   = ( 'drafts' === $special )
+		? array( 'INBOX.Drafts', 'Drafts', 'INBOX.INBOX.Drafts' )
+		: array( 'INBOX.Sent', 'Sent', 'Sent Items', 'Sent Messages', 'INBOX.Sent Items' );
+
+	$candidates = array();
+	foreach ( array_merge( array( (string) $detected ), $common ) as $c ) {
+		$c = trim( (string) $c );
+		if ( '' !== $c && ! in_array( $c, $candidates, true ) ) { $candidates[] = $c; }
+	}
+	foreach ( $candidates as $folder ) {
+		if ( $imap->append( $folder, $raw, $flags ) ) { return $folder; }
+	}
+	// Nothing matched — create the canonical name and append there. Try the
+	// INBOX-prefixed name (Dovecot default) and the bare name.
+	$leaf = ( 'drafts' === $special ) ? 'Drafts' : 'Sent';
+	foreach ( array( 'INBOX.' . $leaf, $leaf ) as $make ) {
+		if ( $imap->create_folder( $make ) && $imap->append( $make, $raw, $flags ) ) { return $make; }
+	}
+	return '';
 }
 
 /** Resolve a special-use folder's raw name (e.g. 'sent','drafts','trash','junk'). */

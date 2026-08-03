@@ -579,8 +579,7 @@ function osoul_mail_save_draft( $user_id, $args ) {
 	}
 	$imap = osoul_mail_open( $user_id );
 	if ( is_wp_error( $imap ) ) { return $imap; }
-	$drafts = osoul_mail_special_folder( $imap, 'drafts', 'Drafts' );
-	$ok     = $imap->append( $drafts, $raw, '\\Draft \\Seen' );
+	$filed = osoul_mail_file_copy( $imap, 'drafts', $raw, '\\Draft \\Seen' );
 	$imap->logout();
-	return $ok ? array( 'ok' => true ) : new WP_Error( 'osoul_draft_fail', 'تعذّر حفظ المسودة في مجلد المسودات.' );
+	return ( '' !== $filed ) ? array( 'ok' => true ) : new WP_Error( 'osoul_draft_fail', 'تعذّر حفظ المسودة في مجلد المسودات.' );
 }
