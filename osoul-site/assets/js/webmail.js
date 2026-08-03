@@ -123,7 +123,10 @@
 				.map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(opts.query[k]); }).join('&');
 			if (qs) url += '?' + qs;
 		}
-		var init = { method: opts.method || 'GET', headers: { 'X-WP-Nonce': CFG.nonce }, credentials: 'same-origin' };
+		// Default to POST whenever there is a body/form — a GET/HEAD request may
+		// never carry a body (the browser throws otherwise).
+		var method = opts.method || ((opts.body || opts.form) ? 'POST' : 'GET');
+		var init = { method: method, headers: { 'X-WP-Nonce': CFG.nonce }, credentials: 'same-origin' };
 		if (opts.body) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(opts.body); }
 		if (opts.form) { init.method = 'POST'; init.body = opts.form; }
 		return fetch(url, init).then(function (r) {
