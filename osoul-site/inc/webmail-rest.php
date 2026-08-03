@@ -61,6 +61,7 @@ add_action( 'rest_api_init', function () {
 		array( '/mail/send',       $post, 'osoul_rest_mail_send' ),
 		array( '/mail/attachment', $get,  'osoul_rest_mail_attachment' ),
 		array( '/mail/upload',     $post, 'osoul_rest_mail_upload' ),
+		array( '/mail/avatar',     $post, 'osoul_rest_mail_avatar' ),
 		array( '/mail/profile',    $post, 'osoul_rest_mail_profile' ),
 		array( '/mail/contacts',   $get,  'osoul_rest_mail_contacts' ),
 	);
@@ -87,6 +88,7 @@ function osoul_rest_mail_bootstrap() {
 		'email'     => $cfg['email'],
 		'from_name' => $cfg['from_name'],
 		'signature' => $cfg['signature'],
+		'avatar'    => (string) get_user_meta( $uid, '_osoul_mail_avatar', true ),
 		'defaults'  => osoul_mail_server_defaults(),
 		'imap_host' => $cfg['imap_host'],
 		'imap_port' => $cfg['imap_port'],
@@ -511,7 +513,45 @@ function osoul_rest_mail_profile( WP_REST_Request $req ) {
 		update_user_meta( $uid, '_osoul_mail_from', $from );
 	}
 	update_user_meta( $uid, '_osoul_mail_sig', $sig );
-	return rest_ensure_response( array( 'ok' => true, 'from_name' => $from, 'signature' => $sig ) );
+
+	// Profile photo: accept a URL we host (from /mail/avatar). '' clears it.
+	if ( null !== $req->get_param( 'avatar' ) ) {
+		$av = esc_url_raw( (string) $req->get_param( 'avatar' ) );
+		if ( '' === $av || 0 === strpos( $av, home_url() ) || 0 === strpos( $av, content_url() ) ) {
+			update_user_meta( $uid, '_osoul_mail_avatar', $av );
+		}
+	}
+	$avatar = (string) get_user_meta( $uid, '_osoul_mail_avatar', true );
+
+	return rest_ensure_response( array( 'ok' => true, 'from_name' => $from, 'signature' => $sig, 'avatar' => $avatar ) );
+}
+
+/** Upload a profile photo to the media library and return its URL. */
+function osoul_rest_mail_avatar() {
+	if ( empty( $_FILES['file'] ) || ! is_array( $_FILES['file'] ) ) {
+		return new WP_Error( 'osoul_no_file', 'لا يوجد ملف.', array( 'status' => 422 ) );
+	}
+	if ( ! current_user_can( 'upload_files' ) ) {
+		return new WP_Error( 'osoul_forbidden', 'غير مصرح.', array( 'status' => 403 ) );
+	}
+	$file = $_FILES['file'];
+	$type = wp_check_filetype( sanitize_file_name( (string) $file['name'] ) );
+	if ( ! preg_match( '#^image/#', (string) ( $type['type'] ?? '' ) ) && ! preg_match( '/\.(jpe?g|png|webp|gif)$/i', (string) $file['name'] ) ) {
+		return new WP_Error( 'osoul_bad_type', 'الملف يجب أن يكون صورة.', array( 'status' => 422 ) );
+	}
+	if ( ( $file['size'] ?? 0 ) > 6 * MB_IN_BYTES ) {
+		return new WP_Error( 'osoul_big', 'حجم الصورة كبير (الحد 6 ميجابايت).', array( 'status' => 422 ) );
+	}
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	$att_id = media_handle_upload( 'file', 0 );
+	if ( is_wp_error( $att_id ) ) {
+		return new WP_Error( 'osoul_upload_fail', $att_id->get_error_message(), array( 'status' => 500 ) );
+	}
+	$url = wp_get_attachment_url( $att_id );
+	update_user_meta( get_current_user_id(), '_osoul_mail_avatar', esc_url_raw( $url ) );
+	return rest_ensure_response( array( 'ok' => true, 'id' => $att_id, 'url' => $url ) );
 }
 
 function osoul_rest_mail_contacts() {

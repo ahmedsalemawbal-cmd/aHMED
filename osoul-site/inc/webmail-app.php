@@ -27,6 +27,14 @@ function osoul_webmail_render_app() {
 	$dir  = ( 'en' === $lang ) ? 'ltr' : 'rtl';
 	$cfg  = osoul_mail_config( $user->ID );
 
+	// Brand logo shown in the top bar. Prefer Site Settings, then the uploaded
+	// Osoul artwork; filter `osoul_webmail_logo` to override.
+	$osoul_logo = function_exists( 'osoul_opt' ) ? ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo' ) ) : '';
+	if ( '' === $osoul_logo ) {
+		$osoul_logo = 'https://osoulalbinaa.com/wp-content/uploads/2026/08/' . rawurlencode( 'تصميم-بدون-عنوان-89' ) . '.png';
+	}
+	$osoul_logo = apply_filters( 'osoul_webmail_logo', $osoul_logo );
+
 	?><!doctype html>
 <html lang="<?php echo esc_attr( $lang ); ?>" dir="<?php echo esc_attr( $dir ); ?>">
 <head>
@@ -55,7 +63,7 @@ function osoul_webmail_render_app() {
 		email:     <?php echo wp_json_encode( $cfg['email'] ); ?>,
 		lang:      <?php echo wp_json_encode( $lang ); ?>,
 		home:      <?php echo wp_json_encode( home_url( '/' ) ); ?>,
-		logo:      <?php echo wp_json_encode( function_exists( 'osoul_opt' ) ? ( osoul_opt( 'logo_icon' ) ?: osoul_opt( 'logo' ) ) : '' ); ?>,
+		logo:      <?php echo wp_json_encode( esc_url_raw( $osoul_logo ) ); ?>,
 		logout:    <?php echo wp_json_encode( add_query_arg( 'logout', 1, home_url( '/dashboard/' ) ) ); ?>,
 		poll:      20000
 	};

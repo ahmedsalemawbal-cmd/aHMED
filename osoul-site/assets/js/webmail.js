@@ -63,14 +63,16 @@
 	};
 	// Feature-set strings (filters, sort, bulk, storage, contacts, folders).
 	var MORE = {
-		ar: { f_all: 'الكل', f_unread: 'غير مقروء', f_read: 'مقروء', f_starred: 'مميّز', sort: 'ترتيب', newest: 'الأحدث أولاً', oldest: 'الأقدم أولاً',
+		ar: { f_all: 'الكل', f_unread: 'غير مقروء', f_read: 'مقروء', f_starred: 'مميّز', sort: 'ترتيب', newest: 'الأحدث', oldest: 'الأقدم',
 			selected: 'محدد', b_read: 'مقروء', b_unread: 'غير مقروء', b_star: 'تمييز', b_delete: 'حذف', b_move: 'نقل', b_cancel: 'إلغاء',
 			storage: 'مساحة التخزين', add_folder: 'مجلد جديد', folder_name: 'اسم المجلد', contacts: 'جهات الاتصال', no_contacts: 'لا توجد جهات اتصال بعد.',
-			select_all: 'تحديد الكل', deleted_n: 'تم حذف الرسائل', done_n: 'تم التنفيذ', expand: 'تكبير', collapse: 'تصغير', new_folder_ok: 'تم إنشاء المجلد' },
-		en: { f_all: 'All', f_unread: 'Unread', f_read: 'Read', f_starred: 'Starred', sort: 'Sort', newest: 'Newest first', oldest: 'Oldest first',
+			select_all: 'تحديد الكل', deleted_n: 'تم حذف الرسائل', done_n: 'تم التنفيذ', expand: 'تكبير', collapse: 'تصغير', new_folder_ok: 'تم إنشاء المجلد',
+			photo: 'الصورة الشخصية', change_photo: 'تغيير الصورة', remove_photo: 'إزالة', uploading: 'جاري الرفع…', lang_label: 'لغة الواجهة' },
+		en: { f_all: 'All', f_unread: 'Unread', f_read: 'Read', f_starred: 'Starred', sort: 'Sort', newest: 'Newest', oldest: 'Oldest',
 			selected: 'selected', b_read: 'Read', b_unread: 'Unread', b_star: 'Star', b_delete: 'Delete', b_move: 'Move', b_cancel: 'Cancel',
 			storage: 'Storage', add_folder: 'New folder', folder_name: 'Folder name', contacts: 'Contacts', no_contacts: 'No contacts yet.',
-			select_all: 'Select all', deleted_n: 'Messages deleted', done_n: 'Done', expand: 'Expand', collapse: 'Collapse', new_folder_ok: 'Folder created' }
+			select_all: 'Select all', deleted_n: 'Messages deleted', done_n: 'Done', expand: 'Expand', collapse: 'Collapse', new_folder_ok: 'Folder created',
+			photo: 'Profile picture', change_photo: 'Change photo', remove_photo: 'Remove', uploading: 'Uploading…', lang_label: 'Interface language' }
 	};
 	function t(k) { var v = STR[LANG][k]; if (v == null) v = MORE[LANG][k]; return v != null ? v : (STR.ar[k] || MORE.ar[k] || k); }
 
@@ -110,7 +112,7 @@
 		connected: false, folders: [], folder: 'INBOX', special: 'inbox', display: t('inbox'),
 		page: 0, total: 0, per: 25, messages: [], search: '', currentUid: 0, currentMsg: null,
 		from_name: '', signature: '', email: CFG.email || '', name: CFG.name || '', busy: false,
-		filter: '', sort: 'newest', sel: {}
+		filter: '', sort: 'newest', sel: {}, avatar: ''
 	};
 
 	/* --------------------------- dom helpers -------------------------- */
@@ -129,6 +131,13 @@
 	function avatar(name, email, cls) {
 		var key = email || name || '?';
 		return '<span class="om-avatar ' + (cls || '') + '" style="background:' + avColor(key) + '">' + esc(initials(name, email)) + '</span>';
+	}
+	// The logged-in user's own avatar — a photo when one is set, else initials.
+	function selfAvatar(cls) {
+		if (S.avatar) {
+			return '<span class="om-avatar ' + (cls || '') + '" style="background-image:url(\'' + esc(S.avatar) + '\');background-size:cover;background-position:center"></span>';
+		}
+		return avatar(S.name, S.email, cls);
 	}
 
 	/* ------------------------------- api ------------------------------ */
@@ -165,8 +174,9 @@
 
 	/* ============================ SHELL ============================ */
 	function buildShell() {
+		// Brand logo; falls back to the lettermark if the image fails to load.
 		var logo = CFG.logo
-			? '<img src="' + esc(CFG.logo) + '" alt="Osoul">'
+			? '<img src="' + esc(CFG.logo) + '" alt="Osoul" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'"><span class="mk" style="display:none">أ</span>'
 			: '<span class="mk">أ</span>';
 		ROOT.innerHTML =
 			'<div class="om-top">' +
@@ -178,13 +188,12 @@
 				'<div class="om-top-actions">' +
 					'<button class="om-ic om-refresh" title="' + esc(t('refresh')) + '">' + I.refresh + '</button>' +
 					'<div class="om-menu-wrap">' +
-						'<button class="om-ic om-avatar-btn">' + avatar(S.name, S.email) + '</button>' +
+						'<button class="om-ic om-avatar-btn">' + selfAvatar() + '</button>' +
 						'<div class="om-menu">' +
-							'<div class="who"><b>' + esc(S.name) + '</b><span>' + esc(S.email) + '</span></div>' +
+							'<div class="who">' + selfAvatar('who-av') + '<div class="who-tx"><b>' + esc(S.name) + '</b><span>' + esc(S.email) + '</span></div></div>' +
 							'<button data-act="settings">' + I.gear + ' ' + esc(t('settings')) + '</button>' +
 							'<button data-act="theme">🌓 ' + esc(t('theme')) + '</button>' +
 							'<button data-act="lang">🌐 ' + esc(t('language')) + '</button>' +
-							'<button data-act="disconnect">✕ ' + esc(t('disconnect')) + '</button>' +
 							'<button data-act="logout">⎋ ' + esc(t('logout')) + '</button>' +
 						'</div>' +
 					'</div>' +
@@ -235,7 +244,6 @@
 			else if (act === 'theme') { toggleTheme(); }
 			else if (act === 'lang') { toggleLang(); }
 			else if (act === 'settings') { openSettings(); }
-			else if (act === 'disconnect') { doDisconnect(); }
 		});
 	}
 
@@ -745,23 +753,55 @@
 	/* ---------------------------- settings ---------------------------- */
 	function openSettings() {
 		var modal = document.createElement('div'); modal.className = 'om-modal';
-		modal.innerHTML = '<div class="om-modal-card"><h3>' + esc(t('settings')) + '</h3>' +
+		var pending = { avatar: S.avatar };
+		var avatarBox = pending.avatar
+			? '<span class="om-avatar set-av-img" style="background-image:url(\'' + esc(pending.avatar) + '\');background-size:cover;background-position:center"></span>'
+			: avatar(S.name, S.email, 'set-av-img');
+		modal.innerHTML = '<div class="om-modal-card"><h3>' + I.gear + ' ' + esc(t('settings')) + '</h3>' +
+			'<div class="om-set-av">' + '<span class="set-av-wrap">' + avatarBox + '</span>' +
+				'<div class="om-set-av-btns"><label class="om-btn set-av-pick">' + esc(t('change_photo')) + '<input type="file" accept="image/*" class="set-av-file" style="display:none"></label>' +
+				(pending.avatar ? '<button class="om-btn set-av-rm">' + esc(t('remove_photo')) + '</button>' : '') + '</div>' +
+			'</div>' +
 			'<div class="om-field"><label>' + esc(t('display_name')) + '</label><input class="om-input set-name" value="' + esc(S.from_name) + '"></div>' +
+			'<div class="om-field"><label>' + esc(t('lang_label')) + '</label><select class="om-input set-lang"><option value="ar"' + (LANG === 'ar' ? ' selected' : '') + '>العربية</option><option value="en"' + (LANG === 'en' ? ' selected' : '') + '>English</option></select></div>' +
 			'<div class="om-field"><label>' + esc(t('signature')) + '</label><textarea class="om-input set-sig">' + esc(S.signature) + '</textarea></div>' +
 			'<div class="om-modal-actions"><button class="om-btn set-cancel">' + esc(t('cancel')) + '</button><button class="om-btn primary set-save">' + esc(t('save')) + '</button></div></div>';
 		document.body.appendChild(modal);
 		on(modal, 'click', function (e) { if (e.target === modal) modal.remove(); });
 		on(q('.set-cancel', modal), 'click', function () { modal.remove(); });
+
+		// profile photo upload (live preview)
+		var fileInput = q('.set-av-file', modal);
+		on(fileInput, 'change', function () {
+			if (!fileInput.files || !fileInput.files[0]) return;
+			var wrap = q('.set-av-wrap', modal);
+			wrap.innerHTML = '<span class="om-avatar"><span class="om-spin" style="width:16px;height:16px;border-width:2px"></span></span>';
+			var fd = new FormData(); fd.append('file', fileInput.files[0]);
+			api('avatar', { form: fd }).then(function (r) {
+				pending.avatar = r.url;
+				wrap.innerHTML = '<span class="om-avatar set-av-img" style="background-image:url(\'' + esc(r.url) + '\');background-size:cover;background-position:center"></span>';
+			}).catch(function (e) { toast(e.message, 'err'); wrap.innerHTML = avatar(S.name, S.email, 'set-av-img'); });
+		});
+		var rm = q('.set-av-rm', modal);
+		if (rm) on(rm, 'click', function () { pending.avatar = ''; q('.set-av-wrap', modal).innerHTML = avatar(S.name, S.email, 'set-av-img'); rm.style.display = 'none'; });
+
 		on(q('.set-save', modal), 'click', function () {
 			var name = q('.set-name', modal).value.trim(), sig = q('.set-sig', modal).value;
-			api('profile', { body: { from_name: name, signature: sig } }).then(function (r) {
-				S.from_name = r.from_name || name; S.signature = r.signature; modal.remove(); toast(t('saved_ok'), 'ok');
+			var lang = q('.set-lang', modal).value;
+			api('profile', { body: { from_name: name, signature: sig, avatar: pending.avatar } }).then(function (r) {
+				S.from_name = r.from_name || name; S.signature = r.signature; S.avatar = r.avatar || '';
+				modal.remove(); toast(t('saved_ok'), 'ok');
+				// refresh the top-bar avatar
+				var ab = q('.om-avatar-btn'); if (ab) ab.innerHTML = selfAvatar();
+				if (lang !== LANG) { setLang(lang); }
 			}).catch(function (e) { toast(e.message, 'err'); });
 		});
 	}
-	function doDisconnect() {
-		if (!confirm(t('disconnect') + '؟')) return;
-		api('disconnect', { method: 'POST', body: {} }).then(function () { location.reload(); }).catch(function (e) { toast(e.message, 'err'); });
+	function setLang(l) {
+		l = (l === 'en') ? 'en' : 'ar';
+		try { localStorage.setItem('osoul_lang', l); } catch (e) {}
+		document.cookie = 'osoul_lang=' + l + ';path=/;max-age=31536000;SameSite=Lax';
+		location.reload();
 	}
 
 	/* --------------------------- onboarding --------------------------- */
@@ -769,7 +809,7 @@
 		var b = S.bootstrap || {};
 		var d = b.defaults || { imap_host: 'imap.hostinger.com', imap_port: 993, smtp_host: 'smtp.hostinger.com', smtp_port: 465 };
 		ROOT.innerHTML =
-			'<div class="om-top"><span class="om-logo">' + (CFG.logo ? '<img src="' + esc(CFG.logo) + '">' : '<span class="mk">أ</span>') + '<span>' + esc(LANG === 'ar' ? 'بريد أصول البناء' : 'Osoul Mail') + '</span></span>' +
+			'<div class="om-top"><span class="om-logo">' + (CFG.logo ? '<img src="' + esc(CFG.logo) + '" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'"><span class="mk" style="display:none">أ</span>' : '<span class="mk">أ</span>') + '<span>' + esc(LANG === 'ar' ? 'بريد أصول البناء' : 'Osoul Mail') + '</span></span>' +
 				'<div class="om-top-actions"><button class="om-ic ob-lang">🌐</button><button class="om-ic ob-logout" title="' + esc(t('logout')) + '">⎋</button></div></div>' +
 			'<div class="om-onb"><div class="om-onb-card">' +
 				'<div class="om-onb-ic">' + I.mail + '</div>' +
@@ -877,7 +917,7 @@
 	/* ------------------------------ start ----------------------------- */
 	function start() {
 		api('bootstrap').then(function (b) {
-			S.bootstrap = b; S.from_name = b.from_name || ''; S.signature = b.signature || ''; S.email = b.email || S.email;
+			S.bootstrap = b; S.from_name = b.from_name || ''; S.signature = b.signature || ''; S.email = b.email || S.email; S.avatar = b.avatar || '';
 			if (!b.connected) { renderOnboard(b.conn_error || ''); return; }
 			S.folders = b.folders || [];
 			buildShell(); renderFolders();
