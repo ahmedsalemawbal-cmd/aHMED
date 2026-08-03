@@ -103,7 +103,7 @@
 	function on(node, ev, fn) { if (node) node.addEventListener(ev, fn); }
 	function fmtBytes(n) { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(0) + ' KB'; return (n / 1048576).toFixed(1) + ' MB'; }
 
-	function avColor(s) { var h = 0, i; s = String(s || '?'); for (i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) % 360; } return 'hsl(' + h + ',55%,42%)'; }
+	function avColor(s) { var h = 0, i; s = String(s || '?'); for (i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) % 360; } return 'linear-gradient(135deg,hsl(' + h + ',62%,54%),hsl(' + ((h + 26) % 360) + ',58%,42%))'; }
 	function initials(name, email) {
 		name = (name || '').trim();
 		if (name && !/@/.test(name)) { var p = name.split(/\s+/); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
@@ -386,7 +386,7 @@
 			iframe.className = 'om-frame';
 			iframe.setAttribute('sandbox', 'allow-same-origin allow-popups allow-popups-to-escape-sandbox');
 			var doc = '<!doctype html><html dir="' + (LANG === 'ar' ? 'rtl' : 'ltr') + '"><head><meta charset="utf-8"><base target="_blank">' +
-				'<style>html,body{margin:0}body{font-family:Cairo,\'IBM Plex Sans\',system-ui,sans-serif;color:#1a1a1a;background:#fff;padding:18px;word-wrap:break-word;overflow-x:auto}img{max-width:100%;height:auto}a{color:#0074A4}table{max-width:100%}</style></head><body>' + m.html + '</body></html>';
+				'<style>html,body{margin:0}body{font-family:\'Readex Pro\',\'IBM Plex Sans\',system-ui,sans-serif;color:#1a2432;background:#fff;padding:20px;word-wrap:break-word;overflow-x:auto;line-height:1.75}img{max-width:100%;height:auto}a{color:#0B84D6}table{max-width:100%}</style></head><body>' + m.html + '</body></html>';
 			iframe.srcdoc = doc;
 			body.appendChild(iframe);
 			iframe.addEventListener('load', function () {
