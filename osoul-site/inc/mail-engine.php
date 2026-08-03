@@ -228,44 +228,59 @@ class Osoul_IMAP {
 	 * @param int    $per
 	 * @param string $search   optional free-text search
 	 */
-	public function list_messages( $folder, $page = 0, $per = 25, $search = '' ) {
+	public function list_messages( $folder, $page = 0, $per = 25, $search = '', $filter = '', $sort = 'newest' ) {
 		if ( ! $this->select( $folder ) ) { return array( 'total' => 0, 'messages' => array() ); }
 
 		$search = trim( (string) $search );
-		if ( '' !== $search ) {
-			$uids  = $this->search_uids( $search );
+		$crit   = '';
+		if ( 'unread' === $filter )  { $crit = 'UNSEEN'; }
+		elseif ( 'read' === $filter )    { $crit = 'SEEN'; }
+		elseif ( 'starred' === $filter ) { $crit = 'FLAGGED'; }
+		$oldest = ( 'oldest' === $sort );
+
+		if ( '' !== $search || '' !== $crit ) {
+			$uids  = $this->search_uids( $search, $crit );
 			$total = count( $uids );
-			rsort( $uids, SORT_NUMERIC );
+			if ( $oldest ) { sort( $uids, SORT_NUMERIC ); } else { rsort( $uids, SORT_NUMERIC ); }
 			$slice = array_slice( $uids, $page * $per, $per );
 			if ( ! $slice ) { return array( 'total' => $total, 'messages' => array() ); }
-			$set = implode( ',', $slice );
-			$rows = $this->fetch_overview( $set, true );
+			$rows = $this->fetch_overview( implode( ',', $slice ), true );
 		} else {
 			$total = $this->exists;
 			if ( $total <= 0 ) { return array( 'total' => 0, 'messages' => array() ); }
-			$end   = $total - ( $page * $per );
-			$start = $end - $per + 1;
-			if ( $end < 1 ) { return array( 'total' => $total, 'messages' => array() ); }
-			if ( $start < 1 ) { $start = 1; }
+			if ( $oldest ) {
+				$start = $page * $per + 1;
+				if ( $start > $total ) { return array( 'total' => $total, 'messages' => array() ); }
+				$end   = min( $total, $start + $per - 1 );
+			} else {
+				$end   = $total - ( $page * $per );
+				$start = $end - $per + 1;
+				if ( $end < 1 ) { return array( 'total' => $total, 'messages' => array() ); }
+				if ( $start < 1 ) { $start = 1; }
+			}
 			$rows = $this->fetch_overview( $start . ':' . $end, false );
 		}
-		// Newest first.
-		usort( $rows, function ( $a, $b ) { return $b['uid'] <=> $a['uid']; } );
+		usort( $rows, function ( $a, $b ) use ( $oldest ) { return $oldest ? ( $a['uid'] <=> $b['uid'] ) : ( $b['uid'] <=> $a['uid'] ); } );
 		return array( 'total' => $total, 'messages' => array_values( $rows ) );
 	}
 
-	/** UID SEARCH returning an array of ints. */
-	public function search_uids( $term ) {
+	/**
+	 * UID SEARCH returning an array of ints.
+	 *
+	 * @param string $term   free-text (searches FROM/TO/SUBJECT/BODY)
+	 * @param string $extra  extra criteria prefix (e.g. UNSEEN / SEEN / FLAGGED)
+	 */
+	public function search_uids( $term = '', $extra = '' ) {
 		$term  = (string) $term;
+		$extra = ( '' !== $extra ) ? $extra . ' ' : '';
 		$ascii = ( '' === $term ) || ( 1 !== preg_match( '/[\x80-\xff]/', $term ) );
 		if ( '' === $term ) {
-			$r = $this->run( array( ' UID SEARCH ALL' ) );
+			$r = $this->run( array( ' UID SEARCH ' . ( '' !== $extra ? rtrim( $extra ) : 'ALL' ) ) );
 		} elseif ( $ascii ) {
 			$q = $this->quote( $term );
-			$r = $this->run( array( ' UID SEARCH OR OR FROM ' . $q . ' TO ' . $q . ' OR SUBJECT ' . $q . ' BODY ' . $q ) );
+			$r = $this->run( array( ' UID SEARCH ' . $extra . 'OR OR FROM ' . $q . ' TO ' . $q . ' OR SUBJECT ' . $q . ' BODY ' . $q ) );
 		} else {
-			// Non-ASCII: CHARSET UTF-8 with a literal term.
-			$r = $this->run( array( ' UID SEARCH CHARSET UTF-8 TEXT ', array( 'lit' => $term ) ) );
+			$r = $this->run( array( ' UID SEARCH CHARSET UTF-8 ' . $extra . 'TEXT ', array( 'lit' => $term ) ) );
 		}
 		$uids = array();
 		foreach ( $r['untagged'] as $line ) {
@@ -276,6 +291,27 @@ class Osoul_IMAP {
 			}
 		}
 		return $uids;
+	}
+
+	/** Mailbox storage quota in bytes: { used, total } (0 total = unknown). */
+	public function quota() {
+		$out = array( 'used' => 0, 'total' => 0 );
+		if ( ! $this->has_cap( 'QUOTA' ) ) { return $out; }
+		try { $r = $this->run( array( ' GETQUOTAROOT INBOX' ) ); } catch ( Exception $e ) { return $out; }
+		foreach ( $r['untagged'] as $line ) {
+			if ( isset( $line[1] ) && 'QUOTA' === strtoupper( (string) $line[1] ) ) {
+				$vals = end( $line );
+				if ( is_array( $vals ) ) {
+					for ( $i = 0; $i + 2 < count( $vals ); $i += 3 ) {
+						if ( 'STORAGE' === strtoupper( (string) $vals[ $i ] ) ) {
+							$out['used']  = (int) $vals[ $i + 1 ] * 1024;
+							$out['total'] = (int) $vals[ $i + 2 ] * 1024;
+						}
+					}
+				}
+			}
+		}
+		return $out;
 	}
 
 	/**

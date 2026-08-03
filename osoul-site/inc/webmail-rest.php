@@ -55,6 +55,9 @@ add_action( 'rest_api_init', function () {
 		array( '/mail/flag',       $post, 'osoul_rest_mail_flag' ),
 		array( '/mail/delete',     $post, 'osoul_rest_mail_delete' ),
 		array( '/mail/move',       $post, 'osoul_rest_mail_move' ),
+		array( '/mail/batch',      $post, 'osoul_rest_mail_batch' ),
+		array( '/mail/quota',      $get,  'osoul_rest_mail_quota' ),
+		array( '/mail/folder-create', $post, 'osoul_rest_mail_folder_create' ),
 		array( '/mail/send',       $post, 'osoul_rest_mail_send' ),
 		array( '/mail/attachment', $get,  'osoul_rest_mail_attachment' ),
 		array( '/mail/upload',     $post, 'osoul_rest_mail_upload' ),
@@ -183,11 +186,13 @@ function osoul_rest_mail_messages( WP_REST_Request $req ) {
 	$folder = (string) ( $req->get_param( 'folder' ) ?: 'INBOX' );
 	$page   = max( 0, (int) $req->get_param( 'page' ) );
 	$search = (string) $req->get_param( 'search' );
+	$filter = sanitize_key( (string) $req->get_param( 'filter' ) ); // '' | unread | read | starred
+	$sort   = ( 'oldest' === $req->get_param( 'sort' ) ) ? 'oldest' : 'newest';
 	$per    = (int) apply_filters( 'osoul_mail_page_size', 25 );
 
 	$imap = osoul_mail_open( get_current_user_id() );
 	if ( is_wp_error( $imap ) ) { return $imap; }
-	$res  = $imap->list_messages( $folder, $page, $per, $search );
+	$res  = $imap->list_messages( $folder, $page, $per, $search, $filter, $sort );
 	$imap->logout();
 
 	foreach ( $res['messages'] as &$m ) {
@@ -307,6 +312,70 @@ function osoul_rest_mail_move( WP_REST_Request $req ) {
 	$ok = $imap->move( $folder, $uid, $dest );
 	$imap->logout();
 	return rest_ensure_response( array( 'ok' => $ok ) );
+}
+
+/**
+ * Apply one action to many messages at once (bulk toolbar).
+ * action: read | unread | star | unstar | delete | move (+ dest special)
+ */
+function osoul_rest_mail_batch( WP_REST_Request $req ) {
+	$folder = (string) $req->get_param( 'folder' );
+	$action = sanitize_key( (string) $req->get_param( 'action' ) );
+	$uids   = array_values( array_filter( array_map( 'intval', (array) $req->get_param( 'uids' ) ) ) );
+	if ( ! $uids ) { return new WP_Error( 'osoul_bad', 'لم تُحدَّد رسائل.', array( 'status' => 422 ) ); }
+
+	$imap = osoul_mail_open( get_current_user_id() );
+	if ( is_wp_error( $imap ) ) { return $imap; }
+
+	$done = 0;
+	if ( 'read' === $action || 'unread' === $action ) {
+		$done = $imap->set_flag_many( $folder, $uids, '\\Seen', ( 'read' === $action ) ) ? count( $uids ) : 0;
+	} elseif ( 'star' === $action || 'unstar' === $action ) {
+		$done = $imap->set_flag_many( $folder, $uids, '\\Flagged', ( 'star' === $action ) ) ? count( $uids ) : 0;
+	} elseif ( 'delete' === $action || 'move' === $action ) {
+		// Resolve destination (Trash for delete, or requested special).
+		$special = ( 'delete' === $action ) ? 'trash' : sanitize_key( (string) $req->get_param( 'dest' ) );
+		$dest    = '';
+		$is_trash_src = false;
+		foreach ( $imap->folders() as $f ) {
+			if ( $f['special'] === $special ) { $dest = $f['raw']; }
+			if ( $f['raw'] === $folder && 'trash' === $f['special'] ) { $is_trash_src = true; }
+		}
+		foreach ( $uids as $u ) {
+			if ( 'delete' === $action && ( $is_trash_src || '' === $dest ) ) {
+				$done += $imap->delete( $folder, $u ) ? 1 : 0;
+			} elseif ( '' !== $dest ) {
+				$done += $imap->move( $folder, $u, $dest ) ? 1 : 0;
+			}
+		}
+	} else {
+		$imap->logout();
+		return new WP_Error( 'osoul_bad', 'إجراء غير معروف.', array( 'status' => 422 ) );
+	}
+	$imap->logout();
+	return rest_ensure_response( array( 'ok' => true, 'done' => $done ) );
+}
+
+/** Mailbox storage usage for the sidebar meter. */
+function osoul_rest_mail_quota() {
+	$imap = osoul_mail_open( get_current_user_id() );
+	if ( is_wp_error( $imap ) ) { return $imap; }
+	$q = $imap->quota();
+	$imap->logout();
+	return rest_ensure_response( $q );
+}
+
+/** Create a custom folder (the sidebar "+"). */
+function osoul_rest_mail_folder_create( WP_REST_Request $req ) {
+	$name = sanitize_text_field( (string) $req->get_param( 'name' ) );
+	$name = trim( preg_replace( '/[\/"\\\\\r\n]+/', '', $name ) );
+	if ( '' === $name ) { return new WP_Error( 'osoul_bad', 'أدخل اسم المجلد.', array( 'status' => 422 ) ); }
+	$imap = osoul_mail_open( get_current_user_id() );
+	if ( is_wp_error( $imap ) ) { return $imap; }
+	// Dovecot mailboxes live under the INBOX namespace.
+	$ok = $imap->create_folder( 'INBOX.' . $name ) || $imap->create_folder( $name );
+	$imap->logout();
+	return $ok ? rest_ensure_response( array( 'ok' => true ) ) : new WP_Error( 'osoul_fail', 'تعذّر إنشاء المجلد.', array( 'status' => 400 ) );
 }
 
 function osoul_rest_mail_send( WP_REST_Request $req ) {

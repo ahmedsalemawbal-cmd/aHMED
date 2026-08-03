@@ -61,7 +61,18 @@
 			link_prompt: 'Enter URL:', download: 'Download', reconnect_needed: 'Mail session expired. Please reconnect.',
 		}
 	};
-	function t(k) { var v = STR[LANG][k]; return v != null ? v : (STR.ar[k] || k); }
+	// Feature-set strings (filters, sort, bulk, storage, contacts, folders).
+	var MORE = {
+		ar: { f_all: 'الكل', f_unread: 'غير مقروء', f_read: 'مقروء', f_starred: 'مميّز', sort: 'ترتيب', newest: 'الأحدث أولاً', oldest: 'الأقدم أولاً',
+			selected: 'محدد', b_read: 'مقروء', b_unread: 'غير مقروء', b_star: 'تمييز', b_delete: 'حذف', b_move: 'نقل', b_cancel: 'إلغاء',
+			storage: 'مساحة التخزين', add_folder: 'مجلد جديد', folder_name: 'اسم المجلد', contacts: 'جهات الاتصال', no_contacts: 'لا توجد جهات اتصال بعد.',
+			select_all: 'تحديد الكل', deleted_n: 'تم حذف الرسائل', done_n: 'تم التنفيذ', expand: 'تكبير', collapse: 'تصغير', new_folder_ok: 'تم إنشاء المجلد' },
+		en: { f_all: 'All', f_unread: 'Unread', f_read: 'Read', f_starred: 'Starred', sort: 'Sort', newest: 'Newest first', oldest: 'Oldest first',
+			selected: 'selected', b_read: 'Read', b_unread: 'Unread', b_star: 'Star', b_delete: 'Delete', b_move: 'Move', b_cancel: 'Cancel',
+			storage: 'Storage', add_folder: 'New folder', folder_name: 'Folder name', contacts: 'Contacts', no_contacts: 'No contacts yet.',
+			select_all: 'Select all', deleted_n: 'Messages deleted', done_n: 'Done', expand: 'Expand', collapse: 'Collapse', new_folder_ok: 'Folder created' }
+	};
+	function t(k) { var v = STR[LANG][k]; if (v == null) v = MORE[LANG][k]; return v != null ? v : (STR.ar[k] || MORE.ar[k] || k); }
 
 	/* ------------------------------ icons ----------------------------- */
 	var I = {
@@ -88,12 +99,18 @@
 		mail: '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
 	};
 	var FOLDER_ICON = { inbox: I.inbox, sent: I.sent, drafts: I.drafts, trash: I.trash, junk: I.junk, archive: I.archive };
+	I.sort = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>';
+	I.expand = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+	I.compress = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
+	I.plus = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+	I.contacts = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 
 	/* ------------------------------ state ----------------------------- */
 	var S = {
 		connected: false, folders: [], folder: 'INBOX', special: 'inbox', display: t('inbox'),
 		page: 0, total: 0, per: 25, messages: [], search: '', currentUid: 0, currentMsg: null,
-		from_name: '', signature: '', email: CFG.email || '', name: CFG.name || '', busy: false
+		from_name: '', signature: '', email: CFG.email || '', name: CFG.name || '', busy: false,
+		filter: '', sort: 'newest', sel: {}
 	};
 
 	/* --------------------------- dom helpers -------------------------- */
@@ -178,9 +195,17 @@
 				'<aside class="om-rail">' +
 					'<button class="om-compose">✎ ' + esc(t('compose')) + '</button>' +
 					'<nav class="om-folders"></nav>' +
+						'<button class="om-addfold">' + I.plus + ' <span>' + esc(t('add_folder')) + '</span></button>' +
+						'<button class="om-contacts-nav">' + I.contacts + ' <span>' + esc(t('contacts')) + '</span></button>' +
+						'<div class="om-quota"></div>' +
 					'<div class="om-rail-foot">Osoul Albinaa • Webmail</div>' +
 				'</aside>' +
-				'<section class="om-list"><div class="om-list-head"></div><div class="om-rows"></div></section>' +
+				'<section class="om-list">' +
+						'<div class="om-list-head"></div>' +
+						'<div class="om-list-tools"></div>' +
+						'<div class="om-bulk"></div>' +
+						'<div class="om-rows"></div>' +
+					'</section>' +
 				'<section class="om-view"></section>' +
 			'</div>';
 
@@ -195,6 +220,8 @@
 		on(q('.om-sx'), 'click', function () { search.value = ''; searchWrap.classList.remove('has'); S.search = ''; S.page = 0; loadMessages(); });
 		on(q('.om-refresh'), 'click', function () { refreshAll(); });
 		on(q('.om-compose'), 'click', function () { openCompose('new'); });
+		on(q('.om-addfold'), 'click', addFolder);
+		on(q('.om-contacts-nav'), 'click', openContacts);
 		on(q('.om-menu-toggle'), 'click', function () { q('.om-rail').classList.toggle('open'); q('.om-scrim').classList.toggle('open'); });
 		on(q('.om-scrim'), 'click', function () { q('.om-rail').classList.remove('open'); q('.om-scrim').classList.remove('open'); });
 
@@ -242,7 +269,7 @@
 				S.folder = btn.getAttribute('data-raw');
 				S.special = btn.getAttribute('data-special');
 				S.display = btn.getAttribute('data-display');
-				S.page = 0; S.search = ''; var si = q('.om-search input'); if (si) { si.value = ''; q('.om-search').classList.remove('has'); }
+				S.page = 0; S.search = ''; S.filter = ''; clearSel(); var si = q('.om-search input'); if (si) { si.value = ''; q('.om-search').classList.remove('has'); }
 				q('.om-rail').classList.remove('open'); q('.om-scrim').classList.remove('open');
 				renderFolders(); clearView(); loadMessages();
 			});
@@ -270,11 +297,31 @@
 		for (var i = 0; i < 8; i++) { h += '<div class="om-sk"><div class="c"></div><div class="l"><div class="b"></div><div class="b"></div><div class="b"></div></div></div>'; }
 		rows.innerHTML = h;
 	}
+	// Filter tabs + sort control (below the folder title).
+	function listTools() {
+		var tabs = [['', 'f_all'], ['unread', 'f_unread'], ['read', 'f_read'], ['starred', 'f_starred']];
+		var el = q('.om-list-tools'); if (!el) return;
+		el.innerHTML =
+			'<label class="om-selall" title="' + esc(t('select_all')) + '"><input type="checkbox" class="om-selall-cb"></label>' +
+			'<div class="om-tabs">' + tabs.map(function (x) {
+				return '<button class="om-tab' + (S.filter === x[0] ? ' on' : '') + '" data-f="' + x[0] + '">' + esc(t(x[1])) + '</button>';
+			}).join('') + '</div>' +
+			'<button class="om-sort" title="' + esc(t('sort')) + '">' + I.sort + '<span>' + esc(S.sort === 'oldest' ? t('oldest') : t('newest')) + '</span></button>';
+		qa('.om-tab', el).forEach(function (b) {
+			on(b, 'click', function () { S.filter = b.getAttribute('data-f'); S.page = 0; clearSel(); loadMessages(); });
+		});
+		on(q('.om-sort', el), 'click', function () { S.sort = (S.sort === 'oldest') ? 'newest' : 'oldest'; S.page = 0; loadMessages(); });
+		on(q('.om-selall-cb', el), 'change', function () {
+			var on_ = this.checked; S.sel = {};
+			if (on_) { S.messages.forEach(function (m) { S.sel[m.uid] = true; }); }
+			renderList(); renderBulk();
+		});
+	}
 	function loadMessages() {
-		listHead(); skeleton();
-		api('messages', { query: { folder: S.folder, page: S.page, search: S.search } }).then(function (r) {
+		listHead(); listTools(); skeleton();
+		api('messages', { query: { folder: S.folder, page: S.page, search: S.search, filter: S.filter, sort: S.sort } }).then(function (r) {
 			S.total = r.total; S.messages = r.messages || [];
-			listHead(); renderList();
+			listHead(); renderList(); renderBulk();
 		}).catch(function (e) { q('.om-rows').innerHTML = '<div class="om-empty"><div class="h">' + esc(e.message) + '</div></div>'; });
 	}
 	function renderList() {
@@ -290,7 +337,9 @@
 				: (m.from.name || m.from.email || '—');
 			var whoKey = showTo ? (m.to && m.to[0] ? m.to[0].email : '') : m.from.email;
 			var whoName = showTo ? (m.to && m.to[0] ? m.to[0].name : '') : m.from.name;
-			return '<div class="om-row' + (m.seen ? '' : ' unread') + (m.uid === S.currentUid ? ' sel' : '') + '" data-uid="' + m.uid + '">' +
+			var checked = S.sel[m.uid] ? ' checked' : '';
+			return '<div class="om-row' + (m.seen ? '' : ' unread') + (m.uid === S.currentUid ? ' sel' : '') + (S.sel[m.uid] ? ' picked' : '') + '" data-uid="' + m.uid + '">' +
+				'<label class="om-r-check"><input type="checkbox" data-uid="' + m.uid + '"' + checked + '></label>' +
 				'<div class="om-r-av">' + avatar(whoName, whoKey) + '</div>' +
 				'<div class="om-r-body">' +
 					'<div class="om-r-line1">' + (m.seen ? '' : '<span class="om-r-dot"></span>') +
@@ -304,13 +353,58 @@
 		}).join('');
 		qa('.om-row', rows).forEach(function (row) {
 			on(row, 'click', function (e) {
-				if (e.target.closest('.om-r-star')) return;
+				if (e.target.closest('.om-r-star') || e.target.closest('.om-r-check')) return;
 				openMessage(+row.getAttribute('data-uid'));
 			});
 		});
 		qa('.om-r-star', rows).forEach(function (st) {
 			on(st, 'click', function (e) { e.stopPropagation(); toggleStar(+st.getAttribute('data-uid'), st); });
 		});
+		qa('.om-r-check input', rows).forEach(function (cb) {
+			on(cb, 'change', function (e) {
+				e.stopPropagation(); var uid = +cb.getAttribute('data-uid');
+				if (cb.checked) { S.sel[uid] = true; } else { delete S.sel[uid]; }
+				cb.closest('.om-row').classList.toggle('picked', cb.checked);
+				renderBulk();
+			});
+		});
+	}
+
+	/* --------------------------- bulk selection ----------------------- */
+	function clearSel() { S.sel = {}; }
+	function selCount() { return Object.keys(S.sel).length; }
+	function renderBulk() {
+		var bar = q('.om-bulk'); if (!bar) return;
+		var n = selCount();
+		var cb = q('.om-selall-cb'); if (cb) { cb.checked = (n > 0 && n === S.messages.length); cb.indeterminate = (n > 0 && n < S.messages.length); }
+		if (!n) { bar.classList.remove('show'); bar.innerHTML = ''; return; }
+		bar.classList.add('show');
+		bar.innerHTML = '<span class="om-bulk-n om-num">' + n + '</span><span class="om-bulk-lbl">' + esc(t('selected')) + '</span>' +
+			'<span style="flex:1"></span>' +
+			'<button class="om-bulk-b" data-a="read">' + esc(t('b_read')) + '</button>' +
+			'<button class="om-bulk-b" data-a="unread">' + esc(t('b_unread')) + '</button>' +
+			'<button class="om-bulk-b" data-a="star">' + I.star + '</button>' +
+			'<button class="om-bulk-b danger" data-a="delete">' + I.trash + '</button>' +
+			'<button class="om-bulk-x" title="' + esc(t('b_cancel')) + '">' + I.close + '</button>';
+		qa('.om-bulk-b', bar).forEach(function (b) { on(b, 'click', function () { bulkAction(b.getAttribute('data-a')); }); });
+		on(q('.om-bulk-x', bar), 'click', function () { clearSel(); renderList(); renderBulk(); });
+	}
+	function bulkAction(action) {
+		var uids = Object.keys(S.sel).map(Number); if (!uids.length) return;
+		api('batch', { body: { folder: S.folder, action: action, uids: uids } }).then(function () {
+			if (action === 'delete') {
+				uids.forEach(function (u) { S.messages = S.messages.filter(function (m) { return m.uid !== u; }); });
+				S.total = Math.max(0, S.total - uids.length);
+				toast(t('deleted_n'), 'ok');
+			} else if (action === 'read' || action === 'unread') {
+				S.messages.forEach(function (m) { if (S.sel[m.uid]) m.seen = (action === 'read'); });
+				toast(t('done_n'), 'ok');
+			} else if (action === 'star') {
+				S.messages.forEach(function (m) { if (S.sel[m.uid]) m.flagged = true; });
+			}
+			clearSel(); renderList(); renderBulk(); refreshFoldersQuiet();
+			if (!S.messages.length) loadMessages();
+		}).catch(function (e) { toast(e.message, 'err'); });
 	}
 
 	function toggleStar(uid, btn) {
@@ -503,6 +597,7 @@
 		var dock = document.createElement('div'); dock.className = 'om-compose-dock';
 		dock.innerHTML =
 			'<div class="om-cd-head"><span class="t">' + esc(mode === 'new' ? t('new_message') : subject || t('new_message')) + '</span>' +
+				'<button class="om-ic om-cd-expand" title="' + esc(t('expand')) + '">' + I.expand + '</button>' +
 				'<button class="om-ic om-cd-min">–</button><button class="om-ic om-cd-close">' + I.close + '</button></div>' +
 			'<div class="om-cd-body">' +
 				'<div class="om-cd-fields">' +
@@ -534,7 +629,11 @@
 		else if (mode === 'new') { q('.cto', dock).focus(); }
 
 		on(q('.om-cd-close', dock), 'click', function () { dock.remove(); });
-		on(q('.om-cd-min', dock), 'click', function () { dock.classList.toggle('min'); });
+		on(q('.om-cd-min', dock), 'click', function () { dock.classList.remove('full'); dock.classList.toggle('min'); });
+		on(q('.om-cd-expand', dock), 'click', function () {
+			dock.classList.remove('min'); var full = dock.classList.toggle('full');
+			q('.om-cd-expand', dock).innerHTML = full ? I.compress : I.expand;
+		});
 		on(q('.om-cd-head', dock), 'click', function (e) { if (e.target.closest('.om-ic')) return; dock.classList.toggle('min'); });
 		on(q('.show-cc', dock), 'click', function () { q('.cc-row', dock).classList.toggle('om-hide'); });
 		on(q('.show-bcc', dock), 'click', function () { q('.bcc-row', dock).classList.toggle('om-hide'); });
@@ -710,8 +809,50 @@
 		var pass = q('.ob-pass'); if (pass) on(pass, 'keydown', function (e) { if (e.key === 'Enter') q('.ob-connect').click(); });
 	}
 
+	/* --------------------------- storage meter ------------------------ */
+	function loadQuota() {
+		api('quota').then(function (q_) {
+			var el = q('.om-quota'); if (!el) return;
+			if (!q_ || !q_.total) { el.innerHTML = ''; return; }
+			var pct = Math.min(100, Math.round(q_.used / q_.total * 100));
+			var hot = pct >= 85 ? ' hot' : '';
+			el.innerHTML = '<div class="om-quota-lbl"><span>' + esc(t('storage')) + '</span><span class="om-num">' + pct + '%</span></div>' +
+				'<div class="om-quota-bar' + hot + '"><i style="width:' + pct + '%"></i></div>' +
+				'<div class="om-quota-sub om-num">' + fmtBytes(q_.used) + ' / ' + fmtBytes(q_.total) + '</div>';
+		}).catch(function () {});
+	}
+
+	/* --------------------------- custom folder ------------------------ */
+	function addFolder() {
+		var name = prompt(t('folder_name'), ''); if (name == null) return;
+		name = name.trim(); if (!name) return;
+		api('folder-create', { body: { name: name } }).then(function () {
+			toast(t('new_folder_ok'), 'ok'); refreshFoldersQuiet();
+		}).catch(function (e) { toast(e.message, 'err'); });
+	}
+
+	/* --------------------------- contacts view ------------------------ */
+	function openContacts() {
+		q('.om-rail').classList.remove('open'); q('.om-scrim').classList.remove('open');
+		var modal = document.createElement('div'); modal.className = 'om-modal';
+		var list = S.contacts && S.contacts.length
+			? '<div class="om-contacts-list">' + S.contacts.map(function (c) {
+				return '<button class="om-contact" data-email="' + esc(c.email) + '">' + avatar(c.name, c.email) +
+					'<span class="om-contact-i"><b>' + esc(c.name || c.email) + '</b><span>' + esc(c.email) + '</span></span></button>';
+			}).join('') + '</div>'
+			: '<div class="om-empty" style="padding:34px">' + I.contacts + '<div class="h">' + esc(t('no_contacts')) + '</div></div>';
+		modal.innerHTML = '<div class="om-modal-card"><h3>' + I.contacts + ' ' + esc(t('contacts')) + '</h3>' + list +
+			'<div class="om-modal-actions"><button class="om-btn om-c-close">' + esc(t('cancel')) + '</button></div></div>';
+		document.body.appendChild(modal);
+		on(modal, 'click', function (e) { if (e.target === modal) modal.remove(); });
+		on(q('.om-c-close', modal), 'click', function () { modal.remove(); });
+		qa('.om-contact', modal).forEach(function (b) {
+			on(b, 'click', function () { modal.remove(); openCompose('new'); var to = q('.cto'); if (to) { to.value = b.getAttribute('data-email') + ', '; to.focus(); } });
+		});
+	}
+
 	/* ------------------------- refresh / polling ---------------------- */
-	function refreshAll() { loadMessages(); refreshFoldersQuiet(); }
+	function refreshAll() { loadMessages(); refreshFoldersQuiet(); loadQuota(); }
 	function refreshFoldersQuiet() {
 		api('folders').then(function (r) { S.folders = r.folders || S.folders; renderFolders(); }).catch(function () {});
 	}
@@ -742,7 +883,7 @@
 			buildShell(); renderFolders();
 			var inbox = pickInbox();
 			if (inbox) { S.folder = inbox.raw; S.special = inbox.special; S.display = inbox.special ? t(inbox.special) : inbox.display; }
-			renderFolders(); clearView(); loadMessages(); loadContacts(); startPolling();
+			renderFolders(); clearView(); loadMessages(); loadContacts(); loadQuota(); startPolling();
 		}).catch(function (e) {
 			ROOT.innerHTML = '<div class="om-onb"><div class="om-onb-card"><h2>⚠</h2><p class="sub">' + esc(e.message) + '</p><button class="om-btn primary om-full" onclick="location.reload()">' + esc(t('refresh')) + '</button></div></div>';
 		});
