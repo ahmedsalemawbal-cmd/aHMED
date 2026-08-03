@@ -480,7 +480,7 @@
 			iframe.className = 'om-frame';
 			iframe.setAttribute('sandbox', 'allow-same-origin allow-popups allow-popups-to-escape-sandbox');
 			var doc = '<!doctype html><html dir="' + (LANG === 'ar' ? 'rtl' : 'ltr') + '"><head><meta charset="utf-8"><base target="_blank">' +
-				'<style>html,body{margin:0}body{font-family:\'Readex Pro\',\'IBM Plex Sans\',system-ui,sans-serif;color:#1a2432;background:#fff;padding:20px;word-wrap:break-word;overflow-x:auto;line-height:1.75}img{max-width:100%;height:auto}a{color:#0B84D6}table{max-width:100%}</style></head><body>' + m.html + '</body></html>';
+				'<style>html,body{margin:0}body{font-family:Cairo,\'IBM Plex Sans\',system-ui,sans-serif;color:#1a2432;background:#fff;padding:18px;word-wrap:break-word;overflow-x:auto;line-height:1.7}img{max-width:100%;height:auto}a{color:#0074A4}table{max-width:100%}</style></head><body>' + m.html + '</body></html>';
 			iframe.srcdoc = doc;
 			body.appendChild(iframe);
 			iframe.addEventListener('load', function () {
