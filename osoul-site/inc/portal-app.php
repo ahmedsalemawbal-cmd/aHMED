@@ -80,7 +80,7 @@ function osoul_portal_route() {
 		), is_ssl() );
 		if ( is_wp_error( $user ) ) {
 			$login_error = osoul_bi( 'بيانات الدخول غير صحيحة.', 'Incorrect login details.', true );
-		} elseif ( ! osoul_portal_can_access( $user ) ) {
+		} elseif ( ! osoul_portal_can_access( $user ) && ! ( function_exists( 'osoul_is_employee' ) && osoul_is_employee( $user ) ) ) {
 			wp_logout();
 			$login_error = osoul_bi( 'هذا الحساب لا يملك صلاحية الدخول للوحة.', 'This account is not allowed to access the dashboard.', true );
 		} elseif ( ! osoul_portal_is_active( $user->ID ) ) {
@@ -93,7 +93,7 @@ function osoul_portal_route() {
 	}
 
 	// ── Gate ──
-	if ( ! is_user_logged_in() || ! osoul_portal_can_access() ) {
+	if ( ! is_user_logged_in() || ( ! osoul_portal_can_access() && ! ( function_exists( 'osoul_is_employee' ) && osoul_is_employee() ) ) ) {
 		osoul_portal_render_login( $login_error, isset( $invite_note ) ? $invite_note : '' );
 		return;
 	}
@@ -405,6 +405,16 @@ function osoul_portal_render_invite( $user, $error = '' ) {
 /** The live single-page app shell (assets + config; JS renders the rest). */
 function osoul_portal_render_app() {
 	$user = wp_get_current_user();
+
+	// Employees get the webmail client instead of the sales SPA. They are kept
+	// out of osoul_portal_role() entirely, so this is the only place the two
+	// dashboards diverge — everything below (login, invite, active-account,
+	// logout) is shared.
+	if ( function_exists( 'osoul_is_employee' ) && osoul_is_employee( $user ) && function_exists( 'osoul_webmail_render_app' ) ) {
+		osoul_webmail_render_app();
+		return;
+	}
+
 	$role = osoul_portal_role( $user );
 
 	osoul_portal_head( 'لوحة التحكم' );

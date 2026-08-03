@@ -240,6 +240,54 @@ issue time — the colours of every quote it renders for its customers. The
 partner dashboard is a self-contained, brand-themed, responsive UI
 (`osoul_partner_css()`, driven by the `--pp-primary` / `--pp-accent` variables).
 
+---
+
+### 11. Employee Webmail — read & send company email from `/dashboard`
+A fifth dashboard actor beside admin / branch / rep / partner: an internal
+**employee** whose `/dashboard` is a full, elegant webmail client bound to that
+person's own Hostinger mailbox. Built for the company's per-staff mailboxes
+(e.g. `sales@osoulalbinaa.com`).
+
+**Flow**
+1. **Add the employee** under **WP Admin → بريد الموظفين (Employee Mailboxes)** —
+   name + email + a login password. The account is created active immediately.
+2. **The employee signs in** at **`/dashboard`** with that email + password (the
+   same shared login screen as the sales portal — no separate URL).
+3. **They link their mailbox once** on first login: they enter only their email
+   address and its password. Server settings default to Hostinger
+   (`imap.hostinger.com:993` SSL / `smtp.hostinger.com:465` SSL), so there is
+   nothing technical to configure — an "advanced" panel can override the hosts if
+   ever needed. The credentials are verified (IMAP + SMTP) before saving.
+4. **They send & receive** from a Gmail/Outlook-style, bilingual (AR/EN),
+   light/dark, RTL/LTR 3-pane client: folders with unread badges, message list,
+   reading pane, compose / reply / reply-all / forward, drafts, search,
+   attachments (send + download), star, mark read/unread, delete (→ Trash),
+   move, a signature, and recipient autocomplete from past correspondents.
+
+**Privacy.** Each mailbox is strictly private to its owner — every REST route is
+scoped to the current user, so no employee can read another's mail. The site
+owner manages the *account* (add / suspend / reset the login password / unlink /
+delete) but has **no path into a mailbox** and never reads anyone's email.
+
+**Security.** The mailbox password must be reversible (IMAP/SMTP need the
+plaintext each connection), so it is stored with **AES-256-GCM** using a random
+key generated once and kept out of autoload (`osoul_mail_secret`); it is never
+stored or logged in the clear. Received HTML is sanitised server-side and
+rendered inside a script-less sandboxed iframe.
+
+**No server extension required.** The IMAP client (`inc/mail-engine.php`,
+`Osoul_IMAP` + `Osoul_MIME`) is pure PHP over TLS sockets — it does **not** need
+the PHP `imap` extension to be enabled — so it works on any Hostinger plan.
+Sending uses the PHPMailer that ships with WordPress and files a copy into the
+Sent folder. Files: `inc/employees.php` (role + admin manager + credential
+vault), `inc/mail-engine.php` (IMAP/MIME/SMTP engine), `inc/webmail-rest.php`
+(`osoul/v1/mail/*` API), `inc/webmail-app.php` + `assets/css/webmail.css` +
+`assets/js/webmail.js` (the client).
+
+> Requires **pretty permalinks** for `/dashboard` to resolve (same as the sales
+> portal). PHP needs `openssl` (credential vault) and outbound access to the
+> mail host — both standard on Hostinger.
+
 ## Customising
 - **Contact info (phone/WhatsApp/email/address/hours/social/map):**
   **WP Admin → Quote Leads → Site Settings** (no code).
