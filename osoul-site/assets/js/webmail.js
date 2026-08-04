@@ -69,14 +69,18 @@
 			select_all: 'تحديد الكل', deleted_n: 'تم حذف الرسائل', done_n: 'تم التنفيذ', expand: 'تكبير', collapse: 'تصغير', new_folder_ok: 'تم إنشاء المجلد',
 			photo: 'الصورة الشخصية', change_photo: 'تغيير الصورة', remove_photo: 'إزالة', uploading: 'جاري الرفع…', lang_label: 'لغة الواجهة',
 			change_pw: 'تغيير كلمة مرور الدخول', cur_pw: 'كلمة المرور الحالية', new_pw: 'كلمة المرور الجديدة', conf_pw: 'تأكيد كلمة المرور الجديدة',
-			do_change_pw: 'تغيير كلمة المرور', pw_mismatch: 'كلمتا المرور غير متطابقتين', pw_short: 'كلمة المرور 8 أحرف على الأقل', pw_ok: 'تم تغيير كلمة المرور', pw_need_cur: 'أدخل كلمة المرور الحالية' },
+			do_change_pw: 'تغيير كلمة المرور', pw_mismatch: 'كلمتا المرور غير متطابقتين', pw_short: 'كلمة المرور 8 أحرف على الأقل', pw_ok: 'تم تغيير كلمة المرور', pw_need_cur: 'أدخل كلمة المرور الحالية',
+			ai_draft_ph: 'اطلب من الذكاء الاصطناعي كتابة رسالة…', ai_generate: 'إنشاء', ai_improve: 'تحسين بالذكاء الاصطناعي', ai_improve_short: 'تحسين', ai_working: 'يكتب…',
+			ai_need_idea: 'اكتب فكرة قصيرة أولاً', ai_need_text: 'اكتب نص الرسالة أولاً حتى أحسّنه', ai_off: 'ميزة الذكاء الاصطناعي غير مفعّلة — راجع المسؤول', ai_done: 'تم إنشاء المسودة', ai_improved: 'تم تحسين الرسالة', pick_contact: 'اختر من جهات الاتصال' },
 		en: { f_all: 'All', f_unread: 'Unread', f_read: 'Read', f_starred: 'Starred', sort: 'Sort', newest: 'Newest', oldest: 'Oldest',
 			selected: 'selected', b_read: 'Read', b_unread: 'Unread', b_star: 'Star', b_delete: 'Delete', b_move: 'Move', b_cancel: 'Cancel',
 			storage: 'Storage', add_folder: 'New folder', folder_name: 'Folder name', contacts: 'Contacts', no_contacts: 'No contacts yet.',
 			select_all: 'Select all', deleted_n: 'Messages deleted', done_n: 'Done', expand: 'Expand', collapse: 'Collapse', new_folder_ok: 'Folder created',
 			photo: 'Profile picture', change_photo: 'Change photo', remove_photo: 'Remove', uploading: 'Uploading…', lang_label: 'Interface language',
 			change_pw: 'Change login password', cur_pw: 'Current password', new_pw: 'New password', conf_pw: 'Confirm new password',
-			do_change_pw: 'Change password', pw_mismatch: 'Passwords do not match', pw_short: 'Password must be at least 8 characters', pw_ok: 'Password changed', pw_need_cur: 'Enter your current password' }
+			do_change_pw: 'Change password', pw_mismatch: 'Passwords do not match', pw_short: 'Password must be at least 8 characters', pw_ok: 'Password changed', pw_need_cur: 'Enter your current password',
+			ai_draft_ph: 'Ask AI to draft a message…', ai_generate: 'Generate', ai_improve: 'Improve with AI', ai_improve_short: 'Improve', ai_working: 'Writing…',
+			ai_need_idea: 'Type a short idea first', ai_need_text: 'Write the message first', ai_off: 'AI is not enabled — ask your admin', ai_done: 'Draft ready', ai_improved: 'Message improved', pick_contact: 'Pick from contacts' }
 	};
 	function t(k) { var v = STR[LANG][k]; if (v == null) v = MORE[LANG][k]; return v != null ? v : (STR.ar[k] || MORE.ar[k] || k); }
 
@@ -115,13 +119,16 @@
 	I.alignl = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h12M3 18h15"/></svg>';
 	I.alignj = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>';
 	I.grip = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L20 4M9 20l11-11M14 20l6-6"/></svg>';
+	I.spark = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.4L19 9.3l-5.1 1.9L12 16.6l-1.9-5.4L5 9.3l5.1-1.9L12 2z"/><path d="M19 14l.7 2.3 2.3.7-2.3.7L19 20l-.7-2.3-2.3-.7 2.3-.7L19 14z"/></svg>';
+	I.caret = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+	I.arrowup = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
 
 	/* ------------------------------ state ----------------------------- */
 	var S = {
 		connected: false, folders: [], folder: 'INBOX', special: 'inbox', display: t('inbox'),
 		page: 0, total: 0, per: 25, messages: [], search: '', currentUid: 0, currentMsg: null,
 		from_name: '', signature: '', email: CFG.email || '', name: CFG.name || '', busy: false,
-		filter: '', sort: 'newest', sel: {}, avatar: ''
+		filter: '', sort: 'newest', sel: {}, avatar: '', ai: false, contacts: []
 	};
 
 	/* --------------------------- dom helpers -------------------------- */
@@ -629,6 +636,17 @@
 		}
 		composeState = { atts: [], irt: irt, refs: refs, mode: mode };
 
+		// AI assistant UI (only when the admin has configured an OpenAI key).
+		var aiBar = S.ai ?
+			('<div class="om-ai-bar">' +
+				'<span class="om-ai-ic">' + I.spark + '</span>' +
+				'<input class="om-ai-in" type="text" autocomplete="off" placeholder="' + esc(t('ai_draft_ph')) + '">' +
+				'<button class="om-ai-go" title="' + esc(t('ai_generate')) + '">' + I.arrowup + '</button>' +
+			'</div>') : '';
+		var improveBtn = S.ai ?
+			('<button class="om-tool om-ai-improve" title="' + esc(t('ai_improve')) + '">' + I.spark + ' <span>' + esc(t('ai_improve_short')) + '</span></button>' +
+			'<span class="om-tool-sep"></span>') : '';
+
 		var dock = document.createElement('div'); dock.className = 'om-compose-dock';
 		dock.innerHTML =
 			'<div class="om-cd-grip" title="اسحب لتغيير الحجم">' + I.grip + '</div>' +
@@ -637,14 +655,16 @@
 				'<button class="om-ic om-cd-min">–</button><button class="om-ic om-cd-close">' + I.close + '</button></div>' +
 			'<div class="om-cd-body">' +
 				'<div class="om-cd-fields">' +
-					'<div class="om-cd-fld"><label>' + esc(t('to')) + '</label><input class="cto" type="text" autocomplete="off" value="' + esc(to) + '"><span class="ccbcc"><button class="show-cc">' + esc(t('cc')) + '</button><button class="show-bcc">' + esc(t('bcc')) + '</button></span></div>' +
-					'<div class="om-cd-fld cc-row om-hide"><label>' + esc(t('cc')) + '</label><input class="ccc" type="text" autocomplete="off" value="' + esc(cc) + '"></div>' +
-					'<div class="om-cd-fld bcc-row om-hide"><label>' + esc(t('bcc')) + '</label><input class="cbcc" type="text" autocomplete="off"></div>' +
+					'<div class="om-cd-fld"><label>' + esc(t('to')) + '</label><input class="cto" type="text" autocomplete="off" value="' + esc(to) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button><span class="ccbcc"><button class="show-cc">' + esc(t('cc')) + '</button><button class="show-bcc">' + esc(t('bcc')) + '</button></span></div>' +
+					'<div class="om-cd-fld cc-row om-hide"><label>' + esc(t('cc')) + '</label><input class="ccc" type="text" autocomplete="off" value="' + esc(cc) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
+					'<div class="om-cd-fld bcc-row om-hide"><label>' + esc(t('bcc')) + '</label><input class="cbcc" type="text" autocomplete="off"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
 					'<div class="om-cd-fld"><label>' + esc(t('subject')) + '</label><input class="csubj" type="text" value="' + esc(subject) + '"></div>' +
 				'</div>' +
+				aiBar +
 				'<div class="om-cd-editor" contenteditable="true" data-ph="…"></div>' +
 				'<div class="om-cd-atts"></div>' +
 				'<div class="om-cd-tools">' +
+					improveBtn +
 					'<button class="om-tool" data-cmd="bold" title="Bold">B</button>' +
 					'<button class="om-tool" data-cmd="italic" title="Italic" style="font-style:italic">I</button>' +
 					'<button class="om-tool" data-cmd="underline" title="Underline" style="text-decoration:underline">U</button>' +
@@ -726,7 +746,41 @@
 		on(q('.om-send', dock), 'click', function () { doSend(dock, false); });
 		on(q('.om-draft', dock), 'click', function () { doSend(dock, true); });
 
-		// recipient autocomplete
+		// AI assistant — draft a full email from a short instruction, or polish the
+		// current text. Runs through our own server (the OpenAI key stays there).
+		if (S.ai) {
+			var aiIn = q('.om-ai-in', dock), aiGo = q('.om-ai-go', dock), aiBarEl = q('.om-ai-bar', dock);
+			var aiGenerate = function () {
+				var idea = aiIn.value.trim();
+				if (!idea) { toast(t('ai_need_idea'), 'err'); aiIn.focus(); return; }
+				aiBarEl.classList.add('busy'); aiGo.disabled = true; aiIn.disabled = true;
+				api('ai', { body: { mode: 'draft', text: idea, subject: q('.csubj', dock).value.trim() } }).then(function (r) {
+					editor.innerHTML = r.html + sig + (mode !== 'new' ? quoted : '');
+					if (r.subject && !q('.csubj', dock).value.trim()) { q('.csubj', dock).value = r.subject; }
+					aiIn.value = ''; toast(t('ai_done'), 'ok'); editor.focus(); moveCaretStart(editor);
+				}).catch(function (e) { toast(e.message, 'err'); }).then(function () {
+					aiBarEl.classList.remove('busy'); aiGo.disabled = false; aiIn.disabled = false;
+				});
+			};
+			on(aiGo, 'click', aiGenerate);
+			on(aiIn, 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); aiGenerate(); } });
+
+			var impBtn = q('.om-ai-improve', dock);
+			on(impBtn, 'mousedown', function (e) { e.preventDefault(); });
+			on(impBtn, 'click', function () {
+				var text = (editor.innerText || editor.textContent || '').trim();
+				if (!text) { toast(t('ai_need_text'), 'err'); return; }
+				var orig = impBtn.innerHTML; impBtn.disabled = true; impBtn.classList.add('busy');
+				impBtn.innerHTML = '<span class="om-spin" style="width:13px;height:13px;border-width:2px"></span> <span>' + esc(t('ai_working')) + '</span>';
+				api('ai', { body: { mode: 'improve', text: text } }).then(function (r) {
+					editor.innerHTML = r.html; toast(t('ai_improved'), 'ok'); editor.focus();
+				}).catch(function (e) { toast(e.message, 'err'); }).then(function () {
+					impBtn.disabled = false; impBtn.classList.remove('busy'); impBtn.innerHTML = orig;
+				});
+			});
+		}
+
+		// recipient autocomplete + dropdown picker
 		[q('.cto', dock), q('.ccc', dock), q('.cbcc', dock)].forEach(setupAutocomplete);
 	}
 
@@ -786,33 +840,53 @@
 		if (!input) return;
 		var box = document.createElement('div'); box.className = 'om-ac'; document.body.appendChild(box);
 		var hi = -1, matches = [];
+		var pickBtn = input.parentNode ? input.parentNode.querySelector('.om-rcp-pick') : null;
 		function currentToken() { var v = input.value; var i = Math.max(v.lastIndexOf(','), v.lastIndexOf(';')); return v.slice(i + 1).trim(); }
-		function place() { var r = input.getBoundingClientRect(); box.style.position = 'fixed'; box.style.top = (r.bottom + 2) + 'px'; box.style.left = r.left + 'px'; box.style.minWidth = r.width + 'px'; }
-		function close() { box.classList.remove('open'); hi = -1; }
+		function place() { var r = input.getBoundingClientRect(); box.style.position = 'fixed'; box.style.top = (r.bottom + 3) + 'px'; box.style.left = r.left + 'px'; box.style.minWidth = r.width + 'px'; box.style.maxWidth = Math.max(r.width, 280) + 'px'; }
+		function close() { box.classList.remove('open'); hi = -1; if (pickBtn) pickBtn.classList.remove('open'); }
 		function pick(c) {
 			var v = input.value; var i = Math.max(v.lastIndexOf(','), v.lastIndexOf(';'));
 			input.value = (i >= 0 ? v.slice(0, i + 1) + ' ' : '') + c.email + ', '; close(); input.focus();
 		}
+		function render(list) {
+			matches = list; hi = -1;
+			if (!list.length) { box.innerHTML = '<div class="om-ac-empty">' + esc(t('no_contacts')) + '</div>'; }
+			else {
+				box.innerHTML = list.map(function (c, i) {
+					return '<div data-i="' + i + '"><span class="om-ac-av">' + esc(initials(c.name, c.email)) + '</span>' +
+						'<span class="om-ac-t"><b>' + esc(c.name || c.email) + '</b><span class="e">' + esc(c.email) + '</span></span></div>';
+				}).join('');
+			}
+			place(); box.classList.add('open');
+			qa('div[data-i]', box).forEach(function (d) { on(d, 'mousedown', function (e) { e.preventDefault(); pick(matches[+d.getAttribute('data-i')]); }); });
+		}
+		function openAll() {
+			if (box.classList.contains('open')) { close(); return; }
+			render((S.contacts || []).slice(0, 60));
+			if (pickBtn) pickBtn.classList.add('open');
+		}
 		on(input, 'input', function () {
 			var tok = currentToken().toLowerCase(); if (tok.length < 1) { close(); return; }
-			matches = S.contacts.filter(function (c) { return (c.email + ' ' + (c.name || '')).toLowerCase().indexOf(tok) >= 0; }).slice(0, 6);
-			if (!matches.length) { close(); return; }
-			place();
-			box.innerHTML = matches.map(function (c, i) { return '<div data-i="' + i + '">' + esc(c.name || c.email) + ' <span class="e">' + esc(c.email) + '</span></div>'; }).join('');
-			box.classList.add('open'); hi = -1;
-			qa('div', box).forEach(function (d) { on(d, 'mousedown', function (e) { e.preventDefault(); pick(matches[+d.getAttribute('data-i')]); }); });
+			var list = (S.contacts || []).filter(function (c) { return (c.email + ' ' + (c.name || '')).toLowerCase().indexOf(tok) >= 0; }).slice(0, 8);
+			if (!list.length) { close(); return; }
+			render(list);
 		});
 		on(input, 'keydown', function (e) {
 			if (!box.classList.contains('open')) return;
-			if (e.key === 'ArrowDown') { hi = Math.min(matches.length - 1, hi + 1); }
+			var items = qa('div[data-i]', box);
+			if (e.key === 'ArrowDown') { hi = Math.min(items.length - 1, hi + 1); }
 			else if (e.key === 'ArrowUp') { hi = Math.max(0, hi - 1); }
 			else if (e.key === 'Enter' && hi >= 0) { e.preventDefault(); pick(matches[hi]); return; }
 			else if (e.key === 'Escape') { close(); return; }
 			else return;
 			e.preventDefault();
-			qa('div', box).forEach(function (d, i) { d.classList.toggle('hi', i === hi); });
+			items.forEach(function (d, i) { d.classList.toggle('hi', i === hi); if (i === hi) d.scrollIntoView({ block: 'nearest' }); });
 		});
-		on(input, 'blur', function () { setTimeout(close, 150); });
+		on(input, 'blur', function () { setTimeout(close, 180); });
+		if (pickBtn) {
+			on(pickBtn, 'mousedown', function (e) { e.preventDefault(); });
+			on(pickBtn, 'click', function (e) { e.preventDefault(); input.focus(); openAll(); });
+		}
 	}
 
 	/* ---------------------------- settings ---------------------------- */
@@ -1005,7 +1079,7 @@
 	/* ------------------------------ start ----------------------------- */
 	function start() {
 		api('bootstrap').then(function (b) {
-			S.bootstrap = b; S.from_name = b.from_name || ''; S.signature = b.signature || ''; S.email = b.email || S.email; S.avatar = b.avatar || '';
+			S.bootstrap = b; S.from_name = b.from_name || ''; S.signature = b.signature || ''; S.email = b.email || S.email; S.avatar = b.avatar || ''; S.ai = !!b.ai;
 			if (!b.connected) { renderOnboard(b.conn_error || ''); return; }
 			S.folders = b.folders || [];
 			buildShell(); renderFolders();

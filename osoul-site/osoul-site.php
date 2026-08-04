@@ -3,7 +3,7 @@
  * Plugin Name:       Osoul Albinaa Site
  * Plugin URI:        https://osoulalbinaa.com
  * Description:        Front-end, bilingual (AR/EN) site layer for Osoul Albinaa Industrial Co. — header, footer, pages, product catalog, quote list and a real server-side quote/contact backend. Refactored from a single WPCode snippet into a maintainable, performance-oriented plugin.
- * Version:           2.21.10
+ * Version:           2.21.11
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Osoul Albinaa
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // Guard against double-load (kept from the original WPCode protection).
 if ( defined( 'OSOUL_VERSION' ) ) { return; }
 
-define( 'OSOUL_VERSION', '2.21.10' );
+define( 'OSOUL_VERSION', '2.21.11' );
 define( 'OSOUL_FILE', __FILE__ );
 define( 'OSOUL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OSOUL_URL', plugin_dir_url( __FILE__ ) );
@@ -47,6 +47,7 @@ $osoul_modules = array(
 	'inc/employees.php',      // Employee webmail: role, admin manager, credential vault
 	'inc/mail-engine.php',    // Employee webmail: self-contained IMAP client + MIME + SMTP
 	'inc/webmail-rest.php',   // Employee webmail: mailbox REST API (osoul/v1/mail/*)
+	'inc/mail-ai.php',        // Employee webmail: AI email assistant (OpenAI draft/improve)
 	'inc/webmail-app.php',    // Employee webmail: /dashboard mail client (rendered for employees)
 	'inc/partners.php',       // Partner Portal: white-label reseller data layer
 	'inc/partners-app.php',   // Partner Portal: registration, dashboard, admin mgmt

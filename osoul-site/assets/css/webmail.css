@@ -314,11 +314,39 @@ textarea.om-input{height:auto;padding:13px 16px;min-height:96px;resize:vertical;
 [dir="rtl"] .om-cd-grip svg{transform:scaleX(-1)}
 @media (max-width:900px){ .om-cd-grip{display:none} }
 
-.om-ac{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-lg);z-index:80;max-height:240px;overflow-y:auto;min-width:250px;display:none;padding:6px;animation:om-in .14s var(--ease)}
+.om-ac{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-lg);z-index:80;max-height:280px;overflow-y:auto;min-width:250px;display:none;padding:6px;animation:om-in .14s var(--ease)}
 .om-ac.open{display:block}
 .om-ac div{padding:10px 13px;cursor:pointer;font-size:13.5px;border-radius:10px}
 .om-ac div:hover,.om-ac div.hi{background:var(--hover)}
 .om-ac .e{color:var(--muted);font-size:12px;font-family:var(--num)}
+/* recipient picker dropdown — richer rows */
+.om-ac div[data-i]{display:flex;align-items:center;gap:10px;padding:8px 11px}
+.om-ac-av{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--grad);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700}
+.om-ac-t{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.om-ac-t b{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.om-ac-t .e{font-size:11.5px}
+.om-ac-empty{padding:12px 13px;color:var(--muted);font-size:12.5px;text-align:center;cursor:default}
+.om-rcp-pick{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:none;background:none;color:var(--muted2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.14s var(--ease)}
+.om-rcp-pick:hover{background:var(--hover);color:var(--a1)}
+.om-rcp-pick.open{color:var(--a1);transform:rotate(180deg)}
+
+/* AI email assistant — "Ask AI to draft a message" bar + Improve button */
+.om-ai-bar{display:flex;align-items:center;gap:9px;margin:10px 18px 2px;padding:5px;padding-inline-start:13px;border:1.5px solid var(--line);border-radius:16px;background:var(--field);transition:.16s var(--ease)}
+.om-ai-bar:focus-within{border-color:var(--a1);background:var(--input);box-shadow:0 0 0 4px rgba(0,116,164,.12)}
+.om-ai-bar.busy{border-color:var(--a1)}
+.om-ai-ic{display:inline-flex;flex:0 0 auto;color:var(--a2)}
+.om-ai-in{flex:1;border:none;background:none;outline:none;color:var(--ink);font-size:14px;font-family:inherit;min-width:0}
+.om-ai-in::placeholder{color:var(--muted2)}
+.om-ai-go{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:none;background:var(--grad);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.16s var(--ease);position:relative}
+.om-ai-go:hover{filter:brightness(1.08)}
+.om-ai-go[disabled]{opacity:.55;cursor:default}
+[dir="rtl"] .om-ai-go svg{transform:scaleX(-1)}
+.om-ai-bar.busy .om-ai-go{color:transparent}
+.om-ai-bar.busy .om-ai-go::after{content:"";position:absolute;top:50%;inset-inline-start:50%;width:15px;height:15px;margin:-8px 0 0 -8px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:om-rot .7s linear infinite}
+.om-tool.om-ai-improve{width:auto;gap:6px;padding:0 12px;height:34px;border-radius:10px;color:var(--a1);font-weight:700;font-size:12.5px;background:rgba(0,116,164,.10)}
+.om-tool.om-ai-improve:hover{background:rgba(0,116,164,.18);color:var(--a1)}
+.om-tool.om-ai-improve span{font-weight:700}
+.om-tool.om-ai-improve[disabled]{opacity:.6;cursor:default}
 
 /* ============================ toast + modal ============================ */
 .om-toasts{position:fixed;inset-block-end:22px;inset-inline-start:22px;z-index:120;display:flex;flex-direction:column;gap:11px}

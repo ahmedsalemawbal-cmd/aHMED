@@ -169,6 +169,46 @@ function osoul_mail_decrypt( $token ) {
 }
 
 /* =========================================================================
+ *  AI email assistant — one site-wide OpenAI key (admin-managed)
+ *
+ *  A single company key, entered once in wp-admin, encrypted at rest and used
+ *  server-side for every employee's "draft / improve email with AI" action.
+ *  The key is never exposed to the browser — employees only ever call our own
+ *  REST endpoint, which holds the key on the server.
+ * ====================================================================== */
+
+/** Store (encrypted) the OpenAI API key. Empty string clears it. Autoload off. */
+function osoul_ai_key_save( $key ) {
+	$key = trim( (string) $key );
+	delete_option( 'osoul_mail_ai_key' );
+	if ( '' !== $key ) {
+		add_option( 'osoul_mail_ai_key', osoul_mail_encrypt( $key ), '', 'no' );
+	}
+}
+
+/** The decrypted OpenAI API key, or '' when not configured. */
+function osoul_ai_key() {
+	return osoul_mail_decrypt( (string) get_option( 'osoul_mail_ai_key', '' ) );
+}
+
+/** The chat model to use (admin-selectable). */
+function osoul_ai_model() {
+	$m = (string) get_option( 'osoul_mail_ai_model', '' );
+	return ( '' !== $m ) ? $m : 'gpt-4o-mini';
+}
+
+/** Persist the chosen chat model. */
+function osoul_ai_model_save( $m ) {
+	$m = sanitize_text_field( (string) $m );
+	if ( '' !== $m ) { update_option( 'osoul_mail_ai_model', $m, false ); }
+}
+
+/** Whether the AI assistant is configured (a key is present). */
+function osoul_ai_is_ready() {
+	return '' !== osoul_ai_key();
+}
+
+/* =========================================================================
  *  Mailbox connection settings (per employee)
  * ====================================================================== */
 
@@ -459,6 +499,20 @@ add_action( 'admin_post_osoul_employee_action', function () {
 			wp_delete_user( $uid );
 			$notice = 'تم حذف الحساب.';
 		}
+	} elseif ( 'ai' === $action ) {
+		$key   = trim( (string) wp_unslash( $_POST['ai_key'] ?? '' ) );
+		$model = sanitize_text_field( wp_unslash( $_POST['ai_model'] ?? '' ) );
+		if ( '' !== $model ) { osoul_ai_model_save( $model ); }
+		$low = strtolower( $key );
+		if ( 'حذف' === $key || 'مسح' === $key || 'clear' === $low || 'remove' === $low ) {
+			osoul_ai_key_save( '' );
+			$notice = 'تم مسح مفتاح الذكاء الاصطناعي.';
+		} elseif ( '' !== $key ) {
+			osoul_ai_key_save( $key );
+			$notice = 'تم حفظ مفتاح الذكاء الاصطناعي وإعداداته. الميزة الآن مفعّلة للموظفين.';
+		} else {
+			$notice = 'تم حفظ إعدادات الذكاء الاصطناعي.';
+		}
 	} else {
 		$notice = 'إجراء غير معروف.';
 		$type   = 'err';
@@ -492,6 +546,56 @@ function osoul_employees_admin_page() {
 		<?php if ( $notice ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $ntype ); ?> is-dismissible"><p><?php echo esc_html( $notice ); ?></p></div>
 		<?php endif; ?>
+
+		<?php
+		$ai_ready  = osoul_ai_is_ready();
+		$ai_model  = osoul_ai_model();
+		$ai_models = array(
+			'gpt-4o-mini'  => 'gpt-4o-mini — سريع واقتصادي (موصى به)',
+			'gpt-4o'       => 'gpt-4o — الأقوى',
+			'gpt-4.1-mini' => 'gpt-4.1-mini',
+			'gpt-4.1'      => 'gpt-4.1',
+		);
+		if ( ! isset( $ai_models[ $ai_model ] ) ) { $ai_models[ $ai_model ] = $ai_model; }
+		?>
+		<h2 style="margin-top:24px">مساعد الذكاء الاصطناعي للبريد (OpenAI)</h2>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:18px;max-width:820px">
+			<?php wp_nonce_field( 'osoul_employee_action' ); ?>
+			<input type="hidden" name="action" value="osoul_employee_action">
+			<input type="hidden" name="do" value="ai">
+			<p class="description" style="margin:0 0 10px;max-width:760px">
+				مفتاح واحد للشركة يُشغّل ميزة «كتابة / تحسين الإيميل بالذكاء الاصطناعي» لكل الموظفين داخل اللوحة.
+				المفتاح يُحفظ مشفّراً على الخادم ولا يظهر في المتصفح إطلاقاً. احصل على المفتاح من
+				<code>platform.openai.com/api-keys</code>.
+				<?php if ( $ai_ready ) : ?>
+					<strong style="color:#1a7f37">● الميزة مُفعّلة حالياً</strong>
+				<?php else : ?>
+					<strong style="color:#b32d2e">● غير مُفعّلة بعد</strong>
+				<?php endif; ?>
+			</p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="osoul-ai-key">مفتاح OpenAI API</label></th>
+					<td>
+						<input name="ai_key" id="osoul-ai-key" type="password" class="regular-text" dir="ltr" autocomplete="new-password"
+							placeholder="<?php echo $ai_ready ? '•••••••••••••  (مخزّن — اترك الحقل فارغاً للإبقاء عليه)' : 'sk-...'; ?>">
+						<p class="description">للتغيير الصق مفتاحاً جديداً. للمسح اكتب <code>حذف</code>.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="osoul-ai-model">النموذج</label></th>
+					<td>
+						<select name="ai_model" id="osoul-ai-model">
+							<?php foreach ( $ai_models as $mk => $ml ) : ?>
+								<option value="<?php echo esc_attr( $mk ); ?>" <?php selected( $ai_model, $mk ); ?>><?php echo esc_html( $ml ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description">gpt-4o-mini كافٍ وممتاز للإيميلات وتكلفته منخفضة.</p>
+					</td>
+				</tr>
+			</table>
+			<?php submit_button( 'حفظ إعدادات الذكاء الاصطناعي', 'primary', 'submit', false ); ?>
+		</form>
 
 		<h2 style="margin-top:24px">إضافة موظف</h2>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="osoul-emp-form" style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:18px;max-width:820px">

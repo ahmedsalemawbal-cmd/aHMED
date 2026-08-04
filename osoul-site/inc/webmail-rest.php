@@ -90,6 +90,7 @@ function osoul_rest_mail_bootstrap() {
 		'from_name' => $cfg['from_name'],
 		'signature' => $cfg['signature'],
 		'avatar'    => (string) get_user_meta( $uid, '_osoul_mail_avatar', true ),
+		'ai'        => function_exists( 'osoul_ai_is_ready' ) && osoul_ai_is_ready(),
 		'defaults'  => osoul_mail_server_defaults(),
 		'imap_host' => $cfg['imap_host'],
 		'imap_port' => $cfg['imap_port'],
@@ -432,9 +433,9 @@ function osoul_rest_mail_send( WP_REST_Request $req ) {
 	// Clean up temp attachments + record contacts.
 	foreach ( $tokens_used as $tok ) { osoul_mail_tmp_delete( $uid, $tok ); }
 	if ( ! $draft ) {
-		osoul_mail_add_contacts( $uid, array_merge(
-			array_map( function ( $e ) { return array( 'email' => $e, 'name' => '' ); }, $to ),
-			array_map( function ( $e ) { return array( 'email' => $e, 'name' => '' ); }, $cc )
+		osoul_mail_add_contacts( $uid, array_map(
+			function ( $e ) { return array( 'email' => $e, 'name' => '' ); },
+			array_merge( $to, $cc, $bcc )
 		) );
 	}
 
