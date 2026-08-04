@@ -268,12 +268,23 @@ function osoul_mail_forget( $user_id ) {
  * ====================================================================== */
 
 /**
- * Create an employee account with a password chosen by the admin.
+ * Create — or adopt — an employee account with a password chosen by the admin.
  *
- * @param array $args { name, email, password, phone? }
- * @return int|WP_Error  new user id
+ * WordPress emails are unique site-wide, so if the address already belongs to a
+ * user (a stray account created by mistake, an old customer/portal account, …)
+ * a plain wp_insert_user would fail with "already registered" even though that
+ * account is *not* an employee and never shows in this list. Instead of dead-
+ * ending, we adopt it: convert it into a clean employee mailbox using the name +
+ * password the admin just entered. Site administrators/editors are never taken
+ * over — those keep their account and the admin is told to use another address.
+ *
+ * @param array $args        { name, email, password, phone? }
+ * @param bool  $adopted     Set true (by reference) when an existing account was
+ *                           linked rather than a brand-new one created.
+ * @return int|WP_Error      user id
  */
-function osoul_employee_create( $args ) {
+function osoul_employee_create( $args, &$adopted = null ) {
+	$adopted = false;
 	$name  = sanitize_text_field( $args['name'] ?? '' );
 	$email = sanitize_email( $args['email'] ?? '' );
 	$pass  = (string) ( $args['password'] ?? '' );
@@ -285,11 +296,34 @@ function osoul_employee_create( $args ) {
 	if ( ! is_email( $email ) ) {
 		return new WP_Error( 'osoul_bad_email', 'بريد إلكتروني غير صحيح.' );
 	}
-	if ( email_exists( $email ) || username_exists( $email ) ) {
-		return new WP_Error( 'osoul_dupe', 'هذا البريد مسجّل مسبقاً.' );
-	}
 	if ( strlen( $pass ) < 8 ) {
 		return new WP_Error( 'osoul_weak', 'كلمة مرور الدخول يجب أن تكون 8 أحرف على الأقل.' );
+	}
+
+	// Address already taken? Adopt that account instead of erroring out.
+	$existing = email_exists( $email );
+	if ( ! $existing ) { $existing = username_exists( $email ); }
+	if ( $existing ) {
+		$user = get_user_by( 'id', (int) $existing );
+		if ( ! $user ) {
+			return new WP_Error( 'osoul_dupe', 'هذا البريد مسجّل مسبقاً.' );
+		}
+		// Never hijack a privileged account.
+		if ( user_can( $user, 'manage_options' )
+			|| array_intersect( array( 'administrator', 'editor' ), (array) $user->roles ) ) {
+			return new WP_Error( 'osoul_dupe_priv', 'هذا البريد مستخدم لحساب إداري ولا يمكن تحويله إلى موظف — استخدم بريداً آخر.' );
+		}
+		$user->set_role( 'osoul_employee' );                 // becomes a pure employee
+		wp_set_password( $pass, (int) $existing );           // apply the dashboard password
+		wp_update_user( array( 'ID' => (int) $existing, 'display_name' => $name, 'nickname' => $name ) );
+		update_user_meta( (int) $existing, '_osoul_phone', $phone );
+		update_user_meta( (int) $existing, '_osoul_active', 1 );
+		if ( '' === (string) get_user_meta( (int) $existing, '_osoul_mail_email', true ) ) {
+			update_user_meta( (int) $existing, '_osoul_mail_email', $email );
+		}
+		update_user_meta( (int) $existing, '_osoul_mail_from', $name );
+		$adopted = true;
+		return (int) $existing;
 	}
 
 	$user_id = wp_insert_user( array(
@@ -351,22 +385,25 @@ add_action( 'admin_post_osoul_employee_action', function () {
 	$type    = 'ok';
 
 	if ( 'add' === $action ) {
+		$adopted = false;
 		$res = osoul_employee_create( array(
 			'name'     => wp_unslash( $_POST['name'] ?? '' ),
 			'email'    => wp_unslash( $_POST['email'] ?? '' ),
 			'password' => (string) ( $_POST['password'] ?? '' ),
 			'phone'    => wp_unslash( $_POST['phone'] ?? '' ),
-		) );
+		), $adopted );
 		if ( is_wp_error( $res ) ) {
 			$notice = $res->get_error_message();
 			$type   = 'err';
 		} else {
-			$notice = 'تم إنشاء حساب الموظف. أعطه رابط الدخول: ' . home_url( '/dashboard/' );
+			$notice = ( $adopted
+				? 'هذا البريد كان مسجّلاً مسبقاً — تم ربطه وتفعيله كموظف بكلمة المرور التي أدخلتها. رابط الدخول: '
+				: 'تم إنشاء حساب الموظف. أعطه رابط الدخول: ' ) . home_url( '/dashboard/' );
 		}
 	} elseif ( 'bulk' === $action ) {
 		$raw   = (string) wp_unslash( $_POST['bulk'] ?? '' );
 		$lines = preg_split( '/\r\n|\r|\n/', $raw );
-		$added = 0; $dupe = 0; $err = 0; $errs = array();
+		$added = 0; $linked = 0; $dupe = 0; $err = 0; $errs = array();
 		foreach ( (array) $lines as $line ) {
 			$line = trim( $line );
 			if ( '' === $line ) { continue; }
@@ -379,15 +416,19 @@ add_action( 'admin_post_osoul_employee_action', function () {
 			// Skip a header row if pasted.
 			if ( 'name' === strtolower( $name ) || 'email' === strtolower( $email ) || false === strpos( $email, '@' ) ) { continue; }
 			if ( strlen( $pass ) < 8 ) { $pass = wp_generate_password( 12, false ); }
-			$res = osoul_employee_create( array( 'name' => $name, 'email' => $email, 'password' => $pass, 'phone' => $phone ) );
+			$adopted = false;
+			$res = osoul_employee_create( array( 'name' => $name, 'email' => $email, 'password' => $pass, 'phone' => $phone ), $adopted );
 			if ( is_wp_error( $res ) ) {
 				if ( 'osoul_dupe' === $res->get_error_code() ) { $dupe++; }
 				else { $err++; if ( count( $errs ) < 6 ) { $errs[] = $email . ' (' . $res->get_error_message() . ')'; } }
 			} else {
 				$added++;
+				if ( $adopted ) { $linked++; }
 			}
 		}
-		$notice = 'تمت إضافة ' . $added . ' موظف — موجودون مسبقاً (تم تخطّيهم): ' . $dupe . ' — أخطاء: ' . $err;
+		$notice = 'تمت إضافة ' . $added . ' موظف';
+		if ( $linked > 0 ) { $notice .= ' (منها ' . $linked . ' حساب موجود تم ربطه)'; }
+		$notice .= ' — أخطاء: ' . $err;
 		if ( $errs ) { $notice .= ' | ' . implode( ' ؛ ', $errs ); }
 		if ( $err > 0 ) { $type = 'err'; }
 	} elseif ( in_array( $action, array( 'suspend', 'activate', 'reset', 'delete', 'unlink' ), true ) ) {
