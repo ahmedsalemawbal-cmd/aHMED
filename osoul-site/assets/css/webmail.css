@@ -86,7 +86,7 @@ button{font-family:inherit}
 }
 .om-top::after{content:"";position:absolute;inset-inline:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,137,190,.5),transparent)}
 .om-logo{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16.5px;color:#fff;white-space:nowrap;letter-spacing:-.02em}
-.om-logo img{height:34px;border-radius:9px;background:#fff;padding:3px}
+.om-logo img{height:40px;width:auto;max-width:190px;object-fit:contain}
 .om-logo .mk{width:36px;height:36px;border-radius:11px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;box-shadow:var(--glow)}
 .om-logo-tx{opacity:.96}
 .om-search{flex:1;max-width:640px;position:relative}
@@ -254,6 +254,9 @@ button{font-family:inherit}
 textarea.om-input{height:auto;padding:13px 16px;min-height:96px;resize:vertical;line-height:1.6}
 .om-pass-wrap{position:relative}
 .om-pass-wrap .om-input{padding-inline-end:48px}
+.om-pw-sec{margin-top:20px;padding-top:18px;border-top:1.5px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.om-pw-h{font-size:13px;font-weight:700;color:var(--ink)}
+.om-pw-sec .set-pw-btn{align-self:flex-start;margin-top:2px}
 .om-eye{position:absolute;inset-inline-end:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:8px;border-radius:9px;font-size:15px}
 .om-eye:hover{background:var(--hover)}
 .om-note{background:var(--field);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:12.5px;color:var(--muted);margin-bottom:20px;display:flex;gap:10px;line-height:1.55}
@@ -391,7 +394,7 @@ textarea.om-input{height:auto;padding:13px 16px;min-height:96px;resize:vertical;
 .set-av-pick{cursor:pointer;margin:0}
 
 /* brand logo in the top bar */
-.om-logo img{height:38px;width:auto;max-width:168px;object-fit:contain;border-radius:9px;background:#fff;padding:4px 8px}
+.om-logo img{height:40px;width:auto;max-width:190px;object-fit:contain}
 
 /* compose fullscreen */
 .om-compose-dock.full{top:24px;bottom:24px;inset-inline-start:24px;inset-inline-end:24px;width:auto;max-width:none;max-height:none;height:auto;border-radius:20px;border:1px solid var(--line)}

@@ -64,6 +64,7 @@ add_action( 'rest_api_init', function () {
 		array( '/mail/avatar',     $post, 'osoul_rest_mail_avatar' ),
 		array( '/mail/profile',    $post, 'osoul_rest_mail_profile' ),
 		array( '/mail/contacts',   $get,  'osoul_rest_mail_contacts' ),
+		array( '/mail/password',   $post, 'osoul_rest_mail_password' ),
 	);
 	foreach ( $routes as $r ) {
 		register_rest_route( $ns, $r[0], array(
@@ -563,6 +564,41 @@ function osoul_rest_mail_contacts() {
 		}
 	}
 	return rest_ensure_response( array( 'contacts' => $out ) );
+}
+
+/**
+ * Change the employee's own dashboard (login) password.
+ *
+ * This is the WordPress account password used to sign in to /dashboard — not
+ * the Hostinger mailbox password. We verify the current password first, require
+ * a reasonable new one, then re-issue the auth cookie so the session survives
+ * the change (WordPress invalidates the old cookie on a password reset).
+ */
+function osoul_rest_mail_password( WP_REST_Request $req ) {
+	$uid  = get_current_user_id();
+	$cur  = (string) $req->get_param( 'current' );
+	$new  = (string) $req->get_param( 'new' );
+	$user = get_user_by( 'id', $uid );
+
+	if ( ! $user ) {
+		return new WP_Error( 'osoul_forbidden', 'غير مصرح.', array( 'status' => 403 ) );
+	}
+	if ( '' === $cur || ! wp_check_password( $cur, $user->user_pass, $uid ) ) {
+		return new WP_Error( 'osoul_badpass', 'كلمة المرور الحالية غير صحيحة.', array( 'status' => 403 ) );
+	}
+	if ( strlen( $new ) < 8 ) {
+		return new WP_Error( 'osoul_weakpass', 'كلمة المرور الجديدة يجب ألا تقل عن 8 أحرف.', array( 'status' => 422 ) );
+	}
+	if ( $new === $cur ) {
+		return new WP_Error( 'osoul_samepass', 'كلمة المرور الجديدة مطابقة للحالية.', array( 'status' => 422 ) );
+	}
+
+	wp_set_password( $new, $uid );
+	// Keep the current session alive (wp_set_password logs the user out).
+	wp_set_current_user( $uid );
+	wp_set_auth_cookie( $uid, true );
+
+	return rest_ensure_response( array( 'ok' => true ) );
 }
 
 /* -------------------------------------------------------------------------

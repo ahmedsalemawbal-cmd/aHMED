@@ -67,12 +67,16 @@
 			selected: 'محدد', b_read: 'مقروء', b_unread: 'غير مقروء', b_star: 'تمييز', b_delete: 'حذف', b_move: 'نقل', b_cancel: 'إلغاء',
 			storage: 'مساحة التخزين', add_folder: 'مجلد جديد', folder_name: 'اسم المجلد', contacts: 'جهات الاتصال', no_contacts: 'لا توجد جهات اتصال بعد.',
 			select_all: 'تحديد الكل', deleted_n: 'تم حذف الرسائل', done_n: 'تم التنفيذ', expand: 'تكبير', collapse: 'تصغير', new_folder_ok: 'تم إنشاء المجلد',
-			photo: 'الصورة الشخصية', change_photo: 'تغيير الصورة', remove_photo: 'إزالة', uploading: 'جاري الرفع…', lang_label: 'لغة الواجهة' },
+			photo: 'الصورة الشخصية', change_photo: 'تغيير الصورة', remove_photo: 'إزالة', uploading: 'جاري الرفع…', lang_label: 'لغة الواجهة',
+			change_pw: 'تغيير كلمة مرور الدخول', cur_pw: 'كلمة المرور الحالية', new_pw: 'كلمة المرور الجديدة', conf_pw: 'تأكيد كلمة المرور الجديدة',
+			do_change_pw: 'تغيير كلمة المرور', pw_mismatch: 'كلمتا المرور غير متطابقتين', pw_short: 'كلمة المرور 8 أحرف على الأقل', pw_ok: 'تم تغيير كلمة المرور', pw_need_cur: 'أدخل كلمة المرور الحالية' },
 		en: { f_all: 'All', f_unread: 'Unread', f_read: 'Read', f_starred: 'Starred', sort: 'Sort', newest: 'Newest', oldest: 'Oldest',
 			selected: 'selected', b_read: 'Read', b_unread: 'Unread', b_star: 'Star', b_delete: 'Delete', b_move: 'Move', b_cancel: 'Cancel',
 			storage: 'Storage', add_folder: 'New folder', folder_name: 'Folder name', contacts: 'Contacts', no_contacts: 'No contacts yet.',
 			select_all: 'Select all', deleted_n: 'Messages deleted', done_n: 'Done', expand: 'Expand', collapse: 'Collapse', new_folder_ok: 'Folder created',
-			photo: 'Profile picture', change_photo: 'Change photo', remove_photo: 'Remove', uploading: 'Uploading…', lang_label: 'Interface language' }
+			photo: 'Profile picture', change_photo: 'Change photo', remove_photo: 'Remove', uploading: 'Uploading…', lang_label: 'Interface language',
+			change_pw: 'Change login password', cur_pw: 'Current password', new_pw: 'New password', conf_pw: 'Confirm new password',
+			do_change_pw: 'Change password', pw_mismatch: 'Passwords do not match', pw_short: 'Password must be at least 8 characters', pw_ok: 'Password changed', pw_need_cur: 'Enter your current password' }
 	};
 	function t(k) { var v = STR[LANG][k]; if (v == null) v = MORE[LANG][k]; return v != null ? v : (STR.ar[k] || MORE.ar[k] || k); }
 
@@ -439,13 +443,16 @@
 		S.currentUid = uid;
 		qa('.om-row').forEach(function (r) { r.classList.toggle('sel', +r.getAttribute('data-uid') === uid); });
 		var row = S.messages.filter(function (m) { return m.uid === uid; })[0];
-		if (row && !row.seen) { row.seen = true; var rn = q('.om-row[data-uid="' + uid + '"]'); if (rn) { rn.classList.remove('unread'); var d = q('.om-r-dot', rn); if (d) d.remove(); } bumpUnread(-1); }
+		var wasUnread = row && !row.seen;
+		if (wasUnread) { row.seen = true; var rn = q('.om-row[data-uid="' + uid + '"]'); if (rn) { rn.classList.remove('unread'); var d = q('.om-r-dot', rn); if (d) d.remove(); } bumpUnread(-1); }
 		var view = q('.om-view');
 		view.innerHTML = '<div class="om-view-empty"><span class="om-spin"></span></div>';
 		setReading(true);
 		api('message', { query: { folder: S.folder, uid: uid } }).then(function (m) {
 			if (S.currentUid !== uid) return;
 			S.currentMsg = m; renderMessage(m);
+			// The server has now marked it read — re-sync the sidebar unread counts.
+			if (wasUnread) { setTimeout(refreshFoldersQuiet, 500); }
 		}).catch(function (e) { view.innerHTML = '<div class="om-view-empty"><div>' + esc(e.message) + '</div></div>'; });
 	}
 
@@ -823,6 +830,12 @@
 			'<div class="om-field"><label>' + esc(t('display_name')) + '</label><input class="om-input set-name" value="' + esc(S.from_name) + '"></div>' +
 			'<div class="om-field"><label>' + esc(t('lang_label')) + '</label><select class="om-input set-lang"><option value="ar"' + (LANG === 'ar' ? ' selected' : '') + '>العربية</option><option value="en"' + (LANG === 'en' ? ' selected' : '') + '>English</option></select></div>' +
 			'<div class="om-field"><label>' + esc(t('signature')) + '</label><textarea class="om-input set-sig">' + esc(S.signature) + '</textarea></div>' +
+			'<div class="om-pw-sec"><label class="om-pw-h">' + esc(t('change_pw')) + '</label>' +
+				'<input type="password" class="om-input set-pw-cur" placeholder="' + esc(t('cur_pw')) + '" autocomplete="current-password">' +
+				'<input type="password" class="om-input set-pw-new" placeholder="' + esc(t('new_pw')) + '" autocomplete="new-password">' +
+				'<input type="password" class="om-input set-pw-conf" placeholder="' + esc(t('conf_pw')) + '" autocomplete="new-password">' +
+				'<button class="om-btn set-pw-btn">' + esc(t('do_change_pw')) + '</button>' +
+			'</div>' +
 			'<div class="om-modal-actions"><button class="om-btn set-cancel">' + esc(t('cancel')) + '</button><button class="om-btn primary set-save">' + esc(t('save')) + '</button></div></div>';
 		document.body.appendChild(modal);
 		on(modal, 'click', function (e) { if (e.target === modal) modal.remove(); });
@@ -853,6 +866,23 @@
 				var ab = q('.om-avatar-btn'); if (ab) ab.innerHTML = selfAvatar();
 				if (lang !== LANG) { setLang(lang); }
 			}).catch(function (e) { toast(e.message, 'err'); });
+		});
+
+		// change login password (verified + applied immediately)
+		on(q('.set-pw-btn', modal), 'click', function () {
+			var cur = q('.set-pw-cur', modal).value, nw = q('.set-pw-new', modal).value, cf = q('.set-pw-conf', modal).value;
+			if (!cur) { toast(t('pw_need_cur'), 'err'); return; }
+			if (nw.length < 8) { toast(t('pw_short'), 'err'); return; }
+			if (nw !== cf) { toast(t('pw_mismatch'), 'err'); return; }
+			var btn = q('.set-pw-btn', modal); btn.disabled = true;
+			api('password', { body: { current: cur, 'new': nw } }).then(function () {
+				q('.set-pw-cur', modal).value = ''; q('.set-pw-new', modal).value = ''; q('.set-pw-conf', modal).value = '';
+				toast(t('pw_ok'), 'ok');
+				// Changing the password rotates the auth cookie + session token, which
+				// invalidates the page's REST nonce. Reload once so the app picks up a
+				// fresh nonce and keeps working seamlessly.
+				setTimeout(function () { location.reload(); }, 1100);
+			}).catch(function (e) { btn.disabled = false; toast(e.message, 'err'); });
 		});
 	}
 	function setLang(l) {
