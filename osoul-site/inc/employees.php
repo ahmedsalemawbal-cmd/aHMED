@@ -363,6 +363,33 @@ add_action( 'admin_post_osoul_employee_action', function () {
 		} else {
 			$notice = 'تم إنشاء حساب الموظف. أعطه رابط الدخول: ' . home_url( '/dashboard/' );
 		}
+	} elseif ( 'bulk' === $action ) {
+		$raw   = (string) wp_unslash( $_POST['bulk'] ?? '' );
+		$lines = preg_split( '/\r\n|\r|\n/', $raw );
+		$added = 0; $dupe = 0; $err = 0; $errs = array();
+		foreach ( (array) $lines as $line ) {
+			$line = trim( $line );
+			if ( '' === $line ) { continue; }
+			// Accept tab / comma / pipe separated columns: Name, Email, Password[, Phone]
+			$parts = array_map( 'trim', preg_split( '/\t|,|\|/', $line ) );
+			$name  = $parts[0] ?? '';
+			$email = $parts[1] ?? '';
+			$pass  = $parts[2] ?? '';
+			$phone = $parts[3] ?? '';
+			// Skip a header row if pasted.
+			if ( 'name' === strtolower( $name ) || 'email' === strtolower( $email ) || false === strpos( $email, '@' ) ) { continue; }
+			if ( strlen( $pass ) < 8 ) { $pass = wp_generate_password( 12, false ); }
+			$res = osoul_employee_create( array( 'name' => $name, 'email' => $email, 'password' => $pass, 'phone' => $phone ) );
+			if ( is_wp_error( $res ) ) {
+				if ( 'osoul_dupe' === $res->get_error_code() ) { $dupe++; }
+				else { $err++; if ( count( $errs ) < 6 ) { $errs[] = $email . ' (' . $res->get_error_message() . ')'; } }
+			} else {
+				$added++;
+			}
+		}
+		$notice = 'تمت إضافة ' . $added . ' موظف — موجودون مسبقاً (تم تخطّيهم): ' . $dupe . ' — أخطاء: ' . $err;
+		if ( $errs ) { $notice .= ' | ' . implode( ' ؛ ', $errs ); }
+		if ( $err > 0 ) { $type = 'err'; }
 	} elseif ( in_array( $action, array( 'suspend', 'activate', 'reset', 'delete', 'unlink' ), true ) ) {
 		$uid = (int) ( $_POST['uid'] ?? 0 );
 		if ( ! $uid || ! osoul_is_employee( $uid ) ) {
@@ -456,6 +483,19 @@ function osoul_employees_admin_page() {
 				</tr>
 			</table>
 			<?php submit_button( 'إضافة الموظف', 'primary', 'submit', false ); ?>
+		</form>
+
+		<h2 style="margin-top:26px">إضافة جماعية (دفعة واحدة)</h2>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:18px;max-width:820px">
+			<?php wp_nonce_field( 'osoul_employee_action' ); ?>
+			<input type="hidden" name="action" value="osoul_employee_action">
+			<input type="hidden" name="do" value="bulk">
+			<p class="description" style="margin:0 0 8px">
+				الصق قائمة الموظفين — كل سطر: <code>الاسم، البريد، كلمة المرور</code> (مفصولة بفاصلة أو Tab).
+				الموجودون مسبقاً يُتخطّون تلقائياً، فتقدر تلصق القائمة كاملة بدون قلق. لو تركت كلمة المرور فاضية، تُولَّد تلقائياً.
+			</p>
+			<textarea name="bulk" rows="10" class="large-text code" dir="ltr" placeholder="AHMED ALI, ahmed@osoulalbinaa.com, StrongPass12@&#10;SARA OMAR, sara@osoulalbinaa.com, StrongPass34@"></textarea>
+			<?php submit_button( 'إضافة الكل', 'primary', 'submit', false ); ?>
 		</form>
 
 		<h2 style="margin-top:30px">الموظفون (<?php echo count( $emps ); ?>)</h2>
