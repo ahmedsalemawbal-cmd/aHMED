@@ -106,6 +106,11 @@
 	I.compress = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
 	I.plus = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
 	I.contacts = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+	I.alignr = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 6H3M21 12H9M21 18H7"/></svg>';
+	I.alignc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 6H3M18 12H6M20 18H4"/></svg>';
+	I.alignl = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h12M3 18h15"/></svg>';
+	I.alignj = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>';
+	I.grip = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L20 4M9 20l11-11M14 20l6-6"/></svg>';
 
 	/* ------------------------------ state ----------------------------- */
 	var S = {
@@ -492,7 +497,22 @@
 			iframe.srcdoc = doc;
 			body.appendChild(iframe);
 			iframe.addEventListener('load', function () {
-				try { var h = iframe.contentDocument.body.scrollHeight; iframe.style.height = (h + 30) + 'px'; } catch (e) { iframe.style.height = '600px'; }
+				function fit() {
+					try {
+						var d = iframe.contentDocument;
+						var h = Math.max( d.body.scrollHeight, d.documentElement.scrollHeight, d.body.offsetHeight );
+						iframe.style.height = ( h + 32 ) + 'px';
+					} catch ( e ) { iframe.style.height = '600px'; }
+				}
+				fit();
+				// Re-measure once images/fonts finish so long messages aren't clipped.
+				try {
+					var imgs = iframe.contentDocument.images || [];
+					for ( var i = 0; i < imgs.length; i++ ) {
+						if ( ! imgs[ i ].complete ) { imgs[ i ].addEventListener('load', fit); imgs[ i ].addEventListener('error', fit); }
+					}
+				} catch ( e ) {}
+				setTimeout( fit, 250 ); setTimeout( fit, 800 ); setTimeout( fit, 1800 );
 			});
 		} else {
 			body.innerHTML = '<div class="om-plain">' + esc(m.text || '') + '</div>';
@@ -604,6 +624,7 @@
 
 		var dock = document.createElement('div'); dock.className = 'om-compose-dock';
 		dock.innerHTML =
+			'<div class="om-cd-grip" title="اسحب لتغيير الحجم">' + I.grip + '</div>' +
 			'<div class="om-cd-head"><span class="t">' + esc(mode === 'new' ? t('new_message') : subject || t('new_message')) + '</span>' +
 				'<button class="om-ic om-cd-expand" title="' + esc(t('expand')) + '">' + I.expand + '</button>' +
 				'<button class="om-ic om-cd-min">–</button><button class="om-ic om-cd-close">' + I.close + '</button></div>' +
@@ -621,6 +642,11 @@
 					'<button class="om-tool" data-cmd="italic" title="Italic" style="font-style:italic">I</button>' +
 					'<button class="om-tool" data-cmd="underline" title="Underline" style="text-decoration:underline">U</button>' +
 					'<button class="om-tool" data-cmd="insertUnorderedList" title="List">•</button>' +
+					'<span class="om-tool-sep"></span>' +
+					'<button class="om-tool" data-cmd="justifyRight" title="محاذاة يمين">' + I.alignr + '</button>' +
+					'<button class="om-tool" data-cmd="justifyCenter" title="توسيط">' + I.alignc + '</button>' +
+					'<button class="om-tool" data-cmd="justifyLeft" title="محاذاة يسار">' + I.alignl + '</button>' +
+					'<span class="om-tool-sep"></span>' +
 					'<button class="om-tool" data-cmd="createLink" title="Link">🔗</button>' +
 					'<button class="om-tool om-attach" title="' + esc(t('attach')) + '">' + I.attach + '</button>' +
 					'<input type="file" class="om-file" multiple style="display:none">' +
@@ -645,6 +671,38 @@
 		on(q('.om-cd-head', dock), 'click', function (e) { if (e.target.closest('.om-ic')) return; dock.classList.toggle('min'); });
 		on(q('.show-cc', dock), 'click', function () { q('.cc-row', dock).classList.toggle('om-hide'); });
 		on(q('.show-bcc', dock), 'click', function () { q('.bcc-row', dock).classList.toggle('om-hide'); });
+
+		// Drag the corner grip to resize the compose panel.
+		(function () {
+			var grip = q('.om-cd-grip', dock); if (!grip) return;
+			var rtl = (document.documentElement.getAttribute('dir') || 'rtl') === 'rtl';
+			var sx, sy, sw, sh, dragging = false;
+			function down(e) {
+				dock.classList.remove('full', 'min');
+				var pt = e.touches ? e.touches[0] : e, r = dock.getBoundingClientRect();
+				sx = pt.clientX; sy = pt.clientY; sw = r.width; sh = r.height; dragging = true;
+				document.body.style.userSelect = 'none';
+				document.addEventListener('mousemove', move); document.addEventListener('mouseup', up);
+				document.addEventListener('touchmove', move, { passive: false }); document.addEventListener('touchend', up);
+				e.preventDefault();
+			}
+			function move(e) {
+				if (!dragging) return;
+				var pt = e.touches ? e.touches[0] : e;
+				var dy = sy - pt.clientY;                                   // drag up → taller
+				var dx = rtl ? (pt.clientX - sx) : (sx - pt.clientX);       // drag away from anchor → wider
+				dock.style.width = Math.max(360, Math.min(window.innerWidth - 32, sw + dx)) + 'px';
+				dock.style.height = Math.max(300, Math.min(window.innerHeight - 24, sh + dy)) + 'px';
+				dock.style.maxHeight = 'none';
+				if (e.cancelable) e.preventDefault();
+			}
+			function up() {
+				dragging = false; document.body.style.userSelect = '';
+				document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up);
+				document.removeEventListener('touchmove', move); document.removeEventListener('touchend', up);
+			}
+			on(grip, 'mousedown', down); on(grip, 'touchstart', down);
+		})();
 
 		qa('.om-tool[data-cmd]', dock).forEach(function (b) {
 			on(b, 'mousedown', function (e) { e.preventDefault(); });

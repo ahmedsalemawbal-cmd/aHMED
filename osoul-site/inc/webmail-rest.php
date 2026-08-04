@@ -587,13 +587,29 @@ function osoul_mail_split_addrs( $raw ) {
 	return array_values( array_unique( $out ) );
 }
 
-/** Human date (Riyadh-friendly). */
+/**
+ * Format a message timestamp in the correct local time.
+ *
+ * $ts is a true UTC epoch (parsed from the message's Date/INTERNALDATE, which
+ * carry their own offset). We convert it into the site's timezone; if WordPress
+ * is left on UTC we fall back to the company's zone so times don't read 3h off.
+ */
 function osoul_mail_fmt_date( $ts ) {
 	$ts = (int) $ts;
 	if ( $ts <= 0 ) { return ''; }
-	$now  = current_time( 'timestamp' );
-	$fmt  = ( gmdate( 'Y-m-d', $ts ) === gmdate( 'Y-m-d', $now ) ) ? 'H:i' : 'Y-m-d H:i';
-	return date_i18n( $fmt, $ts );
+	$tz = wp_timezone();
+	if ( in_array( $tz->getName(), array( 'UTC', '+00:00', 'Z' ), true ) ) {
+		$tz = new DateTimeZone( (string) apply_filters( 'osoul_mail_timezone', 'Asia/Riyadh' ) );
+	}
+	try {
+		$dt = new DateTime( '@' . $ts );      // UTC
+		$dt->setTimezone( $tz );
+		$now = new DateTime( 'now', $tz );
+	} catch ( Exception $e ) {
+		return date_i18n( 'Y-m-d H:i', $ts );
+	}
+	$today = ( $dt->format( 'Y-m-d' ) === $now->format( 'Y-m-d' ) );
+	return $dt->format( $today ? 'H:i' : 'Y-m-d H:i' );
 }
 
 /** Contacts store (email → best display name). */
