@@ -23,7 +23,6 @@
     background-attachment:fixed;
     min-height:100vh;
   }
-  /* starfield */
   body::before{
     content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background-image:
@@ -36,58 +35,53 @@
       radial-gradient(1.5px 1.5px at 90% 88%, #fff, transparent);
     opacity:.35;
   }
-  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:40px 20px 70px}
-
-  /* header */
+  .wrap{position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:40px 20px 70px}
   header{text-align:center; padding:26px 16px 10px}
   .kicker{color:var(--gold); letter-spacing:.14em; font-size:.82rem; font-weight:700}
   h1{font-size:clamp(2rem,6vw,3.3rem); margin:.15em 0 .1em; font-weight:800;
      background:linear-gradient(90deg,#fff,var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent}
-  .logline{color:var(--muted); max-width:640px; margin:.4em auto 0; font-size:1.06rem}
+  .logline{color:var(--muted); max-width:660px; margin:.4em auto 0; font-size:1.06rem}
   .msg{margin:22px auto 0; max-width:720px; padding:16px 22px; border:1px solid var(--line);
        border-radius:16px; background:var(--card); font-size:1.12rem}
   .msg b{color:var(--gold)}
-
-  /* strategy chips */
   .chips{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:26px 0 8px}
   .chip{border:1px solid var(--line); background:var(--card); padding:9px 14px; border-radius:999px; font-size:.92rem}
   .chip b{color:var(--gold)}
-
   .sec-title{display:flex; align-items:center; gap:12px; margin:46px 0 18px; font-size:1.3rem; font-weight:800}
   .sec-title::before{content:""; width:26px; height:2px; background:linear-gradient(90deg,var(--gold),transparent)}
-
-  /* storyboard grid */
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px}
   .frame{border:1px solid var(--line); background:var(--card); border-radius:18px; overflow:hidden;
          display:flex; flex-direction:column; transition:transform .15s ease, border-color .15s ease}
   .frame:hover{transform:translateY(-3px); border-color:rgba(255,207,107,.45)}
-  /* the 'phone screen' shot */
   .shot{position:relative; aspect-ratio:9/13; margin:14px 14px 0; border-radius:14px;
         background:radial-gradient(120% 90% at 50% 20%, #16224e, var(--shot));
         border:1px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden}
   .shot.bright{background:radial-gradient(120% 90% at 50% 30%, #3a2f18, #241a3a)}
   .shot.warm{background:radial-gradient(120% 100% at 50% 40%, rgba(255,180,80,.28), #1a1330)}
-  .scene{font-size:3.4rem; filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
-  .ost{position:absolute; top:10px; inset-inline:10px; text-align:center; font-size:.8rem; font-weight:700;
+  .scene{font-size:3.2rem; filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+  .ost{position:absolute; top:10px; inset-inline:10px; text-align:center; font-size:.78rem; font-weight:700;
        background:rgba(0,0,0,.45); border:1px solid var(--line); padding:6px 8px; border-radius:10px; color:#fff}
   .tc{position:absolute; bottom:8px; inset-inline-start:8px; font-size:.72rem; color:#fff;
       background:rgba(0,0,0,.55); padding:3px 8px; border-radius:8px; letter-spacing:.03em}
-  .fno{position:absolute; bottom:8px; inset-inline-end:8px; width:26px; height:26px; border-radius:50%;
+  .fno{position:absolute; bottom:8px; inset-inline-end:8px; min-width:26px; height:26px; padding:0 6px; border-radius:13px;
        display:grid; place-items:center; font-weight:800; font-size:.82rem; color:#1a1330;
        background:linear-gradient(180deg,var(--gold),var(--gold2))}
   .cta-badge{position:absolute; inset-inline:14px; bottom:34px; text-align:center; font-weight:800; color:#1a1330;
-       background:linear-gradient(180deg,var(--gold),var(--gold2)); padding:8px; border-radius:10px; font-size:.9rem}
+       background:linear-gradient(180deg,var(--gold),var(--gold2)); padding:8px; border-radius:10px; font-size:.86rem}
   .body{padding:12px 16px 16px}
-  .desc{font-size:.92rem; color:var(--muted)}
-  .line{margin-top:9px; font-size:.95rem; padding-inline-start:12px; border-inline-start:2px solid var(--gold)}
+  .desc{font-size:.9rem; color:var(--muted)}
+  .line{margin-top:9px; font-size:.94rem; padding-inline-start:12px; border-inline-start:2px solid var(--gold)}
   .line .who{color:var(--gold); font-weight:700}
-
-  /* platform + cta */
   .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px}
   .box{border:1px solid var(--line); background:var(--card); border-radius:16px; padding:18px 20px}
   .box h3{margin:.1em 0 .5em; color:var(--gold); font-size:1.05rem}
   .box ul{margin:.3em 0; padding-inline-start:1.1em} .box li{margin:.28em 0; color:var(--muted)}
-
+  .hooks{margin-top:22px; border:1px solid rgba(255,207,107,.28); background:linear-gradient(180deg,rgba(255,180,80,.07),var(--card));
+         border-radius:16px; padding:16px 20px}
+  .hooks h3{color:var(--gold); margin:.1em 0 .5em; font-size:1.05rem}
+  .hooks ol{margin:.2em 0; padding-inline-start:1.2em; columns:2; column-gap:26px}
+  .hooks li{margin:.3em 0; color:var(--muted); font-size:.92rem; break-inside:avoid}
+  .hooks li b{color:var(--ink)}
   .final{margin-top:46px; text-align:center; padding:34px 20px; border:1px solid rgba(255,207,107,.35);
          border-radius:22px; background:linear-gradient(180deg, rgba(255,180,80,.10), var(--card))}
   .final .big{font-size:clamp(1.4rem,4vw,2rem); font-weight:800; margin:.1em 0}
@@ -96,6 +90,7 @@
        color:#1a1330; text-decoration:none; background:linear-gradient(180deg,var(--gold),var(--gold2))}
   .site{margin-top:12px; color:var(--muted); font-size:.95rem}
   footer{text-align:center; color:var(--muted); font-size:.82rem; margin-top:34px; opacity:.8}
+  @media(max-width:640px){ .hooks ol{columns:1} }
 </style>
 </head>
 <body>
@@ -107,93 +102,107 @@
     <p class="logline">طفلٌ في العاشرة يُقدّم استقالته الرسمية من مدرسته — لا هرباً من مكان، بل شوقاً إلى النور — لينتقل إلى مدارس الفلك المنير.</p>
     <div class="msg">الرسالة: <b>حين يختار طفلك مدرسته بنفسه… تعرف أنك في المكان الصحيح.</b></div>
     <div class="chips">
-      <span class="chip">⏱️ ٣٠ ثانية · عمودي 9:16</span>
-      <span class="chip">🎯 <b>انتشار</b> + تسجيل أعلى</span>
-      <span class="chip">🌟 ثيمة: من العتمة إلى <b>النور</b></span>
+      <span class="chip">⏱️ ٣٢ ثانية · عمودي 9:16</span>
+      <span class="chip">🪝 <b>كله خطّافات</b> ومفاجآت</span>
+      <span class="chip">🎯 انتشار + تسجيل أعلى</span>
       <span class="chip">✅ محتوى مناسب للقيم</span>
     </div>
   </header>
 
-  <div class="sec-title">اللوحة القصصية — لقطة بلقطة</div>
+  <div class="sec-title">اللوحة القصصية — لقطة بلقطة (تشويق متصاعد)</div>
   <div class="grid">
 
     <div class="frame">
       <div class="shot">
-        <div class="ost">طفل عمره ١٠ سنوات… قدّم استقالته 😳</div>
+        <div class="ost">طفل بالصف الرابع… سلّم المديرة هذي الورقة 😳</div>
         <div class="scene">📄✋</div>
         <div class="tc">0–3s</div><div class="fno">1</div>
       </div>
       <div class="body">
-        <div class="desc">لقطة قريبة جداً: يدٌ صغيرة تدفع ورقة «خطاب استقالة» على المكتب. <b>الخطّاف.</b></div>
+        <div class="desc"><b>افتتاح صادم:</b> يدٌ صغيرة تضع ورقة «استقالة»، ووجه المديرة يتجمّد.</div>
         <div class="line"><span class="who">المديرة:</span> «استقالة؟!»</div>
       </div>
     </div>
 
     <div class="frame">
       <div class="shot">
-        <div class="scene">👩‍🏫📄</div>
+        <div class="ost">وطلّع ورقة ثانية… 👀</div>
+        <div class="scene">👩‍🏫📑</div>
         <div class="tc">3–6s</div><div class="fno">2</div>
       </div>
       <div class="body">
-        <div class="desc">المديرة تمسك الورقة، تكتم ابتسامتها، تنظر للطفل بحنان.</div>
-        <div class="line"><span class="who">المديرة:</span> «ليش يا ولدي؟»</div>
+        <div class="desc"><b>مفاجأة:</b> جاء مجهّزاً — يُخرج استمارة معبّأة مسبقاً.</div>
+        <div class="line"><span class="who">المديرة:</span> «ليش يا ولدي؟» — <span class="who">الطفل:</span> «قرار مدروس يا أستاذة.»</div>
       </div>
     </div>
 
     <div class="frame">
       <div class="shot">
-        <div class="scene">🎒🧒</div>
-        <div class="tc">6–11s</div><div class="fno">3</div>
+        <div class="scene">🖊️😊</div>
+        <div class="tc">6–9s</div><div class="fno">3</div>
       </div>
       <div class="body">
-        <div class="desc">الطفل واقفٌ بثقة، يتكلّم بجديّة طفلٍ يقلّد الكبار.</div>
-        <div class="line"><span class="who">الطفل:</span> «بكل احترام يا أستاذة… قرّرت أكمّل مشواري في مدارس الفلك المنير.»</div>
+        <div class="desc"><b>انعكاس توقّع:</b> المديرة توقّع بفخرٍ ولا تجادل.</div>
+        <div class="line"><span class="who">الطفل:</span> «حوّلت أوراقي لمدارس الفلك المنير.» — <span class="who">المديرة:</span> «الله يوفّقك يا بطل.»</div>
       </div>
     </div>
 
     <div class="frame">
       <div class="shot">
-        <div class="ost">✔ قرآن ✔ قيم ✔ تميّز</div>
-        <div class="scene">💛🏫</div>
-        <div class="tc">11–18s</div><div class="fno">4</div>
+        <div class="ost">وين رايح؟…</div>
+        <div class="scene">🎒🚪</div>
+        <div class="tc">9–11s</div><div class="fno">4</div>
       </div>
       <div class="body">
-        <div class="desc">يجيب بصدقٍ طفولي — الجملة التي تجسّد رسالة الحملة (النصّ قابل للتخصيص).</div>
-        <div class="line"><span class="who">الطفل:</span> «لأنهم ما يعلّموني عشان الاختبار بس… يعلّموني ديني وأخلاقي، ويخلّوني أحب أروح المدرسة كل يوم.»</div>
-      </div>
-    </div>
-
-    <div class="frame">
-      <div class="shot">
-        <div class="scene">✍️😊</div>
-        <div class="tc">18–20s</div><div class="fno">5</div>
-      </div>
-      <div class="body">
-        <div class="desc">المديرة توقّع الورقة بابتسامة فخر — مشهد دافئ يحترم مقام المعلّم.</div>
-        <div class="line"><span class="who">المديرة:</span> «تمام يا بطل… الله يوفّقك.»</div>
+        <div class="desc"><b>قطع سريع:</b> يخرج من البوابة بخطى واثقة (كسر إيقاع يشدّ الانتباه).</div>
+        <div class="line"><span class="who">صوت:</span> الموسيقى تبدأ بالتصاعد.</div>
       </div>
     </div>
 
     <div class="frame">
       <div class="shot warm">
-        <div class="ost">حيّاك الله في الفلك المنير 🌟</div>
-        <div class="scene">🌟🚪</div>
-        <div class="tc">20–24s</div><div class="fno">6</div>
+        <div class="ost">هنا بدأت الحكاية… 🌟</div>
+        <div class="scene">🏫✨</div>
+        <div class="tc">11–16s</div><div class="fno">5</div>
       </div>
       <div class="body">
-        <div class="desc">قطع إلى بوابة الفلك المنير المضيئة؛ المشرفة تستقبله بترحاب ودفء.</div>
-        <div class="line"><span class="who">المشرفة:</span> «حيّاك الله في الفلك المنير.»</div>
+        <div class="desc"><b>الاستقبال والتسجيل:</b> المديرة الجديدة تستقبله في مكتبها وتطبع بطاقته.</div>
+        <div class="line"><span class="who">المديرة الجديدة:</span> «تم تسجيلك في مدارس الفلك المنير… كنّا ننتظرك.»</div>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="shot">
+        <div class="ost">وخلف هذا الباب…</div>
+        <div class="scene">🚶‍♂️🚪</div>
+        <div class="tc">16–21s</div><div class="fno">6</div>
+      </div>
+      <div class="body">
+        <div class="desc"><b>ذروة الفضول:</b> المشرفة توصله الفصل في ممرٍ مضيء وتمسك المقبض.</div>
+        <div class="line"><span class="who">المشرفة:</span> «تعال… خلّني أوريك صفّك.»</div>
       </div>
     </div>
 
     <div class="frame">
       <div class="shot bright">
-        <div class="scene">😄</div>
-        <div class="tc">24–27s</div><div class="fno">7</div>
+        <div class="scene">🌤️👋</div>
+        <div class="tc">21–24s</div><div class="fno">7</div>
       </div>
       <div class="body">
-        <div class="desc">تفتح باب الفصل فينسكب ضوءٌ دافئ. لقطة قريبة على وجهه: <b>ابتسامة تكبر… وتكبر.</b></div>
-        <div class="line"><span class="who">صوت:</span> موسيقى تتصاعد + همسة أطفال يرحّبون.</div>
+        <div class="desc"><b>الكشف:</b> يُفتح الباب فينسكب نورٌ دافئ؛ معلّم وطلاب يرحّبون.</div>
+        <div class="line"><span class="who">صوت:</span> همسة ترحيب + الموسيقى تعلو.</div>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="shot bright">
+        <div class="ost">هذي الابتسامة… ما تنشرى</div>
+        <div class="scene">😄</div>
+        <div class="tc">24–27s</div><div class="fno">8</div>
+      </div>
+      <div class="body">
+        <div class="desc"><b>الذروة العاطفية:</b> ابتسامةٌ تكبر وضحكةٌ صادقة لأنه صار من الفلك المنير.</div>
+        <div class="line"><span class="who">صوت:</span> ذروة الموسيقى.</div>
       </div>
     </div>
 
@@ -201,14 +210,42 @@
       <div class="shot warm">
         <div class="scene">🏫⬆️</div>
         <div class="cta-badge">العدد محدود — سجّل الآن</div>
-        <div class="tc">27–30s</div><div class="fno">8</div>
+        <div class="tc">27–30s</div><div class="fno">9</div>
       </div>
       <div class="body">
-        <div class="desc">يُغلق الباب، الكاميرا ترتفع فوق المدرسة. شعار + رابط + إلحاح.</div>
+        <div class="desc"><b>الدعوة:</b> الكاميرا ترتفع فوق المدرسة، يُغلق الباب بهدوء.</div>
         <div class="line"><span class="who">VO:</span> «حين يختار طفلك مدرسته بنفسه… تعرف أنك في المكان الصحيح.»</div>
       </div>
     </div>
 
+    <div class="frame">
+      <div class="shot">
+        <div class="ost">مين التالي؟ 😏</div>
+        <div class="scene">🧒📄</div>
+        <div class="tc">30–32s</div><div class="fno">10</div>
+      </div>
+      <div class="body">
+        <div class="desc"><b>مفاجأة ختامية:</b> عند المدرسة القديمة، طفلٌ آخر يقف حاملاً ورقته «استقالة» ويغمز للكاميرا — يكافئ من أكمل ويصنع المشاركة.</div>
+        <div class="line"><span class="who">نص:</span> التسجيل مفتوح · alfalakalmuneer.com</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hooks">
+    <h3>🪝 خريطة التشويق — لماذا يُشاهد حتى النهاية</h3>
+    <ol>
+      <li><b>٠–٣ث</b> خطّاف صادم: طفلٌ يستقيل! (سؤال فوري: ليش؟)</li>
+      <li><b>٣–٦ث</b> مفاجأة: جاء مجهّزاً بورقة ثانية.</li>
+      <li><b>٦–٩ث</b> انعكاس توقّع: المديرة تحترم قراره.</li>
+      <li><b>٩–١١ث</b> قطع سريع يعيد شدّ الانتباه.</li>
+      <li><b>١١–١٦ث</b> دفءٌ غير متوقّع: «كنّا ننتظرك».</li>
+      <li><b>١٦–٢١ث</b> ذروة الفضول: «وخلف هذا الباب…».</li>
+      <li><b>٢١–٢٤ث</b> الكشف: نورٌ وترحيب.</li>
+      <li><b>٢٤–٢٧ث</b> الدفعة العاطفية: الابتسامة والضحكة.</li>
+      <li><b>٢٧–٣٠ث</b> الدعوة: نداءٌ واحد + إلحاح.</li>
+      <li><b>٣٠–٣٢ث</b> زرٌّ ختامي: «مين التالي؟».</li>
+    </ol>
   </div>
 
   <div class="sec-title">نسخ المنصات وخطة النشر</div>
@@ -216,14 +253,14 @@
     <div class="box">
       <h3>⏱️ ١٥ ثانية — للإعلان المموّل</h3>
       <ul>
-        <li>الخطّاف → سبب واحد قوي → الابتسامة → CTA.</li>
+        <li>الافتتاح الصادم ← «تم تسجيلك في الفلك المنير» ← الابتسامة ← CTA.</li>
         <li>الأعلى تحويلاً على سناب/تيك توك.</li>
       </ul>
     </div>
     <div class="box">
       <h3>🎬 ٤٥–٦٠ ثانية — للعمق</h3>
       <ul>
-        <li>مشهد ليلي صامت (يطبع الورقة بجديّة).</li>
+        <li>مشهد ليلي صامت (يجهّز أوراقه بجديّة).</li>
         <li>حلقة تحفيظ + نور + نظرة الأب الفخورة.</li>
       </ul>
     </div>
