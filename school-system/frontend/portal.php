@@ -17,16 +17,16 @@ $school = sch_settings('school_name', get_bloginfo('name'));
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#F5F3F0">
+    <meta name="theme-color" content="#FFFFFF">
     <meta name="robots" content="noindex, nofollow">
     <?php /* منع وميض السمة على بوابة الدخول — تتبع الجهاز/الاختيار المحفوظ */ ?>
-    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='light'?'light':(s==='dark'?'dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C100E':'#F5F3F0';}}catch(e){}})();</script>
+    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C0A16':'#FFFFFF';}}catch(e){}})();</script>
     <title><?php echo esc_html($school); ?></title>
 
     <link rel="apple-touch-icon" href="<?php echo esc_url(SCH_URL . 'assets/icon-192.png'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/parent.css')); ?>">
 </head>
 

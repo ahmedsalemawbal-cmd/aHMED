@@ -14,48 +14,49 @@
 
 :root {
   color-scheme: light;
-  /* ---------- الأسطح ---------- */
-  --p-bg:       #F5F3F0;   /* ورقية دافئة لا رمادية باردة */
-  --p-card:     #FFFFFF;
-  --p-alt:      #EFECE7;
-  --p-line:     #E5E1DA;
-  --p-line-2:   #D2CCC2;
+  /* ---------- الأسطح: أبيض نقيّ + زجاج بنفسجي شفّاف ---------- */
+  --p-bg:       #FFFFFF;
+  --p-card:     rgba(246, 243, 255, .72);   /* زجاج أميثيست شفّاف */
+  --p-alt:      #F1EDFB;                     /* لافندر فاتح للجيوب الداخلية */
+  --p-glass-brd:rgba(255, 255, 255, .72);
+  --p-line:     rgba(124, 92, 214, .14);
+  --p-line-2:   rgba(124, 92, 214, .24);
 
   /* ---------- النص ---------- */
-  --p-ink:      #161D1A;
-  --p-ink-2:    #414B47;
-  --p-mute:     #66706A;   /* رُفِع من #6E7873 لتباين AA على الورقية */
-  --p-faint:    #737C76;   /* رُفِع من #9CA5A0 (كان 2.8:1) إلى ≥4.5:1 */
+  --p-ink:      #1A1730;
+  --p-ink-2:    #514C6B;
+  --p-mute:     #63607D;
+  --p-faint:    #7C7796;
 
-  /* ---------- الهوية ---------- */
-  --p-brand:    #5170FF;
-  --p-brand-ink:#3348C7;   /* للنص الدقيق على أبيض */
-  --p-brand-d:  #3E58E0;
-  --p-brand-s:  #E5EBFF;
+  /* ---------- الهوية: أميثيست (أرجواني ملكي) ---------- */
+  --p-brand:    #7C3AED;
+  --p-brand-ink:#5B21B6;
+  --p-brand-d:  #6D28D9;
+  --p-brand-s:  rgba(124, 58, 237, .10);
 
-  /* ---------- العمق: مرساة واحدة في كل شاشة ---------- */
-  --p-deep-1:   #0D1438;
-  --p-deep-2:   #1F2E86;
-  --p-deep-3:   #6C86FF;
-  --p-shine:    #AEC0FF;
+  /* ---------- العمق ---------- */
+  --p-deep-1:   #4C1D95;
+  --p-deep-2:   #6D28D9;
+  --p-deep-3:   #22D3EE;
+  --p-shine:    #C4B5FD;
 
-  /* ---------- أربع نغمات متساوية الثقل ---------- */
-  --p-n1:       #1B287A;   /* بنفسجي عميق */
-  --p-n2:       #5170FF;   /* الهوية */
-  --p-n3:       #8B2F55;   /* توتي — الصحة، الوحيدة التي قد تكون عاجلة */
-  --p-n4:       #3F4785;   /* أرجواني حجري */
+  /* ---------- أربع نغمات (بوابات) ---------- */
+  --p-n1:       #7C3AED;   /* أرجواني */
+  --p-n2:       #06B6D4;   /* سماوي */
+  --p-n3:       #EF476F;   /* توتي — الصحة، الوحيدة التي قد تكون عاجلة */
+  --p-n4:       #6366F1;   /* إنديجو */
 
   /* ---------- الحالات ---------- */
-  --p-ok:       #0F7A55;
-  --p-ok-s:     #E5F4EC;
-  --p-warn:     #9E6318;
-  --p-warn-s:   #F9F1E4;
-  --p-late:     #161D1A;
-  --p-late-s:   #EBE8E4;
-  --p-gold:     #A98617;
+  --p-ok:       #0E9F6E;
+  --p-ok-s:     rgba(14, 159, 110, .12);
+  --p-warn:     #C77A15;
+  --p-warn-s:   rgba(199, 122, 21, .14);
+  --p-late:     #1A1730;
+  --p-late-s:   #EFEBF9;
+  --p-gold:     #C79A3E;
 
   /* ---------- الخط ---------- */
-  --p-font:  'Tajawal', system-ui, -apple-system, sans-serif;
+  --p-font:  'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
   --p-t1:    32px;   /* الرقم البطل */
   --p-t2:    20px;   /* عنوان الشاشة */
   --p-t3:    15px;   /* عنوان قسم */
@@ -70,10 +71,11 @@
   /* ---------- الزوايا ---------- */
   --p-r1: 12px; --p-r2: 16px; --p-r3: 20px; --p-r4: 26px;
 
-  /* ---------- الظل: ضوء واحد ثابت من الأعلى ---------- */
-  --p-e1: 0 1px 2px rgba(22,29,26,.04), 0 4px 10px -6px rgba(22,29,26,.14);
-  --p-e2: 0 2px 4px rgba(22,29,26,.05), 0 14px 26px -14px rgba(22,29,26,.26);
-  --p-e3: 0 3px 6px rgba(22,29,26,.06), 0 26px 46px -22px rgba(22,29,26,.4);
+  /* ---------- الظل: بنفسجي ناعم + لمعان علوي (عمق ثابت) ---------- */
+  --p-e1: 0 1px 2px rgba(76, 29, 149, .06), 0 4px 12px -6px rgba(76, 29, 149, .16);
+  --p-e2: 0 2px 6px rgba(76, 29, 149, .08), 0 16px 30px -14px rgba(76, 29, 149, .24);
+  --p-e3: 0 3px 8px rgba(76, 29, 149, .10), 0 28px 52px -20px rgba(76, 29, 149, .34);
+  --p-hi: inset 0 1px 0 rgba(255, 255, 255, .85);
 
   /* ---------- الحركة: منحنى واحد لكل شيء ---------- */
   --p-ease: cubic-bezier(.22, 1, .36, 1);
@@ -87,56 +89,58 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --p-bg:       #0C100E;   /* ليل دافئ لا أسود بارد */
-  --p-card:     #161B18;
-  --p-alt:      #1E2420;
-  --p-line:     rgba(255, 255, 255, .08);
-  --p-line-2:   rgba(255, 255, 255, .15);
+  --p-bg:       #0C0A16;   /* ليل بنفسجي لا أسود بارد */
+  --p-card:     rgba(255, 255, 255, .06);   /* زجاج داكن شفّاف */
+  --p-alt:      #1E1A30;
+  --p-glass-brd:rgba(255, 255, 255, .12);
+  --p-line:     rgba(180, 150, 255, .14);
+  --p-line-2:   rgba(180, 150, 255, .22);
 
-  --p-ink:      #ECEFEC;
-  --p-ink-2:    #B7BFB9;
-  --p-mute:     #8B948D;
-  --p-faint:    #6E766F;
+  --p-ink:      #F2EFFA;
+  --p-ink-2:    #BFB9D4;
+  --p-mute:     #948FAC;
+  --p-faint:    #7B7594;
 
-  --p-brand:    #7B93FF;
-  --p-brand-ink:#AEBEFF;
-  --p-brand-d:  #93A8FF;
-  --p-brand-s:  rgba(123, 147, 255, .16);
+  --p-brand:    #A78BFA;
+  --p-brand-ink:#C4B5FD;
+  --p-brand-d:  #9B7CF0;
+  --p-brand-s:  rgba(167, 139, 250, .16);
 
-  --p-deep-1:   #0A1030;
-  --p-deep-2:   #24338F;
-  --p-deep-3:   #7E97FF;
-  --p-shine:    #B9C8FF;
+  --p-deep-1:   #3B0F73;
+  --p-deep-2:   #6D28D9;
+  --p-deep-3:   #22D3EE;
+  --p-shine:    #DDD6FE;
 
-  --p-n1:       #7C8BFF;
-  --p-n2:       #7B93FF;
-  --p-n3:       #E68AAE;   /* توتي الصحة — يُضاء ليبقى واضحًا على الداكن */
-  --p-n4:       #9AA2E0;
+  --p-n1:       #A78BFA;
+  --p-n2:       #22D3EE;
+  --p-n3:       #FB7185;   /* توتي الصحة — يُضاء ليبقى واضحًا على الداكن */
+  --p-n4:       #818CF8;
 
-  --p-ok:       #34D39A;
-  --p-ok-s:     rgba(52, 211, 154, .15);
-  --p-warn:     #F5B84B;
-  --p-warn-s:   rgba(245, 184, 75, .15);
-  --p-late:     #ECEFEC;
+  --p-ok:       #34D399;
+  --p-ok-s:     rgba(52, 211, 153, .15);
+  --p-warn:     #F0B44C;
+  --p-warn-s:   rgba(240, 180, 76, .14);
+  --p-late:     #F2EFFA;
   --p-late-s:   rgba(255, 255, 255, .08);
-  --p-gold:     #E6C56A;
+  --p-gold:     #E6C067;
 
-  --p-e1: 0 1px 2px rgba(0, 0, 0, .40), 0 4px 12px -6px rgba(0, 0, 0, .60);
-  --p-e2: 0 2px 5px rgba(0, 0, 0, .45), 0 16px 30px -16px rgba(0, 0, 0, .70);
-  --p-e3: 0 4px 10px rgba(0, 0, 0, .50), 0 30px 54px -24px rgba(0, 0, 0, .80);
+  --p-e1: 0 1px 2px rgba(0, 0, 0, .45), 0 4px 12px -6px rgba(0, 0, 0, .60);
+  --p-e2: 0 2px 6px rgba(0, 0, 0, .50), 0 16px 30px -16px rgba(0, 0, 0, .70);
+  --p-e3: 0 4px 10px rgba(0, 0, 0, .55), 0 30px 54px -24px rgba(0, 0, 0, .80);
+  --p-hi: inset 0 1px 0 rgba(255, 255, 255, .07);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
     color-scheme: dark;
-    --p-bg:#0C100E; --p-card:#161B18; --p-alt:#1E2420;
-    --p-line:rgba(255,255,255,.08); --p-line-2:rgba(255,255,255,.15);
-    --p-ink:#ECEFEC; --p-ink-2:#B7BFB9; --p-mute:#8B948D; --p-faint:#6E766F;
-    --p-brand:#7B93FF; --p-brand-ink:#AEBEFF; --p-brand-d:#93A8FF; --p-brand-s:rgba(123,147,255,.16);
-    --p-deep-1:#0A1030; --p-deep-2:#24338F; --p-deep-3:#7E97FF; --p-shine:#B9C8FF;
-    --p-n1:#7C8BFF; --p-n2:#7B93FF; --p-n3:#E68AAE; --p-n4:#9AA2E0;
-    --p-ok:#34D39A; --p-ok-s:rgba(52,211,154,.15); --p-warn:#F5B84B; --p-warn-s:rgba(245,184,75,.15);
-    --p-late:#ECEFEC; --p-late-s:rgba(255,255,255,.08); --p-gold:#E6C56A;
+    --p-bg:#0C0A16; --p-card:rgba(255,255,255,.06); --p-alt:#1E1A30; --p-glass-brd:rgba(255,255,255,.12);
+    --p-line:rgba(180,150,255,.14); --p-line-2:rgba(180,150,255,.22);
+    --p-ink:#F2EFFA; --p-ink-2:#BFB9D4; --p-mute:#948FAC; --p-faint:#7B7594;
+    --p-brand:#A78BFA; --p-brand-ink:#C4B5FD; --p-brand-d:#9B7CF0; --p-brand-s:rgba(167,139,250,.16);
+    --p-deep-1:#3B0F73; --p-deep-2:#6D28D9; --p-deep-3:#22D3EE; --p-shine:#DDD6FE;
+    --p-n1:#A78BFA; --p-n2:#22D3EE; --p-n3:#FB7185; --p-n4:#818CF8;
+    --p-ok:#34D399; --p-ok-s:rgba(52,211,153,.15); --p-warn:#F0B44C; --p-warn-s:rgba(240,180,76,.14);
+    --p-late:#F2EFFA; --p-late-s:rgba(255,255,255,.08); --p-gold:#E6C067;
     --p-e1:0 1px 2px rgba(0,0,0,.40),0 4px 12px -6px rgba(0,0,0,.60);
     --p-e2:0 2px 5px rgba(0,0,0,.45),0 16px 30px -16px rgba(0,0,0,.70);
     --p-e3:0 4px 10px rgba(0,0,0,.50),0 30px 54px -24px rgba(0,0,0,.80);
@@ -147,7 +151,11 @@
 
 body.p-body {
   margin: 0;
-  background: var(--p-bg);
+  background:
+    radial-gradient(58% 40% at 88% 2%, rgba(124, 58, 237, .10), transparent 60%),
+    radial-gradient(52% 40% at 4% 98%, rgba(6, 182, 212, .09), transparent 60%),
+    var(--p-bg);
+  background-attachment: fixed;
   color: var(--p-ink);
   font-family: var(--p-font);
   font-size: var(--p-t4);
@@ -1250,4 +1258,42 @@ img { max-width: 100%; }
   @page { size: A4 landscape; margin: 0; }
   .p-main { padding: 0 !important; }
   .p-cert { box-shadow: none; border-radius: 0; }
+}
+
+/* ═══════════════════ طبقة الزجاج «أميثيست» (v1) ═══════════════════
+   خلفية بيضاء · بطاقات زجاجية بنفسجية شفّافة (frosted) · عمق ثابت
+   بين 2D و3D (لمعان علوي داخلي + ظلال بنفسجية)، بلا حركة زائدة.
+   تُطبّق على أصناف البطاقات القائمة فلا ينكسر أي قالب. */
+.p-card, .p-list, .p-num, .p-num--att, .p-auth__box, .p-trk, .p-pay,
+.p-id, .p-day, .p-certcard, .p-in, .p-state, .p-empty, .p-due {
+  background: var(--p-card);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid var(--p-glass-brd);
+  box-shadow: var(--p-e1), var(--p-hi);
+}
+
+/* بطاقة الابن النشط: زجاج لافندر شفّاف بدل الباستيل القديم */
+.p-kid--0.is-on, .p-kid--1.is-on, .p-kid--2.is-on,
+.p-kid--3.is-on, .p-kid--4.is-on, .p-kid--5.is-on {
+  background: var(--p-card);
+  border-color: var(--p-line-2);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+/* عمق ثابت (2.5D) على البلاطات الملوّنة والصور: لمعان علوي + ظل بنفسجي */
+.p-gate, .p-kid__pic {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 8px 18px -8px rgba(76, 29, 149, .38);
+}
+:root[data-theme="dark"] .p-gate,
+:root[data-theme="dark"] .p-kid__pic {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 8px 18px -8px rgba(0, 0, 0, .6);
+}
+
+/* لمعان علوي زجاجي على البطل والتتبّع */
+.p-sc, .p-hero, .p-trk { position: relative; }
+.p-sc::before, .p-hero::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 42%);
 }
