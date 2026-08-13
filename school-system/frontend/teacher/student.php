@@ -6,7 +6,7 @@ $id      = (int) ($sch_data['id'] ?? 0);
 $student = SCH_Students::get($id);
 
 if (!$student) {
-    echo '<div class="scha-empty"><strong>' . esc_html__('الطالب غير موجود', 'school-system') . '</strong></div>';
+    echo '<div class="t-empty"><b>' . esc_html__('الطالب غير موجود', 'school-system') . '</b></div>';
     return;
 }
 
@@ -16,25 +16,29 @@ $class    = SCH_Students::current_class($id);
 $previous = SCH_Nerve::previous_summary($id);
 $notes    = SCH_Notes::of_student($id, 8);
 ?>
-<a class="scha-back" href="<?php echo esc_url($class ? SCH_Teacher::url('klass', (int) $class->id) : SCH_Teacher::url()); ?>">‹ <?php esc_html_e('الفصل', 'school-system'); ?></a>
+<a class="t-back t-tap" href="<?php echo esc_url($class ? SCH_Teacher::url('klass', (int) $class->id) : SCH_Teacher::url()); ?>"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php esc_html_e('الفصل', 'school-system'); ?></a>
 
-<div class="scha-card">
-    <div class="scha-pupil__head">
-        <?php if ($photo) : ?>
-            <img src="<?php echo esc_url($photo); ?>" alt="" width="64" height="80">
-        <?php endif; ?>
-        <div>
-            <strong class="scha-card__name"><?php echo esc_html($name); ?></strong>
-            <span class="scha-card__sub"><?php echo esc_html($class ? SCH_Classes::label($class) : ''); ?></span>
-            <span class="scha-card__sub"><?php echo esc_html(SCH_Custody::state_label($student->custody_state)); ?></span>
-        </div>
+<div class="t-card">
+    <div class="t-id">
+        <span class="t-id__pic">
+            <?php if ($photo) : ?>
+                <img src="<?php echo esc_url($photo); ?>" alt="" width="64" height="80">
+            <?php else : ?>
+                <?php echo esc_html(mb_substr($name, 0, 1)); ?>
+            <?php endif; ?>
+        </span>
+        <span class="t-id__t">
+            <b><?php echo esc_html($name); ?></b>
+            <span><?php echo esc_html($class ? SCH_Classes::label($class) : ''); ?></span>
+            <span><?php echo esc_html(SCH_Custody::state_label($student->custody_state)); ?></span>
+        </span>
     </div>
 </div>
 
 <?php if ($previous) : ?>
     <!-- الذاكرة عبر السنوات: ما تعلّمته معلمة العام الماضي لا يضيع في الصيف -->
-    <div class="sch-memo">
-        <span class="sch-memo__k">
+    <div class="t-memo">
+        <span class="t-memo__k">
             <?php echo esc_html(sprintf(
                 /* translators: %s: اسم السنة الدراسية */
                 __('من معلم العام السابق — %s', 'school-system'),
@@ -56,52 +60,54 @@ $notes    = SCH_Notes::of_student($id, 8);
 <?php endif; ?>
 
 <!-- تسجيل ملاحظة: تصنيف + سطر واحد. دور المعلم ينتهي هنا -->
-<div class="scha-card">
-    <span class="scha-card__label"><?php esc_html_e('تسجيل ملاحظة', 'school-system'); ?></span>
+<div class="t-card">
+    <span class="t-note__label"><?php esc_html_e('تسجيل ملاحظة', 'school-system'); ?></span>
 
-    <form method="post" id="scha-note-form">
+    <form method="post" id="t-note-form">
         <?php wp_nonce_field('sch_tch_note', '_sch_nonce'); ?>
         <input type="hidden" name="sch_tch_action" value="note">
         <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
-        <input type="hidden" name="category" id="scha-cat" value="positive">
+        <input type="hidden" name="category" id="t-cat-field" value="positive">
 
-        <div class="scha-cats" id="scha-cats">
+        <div class="t-cats" id="t-cats">
             <?php foreach (SCH_Notes::CATEGORIES as $slug => $meta) : ?>
-                <button type="button" class="scha-cat<?php echo $slug === 'positive' ? ' is-on' : ''; ?>"
+                <button type="button" class="t-cat<?php echo $slug === 'positive' ? ' is-on' : ''; ?>"
                         data-cat="<?php echo esc_attr($slug); ?>">
                     <?php echo esc_html($meta[0]); ?>
                 </button>
             <?php endforeach; ?>
         </div>
 
-        <label class="scha-field-label" for="scha-body"><?php esc_html_e('سطر واحد محدد', 'school-system'); ?></label>
-        <input class="scha-input" id="scha-body" type="text" name="body" required
+        <label class="t-field-label" for="t-body-in"><?php esc_html_e('سطر واحد محدد', 'school-system'); ?></label>
+        <input class="t-in" id="t-body-in" type="text" name="body" required
                placeholder="<?php esc_attr_e('مثال: شرح الدرس لزملائه اليوم', 'school-system'); ?>">
 
-        <div class="scha-route" id="scha-route">
+        <div class="t-route" id="t-route">
             <?php echo sch_icon('check', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <span id="scha-route-t"><?php esc_html_e('يصل لولي الأمر صامتًا في خطه الزمني — بلا إزعاج.', 'school-system'); ?></span>
+            <span id="t-route-t"><?php esc_html_e('يصل لولي الأمر صامتًا في خطه الزمني — بلا إزعاج.', 'school-system'); ?></span>
         </div>
 
-        <button class="scha-btn" type="submit"><?php esc_html_e('حفظ', 'school-system'); ?></button>
+        <button class="t-btn t-tap" type="submit"><?php esc_html_e('حفظ', 'school-system'); ?></button>
     </form>
 </div>
 
 <?php if ($notes !== []) : ?>
-    <h2 class="scha-h2"><?php esc_html_e('آخر الملاحظات', 'school-system'); ?></h2>
-    <?php foreach ($notes as $n) : ?>
-        <div class="scha-item">
-            <strong><?php echo esc_html(SCH_Notes::CATEGORIES[$n->category][0] ?? ''); ?></strong>
-            <span class="scha-card__sub"><?php echo esc_html($n->body ?: ''); ?></span>
-            <span class="scha-time" dir="ltr"><?php echo esc_html(substr((string) $n->created_at, 0, 16)); ?></span>
-        </div>
-    <?php endforeach; ?>
+    <h2 class="t-h2"><?php esc_html_e('آخر الملاحظات', 'school-system'); ?></h2>
+    <div class="t-list">
+        <?php foreach ($notes as $n) : ?>
+            <div class="t-row">
+                <b><?php echo esc_html(SCH_Notes::CATEGORIES[$n->category][0] ?? ''); ?></b>
+                <span><?php echo esc_html($n->body ?: ''); ?></span>
+                <time dir="ltr"><?php echo esc_html(substr((string) $n->created_at, 0, 16)); ?></time>
+            </div>
+        <?php endforeach; ?>
+    </div>
 <?php endif; ?>
 
 <script>
 (function () {
-  var wrap = document.getElementById('scha-cats');
-  var field = document.getElementById('scha-cat');
+  var wrap = document.getElementById('t-cats');
+  var field = document.getElementById('t-cat-field');
   if (!wrap || !field) { return; }
 
   var ROUTES = {
@@ -112,13 +118,13 @@ $notes    = SCH_Notes::of_student($id, 8);
   };
 
   wrap.addEventListener('click', function (e) {
-    var btn = e.target.closest('.scha-cat');
+    var btn = e.target.closest('.t-cat');
     if (!btn) { return; }
     field.value = btn.dataset.cat;
-    wrap.querySelectorAll('.scha-cat').forEach(function (b) {
+    wrap.querySelectorAll('.t-cat').forEach(function (b) {
       b.classList.toggle('is-on', b === btn);
     });
-    var t = document.getElementById('scha-route-t');
+    var t = document.getElementById('t-route-t');
     if (t && ROUTES[btn.dataset.cat]) { t.textContent = ROUTES[btn.dataset.cat]; }
   });
 })();
