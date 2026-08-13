@@ -1,0 +1,583 @@
+/* =========================================================
+   نظام التصميم «أصول» — الأساس الموحّد (v5.0)
+   ─────────────────────────────────────────────────────────
+   المصدر الوحيد لكل رمز لون/مسافة/خط/ظل في تطبيقات النظام.
+   يُحمَّل أولًا في: الداشبورد · الطالب · السائق · البوابة · المعلم.
+
+   هوية فاخرة بوضعين — الداكن هو الهوية الأساسية:
+   • نيلي عميق يرسو عليه البصر + ذهب شمبانيا للتميّز وحده.
+   • العمق دلالة لا زينة: الأعلى إضاءةً هو الأقرب.
+   • لون بارز نادر — للفعل الأساسي والحالة الحيّة وحدهما.
+   • رمز واحد لكل دور بصري، ولا لون مكتوب مباشرة في مكوّن.
+
+   التبديل: السمة تُضبط على <html data-theme="dark|light">،
+   والافتراضي داكن. الفاتح طبقة كاملة لا استثناء.
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* ═══ سُلّم الهوية النيلي — ثابت عبر الوضعين ═══ */
+  --sch-brand-50:  #EEF1FF;
+  --sch-brand-100: #E0E6FF;
+  --sch-brand-200: #C4CEFF;
+  --sch-brand-300: #9DAFFF;
+  --sch-brand-400: #7089FF;
+  --sch-brand-500: #5170FF;
+  --sch-brand-600: #3E58E0;
+  --sch-brand-700: #3348C7;
+  --sch-brand-800: #283A9E;
+  --sch-brand-900: #1E2B70;
+  --sch-brand-950: #131A44;
+
+  /* ═══ ذهب شمبانيا — للإنجاز والشهادات والتميّز وحدها ═══ */
+  --sch-gold:       #B8912F;
+  --sch-gold-bright:#E6C56A;
+  --sch-gold-soft:  #F7EFD9;
+  --sch-gold-ink:   #7C6216;
+
+  /* ═══ الرموز الدلالية — الوضع الفاتح (الأساس) ═══ */
+  --sch-paper:        #F4F6FB;   /* قماش الصفحة */
+  --sch-surface:      #FFFFFF;   /* البطاقات والجداول */
+  --sch-surface-alt:  #EDF0F7;   /* رؤوس ومناطق ثانوية */
+  --sch-surface-2:    #EDF0F7;   /* اسم بديل */
+  --sch-bg:           #EDF0F7;   /* خلفية تمرير/منجَز (كان غير معرَّف) */
+  --sch-sidebar:      #10131C;
+  --sch-sidebar-soft: #1A1F2C;
+
+  /* الكروم الداكن الدائم — أشرطة تبقى داكنة في الوضعين (بطاقة الهوية، الشريط الجماعي) */
+  --sch-chrome:       #12151E;
+  --sch-chrome-2:     #1C2130;
+  --sch-chrome-ink:   #EAEDF5;
+  --sch-chrome-mut:   #93A0B6;
+
+  --sch-ink:          #0E1420;
+  --sch-ink-soft:     #39424F;
+  --sch-muted:        #6A7385;
+  --sch-line:         #E7EAF1;
+  --sch-line-strong:  #D3D9E4;
+
+  /* ═══ اللون البارز — نادر لا شائع ═══ */
+  --sch-accent:       #5170FF;
+  --sch-accent-ink:   #3348C7;   /* نص دقيق على أبيض: تباين 7.3 */
+  --sch-accent-dark:  #3348C7;   /* اسم بديل (كان غير معرَّف) */
+  --sch-accent-hover: #3E58E0;
+  --sch-accent-soft:  #EDF1FF;
+  --sch-accent-glow:  rgba(81, 112, 255, .28);
+
+  /* ═══ الحالة — للحالة لا للزينة ═══ */
+  --sch-success:      #0E875A;
+  --sch-success-soft: #E6F6EF;
+  --sch-warn:         #A9700C;
+  --sch-warn-soft:    #FBF2E2;
+  --sch-danger:       #C13A31;
+  --sch-danger-soft:  #FCEDEC;
+
+  /* ═══ الزجاج — سطح راقٍ للأشرطة الطافية ═══ */
+  --sch-glass:        rgba(255, 255, 255, .72);
+  --sch-glass-line:   rgba(15, 20, 32, .08);
+  --sch-glass-blur:   saturate(180%) blur(20px);
+
+  /* ═══ الخط ═══ */
+  --sch-font-display: 'Cairo', system-ui, sans-serif;
+  --sch-font-body:    'Cairo', system-ui, sans-serif;
+
+  --sch-text-xs:  11.5px;
+  --sch-text-sm:  13px;
+  --sch-text-base:14.5px;
+  --sch-text-lg:  17px;
+  --sch-text-xl:  22px;
+  --sch-text-2xl: 28px;
+  --sch-text-3xl: 38px;
+
+  /* ═══ إيقاع من 4 ═══ */
+  --sch-1: 4px;  --sch-2: 8px;  --sch-3: 12px;
+  --sch-4: 16px; --sch-5: 24px; --sch-6: 32px; --sch-7: 48px;
+
+  /* ═══ الزوايا — سلّم واحد ═══ */
+  --sch-r-sm:   8px;    /* حبّات ووسوم */
+  --sch-radius: 10px;   /* حقول وأزرار */
+  --sch-radius-lg: 14px;/* بطاقات */
+  --sch-r-xl:   20px;   /* نوافذ وبطاقات بطلة */
+  --sch-r-full: 999px;
+
+  /* ═══ الارتفاع — أربع درجات بمعنى ═══ */
+  --sch-e1: 0 1px 2px rgba(16, 22, 34, .04), 0 2px 8px -4px rgba(16, 22, 34, .10);
+  --sch-e2: 0 1px 3px rgba(16, 22, 34, .05), 0 10px 22px -12px rgba(16, 22, 34, .22);
+  --sch-e3: 0 2px 8px rgba(16, 22, 34, .07), 0 22px 44px -20px rgba(16, 22, 34, .34);
+  --sch-e4: 0 8px 18px rgba(16, 22, 34, .12), 0 48px 88px -32px rgba(16, 22, 34, .52);
+  --sch-glow: 0 0 0 1px var(--sch-accent-glow), 0 10px 34px -10px var(--sch-accent-glow);
+  --sch-hair: inset 0 1px 0 rgba(255, 255, 255, .6);   /* خيط ضوء علوي */
+
+  /* ═══ الحركة — منحنى حرير واحد ═══ */
+  --sch-ease: cubic-bezier(.22, 1, .36, 1);
+  --sch-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --sch-fast: .15s;
+  --sch-slow: .32s;
+}
+
+/* ═════════ الوضع الداكن — الهوية الأساسية ═════════
+   الأسطح تُضاء درجةً درجةً (الأعلى = الأقرب)، والظل يُدعَم
+   بخيط ضوء علوي لأن الظلال وحدها لا تُقرأ على الداكن. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --sch-paper:        #090B11;
+  --sch-surface:      #141824;
+  --sch-surface-alt:  #1B2130;
+  --sch-surface-2:    #1B2130;
+  --sch-bg:           #1B2130;
+  --sch-sidebar:      #0C0F16;
+  --sch-sidebar-soft: #161B27;
+
+  --sch-chrome:       #0E1119;
+  --sch-chrome-2:     #1A1F2C;
+  --sch-chrome-ink:   #EAEDF5;
+  --sch-chrome-mut:   #8B95AB;
+
+  --sch-ink:          #ECEEF5;
+  --sch-ink-soft:     #B2BACB;
+  --sch-muted:        #7B8497;
+  --sch-line:         rgba(255, 255, 255, .08);
+  --sch-line-strong:  rgba(255, 255, 255, .15);
+
+  --sch-accent:       #7B93FF;
+  --sch-accent-ink:   #AEBEFF;   /* روابط/نص دقيق فاتح على داكن */
+  --sch-accent-dark:  #AEBEFF;
+  --sch-accent-hover: #93A8FF;
+  --sch-accent-soft:  rgba(123, 147, 255, .16);
+  --sch-accent-glow:  rgba(123, 147, 255, .40);
+
+  --sch-success:      #34D39A;
+  --sch-success-soft: rgba(52, 211, 154, .15);
+  --sch-warn:         #F5B84B;
+  --sch-warn-soft:    rgba(245, 184, 75, .15);
+  --sch-danger:       #FF6B63;
+  --sch-danger-soft:  rgba(255, 107, 99, .15);
+
+  --sch-gold:         #E6C56A;
+  --sch-gold-bright:  #F2D98C;
+  --sch-gold-soft:    rgba(230, 197, 106, .14);
+  --sch-gold-ink:     #F2D98C;
+
+  --sch-glass:        rgba(18, 22, 33, .72);
+  --sch-glass-line:   rgba(255, 255, 255, .09);
+
+  --sch-e1: 0 1px 2px rgba(0, 0, 0, .40), 0 2px 8px -4px rgba(0, 0, 0, .55);
+  --sch-e2: 0 2px 6px rgba(0, 0, 0, .45), 0 12px 26px -12px rgba(0, 0, 0, .65);
+  --sch-e3: 0 4px 12px rgba(0, 0, 0, .50), 0 26px 50px -20px rgba(0, 0, 0, .72);
+  --sch-e4: 0 10px 24px rgba(0, 0, 0, .55), 0 54px 96px -30px rgba(0, 0, 0, .80);
+  --sch-hair: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+/* من لم يبدّل يدويًا ونظامه داكن: يتبع النظام */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --sch-paper:#090B11; --sch-surface:#141824; --sch-surface-alt:#1B2130;
+    --sch-surface-2:#1B2130; --sch-bg:#1B2130; --sch-sidebar:#0C0F16; --sch-sidebar-soft:#161B27;
+    --sch-chrome:#0E1119; --sch-chrome-2:#1A1F2C; --sch-chrome-ink:#EAEDF5; --sch-chrome-mut:#8B95AB;
+    --sch-ink:#ECEEF5; --sch-ink-soft:#B2BACB; --sch-muted:#7B8497;
+    --sch-line:rgba(255,255,255,.08); --sch-line-strong:rgba(255,255,255,.15);
+    --sch-accent:#7B93FF; --sch-accent-ink:#AEBEFF; --sch-accent-dark:#AEBEFF;
+    --sch-accent-hover:#93A8FF; --sch-accent-soft:rgba(123,147,255,.16); --sch-accent-glow:rgba(123,147,255,.40);
+    --sch-success:#34D39A; --sch-success-soft:rgba(52,211,154,.15);
+    --sch-warn:#F5B84B; --sch-warn-soft:rgba(245,184,75,.15);
+    --sch-danger:#FF6B63; --sch-danger-soft:rgba(255,107,99,.15);
+    --sch-gold:#E6C56A; --sch-gold-bright:#F2D98C; --sch-gold-soft:rgba(230,197,106,.14); --sch-gold-ink:#F2D98C;
+    --sch-glass:rgba(18,22,33,.72); --sch-glass-line:rgba(255,255,255,.09);
+    --sch-e1:0 1px 2px rgba(0,0,0,.40),0 2px 8px -4px rgba(0,0,0,.55);
+    --sch-e2:0 2px 6px rgba(0,0,0,.45),0 12px 26px -12px rgba(0,0,0,.65);
+    --sch-e3:0 4px 12px rgba(0,0,0,.50),0 26px 50px -20px rgba(0,0,0,.72);
+    --sch-e4:0 10px 24px rgba(0,0,0,.55),0 54px 96px -30px rgba(0,0,0,.80);
+    --sch-hair:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+}
+
+/* =========================================================
+   اللغة البصرية الموحّدة (v2.6.0 — محافَظ عليها)
+
+   ثلاث قواعد تحكم التطبيقات الخمسة:
+   1. **رأس داكن يرسو عليه البصر**، وفيه شريط «الآن» — أهم سطر في الشاشة.
+   2. **السكة**: ما هو تسلسل زمني يُعرض كخط — حصص المعلم، نقاط الباص، حالة الطالب.
+      الماضي باهت، والجاري بارز، والقادم عادي.
+   3. **الحلقة**: ما هو إنجاز يُعرض كحلقة لا كنسبة مكتوبة.
+
+   والعمق يُستخدم للدلالة لا للزينة: المرتفع هو الحيّ أو ما ينتظر تصرفًا.
+   ========================================================= */
+
+.sch-hd {
+  background: var(--sch-chrome, #0D1520);
+  color: #EEF2F7;
+  padding: calc(14px + env(safe-area-inset-top)) 18px 18px;
+  position: relative;
+  flex: 0 0 auto;
+}
+.sch-hd::after {
+  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+}
+.sch-hd__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sch-hd__who b { display: block; font-size: 16px; letter-spacing: -.01em; }
+.sch-hd__who span { display: block; font-size: 11px; color: #8FA0B6; letter-spacing: .05em; }
+.sch-hd__act {
+  width: 36px; height: 36px; border-radius: 11px; flex: 0 0 auto;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+  color: #C6D2E0; display: flex; align-items: center; justify-content: center;
+}
+
+/* شريط «الآن» */
+.sch-now { margin-top: 16px; display: flex; align-items: center; gap: 12px; }
+.sch-now__no {
+  width: 44px; height: 44px; border-radius: 13px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(45,212,191,.13); border: 1px solid rgba(45,212,191,.3);
+}
+.sch-now__no b { font-size: 19px; color: #9FB4FF; font-variant-numeric: tabular-nums; }
+.sch-now__txt { flex: 1; min-width: 0; }
+.sch-now__txt b { display: block; font-size: 16px; }
+.sch-now__txt span { display: block; font-size: 11px; color: #8FA0B6; }
+.sch-now__pct { font-size: 11px; color: #9FB4FF; font-variant-numeric: tabular-nums; }
+.sch-now__bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,.1); margin-top: 12px; overflow: hidden; }
+.sch-now__bar i { display: block; height: 100%; background: #9FB4FF; border-radius: 99px; }
+
+/* السكة */
+.sch-rail { position: relative; padding: 0 18px; }
+.sch-rail::before {
+  content: ""; position: absolute; top: 14px; bottom: 14px; inset-inline-start: 39px;
+  width: 2px; background: linear-gradient(180deg, var(--sch-line-strong, #DFE5EC), var(--sch-line, #EDF0F4));
+}
+.sch-slot { position: relative; display: flex; align-items: center; gap: 14px; padding: 9px 0; }
+.sch-slot__dot {
+  width: 44px; height: 44px; border-radius: 13px; flex: 0 0 auto; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sch-surface, #fff); border: 1px solid var(--sch-line-strong, #DFE5EC);
+  box-shadow: 0 1px 1px rgba(13,21,32,.04), 0 2px 6px -2px rgba(13,21,32,.1);
+}
+.sch-slot__dot b { font-size: 16px; color: var(--sch-ink-soft, #2C3A4B); font-variant-numeric: tabular-nums; }
+.sch-slot__txt { flex: 1; min-width: 0; }
+.sch-slot__txt b { display: block; font-size: 15px; }
+.sch-slot__txt span { display: block; font-size: 11px; color: var(--sch-muted, #71829A); font-variant-numeric: tabular-nums; }
+.sch-slot--done { opacity: .42; }
+.sch-slot--done .sch-slot__dot { background: var(--sch-bg, #F7F8FA); box-shadow: none; }
+.sch-slot--now .sch-slot__dot {
+  background: var(--sch-accent, #5170FF); border-color: var(--sch-accent, #5170FF);
+  box-shadow: 0 8px 18px -8px rgba(81,112,255,.7);
+}
+.sch-slot--now .sch-slot__dot b { color: #fff; }
+.sch-slot--now .sch-slot__txt b { color: var(--sch-accent-dark, #3E58E0); }
+
+/* الحلقة */
+.sch-ring { width: 46px; height: 46px; flex: 0 0 auto; position: relative; }
+.sch-ring svg { transform: rotate(-90deg); }
+.sch-ring circle { fill: none; stroke-width: 3.5; }
+.sch-ring .bg { stroke: var(--sch-line, #EDF0F4); }
+.sch-ring .fg { stroke: var(--sch-accent, #5170FF); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.sch-ring.is-warn .fg { stroke: var(--sch-warn, #B4690E); }
+.sch-ring b {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-variant-numeric: tabular-nums; color: var(--sch-ink-soft, #2C3A4B);
+}
+
+/* عنوان قسم */
+.sch-sect {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin: 24px 0 12px; padding: 0 18px;
+}
+.sch-sect h2 { margin: 0; font-size: 11px; letter-spacing: .13em; color: var(--sch-muted, #9DAABC); font-weight: 700; }
+.sch-sect span { font-size: 11px; color: var(--sch-muted, #9DAABC); font-variant-numeric: tabular-nums; }
+
+/* بند مشكلة */
+.sch-prob {
+  display: flex; align-items: center; gap: 14px; margin: 0 18px 9px; padding: 14px 16px;
+  background: var(--sch-surface, #fff); border-radius: 18px;
+  box-shadow: 0 1px 1px rgba(13,21,32,.04), 0 2px 6px -2px rgba(13,21,32,.1);
+  border-inline-start: 3px solid var(--sch-line-strong, #DFE5EC);
+}
+.sch-prob--r { border-inline-start-color: var(--sch-danger, #B3251F); }
+.sch-prob--a { border-inline-start-color: var(--sch-warn, #B4690E); }
+.sch-prob--t { border-inline-start-color: var(--sch-accent, #5170FF); }
+.sch-prob--clear { opacity: .5; border-inline-start-color: var(--sch-success, #0E7C56); }
+.sch-prob__n {
+  min-width: 38px; text-align: center; font-size: 26px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+}
+.sch-prob--r .sch-prob__n { color: var(--sch-danger, #B3251F); }
+.sch-prob--a .sch-prob__n { color: var(--sch-warn, #B4690E); }
+.sch-prob--t .sch-prob__n { color: var(--sch-accent, #5170FF); }
+.sch-prob--clear .sch-prob__n { color: var(--sch-success, #0E7C56); }
+.sch-prob__t { flex: 1; min-width: 0; }
+.sch-prob__t b { display: block; font-size: 15px; }
+.sch-prob__t span { display: block; font-size: 13px; color: var(--sch-muted, #71829A); }
+
+/* شبكة الوجوه */
+.sch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px; }
+.sch-tile {
+  background: var(--sch-surface, #fff); border-radius: 18px; padding: 14px 12px 12px;
+  text-align: center; box-shadow: 0 1px 1px rgba(13,21,32,.04), 0 2px 6px -2px rgba(13,21,32,.1);
+}
+.sch-tile__face {
+  width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 9px; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700; overflow: hidden;
+  background: var(--sch-accent-soft, #EEF2FF); color: var(--sch-accent, #5170FF);
+}
+.sch-tile__face img { width: 100%; height: 100%; object-fit: cover; }
+.sch-tile--wait .sch-tile__face { box-shadow: 0 0 0 3px var(--sch-warn, #B4690E); }
+.sch-tile b { display: block; font-size: 13px; line-height: 1.45; }
+.sch-tile__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.sch-mini {
+  padding: 10px 2px; font-family: inherit; font-size: 12px; font-weight: 700;
+  border-radius: 10px; border: 1px solid var(--sch-line-strong, #DFE5EC);
+  background: var(--sch-bg, #F7F8FA); cursor: pointer;
+}
+.sch-mini--y { color: var(--sch-success, #0E7C56); }
+.sch-mini--n { color: var(--sch-danger, #B3251F); }
+.sch-state {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+  padding: 3px 11px; border-radius: 99px; font-size: 11px; font-weight: 700;
+}
+.sch-state i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.sch-state--ok { background: var(--sch-success-soft, #E9F7F0); color: var(--sch-success, #0E7C56); }
+.sch-state--no { background: var(--sch-danger-soft, #FDF0EF); color: var(--sch-danger, #B3251F); }
+
+/* بطاقة ورقية: ما تركه إنسان لإنسان */
+.sch-memo {
+  margin: 0 18px 14px; padding: 18px; border-radius: 20px;
+  background: #FAF6EE; border: 1px solid #E8DDC8; position: relative;
+}
+.sch-memo::before {
+  content: ""; position: absolute; inset-inline-start: 18px; top: -1px;
+  width: 34px; height: 3px; border-radius: 0 0 3px 3px; background: #7A5C22; opacity: .5;
+}
+.sch-memo__k { font-size: 11px; letter-spacing: .1em; color: #A9884A; font-weight: 700; }
+.sch-memo dl { margin: 12px 0 0; display: grid; gap: 11px; }
+.sch-memo dt { font-size: 11px; color: #A9884A; margin-bottom: 2px; }
+.sch-memo dd { margin: 0; font-size: 15px; color: #4A3A18; line-height: 1.65; }
+
+/* رسالة عابرة */
+.sch-toast {
+  position: fixed; inset-inline: 0; bottom: 26px; margin: 0 auto; width: 310px; z-index: 90;
+  padding: 13px 18px; border-radius: 16px;
+  background: var(--sch-chrome, #0D1520); color: #EEF2F7;
+  box-shadow: 0 2px 4px rgba(13,21,32,.06), 0 22px 40px -18px rgba(13,21,32,.5);
+  font-size: 13px; text-align: center;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity .25s, transform .25s; pointer-events: none;
+}
+.sch-toast.is-on { opacity: 1; transform: none; }
+.sch-toast b { display: block; font-size: 15px; margin-bottom: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-ring .fg, .sch-toast { transition: none; }
+}
+
+/* =========================================================
+   الحركة واللمس.
+
+   كل حركة تجيب سؤالًا: **ماذا حدث؟ وأين ذهب؟**
+   لا حركة للزينة — الحركة التي لا تشرح شيئًا تُبطئ وتُتعب.
+
+   وثلاث قواعد:
+   1. الاستجابة للمس فورية (≤100ms) — التأخير يجعل المستخدم يضغط مرتين.
+   2. الظهور أبطأ من الاختفاء — ما يأتي يُلاحَظ، وما يذهب لا يُنتظر.
+   3. من فعّل «تقليل الحركة» في نظامه يرى كل شيء ساكنًا.
+   ========================================================= */
+
+:root {
+  --sch-t-tap:  .10s cubic-bezier(.4, 0, 1, 1);
+  --sch-t-in:   .28s cubic-bezier(.22, .8, .28, 1);
+  --sch-t-out:  .18s cubic-bezier(.4, 0, 1, 1);
+}
+
+/* اللمس: هبوط طفيف يقول «وصلت ضغطتك» */
+.sch-prob:active,
+.sch-tile__face:active,
+.sch-mini:active,
+.scha-sc:active,
+.schs-card:active,
+.sch-hd__act:active {
+  transform: translateY(1px) scale(.995);
+  transition: transform var(--sch-t-tap);
+}
+
+/* الوصول بلوحة المفاتيح: حلقة واضحة لا خط باهت */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sch-accent, #5170FF);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ظهور البطاقات: من الأسفل قليلًا — تُقرأ كأنها وصلت للتو */
+@keyframes sch-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.sch-rise { animation: sch-rise var(--sch-t-in) both; }
+.sch-rise:nth-child(2) { animation-delay: .04s; }
+.sch-rise:nth-child(3) { animation-delay: .08s; }
+.sch-rise:nth-child(4) { animation-delay: .12s; }
+
+/* الحالة الحيّة تنبض — ما ينبض متجدد، وما سكن ثابت */
+@keyframes sch-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: .28; transform: scale(1.5); }
+}
+.sch-dot-live { animation: sch-pulse 1.9s ease-in-out infinite; }
+
+/* الانتظار: هيكل رمادي لا دوّامة — يقول «المحتوى قادم بهذا الشكل» */
+@keyframes sch-shimmer { to { background-position: -200% 0; } }
+.sch-skeleton {
+  background: linear-gradient(90deg, var(--sch-surface-alt, #EDF0F4) 25%, var(--sch-surface, #F6F8FA) 37%, var(--sch-surface-alt, #EDF0F4) 63%);
+  background-size: 200% 100%;
+  animation: sch-shimmer 1.3s linear infinite;
+  border-radius: 10px;
+  color: transparent !important;
+}
+
+/* الرقم يتغيّر: ومضة خفيفة تقول «هذا الرقم تحرّك» */
+@keyframes sch-bump {
+  0%   { transform: none; }
+  35%  { transform: translateY(-3px) scale(1.06); }
+  100% { transform: none; }
+}
+.sch-bump { animation: sch-bump .34s cubic-bezier(.22, .8, .28, 1); }
+
+/* الأزرار: حد أدنى للمس 44px — إصبع في باص متحرك لا تصيب أصغر */
+.sch-mini, .schg-mini, .scha-btn, .schs-btn, .sch-btn { min-height: 44px; }
+
+/* النص المهم لا يُقص: العناوين تلتف والأرقام لا تنكسر */
+.sch-prob__t b, .sch-slot__txt b, .sch-tile b { overflow-wrap: anywhere; }
+[class*="__n"], [class*="hero"], .sch-ring b { font-variant-numeric: tabular-nums; }
+
+/* السحب للتحديث في التطبيقات الميدانية */
+.sch-pull {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  height: 0; overflow: hidden;
+  font-size: 12px; color: var(--sch-muted, #71829A);
+  transition: height var(--sch-t-out);
+}
+.sch-pull.is-on { height: 38px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-rise, .sch-bump, .sch-dot-live, .sch-skeleton { animation: none; }
+  .sch-prob:active, .sch-tile__face:active, .sch-mini:active,
+  .scha-sc:active, .schs-card:active, .sch-hd__act:active { transform: none; }
+}
+
+/* =========================================================
+   تطبيق الحركة حيث تخدم فقط.
+
+   القوائم التي تُقرأ عند فتح الشاشة تظهر متتابعة — العين تتبعها
+   بدل أن تصطدم بها كلها دفعة واحدة. والقوائم الطويلة لا تُحرَّك:
+   عنصر يتحرك أثناء التمرير يُتعب لا يُمتع.
+   ========================================================= */
+
+.sch-problems > .sch-prob,
+.sch-tiles > .sch-tile,
+.sch-rail > .sch-slot {
+  animation: sch-rise var(--sch-t-in) both;
+}
+.sch-problems > .sch-prob:nth-child(n+6),
+.sch-tiles > .sch-tile:nth-child(n+9),
+.sch-rail > .sch-slot:nth-child(n+7) { animation: none; }
+
+.sch-problems > .sch-prob:nth-child(2),
+.sch-rail > .sch-slot:nth-child(2) { animation-delay: .05s; }
+.sch-problems > .sch-prob:nth-child(3),
+.sch-rail > .sch-slot:nth-child(3) { animation-delay: .10s; }
+.sch-problems > .sch-prob:nth-child(4),
+.sch-rail > .sch-slot:nth-child(4) { animation-delay: .15s; }
+.sch-problems > .sch-prob:nth-child(5),
+.sch-rail > .sch-slot:nth-child(5) { animation-delay: .20s; }
+
+.sch-tiles > .sch-tile:nth-child(2) { animation-delay: .03s; }
+.sch-tiles > .sch-tile:nth-child(3) { animation-delay: .06s; }
+.sch-tiles > .sch-tile:nth-child(4) { animation-delay: .09s; }
+.sch-tiles > .sch-tile:nth-child(5) { animation-delay: .12s; }
+.sch-tiles > .sch-tile:nth-child(6) { animation-delay: .15s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-problems > .sch-prob,
+  .sch-tiles > .sch-tile,
+  .sch-rail > .sch-slot { animation: none; }
+}
+
+/* =========================================================
+   الحالات التي كانت ناقصة.
+
+   الزر الذي يُضغط ولا يتغيّر يُضغط مرتين. والصفحة التي تُحمَّل بلا إشارة
+   تبدو معطّلة. هذه ليست زينة — هي ما يمنع الموظف من الشكوى.
+   ========================================================= */
+
+/* الزر أثناء الإرسال */
+.is-sending {
+  opacity: .72;
+  cursor: wait !important;
+  position: relative;
+}
+.is-sending::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 10px; top: 50%;
+  width: 13px; height: 13px;
+  margin-top: -7px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: sch-spin .7s linear infinite;
+}
+@keyframes sch-spin { to { transform: rotate(360deg); } }
+
+/* تخطي التنقّل — لمن يتصفّح بلوحة المفاتيح وحده.
+   `top: -60px` وحدها لا تكفي: العنصر يبقى في التخطيط فيدفع المحتوى ويظهر
+   في بعض المتصفحات. فنُخرجه من التدفق تمامًا حتى يُركَّز عليه بـTab. */
+.sch-skip {
+  position: fixed;
+  inset-inline-start: 12px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 18px;
+  border-radius: 0 0 12px 12px;
+  background: var(--sch-chrome, #0D1520);
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.sch-skip:focus,
+.sch-skip:focus-visible {
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* حالة فارغة موحّدة */
+.sch-blank {
+  text-align: center;
+  padding: 44px 20px;
+  color: var(--sch-muted, #5C6B7E);
+}
+.sch-blank__ic {
+  display: flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; margin: 0 auto 14px;
+  border-radius: 18px;
+  background: var(--sch-accent-soft, #EEF2FF);
+  color: var(--sch-accent, #5170FF);
+}
+.sch-blank strong { display: block; font-size: 17px; color: var(--sch-ink, #0D1520); margin-bottom: 4px; }
+.sch-blank p { margin: 0 0 14px; font-size: 13px; line-height: 1.8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-sending::after { animation: none; }
+}

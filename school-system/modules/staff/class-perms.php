@@ -1,0 +1,417 @@
+<?php
+declare(strict_types=1);
+
+defined('ABSPATH') || exit;
+
+/**
+ * الصلاحيات لكل موظف.
+ *
+ * الدور قالب لا قيد: تختاره فتُفتح مفاتيحه، ثم تعدّل ما تشاء لهذا الشخص وحده.
+ * لأن المدارس الحقيقية لا تشبه القوالب — محاسب يدير المستودع، ومعلمة تدير
+ * المكتبة بعد الحصص، ووكيل لا تريده أن يلمس الرواتب.
+ *
+ * ثلاث طبقات:
+ * 1. **مفتوح** — تتحكم به كما تشاء.
+ * 2. **حساس** — يُمنح فورًا، **ويصل إشعار للمدير**. لا بوابة تُغلق بل إيصال لا يُخفى؛
+ *    طابور الموافقات يتعطّل ويحجب موظفًا، والمدير في مدرسة واحدة على بعد غرفتين.
+ * 3. **مقفل** — لا يُفتح لأحد مهما كان. يظهر رماديًا **ومعه سببه** فيفهم الموظف
+ *    لماذا مُنع بدل أن يظن أن فيه عطلًا.
+ *
+ * وبُعد ثانٍ لا يوجد في أنظمة الشركات: **على مَن؟** معلم يرى الحضور — حضور فصوله
+ * أم المدرسة كلها؟ بلا هذا البُعد تفتح كل صلاحية المدرسة بأكملها.
+ */
+final class SCH_Perms
+{
+    /** نطاق البيانات — البُعد الثاني للصلاحية. */
+    public const SCOPES = [
+        'all'   => 'كل المدرسة',
+        'stage' => 'مرحلته فقط',
+        'own'   => 'فصوله وطلابه فقط',
+    ];
+
+    /** أقسام لا تُمنح لأحد إطلاقًا، ومعها سببها. */
+    public const LOCKED = [
+        'custody' => 'سجل العهدة لا يُعدَّل — الخطأ يُصحَّح بحدث مضاد لا بمحو، وسجل يُمحى لا يصلح دليلًا',
+        'audit'   => 'سجل النظام للقراءة فقط — تعديله يُبطل قيمته كسجل',
+    ];
+
+    /** أقسام لا تُمنح لأدوار بعينها. */
+    public const LOCKED_FOR = [
+        'sch_guard'  => ['clinic', 'meds', 'referrals', 'inbox', 'nerve', 'payroll', 'accounting'],
+        'sch_driver' => ['clinic', 'meds', 'referrals', 'inbox', 'nerve', 'payroll', 'accounting'],
+    ];
+
+    /** سبب المنع حسب الدور. */
+    public const LOCKED_FOR_REASON =
+        'بيانات صحية أو سلوكية لا يراها من يقف عند البوابة أو يقود الحافلة';
+
+    /** أقسام تُمنح فورًا ويصل إشعار للمدير. */
+    public const SENSITIVE = ['payroll', 'accounting', 'employees', 'settings', 'org', 'invoices'];
+
+    // ---------- القراءة ----------
+
+    /**
+     * هل لهذا المستخدم صلاحيات مخصصة؟
+     * من ليس له صف واحد يعمل بصلاحيات دوره كما كان — فلا ينكسر شيء قائم.
+     */
+    public static function is_custom(int $user_id): bool
+    {
+        global $wpdb;
+
+        return (bool) $wpdb->get_var($wpdb->prepare(
+            'SELECT 1 FROM ' . sch_table('user_perms') . ' WHERE user_id = %d LIMIT 1',
+            $user_id
+        ));
+    }
+
+    /** خريطة صلاحيات مستخدم: section => ['view' => bool, 'edit' => bool] */
+    public static function map(int $user_id): array
+    {
+        global $wpdb;
+
+        static $cache = [];
+
+        if (isset($cache[$user_id])) {
+            return $cache[$user_id];
+        }
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT section, can_view, can_edit FROM ' . sch_table('user_perms') . ' WHERE user_id = %d',
+            $user_id
+        )) ?: [];
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(string) $r->section] = [
+                'view' => (int) $r->can_view === 1,
+                'edit' => (int) $r->can_edit === 1,
+            ];
+        }
+
+        return $cache[$user_id] = $out;
+    }
+
+    /**
+     * هل يملك المستخدم هذا القسم؟
+     *
+     * المقفل يُرفض دائمًا ولو مُنح بالخطأ — الحماية في القراءة لا في الكتابة وحدها.
+     */
+    public static function may(string $section, string $mode = 'view', ?int $user_id = null): bool
+    {
+        $user_id ??= get_current_user_id();
+
+        if ($user_id === 0) {
+            return false;
+        }
+
+        if (self::is_locked($section, $user_id)) {
+            return false;
+        }
+
+        if (self::expired($user_id)) {
+            return false;
+        }
+
+        // بلا صلاحيات مخصصة: يعمل بدوره كما كان قبل هذه الوحدة.
+        if (!self::is_custom($user_id)) {
+            return true;
+        }
+
+        $map = self::map($user_id);
+
+        if (!isset($map[$section])) {
+            return false;
+        }
+
+        return $mode === 'edit' ? $map[$section]['edit'] : $map[$section]['view'];
+    }
+
+    public static function is_locked(string $section, ?int $user_id = null): bool
+    {
+        if (isset(self::LOCKED[$section])) {
+            return true;
+        }
+
+        $user = get_userdata($user_id ?? get_current_user_id());
+
+        if (!$user) {
+            return false;
+        }
+
+        foreach ($user->roles as $role) {
+            if (in_array($section, self::LOCKED_FOR[$role] ?? [], true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** سبب القفل — يُعرض في الشاشة فيفهم الموظف لماذا مُنع. */
+    public static function lock_reason(string $section, string $role = ''): string
+    {
+        if (isset(self::LOCKED[$section])) {
+            return self::LOCKED[$section];
+        }
+
+        if ($role !== '' && in_array($section, self::LOCKED_FOR[$role] ?? [], true)) {
+            return self::LOCKED_FOR_REASON;
+        }
+
+        return '';
+    }
+
+    // ---------- النطاق ----------
+
+    public static function scope(?int $user_id = null): string
+    {
+        global $wpdb;
+
+        $user_id ??= get_current_user_id();
+
+        $row = $wpdb->get_row($wpdb->prepare(
+            'SELECT scope, expires_at FROM ' . sch_table('user_scope') . ' WHERE user_id = %d',
+            $user_id
+        ));
+
+        if (!$row) {
+            return 'all';
+        }
+
+        return array_key_exists((string) $row->scope, self::SCOPES) ? (string) $row->scope : 'all';
+    }
+
+    /** انتهت مدة صلاحياته؟ معلم بديل لأسبوع، ووكيل ينوب أثناء سفر المدير. */
+    public static function expired(?int $user_id = null): bool
+    {
+        global $wpdb;
+
+        $user_id ??= get_current_user_id();
+
+        $until = $wpdb->get_var($wpdb->prepare(
+            'SELECT expires_at FROM ' . sch_table('user_scope') . ' WHERE user_id = %d',
+            $user_id
+        ));
+
+        return $until !== null && (string) $until !== '' && (string) $until < current_time('Y-m-d');
+    }
+
+    // ---------- الكتابة ----------
+
+    /**
+     * حفظ صلاحيات موظف.
+     *
+     * @param array $sections  section => ['view' => bool, 'edit' => bool]
+     */
+    public static function save(int $user_id, array $sections, string $scope = 'all', string $expires = ''): true|WP_Error
+    {
+        global $wpdb;
+
+        if ($user_id === get_current_user_id()) {
+            return sch_api_error('self_edit', __('لا تعدّل صلاحيات حسابك — اطلب ذلك ممن هو أعلى منك.', 'school-system'), 403);
+        }
+
+        $target = get_userdata($user_id);
+        if (!$target) {
+            return sch_api_error('no_user', __('الموظف غير موجود.', 'school-system'), 404);
+        }
+
+        // لا تمنح من هو في مستواك أو فوقك — نفس قاعدة سلسلة الإنشاء.
+        if (!current_user_can('manage_options') && SCH_Org::level_of($target) >= SCH_Org::level_of()) {
+            return sch_api_error('forbidden', __('لا تملك صلاحية تعديل صلاحيات هذا الموظف.', 'school-system'), 403);
+        }
+
+        $before = self::map($user_id);
+        $added  = [];
+
+        $wpdb->delete(sch_table('user_perms'), ['user_id' => $user_id]);
+
+        foreach ($sections as $slug => $modes) {
+            $slug = sanitize_key((string) $slug);
+
+            if (!isset(SCH_Dashboard::sections()[$slug]) || self::is_locked($slug, $user_id)) {
+                continue;
+            }
+
+            $view = !empty($modes['view']) || !empty($modes['edit']);
+            $edit = !empty($modes['edit']);
+
+            if (!$view) {
+                continue;
+            }
+
+            $wpdb->insert(sch_table('user_perms'), [
+                'user_id'  => $user_id,
+                'section'  => $slug,
+                'can_view' => 1,
+                'can_edit' => $edit ? 1 : 0,
+            ]);
+
+            if (in_array($slug, self::SENSITIVE, true) && empty($before[$slug]['view'])) {
+                $added[] = SCH_Dashboard::sections()[$slug][0];
+            }
+        }
+
+        $wpdb->replace(sch_table('user_scope'), [
+            'user_id'    => $user_id,
+            'scope'      => array_key_exists($scope, self::SCOPES) ? $scope : 'all',
+            'expires_at' => sch_sanitize_date($expires) ?: null,
+            'updated_by' => get_current_user_id() ?: null,
+            'updated_at' => sch_now(),
+        ]);
+
+        self::log($user_id, $before, $sections);
+
+        // الإيصال: صلاحية حساسة تُمنح فورًا، والمدير يعرف بها فورًا.
+        if ($added !== []) {
+            $principal = SCH_Org::principal_user_id();
+
+            if ($principal && $principal !== get_current_user_id()) {
+                SCH_Comms::notify(
+                    $principal,
+                    __('مُنحت صلاحية حساسة', 'school-system'),
+                    sprintf(
+                        /* translators: 1: من منح 2: لمن 3: الأقسام */
+                        __('%1$s منح %2$s: %3$s', 'school-system'),
+                        wp_get_current_user()->display_name,
+                        $target->display_name,
+                        implode(' · ', $added)
+                    ),
+                    'perm',
+                    $user_id
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /** نسخ صلاحيات موظف إلى آخر — عيّنت محاسبًا ثانيًا؟ ثانيتان. */
+    public static function copy_from(int $source_id, int $target_id): true|WP_Error
+    {
+        $map = self::map($source_id);
+
+        if ($map === []) {
+            return sch_api_error('empty', __('الموظف المصدر يعمل بصلاحيات دوره، فلا شيء يُنسخ.', 'school-system'), 422);
+        }
+
+        return self::save($target_id, $map, self::scope($source_id));
+    }
+
+    /** قالب الدور: ما يفتحه الدور افتراضيًا — نقطة بداية لا قيد. */
+    public static function template(string $role): array
+    {
+        $out = [];
+
+        foreach (SCH_Dashboard::sections() as $slug => $meta) {
+            $cap = (string) $meta[1];
+
+            if ($cap !== '' && !self::role_has_cap($role, $cap)) {
+                continue;
+            }
+
+            if (isset(self::LOCKED[$slug]) || in_array($slug, self::LOCKED_FOR[$role] ?? [], true)) {
+                continue;
+            }
+
+            $out[$slug] = ['view' => true, 'edit' => true];
+        }
+
+        return $out;
+    }
+
+    private static function role_has_cap(string $role, string $cap): bool
+    {
+        $obj = get_role($role);
+
+        return $obj !== null && $obj->has_cap($cap);
+    }
+
+    // ---------- السجل ----------
+
+    private static function log(int $target, array $before, array $after): void
+    {
+        global $wpdb;
+
+        $granted = [];
+        $revoked = [];
+
+        foreach (SCH_Dashboard::sections() as $slug => $meta) {
+            $had = !empty($before[$slug]['view']);
+            $has = !empty($after[$slug]['view']) || !empty($after[$slug]['edit']);
+
+            if (!$had && $has) {
+                $granted[] = (string) $meta[0];
+            }
+            if ($had && !$has) {
+                $revoked[] = (string) $meta[0];
+            }
+        }
+
+        if ($granted === [] && $revoked === []) {
+            return;
+        }
+
+        $wpdb->insert(sch_table('perm_log'), [
+            'target_user' => $target,
+            'actor_user'  => get_current_user_id() ?: null,
+            'granted'     => implode(' · ', $granted) ?: null,
+            'revoked'     => implode(' · ', $revoked) ?: null,
+            'created_at'  => sch_now(),
+        ]);
+
+        sch_audit('perms.changed', 'user', $target, [
+            'granted' => count($granted),
+            'revoked' => count($revoked),
+        ]);
+    }
+
+    public static function history(int $target = 0, int $limit = 40): array
+    {
+        global $wpdb;
+
+        $sql = 'SELECT l.*, t.display_name AS target_name, a.display_name AS actor_name
+                FROM ' . sch_table('perm_log') . " l
+                LEFT JOIN {$wpdb->users} t ON t.ID = l.target_user
+                LEFT JOIN {$wpdb->users} a ON a.ID = l.actor_user ";
+
+        return ($target > 0
+            ? $wpdb->get_results($wpdb->prepare($sql . 'WHERE l.target_user = %d ORDER BY l.id DESC LIMIT %d', $target, $limit))
+            : $wpdb->get_results($wpdb->prepare($sql . 'ORDER BY l.id DESC LIMIT %d', $limit))) ?: [];
+    }
+
+    // ---------- العرض ----------
+
+    /** الأقسام مجمّعة كما تظهر في الشاشة. */
+    public static function grouped(): array
+    {
+        $out = [];
+
+        foreach (SCH_Dashboard::sections() as $slug => $meta) {
+            $card  = (string) ($meta[2] ?? 'school');
+            $group = (string) ($meta[3] ?? '');
+            $key   = $card . '|' . $group;
+
+            $out[$key][$slug] = $meta;
+        }
+
+        return $out;
+    }
+
+    /** ما سيراه هذا الموظف فعلًا — تراجعه بنظرة قبل الحفظ. */
+    public static function preview(int $user_id): array
+    {
+        $out = [];
+
+        foreach (SCH_Dashboard::sections() as $slug => $meta) {
+            if (self::may($slug, 'view', $user_id)) {
+                $out[] = [
+                    'title' => (string) $meta[0],
+                    'edit'  => self::may($slug, 'edit', $user_id),
+                ];
+            }
+        }
+
+        return $out;
+    }
+}

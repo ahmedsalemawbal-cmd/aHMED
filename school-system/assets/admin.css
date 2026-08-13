@@ -1,0 +1,272 @@
+/* =========================================================
+   نظام التصميم — School System
+   كل لون ومسافة وخط في المشروع يأتي من هنا.
+   ممنوع كتابة قيمة لون أو مسافة مباشرة في أي ملف آخر.
+   ========================================================= */
+
+:root {
+  /* الألوان — ورق دافئ، ولون بارز واحد فقط */
+  --sch-paper:        #F8FAFC;
+  --sch-surface:      #FFFFFF;
+  --sch-surface-alt:  #F8FAFC;
+  --sch-ink:          #0F1720;
+  --sch-ink-soft:     #334155;
+  --sch-muted:        #64748B;
+  --sch-line:         #E2E8F0;
+  --sch-line-strong:  #CBD5E1;
+
+  --sch-accent:       #5170FF;
+  --sch-accent-hover: #3E58E0;
+  --sch-accent-soft:  #EEF2FF;
+
+  --sch-success:      #047857;
+  --sch-warn:         #B45309;
+  --sch-danger:       #B91C1C;
+
+  /* الخطوط */
+  --sch-font-display: 'Cairo', system-ui, sans-serif;
+  --sch-font-body:    'Cairo', system-ui, sans-serif;
+
+  --sch-text-xs:  12px;
+  --sch-text-sm:  13px;
+  --sch-text-base:15px;
+  --sch-text-lg:  18px;
+  --sch-text-xl:  24px;
+  --sch-text-2xl: 32px;
+
+  /* المسافات — مقياس الداشبورد (كثيف) */
+  --sch-1: 4px;
+  --sch-2: 8px;
+  --sch-3: 12px;
+  --sch-4: 16px;
+  --sch-5: 24px;
+  --sch-6: 32px;
+  --sch-7: 48px;
+
+  --sch-radius:    6px;
+  --sch-radius-lg: 10px;
+}
+
+/* مقياس واسع لشاشات الجوال — نفس اللغة، كثافة أقل.
+   يُستخدم في واجهات ولي الأمر والسائق. */
+.sch-roomy {
+  --sch-text-base: 17px;
+  --sch-text-lg:   22px;
+  --sch-3: 16px;
+  --sch-4: 24px;
+  --sch-5: 32px;
+  --sch-6: 44px;
+}
+
+/* ---------- الأساس ---------- */
+
+.sch-app {
+  direction: rtl;
+  background: var(--sch-paper);
+  color: var(--sch-ink);
+  font-family: var(--sch-font-body);
+  font-size: var(--sch-text-base);
+  line-height: 1.65;
+  padding: var(--sch-5) var(--sch-5) var(--sch-7);
+  margin-inline-end: -20px; /* يلغي هامش شاشة ووردبريس */
+}
+
+.sch-app :is(h1, h2, h3) {
+  font-family: var(--sch-font-display);
+  font-weight: 700;
+  color: var(--sch-ink);
+  margin: 0;
+}
+
+.sch-page-title {
+  font-size: var(--sch-text-2xl);
+  padding-bottom: var(--sch-3);
+  margin-bottom: var(--sch-5);
+  border-bottom: 2px solid var(--sch-accent);
+  display: inline-block;
+}
+
+.sch-sub { color: var(--sch-muted); font-size: var(--sch-text-sm); }
+
+/* ---------- البطاقات ---------- */
+
+.sch-card {
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-5);
+  margin-bottom: var(--sch-5);
+}
+
+.sch-card > h2 {
+  font-size: var(--sch-text-lg);
+  margin-bottom: var(--sch-4);
+}
+
+/* ---------- الجداول ---------- */
+/* الفصل بالمسافة واللون، لا بالخطوط. حد أفقي واحد فقط. */
+
+.sch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sch-text-sm);
+}
+
+.sch-table th {
+  text-align: start;
+  font-weight: 700;
+  color: var(--sch-muted);
+  font-size: var(--sch-text-xs);
+  letter-spacing: .02em;
+  padding: var(--sch-2) var(--sch-3);
+  border-bottom: 1px solid var(--sch-line-strong);
+}
+
+.sch-table td {
+  padding: var(--sch-3);
+  border-bottom: 1px solid var(--sch-line);
+  color: var(--sch-ink-soft);
+}
+
+.sch-table tbody tr:hover { background: var(--sch-surface-alt); }
+.sch-table tbody tr:last-child td { border-bottom: 0; }
+.sch-table .sch-name { color: var(--sch-ink); font-weight: 700; }
+
+/* ---------- الحالة ---------- */
+
+.sch-badge {
+  display: inline-block;
+  padding: 2px var(--sch-2);
+  border-radius: 100px;
+  font-size: var(--sch-text-xs);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-hover);
+}
+.sch-badge--ok    { background: #ECFDF5; color: var(--sch-success); }
+.sch-badge--muted { background: #F1F5F9; color: var(--sch-muted); }
+
+/* ---------- النماذج ---------- */
+
+.sch-field { margin-bottom: var(--sch-4); }
+
+.sch-field label {
+  display: block;
+  font-size: var(--sch-text-sm);
+  font-weight: 700;
+  margin-bottom: var(--sch-1);
+  color: var(--sch-ink-soft);
+}
+
+.sch-field :is(input, select, textarea) {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--sch-2) var(--sch-3);
+  font-family: inherit;
+  font-size: var(--sch-text-base);
+  color: var(--sch-ink);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  transition: border-color .15s ease;
+}
+
+.sch-field :is(input, select, textarea):focus {
+  outline: 2px solid var(--sch-accent);
+  outline-offset: 1px;
+  border-color: var(--sch-accent);
+}
+
+.sch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 var(--sch-5);
+}
+
+/* ---------- الأزرار ---------- */
+
+.sch-btn {
+  display: inline-block;
+  padding: var(--sch-2) var(--sch-5);
+  font-family: inherit;
+  font-size: var(--sch-text-base);
+  font-weight: 700;
+  color: #fff;
+  background: var(--sch-accent);
+  border: 0;
+  border-radius: var(--sch-radius);
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.sch-btn:hover { background: var(--sch-accent-hover); }
+.sch-btn:focus-visible { outline: 2px solid var(--sch-ink); outline-offset: 2px; }
+
+.sch-btn--quiet {
+  background: transparent;
+  color: var(--sch-accent);
+  border: 1px solid var(--sch-line-strong);
+}
+.sch-btn--quiet:hover { background: var(--sch-accent-soft); }
+
+/* ---------- الشريط العلوي ---------- */
+
+.sch-toolbar {
+  display: flex;
+  gap: var(--sch-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--sch-4);
+}
+.sch-toolbar input[type="search"] {
+  min-width: 260px;
+  padding: var(--sch-2) var(--sch-3);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  font-family: inherit;
+}
+
+/* ---------- الحالة الفارغة ---------- */
+/* شاشة فارغة = دعوة للتصرف، لا رسالة اعتذار. */
+
+.sch-empty {
+  text-align: center;
+  padding: var(--sch-7) var(--sch-5);
+  color: var(--sch-muted);
+}
+.sch-empty strong {
+  display: block;
+  font-family: var(--sch-font-display);
+  font-size: var(--sch-text-lg);
+  color: var(--sch-ink);
+  margin-bottom: var(--sch-1);
+}
+
+/* ---------- التنبيهات ---------- */
+
+.sch-notice {
+  padding: var(--sch-3) var(--sch-4);
+  border-radius: var(--sch-radius);
+  margin-bottom: var(--sch-4);
+  border-inline-end: 3px solid var(--sch-accent);
+  background: var(--sch-accent-soft);
+  color: var(--sch-ink);
+}
+.sch-notice--error { border-inline-end-color: var(--sch-danger); background: #FEF2F2; }
+.sch-notice--ok    { border-inline-end-color: var(--sch-success); background: #ECFDF5; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+
+/* ---------- تصحيح محاذاة العناصر ثنائية الاتجاه ---------- */
+/* dir="ltr" يضبط ترتيب المحارف، لكنه يغيّر المحاذاة الافتراضية إلى اليسار.
+   نعيدها لليمين حتى تبقى القيمة تحت عنوانها تمامًا. */
+
+td[dir="ltr"],
+th[dir="ltr"],
+dd[dir="ltr"],
+input[dir="ltr"],
+select[dir="ltr"],
+textarea[dir="ltr"] {
+  text-align: start;
+}

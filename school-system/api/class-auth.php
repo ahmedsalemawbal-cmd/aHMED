@@ -1,0 +1,218 @@
+<?php
+declare(strict_types=1);
+
+defined('ABSPATH') || exit;
+
+/**
+ * مصادقة التطبيقات: JWT (HS256) بلا مكتبات خارجية.
+ * access_token قصير العمر، refresh_token مربوط بالجهاز وقابل للإلغاء.
+ */
+final class SCH_Auth
+{
+    private const ACCESS_TTL  = 900;          // 15 دقيقة
+    private const REFRESH_TTL = 30 * DAY_IN_SECONDS;
+
+    public static function register_routes(): void
+    {
+        register_rest_route(SCH_API_NS, '/auth/login', [
+            'methods'             => 'POST',
+            'callback'            => [self::class, 'login'],
+            'permission_callback' => '__return_true', // نقطة الدخول الوحيدة المفتوحة
+            'args'                => [
+                'username'  => ['required' => true],
+                'password'  => ['required' => true],
+                'device_id' => ['required' => true],
+            ],
+        ]);
+
+        register_rest_route(SCH_API_NS, '/auth/refresh', [
+            'methods'             => 'POST',
+            'callback'            => [self::class, 'refresh'],
+            'permission_callback' => '__return_true',
+            'args'                => ['refresh_token' => ['required' => true]],
+        ]);
+
+        register_rest_route(SCH_API_NS, '/auth/logout', [
+            'methods'             => 'POST',
+            'callback'            => [self::class, 'logout'],
+            'permission_callback' => static fn (): bool => is_user_logged_in(),
+        ]);
+    }
+
+    public static function login(WP_REST_Request $req): WP_REST_Response|WP_Error
+    {
+        $user = wp_authenticate(
+            sanitize_user((string) $req->get_param('username')),
+            (string) $req->get_param('password')
+        );
+
+        if (is_wp_error($user)) {
+            return sch_api_error('invalid_credentials', __('بيانات الدخول غير صحيحة.', 'school-system'), 401);
+        }
+
+        $device_id = sanitize_text_field((string) $req->get_param('device_id'));
+        $refresh   = self::issue_refresh_token($user->ID, $device_id, (string) $req->get_param('device_name'));
+
+        sch_audit('auth.login', 'user', $user->ID, ['device' => $device_id]);
+
+        return new WP_REST_Response([
+            'access_token'  => self::issue_access_token($user->ID),
+            'refresh_token' => $refresh,
+            'expires_in'    => self::ACCESS_TTL,
+            'user'          => [
+                'id'    => $user->ID,
+                'name'  => $user->display_name,
+                'roles' => array_values($user->roles),
+            ],
+        ]);
+    }
+
+    public static function refresh(WP_REST_Request $req): WP_REST_Response|WP_Error
+    {
+        global $wpdb;
+
+        $token = (string) $req->get_param('refresh_token');
+        $row   = $wpdb->get_row($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('refresh_tokens') . '
+             WHERE token_hash = %s AND revoked_at IS NULL AND expires_at > %s LIMIT 1',
+            hash('sha256', $token),
+            sch_now()
+        ));
+
+        if (!$row) {
+            return sch_api_error('invalid_refresh_token', __('الجلسة منتهية. سجّل الدخول من جديد.', 'school-system'), 401);
+        }
+
+        return new WP_REST_Response([
+            'access_token' => self::issue_access_token((int) $row->user_id),
+            'expires_in'   => self::ACCESS_TTL,
+        ]);
+    }
+
+    public static function logout(WP_REST_Request $req): WP_REST_Response
+    {
+        global $wpdb;
+
+        $wpdb->update(
+            sch_table('refresh_tokens'),
+            ['revoked_at' => sch_now()],
+            ['user_id' => get_current_user_id(), 'device_id' => sanitize_text_field((string) $req->get_param('device_id'))]
+        );
+
+        return new WP_REST_Response(['ok' => true]);
+    }
+
+    /** يربط ترويسة Bearer بمستخدم ووردبريس في كل طلب REST. */
+    public static function authenticate_bearer(mixed $user_id): mixed
+    {
+        if ($user_id) {
+            return $user_id; // مصادَق مسبقًا بالكوكيز (الداشبورد)
+        }
+
+        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if (!is_string($header) || !str_starts_with($header, 'Bearer ')) {
+            return $user_id;
+        }
+
+        $payload = self::decode(substr($header, 7));
+        return $payload['sub'] ?? $user_id;
+    }
+
+    /** إلغاء كل جلسات الجوال لمستخدم — يُستدعى عند إيقاف موظف. */
+    public static function revoke_all_sessions(int $user_id): void
+    {
+        global $wpdb;
+
+        $wpdb->update(
+            sch_table('refresh_tokens'),
+            ['revoked_at' => sch_now()],
+            ['user_id' => $user_id, 'revoked_at' => null]
+        );
+
+        if (function_exists('wp_destroy_all_sessions')) {
+            $manager = WP_Session_Tokens::get_instance($user_id);
+            $manager->destroy_all();
+        }
+    }
+
+    private static function issue_access_token(int $user_id): string
+    {
+        $now = time();
+        return self::encode([
+            'sub' => $user_id,
+            'iat' => $now,
+            'exp' => $now + self::ACCESS_TTL,
+            'iss' => home_url(),
+        ]);
+    }
+
+    private static function issue_refresh_token(int $user_id, string $device_id, string $device_name = ''): string
+    {
+        global $wpdb;
+
+        $token = bin2hex(random_bytes(32));
+
+        // جهاز واحد = جلسة واحدة: ألغِ السابقة قبل إصدار جديدة.
+        $wpdb->update(
+            sch_table('refresh_tokens'),
+            ['revoked_at' => sch_now()],
+            ['user_id' => $user_id, 'device_id' => $device_id, 'revoked_at' => null]
+        );
+
+        $wpdb->insert(sch_table('refresh_tokens'), [
+            'user_id'     => $user_id,
+            'token_hash'  => hash('sha256', $token),
+            'device_id'   => $device_id,
+            'device_name' => sanitize_text_field($device_name) ?: null,
+            'expires_at'  => gmdate('Y-m-d H:i:s', time() + self::REFRESH_TTL),
+            'created_at'  => sch_now(),
+        ]);
+
+        return $token;
+    }
+
+    private static function secret(): string
+    {
+        return (string) get_option('sch_jwt_secret', '');
+    }
+
+    private static function encode(array $payload): string
+    {
+        $header = self::b64(wp_json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
+        $body   = self::b64(wp_json_encode($payload));
+        $sig    = self::b64(hash_hmac('sha256', "{$header}.{$body}", self::secret(), true));
+
+        return "{$header}.{$body}.{$sig}";
+    }
+
+    private static function decode(string $jwt): ?array
+    {
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) {
+            return null;
+        }
+        [$header, $body, $sig] = $parts;
+
+        $expected = self::b64(hash_hmac('sha256', "{$header}.{$body}", self::secret(), true));
+        if (!hash_equals($expected, $sig)) {
+            return null;
+        }
+
+        $payload = json_decode(self::b64_decode($body), true);
+        if (!is_array($payload) || ($payload['exp'] ?? 0) < time()) {
+            return null;
+        }
+
+        return $payload;
+    }
+
+    private static function b64(string $raw): string
+    {
+        return rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
+    }
+
+    private static function b64_decode(string $encoded): string
+    {
+        return (string) base64_decode(strtr($encoded, '-_', '+/'), true);
+    }
+}
