@@ -1484,11 +1484,17 @@ img { max-width: 100%; }
 .p-msg__i {
   width: 44px; height: 44px; flex: 0 0 auto; border-radius: 14px;
   display: grid; place-items: center; color: #fff;
+  background: var(--p-brand);   /* افتراضي — تتجاوزه الأصناف حسب المصدر */
   box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 6px 14px -6px rgba(76,29,149,.34);
 }
 .p-msg--message  .p-msg__i { background: var(--p-brand); }
 .p-msg--note     .p-msg__i { background: var(--p-n4); }
 .p-msg--referral .p-msg__i { background: var(--p-n3); }
+.p-msg--alert    .p-msg__i { background: var(--p-n3); }
+.p-msg--custody  .p-msg__i { background: var(--p-n2); }
+.p-msg--invoice  .p-msg__i { background: var(--p-n4); }
+.p-msg--payment  .p-msg__i { background: var(--p-ok); }
+.p-msg--reversal .p-msg__i { background: var(--p-warn); }
 .p-msg__b { flex: 1; min-width: 0; }
 .p-msg__h { display: flex; align-items: baseline; gap: 8px; }
 .p-msg__h b { font-size: var(--p-t4); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1557,5 +1563,8 @@ img { max-width: 100%; }
 }
 /* الفاصل المقسّم (السجل) — الاختيار حبّة بنفسجية واضحة في الوضعين */
 .p-seg a.is-on { background: var(--p-brand-s); color: var(--p-brand-ink); font-weight: 700; box-shadow: inset 0 0 0 1px var(--p-line-2); }
+
+/* العيادة: بطاقتا الحساسية/فصيلة الدم تأخذان الزجاج مع بقاء الخيط الأحمر */
+.p-vital__x { -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: var(--p-e1), var(--p-hi); }
 
 @media (prefers-reduced-motion: reduce) { .p-hero__badge i { animation: none; } }
