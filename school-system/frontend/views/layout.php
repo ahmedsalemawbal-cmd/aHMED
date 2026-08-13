@@ -16,8 +16,8 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <?php /* منع وميض السمة: تُضبط قبل أول رسم. الافتراضي داكن — الهوية الأساسية. */ ?>
-    <script>(function(){try{var t=localStorage.getItem('sch-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+    <?php /* منع وميض السمة: تُضبط قبل أول رسم. الافتراضي فاتح — هوية SaaS. */ ?>
+    <script>(function(){try{var t=localStorage.getItem('sch-theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
@@ -25,7 +25,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/shared-ui.css')); ?>">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/dashboard.css')); ?>">
 </head>
@@ -45,87 +45,86 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
     $sch_user_ob = wp_get_current_user();
     ?>
 
-    <!-- التنقّل بالبلاطات العلوية: عشر مجموعات بدل عمود بخمسة وأربعين قسمًا،
-         والشاشة تكسب عرض العمود كله. -->
-    <header class="sch-top">
-        <div class="sch-top__r">
-            <a class="sch-brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>">
-                <span class="sch-brand__mark"><?php echo esc_html(mb_substr(sch_settings('school_name', get_bloginfo('name')), 0, 2)); ?></span>
-                <span class="sch-brand__t">
-                    <b><?php echo esc_html(sch_settings('school_name', get_bloginfo('name'))); ?></b>
+    <?php
+    $sch_open  = SCH_Alerts::open_count();
+    $sch_school = sch_settings('school_name', get_bloginfo('name'));
+    // عنوان الشاشة الحالية للمسار العلوي (breadcrumb)
+    $sch_title = __('لوحة التحكم', 'school-system');
+    foreach ($sch_groups as $sch_g) {
+        foreach ($sch_g['sections'] as $sch_s => $sch_m) {
+            if ($sch_s === $sch_current) { $sch_title = (string) $sch_m[0]; }
+        }
+    }
+    ?>
+
+    <!-- التنقّل بشريط جانبي (يمين): مجموعات وأقسام تُقرأ رأسيًا،
+         والشاشة تحتفظ بعمق ثابت للمسار والأدوات في الأعلى. -->
+    <div class="sch-app">
+        <aside class="sch-side" id="sch-side">
+            <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>">
+                <span class="sch-side__mark"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
+                <span class="sch-side__bt">
+                    <b><?php echo esc_html($sch_school); ?></b>
                     <span><?php esc_html_e('لوحة الإدارة', 'school-system'); ?></span>
                 </span>
             </a>
 
-            <span class="sch-top__sp"></span>
-
-            <span class="sch-top__date"><?php echo esc_html(wp_date('l، j F Y')); ?></span>
-
-            <?php $sch_open = SCH_Alerts::open_count(); ?>
-            <a class="sch-top__ic<?php echo $sch_open > 0 ? ' has-dot' : ''; ?>"
-               href="<?php echo esc_url(SCH_Dashboard::url('alerts')); ?>"
-               aria-label="<?php esc_attr_e('الإنذارات', 'school-system'); ?>">
-                <?php echo sch_icon('clock', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            </a>
-
-            <button type="button" class="sch-theme" aria-label="<?php esc_attr_e('تبديل الوضع الفاتح/الداكن', 'school-system'); ?>">
-                <svg class="sch-theme__moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <svg class="sch-theme__sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            </button>
-
-            <span class="sch-me">
-                <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
-                <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
-                <a href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>"
-                   aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
-                    <?php echo sch_icon('route', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                </a>
-            </span>
-        </div>
-
-<!-- شريط واحد لا عشر بطاقات: المجموعات تنفصل بفراغ لا بحدود،
-     والسطر الثاني حُذف (كان يكرّر «إدارة المدرسة» أربع مرات و«ERP» أربعًا). -->
-        <nav class="sch-nav" aria-label="<?php esc_attr_e('المجموعات', 'school-system'); ?>">
-            <?php
-            $sch_prev_area = null;
-
-            foreach ($sch_groups as $sch_key => $sch_g) :
-                $sch_first = array_key_first($sch_g['sections']);
-                $sch_area  = (string) $sch_g['area'];
-
-                // فاصل رفيع عند تغيّر المجال — يجمع المتشابه بلا حدود حول كل عنصر
-                if ($sch_prev_area !== null && $sch_area !== $sch_prev_area) : ?>
-                    <span class="sch-nav__cut" aria-hidden="true"></span>
-                <?php endif;
-                $sch_prev_area = $sch_area; ?>
-
-                <a class="sch-nav__i<?php echo $sch_key === $sch_active ? ' is-on' : ''; ?>"
-                   href="<?php echo esc_url(SCH_Dashboard::url($sch_first)); ?>"
-                   title="<?php echo esc_attr($sch_area); ?>">
-                    <?php echo sch_icon($sch_g['icon'], 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                    <span><?php echo esc_html($sch_g['label']); ?></span>
-                </a>
-            <?php endforeach; ?>
-        </nav>
-
-        <?php if (isset($sch_groups[$sch_active])) : ?>
-            <!-- الشريحة الثانية أخف من الأولى: نص بخط تحته لا حبّات بحدود،
-                 فلا تتنافس طبقتان متشابهتان على العين. -->
-            <div class="sch-sub">
-                <?php foreach ($sch_groups[$sch_active]['sections'] as $sch_slug => $sch_meta) : ?>
-                    <a class="sch-sub__i<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
-                       href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
-                        <?php echo esc_html((string) $sch_meta[0]); ?>
-                    </a>
+            <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الأقسام', 'school-system'); ?>">
+                <?php foreach ($sch_groups as $sch_key => $sch_g) : ?>
+                    <div class="sch-side__grp">
+                        <div class="sch-side__h"><?php echo esc_html($sch_g['label']); ?></div>
+                        <?php foreach ($sch_g['sections'] as $sch_slug => $sch_meta) : ?>
+                            <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
+                               href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
+                                <?php echo sch_icon($sch_g['icon'], 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endforeach; ?>
+            </nav>
+
+            <div class="sch-side__user">
+                <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
+                <span class="sch-side__ut">
+                    <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
+                    <span><?php esc_html_e('حساب الإدارة', 'school-system'); ?></span>
+                </span>
+                <a class="sch-side__out" href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>"
+                   aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
+                    <?php echo sch_icon('route', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </a>
             </div>
-        <?php endif; ?>
-    </header>
+        </aside>
 
-    <div class="sch-shell">
+        <div class="sch-main">
+            <header class="sch-topbar">
+                <button type="button" class="sch-burger" id="sch-burger" aria-label="<?php esc_attr_e('القائمة', 'school-system'); ?>">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+                <nav class="sch-crumb" aria-label="<?php esc_attr_e('المسار', 'school-system'); ?>">
+                    <span><?php echo esc_html($sch_school); ?></span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                    <b><?php echo esc_html($sch_title); ?></b>
+                </nav>
 
-        <main class="sch-main">
-            <div class="sch-content">
+                <span class="sch-top__sp"></span>
+
+                <span class="sch-topbar__date"><?php echo esc_html(wp_date('l، j F')); ?></span>
+
+                <a class="sch-top__ic<?php echo $sch_open > 0 ? ' has-dot' : ''; ?>"
+                   href="<?php echo esc_url(SCH_Dashboard::url('alerts')); ?>"
+                   aria-label="<?php esc_attr_e('الإنذارات', 'school-system'); ?>">
+                    <?php echo sch_icon('clock', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </a>
+
+                <button type="button" class="sch-theme" aria-label="<?php esc_attr_e('تبديل الوضع الفاتح/الداكن', 'school-system'); ?>">
+                    <svg class="sch-theme__moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="sch-theme__sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                </button>
+            </header>
+
+            <main class="sch-content" id="sch-main-content">
                 <?php
                 if (isset($_GET['err'])) {
                     $sch_msg = isset($_GET['msg'])
@@ -157,15 +156,18 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                 <?php endif; ?>
 
                 <?php require $file; ?>
-            </div>
-        </main>
-
+            </main>
+        </div>
     </div>
+    <div class="sch-scrim" id="sch-scrim" hidden></div>
 
 <?php endif; ?>
 
 <?php /* تبديل السمة بالتفويض — بلا معالج مضمّن، فيصمد أمام أي CSP */ ?>
-<script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(!b)return;var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}});</script>
+<script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(b){var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}return;}
+var bg=e.target.closest('.sch-burger'),sc=e.target.closest('.sch-scrim');var side=document.getElementById('sch-side'),scrim=document.getElementById('sch-scrim');
+if(bg&&side){side.classList.add('is-open');if(scrim)scrim.hidden=false;return;}
+if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open')&&window.innerWidth<=980))&&side){side.classList.remove('is-open');if(scrim)scrim.hidden=true;}});</script>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
 </body>
 </html>
