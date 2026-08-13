@@ -10,7 +10,8 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
 
 <h1 class="p-h1"><?php esc_html_e('حسابي', 'school-system'); ?></h1>
 
-<div class="p-card" style="text-align:center">
+<!-- ترويسة الملف: صورة قابلة للتبديل + الاسم + شارات -->
+<div class="p-prof">
     <form method="post" enctype="multipart/form-data" id="p-av">
         <?php wp_nonce_field('sch_app_avatar', '_sch_nonce'); ?>
         <input type="hidden" name="sch_app_action" value="upload_avatar">
@@ -29,12 +30,17 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
                onchange="document.getElementById('p-av').submit()">
     </form>
 
-    <b style="display:block;font-size:var(--p-t3);margin-top:10px"><?php echo esc_html((string) $user->display_name); ?></b>
-    <?php if ($guardian && $guardian->parent_no) : ?>
-        <span class="p-nm" style="font-size:var(--p-t5);color:var(--p-mute)"><?php echo esc_html((string) $guardian->parent_no); ?></span>
-    <?php endif; ?>
+    <b class="p-prof__name"><?php echo esc_html((string) $user->display_name); ?></b>
+    <div class="p-prof__meta">
+        <span class="p-prof__chip"><?php esc_html_e('ولي أمر', 'school-system'); ?></span>
+        <?php if ($guardian && $guardian->parent_no) : ?>
+            <span class="p-prof__chip"><span class="p-nm"><?php echo esc_html((string) $guardian->parent_no); ?></span></span>
+        <?php endif; ?>
+    </div>
 </div>
 
+<!-- المعلومات -->
+<h2 class="p-h2"><?php esc_html_e('المعلومات', 'school-system'); ?></h2>
 <div class="p-list">
     <div class="p-row">
         <span class="p-row__t"><span><?php esc_html_e('الجوال', 'school-system'); ?></span></span>
@@ -50,8 +56,21 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
     </div>
 </div>
 
-<h2 class="p-h2"><?php esc_html_e('كلمة المرور', 'school-system'); ?></h2>
+<!-- الإعدادات -->
+<h2 class="p-h2"><?php esc_html_e('الإعدادات', 'school-system'); ?></h2>
+<div class="p-list">
+    <button type="button" class="p-setrow p-setrow--theme p-theme p-tap">
+        <span class="p-setrow__i"><?php echo sch_icon('sun', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <span class="p-setrow__t"><?php esc_html_e('المظهر', 'school-system'); ?></span>
+        <span class="p-setrow__e" aria-hidden="true">
+            <svg class="p-theme__moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="p-theme__sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </span>
+    </button>
+</div>
 
+<!-- كلمة المرور -->
+<h2 class="p-h2"><?php esc_html_e('كلمة المرور', 'school-system'); ?></h2>
 <form method="post" class="p-card">
     <?php wp_nonce_field('sch_change_password', '_sch_nonce'); ?>
     <input type="hidden" name="sch_app_action" value="change_password">
@@ -72,6 +91,11 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
     <button class="p-btn p-btn--brand p-tap"><?php esc_html_e('حفظ', 'school-system'); ?></button>
 </form>
 
-<a class="p-btn p-btn--quiet p-tap" href="<?php echo esc_url(SCH_App::url('logout')); ?>">
-    <?php esc_html_e('تسجيل الخروج', 'school-system'); ?>
-</a>
+<!-- الخروج -->
+<div class="p-list">
+    <a class="p-setrow p-setrow--out p-tap" href="<?php echo esc_url(SCH_App::url('logout')); ?>">
+        <span class="p-setrow__i"><?php echo sch_icon('door', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <span class="p-setrow__t"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></span>
+        <span class="p-setrow__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+    </a>
+</div>

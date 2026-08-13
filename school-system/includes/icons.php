@@ -63,11 +63,13 @@ function sch_avatar_svg(string $letter, int $size = 62): string
 {
     $letter = trim($letter) !== '' ? mb_substr(trim($letter), 0, 1) : '؟';
 
+    // الألوان تُشتق من السمة عبر متغيّرات CSS، فتتبع هوية كل تطبيق
+    // (بنفسجي أميثيست في تطبيق ولي الأمر). القيم الافتراضية محايدة.
     return sprintf(
         '<svg viewBox="0 0 64 64" width="%1$d" height="%1$d" role="img" aria-hidden="true">'
-        . '<rect width="64" height="64" fill="#ECF6F5"/>'
-        . '<text x="32" y="43" text-anchor="middle" font-family="Cairo, sans-serif" '
-        . 'font-size="30" font-weight="700" fill="#5170FF" opacity=".72">%2$s</text></svg>',
+        . '<rect width="64" height="64" fill="var(--sch-av-bg,#E8E8F0)"/>'
+        . '<text x="32" y="43" text-anchor="middle" font-family="inherit" '
+        . 'font-size="30" font-weight="700" fill="var(--sch-av-ink,#6C6A85)" opacity=".85">%2$s</text></svg>',
         $size,
         esc_html($letter)
     );

@@ -581,6 +581,87 @@ JS;
     }
 
     /**
+     * الخط الزمني ليوم الطفل — قلب شاشة «اليوم».
+     * يدمج مصادر حقيقية زمنيًا: أحداث العهدة (المسح الميداني) + الحضور +
+     * ملاحظات اليوم الإيجابية. مرتّبة صعوديًا (الصباح أولًا).
+     *
+     * @return array<int, array{time:string, kind:string, title:string, detail:string}>
+     */
+    public static function today_timeline(int $student_id): array
+    {
+        global $wpdb;
+
+        $today = current_time('Y-m-d');
+        $rows  = [];
+
+        // 1) أحداث العهدة — كل مسح نقل مسؤولية من جهة لجهة.
+        $events = $wpdb->get_results($wpdb->prepare(
+            'SELECT checkpoint, receiver_name, occurred_at FROM ' . sch_table('custody_events') . '
+             WHERE student_id = %d AND DATE(occurred_at) = %s ORDER BY occurred_at ASC',
+            $student_id,
+            $today
+        ));
+        $kind_of = [
+            'bus_board'  => 'bus',   'gate_in'    => 'login', 'gate_out' => 'logout',
+            'early_out'  => 'alert', 'bus_alight' => 'home',  'manual'   => 'check', 'correction' => 'check',
+        ];
+        foreach ((array) $events as $e) {
+            $cp     = (string) $e->checkpoint;
+            $title  = SCH_Custody::CHECKPOINTS[$cp] ?? __('تحديث الحالة', 'school-system');
+            $detail = ($cp === 'bus_alight' && $e->receiver_name)
+                ? sprintf(/* translators: %s: اسم المستلم */ __('سُلّم إلى %s', 'school-system'), (string) $e->receiver_name)
+                : $title;
+            $rows[] = [
+                '_s'     => (string) $e->occurred_at,
+                'time'   => substr((string) $e->occurred_at, 11, 5),
+                'kind'   => $kind_of[$cp] ?? 'check',
+                'title'  => $title,
+                'detail' => $detail,
+            ];
+        }
+
+        // 2) الحضور — تأكيد المعلم.
+        $att = $wpdb->get_row($wpdb->prepare(
+            'SELECT status, created_at FROM ' . sch_table('attendance') . '
+             WHERE student_id = %d AND att_date = %s',
+            $student_id,
+            $today
+        ));
+        if ($att) {
+            $ok = $att->status === 'present';
+            $rows[] = [
+                '_s'     => (string) $att->created_at,
+                'time'   => substr((string) $att->created_at, 11, 5),
+                'kind'   => $ok ? 'check' : 'alert',
+                'title'  => $ok ? __('حضور مؤكّد', 'school-system') : (SCH_Attendance::STATUSES[$att->status] ?? __('غياب', 'school-system')),
+                'detail' => __('رصده المعلم في الفصل', 'school-system'),
+            ];
+        }
+
+        // 3) ملاحظات اليوم الإيجابية — تصل ولي الأمر صامتةً في خطه الزمني.
+        $notes = $wpdb->get_results($wpdb->prepare(
+            'SELECT category, body, created_at FROM ' . sch_table('student_notes') . "
+             WHERE student_id = %d AND DATE(created_at) = %s AND category IN ('positive','participation')
+             ORDER BY created_at ASC",
+            $student_id,
+            $today
+        ));
+        foreach ((array) $notes as $n) {
+            $rows[] = [
+                '_s'     => (string) $n->created_at,
+                'time'   => substr((string) $n->created_at, 11, 5),
+                'kind'   => 'star',
+                'title'  => SCH_Notes::CATEGORIES[$n->category][0] ?? __('ملاحظة', 'school-system'),
+                'detail' => (string) $n->body,
+            ];
+        }
+
+        usort($rows, static fn (array $a, array $b): int => strcmp((string) $a['_s'], (string) $b['_s']));
+
+        return $rows;
+    }
+
+    /**
      * ما يراه ولي الأمر من السجل الصحي: الحساسية وفصيلة الدم فقط.
      * الأمراض المزمنة والملاحظات تبقى للعيادة — عرضها في تطبيق يُفتح يوميًا
      * يوسّع دائرة الاطلاع بلا فائدة تُذكر لولي الأمر الذي يعرفها أصلًا.
