@@ -24,9 +24,6 @@ if (isset($_GET['sheet'])) {
         'limit'       => 300,
     ]);
     
-// قائمة الأسماء للقوائم المنسدلة: تُستدعى مرة لا مرة لكل قائمة،
-// و`with => false` تُطفئ الضمّ فلا نجلب شعبة وولي أمر لا نعرضهما.
-$sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' => false])['items'];
 ?>
     <div class="sch-head sch-noprint">
         <div>
@@ -97,6 +94,9 @@ $sch_recent = SCH_Certificates::search([
     'limit'       => 120,
 ]);
 $sch_sugg   = SCH_Certificates::suggestions();
+// قائمة الأسماء للقوائم المنسدلة: تُستدعى مرة لا مرة لكل قائمة،
+// و`with => false` تُطفئ الضمّ فلا نجلب شعبة وولي أمر لا نعرضهما.
+$sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' => false])['items'];
 ?>
 
 <?php
@@ -285,7 +285,8 @@ $sch_on = array_filter($sch_f);
                         <td>
                             <div class="sch-rowacts">
                                 <a href="<?php echo esc_url(add_query_arg('cert', (int) $sch_r->id, SCH_Dashboard::url('certificates'))); ?>"
-                                   title="<?php esc_attr_e('عرض وطباعة', 'school-system'); ?>">
+                                   title="<?php esc_attr_e('عرض وطباعة', 'school-system'); ?>"
+                                   aria-label="<?php esc_attr_e('عرض وطباعة', 'school-system'); ?>">
                                     <?php echo sch_icon('print', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 </a>
                             </div>

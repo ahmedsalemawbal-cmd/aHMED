@@ -42,7 +42,7 @@ $photo_url = $student->photo_file
 
     :root {
       --ink:#0F1720; --muted:#64748B; --line:#E2E8F0; --line2:#CBD5E1;
-      --accent:#5170FF; --soft:#EEF2FF; --paper:#F8FAFC;
+      --accent:#1F5F52; --soft:#E8F0ED; --paper:#F8FAFC;
     }
 
     * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -85,7 +85,7 @@ $photo_url = $student->photo_file
     }
     .head h1 { margin: 0; font-size: 16pt; font-weight: 700; line-height: 1.35; }
     .head .sub { color: var(--muted); font-size: 9.5pt; }
-    .head .doc { text-align: left; font-size: 9pt; color: var(--muted); letter-spacing: .06em; }
+    .head .doc { text-align: end; font-size: 9pt; color: var(--muted); letter-spacing: .06em; }
 
     .top {
       display: grid; grid-template-columns: 34mm 1fr 30mm; gap: 8mm;
@@ -120,11 +120,11 @@ $photo_url = $student->photo_file
     .fields > div { min-width: 0; }
     .fields dt { font-size: 8.5pt; color: var(--muted); }
     .fields dd { margin: 0; font-weight: 700; font-size: 10.5pt; font-variant-numeric: tabular-nums; word-break: break-word; }
-    dd[dir="ltr"] { text-align: right; }
+    dd[dir="ltr"] { text-align: end; }
 
     table { width: 100%; border-collapse: collapse; font-size: 10pt; }
     th {
-      text-align: right; font-size: 8.5pt; font-weight: 700; color: var(--muted);
+      text-align: start; font-size: 8.5pt; font-weight: 700; color: var(--muted);
       padding: 2mm 2mm; border-bottom: 1px solid var(--line2);
     }
     td { padding: 2.5mm 2mm; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
@@ -173,9 +173,9 @@ $photo_url = $student->photo_file
                 <img src="<?php echo esc_url($photo_url); ?>" alt="<?php echo esc_attr($full); ?>">
             <?php else : ?>
                 <svg viewBox="0 0 100 124" width="100%" height="100%" aria-hidden="true">
-                    <rect width="100" height="124" fill="#EEF2FF"/>
-                    <circle cx="50" cy="44" r="20" fill="#5170FF" opacity=".22"/>
-                    <path d="M14 124c0-22 16-34 36-34s36 12 36 34z" fill="#5170FF" opacity=".22"/>
+                    <rect width="100" height="124" fill="var(--soft)"/>
+                    <circle cx="50" cy="44" r="20" fill="var(--accent)" opacity=".22"/>
+                    <path d="M14 124c0-22 16-34 36-34s36 12 36 34z" fill="var(--accent)" opacity=".22"/>
                 </svg>
             <?php endif; ?>
         </div>

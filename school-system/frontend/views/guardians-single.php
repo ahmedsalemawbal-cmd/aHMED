@@ -15,7 +15,7 @@ $user     = get_user_by('id', (int) $guardian->user_id);
 $name     = $user instanceof WP_User ? $user->display_name : '';
 $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
 ?>
-<a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('guardians')); ?>">&larr; <?php esc_html_e('كل أولياء الأمور', 'school-system'); ?></a>
+<a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('guardians')); ?>"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php esc_html_e('كل أولياء الأمور', 'school-system'); ?></a>
 
 <div class="sch-idcard">
     <div class="sch-idcard__head">
@@ -59,7 +59,7 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
             <input type="hidden" name="academic_no" id="sch-link-no">
 
             <div class="sch-toolbar">
-                <select name="relation" aria-label="صلة القرابة">
+                <select name="relation" aria-label="<?php esc_attr_e('صلة القرابة', 'school-system'); ?>">
                     <?php foreach (SCH_Guardians::RELATIONS as $slug => $label) : ?>
                         <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
                     <?php endforeach; ?>

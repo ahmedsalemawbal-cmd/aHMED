@@ -74,7 +74,7 @@ $pending = $wpdb->get_results(
                         <td class="sch-name">
                             <?php echo esc_html($d->full_name); ?>
                             <?php if ($d->allergies) : ?>
-                                <span class="sch-badge"><?php echo esc_html(__('حساسية:', 'school-system') . ' ' . $d->allergies); ?></span>
+                                <span class="sch-badge sch-badge--danger"><?php echo esc_html(__('حساسية:', 'school-system') . ' ' . $d->allergies); ?></span>
                             <?php endif; ?>
                         </td>
                         <td><?php echo esc_html($d->med_name . ' · ' . $d->dose); ?></td>
@@ -82,7 +82,15 @@ $pending = $wpdb->get_results(
                             <?php if ($d->given_at) : ?>
                                 <span class="sch-badge sch-badge--ok" dir="ltr"><?php echo esc_html(substr((string) $d->given_at, 11, 5)); ?></span>
                             <?php else : ?>
-                                <span class="sch-badge"><?php esc_html_e('بانتظار', 'school-system'); ?></span>
+                                <?php
+                                $sch_due  = strtotime(current_time('Y-m-d') . ' ' . $d->due_time);
+                                $sch_late = $sch_due && (strtotime(current_time('mysql')) - $sch_due) >= 20 * MINUTE_IN_SECONDS;
+                                ?>
+                                <?php if ($sch_late) : ?>
+                                    <span class="sch-badge sch-badge--danger"><?php esc_html_e('متأخرة', 'school-system'); ?></span>
+                                <?php else : ?>
+                                    <span class="sch-badge sch-badge--muted"><?php esc_html_e('بانتظار', 'school-system'); ?></span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                         <td>

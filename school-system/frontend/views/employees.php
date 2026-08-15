@@ -194,12 +194,14 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                             <td>
                                 <div class="sch-rowacts">
                                     <a href="<?php echo esc_url(add_query_arg('user_id', $sch_uid, SCH_Dashboard::url('perms'))); ?>"
-                                       title="<?php esc_attr_e('الصلاحيات', 'school-system'); ?>">
+                                       title="<?php esc_attr_e('الصلاحيات', 'school-system'); ?>"
+                                       aria-label="<?php esc_attr_e('الصلاحيات', 'school-system'); ?>">
                                         <?php echo sch_icon('shield', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                     </a>
 
                                     <a href="<?php echo esc_url(add_query_arg('edit', (int) $emp->id, SCH_Dashboard::url('employees'))); ?>"
-                                       title="<?php esc_attr_e('تعديل البيانات', 'school-system'); ?>">
+                                       title="<?php esc_attr_e('تعديل البيانات', 'school-system'); ?>"
+                                       aria-label="<?php esc_attr_e('تعديل البيانات', 'school-system'); ?>">
                                         <?php echo sch_icon('user', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                     </a>
 
@@ -208,7 +210,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                                             <?php wp_nonce_field('sch_suspend_employee', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="suspend_employee">
                                             <input type="hidden" name="employee_id" value="<?php echo esc_attr((string) $emp->id); ?>">
-                                            <button type="submit" title="<?php esc_attr_e('إيقاف', 'school-system'); ?>">
+                                            <button type="submit" title="<?php esc_attr_e('إيقاف', 'school-system'); ?>" aria-label="<?php esc_attr_e('إيقاف', 'school-system'); ?>">
                                                 <?php echo sch_icon('x', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                             </button>
                                         </form>
@@ -218,7 +220,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                                             <?php wp_nonce_field('sch_restore_employee', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="restore_employee">
                                             <input type="hidden" name="employee_id" value="<?php echo esc_attr((string) $emp->id); ?>">
-                                            <button type="submit" title="<?php esc_attr_e('إعادة للعمل', 'school-system'); ?>">
+                                            <button type="submit" title="<?php esc_attr_e('إعادة للعمل', 'school-system'); ?>" aria-label="<?php esc_attr_e('إعادة للعمل', 'school-system'); ?>">
                                                 <?php echo sch_icon('check', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                             </button>
                                         </form>

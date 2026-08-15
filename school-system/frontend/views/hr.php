@@ -28,53 +28,6 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
     </div>
 <?php endif; ?>
 
-
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
-
-    <form method="post" class="sch-mt">
-        <?php wp_nonce_field('sch_request_leave', '_sch_nonce'); ?>
-        <input type="hidden" name="sch_action" value="request_leave">
-        <div class="sch-grid">
-            <div class="sch-field">
-                <label for="l-user"><?php esc_html_e('الموظف', 'school-system'); ?></label>
-                <select id="l-user" name="user_id" required>
-                    <?php foreach ($staff['items'] as $e) : ?>
-                        <option value="<?php echo esc_attr((string) $e->user_id); ?>"><?php echo esc_html($e->display_name); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="sch-field">
-                <label for="l-type"><?php esc_html_e('نوع الإجازة', 'school-system'); ?></label>
-                <select id="l-type" name="leave_type">
-                    <?php foreach (SCH_HR::LEAVE_TYPES as $slug => $label) : ?>
-                        <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="sch-field">
-                <label for="l-start"><?php esc_html_e('من', 'school-system'); ?></label>
-                <input id="l-start" type="date" name="start_date" required>
-            </div>
-            <div class="sch-field">
-                <label for="l-end"><?php esc_html_e('إلى', 'school-system'); ?></label>
-                <input id="l-end" type="date" name="end_date" required>
-            </div>
-            <div class="sch-field">
-                <label for="l-reason"><?php esc_html_e('السبب', 'school-system'); ?></label>
-                <input id="l-reason" type="text" name="reason">
-            </div>
-        </div>
-        <button class="sch-btn"><?php esc_html_e('تقديم الطلب', 'school-system'); ?></button>
-    </form>
-</div>
-
 <?php SCH_Modal::open('sch-add-contract', __('إضافة عقد', 'school-system'), __('بدونه لا يدخل الموظف في مسير الرواتب', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('العقود', 'school-system'); ?></h2>
     <?php if ($contracts === []) : ?>
@@ -184,7 +137,7 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
                         $sch_leave_class = match ($l->status) {
                             'approved' => 'sch-badge--ok',
                             'rejected' => 'sch-badge--muted',
-                            default    => '',
+                            default    => 'sch-badge--warn',
                         };
                         ?>
                         <td>
@@ -208,4 +161,49 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
                                             <button class="<?php echo $dec === 'approved' ? 'sch-btn sch-btn--quiet' : 'sch-link-danger'; ?>"><?php echo esc_html($label); ?></button>
                                         </form>
                                     <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+
+    <form method="post" class="sch-mt">
+        <?php wp_nonce_field('sch_request_leave', '_sch_nonce'); ?>
+        <input type="hidden" name="sch_action" value="request_leave">
+        <div class="sch-grid">
+            <div class="sch-field">
+                <label for="l-user"><?php esc_html_e('الموظف', 'school-system'); ?></label>
+                <select id="l-user" name="user_id" required>
+                    <?php foreach ($staff['items'] as $e) : ?>
+                        <option value="<?php echo esc_attr((string) $e->user_id); ?>"><?php echo esc_html($e->display_name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="sch-field">
+                <label for="l-type"><?php esc_html_e('نوع الإجازة', 'school-system'); ?></label>
+                <select id="l-type" name="leave_type">
+                    <?php foreach (SCH_HR::LEAVE_TYPES as $slug => $label) : ?>
+                        <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="sch-field">
+                <label for="l-start"><?php esc_html_e('من', 'school-system'); ?></label>
+                <input id="l-start" type="date" name="start_date" required>
+            </div>
+            <div class="sch-field">
+                <label for="l-end"><?php esc_html_e('إلى', 'school-system'); ?></label>
+                <input id="l-end" type="date" name="end_date" required>
+            </div>
+            <div class="sch-field">
+                <label for="l-reason"><?php esc_html_e('السبب', 'school-system'); ?></label>
+                <input id="l-reason" type="text" name="reason">
+            </div>
+        </div>
+        <button class="sch-btn"><?php esc_html_e('تقديم الطلب', 'school-system'); ?></button>
+    </form>
 <?php SCH_Modal::close(); ?>

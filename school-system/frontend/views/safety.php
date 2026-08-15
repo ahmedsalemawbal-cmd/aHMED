@@ -35,7 +35,7 @@ SCH_Modal::head(
                     <tr>
                         <td class="sch-name"><?php echo esc_html($i->title); ?></td>
                         <td><?php echo esc_html(SCH_Security::INCIDENT_TYPES[$i->incident_type] ?? $i->incident_type); ?></td>
-                        <td><?php echo esc_html(SCH_Security::SEVERITIES[$i->severity] ?? $i->severity); ?></td>
+                        <td><?php $sch_sev = match ($i->severity) { 'high' => 'sch-badge--danger', 'medium' => 'sch-badge--warn', default => 'sch-badge--muted' }; ?><span class="sch-badge <?php echo esc_attr($sch_sev); ?>"><?php echo esc_html(SCH_Security::SEVERITIES[$i->severity] ?? $i->severity); ?></span></td>
                         <td dir="ltr"><?php echo esc_html($i->occurred_at); ?></td>
                         <td>
                             <span class="sch-badge <?php echo $i->status === 'closed' ? 'sch-badge--ok' : ''; ?>">

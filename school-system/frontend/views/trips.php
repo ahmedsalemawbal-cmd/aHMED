@@ -41,7 +41,7 @@ $position = $open_id > 0 ? SCH_Trips::last_position($open_id) : null;
                         </td>
                         <td>
                             <?php if ($t->status === 'running') : ?>
-                                <form method="post" onsubmit="return confirm('ستُغلق الرحلة. تأكد أن كل الطلاب نزلوا. متابعة؟');">
+                                <form method="post" onsubmit="return confirm('<?php esc_attr_e('ستُغلق الرحلة. تأكد أن كل الطلاب نزلوا. متابعة؟', 'school-system'); ?>');">
                                     <?php wp_nonce_field('sch_close_trip', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="close_trip">
                                     <input type="hidden" name="trip_id" value="<?php echo esc_attr((string) $t->id); ?>">

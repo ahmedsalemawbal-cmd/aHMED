@@ -115,20 +115,20 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
 
 <div class="sch-stats">
     <div class="sch-stat">
-        <span class="sch-stat__num"><?php echo esc_html(number_format($summary['billed'], 0)); ?></span>
-        <span class="sch-stat__label"><?php esc_html_e('إجمالي المفوتر (ر.س)', 'school-system'); ?></span>
+        <span class="sch-stat__num"><?php echo esc_html(sch_money($summary['billed'])); ?></span>
+        <span class="sch-stat__label"><?php esc_html_e('إجمالي المفوتر', 'school-system'); ?></span>
     </div>
     <div class="sch-stat">
-        <span class="sch-stat__num"><?php echo esc_html(number_format($summary['collected'], 0)); ?></span>
-        <span class="sch-stat__label"><?php esc_html_e('المحصّل (ر.س)', 'school-system'); ?></span>
+        <span class="sch-stat__num"><?php echo esc_html(sch_money($summary['collected'])); ?></span>
+        <span class="sch-stat__label"><?php esc_html_e('المحصّل', 'school-system'); ?></span>
     </div>
     <div class="sch-stat">
-        <span class="sch-stat__num"><?php echo esc_html(number_format($summary['outstanding'], 0)); ?></span>
-        <span class="sch-stat__label"><?php esc_html_e('المتبقي (ر.س)', 'school-system'); ?></span>
+        <span class="sch-stat__num"><?php echo esc_html(sch_money($summary['outstanding'])); ?></span>
+        <span class="sch-stat__label"><?php esc_html_e('المتبقي', 'school-system'); ?></span>
     </div>
     <div class="sch-stat">
-        <span class="sch-stat__num"><?php echo esc_html(number_format($summary['overdue'], 0)); ?></span>
-        <span class="sch-stat__label"><?php esc_html_e('متأخر السداد (ر.س)', 'school-system'); ?></span>
+        <span class="sch-stat__num"><?php echo esc_html(sch_money($summary['overdue'])); ?></span>
+        <span class="sch-stat__label"><?php esc_html_e('متأخر السداد', 'school-system'); ?></span>
     </div>
 </div>
 
@@ -204,8 +204,6 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
 </div>
 
 
-<?php if ($plans !== []) : ?>
-<?php endif; ?>
 <?php endif; ?>
 
 <?php SCH_Bulk::bar('finance'); ?>

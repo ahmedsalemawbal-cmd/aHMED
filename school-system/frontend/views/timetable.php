@@ -11,7 +11,7 @@ $status   = (string) $state->tt_status;
 <p class="sch-sub"><?php esc_html_e('مسودة ← اعتماد المدير ← نشر. لا يراه المعلمون قبل النشر — فلا يستيقظ أحد على جدول تغيّر ثلاث مرات ليلًا.', 'school-system'); ?></p>
 
 <!-- المراحل الثلاث -->
-<div class="sch-steps-bar sch-flow">
+<ol class="sch-steps-bar">
     <?php foreach (SCH_Org::TT_STATES as $slug => $label) :
         $order = (int) array_search($slug, array_keys(SCH_Org::TT_STATES), true);
         $now   = (int) array_search($status, array_keys(SCH_Org::TT_STATES), true);
@@ -20,7 +20,7 @@ $status   = (string) $state->tt_status;
             <span><?php echo esc_html((string) ($order + 1)); ?></span><?php echo esc_html($label); ?>
         </li>
     <?php endforeach; ?>
-</div>
+</ol>
 
 <div class="sch-card">
     <h2><?php esc_html_e('جاهزية الجدول', 'school-system'); ?></h2>
@@ -96,7 +96,7 @@ $status   = (string) $state->tt_status;
                         <td class="sch-sub"><?php echo esc_html(number_format_i18n((int) $l->weekly_quota)); ?></td>
                         <td>
                             <?php if ($over) : ?>
-                                <span class="sch-badge"><?php esc_html_e('فوق النصاب', 'school-system'); ?></span>
+                                <span class="sch-badge sch-badge--warn"><?php esc_html_e('فوق النصاب', 'school-system'); ?></span>
                             <?php else : ?>
                                 <span class="sch-badge sch-badge--ok"><?php esc_html_e('ضمن النصاب', 'school-system'); ?></span>
                             <?php endif; ?>

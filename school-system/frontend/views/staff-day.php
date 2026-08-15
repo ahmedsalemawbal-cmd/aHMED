@@ -28,11 +28,12 @@ $staff = SCH_Deputy::staff_sheet();
                             <?php if ((int) $s->on_leave > 0) : ?>
                                 <span class="sch-badge sch-badge--muted"><?php esc_html_e('إجازة معتمدة', 'school-system'); ?></span>
                             <?php elseif ($s->status) : ?>
-                                <span class="sch-badge <?php echo $s->status === 'present' ? 'sch-badge--ok' : ''; ?>">
+                                <?php $sch_sm = ['present' => 'sch-badge--ok', 'late' => 'sch-badge--warn', 'absent' => 'sch-badge--danger'][$s->status] ?? 'sch-badge--muted'; ?>
+                                <span class="sch-badge <?php echo esc_attr($sch_sm); ?>">
                                     <?php echo esc_html(SCH_Deputy::STAFF_STATUSES[$s->status] ?? ''); ?>
                                 </span>
                             <?php else : ?>
-                                <span class="sch-badge"><?php esc_html_e('لم يُرصد', 'school-system'); ?></span>
+                                <span class="sch-badge sch-badge--muted"><?php esc_html_e('لم يُرصد', 'school-system'); ?></span>
                             <?php endif; ?>
                         </td>
                         <td>

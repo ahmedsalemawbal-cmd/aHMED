@@ -51,6 +51,7 @@ function sch_icon(string $name, int $size = 18): string
         'user-check'=> '<circle cx="9.5" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.7-5.5 6-5.5 1.3 0 2.5.3 3.5.9"/><path d="m15.5 15 2 2 3.5-3.5"/>',
         'flag'     => '<path d="M6 21V4"/><path d="M6 4.5h10.5l-2 3.2 2 3.2H6"/>',
         'lock'     => '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.2" r="1.2"/>',
+        'x'        => '<path d="M6 6l12 12M18 6 6 18"/>',
         'dot'      => '<circle cx="12" cy="12" r="3"/>',
     ];
 

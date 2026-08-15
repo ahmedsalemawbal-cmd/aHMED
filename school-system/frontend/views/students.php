@@ -176,11 +176,13 @@ SCH_Modal::head(
                         <td>
                             <div class="sch-rowacts">
                                 <a href="<?php echo esc_url(SCH_Dashboard::url('students', (int) $st->id)); ?>"
-                                   title="<?php esc_attr_e('الملف', 'school-system'); ?>">
+                                   title="<?php esc_attr_e('الملف', 'school-system'); ?>"
+                                   aria-label="<?php esc_attr_e('الملف', 'school-system'); ?>">
                                     <?php echo sch_icon('badge', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 </a>
                                 <a href="<?php echo esc_url(SCH_Dashboard::url('badges')); ?>"
-                                   title="<?php esc_attr_e('البطاقة', 'school-system'); ?>">
+                                   title="<?php esc_attr_e('البطاقة', 'school-system'); ?>"
+                                   aria-label="<?php esc_attr_e('البطاقة', 'school-system'); ?>">
                                     <?php echo sch_icon('print', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 </a>
                             </div>

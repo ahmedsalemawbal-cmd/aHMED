@@ -11,15 +11,16 @@ $visits   = SCH_Clinic::visits(80);
 $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
 ?>
 <?php if ($sch_pre_obj) : ?>
-    <div class="sch-notice">
+    <?php $sch_pre_health = SCH_Enrollment::health($sch_pre_student); ?>
+    <?php $sch_has_allergy = $sch_pre_health && $sch_pre_health->allergies; ?>
+    <div class="sch-notice<?php echo $sch_has_allergy ? ' sch-notice--error' : ''; ?>">
         <strong><?php echo esc_html(sprintf(
             /* translators: %s: اسم الطالب */
             __('إحالة: %s', 'school-system'),
             SCH_Enrollment::full_name($sch_pre_obj)
         )); ?></strong>
-        <?php $sch_pre_health = SCH_Enrollment::health($sch_pre_student); ?>
-        <?php if ($sch_pre_health && $sch_pre_health->allergies) : ?>
-            <div class="sch-sub"><?php echo esc_html(__('حساسية:', 'school-system') . ' ' . $sch_pre_health->allergies); ?></div>
+        <?php if ($sch_has_allergy) : ?>
+            <div class="sch-sub"><strong><?php esc_html_e('حساسية:', 'school-system'); ?></strong> <?php echo esc_html($sch_pre_health->allergies); ?></div>
         <?php endif; ?>
     </div>
 <?php endif; ?>

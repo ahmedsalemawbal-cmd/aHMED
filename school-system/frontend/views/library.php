@@ -62,7 +62,7 @@ SCH_Modal::head(
     <form method="post" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_loan_book', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="loan_book">
-        <select name="book_id" required aria-label="الكتاب">
+        <select name="book_id" required aria-label="<?php esc_attr_e('الكتاب', 'school-system'); ?>">
             <option value=""><?php esc_html_e('الكتاب…', 'school-system'); ?></option>
             <?php foreach ($books as $b) : ?>
                 <option value="<?php echo esc_attr((string) $b->id); ?>">
@@ -70,13 +70,13 @@ SCH_Modal::head(
                 </option>
             <?php endforeach; ?>
         </select>
-        <select name="student_id" required aria-label="الطالب">
+        <select name="student_id" required aria-label="<?php esc_attr_e('الطالب', 'school-system'); ?>">
             <option value=""><?php esc_html_e('الطالب…', 'school-system'); ?></option>
             <?php foreach ($students['items'] as $s) : ?>
                 <option value="<?php echo esc_attr((string) $s->id); ?>"><?php echo esc_html($s->full_name); ?></option>
             <?php endforeach; ?>
         </select>
-        <input type="date" name="due_date" aria-label="تاريخ الاستحقاق">
+        <input type="date" name="due_date" aria-label="<?php esc_attr_e('تاريخ الاستحقاق', 'school-system'); ?>">
         <button class="sch-btn"><?php esc_html_e('إعارة', 'school-system'); ?></button>
     </form>
     <?php endif; ?>
@@ -114,7 +114,7 @@ SCH_Modal::head(
         <input type="hidden" name="sch_action" value="add_book">
         <input type="text" name="title" placeholder="<?php esc_attr_e('العنوان', 'school-system'); ?>" required>
         <input type="text" name="author" placeholder="<?php esc_attr_e('المؤلف', 'school-system'); ?>">
-        <input type="number" name="copies" value="1" min="1" max="999" title="<?php esc_attr_e('عدد النسخ', 'school-system'); ?>" aria-label="عدد النسخ">
+        <input type="number" name="copies" value="1" min="1" max="999" title="<?php esc_attr_e('عدد النسخ', 'school-system'); ?>" aria-label="<?php esc_attr_e('عدد النسخ', 'school-system'); ?>">
         <button class="sch-btn sch-btn--quiet"><?php esc_html_e('إضافة كتاب', 'school-system'); ?></button>
     </form>
 <?php SCH_Modal::close(); ?>

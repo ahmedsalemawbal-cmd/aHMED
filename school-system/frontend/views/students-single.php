@@ -33,7 +33,7 @@ $photo_url = $student->photo_file
     ? add_query_arg('sch_photo', '1', SCH_Dashboard::url('students', $id))
     : '';
 ?>
-<a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>">&larr; <?php esc_html_e('كل الطلاب', 'school-system'); ?></a>
+<a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php esc_html_e('كل الطلاب', 'school-system'); ?></a>
 
 <!-- الهوية: بطاقة ثابتة تُقرأ ولا يُلعب بها -->
 <div class="sch-idbar">
@@ -49,7 +49,7 @@ $photo_url = $student->photo_file
     <article class="sch-idc" id="sch-idc">
         <header class="sch-idc__head">
             <svg class="sch-guilloche" viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true">
-                <g fill="none" stroke="#94A3B8" stroke-width=".6">
+                <g fill="none" stroke="var(--sch-chrome-mut)" stroke-width=".6">
                     <path d="M0 30 Q 25 4 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30"/>
                     <path d="M0 30 Q 25 56 50 30 T 100 30 T 150 30 T 200 30 T 250 30 T 300 30 T 350 30 T 400 30 T 450 30 T 500 30 T 550 30 T 600 30"/>
                     <path d="M0 30 Q 40 8 80 30 T 160 30 T 240 30 T 320 30 T 400 30 T 480 30 T 560 30 T 640 30"/>
@@ -66,9 +66,9 @@ $photo_url = $student->photo_file
                         <img src="<?php echo esc_url($photo_url); ?>" alt="<?php echo esc_attr($full); ?>" width="150" height="186">
                     <?php else : ?>
                         <svg viewBox="0 0 100 124" width="150" height="186" aria-hidden="true">
-                            <rect width="100" height="124" fill="#EEF2FF"/>
-                            <circle cx="50" cy="44" r="20" fill="#5170FF" opacity=".22"/>
-                            <path d="M14 124c0-22 16-34 36-34s36 12 36 34z" fill="#5170FF" opacity=".22"/>
+                            <rect width="100" height="124" fill="var(--sch-accent-soft)"/>
+                            <circle cx="50" cy="44" r="20" fill="var(--sch-accent)" opacity=".22"/>
+                            <path d="M14 124c0-22 16-34 36-34s36 12 36 34z" fill="var(--sch-accent)" opacity=".22"/>
                         </svg>
                     <?php endif; ?>
                 </div>
@@ -193,7 +193,7 @@ $photo_url = $student->photo_file
     <form method="post" class="sch-toolbar">
         <?php wp_nonce_field('sch_enroll_student', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="enroll_student">
-        <select name="class_id" required aria-label="الشعبة">
+        <select name="class_id" required aria-label="<?php esc_attr_e('الشعبة', 'school-system'); ?>">
             <?php foreach ($classes as $c) : ?>
                 <option value="<?php echo esc_attr((string) $c->id); ?>" <?php selected($class && (int) $class->id === (int) $c->id); ?>>
                     <?php echo esc_html(SCH_Classes::label($c) . ' (' . $c->enrolled . '/' . $c->capacity . ')'); ?>
@@ -256,13 +256,13 @@ $photo_url = $student->photo_file
         <form method="post" class="sch-toolbar sch-mt">
             <?php wp_nonce_field('sch_link_guardian', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="link_guardian">
-            <select name="guardian_id" required aria-label="ولي الأمر">
+            <select name="guardian_id" required aria-label="<?php esc_attr_e('ولي الأمر', 'school-system'); ?>">
                 <option value=""><?php esc_html_e('اختر ولي أمر…', 'school-system'); ?></option>
                 <?php foreach ($all_g['items'] as $g) : ?>
                     <option value="<?php echo esc_attr((string) $g->id); ?>"><?php echo esc_html($g->display_name . ' — ' . $g->phone); ?></option>
                 <?php endforeach; ?>
             </select>
-            <select name="relation" aria-label="صلة القرابة">
+            <select name="relation" aria-label="<?php esc_attr_e('صلة القرابة', 'school-system'); ?>">
                 <?php foreach (SCH_Guardians::RELATIONS as $slug => $label) : ?>
                     <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
                 <?php endforeach; ?>
@@ -325,12 +325,12 @@ $photo_url = $student->photo_file
         <?php wp_nonce_field('sch_upload_doc', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="upload_doc">
         <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
-        <select name="doc_type" required aria-label="نوع المستند">
+        <select name="doc_type" required aria-label="<?php esc_attr_e('نوع المستند', 'school-system'); ?>">
             <?php foreach (SCH_Enrollment::DOC_TYPES as $slug => $label) : ?>
                 <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
             <?php endforeach; ?>
         </select>
-        <input type="file" name="doc" accept="image/jpeg,image/png,application/pdf" required aria-label="الملف">
+        <input type="file" name="doc" accept="image/jpeg,image/png,application/pdf" required aria-label="<?php esc_attr_e('الملف', 'school-system'); ?>">
         <button class="sch-btn sch-btn--quiet"><?php esc_html_e('رفع', 'school-system'); ?></button>
     </form>
 </div>

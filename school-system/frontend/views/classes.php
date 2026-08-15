@@ -97,7 +97,7 @@ SCH_Modal::head(
             </div>
             <div class="sch-field">
                 <label for="c-section"><?php esc_html_e('الشعبة', 'school-system'); ?></label>
-                <input id="c-section" type="text" name="section" placeholder="أ" required>
+                <input id="c-section" type="text" name="section" placeholder="<?php esc_attr_e('أ', 'school-system'); ?>" required>
             </div>
             <div class="sch-field">
                 <label for="c-cap"><?php esc_html_e('السعة القصوى', 'school-system'); ?></label>

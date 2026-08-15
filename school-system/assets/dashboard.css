@@ -58,6 +58,15 @@ body.sch-body {
   gap: var(--sch-4);
   margin-bottom: var(--sch-5);
 }
+/* أساس البطاقة الإحصائية — كانت الكسوة محصورة في a.sch-stat فقط،
+   فبطاقات <div class="sch-stat"> تطفو بلا سطح. */
+.sch-stat {
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-5);
+  box-shadow: var(--sch-e1);
+}
 .sch-body a.sch-stat {
   background: var(--sch-surface);
   border: 1px solid var(--sch-line);
@@ -88,7 +97,7 @@ body.sch-body {
   padding: var(--sch-3) var(--sch-4);
   font-size: var(--sch-text-xs);
   font-weight: 700;
-  color: var(--sch-muted);
+  color: var(--sch-ink-soft);
   letter-spacing: .02em;
   white-space: nowrap;
   background: var(--sch-surface-alt);
@@ -101,8 +110,6 @@ body.sch-body {
   border-bottom: 1px solid var(--sch-line);
   vertical-align: middle;
 }
-.sch-table tbody tr:last-child td { border-bottom: 0; }
-
 .sch-table tbody tr:last-child td { border-bottom: 0; }
 .sch-table .sch-name { color: var(--sch-ink); font-weight: 700; }
 .sch-table form { margin: 0; }
@@ -148,7 +155,7 @@ body.sch-body {
   border: 0;
   border-radius: var(--sch-radius);
   background: var(--sch-accent);
-  color: #fff;
+  color: var(--sch-on-accent);
   font-family: inherit;
   font-size: var(--sch-text-sm);
   font-weight: 700;
@@ -201,8 +208,8 @@ body.sch-body {
 
 .sch-code {
   display: inline-block; margin-inline-start: var(--sch-2);
-  padding: 2px var(--sch-2); background: #fff;
-  border: 1px solid var(--sch-line-strong); border-radius: 4px;
+  padding: 2px var(--sch-2); background: var(--sch-surface-alt); color: var(--sch-ink);
+  border: 1px solid var(--sch-line-strong); border-radius: var(--sch-r-sm);
   font-family: ui-monospace, monospace; direction: ltr;
 }
 
@@ -292,7 +299,7 @@ body.sch-body {
 
 /* خطوات مرقّمة — الترتيب هنا يحمل معنى (فحص ثم تأكيد) */
 .sch-steps {
-  margin: 0 var(--sch-4) var(--sch-3) 0;
+  margin-block: 0 var(--sch-3); margin-inline-start: var(--sch-4);
   padding: 0;
   color: var(--sch-ink-soft);
 }
@@ -586,8 +593,8 @@ body.sch-body {
   color: var(--sch-ink);
   font-weight: 700;
 }
-.sch-steps-bar li.is-active span { background: var(--sch-accent); color: #fff; }
-.sch-steps-bar li.is-done span { background: var(--sch-success); color: #fff; }
+.sch-steps-bar li.is-active span { background: var(--sch-accent); color: var(--sch-on-accent); }
+.sch-steps-bar li.is-done span { background: var(--sch-success); color: var(--sch-on-success); }
 
 .sch-step { display: none; }
 .sch-step.is-active { display: block; }
@@ -654,7 +661,7 @@ select[dir="ltr"],
 textarea[dir="ltr"] {
   text-align: start;
 }
-.sch-seg button.is-on { background: var(--sch-accent); color: #fff; font-weight: 700; }
+.sch-seg button.is-on { background: var(--sch-accent); color: var(--sch-on-accent); font-weight: 700; }
 
 .sch-idc {
   position: relative;
@@ -671,13 +678,13 @@ textarea[dir="ltr"] {
   gap: var(--sch-4);
   padding: var(--sch-4) var(--sch-5);
   background: var(--sch-chrome);
-  color: #E2E8F0;
+  color: var(--sch-chrome-ink);
   border-radius: 14px 14px 0 0;
   position: relative;
   overflow: hidden;
 }
 .sch-idc__school { font-weight: 700; font-size: var(--sch-text-lg); }
-.sch-idc__doc { font-size: var(--sch-text-xs); color: #94A3B8; letter-spacing: .06em; }
+.sch-idc__doc { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); letter-spacing: .06em; }
 
 /* نقش أمني كوثائق الهوية الرسمية */
 .sch-guilloche { position: absolute; inset: 0; opacity: .16; pointer-events: none; }
@@ -726,7 +733,7 @@ textarea[dir="ltr"] {
 .sch-idc__who { margin-bottom: var(--sch-5); }
 .sch-idc__who h1 {
   margin: 0;
-  font-size: 27px;
+  font-size: var(--sch-text-2xl);
   font-weight: 700;
   letter-spacing: -.02em;
   line-height: 1.25;
@@ -834,7 +841,7 @@ textarea[dir="ltr"] {
 /* مقياس واحد للعناوين — لا مقاسات متقاربة تُربك العين */
 .sch-title,
 .sch-page-title {
-  font-size: 26px;
+  font-size: var(--sch-text-xl);
   font-weight: 700;
   line-height: 1.4;
   margin: 0 0 var(--sch-2);
@@ -1088,7 +1095,7 @@ textarea[dir="ltr"] {
 }
 .sch-wiz__tab.is-done .sch-wiz__n {
   background: var(--sch-success-soft);
-  border-color: #C9E9DA;
+  border-color: var(--sch-success);
   color: var(--sch-success);
 }
 
@@ -1224,9 +1231,9 @@ textarea[dir="ltr"] {
   font-style: normal;
   padding: 1px 7px;
   border-radius: var(--sch-r-full);
-  background: #FFF7EC;
+  background: var(--sch-warn-soft);
   color: var(--sch-warn);
-  border: 1px solid #F3E5CD;
+  border: 1px solid var(--sch-warn-soft);
   font-size: 10px;
   font-weight: 700;
   white-space: nowrap;
@@ -1532,8 +1539,8 @@ tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
   flex: 0 0 auto;
   padding: 4px 13px;
   border-radius: var(--sch-r-full);
-  background: rgba(94, 234, 212, .16);
-  color: #7FE6C8;
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-ink);
   font-size: var(--sch-text-sm);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1551,8 +1558,8 @@ tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
 }
 .sch-bulk button:hover { background: rgba(255, 255, 255, .18); }
 .sch-bulk button[disabled] { opacity: .5; cursor: wait; }
-.sch-bulk__x { background: none !important; color: #8FA0B6 !important; padding: 8px !important; }
-.sch-bulk__x:hover { color: #FCA5A5 !important; }
+.sch-bulk__x { background: none !important; color: var(--sch-chrome-mut) !important; padding: 8px !important; }
+.sch-bulk__x:hover { color: var(--sch-danger) !important; }
 
 /* الشريط الجماعي معاكس للثيم: داكن على الوضع الفاتح (يبرز على المحتوى)،
    ويَنقلب سطحًا فاتحًا في الوضع الداكن — لأنه كان داكنًا على داكن فيختفي. */
@@ -1578,11 +1585,11 @@ tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
 .sch-views::-webkit-scrollbar { display: none; }
 .sch-view.is-on {
   background: var(--sch-accent-soft);
-  border-color: #C9D5FF;
+  border-color: var(--sch-accent);
   color: var(--sch-accent-dark);
   font-weight: 700;
 }
-.sch-view.is-on b { background: var(--sch-accent); color: #fff; }
+.sch-view.is-on b { background: var(--sch-accent); color: var(--sch-on-accent); }
 .sch-filter.has select,
 .sch-filter.has input { color: var(--sch-accent-dark); font-weight: 700; }
 .sch-filter.has button { color: var(--sch-danger); }
@@ -1591,27 +1598,15 @@ tr.is-open .sch-expand {
   transform: rotate(180deg);
   background: var(--sch-accent-soft);
   color: var(--sch-accent);
-  border-color: #C9D5FF;
+  border-color: var(--sch-accent);
 }
-.sch-watch button.is-on { color: #A07400; }
+.sch-watch button.is-on { color: var(--sch-gold-ink); }
 .sch-watch button.is-on svg { fill: currentColor; }
 .sch-watch button.is-on[data-bell] { color: var(--sch-accent); }
 .sch-watch button.is-on[data-bell] svg { fill: none; }
 
 /* ---------- مجموعة أدوات الصف ---------- */
 
-.sch-rowacts a, .sch-rowacts button {
-  position: relative;
-  width: 30px; height: 30px;
-  border: 0; border-radius: var(--sch-r-sm);
-  background: none; color: var(--sch-muted);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.sch-rowacts a:hover, .sch-rowacts button:hover {
-  background: var(--sch-surface); color: var(--sch-accent);
-  box-shadow: var(--sch-e1);
-}
 /* أيقونة بلا اسم تُحفظ بالتجربة لا بالنظر — فالتلميح ليس زينة */
 .sch-rowacts [title]::after {
   content: attr(title);
@@ -1659,7 +1654,7 @@ tr.is-open .sch-expand {
   padding: 16px 20px;
   border-radius: var(--sch-radius-lg);
   background: var(--sch-surface);
-  border: 1px solid #C9E9DA;
+  border: 1px solid var(--sch-line);
   border-inline-start: 4px solid var(--sch-success);
   box-shadow: var(--sch-e2);
 }
@@ -1739,7 +1734,7 @@ tr.is-open .sch-expand {
 .sch-idcard__school { font-size: var(--sch-text-base); font-weight: 700; }
 .sch-idcard__doc {
   padding: 3px 12px; border-radius: var(--sch-r-full);
-  background: rgba(94, 234, 212, .16); color: #9FB4FF;
+  background: rgba(94, 234, 212, .16); color: var(--sch-chrome-ink);
   font-size: var(--sch-text-xs); font-weight: 700;
 }
 .sch-idcard__body {
@@ -1789,13 +1784,13 @@ tr.is-open .sch-expand {
 
 .sch-body a.sch-btn,
 .sch-body a.sch-btn:hover,
-.sch-body a.sch-btn:visited { color: #fff; text-decoration: none; }
+.sch-body a.sch-btn:visited { color: var(--sch-on-accent); text-decoration: none; }
 
 .sch-body a.sch-btn--quiet,
 .sch-body a.sch-btn--quiet:hover,
 .sch-body a.sch-btn--quiet:visited { color: var(--sch-accent); }
 
-.sch-body a.sch-btn--sm { color: #fff; }
+.sch-body a.sch-btn--sm { color: var(--sch-on-accent); }
 
 /* أي زر بلا نص مرئي عطل — نُظهره بحد أدنى للعرض حتى لا يختفي */
 
@@ -1920,7 +1915,7 @@ tr.is-open .sch-expand {
 }
 .sch-badge2.is-picked .sch-badge2__card {
   border-color: var(--sch-accent);
-  box-shadow: 0 0 0 2px var(--sch-accent), 0 12px 24px -14px rgba(81, 112, 255, .6);
+  box-shadow: 0 0 0 2px var(--sch-accent), 0 12px 24px -14px var(--sch-accent-glow);
 }
 .sch-badge2.is-picked .sch-badge2__tick {
   background: var(--sch-accent);
@@ -1972,8 +1967,8 @@ tr.is-open .sch-expand {
     page-break-inside: avoid;
   }
   .sch-badge2__top { background: #0F1720 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .sch-badge2__foot { background: #5170FF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .sch-badge2__class { background: #EEF2FF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sch-badge2__foot { background: var(--sch-accent) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sch-badge2__class { background: var(--sch-accent-soft) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sch-badge2.is-printed .sch-badge2__card { opacity: 1; }
 }
 
@@ -1997,11 +1992,11 @@ tr.is-open .sch-expand {
 .sch-mode input:checked + .sch-mode__b {
   border-color: var(--sch-accent);
   background: var(--sch-accent-soft);
-  box-shadow: 0 0 0 1px var(--sch-accent), 0 10px 22px -14px rgba(81, 112, 255, .6);
+  box-shadow: 0 0 0 1px var(--sch-accent), 0 10px 22px -14px var(--sch-accent-glow);
 }
 .sch-mode--grant input:checked + .sch-mode__b {
   border-color: var(--sch-warn);
-  background: #FFF7EC;
+  background: var(--sch-warn-soft);
   box-shadow: 0 0 0 1px var(--sch-warn), 0 10px 22px -14px rgba(180, 105, 14, .5);
 }
 .sch-mode input:focus-visible + .sch-mode__b { outline: 2px solid var(--sch-accent); outline-offset: 2px; }
@@ -2010,9 +2005,9 @@ tr.is-open .sch-expand {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sch-4);
   margin-top: var(--sch-4); padding: var(--sch-4);
   border-radius: var(--sch-radius-lg);
-  background: #FFF7EC; border: 1px solid #F0E2C6;
+  background: var(--sch-warn-soft); border: 1px solid var(--sch-line);
 }
-.sch-hint { display: block; margin-top: 4px; font-size: var(--sch-text-xs); color: #8A6A2A; }
+.sch-hint { display: block; margin-top: 4px; font-size: var(--sch-text-xs); color: var(--sch-warn); }
 
 .sch-nums { display: flex; gap: var(--sch-2); }
 .sch-num { position: relative; flex: 1; cursor: pointer; }
@@ -2025,7 +2020,7 @@ tr.is-open .sch-expand {
   text-align: center; font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.sch-num input:checked + span { border-color: var(--sch-accent); background: var(--sch-accent); color: #fff; }
+.sch-num input:checked + span { border-color: var(--sch-accent); background: var(--sch-accent); color: var(--sch-on-accent); }
 
 .sch-plan {
   margin-top: var(--sch-5);
@@ -2333,7 +2328,7 @@ body:has(.sch-modal:not([hidden])) .sch-bulk { display: none; }
 .sch-modal__body .sch-steps-bar li.is-active { color: var(--sch-ink); font-weight: 700; }
 .sch-modal__body .sch-steps-bar li.is-done span {
   background: var(--sch-success-soft);
-  border-color: #C9E9DA;
+  border-color: var(--sch-success);
   color: var(--sch-success);
 }
 
@@ -2384,7 +2379,7 @@ body:has(.sch-modal:not([hidden])) .sch-bulk { display: none; }
   background: var(--sch-success);
   min-width: 180px;
 }
-.sch-modal__body #sch-save:hover { background: #0B6647; }
+.sch-modal__body #sch-save:hover { filter: brightness(0.94); }
 
 /* منع تمرير الخلفية خلف النافذة */
 body.sch-locked { overflow: hidden; }
@@ -2468,7 +2463,7 @@ body.sch-locked { overflow: hidden; }
   border-radius: var(--sch-radius-lg);
   overflow: hidden;
   background: var(--sch-surface);
-  border: 1px solid #C9E9DA;
+  border: 1px solid var(--sch-line);
   box-shadow: var(--sch-e2);
 }
 .sch-sugg__h {
@@ -2477,7 +2472,7 @@ body.sch-locked { overflow: hidden; }
   gap: var(--sch-3);
   padding: var(--sch-4);
   background: var(--sch-success-soft);
-  border-bottom: 1px solid #C9E9DA;
+  border-bottom: 1px solid var(--sch-line);
 }
 .sch-sugg__i {
   width: 40px; height: 40px; flex: 0 0 auto;
@@ -2587,7 +2582,7 @@ body.sch-locked { overflow: hidden; }
   margin-bottom: var(--sch-4);
   border-radius: var(--sch-radius-lg);
   background: var(--sch-warn-soft, #FFF7EC);
-  border: 1px solid #F0E2C6;
+  border: 1px solid var(--sch-line);
 }
 .sch-keybox b { display: block; font-size: var(--sch-text-base); color: var(--sch-warn); }
 .sch-keybox p { margin: 2px 0 var(--sch-3); font-size: var(--sch-text-xs); color: var(--sch-ink-soft); }
@@ -2711,7 +2706,7 @@ body.sch-locked { overflow: hidden; }
   display: block;
   height: 100%;
   border-radius: var(--sch-r-full);
-  background: linear-gradient(90deg, var(--sch-accent), #7B92FF);
+  background: linear-gradient(90deg, var(--sch-accent), var(--sch-accent-hover));
   transition: width .6s cubic-bezier(.22, .8, .28, 1);
 }
 
@@ -2747,14 +2742,14 @@ body.sch-locked { overflow: hidden; }
 
 /* منجَزة: هادئة تمامًا — أدّت دورها فلا تنافس ما بعدها */
 .sch-step2.is-done { background: var(--sch-bg); border-color: transparent; }
-.sch-step2.is-done .sch-step2__c { background: var(--sch-success); border-color: var(--sch-success); color: #fff; }
+.sch-step2.is-done .sch-step2__c { background: var(--sch-success); border-color: var(--sch-success); color: var(--sch-on-success); }
 .sch-step2.is-done > b { color: var(--sch-muted); font-weight: 400; }
 .sch-step2.is-done > p { display: none; }
 
 /* التالية: وحدها بارزة — هي ما تبحث عنه العين */
 .sch-step2.is-current {
   border-color: var(--sch-accent);
-  box-shadow: 0 0 0 1px var(--sch-accent), 0 14px 28px -16px rgba(81, 112, 255, .7);
+  box-shadow: 0 0 0 1px var(--sch-accent), 0 14px 28px -16px var(--sch-accent-glow);
   transform: translateY(-2px);
 }
 .sch-step2.is-current .sch-step2__c { border-color: var(--sch-accent); background: var(--sch-accent-soft); }
@@ -2857,13 +2852,14 @@ body.sch-locked { overflow: hidden; }
 }
 .sch-btn--quiet:hover { background: var(--sch-surface-alt); }
 .sch-btn--danger { background: var(--sch-danger); }
-.sch-btn--danger:hover { background: #9B1D1A; }
+.sch-btn--danger:hover { filter: brightness(0.94); }
 .sch-btn--sm { min-height: 32px; min-width: 0; padding: 0 var(--sch-3); font-size: var(--sch-text-xs); }
 
 /* أفعال الصف: أيقونات هادئة تظهر عند المرور */
 .sch-rowacts { display: flex; gap: 2px; justify-content: flex-end; }
 .sch-rowacts a,
 .sch-rowacts button {
+  position: relative;
   width: 32px; height: 32px;
   border: 0;
   border-radius: var(--sch-r-sm);
@@ -2886,11 +2882,24 @@ body.sch-locked { overflow: hidden; }
   font-size: var(--sch-text-xs);
   font-weight: 700;
   white-space: nowrap;
+  background: var(--sch-surface-alt);
+  color: var(--sch-ink-soft);
 }
 .sch-badge--ok     { background: var(--sch-success-soft); color: var(--sch-success); }
 .sch-badge--warn   { background: var(--sch-warn-soft);    color: var(--sch-warn); }
 .sch-badge--danger { background: var(--sch-danger-soft);  color: var(--sch-danger); }
 .sch-badge--muted  { background: var(--sch-surface-alt);  color: var(--sch-muted); }
+
+/* رقائق (chips): قوائم وسوم تلتفّ — كانت غير معرّفة فتظهر نصًّا سطريًا */
+.sch-chips { display: flex; flex-wrap: wrap; gap: var(--sch-2); }
+.sch-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--sch-r-full); background: var(--sch-surface-alt); color: var(--sch-muted); font-size: var(--sch-text-xs); }
+
+/* فاصل رأسي داخل الجدول — margin لا يعمل على خلايا الجدول، فالحشو المنطقي هو الصحيح */
+.sch-table td.sch-td-sep { padding-block-start: var(--sch-5); }
+
+/* عناوين الأقسام بمقياس الداشبورد — تجاوز تعريف shared-ui الأصغر (11px) */
+.sch-sect h2 { font-size: var(--sch-text-lg); letter-spacing: normal; color: var(--sch-ink); }
+.sch-sect span { color: var(--sch-muted); font-size: var(--sch-text-sm); }
 
 /* الحقول: ارتفاع الزر نفسه فتصطف معه */
 .sch-body :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
@@ -3005,7 +3014,7 @@ body.sch-locked { overflow: hidden; }
 
    تُحمَّل بعد shared-ui فتحكم صفحة الداشبورد وحدها؛ التطبيقات الخمسة تبقى
    على هوية shared-ui حتى تُهاجَر. أخضر «الجذور» #1F5F52 (لون مملوك مرتبط
-   بمعنى «أُصول»)، محايدات دافئة تُوازن الأخضر، وخط IBM Plex Sans Arabic.
+   بمعنى «أُصول»)، محايدات دافئة تُوازن الأخضر، وخط Cairo.
    كل الأصناف القديمة (.sch-card · .sch-table · .sch-stat · .sch-btn …)
    محفوظة — تُلوَّن تلقائيًا لأنها كلها ترث من هذه الرموز.
    ========================================================= */
@@ -3021,6 +3030,7 @@ body.sch-locked { overflow: hidden; }
   --sch-line:#E7E7EE; --sch-line-strong:#DADAE3;
   --sch-accent:#1F5F52; --sch-accent-ink:#184A40; --sch-accent-dark:#184A40; --sch-accent-hover:#267465;
   --sch-accent-soft:#E8F0ED; --sch-accent-glow:rgba(31,95,82,.22);
+  --sch-on-accent:#fff; --sch-on-success:#fff; --sch-on-danger:#fff;
   --sch-success:#1E8E5A; --sch-success-soft:#E4F3EB; --sch-warn:#C77A15; --sch-warn-soft:#FBEFDC;
   --sch-danger:#D64545; --sch-danger-soft:#FBE9E9;
   --sch-gold:#B08512; --sch-gold-bright:#E6C56A; --sch-gold-soft:#F7EFD9; --sch-gold-ink:#7C6216;
@@ -3039,6 +3049,7 @@ body.sch-locked { overflow: hidden; }
   --sch-line:rgba(255,255,255,.08); --sch-line-strong:rgba(255,255,255,.14);
   --sch-accent:#5AB89F; --sch-accent-ink:#8AD6C0; --sch-accent-dark:#8AD6C0; --sch-accent-hover:#7ACBB4;
   --sch-accent-soft:rgba(90,184,159,.16); --sch-accent-glow:rgba(90,184,159,.40);
+  --sch-on-accent:#08120E; --sch-on-success:#08120E; --sch-on-danger:#2A0A0A;
   --sch-success:#35C489; --sch-success-soft:rgba(53,196,137,.15); --sch-warn:#E9B44C; --sch-warn-soft:rgba(233,180,76,.15);
   --sch-danger:#FF6B6B; --sch-danger-soft:rgba(255,107,107,.15);
   --sch-gold:#E6C56A; --sch-gold-bright:#F2D98C; --sch-gold-soft:rgba(230,197,106,.14); --sch-gold-ink:#F2D98C;

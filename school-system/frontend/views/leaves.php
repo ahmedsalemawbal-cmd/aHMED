@@ -31,7 +31,7 @@ $pending = SCH_StudentLeave::pending();
                         <?php echo esc_html($l->full_name); ?>
                     </a>
                 </strong>
-                <span class="sch-badge"><?php echo esc_html(SCH_StudentLeave::REASONS[$l->reason_code] ?? ''); ?></span>
+                <span class="sch-badge sch-badge--muted"><?php echo esc_html(SCH_StudentLeave::REASONS[$l->reason_code] ?? ''); ?></span>
             </div>
 
             <span class="sch-sub" dir="ltr">

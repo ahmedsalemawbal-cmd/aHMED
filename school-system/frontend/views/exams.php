@@ -93,8 +93,6 @@ SCH_Modal::head(
     <?php endif; ?>
 </div>
 
-<?php if ($classes !== [] && $subjects !== []) : ?>
-<?php endif; ?>
 <?php endif; ?>
 
 <?php SCH_Modal::open('sch-add-exam', __('إنشاء اختبار', 'school-system'), __('يظهر في تطبيق الطالب وولي الأمر فور إنشائه', 'school-system')); ?>

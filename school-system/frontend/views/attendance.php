@@ -85,6 +85,7 @@ foreach ($sheet as $sch_row) {
                                     <input type="radio"
                                            name="status[<?php echo esc_attr((string) $row->id); ?>]"
                                            value="<?php echo esc_attr($key); ?>"
+                                           aria-label="<?php echo esc_attr(SCH_Attendance::STATUSES[$key] . ' — ' . $row->full_name); ?>"
                                            <?php checked($current, $key); ?>>
                                 </td>
                             <?php endforeach; ?>

@@ -17,15 +17,7 @@ if ($one > 0) {
     }
     ?>
     <a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('homework')); ?>">‹ <?php esc_html_e('الواجبات', 'school-system'); ?></a>
-    <?php
-SCH_Modal::head(
-    __('الواجبات', 'school-system'),
-    '',
-    'sch-add-hw',
-    __('واجب جديد', 'school-system'),
-    'book'
-);
-?>
+    <?php SCH_Modal::head(__('الواجبات', 'school-system')); ?>
     <p class="sch-sub">
         <?php echo esc_html(trim((string) $hw->grade_level . ' / ' . (string) $hw->section)
             . ' · ' . ($hw->subject_name ?: '') . ' · ' . $hw->due_date); ?>
@@ -71,7 +63,7 @@ SCH_Modal::head(
                             <?php if ($r->sub_id) : ?>
                                 <span class="sch-badge sch-badge--ok" dir="ltr"><?php echo esc_html(substr((string) $r->submitted_at, 0, 16)); ?></span>
                             <?php elseif (in_array((string) $r->taught_day_status, ['absent', 'excused'], true)) : ?>
-                                <span class="sch-badge"><?php esc_html_e('كان غائبًا يوم الشرح', 'school-system'); ?></span>
+                                <span class="sch-badge sch-badge--warn"><?php esc_html_e('كان غائبًا يوم الشرح', 'school-system'); ?></span>
                             <?php else : ?>
                                 <span class="sch-badge sch-badge--muted"><?php esc_html_e('لم يسلّم', 'school-system'); ?></span>
                             <?php endif; ?>
@@ -114,8 +106,7 @@ $class_id = isset($_GET['class_id']) ? absint($_GET['class_id']) : 0;
 $list     = $class_id > 0 ? SCH_Homework::for_class($class_id) : [];
 $past     = $class_id > 0 ? SCH_Homework::for_class($class_id, false) : [];
 ?>
-<h1 class="sch-title"><?php echo sch_icon('list', 22); ?><?php esc_html_e('الواجبات', 'school-system'); ?></h1>
-<p class="sch-sub"><?php esc_html_e('أسبوعية: تنزل آخر الأسبوع إلى «السابقة» ولا تُحذف — الغائب يحتاجها وأنت تحتاج سجلها.', 'school-system'); ?></p>
+<?php SCH_Modal::head(__('الواجبات', 'school-system'), __('أسبوعية: تنزل آخر الأسبوع إلى «السابقة» ولا تُحذف — الغائب يحتاجها وأنت تحتاج سجلها.', 'school-system'), 'sch-add-hw', __('واجب جديد', 'school-system'), 'book'); ?>
 
 
 <div class="sch-card">

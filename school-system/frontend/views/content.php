@@ -71,7 +71,7 @@ SCH_Modal::head(
                         <td class="sch-sub"><?php echo esc_html(SCH_Classes::STAGES[$c->stage] ?? ''); ?></td>
                         <td><?php echo esc_html(number_format_i18n((int) $c->opens)); ?></td>
                         <td>
-                            <span class="sch-badge <?php echo $c->status === 'published' ? 'sch-badge--ok' : ''; ?>">
+                            <span class="sch-badge <?php echo $c->status === 'published' ? 'sch-badge--ok' : 'sch-badge--muted'; ?>">
                                 <?php echo esc_html(SCH_Content::STATUSES[$c->status] ?? ''); ?>
                             </span>
                         </td>

@@ -38,13 +38,13 @@ $tc = array_sum(array_map(static fn ($r): float => (float) $r->total_credit, $tr
                 <?php foreach ($income['revenue'] as $r) : ?>
                     <tr><td><?php echo esc_html($r->name); ?></td><td><?php echo esc_html(sch_money($r->amount)); ?></td></tr>
                 <?php endforeach; ?>
-                <tr><td class="sch-name"><?php esc_html_e('إجمالي الإيرادات', 'school-system'); ?></td><td class="sch-name"><?php echo esc_html(number_format($income['rev_sum'], 2)); ?></td></tr>
+                <tr><td class="sch-name"><?php esc_html_e('إجمالي الإيرادات', 'school-system'); ?></td><td class="sch-name"><?php echo esc_html(sch_money($income['rev_sum'])); ?></td></tr>
 
-                <tr><td colspan="2" class="sch-name sch-mt"><?php esc_html_e('المصروفات', 'school-system'); ?></td></tr>
+                <tr><td colspan="2" class="sch-name sch-td-sep"><?php esc_html_e('المصروفات', 'school-system'); ?></td></tr>
                 <?php foreach ($income['expense'] as $r) : ?>
                     <tr><td><?php echo esc_html($r->name); ?></td><td><?php echo esc_html(sch_money($r->amount)); ?></td></tr>
                 <?php endforeach; ?>
-                <tr><td class="sch-name"><?php esc_html_e('إجمالي المصروفات', 'school-system'); ?></td><td class="sch-name"><?php echo esc_html(number_format($income['exp_sum'], 2)); ?></td></tr>
+                <tr><td class="sch-name"><?php esc_html_e('إجمالي المصروفات', 'school-system'); ?></td><td class="sch-name"><?php echo esc_html(sch_money($income['exp_sum'])); ?></td></tr>
                 </tbody>
             </table>
         </div>
@@ -83,8 +83,8 @@ $tc = array_sum(array_map(static fn ($r): float => (float) $r->total_credit, $tr
                 <tr>
                     <td></td>
                     <td class="sch-name"><?php esc_html_e('الإجمالي', 'school-system'); ?></td>
-                    <td class="sch-name"><?php echo esc_html(number_format($td, 2)); ?></td>
-                    <td class="sch-name"><?php echo esc_html(number_format($tc, 2)); ?></td>
+                    <td class="sch-name"><?php echo esc_html(sch_money($td)); ?></td>
+                    <td class="sch-name"><?php echo esc_html(sch_money($tc)); ?></td>
                 </tr>
                 </tbody>
             </table>
