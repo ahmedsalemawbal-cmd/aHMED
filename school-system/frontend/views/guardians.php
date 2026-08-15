@@ -43,12 +43,12 @@ SCH_Modal::head(
                 <tbody>
                 <?php foreach ($list['items'] as $g) : ?>
                     <tr>
-                        <td class="sch-mono" dir="ltr"><?php echo esc_html($g->parent_no ?: '—'); ?></td>
+                        <td class="sch-mono"><bdi><?php echo esc_html($g->parent_no ?: '—'); ?></bdi></td>
                         <td class="sch-name">
                             <a href="<?php echo esc_url(SCH_Dashboard::url('guardians', (int) $g->id)); ?>"><?php echo esc_html($g->display_name); ?></a>
                         </td>
-                        <td dir="ltr"><?php echo esc_html($g->phone ?: '—'); ?></td>
-                        <td dir="ltr"><?php echo esc_html($g->national_id ?: '—'); ?></td>
+                        <td><bdi><?php echo esc_html($g->phone ?: '—'); ?></bdi></td>
+                        <td><bdi><?php echo esc_html($g->national_id ?: '—'); ?></bdi></td>
                         <td><?php echo esc_html(number_format_i18n((int) $g->children_count)); ?></td>
                         <td>
                             <?php if ($g->status === 'active') : ?>

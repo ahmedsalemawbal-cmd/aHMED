@@ -73,6 +73,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                 <?php $sch_i = 0; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++; ?>
                     <div class="sch-side__grp" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
                         <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
+                            <?php echo sch_icon((string) $sch_g['icon'], 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                             <span><?php echo esc_html($sch_g['label']); ?></span>
                             <svg class="sch-side__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                         </button>

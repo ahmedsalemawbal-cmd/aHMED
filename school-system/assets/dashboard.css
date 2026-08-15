@@ -112,6 +112,9 @@ body.sch-body {
 }
 .sch-table tbody tr:last-child td { border-bottom: 0; }
 .sch-table .sch-name { color: var(--sch-ink); font-weight: 700; }
+/* اسم داخل الجدول رابطًا: نصّ نظيف لا رابط خام مسطّر (يتغلّب على .sch-body a) */
+.sch-body .sch-table td.sch-name a { color: inherit; text-decoration: none; }
+.sch-body .sch-table td.sch-name a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .sch-table form { margin: 0; }
 
 /* ---------- العناصر ---------- */
@@ -3109,13 +3112,15 @@ body.sch-locked { overflow: hidden; }
 
 /* رأس المجموعة زرّ طيّ/فتح: عنوان خافت + سهم يدور */
 .sch-body button.sch-side__h{
-  display:flex;align-items:center;gap:var(--sch-2);width:100%;
+  display:flex;align-items:center;gap:var(--sch-3);width:100%;
   padding:var(--sch-2) var(--sch-3);margin:0 0 2px;
   background:none;border:0;cursor:pointer;text-align:start;border-radius:var(--sch-radius);
-  font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.11em;
-  color:var(--sch-muted);transition:color .15s var(--sch-ease),background .15s var(--sch-ease);
+  font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0;
+  color:var(--sch-ink-soft);transition:color .15s var(--sch-ease),background .15s var(--sch-ease);
 }
-.sch-body button.sch-side__h:hover{color:var(--sch-ink-soft);background:var(--sch-surface-alt)}
+.sch-body button.sch-side__h:hover{color:var(--sch-ink);background:var(--sch-surface-alt)}
+.sch-side__h .sch-icon{flex:0 0 auto;color:var(--sch-muted);transition:color .15s}
+.sch-body button.sch-side__h:hover .sch-icon{color:var(--sch-ink-soft)}
 .sch-side__h > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sch-side__chev{width:13px;height:13px;flex:0 0 auto;color:var(--sch-muted);transition:transform .22s var(--sch-ease)}
 .sch-side__grp.is-collapsed .sch-side__chev{transform:rotate(-90deg)}
