@@ -1583,7 +1583,33 @@ tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
   scrollbar-width: none;
 }
 .sch-views::-webkit-scrollbar { display: none; }
-.sch-view.is-on {
+
+/* شريحة العرض المحفوظ: حبّة نظيفة بعدّاد — لا رابط خام مسطّر.
+   تُكتب بـ.sch-body a.sch-view لتتغلّب على لون/تسطير .sch-body a. */
+.sch-body a.sch-view {
+  display: inline-flex; align-items: center; gap: var(--sch-2);
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: var(--sch-r-full);
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+  color: var(--sch-ink-soft);
+  font-size: var(--sch-text-sm); font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+  transition: background .15s var(--sch-ease), border-color .15s var(--sch-ease), color .15s var(--sch-ease);
+}
+.sch-body a.sch-view:hover {
+  background: var(--sch-surface-alt); border-color: var(--sch-line-strong);
+  color: var(--sch-ink); text-decoration: none;
+}
+.sch-view b {
+  min-width: 20px; height: 18px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-full);
+  background: var(--sch-surface-alt); color: var(--sch-muted);
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sch-body a.sch-view.is-on {
   background: var(--sch-accent-soft);
   border-color: var(--sch-accent);
   color: var(--sch-accent-dark);
