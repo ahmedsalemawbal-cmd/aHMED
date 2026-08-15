@@ -142,6 +142,11 @@ $applied = $custom ? $map : SCH_Perms::template($role);
             </select>
         </div>
 
+        <div class="sch-permbar__f sch-permbar__f--grow">
+            <label for="p-search"><?php esc_html_e('بحث', 'school-system'); ?></label>
+            <input id="p-search" type="search" placeholder="<?php esc_attr_e('ابحث عن صلاحية…', 'school-system'); ?>" autocomplete="off">
+        </div>
+
         <div class="sch-permbar__acts">
             <button type="button" class="sch-btn sch-btn--quiet" id="p-all"><?php esc_html_e('فتح الكل', 'school-system'); ?></button>
             <button type="button" class="sch-btn sch-btn--quiet" id="p-none"><?php esc_html_e('إغلاق الكل', 'school-system'); ?></button>
@@ -150,17 +155,34 @@ $applied = $custom ? $map : SCH_Perms::template($role);
     </div>
 
     <div class="sch-permgrid">
+        <nav class="sch-prail" aria-label="<?php esc_attr_e('الفئات', 'school-system'); ?>">
+            <?php $sch_gi = 0; foreach ($groups as $sch_k => $sch_secs) : $sch_gi++;
+                [$sch_c, $sch_g] = explode('|', $sch_k);
+                $sch_head = trim(($cards[$sch_c][0] ?? '') . ($sch_g !== '' ? ' · ' . $sch_g : '')); ?>
+                <a class="sch-prail__i" href="#sch-pg-<?php echo esc_attr((string) $sch_gi); ?>" data-rail="<?php echo esc_attr((string) $sch_gi); ?>">
+                    <span><?php echo esc_html($sch_head); ?></span>
+                    <b data-railcount="<?php echo esc_attr((string) $sch_gi); ?>">٠</b>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+
         <div class="sch-permgrid__main">
-            <?php foreach ($groups as $key => $sections) :
+            <?php $sch_gi = 0; foreach ($groups as $key => $sections) : $sch_gi++;
                 [$card, $group] = explode('|', $key);
                 $heading = trim(($cards[$card][0] ?? '') . ($group !== '' ? ' · ' . $group : '')); ?>
 
-                <section class="sch-pg" data-group>
-                    <button type="button" class="sch-pg__h" data-toggle>
-                        <svg class="sch-pg__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 10 6 6 6-6"/></svg>
+                <section class="sch-pg is-open" id="sch-pg-<?php echo esc_attr((string) $sch_gi); ?>" data-group data-gi="<?php echo esc_attr((string) $sch_gi); ?>">
+                    <div class="sch-pg__h">
+                        <button type="button" class="sch-pg__caretbtn" data-toggle aria-label="<?php esc_attr_e('طيّ أو فتح المجموعة', 'school-system'); ?>">
+                            <svg class="sch-pg__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 10 6 6 6-6"/></svg>
+                        </button>
                         <b><?php echo esc_html($heading); ?></b>
-                        <span class="sch-pg__count" data-count></span>
-                    </button>
+                        <span class="sch-pg__count" data-count>٠ / ٠</span>
+                        <label class="sch-switch sch-switch--master" title="<?php esc_attr_e('تفعيل أو تعطيل المجموعة كاملة', 'school-system'); ?>">
+                            <input type="checkbox" data-master aria-label="<?php echo esc_attr($heading); ?>">
+                            <span class="sch-switch__t"></span>
+                        </label>
+                    </div>
 
                     <div class="sch-pg__rows">
                         <?php foreach ($sections as $slug => $meta) :
@@ -173,35 +195,37 @@ $applied = $custom ? $map : SCH_Perms::template($role);
 
                             <div class="sch-pr<?php echo $locked ? ' is-locked' : ''; ?>"
                                  data-row data-name="<?php echo esc_attr((string) $meta[0]); ?>">
-                                <span class="sch-pr__t">
-                                    <?php echo sch_icon((string) ($meta[4] ?? 'dot'), 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                    <b><?php echo esc_html((string) $meta[0]); ?></b>
-                                    <?php if ($hot && !$locked) : ?>
-                                        <em class="sch-hot" title="<?php esc_attr_e('يصل إشعار للمدير عند منحها', 'school-system'); ?>">
-                                            <?php esc_html_e('حسّاس', 'school-system'); ?>
-                                        </em>
-                                    <?php endif; ?>
-                                </span>
-
                                 <?php if ($locked) : ?>
+                                    <span class="sch-pr__t">
+                                        <?php echo sch_icon((string) ($meta[4] ?? 'dot'), 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                        <b><?php echo esc_html((string) $meta[0]); ?></b>
+                                    </span>
                                     <span class="sch-pr__lock" title="<?php echo esc_attr($reason); ?>">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
                                         <?php esc_html_e('مقفل', 'school-system'); ?>
                                     </span>
                                 <?php else : ?>
-                                    <span class="sch-tri" data-tri>
-                                        <?php foreach ([
-                                            'none' => __('مخفي', 'school-system'),
-                                            'view' => __('يرى', 'school-system'),
-                                            'edit' => __('يعدّل', 'school-system'),
-                                        ] as $m => $label) : ?>
-                                            <label class="sch-tri__o sch-tri__o--<?php echo esc_attr($m); ?>">
-                                                <input type="radio" name="perm[<?php echo esc_attr($slug); ?>][mode]"
-                                                       value="<?php echo esc_attr($m); ?>" <?php checked($mode, $m); ?>>
-                                                <span><?php echo esc_html($label); ?></span>
-                                            </label>
-                                        <?php endforeach; ?>
+                                    <input type="hidden" name="perm[<?php echo esc_attr($slug); ?>][mode]" value="<?php echo esc_attr($mode); ?>" data-mode>
+                                    <label class="sch-pr__chk">
+                                        <input type="checkbox" data-access <?php checked($mode !== 'none'); ?> aria-label="<?php echo esc_attr((string) $meta[0]); ?>">
+                                        <span class="sch-pr__box" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.5 17 4 11.5"/></svg>
+                                        </span>
+                                    </label>
+                                    <span class="sch-pr__t">
+                                        <?php echo sch_icon((string) ($meta[4] ?? 'dot'), 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                        <b><?php echo esc_html((string) $meta[0]); ?></b>
+                                        <?php if ($hot) : ?>
+                                            <em class="sch-hot" title="<?php esc_attr_e('يصل إشعار للمدير عند منحها', 'school-system'); ?>">
+                                                <?php esc_html_e('حسّاس', 'school-system'); ?>
+                                            </em>
+                                        <?php endif; ?>
                                     </span>
+                                    <label class="sch-switch sch-switch--edit" title="<?php esc_attr_e('يعدّل — تحكّم كامل', 'school-system'); ?>">
+                                        <input type="checkbox" data-edit <?php checked($mode === 'edit'); ?>>
+                                        <span class="sch-switch__t"></span>
+                                        <em><?php esc_html_e('يعدّل', 'school-system'); ?></em>
+                                    </label>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
@@ -261,31 +285,53 @@ $applied = $custom ? $map : SCH_Perms::template($role);
       array_combine(array_keys(SCH_Staff::ROLES), array_keys(SCH_Staff::ROLES))
   )); ?>;
 
-  function setRow(row, mode) {
-    var i = row.querySelector('input[value="' + mode + '"]');
-    if (i) { i.checked = true; }
-  }
+  // الخريطة: بلا وصول=none(مخفي) · وصول=view(يرى) · وصول+يعدّل=edit(يعدّل).
   function rowMode(row) {
-    var on = row.querySelector('input:checked');
-    return on ? on.value : 'none';
+    var h = row.querySelector('[data-mode]');
+    return h ? h.value : 'none';
+  }
+  function apply(row, mode) {
+    var h = row.querySelector('[data-mode]');
+    if (!h) { return; } // صف مقفل — يُتجاوز
+    var acc = row.querySelector('[data-access]');
+    var ed  = row.querySelector('[data-edit]');
+    h.value = mode;
+    if (acc) { acc.checked = mode !== 'none'; }
+    if (ed)  { ed.checked = mode === 'edit'; ed.disabled = mode === 'none'; }
+    row.classList.toggle('is-on', mode !== 'none');
+    row.classList.toggle('is-edit', mode === 'edit');
+  }
+  function recompute(row) {
+    var acc = row.querySelector('[data-access]');
+    if (!acc) { return; }
+    var ed = row.querySelector('[data-edit]');
+    apply(row, !acc.checked ? 'none' : (ed && ed.checked ? 'edit' : 'view'));
   }
 
   form.querySelectorAll('[data-toggle]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      b.closest('[data-group]').classList.toggle('is-open');
-    });
+    b.addEventListener('click', function () { b.closest('[data-group]').classList.toggle('is-open'); });
   });
 
   form.addEventListener('change', function (e) {
-    if (e.target.matches('[data-tri] input')) { sync(); }
+    var t = e.target;
+    if (t.matches('[data-access]')) { recompute(t.closest('[data-row]')); sync(); }
+    else if (t.matches('[data-edit]')) {
+      var row = t.closest('[data-row]'), acc = row.querySelector('[data-access]');
+      if (t.checked && acc && !acc.checked) { acc.checked = true; }
+      recompute(row); sync();
+    } else if (t.matches('[data-master]')) {
+      var g = t.closest('[data-group]'), on = t.checked;
+      g.querySelectorAll('[data-row]').forEach(function (r) { apply(r, on ? 'view' : 'none'); });
+      sync();
+    }
   });
 
   document.getElementById('p-all').addEventListener('click', function () {
-    form.querySelectorAll('[data-row]').forEach(function (r) { setRow(r, 'edit'); });
+    form.querySelectorAll('[data-row]').forEach(function (r) { apply(r, 'edit'); });
     sync();
   });
   document.getElementById('p-none').addEventListener('click', function () {
-    form.querySelectorAll('[data-row]').forEach(function (r) { setRow(r, 'none'); });
+    form.querySelectorAll('[data-row]').forEach(function (r) { apply(r, 'none'); });
     sync();
   });
 
@@ -293,31 +339,60 @@ $applied = $custom ? $map : SCH_Perms::template($role);
     var open = TEMPLATES[this.value];
     if (!open) { return; }
     form.querySelectorAll('[data-row]').forEach(function (row) {
-      var i = row.querySelector('input[name^="perm["]');
-      if (!i) { return; }
-      var slug = i.name.slice(5, i.name.indexOf(']'));
-      setRow(row, open.indexOf(slug) !== -1 ? 'edit' : 'none');
+      var h = row.querySelector('[data-mode]');
+      if (!h) { return; }
+      var slug = h.name.slice(5, h.name.indexOf(']'));
+      apply(row, open.indexOf(slug) !== -1 ? 'edit' : 'none');
     });
     sync();
+  });
+
+  var search = document.getElementById('p-search');
+  if (search) {
+    search.addEventListener('input', function () {
+      var q = this.value.trim();
+      form.querySelectorAll('[data-group]').forEach(function (g) {
+        var shown = 0;
+        g.querySelectorAll('[data-row]').forEach(function (r) {
+          var hit = !q || (r.dataset.name || '').indexOf(q) !== -1;
+          r.hidden = !hit;
+          if (hit) { shown++; }
+        });
+        g.hidden = q !== '' && shown === 0;
+        if (q) { g.classList.add('is-open'); }
+      });
+    });
+  }
+
+  form.querySelectorAll('[data-rail]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var t = document.getElementById('sch-pg-' + a.dataset.rail);
+      if (t) { t.classList.add('is-open'); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
   });
 
   function sync() {
     var total = 0, on = 0;
 
     form.querySelectorAll('[data-group]').forEach(function (g) {
-      var rows = g.querySelectorAll('[data-row] [data-tri]');
-      var open = 0;
-      rows.forEach(function (s) {
-        if (rowMode(s.closest('[data-row]')) !== 'none') { open++; }
+      var cnt = 0, grp = 0;
+      g.querySelectorAll('[data-row]').forEach(function (r) {
+        if (!r.querySelector('[data-access]')) { return; } // تجاوز المقفل
+        cnt++;
+        if (rowMode(r) !== 'none') { grp++; }
       });
-      total += rows.length;
-      on += open;
+      total += cnt; on += grp;
 
       var c = g.querySelector('[data-count]');
       if (c) {
-        c.textContent = open + ' / ' + rows.length;
-        c.className = 'sch-pg__count' + (open === 0 ? ' is-off' : (open === rows.length ? ' is-full' : ''));
+        c.textContent = grp + ' / ' + cnt;
+        c.className = 'sch-pg__count' + (grp === 0 ? ' is-off' : (grp === cnt ? ' is-full' : ''));
       }
+      var m = g.querySelector('[data-master]');
+      if (m) { m.checked = cnt > 0 && grp === cnt; m.indeterminate = grp > 0 && grp < cnt; }
+      var rc = form.querySelector('[data-railcount="' + g.dataset.gi + '"]');
+      if (rc) { rc.textContent = grp; rc.className = grp === 0 ? 'is-off' : ''; }
     });
 
     document.getElementById('p-count').textContent = on;
@@ -329,7 +404,6 @@ $applied = $custom ? $map : SCH_Perms::template($role);
 
     var list = document.getElementById('p-preview');
     list.innerHTML = '';
-
     if (on === 0) {
       var w = document.createElement('li');
       w.className = 'sch-sum__warn';
@@ -337,8 +411,8 @@ $applied = $custom ? $map : SCH_Perms::template($role);
       list.appendChild(w);
       return;
     }
-
     form.querySelectorAll('[data-row]').forEach(function (row) {
+      if (!row.querySelector('[data-access]')) { return; }
       var m = rowMode(row);
       if (m === 'none') { return; }
       var li = document.createElement('li');
@@ -352,8 +426,7 @@ $applied = $custom ? $map : SCH_Perms::template($role);
     });
   }
 
+  form.querySelectorAll('[data-row]').forEach(function (r) { recompute(r); });
   sync();
-  var first = form.querySelector('[data-group]');
-  if (first) { first.classList.add('is-open'); }
 })();
 </script>
