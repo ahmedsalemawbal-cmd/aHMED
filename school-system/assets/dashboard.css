@@ -115,6 +115,14 @@ body.sch-body {
 /* اسم داخل الجدول رابطًا: نصّ نظيف لا رابط خام مسطّر (يتغلّب على .sch-body a) */
 .sch-body .sch-table td.sch-name a { color: inherit; text-decoration: none; }
 .sch-body .sch-table td.sch-name a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+/* اتجاه القيم الإنجليزية (رقم/جوال/هوية/بريد/تاريخ) في تخطيط RTL:
+   dir="ltr" على عنصر عرض يجعل محاذاته للبداية اليسرى بينما تسميته يمين،
+   فتظهر القيمة تحت التسمية المجاورة = «لخبطة». الحل: text-align:end —
+   في عنصر LTR الـend = يمين، فتحاذي تسميتها تمامًا مع بقاء ترتيبها LTR.
+   قاعدة واحدة تصلح كل الجداول وبطاقات الملفات (dd) بلا لمس كل وسم. */
+.sch-body .sch-table td[dir="ltr"],
+.sch-body dd[dir="ltr"] { text-align: end; }
 .sch-table form { margin: 0; }
 
 /* ---------- العناصر ---------- */
