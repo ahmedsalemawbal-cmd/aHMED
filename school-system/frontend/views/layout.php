@@ -25,7 +25,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/shared-ui.css')); ?>">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/dashboard.css')); ?>">
 </head>
@@ -70,19 +70,29 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             </a>
 
             <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الأقسام', 'school-system'); ?>">
-                <?php foreach ($sch_groups as $sch_key => $sch_g) : ?>
-                    <div class="sch-side__grp">
-                        <div class="sch-side__h"><?php echo esc_html($sch_g['label']); ?></div>
+                <?php $sch_i = 0; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++; ?>
+                    <div class="sch-side__grp" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
+                        <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
+                            <span><?php echo esc_html($sch_g['label']); ?></span>
+                            <svg class="sch-side__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div class="sch-side__links" id="sch-grp-<?php echo esc_attr((string) $sch_i); ?>"><div class="sch-side__linksin">
                         <?php foreach ($sch_g['sections'] as $sch_slug => $sch_meta) : ?>
                             <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
                                href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
-                                <?php echo sch_icon($sch_g['icon'], 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                <?php echo sch_icon((string) ($sch_meta[4] ?? $sch_g['icon']), 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
+                                <?php if ($sch_slug === 'alerts' && $sch_open > 0) : ?>
+                                    <span class="sch-side__badge"><?php echo esc_html((string) $sch_open); ?></span>
+                                <?php endif; ?>
                             </a>
                         <?php endforeach; ?>
+                        </div></div>
                     </div>
                 <?php endforeach; ?>
             </nav>
+            <?php /* استعادة حالة طيّ المجموعات قبل رسم بقية الصفحة — بلا وميض */ ?>
+            <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}})();</script>
 
             <div class="sch-side__user">
                 <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
@@ -165,6 +175,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
 <?php /* تبديل السمة بالتفويض — بلا معالج مضمّن، فيصمد أمام أي CSP */ ?>
 <script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(b){var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}return;}
+var hh=e.target.closest('.sch-side__h');if(hh){var gg=hh.closest('.sch-side__grp');if(gg){var col=gg.classList.toggle('is-collapsed');hh.setAttribute('aria-expanded',col?'false':'true');try{var k=gg.getAttribute('data-grp'),s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');s=s.filter(function(x){return x!==k;});if(col)s.push(k);localStorage.setItem('sch-side-collapsed',JSON.stringify(s));}catch(_){}}return;}
 var bg=e.target.closest('.sch-burger'),sc=e.target.closest('.sch-scrim');var side=document.getElementById('sch-side'),scrim=document.getElementById('sch-scrim');
 if(bg&&side){side.classList.add('is-open');if(scrim)scrim.hidden=false;return;}
 if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open')&&window.innerWidth<=980))&&side){side.classList.remove('is-open');if(scrim)scrim.hidden=true;}});</script>

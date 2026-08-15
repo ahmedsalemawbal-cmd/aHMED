@@ -23,7 +23,7 @@ final class SCH_Dashboard
     private const SECTIONS = [
         'overview'   => ['نظرة عامة',       'sch_view_students',     'school', '',            'home'],
         'custody'    => ['لوحة العهدة',     'sch_view_custody',      'school', '',            'shield'],
-        'alerts'     => ['الإنذارات',       'sch_manage_alerts',     'school', '',            'clock'],
+        'alerts'     => ['الإنذارات',       'sch_manage_alerts',     'school', '',            'bell'],
         // السجلات — الأصل قبل المشتق: يُسجَّل، فيُربط بوليّه، فيُوضع في شعبة،
         // فتُطبع بطاقته، فيُكرَّم. والترتيب هنا هو ترتيب العرض.
         'students'   => ['الطلاب',          'sch_view_students',     'school', 'السجلات',     'users'],
@@ -35,25 +35,25 @@ final class SCH_Dashboard
         // اليوم الدراسي — ما يجري اليوم، بترتيب حدوثه
         'attendance' => ['الحضور',          'sch_manage_attendance', 'school', 'اليوم الدراسي','check'],
         'timetable'  => ['بناء الجدول',     'sch_build_timetable',   'school', 'اليوم الدراسي','calendar'],
-        'subjects'   => ['المواد والجداول', 'sch_manage_subjects',   'school', 'اليوم الدراسي','calendar'],
-        'homework'   => ['الواجبات',        'sch_manage_homework',   'school', 'اليوم الدراسي','list'],
-        'exams'      => ['الاختبارات',      'sch_manage_exams',      'school', 'اليوم الدراسي','award'],
-        'content'    => ['المحتوى التعليمي','sch_manage_content',    'school', 'اليوم الدراسي','book'],
-        'leaves'     => ['إجازات الطلاب',   'sch_decide_leaves',     'school', 'اليوم الدراسي','check'],
+        'subjects'   => ['المواد والجداول', 'sch_manage_subjects',   'school', 'اليوم الدراسي','book'],
+        'homework'   => ['الواجبات',        'sch_manage_homework',   'school', 'اليوم الدراسي','pen'],
+        'exams'      => ['الاختبارات',      'sch_manage_exams',      'school', 'اليوم الدراسي','clipboard'],
+        'content'    => ['المحتوى التعليمي','sch_manage_content',    'school', 'اليوم الدراسي','play'],
+        'leaves'     => ['إجازات الطلاب',   'sch_decide_leaves',     'school', 'اليوم الدراسي','leaf'],
         'kg'         => ['رياض الأطفال',    'sch_manage_kg',         'school', 'اليوم الدراسي','sun'],
         // حضور المعلمين شأن موظفين لا سجلات طلاب — نُقل هنا
-        'staff-day'  => ['حضور المعلمين',   'sch_supervise_stage',   'school', 'اليوم الدراسي','check'],
+        'staff-day'  => ['حضور المعلمين',   'sch_supervise_stage',   'school', 'اليوم الدراسي','user-check'],
 
         // الخدمات — ما يُقدَّم للطالب
         'clinic'     => ['الصحة المدرسية',  'sch_manage_services',   'school', 'الخدمات',     'heart'],
-        'meds'       => ['أدوية الطلاب',    'sch_manage_meds',       'school', 'الخدمات',     'clock'],
+        'meds'       => ['أدوية الطلاب',    'sch_manage_meds',       'school', 'الخدمات',     'pill'],
         'inbox'      => ['صندوق المتابعة',  'sch_handle_notes',      'school', 'الخدمات',     'user'],
         'messages'   => ['الرسائل',         'sch_send_messages',     'school', 'الخدمات',     'mail'],
         'library'    => ['المكتبة',         'sch_manage_services',   'school', 'الخدمات',     'book'],
 
-        'nerve'      => ['المتابعة العميقة','sch_view_insights',     'school', '',            'award'],
-        'deputy'     => ['يومي',            'sch_supervise_stage',   'school', '',            'home'],
-        'perms'      => ['الصلاحيات',       'sch_manage_staff',      'system', '',           'shield'],
+        'nerve'      => ['المتابعة العميقة','sch_view_insights',     'school', '',            'activity'],
+        'deputy'     => ['يومي',            'sch_supervise_stage',   'school', '',            'flag'],
+        'perms'      => ['الصلاحيات',       'sch_manage_staff',      'system', '',           'lock'],
 
         'transport'  => ['المسارات والباصات','sch_manage_transport',  'transport', '',        'bus'],
 

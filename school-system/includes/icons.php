@@ -41,6 +41,16 @@ function sch_icon(string $name, int $size = 18): string
         'upload'   => '<path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16"/>',
         'cog'      => '<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/>',
         'clock'    => '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+        'bell'     => '<path d="M6 9.5a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+        'activity' => '<path d="M3 12h4l2.5-7 5 14 2.5-7H21"/>',
+        'pen'      => '<path d="m15.5 5 3.5 3.5"/><path d="M4 20l1.2-4.2L16 5a2 2 0 0 1 3 3L8.2 18.8z"/>',
+        'clipboard'=> '<path d="M9 4.5H7.5A2 2 0 0 0 5.5 6.5V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V6.5a2 2 0 0 0-2-2H15"/><rect x="9" y="3" width="6" height="3.6" rx="1"/><path d="M9 12h6M9 15.5h4"/>',
+        'pill'     => '<rect x="3.5" y="9" width="17" height="6" rx="3"/><path d="M12 9v6"/>',
+        'leaf'     => '<path d="M6 18C6 9.5 12 5.5 19 5.5c0 8.5-5 12.5-12 12.5z"/><path d="M6 18c2.5-3.8 5.5-6 9.5-7"/>',
+        'play'     => '<circle cx="12" cy="12" r="8.5"/><path d="M10.2 8.5v7l5.5-3.5z"/>',
+        'user-check'=> '<circle cx="9.5" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.7-5.5 6-5.5 1.3 0 2.5.3 3.5.9"/><path d="m15.5 15 2 2 3.5-3.5"/>',
+        'flag'     => '<path d="M6 21V4"/><path d="M6 4.5h10.5l-2 3.2 2 3.2H6"/>',
+        'lock'     => '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.2" r="1.2"/>',
         'dot'      => '<circle cx="12" cy="12" r="3"/>',
     ];
 
