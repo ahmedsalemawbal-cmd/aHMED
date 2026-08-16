@@ -1828,29 +1828,6 @@ tr.is-open .sch-expand {
 
 /* ---------- بطاقة «التالي» ---------- */
 
-.sch-next {
-  display: flex; align-items: center; gap: var(--sch-4);
-  flex-wrap: wrap;
-  margin-bottom: var(--sch-4);
-  padding: 16px 20px;
-  border-radius: var(--sch-radius-lg);
-  background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
-  border-inline-start: 4px solid var(--sch-success);
-  box-shadow: var(--sch-e2);
-}
-.sch-next__ic {
-  width: 44px; height: 44px; border-radius: var(--sch-radius-lg); flex: 0 0 auto;
-  background: var(--sch-success-soft); color: var(--sch-success);
-  display: flex; align-items: center; justify-content: center;
-}
-.sch-next__t { flex: 1; min-width: 0; }
-.sch-next__t b { display: block; font-size: var(--sch-text-base); }
-/* يقول لماذا لا ماذا فقط — من يفهم السبب لا ينساه */
-.sch-next__t span { display: block; font-size: var(--sch-text-sm); color: var(--sch-muted); }
-.sch-next .sch-btn { margin: 0; flex: 0 0 auto; }
-.sch-next.is-done { border-color: var(--sch-line); border-inline-start-color: var(--sch-line-strong); }
-.sch-next.is-done .sch-next__ic { background: var(--sch-bg); color: var(--sch-muted); }
 
 /* ---------- قائمة التحقق ---------- */
 
@@ -2823,119 +2800,98 @@ body.sch-locked { overflow: hidden; }
    لا لوحة تُقرأ، **وكل الخطوات بنفس العلامة فلا تعرف ما التالي**.
    ========================================================= */
 
-.sch-setup {
+/* =========================================================
+   قائمة الإكمال — «النجم الشمالي».
+   خطوة تالية واحدة واضحة، شريط تقدّم مجزّأ، والمتبقّي مطويّ،
+   والمكتمل شرائح هادئة — وحالة «اكتمل» بميدالية. بلا جدار بطاقات.
+   ========================================================= */
+.sch-ns {
+  background: var(--sch-surface);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e1);
   padding: var(--sch-5);
   margin-bottom: var(--sch-5);
-  border-radius: var(--sch-radius-lg);
-  background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
-  box-shadow: var(--sch-e3);
 }
 
-.sch-setup__h {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--sch-4);
-  margin-bottom: var(--sch-3);
-}
-.sch-setup__h h2 { margin: 0 0 2px; font-size: var(--sch-text-xl); }
-.sch-setup__h p { margin: 0; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+/* شريط التركيز */
+.sch-ns__focus { display: flex; align-items: center; gap: var(--sch-4); }
+.sch-ns__t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sch-ns__k { font-size: var(--sch-text-xs); color: var(--sch-muted); font-weight: 700; letter-spacing: .02em; }
+.sch-ns__k b { color: var(--sch-accent-ink); }
+.sch-ns__k--ok { color: var(--sch-success); }
+.sch-ns__h { font-size: var(--sch-text-lg); font-weight: 800; letter-spacing: -.02em; margin: 3px 0; color: var(--sch-ink); }
+.sch-ns__d { font-size: var(--sch-text-sm); color: var(--sch-muted); }
+.sch-ns__act { display: inline-flex; align-items: center; gap: var(--sch-3); flex: 0 0 auto; }
+.sch-ns__act .sch-btn { margin: 0; }
 
-.sch-setup__n { flex: 0 0 auto; display: flex; align-items: baseline; gap: 3px; }
-.sch-setup__n b {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -.03em;
-  color: var(--sch-accent);
-  font-variant-numeric: tabular-nums;
+/* ميدالية الاكتمال + توقيع ذهبي نادر */
+.sch-ns__medal {
+  position: relative; flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
+  background: var(--sch-success-soft); color: var(--sch-success);
+  display: grid; place-items: center;
 }
-.sch-setup__n em { font-style: normal; font-size: var(--sch-text-base); color: var(--sch-muted); }
+.sch-ns__medal::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--sch-success); opacity: .25; }
+.sch-ns__spark { position: absolute; top: -3px; inset-inline-start: -3px; width: 16px; height: 16px; color: var(--sch-gold); }
 
-.sch-setup__bar {
-  height: 8px;
-  margin-bottom: var(--sch-5);
-  border-radius: var(--sch-r-full);
-  background: var(--sch-bg);
-  overflow: hidden;
+/* شريط تقدّم مجزّأ */
+.sch-ns__seg { display: flex; gap: 4px; margin-top: var(--sch-4); }
+.sch-ns__seg i { flex: 1; height: 6px; border-radius: var(--sch-r-full); background: var(--sch-surface-alt); }
+.sch-ns__seg i.is-done { background: var(--sch-accent); }
+.sch-ns__seg i.is-cur { background: var(--sch-accent); box-shadow: 0 0 0 3px var(--sch-accent-soft); }
+.sch-ns.is-complete .sch-ns__seg i { background: var(--sch-success); }
+
+.sch-ns__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sch-3); margin-top: var(--sch-3); }
+.sch-ns__of { font-size: var(--sch-text-xs); color: var(--sch-muted); font-weight: 600; }
+.sch-body button.sch-ns__toggle {
+  background: none; border: 0; cursor: pointer; font-family: inherit;
+  font-size: var(--sch-text-xs); font-weight: 700; color: var(--sch-accent-ink); padding: 6px;
 }
-.sch-setup__bar i {
-  display: block;
-  height: 100%;
-  border-radius: var(--sch-r-full);
-  background: linear-gradient(90deg, var(--sch-accent), var(--sch-accent-hover));
-  transition: width .6s cubic-bezier(.22, .8, .28, 1);
+.sch-ns__toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* المتبقّي — أسطر تُكشف عند الطلب */
+.sch-ns__more { margin-top: var(--sch-2); border-top: 1px solid var(--sch-line); padding-top: 4px; }
+.sch-ns__row { display: flex; align-items: center; gap: var(--sch-3); padding: 11px 2px; }
+.sch-ns__dot { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--sch-line-strong); }
+.sch-ns__rt { font-size: var(--sch-text-sm); font-weight: 600; color: var(--sch-ink); flex: 0 0 auto; }
+.sch-ns__opt {
+  font-size: 10.5px; font-weight: 700; color: var(--sch-muted);
+  background: var(--sch-surface-alt); padding: 1px 8px; border-radius: var(--sch-r-full); flex: 0 0 auto;
 }
+.sch-ns__rd { font-size: var(--sch-text-xs); color: var(--sch-muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sch-ns__a { display: inline-flex; align-items: center; gap: var(--sch-3); flex: 0 0 auto; }
 
-.sch-setup__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--sch-3);
+/* روابط الإجراء (ابدأ / تمّ / لا ينطبق) خفيفة كالنص */
+.sch-body a.sch-lnk { color: var(--sch-accent-ink); font-size: var(--sch-text-xs); font-weight: 700; text-decoration: none; }
+.sch-body a.sch-lnk:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sch-ns .sch-fstep__f { display: inline; margin: 0; }
+.sch-body button.sch-fstep__b {
+  background: none; border: 0; cursor: pointer; font-family: inherit;
+  font-size: var(--sch-text-xs); font-weight: 700; color: var(--sch-accent-ink); padding: 0;
 }
+.sch-body button.sch-fstep__b.is-na { color: var(--sch-muted); }
+.sch-fstep__b:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-.sch-step2 {
-  display: flex;
-  flex-direction: column;
-  padding: var(--sch-4);
-  border-radius: var(--sch-radius-lg);
-  background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
-  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+/* المكتمل — شرائح هادئة مطويّة */
+.sch-ns__done { margin-top: var(--sch-2); border-top: 1px solid var(--sch-line); }
+.sch-body button.sch-ns__doneh {
+  display: flex; align-items: center; gap: var(--sch-2); width: 100%;
+  padding: 12px 2px 4px; background: none; border: 0; cursor: pointer; font-family: inherit; text-align: start;
 }
-.sch-step2 header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.sch-step2 > b { font-size: var(--sch-text-base); margin-bottom: 2px; }
-.sch-step2 > p { margin: 0; font-size: var(--sch-text-xs); color: var(--sch-muted); line-height: 1.75; }
-.sch-step2 footer { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--sch-3); }
-.sch-step2 footer .sch-btn { margin: 0; }
+.sch-ns__doneh b { font-size: var(--sch-text-sm); font-weight: 600; color: var(--sch-ink); }
+.sch-ns__ck { width: 20px; height: 20px; flex: 0 0 auto; border-radius: 50%; background: var(--sch-success-soft); color: var(--sch-success); display: grid; place-items: center; }
+.sch-ns__chev { margin-inline-start: auto; color: var(--sch-muted); transition: transform .24s var(--sch-ease); }
+.sch-ns__done.is-open .sch-ns__chev { transform: rotate(180deg); }
+.sch-ns__chips { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px 2px 2px; }
+.sch-ns__chip { display: inline-flex; align-items: center; gap: 6px; font-size: var(--sch-text-xs); color: var(--sch-muted); background: var(--sch-surface-alt); border-radius: var(--sch-r-full); padding: 5px 12px; font-weight: 500; }
+.sch-ns__chip .sch-icon { color: var(--sch-success); flex: 0 0 auto; }
+.sch-ns__chip.is-na .sch-icon { color: var(--sch-muted); }
 
-.sch-step2__c {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--sch-line-strong);
-  background: var(--sch-surface);
-  color: var(--sch-muted);
-  display: flex; align-items: center; justify-content: center;
+@media (max-width: 700px) {
+  .sch-ns__focus { flex-direction: column; align-items: stretch; }
+  .sch-ns__rd { display: none; }
 }
-
-/* منجَزة: هادئة تمامًا — أدّت دورها فلا تنافس ما بعدها */
-.sch-step2.is-done { background: var(--sch-bg); border-color: transparent; }
-.sch-step2.is-done .sch-step2__c { background: var(--sch-success); border-color: var(--sch-success); color: var(--sch-on-success); }
-.sch-step2.is-done > b { color: var(--sch-muted); font-weight: 400; }
-.sch-step2.is-done > p { display: none; }
-
-/* التالية: وحدها بارزة — هي ما تبحث عنه العين */
-.sch-step2.is-current {
-  border-color: var(--sch-accent);
-  box-shadow: 0 0 0 1px var(--sch-accent), 0 14px 28px -16px var(--sch-accent-glow);
-  transform: translateY(-2px);
-}
-.sch-step2.is-current .sch-step2__c { border-color: var(--sch-accent); background: var(--sch-accent-soft); }
-.sch-step2__now {
-  font-style: normal;
-  padding: 3px 11px;
-  border-radius: var(--sch-r-full);
-  background: var(--sch-accent);
-  color: #fff;
-  font-size: var(--sch-text-xs);
-  font-weight: 700;
-}
-
-.sch-step2__opt {
-  font-style: normal;
-  padding: 2px 10px;
-  border-radius: var(--sch-r-full);
-  background: var(--sch-bg);
-  color: var(--sch-muted);
-  font-size: var(--sch-text-xs);
-}
-
-/* لا تنطبق: باهتة ولا تشغل انتباهًا */
-.sch-step2.is-na { opacity: .5; }
-.sch-step2.is-na > p { display: none; }
-
 @media (prefers-reduced-motion: reduce) {
-  .sch-setup__bar i, .sch-step2 { transition: none; }
-  .sch-step2.is-current { transform: none; }
+  .sch-ns__seg i, .sch-ns__chev { transition: none; }
 }
 
 /* تبويب داخلي: للشاشات التي دُمجت فيها شاشتان (النقل · صندوق المتابعة) */

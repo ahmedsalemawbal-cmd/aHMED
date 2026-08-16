@@ -442,116 +442,150 @@ final class SCH_Flow
 
     // ---------- العرض ----------
 
-    /** بطاقة «التالي» — الدفعة بعد كل حفظ. */
+    /**
+     * بطاقة «التالي» — دُمجت في checklist() ضمن شريط التركيز (النجم الشمالي)،
+     * فتبقى فارغة تفاديًا للتكرار (كل استدعاءاتها مقرونة بـchecklist).
+     */
     public static function next_card(string $flow, int $entity_id = 0): void
     {
-        $p = self::progress($flow, $entity_id);
+    }
 
-        if ($p['next'] === null) {
-            ?>
-            <div class="sch-next is-done">
-                <span class="sch-next__ic"><?php echo sch_icon('check', 22); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-                <span class="sch-next__t">
-                    <b><?php esc_html_e('اكتمل الملف', 'school-system'); ?></b>
-                    <span><?php esc_html_e('لا شيء ناقص.', 'school-system'); ?></span>
-                </span>
-            </div>
-            <?php
+    /**
+     * لوحة «النجم الشمالي»: خطوة تالية واحدة واضحة، شريط تقدّم مجزّأ،
+     * والمتبقّي مطويّ، والمكتمل شرائح — وحالة «اكتمل» بميدالية. بلا جدار بطاقات.
+     */
+    public static function checklist(string $flow, int $entity_id = 0, string $title = ''): void
+    {
+        $p = self::progress($flow, $entity_id);
+        if ($p['total'] === 0) {
             return;
         }
 
-        $step = $p['steps'][$p['next']];
+        $title    = $title !== '' ? $title : __('خطوات الإكمال', 'school-system');
+        $complete = $p['next'] === null;
+        $current  = $complete ? null : $p['steps'][$p['next']];
+
+        $remaining = [];
+        $completed = [];
+        foreach ($p['steps'] as $key => $s) {
+            if ($s['state'] === 'done' || $s['state'] === 'na') {
+                $completed[$key] = $s;
+            } elseif ($s['state'] !== 'current') {
+                $remaining[$key] = $s;
+            }
+        }
         ?>
-        <div class="sch-next">
-            <span class="sch-next__ic"><?php echo sch_icon('check', 22); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-            <span class="sch-next__t">
-                <b><?php echo esc_html(sprintf(
-                    /* translators: 1: المنجَز 2: الإجمالي */
-                    __('أُنجز %1$s من %2$s', 'school-system'),
-                    number_format_i18n($p['done']),
-                    number_format_i18n($p['total'])
-                )); ?></b>
-                <span><?php echo esc_html(sprintf(
-                    /* translators: 1: الخطوة 2: سببها */
-                    __('التالي: %1$s — %2$s', 'school-system'),
-                    $step['label'],
-                    $step['why']
-                )); ?></span>
-            </span>
-            <a class="sch-btn" href="<?php echo esc_url($step['url']); ?>">
-                <?php echo esc_html($step['label']); ?>
-            </a>
-        </div>
-        <?php
-    }
+        <section class="sch-ns<?php echo $complete ? ' is-complete' : ''; ?>">
 
-    /** قائمة التحقق — تعمل بعد أسبوع كما تعمل الآن. */
-    public static function checklist(string $flow, int $entity_id = 0, string $title = ''): void
-    {
-        $p   = self::progress($flow, $entity_id);
-        $pct = $p['total'] > 0 ? $p['done'] / $p['total'] : 0;
-        ?>
-        <section class="sch-setup">
-            <!-- التقدّم في الأعلى بشريط عريض ورقم كبير: أربعة عشر صفًا متطابقة
-                 كانت قائمة تُمرَّر لا لوحة تُقرأ، والحلقة الصغيرة لا تُرى. -->
-            <header class="sch-setup__h">
-                <div>
-                    <h2><?php echo esc_html($title !== '' ? $title : __('خطوات الإكمال', 'school-system')); ?></h2>
-                    <p><?php esc_html_e('يقترح ولا يمنع — أكمل ما تشاء متى شئت.', 'school-system'); ?></p>
-                </div>
-
-                <span class="sch-setup__n">
-                    <b><?php echo esc_html(number_format_i18n($p['done'])); ?></b>
-                    <em><?php echo esc_html('/ ' . number_format_i18n($p['total'])); ?></em>
-                </span>
-            </header>
-
-            <div class="sch-setup__bar">
-                <i style="width:<?php echo esc_attr((string) round($pct * 100)); ?>%"></i>
+            <!-- شريط التركيز: الخطوة التالية وحدها — أو ميدالية الاكتمال -->
+            <div class="sch-ns__focus">
+                <?php if ($complete) : ?>
+                    <span class="sch-ns__medal">
+                        <svg class="sch-ns__spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.6 4.9L18.5 8l-4.9 1.6L12 14l-1.6-4.4L5.5 8l4.9-1.1z"/></svg>
+                        <?php echo sch_icon('check', 26); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    </span>
+                    <span class="sch-ns__t">
+                        <span class="sch-ns__k sch-ns__k--ok"><?php esc_html_e('مكتمل', 'school-system'); ?></span>
+                        <b class="sch-ns__h"><?php echo esc_html(sprintf(
+                            /* translators: %s: عنوان القائمة */
+                            __('اكتمل %s', 'school-system'),
+                            $title
+                        )); ?></b>
+                        <span class="sch-ns__d"><?php echo esc_html(sprintf(
+                            /* translators: %s: العدد الكلي */
+                            __('أنجزت كل الخطوات (%s) — كل شيء جاهز.', 'school-system'),
+                            number_format_i18n($p['total'])
+                        )); ?></span>
+                    </span>
+                <?php else : ?>
+                    <span class="sch-ns__t">
+                        <span class="sch-ns__k"><?php echo esc_html(sprintf(
+                            /* translators: 1: رقم الخطوة 2: الإجمالي */
+                            __('الخطوة %1$s من %2$s · التالية', 'school-system'),
+                            number_format_i18n($p['done'] + 1),
+                            number_format_i18n($p['total'])
+                        )); ?></span>
+                        <b class="sch-ns__h"><?php echo esc_html($current['label']); ?></b>
+                        <span class="sch-ns__d"><?php echo esc_html($current['why']); ?></span>
+                    </span>
+                    <span class="sch-ns__act">
+                        <a class="sch-btn" href="<?php echo esc_url($current['url']); ?>"><?php esc_html_e('ابدأ الآن', 'school-system'); ?></a>
+                        <?php if ($current['manual']) : ?>
+                            <?php self::mark_button($flow, $entity_id, $p['next'], 'done', __('علّمه تمّ', 'school-system')); ?>
+                        <?php endif; ?>
+                    </span>
+                <?php endif; ?>
             </div>
 
-            <!-- بطاقات في شبكة لا صفوف متطابقة: ثلاث حالات مميّزة —
-                 منجَزة هادئة · التالية بارزة بزرّها · لم تبدأ باهتة. -->
-            <div class="sch-setup__grid">
-                <?php foreach ($p['steps'] as $key => $s) : ?>
-                    <article class="sch-step2 is-<?php echo esc_attr($s['state']); ?>">
-                        <header>
-                            <span class="sch-step2__c">
-                                <?php if ($s['state'] === 'done') : ?>
-                                    <?php echo sch_icon('check', 13); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                <?php elseif ($s['state'] === 'na') : ?>
-                                    <?php echo sch_icon('x', 12); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                <?php endif; ?>
-                            </span>
+            <!-- شريط تقدّم مجزّأ -->
+            <div class="sch-ns__seg" aria-hidden="true">
+                <?php foreach ($p['steps'] as $s) :
+                    $seg = ($s['state'] === 'done' || $s['state'] === 'na') ? ' is-done'
+                        : ($s['state'] === 'current' ? ' is-cur' : ''); ?>
+                    <i class="<?php echo esc_attr(trim($seg)); ?>"></i>
+                <?php endforeach; ?>
+            </div>
 
-                            <?php if ($s['state'] === 'current') : ?>
-                                <em class="sch-step2__now"><?php esc_html_e('التالي', 'school-system'); ?></em>
-                            <?php elseif ($s['state'] !== 'done' && $s['state'] !== 'na' && !$s['required']) : ?>
-                                <em class="sch-step2__opt"><?php esc_html_e('اختياري', 'school-system'); ?></em>
+            <div class="sch-ns__foot">
+                <span class="sch-ns__of"><?php echo esc_html(sprintf(
+                    /* translators: 1: المنجَز 2: الإجمالي */
+                    __('أنجزت %1$s من %2$s', 'school-system'),
+                    number_format_i18n($p['done']),
+                    number_format_i18n($p['total'])
+                )); ?></span>
+                <?php if ($remaining !== []) : ?>
+                    <button type="button" class="sch-ns__toggle" data-ns-more aria-expanded="false"><?php echo esc_html(sprintf(
+                        /* translators: %s: عدد الخطوات المتبقّية */
+                        __('عرض بقية الخطوات (%s)', 'school-system'),
+                        number_format_i18n(count($remaining))
+                    )); ?></button>
+                <?php endif; ?>
+            </div>
+
+            <!-- المتبقّي — أسطر تُكشف عند الطلب -->
+            <?php if ($remaining !== []) : ?>
+                <div class="sch-ns__more" data-ns-morewrap hidden>
+                    <?php foreach ($remaining as $key => $s) : ?>
+                        <div class="sch-ns__row">
+                            <span class="sch-ns__dot" aria-hidden="true"></span>
+                            <span class="sch-ns__rt"><?php echo esc_html($s['label']); ?></span>
+                            <?php if (!$s['required']) : ?>
+                                <span class="sch-ns__opt"><?php esc_html_e('اختياري', 'school-system'); ?></span>
                             <?php endif; ?>
-                        </header>
-
-                        <b><?php echo esc_html($s['label']); ?></b>
-                        <p><?php echo esc_html($s['why']); ?></p>
-
-                        <?php if ($s['state'] !== 'done' && $s['state'] !== 'na') : ?>
-                            <footer>
-                                <a class="sch-btn sch-btn--sm" href="<?php echo esc_url($s['url']); ?>">
-                                    <?php echo esc_html($s['state'] === 'current' ? __('ابدأ الآن', 'school-system') : __('ابدأ', 'school-system')); ?>
-                                </a>
-
+                            <span class="sch-ns__rd"><?php echo esc_html($s['why']); ?></span>
+                            <span class="sch-ns__a">
+                                <a class="sch-lnk" href="<?php echo esc_url($s['url']); ?>"><?php esc_html_e('ابدأ', 'school-system'); ?></a>
                                 <?php if ($s['manual']) : ?>
-                                    <?php self::mark_button($flow, $entity_id, $key, 'done', __('تم', 'school-system')); ?>
+                                    <?php self::mark_button($flow, $entity_id, $key, 'done', __('تمّ', 'school-system')); ?>
                                 <?php endif; ?>
-
                                 <?php if (!$s['required']) : ?>
                                     <?php self::mark_button($flow, $entity_id, $key, 'na', __('لا ينطبق', 'school-system')); ?>
                                 <?php endif; ?>
-                            </footer>
-                        <?php endif; ?>
-                    </article>
-                <?php endforeach; ?>
-            </div>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- المكتمل — شرائح هادئة مطويّة -->
+            <?php if ($completed !== []) : ?>
+                <div class="sch-ns__done">
+                    <button type="button" class="sch-ns__doneh" data-ns-done aria-expanded="false">
+                        <span class="sch-ns__ck"><?php echo sch_icon('check', 12); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+                        <b><?php esc_html_e('خطوات مكتملة', 'school-system'); ?></b>
+                        <span class="sch-ns__of"><?php echo esc_html(number_format_i18n(count($completed))); ?></span>
+                        <svg class="sch-ns__chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="sch-ns__chips" hidden>
+                        <?php foreach ($completed as $s) : ?>
+                            <span class="sch-ns__chip<?php echo $s['state'] === 'na' ? ' is-na' : ''; ?>">
+                                <?php echo sch_icon($s['state'] === 'na' ? 'x' : 'check', 12); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                <?php echo esc_html($s['label']); ?>
+                            </span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </section>
         <?php
     }
