@@ -118,15 +118,51 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                     <b><?php echo esc_html($sch_title); ?></b>
                 </nav>
 
+                <button type="button" class="sch-cmdk-open" id="sch-cmdk-open" aria-label="<?php esc_attr_e('بحث وتنقّل سريع', 'school-system'); ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                    <span><?php esc_html_e('ابحث أو انتقل…', 'school-system'); ?></span>
+                    <kbd>Ctrl K</kbd>
+                </button>
+
                 <span class="sch-top__sp"></span>
 
                 <span class="sch-topbar__date"><?php echo esc_html(wp_date('l، j F')); ?></span>
 
-                <a class="sch-top__ic<?php echo $sch_open > 0 ? ' has-dot' : ''; ?>"
-                   href="<?php echo esc_url(SCH_Dashboard::url('alerts')); ?>"
-                   aria-label="<?php esc_attr_e('الإنذارات', 'school-system'); ?>">
-                    <?php echo sch_icon('clock', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                </a>
+                <?php
+                $sch_bell_items = sch_pending_items();
+                $sch_bell_rows  = array_values(array_filter($sch_bell_items, static fn (array $i): bool => (int) $i['n'] > 0));
+                $sch_bell_n     = array_sum(array_map(static fn (array $i): int => (int) $i['n'], $sch_bell_items));
+                ?>
+                <div class="sch-bell" id="sch-bell">
+                    <button type="button" class="sch-top__ic sch-bell__btn<?php echo $sch_bell_n > 0 ? ' has-dot' : ''; ?>"
+                            id="sch-bell-btn" aria-haspopup="true" aria-expanded="false"
+                            aria-label="<?php esc_attr_e('ما ينتظرك', 'school-system'); ?>">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    </button>
+                    <div class="sch-bell__drop" id="sch-bell-drop" hidden>
+                        <div class="sch-bell__h">
+                            <b><?php esc_html_e('ما ينتظرك', 'school-system'); ?></b>
+                            <span><?php echo esc_html(number_format_i18n($sch_bell_n)); ?></span>
+                        </div>
+                        <?php if ($sch_bell_rows === []) : ?>
+                            <div class="sch-bell__empty">
+                                <?php echo esc_html($sch_bell_items === []
+                                    ? __('لا صلاحيات متابعة لديك.', 'school-system')
+                                    : __('كل شيء تحت السيطرة — لا مهمة عاجلة.', 'school-system')); ?>
+                            </div>
+                        <?php else : ?>
+                            <?php foreach ($sch_bell_rows as $sch_br) : ?>
+                                <a class="sch-bell__row" href="<?php echo esc_url($sch_br['url']); ?>">
+                                    <span class="sch-bell__n sch-bell__n--<?php echo esc_attr($sch_br['level']); ?>"><?php echo esc_html(number_format_i18n((int) $sch_br['n'])); ?></span>
+                                    <span class="sch-bell__t">
+                                        <strong><?php echo esc_html($sch_br['title']); ?></strong>
+                                        <span><?php echo esc_html($sch_br['hint']); ?></span>
+                                    </span>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
                 <button type="button" class="sch-theme" aria-label="<?php esc_attr_e('تبديل الوضع الفاتح/الداكن', 'school-system'); ?>">
                     <svg class="sch-theme__moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -169,6 +205,32 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             </main>
         </div>
     </div>
+    <?php
+    // بيانات لوحة الأوامر: كل قسم يملكه المستخدم (مُصفّى بالصلاحية في groups()).
+    $sch_cmdk = [];
+    foreach ($sch_groups as $sch_cg) {
+        foreach ($sch_cg['sections'] as $sch_cs => $sch_cm) {
+            $sch_cmdk[] = [
+                'label' => (string) $sch_cm[0],
+                'group' => (string) $sch_cg['label'],
+                'url'   => SCH_Dashboard::url((string) $sch_cs),
+            ];
+        }
+    }
+    ?>
+    <div class="sch-cmdk" id="sch-cmdk" hidden data-items="<?php echo esc_attr(wp_json_encode($sch_cmdk, JSON_UNESCAPED_UNICODE)); ?>">
+        <div class="sch-cmdk__box" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('لوحة الأوامر', 'school-system'); ?>">
+            <div class="sch-cmdk__in">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="sch-cmdk-input" autocomplete="off" spellcheck="false"
+                       placeholder="<?php esc_attr_e('اكتب اسم قسم للانتقال…', 'school-system'); ?>"
+                       aria-label="<?php esc_attr_e('بحث وتنقّل', 'school-system'); ?>">
+                <kbd>Esc</kbd>
+            </div>
+            <div class="sch-cmdk__list" id="sch-cmdk-list" role="listbox"></div>
+        </div>
+    </div>
+
     <div class="sch-scrim" id="sch-scrim" hidden></div>
 
 <?php endif; ?>
@@ -181,6 +243,74 @@ var nd=e.target.closest('[data-ns-done]');if(nd){var box=nd.parentElement.queryS
 var bg=e.target.closest('.sch-burger'),sc=e.target.closest('.sch-scrim');var side=document.getElementById('sch-side'),scrim=document.getElementById('sch-scrim');
 if(bg&&side){side.classList.add('is-open');if(scrim)scrim.hidden=false;return;}
 if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open')&&window.innerWidth<=980))&&side){side.classList.remove('is-open');if(scrim)scrim.hidden=true;}});</script>
+<?php /* لوحة الأوامر ⌘K + جرس «ما ينتظرك» — تنقّل فوري وتجميع المهام المعلّقة */ ?>
+<script>
+(function () {
+  var root = document.getElementById('sch-cmdk');
+  if (root) {
+    var input = document.getElementById('sch-cmdk-input');
+    var list  = document.getElementById('sch-cmdk-list');
+    var items = [];
+    try { items = JSON.parse(root.dataset.items || '[]'); } catch (e) { items = []; }
+    var sel = 0;
+    var NONE = '<?php echo esc_js(__('لا نتائج', 'school-system')); ?>';
+
+    function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+
+    function render(q) {
+      q = (q || '').trim().toLowerCase();
+      var view = q === '' ? items.slice(0, 60) : items.filter(function (it) {
+        return (it.label + ' ' + it.group).toLowerCase().indexOf(q) > -1;
+      });
+      sel = 0;
+      if (!view.length) { list.innerHTML = '<div class="sch-cmdk__empty">' + esc(NONE) + '</div>'; return; }
+      list.innerHTML = view.map(function (it, i) {
+        return '<a class="sch-cmdk__row' + (i === 0 ? ' is-sel' : '') + '" href="' + encodeURI(it.url) + '">' +
+          '<span class="sch-cmdk__lbl">' + esc(it.label) + '</span>' +
+          '<span class="sch-cmdk__grp">' + esc(it.group) + '</span></a>';
+      }).join('');
+    }
+    function openK() { root.hidden = false; document.body.classList.add('sch-cmdk-on'); input.value = ''; render(''); setTimeout(function () { input.focus(); }, 20); }
+    function closeK() { root.hidden = true; document.body.classList.remove('sch-cmdk-on'); }
+    function move(d) {
+      var rows = list.querySelectorAll('.sch-cmdk__row'); if (!rows.length) { return; }
+      if (rows[sel]) { rows[sel].classList.remove('is-sel'); }
+      sel = (sel + d + rows.length) % rows.length;
+      rows[sel].classList.add('is-sel'); rows[sel].scrollIntoView({ block: 'nearest' });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); root.hidden ? openK() : closeK(); return; }
+      if (root.hidden) { return; }
+      if (e.key === 'Escape') { e.preventDefault(); closeK(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); var r = list.querySelectorAll('.sch-cmdk__row')[sel]; if (r) { window.location.href = r.getAttribute('href'); } }
+    });
+    input.addEventListener('input', function () { render(input.value); });
+    root.addEventListener('click', function (e) { if (e.target === root) { closeK(); } });
+    var opener = document.getElementById('sch-cmdk-open');
+    if (opener) { opener.addEventListener('click', openK); }
+  }
+
+  var bell = document.getElementById('sch-bell');
+  var bbtn = document.getElementById('sch-bell-btn');
+  var drop = document.getElementById('sch-bell-drop');
+  if (bell && bbtn && drop) {
+    bbtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var willOpen = drop.hasAttribute('hidden');
+      drop.toggleAttribute('hidden', !willOpen);
+      bbtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!drop.hasAttribute('hidden') && !bell.contains(e.target)) {
+        drop.setAttribute('hidden', ''); bbtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+})();
+</script>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
 </body>
 </html>

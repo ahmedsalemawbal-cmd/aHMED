@@ -3323,3 +3323,161 @@ body.sch-locked { overflow: hidden; }
 }
 @media (min-width:981px){ .sch-scrim{display:none !important} }
 @media (prefers-reduced-motion:reduce){ .sch-app > .sch-side{transition:none} }
+
+/* =========================================================
+   لوحة الأوامر ⌘K + جرس «ما ينتظرك» (v7.1)
+   ========================================================= */
+
+/* مُطلِق البحث في الشريط العلوي — يملأ الفراغ الأوسط */
+.sch-cmdk-open {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 380px;
+  margin-inline: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-r-full);
+  background: var(--sch-paper);
+  color: var(--sch-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: text;
+  transition: border-color .16s ease, background .16s ease;
+}
+.sch-cmdk-open:hover { border-color: var(--sch-accent); color: var(--sch-ink); }
+.sch-cmdk-open > span { flex: 1; text-align: start; }
+.sch-cmdk-open kbd,
+.sch-cmdk__in kbd {
+  font-family: var(--sch-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  color: var(--sch-muted);
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+/* الطبقة */
+.sch-cmdk {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding-top: 12vh;
+  background: rgba(10, 12, 20, .5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+body.sch-cmdk-on { overflow: hidden; }
+
+.sch-cmdk__box {
+  width: min(560px, 92vw);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e4, 0 30px 60px -20px rgba(10, 12, 30, .6));
+  overflow: hidden;
+  animation: sch-cmdk-in .14s ease;
+}
+@keyframes sch-cmdk-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+.sch-cmdk__in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--sch-line);
+  color: var(--sch-muted);
+}
+.sch-cmdk__in input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: var(--sch-ink);
+  outline: none;
+}
+.sch-cmdk__list { max-height: 52vh; overflow-y: auto; padding: 6px; }
+.sch-body a.sch-cmdk__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--sch-radius);
+  color: var(--sch-ink);
+  text-decoration: none;
+}
+.sch-cmdk__row.is-sel { background: var(--sch-accent-soft); }
+.sch-cmdk__lbl { font-weight: 600; font-size: 13.5px; }
+.sch-cmdk__grp { margin-inline-start: auto; font-size: 11px; color: var(--sch-muted); }
+.sch-cmdk__empty { padding: 24px; text-align: center; color: var(--sch-muted); font-size: 13px; }
+
+/* الجرس */
+.sch-bell { position: relative; }
+.sch-bell__drop {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 8px);
+  width: 300px;
+  max-width: 84vw;
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e3, 0 20px 44px -18px rgba(10, 12, 30, .5));
+  overflow: hidden;
+  z-index: 60;
+}
+.sch-bell__h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--sch-line);
+  font-size: 13px;
+}
+.sch-bell__h span { color: var(--sch-muted); font-variant-numeric: tabular-nums; }
+.sch-body a.sch-bell__row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 15px;
+  border-bottom: 1px solid var(--sch-line);
+  color: var(--sch-ink);
+  text-decoration: none;
+}
+.sch-bell__row:last-child { border-bottom: 0; }
+.sch-bell__row:hover { background: var(--sch-accent-soft); }
+.sch-bell__n {
+  flex: none;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.sch-bell__n--r { background: var(--sch-danger); }
+.sch-bell__n--a { background: var(--sch-warn); }
+.sch-bell__n--t { background: var(--sch-gold); }
+.sch-bell__t strong { display: block; font-size: 13px; font-weight: 600; }
+.sch-bell__t span { font-size: 11px; color: var(--sch-muted); }
+.sch-bell__empty { padding: 22px 15px; text-align: center; color: var(--sch-muted); font-size: 12.5px; }
+
+@media (max-width: 760px) {
+  .sch-cmdk-open > span { display: none; }
+  .sch-cmdk-open { flex: 0 0 auto; max-width: none; }
+  .sch-cmdk-open kbd { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .sch-cmdk__box { animation: none; } }
+
+/* شريط أدوات الحضور: «علّم الكل حاضرًا» ثم اقلب الاستثناءات */
+.sch-att-tools { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }

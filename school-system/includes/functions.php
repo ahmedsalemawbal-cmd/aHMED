@@ -138,3 +138,49 @@ function sch_money_html(float|string|null $amount): string
     return '<span class="scha-num">' . esc_html(number_format((float) $amount, 2)) . '</span>'
         . ' <span class="scha-cur">' . esc_html__('ر.س', 'school-system') . '</span>';
 }
+
+/**
+ * بنود «ما ينتظرك اليوم» — تُبنى مرة واحدة لكل طلب (memoized)، ويشترك فيها
+ * مركز القيادة (نظرة عامة) وجرس الشريط العلوي. كل بند مربوط بصلاحيته
+ * ووجهته، فلا يُعرض إلا لمن يملك التصرّف فيه.
+ *
+ * @return array<int,array{level:string,n:int,title:string,hint:string,url:string}>
+ */
+function sch_pending_items(): array
+{
+    static $cache = null;
+
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    if (!class_exists('SCH_Deputy') || !class_exists('SCH_Dashboard')) {
+        return $cache = [];
+    }
+
+    $b = SCH_Deputy::today_board();
+
+    $raw = [
+        ['r', (int) ($b['vacant'] ?? 0),      __('حصص بلا معلم', 'school-system'),               __('اعتمد الاحتياط المقترح', 'school-system'), SCH_Dashboard::url('deputy'),                              'sch_supervise_stage'],
+        ['r', (int) ($b['critical'] ?? 0),    __('إنذار حرج مفتوح', 'school-system'),            __('يحتاج تدخلًا فوريًا', 'school-system'),      SCH_Dashboard::url('alerts'),                              'sch_manage_alerts'],
+        ['a', (int) ($b['clinic'] ?? 0),      __('إحالة صحية مفتوحة', 'school-system'),          __('صندوق الصحة المدرسية', 'school-system'),     add_query_arg('t', 'clinic', SCH_Dashboard::url('inbox')), 'sch_handle_notes'],
+        ['a', (int) ($b['leaves'] ?? 0),      __('طلب إجازة بانتظار القرار', 'school-system'),   __('اعتمد أو ارفض بسبب', 'school-system'),       SCH_Dashboard::url('leaves'),                              'sch_decide_leaves'],
+        ['t', (int) ($b['meds'] ?? 0),        __('إذن دواء بانتظار العيادة', 'school-system'),   __('راجعه واعتمده', 'school-system'),            SCH_Dashboard::url('meds'),                                'sch_manage_meds'],
+        ['t', (int) ($b['stale_notes'] ?? 0), __('ملاحظة بانتظار الأخصائية', 'school-system'),   __('صندوق المتابعة', 'school-system'),           SCH_Dashboard::url('inbox'),                               'sch_handle_notes'],
+    ];
+
+    $out = [];
+    foreach ($raw as $i) {
+        if (current_user_can((string) $i[5])) {
+            $out[] = [
+                'level' => (string) $i[0],
+                'n'     => (int) $i[1],
+                'title' => (string) $i[2],
+                'hint'  => (string) $i[3],
+                'url'   => (string) $i[4],
+            ];
+        }
+    }
+
+    return $cache = $out;
+}

@@ -66,6 +66,11 @@ foreach ($sheet as $sch_row) {
             <input type="hidden" name="sch_action" value="mark_attendance">
             <input type="hidden" name="att_date" value="<?php echo esc_attr($date); ?>">
 
+            <div class="sch-att-tools">
+                <button type="button" class="sch-btn sch-btn--quiet" id="sch-all-present"><?php esc_html_e('علّم الكل حاضرًا', 'school-system'); ?></button>
+                <span class="sch-sub"><?php esc_html_e('ثم اقلب الاستثناءات فقط — الأسرع في الرصد اليومي.', 'school-system'); ?></span>
+            </div>
+
             <div class="sch-table-wrap">
                 <table class="sch-table">
                     <thead><tr>
@@ -100,5 +105,15 @@ foreach ($sheet as $sch_row) {
 
             <button class="sch-btn sch-mt"><?php esc_html_e('حفظ الكشف', 'school-system'); ?></button>
         </form>
+
+        <script>
+        (function () {
+          var b = document.getElementById('sch-all-present');
+          if (!b) { return; }
+          b.addEventListener('click', function () {
+            document.querySelectorAll('.sch-table input[type=radio][value="present"]').forEach(function (r) { r.checked = true; });
+          });
+        })();
+        </script>
     <?php endif; ?>
 </div>
