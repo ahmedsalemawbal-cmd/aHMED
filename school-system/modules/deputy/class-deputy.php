@@ -24,40 +24,15 @@ final class SCH_Deputy
 
     public static function mark_staff(int $user_id, string $status, string $note = ''): bool|WP_Error
     {
-        global $wpdb;
-
-        if (!array_key_exists($status, self::STAFF_STATUSES)) {
-            return sch_api_error('bad_status', __('حالة الحضور غير صحيحة.', 'school-system'), 422);
-        }
-
-        $today = current_time('Y-m-d');
-
-        $data = [
-            'status'      => $status,
-            'checked_at'  => sch_now(),
-            'note'        => sanitize_text_field($note) ?: null,
-            'recorded_by' => get_current_user_id() ?: null,
-        ];
-
-        $existing = $wpdb->get_var($wpdb->prepare(
-            'SELECT id FROM ' . sch_table('staff_attendance') . ' WHERE user_id = %d AND att_date = %s',
-            $user_id,
-            $today
-        ));
-
-        if ($existing) {
-            $wpdb->update(sch_table('staff_attendance'), $data, ['id' => (int) $existing]);
-        } else {
-            $wpdb->insert(sch_table('staff_attendance'), $data + [
-                'user_id'    => $user_id,
-                'att_date'   => $today,
-                'created_at' => sch_now(),
-            ]);
+        // الكتابة تمرّ من الكاتب الوحيد لجدول الحضور — فلا مصدرا حقيقة يتباعدان.
+        $res = SCH_StaffAttendance::mark_manual($user_id, $status, $note);
+        if (is_wp_error($res)) {
+            return $res;
         }
 
         // الغياب يولّد حصصًا شاغرة — نقترح لها بدلاء فورًا.
         if (in_array($status, ['absent', 'leave'], true)) {
-            self::propose_for_teacher($user_id, $today, $status === 'leave' ? 'leave' : 'absence');
+            self::propose_for_teacher($user_id, current_time('Y-m-d'), $status === 'leave' ? 'leave' : 'absence');
         }
 
         return true;

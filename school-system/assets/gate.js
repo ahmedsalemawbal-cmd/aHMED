@@ -42,11 +42,16 @@
       netEl.className = 'schg-pill' + (pending ? ' schg-pill--warn' : ' schg-pill--ok');
     },
     onResult: function (res) {
-      if (res.ok && res.body && res.body.student) {
-        show(res.body.student, res.body.state_label, false);
-        addRecent(res.body.student.name, res.body.checkpoint_label);
-      } else if (res.body && res.body.message) {
-        show({ name: res.body.message }, '', true);
+      var b = res.body;
+      // موظف: يُعرض دوره وحالة حضوره بدل الشعبة وحالة العهدة.
+      if (res.ok && b && b.kind === 'staff' && b.person) {
+        show({ name: b.person.name, klass: b.person.role_label, staff: true, late: b.status === 'late' }, b.flash || b.status_label, false);
+        addRecent(b.person.name, b.checkpoint_label);
+      } else if (res.ok && b && b.student) {
+        show(b.student, b.state_label, false);
+        addRecent(b.student.name, b.checkpoint_label);
+      } else if (b && b.message) {
+        show({ name: b.message }, '', true);
       }
     }
   });
@@ -74,6 +79,8 @@
   function show(student, stateLabel, bad) {
     cardEl.hidden = false;
     cardEl.classList.toggle('is-bad', !!bad);
+    cardEl.classList.toggle('is-staff', !!student.staff);
+    cardEl.classList.toggle('is-late', !!student.late);
 
     nameEl.textContent = student.name || '';
     metaEl.textContent = student.klass || student.academic_no || '';

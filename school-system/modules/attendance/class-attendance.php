@@ -13,7 +13,50 @@ final class SCH_Attendance
         'excused' => 'غياب بعذر',
     ];
 
-    public static function mark(int $student_id, string $date, string $status, string $method = 'manual', string $note = ''): bool|WP_Error
+    /** بداية اليوم الدراسي المتوقّعة للطالب + دقائق التسامح — قابلة للضبط من الإعدادات. */
+    private const EXPECTED_IN = '07:30';
+    private const GRACE_MIN   = 10;
+
+    public static function expected_in(): string
+    {
+        $v = (string) sch_settings('attendance_student_in', '');
+        return preg_match('/^\d{2}:\d{2}$/', $v) ? $v : self::EXPECTED_IN;
+    }
+
+    public static function grace(): int
+    {
+        $v = sch_settings('attendance_grace', '');
+        return $v !== '' ? max(0, (int) $v) : self::GRACE_MIN;
+    }
+
+    /**
+     * حالة الوصول من وقت المسح: حاضر أو متأخر، ودقائق التأخّر عن الموعد.
+     * المقارنة بالوقت المحلّي (كلاهما من current_time) فلا تتأثّر بالمنطقة الزمنية.
+     *
+     * @return array{status:string,minutes:int}
+     */
+    public static function status_for_arrival(?string $occurred): array
+    {
+        $occurred = $occurred ?: sch_now();
+        $t        = substr($occurred, 11, 5);            // 'HH:MM'
+        if (!preg_match('/^\d{2}:\d{2}$/', $t)) {
+            return ['status' => 'present', 'minutes' => 0];
+        }
+
+        [$h, $m]   = array_map('intval', explode(':', $t));
+        [$eh, $em] = array_map('intval', explode(':', self::expected_in()));
+
+        $mins     = $h * 60 + $m;
+        $expected = $eh * 60 + $em;
+        $late     = $mins > ($expected + self::grace());
+
+        return [
+            'status'  => $late ? 'late' : 'present',
+            'minutes' => $late ? max(0, $mins - $expected) : 0,
+        ];
+    }
+
+    public static function mark(int $student_id, string $date, string $status, string $method = 'manual', string $note = '', ?string $occurred_at = null, int $minutes_late = 0): bool|WP_Error
     {
         global $wpdb;
 
@@ -33,12 +76,14 @@ final class SCH_Attendance
         ));
 
         $data = [
-            'class_id'    => $class ? (int) $class->id : null,
-            'status'      => $status,
-            'method'      => in_array($method, ['qr', 'manual', 'transport'], true) ? $method : 'manual',
-            'note'        => sanitize_text_field($note) ?: null,
-            'recorded_by' => get_current_user_id() ?: null,
-            'recorded_at' => sch_now(),
+            'class_id'      => $class ? (int) $class->id : null,
+            'status'        => $status,
+            'method'        => in_array($method, ['qr', 'manual', 'transport'], true) ? $method : 'manual',
+            'checked_in_at' => sch_sanitize_datetime($occurred_at) ?: null,
+            'minutes_late'  => max(0, $minutes_late),
+            'note'          => sanitize_text_field($note) ?: null,
+            'recorded_by'   => get_current_user_id() ?: null,
+            'recorded_at'   => sch_now(),
         ];
 
         if ($existing) {

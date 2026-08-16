@@ -291,8 +291,10 @@ final class SCH_Custody
         $today      = current_time('Y-m-d');
 
         // دخول البوابة يؤكد الحضور — لكل الطلاب، راكب الباص وغيره.
+        // والوقت يحسم: من مسح بعد الموعد + التسامح يُسجَّل «متأخرًا» تلقائيًا.
         if ($checkpoint === 'gate_in') {
-            SCH_Attendance::mark($student_id, $today, 'present', 'qr');
+            $arr = SCH_Attendance::status_for_arrival($when);
+            SCH_Attendance::mark($student_id, $today, $arr['status'], 'qr', '', $when, $arr['minutes']);
             SCH_Alerts::resolve('bus_no_arrival', $student_id, $today);
             SCH_Alerts::resolve('no_attendance', $student_id, $today);
         }

@@ -379,7 +379,19 @@ final class SCH_Rest
     /** مسح البوابة — يمر بآلة الحالات التي ترفض ما لا يجوز. */
     public static function custody_scan(WP_REST_Request $r): WP_REST_Response|WP_Error
     {
-        $result = SCH_Custody::record((array) $r->get_json_params());
+        $params = (array) $r->get_json_params();
+
+        // مسح موحّد: بطاقة الموظف تسجّل حضوره لا عهدته — نفس المسح، نفس القارئ.
+        $token = (string) ($params['badge_token'] ?? '');
+        if ($token !== '') {
+            $staff = SCH_StaffAttendance::resolve_badge($token);
+            if ($staff) {
+                $res = SCH_StaffAttendance::scan($staff, (string) ($params['checkpoint'] ?? ''), $params);
+                return new WP_REST_Response($res, $res['duplicate'] ? 200 : 201);
+            }
+        }
+
+        $result = SCH_Custody::record($params);
 
         if (is_wp_error($result)) {
             return $result;
