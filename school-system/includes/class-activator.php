@@ -563,6 +563,8 @@ final class SCH_Activator
             method         ENUM('cash','transfer','pos','online') NOT NULL DEFAULT 'cash',
             reference      VARCHAR(120)    DEFAULT NULL,
             client_uuid    VARCHAR(64)     DEFAULT NULL,
+            refunded_at    DATETIME        DEFAULT NULL,
+            refund_reason  VARCHAR(190)    DEFAULT NULL,
             received_by    BIGINT UNSIGNED DEFAULT NULL,
             paid_at        DATETIME        NOT NULL,
             created_at     DATETIME        NOT NULL,

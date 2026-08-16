@@ -520,6 +520,116 @@ final class SCH_Finance
         return true;
     }
 
+    /**
+     * استرداد دفعة: يعلّمها مستردّة، ويعيد توزيع صافي المدفوع على الأقساط من
+     * الصفر (التوزيع تسلسليّ فإعادته من المجموع الصافي حالةٌ متسقة بلا تتبّع
+     * تخصيص كل دفعة)، ويعكس قيدها المحاسبي — كله في معاملة واحدة.
+     */
+    public static function refund_payment(int $payment_id, string $reason): bool|WP_Error
+    {
+        global $wpdb;
+
+        $reason = sanitize_text_field($reason);
+        if (trim($reason) === '') {
+            return sch_api_error('no_reason', __('سبب الاسترداد مطلوب.', 'school-system'), 422);
+        }
+
+        $wpdb->query('START TRANSACTION');
+
+        $pay = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, invoice_id, amount, refunded_at FROM " . sch_table('payments') . " WHERE id = %d FOR UPDATE",
+            $payment_id
+        ));
+
+        if (!$pay) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('not_found', __('الدفعة غير موجودة.', 'school-system'), 404);
+        }
+        if ($pay->refunded_at !== null) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('already_refunded', __('الدفعة مستردّة أصلًا.', 'school-system'), 409);
+        }
+
+        $inv = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, total, paid FROM " . sch_table('invoices') . " WHERE id = %d FOR UPDATE",
+            (int) $pay->invoice_id
+        ));
+        if (!$inv) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('not_found', __('الفاتورة غير موجودة.', 'school-system'), 404);
+        }
+
+        $new_paid = max(0.0, round((float) $inv->paid - (float) $pay->amount, 2));
+
+        $u1 = $wpdb->update(sch_table('payments'), [
+            'refunded_at'   => sch_now(),
+            'refund_reason' => $reason,
+        ], ['id' => $payment_id]);
+
+        if ($u1 === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر الاسترداد: %s', 'school-system'), $err), 500);
+        }
+
+        // صفّر الأقساط ثم أعِد توزيع الصافي بالتسلسل — الحالة نفسها التي كانت ستنتج
+        // لو لم تُسجَّل هذه الدفعة أصلًا.
+        if ($wpdb->query($wpdb->prepare("UPDATE " . sch_table('installments') . " SET paid = 0, status = 'open' WHERE invoice_id = %d", (int) $inv->id)) === false) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('db_error', __('تعذّر تحديث الأقساط.', 'school-system'), 500);
+        }
+
+        $left = $new_paid;
+        foreach (self::installments((int) $inv->id) as $inst) {
+            if ($left <= 0) {
+                break;
+            }
+            $apply = min($left, round((float) $inst->amount, 2));
+            $uu = $wpdb->update(sch_table('installments'), [
+                'paid'   => $apply,
+                'status' => $apply >= (float) $inst->amount ? 'paid' : ($apply > 0 ? 'partial' : 'open'),
+            ], ['id' => (int) $inst->id]);
+            if ($uu === false) {
+                $wpdb->query('ROLLBACK');
+                return sch_api_error('db_error', __('تعذّر إعادة توزيع الأقساط.', 'school-system'), 500);
+            }
+            $left = round($left - $apply, 2);
+        }
+
+        $u2 = $wpdb->update(sch_table('invoices'), [
+            'paid'       => $new_paid,
+            'status'     => $new_paid <= 0 ? 'open' : ($new_paid >= (float) $inv->total ? 'paid' : 'partial'),
+            'updated_at' => sch_now(),
+        ], ['id' => (int) $inv->id]);
+
+        if ($u2 === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر تحديث الفاتورة: %s', 'school-system'), $err), 500);
+        }
+
+        // اعكس قيد التحصيل إن وُجد — داخل المعاملة نفسها.
+        $entry_id = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM " . sch_table('journal_entries') . " WHERE ref_type = 'payment' AND ref_id = %d ORDER BY id DESC LIMIT 1",
+            $payment_id
+        ));
+        if ($entry_id > 0) {
+            $rev = SCH_Journal::reverse($entry_id, true);
+            if (is_wp_error($rev)) {
+                $wpdb->query('ROLLBACK');
+                return $rev;
+            }
+        }
+
+        $wpdb->query('COMMIT');
+
+        sch_audit('payment.refunded', 'payment', $payment_id, ['amount' => (float) $pay->amount, 'reason' => $reason]);
+
+        return true;
+    }
+
     public static function payments(int $invoice_id): array
     {
         global $wpdb;

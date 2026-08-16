@@ -106,6 +106,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
                         <th><?php esc_html_e('الطريقة', 'school-system'); ?></th>
                         <th><?php esc_html_e('المرجع', 'school-system'); ?></th>
                         <th><?php esc_html_e('استلمها', 'school-system'); ?></th>
+                        <th></th>
                     </tr></thead>
                     <tbody>
                     <?php foreach ($pays as $p) : ?>
@@ -115,6 +116,19 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
                             <td><?php echo esc_html(SCH_Finance::METHODS[$p->method] ?? $p->method); ?></td>
                             <td dir="ltr"><?php echo esc_html($p->reference ?: '—'); ?></td>
                             <td><?php echo esc_html($p->display_name ?: '—'); ?></td>
+                            <td>
+                                <?php if ($p->refunded_at) : ?>
+                                    <span class="sch-badge sch-badge--muted"><?php esc_html_e('مستردّة', 'school-system'); ?></span>
+                                <?php elseif (current_user_can('sch_manage_finance')) : ?>
+                                    <form method="post" class="sch-toolbar" onsubmit="return confirm('<?php esc_attr_e('استرداد هذه الدفعة وعكس قيدها المحاسبي؟', 'school-system'); ?>');">
+                                        <?php wp_nonce_field('sch_refund_payment', '_sch_nonce'); ?>
+                                        <input type="hidden" name="sch_action" value="refund_payment">
+                                        <input type="hidden" name="payment_id" value="<?php echo esc_attr((string) $p->id); ?>">
+                                        <input type="text" name="reason" required placeholder="<?php esc_attr_e('السبب', 'school-system'); ?>">
+                                        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('استرداد', 'school-system'); ?></button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
