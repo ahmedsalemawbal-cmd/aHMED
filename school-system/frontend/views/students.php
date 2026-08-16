@@ -56,6 +56,13 @@ SCH_Modal::head(
 
 <?php SCH_Views::render('students', $view); ?>
 
+<p class="sch-noprint">
+    <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg('sch_export', 'csv')); ?>">
+        <?php echo sch_icon('upload', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+        <?php esc_html_e('تصدير CSV', 'school-system'); ?>
+    </a>
+</p>
+
 <!-- المرشّحات في بطاقة واحدة: يبحث الموظف بما يعرفه لا بما نرتّبه له -->
 <form method="get" class="sch-card sch-filters">
     <input type="hidden" name="sch_section" value="students">

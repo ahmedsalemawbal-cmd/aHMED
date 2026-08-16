@@ -439,6 +439,10 @@ final class SCH_Dashboard
             exit;
         }
 
+        if (isset($_GET['sch_export']) && in_array($section, ['students', 'audit'], true)) {
+            self::send_export($section);
+        }
+
         self::handle_post($section, $id);
 
         $view = $section;
@@ -1485,6 +1489,67 @@ final class SCH_Dashboard
     }
 
     // ---------- العرض ----------
+
+    /** تصدير CSV — نسخة للمدقّق أو الأرشيف. مسار تنزيل مبكّر قبل القالب،
+        ويحترم فلاتر الشاشة ونطاق الصلاحية (list يطبّق «على مَن»). */
+    private static function send_export(string $section): never
+    {
+        self::no_cache_headers();
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="sch-' . $section . '-' . current_time('Y-m-d') . '.csv"');
+
+        echo "\xEF\xBB\xBF"; // BOM ليقرأ إكسل العربية صحيحًا
+        $out = fopen('php://output', 'w');
+
+        if ($section === 'students') {
+            fputcsv($out, [
+                __('الرقم الأكاديمي', 'school-system'), __('الاسم', 'school-system'),
+                __('المرحلة', 'school-system'), __('الصف', 'school-system'),
+                __('الشعبة', 'school-system'), __('الحالة', 'school-system'),
+            ]);
+            $rows = SCH_Students::list([
+                'search'      => isset($_GET['s']) ? sanitize_text_field(wp_unslash((string) $_GET['s'])) : '',
+                'status'      => 'active',
+                'stage'       => isset($_GET['stage']) ? sanitize_key(wp_unslash((string) $_GET['stage'])) : '',
+                'grade_level' => isset($_GET['g']) ? sanitize_text_field(wp_unslash((string) $_GET['g'])) : '',
+                'class_id'    => isset($_GET['class_id']) ? absint($_GET['class_id']) : 0,
+                'view'        => isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : '',
+                'per_page'    => 5000,
+                'with'        => false,
+            ])['items'];
+            foreach ($rows as $s) {
+                fputcsv($out, [
+                    (string) ($s->academic_no ?? ''), (string) $s->full_name,
+                    (string) ($s->stage ?? ''), (string) ($s->grade_level ?? ''),
+                    (string) ($s->section ?? ''), (string) ($s->status ?? ''),
+                ]);
+            }
+        } elseif ($section === 'audit') {
+            fputcsv($out, [
+                __('الوقت', 'school-system'), __('المستخدم', 'school-system'),
+                __('العملية', 'school-system'), __('الهدف', 'school-system'), 'IP',
+            ]);
+            $rows = SCH_Audit::query([
+                'search'      => isset($_GET['q']) ? sanitize_text_field(wp_unslash((string) $_GET['q'])) : '',
+                'object_type' => isset($_GET['obj']) ? sanitize_key((string) $_GET['obj']) : '',
+                'from'        => isset($_GET['from']) ? (sch_sanitize_date($_GET['from']) ?? '') : '',
+                'to'          => isset($_GET['to']) ? (sch_sanitize_date($_GET['to']) ?? '') : '',
+                'per_page'    => 5000,
+            ])['items'];
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    (string) $r->created_at, (string) ($r->display_name ?? ''),
+                    (string) $r->action,
+                    $r->object_type ? $r->object_type . '#' . $r->object_id : '',
+                    (string) ($r->ip ?? ''),
+                ]);
+            }
+        }
+
+        fclose($out);
+        sch_audit('export.csv', $section, null);
+        exit;
+    }
 
     private static function render(string $view, array $data = []): never
     {

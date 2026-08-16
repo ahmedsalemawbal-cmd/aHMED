@@ -45,6 +45,7 @@ $sch_base  = SCH_Dashboard::url('audit');
         <?php if ($sch_q['search'] !== '' || $sch_q['object_type'] !== '' || $sch_q['from'] !== '' || $sch_q['to'] !== '') : ?>
             <a class="sch-chipbtn" href="<?php echo esc_url($sch_base); ?>"><?php esc_html_e('مسح', 'school-system'); ?></a>
         <?php endif; ?>
+        <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg('sch_export', 'csv')); ?>"><?php esc_html_e('تصدير CSV', 'school-system'); ?></a>
     </form>
 </div>
 
