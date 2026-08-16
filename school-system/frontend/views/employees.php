@@ -451,10 +451,9 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
 
 <script>
 (function () {
-  var wiz = document.getElementById('sch-wiz');
-  if (!wiz) { return; }
-
   var form = document.getElementById('sch-wiz-form');
+  if (!form) { return; }
+  var wiz = form; // النموذج هو حاوية المعالج — كان يبحث عن id غير موجود فيتعطّل الزر
   var TITLES = <?php echo wp_json_encode(array_map(
       static fn (array $m): string => (string) $m[0],
       SCH_Dashboard::sections()
