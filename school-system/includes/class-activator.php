@@ -537,7 +537,8 @@ final class SCH_Activator
             updated_at  DATETIME        NOT NULL,
             PRIMARY KEY (id),
             KEY idx_student (student_id, year_id),
-            KEY idx_status (status, due_date)
+            KEY idx_status (status, due_date),
+            KEY idx_year (year_id, status)
         ) {$charset};";
 
         $sql[] = "CREATE TABLE {$p}installments (
@@ -561,12 +562,14 @@ final class SCH_Activator
             amount         DECIMAL(10,2)   NOT NULL,
             method         ENUM('cash','transfer','pos','online') NOT NULL DEFAULT 'cash',
             reference      VARCHAR(120)    DEFAULT NULL,
+            client_uuid    VARCHAR(64)     DEFAULT NULL,
             received_by    BIGINT UNSIGNED DEFAULT NULL,
             paid_at        DATETIME        NOT NULL,
             created_at     DATETIME        NOT NULL,
             PRIMARY KEY (id),
             KEY idx_invoice (invoice_id),
-            KEY idx_paid (paid_at)
+            KEY idx_paid (paid_at),
+            UNIQUE KEY uniq_client (client_uuid)
         ) {$charset};";
 
         // ===== التواصل =====

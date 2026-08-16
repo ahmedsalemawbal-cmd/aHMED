@@ -190,9 +190,15 @@ final class SCH_Finance
             }
         }
 
+        // القيد المحاسبي داخل المعاملة نفسها — الفاتورة وقيدها معًا أو لا شيء.
+        $posted = SCH_AutoPost::invoice_issued($invoice_id, $total, true);
+        if (is_wp_error($posted)) {
+            $wpdb->query('ROLLBACK');
+            return $posted;
+        }
+
         $wpdb->query('COMMIT');
         sch_audit('invoice.issued', 'invoice', $invoice_id, ['student' => $student_id, 'total' => $total]);
-        SCH_AutoPost::invoice_issued($invoice_id, $total);
 
         return ['id' => $invoice_id];
     }
@@ -312,6 +318,19 @@ final class SCH_Finance
         }
 
         $method = array_key_exists($d['method'] ?? '', self::METHODS) ? $d['method'] : 'cash';
+        $uuid   = sanitize_text_field((string) ($d['client_uuid'] ?? ''));
+
+        // منع التكرار: نفس الدفعة أُرسلت مرتين (ضغط مزدوج/إعادة إرسال)؟ أعِد الأولى
+        // بلا تسجيل ثانٍ — كما تقتضي قاعدة المشروع idempotency لكل كتابة مالية.
+        if ($uuid !== '') {
+            $prior = $wpdb->get_var($wpdb->prepare(
+                'SELECT id FROM ' . sch_table('payments') . ' WHERE client_uuid = %s LIMIT 1',
+                $uuid
+            ));
+            if ($prior) {
+                return ['id' => (int) $prior, 'duplicate' => true];
+            }
+        }
 
         $wpdb->query('START TRANSACTION');
 
@@ -348,6 +367,7 @@ final class SCH_Finance
             'amount'      => $amount,
             'method'      => $method,
             'reference'   => sanitize_text_field((string) ($d['reference'] ?? '')) ?: null,
+            'client_uuid' => $uuid ?: null,
             'received_by' => get_current_user_id() ?: null,
             'paid_at'     => sch_sanitize_datetime($d['paid_at'] ?? null) ?? sch_now(),
             'created_at'  => sch_now(),
@@ -356,6 +376,18 @@ final class SCH_Finance
         if ($ok === false) {
             $err = $wpdb->last_error;
             $wpdb->query('ROLLBACK');
+
+            // سباق: وصلت الدفعة نفسها مرتين معًا فاصطدمت الثانية بالقيد الفريد.
+            if ($uuid !== '') {
+                $prior = $wpdb->get_var($wpdb->prepare(
+                    'SELECT id FROM ' . sch_table('payments') . ' WHERE client_uuid = %s LIMIT 1',
+                    $uuid
+                ));
+                if ($prior) {
+                    return ['id' => (int) $prior, 'duplicate' => true];
+                }
+            }
+
             /* translators: %s: رسالة الخطأ من القاعدة */
             return sch_api_error('db_error', sprintf(__('تعذّر تسجيل الدفعة: %s', 'school-system'), $err), 500);
         }
@@ -407,10 +439,17 @@ final class SCH_Finance
             return sch_api_error('db_error', sprintf(__('تعذّر تحديث الفاتورة: %s', 'school-system'), $err), 500);
         }
 
+        // القيد المحاسبي داخل المعاملة نفسها — المال وقيده معًا أو لا شيء، فلا
+        // يبقى تحصيلٌ بلا قيد وميزان مراجعة خاطئ بصمت.
+        $posted = SCH_AutoPost::payment_received($payment_id, (int) $locked->id, $amount, (string) $method, true);
+        if (is_wp_error($posted)) {
+            $wpdb->query('ROLLBACK');
+            return $posted;
+        }
+
         $wpdb->query('COMMIT');
 
         sch_audit('payment.recorded', 'invoice', (int) $locked->id, ['amount' => $amount, 'method' => $method]);
-        SCH_AutoPost::payment_received($payment_id, (int) $locked->id, $amount, (string) $method);
         self::notify_payment((int) $locked->student_id, $amount, round((float) $locked->total - $total_paid, 2));
 
         return ['id' => $payment_id];

@@ -74,6 +74,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
             <?php wp_nonce_field('sch_record_payment', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="record_payment">
             <input type="hidden" name="invoice_id" value="<?php echo esc_attr((string) $invoice->id); ?>">
+            <input type="hidden" name="client_uuid" value="<?php echo esc_attr(wp_generate_uuid4()); ?>">
             <input type="number" name="amount" step="0.01" min="0.01" placeholder="<?php esc_attr_e('المبلغ', 'school-system'); ?>" required>
             <select name="method" aria-label="الطريقة">
                 <?php foreach (SCH_Finance::METHODS as $slug => $label) : ?>

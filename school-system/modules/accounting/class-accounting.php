@@ -206,7 +206,7 @@ final class SCH_Journal
      * إنشاء قيد.
      * $lines = [['account_id'=>1,'debit'=>100,'credit'=>0,'description'=>''], ...]
      */
-    public static function create(array $d, array $lines, bool $post = true): array|WP_Error
+    public static function create(array $d, array $lines, bool $post = true, bool $in_tx = false): array|WP_Error
     {
         global $wpdb;
 
@@ -259,28 +259,60 @@ final class SCH_Journal
             ), 422);
         }
 
-        $wpdb->query('START TRANSACTION');
-
-        $wpdb->insert(sch_table('journal_entries'), [
-            'entry_no'    => self::next_number(),
-            'entry_date'  => $date,
-            'description' => $desc,
-            'ref_type'    => sanitize_key((string) ($d['ref_type'] ?? '')) ?: null,
-            'ref_id'      => absint($d['ref_id'] ?? 0) ?: null,
-            'total'       => round($debit, 2),
-            'status'      => $post ? 'posted' : 'draft',
-            'created_by'  => get_current_user_id() ?: null,
-            'posted_at'   => $post ? sch_now() : null,
-            'created_at'  => sch_now(),
-        ]);
-
-        $entry_id = (int) $wpdb->insert_id;
-
-        foreach ($clean as $line) {
-            $wpdb->insert(sch_table('journal_lines'), $line + ['entry_id' => $entry_id]);
+        // قد يُستدعى ضمن معاملة المال نفسها (الفاتورة/الدفعة وقيدها معًا) —
+        // عندها لا نبدأ/نُنهي معاملةً خاصةً بنا بل نترك ذلك للمستدعي.
+        if (!$in_tx) {
+            $wpdb->query('START TRANSACTION');
         }
 
-        $wpdb->query('COMMIT');
+        // رقم القيد فريد؛ تحت التزامن قد يحسب قيدان الرقم نفسه (COUNT+1) فنجرّب
+        // أرقامًا متتابعة حتى ينجح الإدراج، وإلا تُلصق السطور بقيدٍ خاطئ.
+        $entry_id = 0;
+
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $res = $wpdb->insert(sch_table('journal_entries'), [
+                'entry_no'    => self::next_number($attempt),
+                'entry_date'  => $date,
+                'description' => $desc,
+                'ref_type'    => sanitize_key((string) ($d['ref_type'] ?? '')) ?: null,
+                'ref_id'      => absint($d['ref_id'] ?? 0) ?: null,
+                'total'       => round($debit, 2),
+                'status'      => $post ? 'posted' : 'draft',
+                'created_by'  => get_current_user_id() ?: null,
+                'posted_at'   => $post ? sch_now() : null,
+                'created_at'  => sch_now(),
+            ]);
+
+            if ($res !== false) {
+                $entry_id = (int) $wpdb->insert_id;
+                break;
+            }
+        }
+
+        if ($entry_id === 0) {
+            if (!$in_tx) {
+                $wpdb->query('ROLLBACK');
+            }
+            return sch_api_error('db_error', __('تعذّر إنشاء القيد — أعد المحاولة.', 'school-system'), 500);
+        }
+
+        foreach ($clean as $line) {
+            $ins = $wpdb->insert(sch_table('journal_lines'), $line + ['entry_id' => $entry_id]);
+
+            if ($ins === false) {
+                $err = $wpdb->last_error;
+                if (!$in_tx) {
+                    $wpdb->query('ROLLBACK');
+                }
+                /* translators: %s: رسالة الخطأ من القاعدة */
+                return sch_api_error('db_error', sprintf(__('تعذّر حفظ سطور القيد: %s', 'school-system'), $err), 500);
+            }
+        }
+
+        if (!$in_tx) {
+            $wpdb->query('COMMIT');
+        }
+
         sch_audit('journal.created', 'journal', $entry_id, ['total' => $debit, 'posted' => $post]);
 
         return ['id' => $entry_id];
@@ -457,12 +489,12 @@ final class SCH_Journal
         ];
     }
 
-    private static function next_number(): string
+    private static function next_number(int $offset = 0): string
     {
         global $wpdb;
 
         $year = current_time('Y');
-        $seq  = 1 + (int) $wpdb->get_var($wpdb->prepare(
+        $seq  = 1 + $offset + (int) $wpdb->get_var($wpdb->prepare(
             'SELECT COUNT(*) FROM ' . sch_table('journal_entries') . ' WHERE entry_no LIKE %s',
             $wpdb->esc_like('JV-' . $year . '-') . '%'
         ));
@@ -477,20 +509,20 @@ final class SCH_Journal
  */
 final class SCH_AutoPost
 {
-    public static function invoice_issued(int $invoice_id, float $total): void
+    public static function invoice_issued(int $invoice_id, float $total, bool $in_tx = false): array|WP_Error|null
     {
         if (!self::enabled()) {
-            return;
+            return null;
         }
 
         $ar  = SCH_Accounts::id_of('students_ar');
         $rev = SCH_Accounts::id_of('tuition_rev');
 
         if ($ar === 0 || $rev === 0 || $total <= 0) {
-            return;
+            return null;
         }
 
-        SCH_Journal::create([
+        return SCH_Journal::create([
             'description' => sprintf(
                 /* translators: %d: رقم الفاتورة */
                 __('إثبات رسوم — فاتورة رقم %d', 'school-system'),
@@ -501,23 +533,23 @@ final class SCH_AutoPost
         ], [
             ['account_id' => $ar,  'debit' => $total, 'credit' => 0],
             ['account_id' => $rev, 'debit' => 0,      'credit' => $total],
-        ]);
+        ], true, $in_tx);
     }
 
-    public static function payment_received(int $payment_id, int $invoice_id, float $amount, string $method): void
+    public static function payment_received(int $payment_id, int $invoice_id, float $amount, string $method, bool $in_tx = false): array|WP_Error|null
     {
         if (!self::enabled()) {
-            return;
+            return null;
         }
 
         $cash = SCH_Accounts::id_of($method === 'cash' ? 'cash' : 'bank');
         $ar   = SCH_Accounts::id_of('students_ar');
 
         if ($cash === 0 || $ar === 0 || $amount <= 0) {
-            return;
+            return null;
         }
 
-        SCH_Journal::create([
+        return SCH_Journal::create([
             'description' => sprintf(
                 /* translators: %d: رقم الفاتورة */
                 __('تحصيل دفعة — فاتورة رقم %d', 'school-system'),
@@ -528,7 +560,7 @@ final class SCH_AutoPost
         ], [
             ['account_id' => $cash, 'debit' => $amount, 'credit' => 0],
             ['account_id' => $ar,   'debit' => 0,       'credit' => $amount],
-        ]);
+        ], true, $in_tx);
     }
 
     private static function enabled(): bool
