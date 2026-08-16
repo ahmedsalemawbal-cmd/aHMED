@@ -34,6 +34,7 @@ final class SCH_Dashboard
 
         // اليوم الدراسي — ما يجري اليوم، بترتيب حدوثه
         'attendance' => ['الحضور',          'sch_manage_attendance', 'school', 'اليوم الدراسي','check'],
+        'attendance-report' => ['تقرير الحضور الشهري', 'sch_manage_attendance', 'school', 'اليوم الدراسي','chart'],
         'timetable'  => ['بناء الجدول',     'sch_build_timetable',   'school', 'اليوم الدراسي','calendar'],
         'subjects'   => ['المواد والجداول', 'sch_manage_subjects',   'school', 'اليوم الدراسي','book'],
         'homework'   => ['الواجبات',        'sch_manage_homework',   'school', 'اليوم الدراسي','pen'],
@@ -43,6 +44,7 @@ final class SCH_Dashboard
         'kg'         => ['رياض الأطفال',    'sch_manage_kg',         'school', 'اليوم الدراسي','sun'],
         // حضور المعلمين شأن موظفين لا سجلات طلاب — نُقل هنا
         'staff-day'  => ['حضور المعلمين',   'sch_supervise_stage',   'school', 'اليوم الدراسي','user-check'],
+        'staff-report' => ['تقرير حضور الموظفين', 'sch_supervise_stage', 'school', 'اليوم الدراسي','chart'],
 
         // الخدمات — ما يُقدَّم للطالب
         'clinic'     => ['الصحة المدرسية',  'sch_manage_services',   'school', 'الخدمات',     'heart'],
@@ -444,7 +446,7 @@ final class SCH_Dashboard
             exit;
         }
 
-        if (isset($_GET['sch_export']) && in_array($section, ['students', 'audit'], true)) {
+        if (isset($_GET['sch_export']) && in_array($section, ['students', 'audit', 'attendance-report', 'staff-report'], true)) {
             self::send_export($section);
         }
 
@@ -1579,6 +1581,43 @@ final class SCH_Dashboard
                     (string) $r->action,
                     $r->object_type ? $r->object_type . '#' . $r->object_id : '',
                     (string) ($r->ip ?? ''),
+                ]);
+            }
+        } elseif ($section === 'attendance-report') {
+            $class_id = isset($_GET['class_id']) ? absint($_GET['class_id']) : 0;
+            $ym       = isset($_GET['ym']) && preg_match('/^\d{4}-\d{2}$/', (string) $_GET['ym']) ? (string) $_GET['ym'] : current_time('Y-m');
+
+            fputcsv($out, [
+                __('الرقم الأكاديمي', 'school-system'), __('الاسم', 'school-system'),
+                __('حاضر', 'school-system'), __('متأخر', 'school-system'),
+                __('غائب', 'school-system'), __('بعذر', 'school-system'),
+                __('دقائق التأخّر', 'school-system'), __('نسبة الحضور %', 'school-system'),
+            ]);
+
+            foreach (($class_id > 0 ? SCH_Attendance::class_month($class_id, $ym) : []) as $r) {
+                $total = (int) $r->total;
+                $rate  = $total > 0 ? round(((int) $r->present + (int) $r->late) / $total * 100, 1) : 0;
+                fputcsv($out, [
+                    (string) ($r->academic_no ?? ''), (string) $r->full_name,
+                    (int) $r->present, (int) $r->late, (int) $r->absent, (int) $r->excused,
+                    (int) $r->late_minutes, $rate,
+                ]);
+            }
+        } elseif ($section === 'staff-report') {
+            $ym = isset($_GET['ym']) && preg_match('/^\d{4}-\d{2}$/', (string) $_GET['ym']) ? (string) $_GET['ym'] : current_time('Y-m');
+
+            fputcsv($out, [
+                __('الاسم', 'school-system'), __('الدور', 'school-system'),
+                __('حاضر', 'school-system'), __('متأخر', 'school-system'),
+                __('غائب', 'school-system'), __('إجازة', 'school-system'),
+                __('دقائق التأخّر', 'school-system'),
+            ]);
+
+            foreach (SCH_StaffAttendance::staff_roster($ym) as $r) {
+                fputcsv($out, [
+                    (string) $r->display_name, SCH_Staff::role_label((string) $r->role),
+                    (int) $r->present, (int) $r->late, (int) $r->absent, (int) $r->leave_days,
+                    (int) $r->late_minutes,
                 ]);
             }
         }

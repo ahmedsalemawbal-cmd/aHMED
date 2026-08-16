@@ -204,6 +204,46 @@ final class SCH_StaffAttendance
         return $out;
     }
 
+    /**
+     * تقرير شهر لكل الموظفين النشطين: صف لكل موظف بعدّاداته.
+     * استعلام واحد مجمَّع — والدور يُقرأ من ووردبريس بعد الاستعلام.
+     *
+     * @return array<int,object>
+     */
+    public static function staff_roster(string $ym): array
+    {
+        global $wpdb;
+
+        if (!preg_match('/^\d{4}-\d{2}$/', $ym)) {
+            $ym = current_time('Y-m');
+        }
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT u.ID AS user_id, u.display_name, e.job_title,
+                    SUM(a.status = 'present') AS present,
+                    SUM(a.status = 'late')    AS late,
+                    SUM(a.status = 'absent')  AS absent,
+                    SUM(a.status = 'leave')   AS leave_days,
+                    COALESCE(SUM(a.minutes_late), 0) AS late_minutes,
+                    COUNT(a.id) AS total
+             FROM " . sch_table('employees') . " e
+             INNER JOIN {$wpdb->users} u ON u.ID = e.user_id
+             LEFT JOIN " . sch_table('staff_attendance') . " a
+                    ON a.user_id = u.ID AND a.att_date LIKE %s
+             WHERE e.status = 'active'
+             GROUP BY u.ID, u.display_name, e.job_title
+             ORDER BY u.display_name",
+            $wpdb->esc_like($ym) . '-%'
+        )) ?: [];
+
+        foreach ($rows as $r) {
+            $user       = get_user_by('id', (int) $r->user_id);
+            $r->role    = $user instanceof WP_User ? (string) ($user->roles[0] ?? '') : '';
+        }
+
+        return $rows;
+    }
+
     /** ملخّص شهر: عدّاد كل حالة + مجموع دقائق التأخّر. */
     public static function month_totals(int $user_id, string $ym): array
     {

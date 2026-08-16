@@ -13,6 +13,7 @@ function sch_icon(string $name, int $size = 18): string
         'image'     => '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="m4 17 4.5-4.5 3.5 3.5 3-3L20 17"/>',
         'search'   => '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
         'download' => '<path d="M12 3.5v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>',
+        'printer'  => '<path d="M6.5 9V3.5h11V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 17v3.5h10V17"/><path d="M16.5 12.5h.5"/>',
         'plus'     => '<path d="M12 5v14M5 12h14"/>',
         'chev'     => '<path d="m14 6-6 6 6 6"/>',
         'home'     => '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/>',

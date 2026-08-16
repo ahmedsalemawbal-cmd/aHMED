@@ -184,3 +184,104 @@ function sch_pending_items(): array
 
     return $cache = $out;
 }
+
+/**
+ * شريحة حالة الحضور — «موجة» أنيقة تبرز للحيّ (اليوم، المسح الآن) بلا إزعاج.
+ * الحركة تحترم prefers-reduced-motion (تُوقَف في CSS)، والصامت للقوائم الطويلة.
+ *
+ * @param string $status present|late|absent|excused|leave|none
+ * @param string $label  نص الشريحة (إن تُرك فارغًا يُستعمل النص الافتراضي للحالة)
+ * @param int    $count  عدد اختياري يظهر داخل الشريحة (‎-1‎ = بلا عدد)
+ * @param bool   $live   إن true تنبض الموجة (لِما هو حيّ)؛ وإلا شريحة ساكنة
+ */
+function sch_wave_pill(string $status, string $label = '', int $count = -1, bool $live = false): string
+{
+    $defaults = [
+        'present' => __('حاضر', 'school-system'),
+        'late'    => __('متأخر', 'school-system'),
+        'absent'  => __('غائب', 'school-system'),
+        'excused' => __('غياب بعذر', 'school-system'),
+        'leave'   => __('في إجازة', 'school-system'),
+        'none'    => __('لم يُرصد', 'school-system'),
+    ];
+
+    $status = array_key_exists($status, $defaults) ? $status : 'none';
+    $text   = $label !== '' ? $label : $defaults[$status];
+
+    $out  = '<span class="sch-wpill sch-wpill--' . $status . ($live ? ' is-live' : '') . '">';
+    $out .= '<span class="sch-wpill__dot" aria-hidden="true"></span>';
+    $out .= '<span class="sch-wpill__t">' . esc_html($text) . '</span>';
+    if ($count >= 0) {
+        $out .= '<b class="sch-wpill__n">' . esc_html(number_format_i18n($count)) . '</b>';
+    }
+    $out .= '</span>';
+
+    return $out;
+}
+
+/**
+ * خريطة تقويم شهرية للحضور — خلية لكل يوم ملوّنة بحالته.
+ *
+ * الأسبوع السعودي يبدأ الأحد (العمود الأيمن في RTL) وينتهي السبت.
+ * الخلايا ساكنة عمدًا — ثلاثون خلية تتحرك تُتعب، والحركة للموجات الحيّة وحدها.
+ *
+ * @param string               $ym     صيغة 'Y-m'
+ * @param array<string,string> $status حالة كل يوم: 'Y-m-d' => 'present|late|absent|excused|leave'
+ */
+function sch_attendance_calendar(string $ym, array $status): string
+{
+    if (!preg_match('/^\d{4}-\d{2}$/', $ym)) {
+        $ym = current_time('Y-m');
+    }
+
+    $first  = strtotime($ym . '-01');
+    $days   = (int) gmdate('t', $first);
+    $offset = (int) gmdate('w', $first);          // 0=الأحد .. 6=السبت
+    $today  = current_time('Y-m-d');
+
+    $labels = [
+        'present' => __('حاضر', 'school-system'),
+        'late'    => __('متأخر', 'school-system'),
+        'absent'  => __('غائب', 'school-system'),
+        'excused' => __('غياب بعذر', 'school-system'),
+        'leave'   => __('إجازة', 'school-system'),
+    ];
+
+    $wd = [
+        __('أحد', 'school-system'), __('اثنين', 'school-system'), __('ثلاثاء', 'school-system'),
+        __('أربعاء', 'school-system'), __('خميس', 'school-system'), __('جمعة', 'school-system'), __('سبت', 'school-system'),
+    ];
+
+    $h = '<div class="sch-cal">';
+
+    $h .= '<div class="sch-cal__head">';
+    foreach ($wd as $i => $w) {
+        $we = ($i === 5 || $i === 6) ? ' is-weekend' : '';
+        $h .= '<span class="sch-cal__wd' . $we . '">' . esc_html($w) . '</span>';
+    }
+    $h .= '</div>';
+
+    $h .= '<div class="sch-cal__grid">';
+    for ($i = 0; $i < $offset; $i++) {
+        $h .= '<span class="sch-cal__pad" aria-hidden="true"></span>';
+    }
+
+    for ($d = 1; $d <= $days; $d++) {
+        $date = sprintf('%s-%02d', $ym, $d);
+        $wday = (int) gmdate('w', strtotime($date));
+        $st   = $status[$date] ?? '';
+        $cls  = $st !== '' ? ' sch-cal__day--' . $st : '';
+        $we   = ($wday === 5 || $wday === 6) ? ' is-weekend' : '';
+        $now  = $date === $today ? ' is-today' : '';
+        $tip  = $st !== '' ? ($labels[$st] ?? $st) : '';
+
+        $h .= '<span class="sch-cal__day' . $cls . $we . $now . '"'
+            . ($tip !== '' ? ' title="' . esc_attr($tip) . '"' : '')
+            . '><b>' . esc_html(number_format_i18n($d)) . '</b>'
+            . ($st !== '' ? '<i class="sch-cal__i" aria-hidden="true"></i>' : '')
+            . '</span>';
+    }
+    $h .= '</div></div>';
+
+    return $h;
+}

@@ -175,6 +175,92 @@ final class SCH_Attendance
         return $total === 0 ? 0.0 : round((int) $row->present / $total * 100, 1);
     }
 
+    /**
+     * سجل شهر لطالب، مفهرسًا باليوم (Y-m-d) => صف — لخريطة التقويم.
+     *
+     * @param string $ym صيغة 'Y-m'
+     * @return array<string,object>
+     */
+    public static function month(int $student_id, string $ym): array
+    {
+        global $wpdb;
+
+        if (!preg_match('/^\d{4}-\d{2}$/', $ym)) {
+            $ym = current_time('Y-m');
+        }
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT att_date, status, method, checked_in_at, minutes_late, note
+             FROM ' . sch_table('attendance') . "
+             WHERE student_id = %d AND att_date LIKE %s
+             ORDER BY att_date",
+            $student_id,
+            $wpdb->esc_like($ym) . '-%'
+        )) ?: [];
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(string) $r->att_date] = $r;
+        }
+
+        return $out;
+    }
+
+    /** ملخّص شهر لطالب: عدّاد كل حالة + دقائق التأخّر + نسبة الحضور. */
+    public static function month_totals(int $student_id, string $ym): array
+    {
+        $t = ['present' => 0, 'late' => 0, 'absent' => 0, 'excused' => 0, 'late_minutes' => 0, 'total' => 0, 'rate' => 0.0];
+
+        foreach (self::month($student_id, $ym) as $r) {
+            $s = (string) $r->status;
+            if (isset($t[$s])) {
+                $t[$s]++;
+            }
+            $t['late_minutes'] += (int) $r->minutes_late;
+            $t['total']++;
+        }
+
+        $t['rate'] = $t['total'] > 0 ? round(($t['present'] + $t['late']) / $t['total'] * 100, 1) : 0.0;
+
+        return $t;
+    }
+
+    /**
+     * تقرير شهر لشعبة كاملة: صف لكل طالب بعدّاداته ونسبته.
+     * استعلام واحد مجمَّع — لا N+1 لثلاثين طالبًا.
+     *
+     * @return array<int,object>
+     */
+    public static function class_month(int $class_id, string $ym): array
+    {
+        global $wpdb;
+
+        if (!preg_match('/^\d{4}-\d{2}$/', $ym)) {
+            $ym = current_time('Y-m');
+        }
+
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT s.id, s.full_name, s.academic_no,
+                    SUM(a.status = 'present') AS present,
+                    SUM(a.status = 'late')    AS late,
+                    SUM(a.status = 'absent')  AS absent,
+                    SUM(a.status = 'excused') AS excused,
+                    COALESCE(SUM(a.minutes_late), 0) AS late_minutes,
+                    COUNT(a.id) AS total
+             FROM " . sch_table('enrollments') . " e
+             INNER JOIN " . sch_table('students') . " s ON s.id = e.student_id
+             LEFT JOIN " . sch_table('attendance') . " a
+                    ON a.student_id = s.id AND a.att_date LIKE %s
+             WHERE e.class_id = %d AND e.status = %s AND s.status = %s
+             GROUP BY s.id, s.full_name, s.academic_no
+             ORDER BY s.full_name",
+            $wpdb->esc_like($ym) . '-%',
+            $class_id,
+            'active',
+            'active'
+        )) ?: [];
+    }
+
     private static function notify_absence(int $student_id, string $date): void
     {
         $student = SCH_Students::get($student_id);
