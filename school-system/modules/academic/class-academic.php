@@ -50,6 +50,18 @@ final class SCH_Years
         $wpdb->update(sch_table('academic_years'), ['is_current' => 1], ['id' => $id]);
         update_option('sch_current_year_id', $id, false);
 
+        // مزامنة الحقول المبسّطة على سجل الطالب من تسجيله في السنة التي صارت
+        // حالية — فالمرحلة/الصف/الشعبة تعكس العام الجاري لا الماضي (بعد الترقية).
+        $wpdb->query($wpdb->prepare(
+            "UPDATE " . sch_table('students') . " s
+             INNER JOIN " . sch_table('enrollments') . " e
+                     ON e.student_id = s.id AND e.year_id = %d AND e.status = 'active'
+             INNER JOIN " . sch_table('classes') . " c ON c.id = e.class_id
+             SET s.stage = c.stage, s.grade_level = c.grade_level, s.section = c.section, s.updated_at = %s",
+            $id,
+            sch_now()
+        ));
+
         sch_audit('year.activated', 'year', $id);
         return true;
     }

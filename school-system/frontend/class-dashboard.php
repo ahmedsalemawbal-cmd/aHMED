@@ -72,6 +72,7 @@ final class SCH_Dashboard
         'safety'     => ['الأمن والسلامة',  'sch_manage_services',   'system', '',           'shield'],
         'import'     => ['استيراد الطلاب',  'sch_manage_students',   'system', '',           'upload'],
         'settings'   => ['الإعدادات',       'sch_manage_settings',   'system', '',           'cog'],
+        'rollover'   => ['ترقية العام',     'sch_manage_settings',   'system', '',           'calendar'],
         'audit'      => ['سجل النظام',      'sch_view_audit',        'system', '',           'clock'],
     ];
 
@@ -320,6 +321,7 @@ final class SCH_Dashboard
             'record_payment'   => ['sch_manage_finance',    'do_record_payment'],
             'void_invoice'     => ['sch_manage_finance',    'do_void_invoice'],
             'refund_payment'   => ['sch_manage_finance',    'do_refund_payment'],
+            'run_rollover'     => ['sch_manage_settings',   'do_run_rollover'],
             'send_message'     => ['sch_send_messages',     'do_send_message'],
 
             'add_account'      => ['sch_manage_accounting', 'do_add_account'],
@@ -1296,6 +1298,21 @@ final class SCH_Dashboard
     private static function do_refund_payment(array $d, int $id): bool|WP_Error
     {
         return SCH_Finance::refund_payment(absint($d['payment_id'] ?? 0), (string) ($d['reason'] ?? ''));
+    }
+
+    private static function do_run_rollover(array $d, int $id): array|WP_Error
+    {
+        $map = [];
+        foreach ((array) ($d['map'] ?? []) as $k => $v) {
+            $map[sanitize_text_field((string) $k)] = sanitize_text_field((string) $v);
+        }
+
+        $grad = [];
+        foreach ((array) ($d['graduate'] ?? []) as $k => $v) {
+            $grad[sanitize_text_field((string) $k)] = 1;
+        }
+
+        return SCH_Rollover::run(absint($d['from_year'] ?? 0), absint($d['to_year'] ?? 0), $map, $grad);
     }
 
     private static function do_send_message(array $d, int $id): array|WP_Error

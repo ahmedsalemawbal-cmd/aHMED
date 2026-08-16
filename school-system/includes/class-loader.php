@@ -43,6 +43,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/staff/class-bulk.php';
         require_once SCH_PATH . 'modules/staff/class-flow.php';
         require_once SCH_PATH . 'modules/academic/class-certificates.php';
+        require_once SCH_PATH . 'modules/academic/class-rollover.php';
         require_once SCH_PATH . 'modules/learning/class-content.php';
         require_once SCH_PATH . 'modules/learning/class-homework.php';
         require_once SCH_PATH . 'includes/class-files.php';
