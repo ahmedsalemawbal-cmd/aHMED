@@ -1874,6 +1874,9 @@ tr.is-open .sch-expand {
   margin-bottom: var(--sch-5);
   box-shadow: var(--sch-e2);
 }
+
+/* شريط أفعال الملف: زر «تعديل البيانات» يفتح نافذة بدل نموذج ثابت في الصفحة */
+.sch-profile-acts { display: flex; margin-bottom: var(--sch-5); }
 .sch-idcard__head {
   display: flex; align-items: center; justify-content: space-between; gap: var(--sch-3);
   padding: var(--sch-3) var(--sch-5);

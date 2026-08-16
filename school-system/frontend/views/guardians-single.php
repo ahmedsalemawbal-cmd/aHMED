@@ -39,6 +39,10 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
     </div>
 </div>
 
+<div class="sch-profile-acts">
+    <?php SCH_Modal::button('sch-edit-guardian', __('تعديل البيانات', 'school-system'), 'pen'); ?>
+</div>
+
 <!-- إضافة ابن بالرقم الأكاديمي -->
 <div class="sch-card">
     <h2><?php esc_html_e('إضافة ابن', 'school-system'); ?></h2>
@@ -123,9 +127,7 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
     <?php endif; ?>
 </div>
 
-<div class="sch-card">
-    <h2><?php esc_html_e('تعديل البيانات', 'school-system'); ?></h2>
-
+<?php SCH_Modal::open('sch-edit-guardian', __('تعديل البيانات', 'school-system'), __('حدّث جوّال ولي الأمر وعنوانه وبياناته', 'school-system')); ?>
     <form method="post">
         <?php wp_nonce_field('sch_update_guardian', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="update_guardian">
@@ -157,9 +159,9 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
             </div>
         </div>
 
-        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('حفظ التعديلات', 'school-system'); ?></button>
+        <button class="sch-btn"><?php esc_html_e('حفظ التعديلات', 'school-system'); ?></button>
     </form>
-</div>
+<?php SCH_Modal::close(); ?>
 
 <script>
 (function () {
