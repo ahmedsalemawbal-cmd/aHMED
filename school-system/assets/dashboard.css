@@ -3481,3 +3481,61 @@ body.sch-cmdk-on { overflow: hidden; }
 
 /* شريط أدوات الحضور: «علّم الكل حاضرًا» ثم اقلب الاستثناءات */
 .sch-att-tools { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+
+/* =========================================================
+   رفع مستوى التصميم — طبقة صقل نهائية (v7.2)
+   على الهوية نفسها (سليت جليدي)؛ تُحمَّل أخيرًا فتغلب بلا مسّ الأساس.
+   ========================================================= */
+
+/* 1) قماش جليدي: غسلتان إشعاعيّتان باردتان خفيفتان بدل التعبئة المسطّحة */
+body.sch-body {
+  background-color: var(--sch-paper);
+  background-image:
+    radial-gradient(58% 40% at 92% -6%, var(--sch-accent-glow, rgba(91, 107, 140, .10)), transparent 60%),
+    radial-gradient(46% 36% at 4% 104%, var(--sch-accent-soft), transparent 62%);
+  background-attachment: fixed;
+}
+
+/* 2) عناوين الصفحات أحدّ: وزن ٨٠٠ (مُحمَّل الآن) وتراصّ خفيف */
+.sch-title, .sch-page-title { font-weight: 800; letter-spacing: -.02em; }
+
+/* 3) الشريط الجانبي: تدرّج رأسي هامس يمنحه عمقًا بدل السطح الأبيض المسطّح،
+      والعنصر النشط يقوده مؤشّر جانبي بلون الهوية ووزن أثقل */
+.sch-app > .sch-side { background: linear-gradient(180deg, var(--sch-surface), var(--sch-paper)); }
+.sch-body a.sch-side__link.is-on { font-weight: 700; box-shadow: inset 3px 0 0 var(--sch-accent); }
+
+/* 4) الشريط العلوي زجاجي يطفو فوق المحتوى */
+.sch-topbar {
+  background: color-mix(in srgb, var(--sch-surface) 78%, transparent);
+  -webkit-backdrop-filter: saturate(1.1) blur(10px);
+  backdrop-filter: saturate(1.1) blur(10px);
+}
+
+/* 5) الزر الأساسي حيّ: عمق راحة، وارتفاع وتوهّج عند المرور */
+.sch-btn { box-shadow: var(--sch-e1); }
+.sch-btn:hover { transform: translateY(-1px); box-shadow: var(--sch-e2), 0 8px 22px -10px var(--sch-accent-glow, rgba(91, 107, 140, .5)); }
+.sch-btn:active { transform: translateY(0); box-shadow: var(--sch-e1); }
+.sch-btn--quiet { box-shadow: none; }
+
+/* 6) الجداول الراقية: تناوب هادئ وحوم أوضح — تُقرأ الصفوف الطويلة بلا إجهاد */
+.sch-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--sch-surface-alt) 42%, transparent); }
+.sch-table tbody tr:hover td { background: var(--sch-accent-soft); }
+
+/* 7) الوضع الداكن: حافة رقيقة تُعيد «تعليق» البطاقات على القماش القريب اللون */
+:root[data-theme="dark"] .sch-card,
+:root[data-theme="dark"] .sch-stat,
+:root[data-theme="dark"] .sch-body a.sch-stat,
+:root[data-theme="dark"] .sch-table-wrap { border: 1px solid var(--sch-line); }
+
+/* 8) الوضع الداكن: النصّ فوق لون السليت الفاتح يصير داكنًا فيُقرأ */
+:root[data-theme="dark"] .sch-side__mark,
+:root[data-theme="dark"] .sch-side__user > i,
+:root[data-theme="dark"] .sch-bell__n { color: var(--sch-on-accent); }
+
+/* 9) دخول لطيف متدرّج للمحتوى — يحترم إيقاف الحركة */
+@media (prefers-reduced-motion: no-preference) {
+  .sch-content > .sch-card,
+  .sch-content > .sch-stats { animation: sch-rise-in .34s var(--sch-ease) both; }
+  .sch-content > .sch-stats { animation-delay: .05s; }
+}
+@keyframes sch-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
