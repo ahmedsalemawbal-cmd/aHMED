@@ -3250,38 +3250,41 @@ body.sch-locked { overflow: hidden; }
 .sch-side__grp{margin-top:var(--sch-4)}
 .sch-side__grp:first-child{margin-top:var(--sch-1)}
 
-/* رأس المجموعة زرّ طيّ/فتح: عنوان خافت + سهم يدور */
+/* عنصر رئيسي: أيقونة + اسم + سهم — خطّ خفيف أنيق (نمط هوستنجر) */
 .sch-body button.sch-side__h{
-  display:flex;align-items:center;gap:var(--sch-3);width:100%;
-  padding:var(--sch-2) var(--sch-3);margin:0 0 2px;
+  display:flex;align-items:center;gap:12px;width:100%;height:44px;
+  padding:0 var(--sch-3);margin:0 0 2px;
   background:none;border:0;cursor:pointer;text-align:start;border-radius:var(--sch-radius);
-  font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0;
-  color:var(--sch-ink-soft);transition:color .15s var(--sch-ease),background .15s var(--sch-ease);
+  font-family:inherit;font-size:14px;font-weight:500;letter-spacing:0;
+  color:var(--sch-ink-soft);transition:color .16s var(--sch-ease),background .16s var(--sch-ease);
 }
 .sch-body button.sch-side__h:hover{color:var(--sch-ink);background:var(--sch-surface-alt)}
-.sch-side__h .sch-icon{flex:0 0 auto;color:var(--sch-muted);transition:color .15s}
+.sch-side__h .sch-icon{flex:0 0 auto;width:20px;height:20px;color:var(--sch-muted);transition:color .16s}
 .sch-body button.sch-side__h:hover .sch-icon{color:var(--sch-ink-soft)}
 .sch-side__h > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-side__chev{width:13px;height:13px;flex:0 0 auto;color:var(--sch-muted);transition:transform .22s var(--sch-ease)}
+.sch-side__chev{width:14px;height:14px;flex:0 0 auto;color:var(--sch-muted);transition:transform .24s var(--sch-ease)}
 .sch-side__grp.is-collapsed .sch-side__chev{transform:rotate(-90deg)}
 
-/* حاوية الروابط: طيّ سلس عبر شبكة الصفوف (0fr↔1fr) */
-.sch-side__links{display:grid;grid-template-rows:1fr;transition:grid-template-rows .24s var(--sch-ease)}
+/* حاوية الروابط: طيّ سلس (0fr↔1fr) + خطّ ربط عمودي رفيع تحت أيقونة الأب */
+.sch-side__links{display:grid;grid-template-rows:1fr;transition:grid-template-rows .26s var(--sch-ease)}
 .sch-side__grp.is-collapsed > .sch-side__links{grid-template-rows:0fr}
-.sch-side__linksin{overflow:hidden;min-height:0}
+.sch-side__linksin{
+  overflow:hidden;min-height:0;
+  margin-inline-start:21px;
+  border-inline-start:1px solid var(--sch-line-strong);
+}
 
+/* عنصر فرعي: نصّ فقط بلا أيقونة — خطّ خفيف كالنموذج (النشط أثقل قليلًا) */
 .sch-body a.sch-side__link{
-  display:flex;align-items:center;gap:var(--sch-3);height:42px;padding:0 var(--sch-3);
-  border-radius:var(--sch-radius);color:var(--sch-ink-soft);font-size:13.5px;font-weight:500;margin-bottom:2px;
+  display:flex;align-items:center;gap:var(--sch-2);height:40px;
+  padding:0 16px;margin-inline-start:10px;margin-bottom:1px;
+  border-radius:9px;color:var(--sch-muted);font-size:13.5px;font-weight:400;
   text-decoration:none;
   transition:background .15s var(--sch-ease),color .15s var(--sch-ease);
 }
 .sch-side__link > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-side__link .sch-icon{flex:0 0 auto;color:var(--sch-muted);opacity:1;transition:color .15s}
-.sch-body a.sch-side__link:hover{background:var(--sch-surface-alt);color:var(--sch-ink);text-decoration:none}
-.sch-body a.sch-side__link:hover .sch-icon{color:var(--sch-ink-soft)}
-.sch-body a.sch-side__link.is-on{background:var(--sch-accent-soft);color:var(--sch-accent-ink);font-weight:700}
-.sch-side__link.is-on .sch-icon{color:var(--sch-accent)}
+.sch-body a.sch-side__link:hover{background:var(--sch-surface-alt);color:var(--sch-ink-soft);text-decoration:none}
+.sch-body a.sch-side__link.is-on{background:var(--sch-accent-soft);color:var(--sch-ink);font-weight:500}
 
 /* شارة عدّاد على عنصر التنقّل (الإنذارات المفتوحة) */
 .sch-side__badge{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:var(--sch-r-full);

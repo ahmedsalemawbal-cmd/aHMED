@@ -81,7 +81,6 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                         <?php foreach ($sch_g['sections'] as $sch_slug => $sch_meta) : ?>
                             <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
                                href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
-                                <?php echo sch_icon((string) ($sch_meta[4] ?? $sch_g['icon']), 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
                                 <?php if ($sch_slug === 'alerts' && $sch_open > 0) : ?>
                                     <span class="sch-side__badge"><?php echo esc_html((string) $sch_open); ?></span>
