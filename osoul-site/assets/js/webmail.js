@@ -137,6 +137,8 @@
 	function qa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 	function on(node, ev, fn) { if (node) node.addEventListener(ev, fn); }
 	function fmtBytes(n) { n = +n || 0; if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(0) + ' KB'; return (n / 1048576).toFixed(1) + ' MB'; }
+	// A contact's real name, or '' when it's just the email (avoids showing it twice).
+	function nm(c) { var n = (c && c.name) ? String(c.name).trim() : ''; return (n && n.toLowerCase() !== String((c && c.email) || '').toLowerCase()) ? n : ''; }
 
 	function avColor(s) { var h = 0, i; s = String(s || '?'); for (i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) % 360; } return 'linear-gradient(135deg,hsl(' + h + ',62%,54%),hsl(' + ((h + 26) % 360) + ',58%,42%))'; }
 	function initials(name, email) {
@@ -867,7 +869,7 @@
 			else {
 				box.innerHTML = list.map(function (c, i) {
 					return '<div data-i="' + i + '"><span class="om-ac-av">' + esc(initials(c.name, c.email)) + '</span>' +
-						'<span class="om-ac-t"><b>' + esc(c.name || c.email) + '</b><span class="e">' + esc(c.email) + '</span></span></div>';
+						'<span class="om-ac-t">' + (nm(c) ? '<b>' + esc(nm(c)) + '</b>' : '') + '<span class="e">' + esc(c.email) + '</span></span></div>';
 				}).join('');
 			}
 			place(); box.classList.add('open');
@@ -1053,7 +1055,7 @@
 		var list = S.contacts && S.contacts.length
 			? '<div class="om-contacts-list">' + S.contacts.map(function (c) {
 				return '<button class="om-contact" data-email="' + esc(c.email) + '">' + avatar(c.name, c.email) +
-					'<span class="om-contact-i"><b>' + esc(c.name || c.email) + '</b><span>' + esc(c.email) + '</span></span></button>';
+					'<span class="om-contact-i"><b>' + esc(nm(c) || c.email) + '</b>' + (nm(c) ? '<span>' + esc(c.email) + '</span>' : '') + '</span></button>';
 			}).join('') + '</div>'
 			: '<div class="om-empty" style="padding:34px">' + I.contacts + '<div class="h">' + esc(t('no_contacts')) + '</div></div>';
 		modal.innerHTML = '<div class="om-modal-card"><h3>' + I.contacts + ' ' + esc(t('contacts')) + '</h3>' + list +

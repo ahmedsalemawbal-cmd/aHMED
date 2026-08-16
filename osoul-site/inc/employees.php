@@ -225,6 +225,53 @@ function osoul_mail_server_defaults() {
 }
 
 /**
+ * The best available *display name* for an employee, used as the outgoing
+ * "From" name so recipients see a person, not a bare address.
+ *
+ * Order: the explicit mail-from name → a real WordPress display name →
+ * first+last → nickname → a name derived from the email local-part
+ * ("ahmed.ali@…" → "Ahmed Ali"). Whatever we resolve is persisted to
+ * _osoul_mail_from so it stays stable and is used everywhere.
+ *
+ * @param int $user_id
+ * @return string
+ */
+function osoul_mail_sender_name( $user_id ) {
+	$user_id = (int) $user_id;
+	$stored  = trim( (string) get_user_meta( $user_id, '_osoul_mail_from', true ) );
+	if ( '' !== $stored ) { return $stored; }
+
+	$u = get_userdata( $user_id );
+	if ( ! $u ) { return ''; }
+	$email = (string) $u->user_email;
+	$login = (string) $u->user_login;
+
+	$name = '';
+	foreach ( array(
+		trim( (string) $u->display_name ),
+		trim( trim( (string) $u->first_name ) . ' ' . trim( (string) $u->last_name ) ),
+		trim( (string) $u->nickname ),
+	) as $cand ) {
+		if ( '' !== $cand && ! is_email( $cand )
+			&& 0 !== strcasecmp( $cand, $email )
+			&& 0 !== strcasecmp( $cand, $login ) ) {
+			$name = $cand; break;
+		}
+	}
+	if ( '' === $name ) {
+		// Derive a friendly name from the address' local part.
+		$local = strstr( $email, '@', true );
+		$local = ( false !== $local ) ? $local : $email;
+		$local = trim( preg_replace( '/\s+/', ' ', str_replace( array( '.', '_', '-', '+' ), ' ', $local ) ) );
+		$name  = ( '' !== $local ) ? ( function_exists( 'mb_convert_case' ) ? mb_convert_case( $local, MB_CASE_TITLE, 'UTF-8' ) : ucwords( $local ) ) : $email;
+	}
+	if ( '' !== $name && 0 !== strcasecmp( $name, $email ) ) {
+		update_user_meta( $user_id, '_osoul_mail_from', $name ); // persist (lazy backfill)
+	}
+	return $name;
+}
+
+/**
  * The saved mailbox configuration for a user, merged over the Hostinger
  * defaults. Password is returned decrypted only when $with_pass is true.
  *
@@ -237,7 +284,7 @@ function osoul_mail_config( $user_id, $with_pass = false ) {
 	$d       = osoul_mail_server_defaults();
 	$cfg     = array(
 		'email'     => (string) get_user_meta( $user_id, '_osoul_mail_email', true ),
-		'from_name' => (string) ( get_user_meta( $user_id, '_osoul_mail_from', true ) ?: get_userdata( $user_id )->display_name ),
+		'from_name' => osoul_mail_sender_name( $user_id ),
 		'imap_host' => (string) ( get_user_meta( $user_id, '_osoul_mail_imap_host', true ) ?: $d['imap_host'] ),
 		'imap_port' => (int) ( get_user_meta( $user_id, '_osoul_mail_imap_port', true ) ?: $d['imap_port'] ),
 		'smtp_host' => (string) ( get_user_meta( $user_id, '_osoul_mail_smtp_host', true ) ?: $d['smtp_host'] ),

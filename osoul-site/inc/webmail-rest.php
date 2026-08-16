@@ -433,10 +433,11 @@ function osoul_rest_mail_send( WP_REST_Request $req ) {
 	// Clean up temp attachments + record contacts.
 	foreach ( $tokens_used as $tok ) { osoul_mail_tmp_delete( $uid, $tok ); }
 	if ( ! $draft ) {
-		osoul_mail_add_contacts( $uid, array_map(
-			function ( $e ) { return array( 'email' => $e, 'name' => '' ); },
-			array_merge( $to, $cc, $bcc )
-		) );
+		$rcpts = array();
+		foreach ( array_merge( $to, $cc, $bcc ) as $e ) {
+			$rcpts[] = array( 'email' => $e, 'name' => osoul_mail_lookup_name( $e ) );
+		}
+		osoul_mail_add_contacts( $uid, $rcpts );
 	}
 
 	return rest_ensure_response( array_merge( array( 'ok' => true, 'draft' => $draft ), (array) $res ) );
@@ -557,14 +558,37 @@ function osoul_rest_mail_avatar() {
 }
 
 function osoul_rest_mail_contacts() {
-	$list = get_user_meta( get_current_user_id(), '_osoul_mail_contacts', true );
-	$out  = array();
-	if ( is_array( $list ) ) {
-		foreach ( $list as $email => $name ) {
-			$out[] = array( 'email' => $email, 'name' => $name );
+	$uid  = get_current_user_id();
+	$list = get_user_meta( $uid, '_osoul_mail_contacts', true );
+	if ( ! is_array( $list ) ) { $list = array(); }
+	$dirty = false;
+	$out   = array();
+	foreach ( $list as $email => $name ) {
+		$name = (string) $name;
+		// Back-fill a real name for contacts stored as a bare address.
+		if ( '' === $name || 0 === strcasecmp( $name, (string) $email ) ) {
+			$look = osoul_mail_lookup_name( $email );
+			if ( '' !== $look ) { $name = $look; $list[ $email ] = $look; $dirty = true; }
 		}
+		$out[] = array( 'email' => $email, 'name' => $name );
 	}
+	if ( $dirty ) { update_user_meta( $uid, '_osoul_mail_contacts', $list ); }
 	return rest_ensure_response( array( 'contacts' => $out ) );
+}
+
+/**
+ * A display name for an address from the local directory (employees / WP users),
+ * or '' when unknown — so contacts can show real names instead of bare emails.
+ */
+function osoul_mail_lookup_name( $email ) {
+	$email = sanitize_email( (string) $email );
+	if ( ! is_email( $email ) ) { return ''; }
+	$u = get_user_by( 'email', $email );
+	if ( $u && function_exists( 'osoul_mail_sender_name' ) ) {
+		$n = osoul_mail_sender_name( $u->ID );
+		if ( '' !== $n && 0 !== strcasecmp( $n, $email ) ) { return $n; }
+	}
+	return '';
 }
 
 /**
