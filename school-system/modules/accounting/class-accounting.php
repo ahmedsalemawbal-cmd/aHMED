@@ -341,7 +341,7 @@ final class SCH_Journal
     }
 
     /** عكس قيد مرحّل بقيد مضاد — القيود المرحّلة لا تُحذف أبدًا. */
-    public static function reverse(int $entry_id): array|WP_Error
+    public static function reverse(int $entry_id, bool $in_tx = false): array|WP_Error
     {
         $entry = self::get($entry_id);
         if (!$entry) {
@@ -370,7 +370,7 @@ final class SCH_Journal
             ),
             'ref_type'    => 'reversal',
             'ref_id'      => $entry_id,
-        ], $reversed, true);
+        ], $reversed, true, $in_tx);
     }
 
     public static function get(int $id): ?object

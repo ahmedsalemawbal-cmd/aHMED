@@ -455,6 +455,71 @@ final class SCH_Finance
         return ['id' => $payment_id];
     }
 
+    /** إلغاء فاتورة غير مدفوعة وعكس قيدها المحاسبي في معاملة واحدة. */
+    public static function void_invoice(int $invoice_id, string $reason): bool|WP_Error
+    {
+        global $wpdb;
+
+        $reason = sanitize_text_field($reason);
+        if (trim($reason) === '') {
+            return sch_api_error('no_reason', __('سبب الإلغاء مطلوب.', 'school-system'), 422);
+        }
+
+        $wpdb->query('START TRANSACTION');
+
+        $inv = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, paid, status FROM " . sch_table('invoices') . " WHERE id = %d FOR UPDATE",
+            $invoice_id
+        ));
+
+        if (!$inv) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('not_found', __('الفاتورة غير موجودة.', 'school-system'), 404);
+        }
+        if ($inv->status === 'void') {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('already_void', __('الفاتورة ملغاة أصلًا.', 'school-system'), 409);
+        }
+        if ((float) $inv->paid > 0) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('has_payments', __('لا تُلغى فاتورة عليها دفعات — استردّها أولًا.', 'school-system'), 409);
+        }
+
+        $upd = $wpdb->update(sch_table('invoices'), [
+            'status'     => 'void',
+            'updated_at' => sch_now(),
+        ], ['id' => $invoice_id]);
+
+        if ($upd === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر إلغاء الفاتورة: %s', 'school-system'), $err), 500);
+        }
+
+        // عكس قيد الإثبات إن كان الترحيل التلقائي أنشأه — داخل المعاملة نفسها،
+        // فلا يبقى دَينٌ في ميزان المراجعة على فاتورة أُلغيت.
+        $entry_id = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM " . sch_table('journal_entries') . "
+             WHERE ref_type = 'invoice' AND ref_id = %d ORDER BY id DESC LIMIT 1",
+            $invoice_id
+        ));
+
+        if ($entry_id > 0) {
+            $rev = SCH_Journal::reverse($entry_id, true);
+            if (is_wp_error($rev)) {
+                $wpdb->query('ROLLBACK');
+                return $rev;
+            }
+        }
+
+        $wpdb->query('COMMIT');
+
+        sch_audit('invoice.voided', 'invoice', $invoice_id, ['reason' => $reason]);
+
+        return true;
+    }
+
     public static function payments(int $invoice_id): array
     {
         global $wpdb;

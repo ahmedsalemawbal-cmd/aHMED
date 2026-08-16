@@ -36,6 +36,17 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
             <div><dt><?php esc_html_e('المدفوع', 'school-system'); ?></dt><dd><?php echo esc_html(sch_money($invoice->paid)); ?></dd></div>
             <div><dt><?php esc_html_e('المتبقي', 'school-system'); ?></dt><dd><?php echo esc_html(sch_money((float) $invoice->total - (float) $invoice->paid)); ?></dd></div>
         </dl>
+        <?php if ($invoice->status === 'void') : ?>
+            <p class="sch-mt"><span class="sch-badge sch-badge--muted"><?php esc_html_e('فاتورة ملغاة', 'school-system'); ?></span></p>
+        <?php elseif ((float) $invoice->paid == 0 && current_user_can('sch_manage_finance')) : ?>
+            <form method="post" class="sch-toolbar sch-mt" onsubmit="return confirm('<?php esc_attr_e('إلغاء هذه الفاتورة وعكس قيدها المحاسبي؟ لا رجعة.', 'school-system'); ?>');">
+                <?php wp_nonce_field('sch_void_invoice', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_action" value="void_invoice">
+                <input type="hidden" name="invoice_id" value="<?php echo esc_attr((string) $invoice->id); ?>">
+                <input type="text" name="reason" required placeholder="<?php esc_attr_e('سبب الإلغاء — إجباري', 'school-system'); ?>">
+                <button class="sch-btn sch-btn--quiet"><?php esc_html_e('إلغاء الفاتورة', 'school-system'); ?></button>
+            </form>
+        <?php endif; ?>
     </div>
 
     <div class="sch-card">

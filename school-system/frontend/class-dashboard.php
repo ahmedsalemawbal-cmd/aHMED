@@ -318,6 +318,7 @@ final class SCH_Dashboard
             'add_fee_plan'     => ['sch_manage_finance',    'do_add_fee_plan'],
             'issue_invoice'    => ['sch_manage_finance',    'do_issue_invoice'],
             'record_payment'   => ['sch_manage_finance',    'do_record_payment'],
+            'void_invoice'     => ['sch_manage_finance',    'do_void_invoice'],
             'send_message'     => ['sch_send_messages',     'do_send_message'],
 
             'add_account'      => ['sch_manage_accounting', 'do_add_account'],
@@ -1280,6 +1281,11 @@ final class SCH_Dashboard
     private static function do_record_payment(array $d, int $id): array|WP_Error
     {
         return SCH_Finance::record_payment($d);
+    }
+
+    private static function do_void_invoice(array $d, int $id): bool|WP_Error
+    {
+        return SCH_Finance::void_invoice(absint($d['invoice_id'] ?? 0), (string) ($d['reason'] ?? ''));
     }
 
     private static function do_send_message(array $d, int $id): array|WP_Error
