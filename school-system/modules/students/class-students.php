@@ -218,6 +218,35 @@ final class SCH_Students
             $params[] = (int) $args['class_id'];
         }
 
+        // النطاق «على مَن» — البُعد الثاني للصلاحية: من ليس نطاقه «كل المدرسة»
+        // يرى طلاب فصوله (own) أو مرحلته (stage) فقط لا المدرسة كلها. الافتراضي
+        // «all» لغير المخصَّصين والمديرين فلا ينكسر شيء قائم. no_scope للاستدعاءات
+        // الداخلية التي تحتاج رؤيةً كاملة (الحارس الآلي مثلًا).
+        if (empty($args['no_scope']) && class_exists('SCH_Perms')) {
+            $scope = SCH_Perms::scope();
+
+            if ($scope === 'own') {
+                $cids = SCH_Perms::class_ids_for();
+                if ($cids === []) {
+                    $where[] = '1=0';
+                } else {
+                    $in      = implode(',', array_map('intval', $cids));
+                    $where[] = 's.id IN (SELECT student_id FROM ' . sch_table('enrollments')
+                             . " WHERE status = 'active' AND class_id IN ($in))";
+                }
+            } elseif ($scope === 'stage') {
+                $stages = SCH_Perms::stages_for();
+                if ($stages === []) {
+                    $where[] = '1=0';
+                } else {
+                    $where[] = 's.stage IN (' . implode(',', array_fill(0, count($stages), '%s')) . ')';
+                    foreach ($stages as $st) {
+                        $params[] = $st;
+                    }
+                }
+            }
+        }
+
         $clause = implode(' AND ', $where);
         $per_page = min(100, max(1, (int) ($args['per_page'] ?? 20)));
         $page     = max(1, (int) ($args['page'] ?? 1));

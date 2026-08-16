@@ -93,10 +93,13 @@ final class SCH_Guardians
             return sch_api_error('user_error', $user_id->get_error_message(), 500);
         }
 
-        $now = sch_now();
-        $wpdb->insert(sch_table('guardians'), $parts + [
+        $now    = sch_now();
+        $first  = SCH_Enrollment::next_parent_no();
+        $prefix = substr($first, 0, -4);
+        $seq    = (int) substr($first, -4);
+
+        $base = $parts + [
             'user_id'     => $user_id,
-            'parent_no'   => SCH_Enrollment::next_parent_no(),
             'id_type'     => array_key_exists($input['id_type'] ?? '', SCH_Enrollment::ID_TYPES) ? $input['id_type'] : 'national',
             'city'        => sanitize_text_field((string) ($input['city'] ?? '')) ?: null,
             'national_id' => $national ?: null,
@@ -107,11 +110,33 @@ final class SCH_Guardians
             'status'      => 'active',
             'created_at'  => $now,
             'updated_at'  => $now,
-        ]);
+        ];
 
-        sch_audit('guardian.created', 'guardian', (int) $wpdb->insert_id);
+        // رقم وليّ الأمر فريد — نجرّب أرقامًا متتابعة تحت التزامن، وإن تعذّر
+        // نحذف حساب ووردبريس الذي أُنشئ لتوّه فلا يبقى يتيمًا بلا صفّ.
+        $guardian_id = 0;
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $ok = $wpdb->insert(sch_table('guardians'), $base + [
+                'parent_no' => $prefix . str_pad((string) ($seq + $attempt), 4, '0', STR_PAD_LEFT),
+            ]);
 
-        return ['id' => (int) $wpdb->insert_id, 'user_id' => (int) $user_id, 'login' => $login, 'password' => $password, 'name' => $name];
+            if ($ok !== false) {
+                $guardian_id = (int) $wpdb->insert_id;
+                break;
+            }
+        }
+
+        if ($guardian_id === 0) {
+            if (!function_exists('wp_delete_user')) {
+                require_once ABSPATH . 'wp-admin/includes/user.php';
+            }
+            wp_delete_user($user_id);
+            return sch_api_error('db_error', __('تعذّر إنشاء وليّ الأمر — أعد المحاولة.', 'school-system'), 500);
+        }
+
+        sch_audit('guardian.created', 'guardian', $guardian_id);
+
+        return ['id' => $guardian_id, 'user_id' => (int) $user_id, 'login' => $login, 'password' => $password, 'name' => $name];
     }
 
     public static function update(int $id, array $input): bool|WP_Error

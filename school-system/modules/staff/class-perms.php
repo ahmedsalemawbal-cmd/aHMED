@@ -181,6 +181,53 @@ final class SCH_Perms
         return array_key_exists((string) $row->scope, self::SCOPES) ? (string) $row->scope : 'all';
     }
 
+    /**
+     * فصول المستخدم — للنطاق «فصوله وطلابه»: ما هو مربّيه + ما يُدرّس فيه.
+     * @return int[]
+     */
+    public static function class_ids_for(?int $user_id = null): array
+    {
+        global $wpdb;
+
+        $user_id ??= get_current_user_id();
+        if ($user_id === 0) {
+            return [];
+        }
+
+        $ids = $wpdb->get_col($wpdb->prepare(
+            'SELECT id FROM ' . sch_table('classes') . ' WHERE homeroom_teacher_id = %d
+             UNION
+             SELECT class_id FROM ' . sch_table('class_subjects') . ' WHERE teacher_user_id = %d',
+            $user_id,
+            $user_id
+        ));
+
+        return array_values(array_unique(array_map('intval', $ids ?: [])));
+    }
+
+    /**
+     * مراحل المستخدم — للنطاق «مرحلته فقط»: مراحل طلاب فصوله.
+     * @return string[]
+     */
+    public static function stages_for(?int $user_id = null): array
+    {
+        global $wpdb;
+
+        $ids = self::class_ids_for($user_id);
+        if ($ids === []) {
+            return [];
+        }
+
+        $in   = implode(',', array_map('intval', $ids));
+        $rows = $wpdb->get_col(
+            'SELECT DISTINCT s.stage FROM ' . sch_table('students') . ' s
+             INNER JOIN ' . sch_table('enrollments') . " e ON e.student_id = s.id AND e.status = 'active'
+             WHERE e.class_id IN ($in) AND s.stage IS NOT NULL AND s.stage <> ''"
+        );
+
+        return array_values(array_filter(array_map('strval', $rows ?: [])));
+    }
+
     /** انتهت مدة صلاحياته؟ معلم بديل لأسبوع، ووكيل ينوب أثناء سفر المدير. */
     public static function expired(?int $user_id = null): bool
     {
