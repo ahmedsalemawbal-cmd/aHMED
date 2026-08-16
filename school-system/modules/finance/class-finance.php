@@ -315,8 +315,36 @@ final class SCH_Finance
 
         $wpdb->query('START TRANSACTION');
 
-        $wpdb->insert(sch_table('payments'), [
-            'invoice_id'  => (int) $invoice->id,
+        // قفل الفاتورة داخل المعاملة ثم إعادة الحساب من القيمة الطازجة —
+        // دفعتان متزامنتان تتسلسلان على القفل فلا تُبنيان على قراءة قديمة
+        // فتزدوج الدفعة أو يتجاوز المجموع الإجمالي.
+        $locked = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, student_id, total, paid, status
+             FROM " . sch_table('invoices') . " WHERE id = %d FOR UPDATE",
+            (int) $invoice->id
+        ));
+
+        if (!$locked) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('not_found', __('الفاتورة غير موجودة.', 'school-system'), 404);
+        }
+        if ($locked->status === 'void') {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('void_invoice', __('الفاتورة ملغاة.', 'school-system'), 409);
+        }
+
+        $remaining = round((float) $locked->total - (float) $locked->paid, 2);
+        if ($amount > $remaining) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('overpay', sprintf(
+                /* translators: %s: المبلغ المتبقي */
+                __('المبلغ يتجاوز المتبقي (%s ر.س).', 'school-system'),
+                number_format($remaining, 2)
+            ), 422);
+        }
+
+        $ok = $wpdb->insert(sch_table('payments'), [
+            'invoice_id'  => (int) $locked->id,
             'amount'      => $amount,
             'method'      => $method,
             'reference'   => sanitize_text_field((string) ($d['reference'] ?? '')) ?: null,
@@ -325,11 +353,18 @@ final class SCH_Finance
             'created_at'  => sch_now(),
         ]);
 
+        if ($ok === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر تسجيل الدفعة: %s', 'school-system'), $err), 500);
+        }
+
         $payment_id = (int) $wpdb->insert_id;
 
         // توزيع المبلغ على الأقساط المفتوحة بالتسلسل.
         $left = $amount;
-        foreach (self::installments((int) $invoice->id) as $inst) {
+        foreach (self::installments((int) $locked->id) as $inst) {
             if ($left <= 0) {
                 break;
             }
@@ -342,27 +377,41 @@ final class SCH_Finance
             $apply = min($left, $due);
             $paid  = round((float) $inst->paid + $apply, 2);
 
-            $wpdb->update(sch_table('installments'), [
+            $upd = $wpdb->update(sch_table('installments'), [
                 'paid'   => $paid,
                 'status' => $paid >= (float) $inst->amount ? 'paid' : 'partial',
             ], ['id' => (int) $inst->id]);
 
+            if ($upd === false) {
+                $err = $wpdb->last_error;
+                $wpdb->query('ROLLBACK');
+                /* translators: %s: رسالة الخطأ من القاعدة */
+                return sch_api_error('db_error', sprintf(__('تعذّر توزيع الدفعة: %s', 'school-system'), $err), 500);
+            }
+
             $left = round($left - $apply, 2);
         }
 
-        $total_paid = round((float) $invoice->paid + $amount, 2);
+        $total_paid = round((float) $locked->paid + $amount, 2);
 
-        $wpdb->update(sch_table('invoices'), [
+        $upd = $wpdb->update(sch_table('invoices'), [
             'paid'       => $total_paid,
-            'status'     => $total_paid >= (float) $invoice->total ? 'paid' : 'partial',
+            'status'     => $total_paid >= (float) $locked->total ? 'paid' : 'partial',
             'updated_at' => sch_now(),
-        ], ['id' => (int) $invoice->id]);
+        ], ['id' => (int) $locked->id]);
+
+        if ($upd === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر تحديث الفاتورة: %s', 'school-system'), $err), 500);
+        }
 
         $wpdb->query('COMMIT');
 
-        sch_audit('payment.recorded', 'invoice', (int) $invoice->id, ['amount' => $amount, 'method' => $method]);
-        SCH_AutoPost::payment_received($payment_id, (int) $invoice->id, $amount, (string) $method);
-        self::notify_payment((int) $invoice->student_id, $amount, round((float) $invoice->total - $total_paid, 2));
+        sch_audit('payment.recorded', 'invoice', (int) $locked->id, ['amount' => $amount, 'method' => $method]);
+        SCH_AutoPost::payment_received($payment_id, (int) $locked->id, $amount, (string) $method);
+        self::notify_payment((int) $locked->student_id, $amount, round((float) $locked->total - $total_paid, 2));
 
         return ['id' => $payment_id];
     }

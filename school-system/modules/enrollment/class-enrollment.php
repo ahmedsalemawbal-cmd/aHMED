@@ -392,18 +392,44 @@ final class SCH_Enrollment
             return $created;
         }
 
-        $student_id  = (int) $created['id'];
-        $academic_no = self::next_academic_no();
+        $student_id = (int) $created['id'];
 
-        $wpdb->update(sch_table('students'), $parts + [
+        // الرقم الأكاديمي فريد — تحت التسجيل المتزامن قد يحسب طلبان الرقم نفسه،
+        // فنجرّب أرقامًا متتابعة حتى ينجح الإدراج (القيد الفريد يرفض المكرَّر
+        // فعليًّا لا في اللقطة). بلا هذا يبقى الطالب برقم NULL بينما يُنشأ حسابه
+        // من الرقم المحسوب فينفصلان.
+        $prefix = (string) self::hijri_year();
+        $seq    = (int) substr(self::next_academic_no(), strlen($prefix));
+
+        $fields = $parts + [
             'name_en'     => sanitize_text_field((string) ($d['name_en'] ?? '')) ?: null,
-            'academic_no' => $academic_no,
-            'student_no'  => self::student_no($academic_no),
             'id_type'     => array_key_exists($d['id_type'] ?? '', self::ID_TYPES) ? $d['id_type'] : 'national',
             'nationality' => sanitize_text_field((string) ($d['nationality'] ?? '')) ?: null,
             'enrolled_at' => current_time('Y-m-d'),
             'updated_at'  => sch_now(),
-        ], ['id' => $student_id]);
+        ];
+
+        $academic_no = '';
+        $applied     = false;
+
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $academic_no = $prefix . str_pad((string) ($seq + $attempt), 4, '0', STR_PAD_LEFT);
+
+            $res = $wpdb->update(sch_table('students'), $fields + [
+                'academic_no' => $academic_no,
+                'student_no'  => self::student_no($academic_no),
+            ], ['id' => $student_id]);
+
+            if ($res !== false) {
+                $applied = true;
+                break;
+            }
+        }
+
+        if (!$applied) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('academic_no_failed', __('تعذّر توليد رقم أكاديمي فريد — أعد المحاولة.', 'school-system'), 500);
+        }
 
         $enrolled = SCH_Students::enroll($student_id, $class_id);
         if (is_wp_error($enrolled)) {

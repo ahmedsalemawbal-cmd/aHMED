@@ -170,7 +170,11 @@ final class SCH_Custody
 
         $occurred = sch_sanitize_datetime($d['occurred_at'] ?? null) ?? sch_now();
 
-        $wpdb->insert(sch_table('custody_events'), [
+        // سجلّ الأحداث مصدر الحقيقة — فالإدراج وتحديث الحالة معاملة واحدة:
+        // إما أن يثبتا معًا أو لا شيء، فلا تنفصل حالة الطالب عن سجلّه.
+        $wpdb->query('START TRANSACTION');
+
+        $ok = $wpdb->insert(sch_table('custody_events'), [
             'student_id'        => $student_id,
             'from_state'        => $from,
             'to_state'          => $to,
@@ -186,12 +190,44 @@ final class SCH_Custody
             'created_at'        => sch_now(),
         ]);
 
+        if ($ok === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+
+            // سباق: وصلت العملية نفسها مرتين معًا فاصطدمت الثانية بالقيد الفريد —
+            // نُعيد الحدث الأول بلا تحديث حالة مزدوج (idempotency كما تقتضي القاعدة).
+            $existing = $wpdb->get_row($wpdb->prepare(
+                'SELECT * FROM ' . sch_table('custody_events') . ' WHERE client_uuid = %s LIMIT 1',
+                $uuid
+            ));
+            if ($existing) {
+                return [
+                    'event_id'  => (int) $existing->id,
+                    'state'     => (string) $existing->to_state,
+                    'student'   => $student,
+                    'duplicate' => true,
+                ];
+            }
+
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر تسجيل الحركة: %s', 'school-system'), $err), 500);
+        }
+
         $event_id = (int) $wpdb->insert_id;
 
-        $wpdb->update(sch_table('students'), [
+        $upd = $wpdb->update(sch_table('students'), [
             'custody_state' => $to,
             'custody_at'    => $occurred,
         ], ['id' => $student_id]);
+
+        if ($upd === false) {
+            $err = $wpdb->last_error;
+            $wpdb->query('ROLLBACK');
+            /* translators: %s: رسالة الخطأ من القاعدة */
+            return sch_api_error('db_error', sprintf(__('تعذّر تحديث حالة الطالب: %s', 'school-system'), $err), 500);
+        }
+
+        $wpdb->query('COMMIT');
 
         self::after_record($student, $from, $to, $checkpoint, $occurred);
 
