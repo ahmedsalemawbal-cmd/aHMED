@@ -275,8 +275,13 @@ $photo_url = $student->photo_file
 
 <?php if (current_user_can('sch_manage_docs')) : ?>
 <div class="sch-card">
-    <h2><?php esc_html_e('المستندات', 'school-system'); ?></h2>
-    <p class="sch-sub"><?php esc_html_e('مخزّنة خارج المجلد العام. كل فتح لمستند يُسجَّل في سجل النظام.', 'school-system'); ?></p>
+    <div class="sch-cardhead">
+        <div>
+            <h2><?php esc_html_e('المستندات', 'school-system'); ?></h2>
+            <p class="sch-sub"><?php esc_html_e('مخزّنة خارج المجلد العام. كل فتح لمستند يُسجَّل في سجل النظام.', 'school-system'); ?></p>
+        </div>
+        <?php SCH_Modal::button('sch-upload-doc', __('رفع مستند', 'school-system'), 'plus'); ?>
+    </div>
 
     <div class="sch-table-wrap">
         <table class="sch-table">
@@ -321,26 +326,42 @@ $photo_url = $student->photo_file
         </table>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="sch-toolbar sch-mt">
+</div>
+
+<?php SCH_Modal::open('sch-upload-doc', __('رفع مستند', 'school-system'), __('يُخزَّن خارج المجلد العام، ويُسجَّل كل فتح له في سجل النظام', 'school-system')); ?>
+    <form method="post" enctype="multipart/form-data">
         <?php wp_nonce_field('sch_upload_doc', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="upload_doc">
         <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
-        <select name="doc_type" required aria-label="<?php esc_attr_e('نوع المستند', 'school-system'); ?>">
-            <?php foreach (SCH_Enrollment::DOC_TYPES as $slug => $label) : ?>
-                <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <input type="file" name="doc" accept="image/jpeg,image/png,application/pdf" required aria-label="<?php esc_attr_e('الملف', 'school-system'); ?>">
-        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('رفع', 'school-system'); ?></button>
+        <div class="sch-field">
+            <label for="doc-type"><?php esc_html_e('نوع المستند', 'school-system'); ?></label>
+            <select id="doc-type" name="doc_type" required>
+                <?php foreach (SCH_Enrollment::DOC_TYPES as $slug => $label) : ?>
+                    <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="sch-field">
+            <label for="doc-file"><?php esc_html_e('الملف', 'school-system'); ?></label>
+            <input id="doc-file" type="file" name="doc" accept="image/jpeg,image/png,application/pdf" required>
+        </div>
+        <button class="sch-btn"><?php esc_html_e('رفع', 'school-system'); ?></button>
     </form>
-</div>
+<?php SCH_Modal::close(); ?>
 <?php endif; ?>
 
 <?php if (current_user_can('sch_view_health')) : ?>
 <div class="sch-card">
-    <h2><?php esc_html_e('السجل الصحي', 'school-system'); ?></h2>
-    <p class="sch-sub"><?php esc_html_e('يراه المدير والصحة المدرسية فقط — لا المعلم ولا السائق ولا المحاسب.', 'school-system'); ?></p>
+    <div class="sch-cardhead">
+        <div>
+            <h2><?php esc_html_e('السجل الصحي', 'school-system'); ?></h2>
+            <p class="sch-sub"><?php esc_html_e('يراه المدير والصحة المدرسية فقط — لا المعلم ولا السائق ولا المحاسب.', 'school-system'); ?></p>
+        </div>
+        <?php SCH_Modal::button('sch-edit-health', __('تعديل السجل الصحي', 'school-system'), 'pen'); ?>
+    </div>
+</div>
 
+<?php SCH_Modal::open('sch-edit-health', __('السجل الصحي', 'school-system'), __('يراه المدير والصحة المدرسية فقط', 'school-system')); ?>
     <form method="post">
         <?php wp_nonce_field('sch_save_health', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="save_health">
@@ -368,17 +389,22 @@ $photo_url = $student->photo_file
                 <input id="hh-needs" type="text" name="special_needs" value="<?php echo esc_attr((string) ($health->special_needs ?? '')); ?>">
             </div>
         </div>
-        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('حفظ السجل الصحي', 'school-system'); ?></button>
+        <button class="sch-btn"><?php esc_html_e('حفظ السجل الصحي', 'school-system'); ?></button>
     </form>
-</div>
+<?php SCH_Modal::close(); ?>
 <?php endif; ?>
 
 <?php if (current_user_can('sch_handle_notes')) :
     $sch_summary = SCH_Nerve::summary($id);
     $sch_prev    = SCH_Nerve::previous_summary($id); ?>
 <div class="sch-card">
-    <h2><?php esc_html_e('الذاكرة عبر السنوات', 'school-system'); ?></h2>
-    <p class="sch-sub"><?php esc_html_e('ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم — بدل ثلاثة أشهر تكتشفها فيها.', 'school-system'); ?></p>
+    <div class="sch-cardhead">
+        <div>
+            <h2><?php esc_html_e('الذاكرة عبر السنوات', 'school-system'); ?></h2>
+            <p class="sch-sub"><?php esc_html_e('ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم — بدل ثلاثة أشهر تكتشفها فيها.', 'school-system'); ?></p>
+        </div>
+        <?php SCH_Modal::button('sch-edit-memory', __('تعديل الذاكرة', 'school-system'), 'pen'); ?>
+    </div>
 
     <?php if ($sch_prev) : ?>
         <div class="sch-notice">
@@ -392,7 +418,9 @@ $photo_url = $student->photo_file
             ])))); ?></div>
         </div>
     <?php endif; ?>
+</div>
 
+<?php SCH_Modal::open('sch-edit-memory', __('الذاكرة عبر السنوات', 'school-system'), __('ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم', 'school-system')); ?>
     <form method="post">
         <?php wp_nonce_field('sch_save_summary', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="save_summary">
@@ -416,9 +444,9 @@ $photo_url = $student->photo_file
         </div>
 
         <p class="sch-sub"><?php esc_html_e('وقائعية لا وصفية: «يستجيب للمدح الفردي» نعم، «طفل صعب» لا.', 'school-system'); ?></p>
-        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('حفظ', 'school-system'); ?></button>
+        <button class="sch-btn"><?php esc_html_e('حفظ', 'school-system'); ?></button>
     </form>
-</div>
+<?php SCH_Modal::close(); ?>
 <?php endif; ?>
 
 <?php $sch_notes = SCH_Notes::of_student($id, 15); ?>

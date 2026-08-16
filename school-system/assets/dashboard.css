@@ -2279,6 +2279,20 @@ tr.is-open .sch-expand {
 .sch-head .sch-title { margin-bottom: 2px; }
 .sch-head .sch-sub { margin: 0; }
 
+/* رأس بطاقة: عنوان ووصف على جهة، وزر يفتح نافذة على الأخرى — بدل نموذج ثابت */
+.sch-cardhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sch-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sch-4);
+}
+.sch-cardhead > div { flex: 1; min-width: 0; }
+.sch-cardhead h2 { margin: 0 0 4px; }
+.sch-cardhead .sch-sub { margin: 0; }
+.sch-card > .sch-cardhead:last-child { margin-bottom: 0; }
+
 .sch-add {
   display: inline-flex;
   align-items: center;
