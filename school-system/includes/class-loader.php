@@ -38,6 +38,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/nerve/class-nerve.php';
         require_once SCH_PATH . 'modules/clinic/class-medication.php';
         require_once SCH_PATH . 'modules/org/class-org.php';
+        require_once SCH_PATH . 'modules/audit/class-audit.php';
         require_once SCH_PATH . 'modules/staff/class-perms.php';
         require_once SCH_PATH . 'modules/staff/class-bulk.php';
         require_once SCH_PATH . 'modules/staff/class-flow.php';
