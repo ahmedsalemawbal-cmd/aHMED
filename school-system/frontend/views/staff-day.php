@@ -25,16 +25,20 @@ $staff = SCH_Deputy::staff_sheet();
                         <td class="sch-name"><?php echo esc_html($s->display_name); ?></td>
                         <td class="sch-sub"><?php echo esc_html($s->job_title ?: '—'); ?></td>
                         <td>
-                            <?php if ((int) $s->on_leave > 0) : ?>
-                                <span class="sch-badge sch-badge--muted"><?php esc_html_e('إجازة معتمدة', 'school-system'); ?></span>
-                            <?php elseif ($s->status) : ?>
-                                <?php $sch_sm = ['present' => 'sch-badge--ok', 'late' => 'sch-badge--warn', 'absent' => 'sch-badge--danger'][$s->status] ?? 'sch-badge--muted'; ?>
-                                <span class="sch-badge <?php echo esc_attr($sch_sm); ?>">
-                                    <?php echo esc_html(SCH_Deputy::STAFF_STATUSES[$s->status] ?? ''); ?>
-                                </span>
-                            <?php else : ?>
-                                <span class="sch-badge sch-badge--muted"><?php esc_html_e('لم يُرصد', 'school-system'); ?></span>
-                            <?php endif; ?>
+                            <?php
+                            if ((int) $s->on_leave > 0) {
+                                echo sch_wave_pill('leave', __('إجازة معتمدة', 'school-system')); // phpcs:ignore WordPress.Security.EscapeOutput
+                            } elseif ($s->status) {
+                                $sch_live = in_array($s->status, ['present', 'late'], true);
+                                $sch_lbl  = SCH_Deputy::STAFF_STATUSES[$s->status] ?? '';
+                                if ($sch_live && !empty($s->checked_at)) {
+                                    $sch_lbl .= ' · ' . substr((string) $s->checked_at, 11, 5);
+                                }
+                                echo sch_wave_pill((string) $s->status, $sch_lbl, -1, $sch_live); // phpcs:ignore WordPress.Security.EscapeOutput
+                            } else {
+                                echo sch_wave_pill('none'); // phpcs:ignore WordPress.Security.EscapeOutput
+                            }
+                            ?>
                         </td>
                         <td>
                             <?php if ((int) $s->on_leave === 0) : ?>

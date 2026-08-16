@@ -90,6 +90,7 @@ final class SCH_Alerts
         self::rule_no_board($now);
         self::rule_no_arrival($now);
         self::rule_no_attendance($now);
+        self::rule_staff_no_show($now);
         self::rule_still_at_school($now);
         self::rule_stale_referral();
 
@@ -230,6 +231,51 @@ final class SCH_Alerts
                 sprintf(
                     /* translators: %d: عدد الطلاب */
                     _n('%d طالب لم يُرصد حضوره ولا غيابه.', '%d طلاب لم يُرصد حضورهم ولا غيابهم.', $count, 'school-system'),
+                    $count
+                ));
+        }
+    }
+
+    /**
+     * 3.ب) موظفون لم يُسجَّل حضورهم بعد بدء الدوام + مهلة — للوكيل لا لأحد آخر.
+     * إنذار مجمَّع بعدد لا قائمة أفراد، والوكيل يفتح كشف الحضور فيرى مَن.
+     */
+    private static function rule_staff_no_show(string $now): void
+    {
+        global $wpdb;
+
+        if (!class_exists('SCH_StaffAttendance')) {
+            return;
+        }
+
+        // مهلة ٤٥ دقيقة بعد بدء دوام الموظف قبل الإنذار — تأخّر ربع ساعة ليس غيابًا.
+        $cutoff = gmdate('H:i', strtotime((string) SCH_StaffAttendance::expected_in()) + 45 * 60);
+        if ($now < $cutoff || $now > '11:00') {
+            return;
+        }
+
+        $today = current_time('Y-m-d');
+
+        $count = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*)
+             FROM " . sch_table('employees') . " e
+             INNER JOIN {$wpdb->users} u ON u.ID = e.user_id
+             LEFT JOIN " . sch_table('staff_attendance') . " a
+                    ON a.user_id = u.ID AND a.att_date = %s
+             LEFT JOIN " . sch_table('leaves') . " l
+                    ON l.user_id = u.ID AND l.status = 'approved'
+                   AND %s BETWEEN l.start_date AND l.end_date
+             WHERE e.status = 'active' AND a.id IS NULL AND l.id IS NULL",
+            $today,
+            $today
+        ));
+
+        if ($count > 0) {
+            self::open('staff_no_show', 'medium', null, null,
+                __('موظفون بلا رصد حضور', 'school-system'),
+                sprintf(
+                    /* translators: %d: عدد الموظفين */
+                    _n('%d موظف لم يُسجَّل حضوره بعد.', '%d موظفين لم يُسجَّل حضورهم بعد.', $count, 'school-system'),
                     $count
                 ));
         }

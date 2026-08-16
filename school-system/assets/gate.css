@@ -97,6 +97,7 @@
 
 /* بطاقة التأكيد — الحارس يطابق الوجه */
 .schg-card {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; gap: 14px;
   margin-top: 14px; padding: 14px;
   background: rgba(16,185,129,.14);
@@ -172,8 +173,44 @@ input[dir="ltr"] { text-align: start; }
 .schg-card__text strong { font-size: 19px; }
 .schg-card__state { font-weight: 700; }
 
+/* الموظف: هوية إردوازية · التأخّر: كهرمانية — بلمسة على حافة البطاقة */
+.schg-card.is-staff { background: rgba(91,107,140,.16); border-color: #7c88a8; }
+.schg-card.is-late  { background: rgba(245,165,36,.14); border-color: #f5a524; }
+.schg-card.is-late .schg-card__state { color: #f5a524 !important; }
+
+.schg-card__edge,
+.schg-card::after {
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px;
+  background: var(--g-ok);
+}
+.schg-card.is-bad::after   { background: var(--g-bad); }
+.schg-card.is-late::after  { background: #f5a524; }
+.schg-card.is-staff::after { background: #8a99b8; }
+
+/* الموجة: حلقة تتوسّع من جهة الصورة لحظة المسح — النبض للحيّ */
+.schg-card::before {
+  content: ""; position: absolute; top: 50%; inset-inline-start: 46px;
+  width: 44px; height: 44px; margin-top: -22px; border-radius: 50%;
+  border: 2px solid var(--g-ok); opacity: 0; pointer-events: none;
+  transform-origin: center;
+  animation: schg-wave 1.5s ease-out 2;
+}
+.schg-card.is-bad::before   { border-color: var(--g-bad); }
+.schg-card.is-late::before  { border-color: #f5a524; }
+.schg-card.is-staff::before { border-color: #8a99b8; }
+@keyframes schg-wave {
+  0%   { opacity: .6; transform: translate(50%, 0) scale(.5); }
+  100% { opacity: 0;  transform: translate(50%, 0) scale(2.8); }
+}
+[dir="ltr"] .schg-card::before { animation-name: schg-wave-ltr; }
+@keyframes schg-wave-ltr {
+  0%   { opacity: .6; transform: translate(-50%, 0) scale(.5); }
+  100% { opacity: 0;  transform: translate(-50%, 0) scale(2.8); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .schg-scan::after { animation: none; opacity: 0; }
+  .schg-card::before { animation: none; opacity: 0; }
 }
 
 
