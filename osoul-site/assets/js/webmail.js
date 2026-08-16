@@ -416,17 +416,24 @@
 	function bulkAction(action) {
 		var uids = Object.keys(S.sel).map(Number); if (!uids.length) return;
 		api('batch', { body: { folder: S.folder, action: action, uids: uids } }).then(function () {
+			var delta = 0;
 			if (action === 'delete') {
+				uids.forEach(function (u) { var m = S.messages.filter(function (x) { return x.uid === u; })[0]; if (m && !m.seen) delta -= 1; });
 				uids.forEach(function (u) { S.messages = S.messages.filter(function (m) { return m.uid !== u; }); });
 				S.total = Math.max(0, S.total - uids.length);
 				toast(t('deleted_n'), 'ok');
 			} else if (action === 'read' || action === 'unread') {
-				S.messages.forEach(function (m) { if (S.sel[m.uid]) m.seen = (action === 'read'); });
+				var read = (action === 'read');
+				S.messages.forEach(function (m) { if (S.sel[m.uid]) { if (!!m.seen !== read) delta += read ? -1 : 1; m.seen = read; } });
 				toast(t('done_n'), 'ok');
 			} else if (action === 'star') {
 				S.messages.forEach(function (m) { if (S.sel[m.uid]) m.flagged = true; });
 			}
-			clearSel(); renderList(); renderBulk(); refreshFoldersQuiet();
+			if (delta) bumpUnread(delta);                 // update the badge instantly
+			clearSel(); renderList(); renderBulk();
+			// Only refetch folders for actions that don't touch \Seen (avoids the
+			// stale-STATUS bounce); read/unread already updated the count above.
+			if (action !== 'read' && action !== 'unread') refreshFoldersQuiet();
 			if (!S.messages.length) loadMessages();
 		}).catch(function (e) { toast(e.message, 'err'); });
 	}
@@ -458,8 +465,10 @@
 		api('message', { query: { folder: S.folder, uid: uid } }).then(function (m) {
 			if (S.currentUid !== uid) return;
 			S.currentMsg = m; renderMessage(m);
-			// The server has now marked it read — re-sync the sidebar unread counts.
-			if (wasUnread) { setTimeout(refreshFoldersQuiet, 500); }
+			// The unread count was already decremented instantly above. We do NOT
+			// re-fetch folders here: a fresh server STATUS can briefly lag the
+			// just-set \Seen flag and make the badge bounce back up. The periodic
+			// poll reconciles with the server a few seconds later.
 		}).catch(function (e) { view.innerHTML = '<div class="om-view-empty"><div>' + esc(e.message) + '</div></div>'; });
 	}
 
@@ -575,10 +584,12 @@
 	function deleteMessage(uid) {
 		var isTrash = S.special === 'trash';
 		if (isTrash && !confirm(t('confirm_purge'))) return;
+		var msg0 = S.messages.filter(function (x) { return x.uid === uid; })[0];
+		var wasUnread = msg0 && !msg0.seen;
 		api('delete', { body: { folder: S.folder, uid: uid } }).then(function (r) {
 			removeRow(uid);
 			toast(r.mode === 'purged' ? t('purged_ok') : t('deleted_ok'), 'ok');
-			if (!isTrash) bumpUnread(0);
+			if (!isTrash && wasUnread) bumpUnread(-1);   // drop the badge instantly
 			refreshFoldersQuiet();
 		}).catch(function (e) { toast(e.message, 'err'); });
 	}
@@ -640,7 +651,7 @@
 		var aiBar = S.ai ?
 			('<div class="om-ai-bar">' +
 				'<span class="om-ai-ic">' + I.spark + '</span>' +
-				'<input class="om-ai-in" type="text" autocomplete="off" placeholder="' + esc(t('ai_draft_ph')) + '">' +
+				'<input class="om-ai-in" type="text" dir="auto" autocomplete="off" placeholder="' + esc(t('ai_draft_ph')) + '">' +
 				'<button class="om-ai-go" title="' + esc(t('ai_generate')) + '">' + I.arrowup + '</button>' +
 			'</div>') : '';
 		var improveBtn = S.ai ?
@@ -655,13 +666,13 @@
 				'<button class="om-ic om-cd-min">–</button><button class="om-ic om-cd-close">' + I.close + '</button></div>' +
 			'<div class="om-cd-body">' +
 				'<div class="om-cd-fields">' +
-					'<div class="om-cd-fld"><label>' + esc(t('to')) + '</label><input class="cto" type="text" autocomplete="off" value="' + esc(to) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button><span class="ccbcc"><button class="show-cc">' + esc(t('cc')) + '</button><button class="show-bcc">' + esc(t('bcc')) + '</button></span></div>' +
-					'<div class="om-cd-fld cc-row om-hide"><label>' + esc(t('cc')) + '</label><input class="ccc" type="text" autocomplete="off" value="' + esc(cc) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
-					'<div class="om-cd-fld bcc-row om-hide"><label>' + esc(t('bcc')) + '</label><input class="cbcc" type="text" autocomplete="off"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
-					'<div class="om-cd-fld"><label>' + esc(t('subject')) + '</label><input class="csubj" type="text" value="' + esc(subject) + '"></div>' +
+					'<div class="om-cd-fld"><label>' + esc(t('to')) + '</label><input class="cto" type="text" dir="auto" autocomplete="off" value="' + esc(to) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button><span class="ccbcc"><button class="show-cc">' + esc(t('cc')) + '</button><button class="show-bcc">' + esc(t('bcc')) + '</button></span></div>' +
+					'<div class="om-cd-fld cc-row om-hide"><label>' + esc(t('cc')) + '</label><input class="ccc" type="text" dir="auto" autocomplete="off" value="' + esc(cc) + '"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
+					'<div class="om-cd-fld bcc-row om-hide"><label>' + esc(t('bcc')) + '</label><input class="cbcc" type="text" dir="auto" autocomplete="off"><button class="om-rcp-pick" type="button" tabindex="-1" title="' + esc(t('pick_contact')) + '">' + I.caret + '</button></div>' +
+					'<div class="om-cd-fld"><label>' + esc(t('subject')) + '</label><input class="csubj" type="text" dir="auto" value="' + esc(subject) + '"></div>' +
 				'</div>' +
 				aiBar +
-				'<div class="om-cd-editor" contenteditable="true" data-ph="…"></div>' +
+				'<div class="om-cd-editor" contenteditable="true" dir="auto" data-ph="…"></div>' +
 				'<div class="om-cd-atts"></div>' +
 				'<div class="om-cd-tools">' +
 					improveBtn +
@@ -814,7 +825,9 @@
 		var cc = q('.ccc', dock).value.trim();
 		var bcc = q('.cbcc', dock).value.trim();
 		var subj = q('.csubj', dock).value.trim();
-		var bodyHtml = q('.om-cd-editor', dock).innerHTML;
+		// Wrap in dir="auto" so the recipient's client renders Arabic RTL / English
+		// LTR correctly (each block keeps its own direction via the editor markup).
+		var bodyHtml = '<div dir="auto" style="text-align:start">' + q('.om-cd-editor', dock).innerHTML + '</div>';
 		if (!draft && !to && !cc && !bcc) { toast(t('need_rcpt'), 'err'); return; }
 		var sendBtn = q('.om-send', dock), draftBtn = q('.om-draft', dock);
 		sendBtn.disabled = true; draftBtn.disabled = true;

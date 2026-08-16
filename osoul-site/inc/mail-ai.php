@@ -204,7 +204,7 @@ function osoul_ai_text_to_html( $text ) {
 	if ( '' === $text ) { return '<p></p>'; }
 	$out = '';
 	foreach ( preg_split( '/\n{2,}/', $text ) as $para ) {
-		$out .= '<p>' . nl2br( esc_html( $para ) ) . '</p>';
+		$out .= '<p dir="auto">' . nl2br( esc_html( $para ) ) . '</p>';
 	}
 	return $out;
 }
