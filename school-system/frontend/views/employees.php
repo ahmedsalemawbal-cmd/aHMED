@@ -150,6 +150,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
             <table class="sch-table">
                 <thead>
                     <tr>
+                        <th class="sch-th-pick"><?php SCH_Bulk::pick_all(); ?></th>
                         <th><?php esc_html_e('الاسم', 'school-system'); ?></th>
                         <th><?php esc_html_e('الدور', 'school-system'); ?></th>
                         <th><?php esc_html_e('المسمى الوظيفي', 'school-system'); ?></th>
@@ -165,6 +166,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                         $sch_custom = SCH_Perms::is_custom($sch_uid);
                         $sch_gone   = SCH_Perms::expired($sch_uid); ?>
                         <tr>
+                            <td class="sch-th-pick"><?php SCH_Bulk::pick((int) $emp->id); ?></td>
                             <td class="sch-name">
                                 <?php echo esc_html($emp->display_name); ?>
                                 <span class="sch-sub sch-block"><?php echo esc_html($emp->user_email); ?></span>
@@ -232,6 +234,8 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                 </tbody>
             </table>
         </div>
+
+        <?php SCH_Bulk::bar('employees'); ?>
     <?php endif; ?>
 </div>
 

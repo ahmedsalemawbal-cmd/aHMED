@@ -81,6 +81,17 @@ final class SCH_Bulk
                     ['text', __('ماذا فُعل؟', 'school-system')],
                 ],
             ],
+
+            'employees' => [
+                'reactivate' => [
+                    __('إعادة للعمل', 'school-system'), 'check', 'sch_manage_staff',
+                    __('سيُعاد %d موظفًا إلى العمل. متابعة؟', 'school-system'),
+                ],
+                'suspend' => [
+                    __('إيقاف عن العمل', 'school-system'), 'x', 'sch_manage_staff',
+                    __('سيُوقَف %d موظفًا عن العمل — لا يُحذف، ويمكن إعادته لاحقًا. متابعة؟', 'school-system'),
+                ],
+            ],
         ];
     }
 
@@ -153,6 +164,8 @@ final class SCH_Bulk
             'invoices.print'             => count($ids),
             'alerts.ack'                 => self::alerts($ids, 'ack'),
             'alerts.close'               => self::alerts($ids, 'close', (string) ($args['text'] ?? '')),
+            'employees.suspend'          => self::staff_status($ids, 'suspend'),
+            'employees.reactivate'       => self::staff_status($ids, 'reactivate'),
             default                      => 0,
         };
 
@@ -166,6 +179,24 @@ final class SCH_Bulk
     }
 
     // ---------- الأفعال ----------
+
+    /** إيقاف/إعادة موظفين دفعةً — الموظف يُوقَف لا يُحذف، وإعادته بضغطة. */
+    private static function staff_status(array $ids, string $mode): int
+    {
+        $done = 0;
+
+        foreach ($ids as $sid) {
+            $res = $mode === 'suspend'
+                ? SCH_Staff::suspend($sid)
+                : SCH_Staff::update($sid, ['status' => 'active']);
+
+            if ($res === true) {
+                $done++;
+            }
+        }
+
+        return $done;
+    }
 
     private static function message_guardians(array $ids, string $text): int|WP_Error
     {
