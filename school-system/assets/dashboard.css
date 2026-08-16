@@ -875,8 +875,13 @@ textarea[dir="ltr"] {
 @media print {
   /* المتصفحات تحذف الخلفيات والصور افتراضيًا عند الطباعة */
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .sch-top, .sch-wiz__nav, .sch-permbar, .sch-permtools, .sch-prail { display: none; }
-  .sch-main, .sch-content { padding: 0; }
+  /* قشرة الداشبورد كاملةً لا تُطبع — الشريط الجانبي والعلوي والحجاب.
+     كانت تظهر لأن الطباعة تُخفي الصنف القديم (.sch-top) وحده. */
+  .sch-noprint,
+  .sch-side, .sch-topbar, .sch-scrim,
+  .sch-top, .sch-wiz__nav, .sch-permbar, .sch-permtools, .sch-prail { display: none !important; }
+  .sch-app { display: block; }
+  .sch-main, .sch-content { padding: 0; margin: 0; }
   .sch-idc { box-shadow: var(--sch-e1); }
   .sch-idc__dl, .sch-back { display: none; }
 }
@@ -933,11 +938,7 @@ textarea[dir="ltr"] {
 .sch-alert__head strong { font-size: var(--sch-text-lg); }
 .sch-alert .sch-sub { display: block; }
 
-@media print {
-  .sch-noprint, .sch-title { display: none; }
-  .sch-badges { grid-template-columns: repeat(2, 1fr); gap: 5mm; }
-  @page { size: A4 portrait; margin: 10mm; }
-}
+/* (طباعة البطاقات مُعرَّفة بالكامل عند كتلة .sch-badges أدناه بصفحة مُسمّاة) */
 
 /* ---------- يوم الوكيل ---------- */
 
@@ -1956,89 +1957,118 @@ tr.is-open .sch-expand {
 /* أي زر بلا نص مرئي عطل — نُظهره بحد أدنى للعرض حتى لا يختفي */
 
 /* =========================================================
-   بطاقات الطلاب — تصميم الطباعة.
+   بطاقات الطلاب — «أورora جلاس».
 
-   بطاقة رأسية كبطاقة هوية معلَّقة: رأس داكن، صورة كبيرة، اسم، رمز.
-   وست في ورقة A4 بدل ثمانٍ — أكبر فتُقرأ من بعيد، وأمتن على الرقبة.
+   بطاقة هوية فاخرة: شفقٌ لونيّ خفيف يسبح خلف لوح زجاجي مصنفر،
+   صورة دائرية بحلقة توهّج، اسم غامق، ورمز في بلاطة زجاجية.
+   على الشاشة معاينة بنسبة CR80، وتُطبع بحجم CR80 الحقيقي فتُقصّ
+   بطاقةً تُعلَّق. (مرجع: Apple Card · Revolut)
    ========================================================= */
 
 .sch-badges {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: var(--sch-4);
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: var(--sch-5);
   margin-top: var(--sch-4);
+  justify-items: center;
 }
 
-.sch-badge2 { position: relative; display: block; cursor: pointer; }
+.sch-badge2 { position: relative; display: block; width: 100%; max-width: 320px; cursor: pointer; }
 .sch-badge2__pick { position: absolute; opacity: 0; width: 0; height: 0; }
 
+/* الإطار: نسبة CR80 عمودية، ظل عريض ناعم — بطاقة معلّقة بلا حدّ */
 .sch-badge2__card {
+  position: relative;
+  aspect-ratio: 300 / 476;
+  border-radius: var(--sch-radius-xl);
+  overflow: hidden;
+  background: #f5f6fb;
+  box-shadow: 0 24px 48px -22px rgba(15, 18, 40, .5), 0 6px 16px -8px rgba(15, 18, 40, .28);
+  transition: box-shadow .16s ease, transform .16s ease;
+}
+.sch-badge2:hover .sch-badge2__card { transform: translateY(-3px); }
+
+/* الشفق: ثلاث بقع لونية منخفضة الإشباع خلف الزجاج */
+.sch-badge2__blob {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(70% 45% at 20% 0%, #9fb0d8 0%, transparent 55%),
+    radial-gradient(60% 45% at 100% 15%, #a8dcc9 0%, transparent 55%),
+    radial-gradient(70% 50% at 60% 100%, #c7b3e6 0%, transparent 55%);
+  filter: saturate(1.05);
+}
+
+/* اللوح الزجاجي المصنفر يطفو فوق الشفق */
+.sch-badge2__glass {
+  position: absolute; inset: 12px;
+  border-radius: var(--sch-radius-lg);
+  background: rgba(255, 255, 255, .55);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: 0 10px 30px -12px rgba(40, 50, 90, .25);
+}
+
+.sch-badge2__in {
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 0 14px;
-  border-radius: var(--sch-radius-lg);
-  overflow: hidden;
-  background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
-  box-shadow: var(--sch-e2);
-  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
-}
-.sch-badge2:hover .sch-badge2__card { transform: translateY(-2px); }
-
-.sch-badge2__top {
-  width: 100%;
-  padding: 9px 12px 30px;
-  background: var(--sch-sidebar);
+  padding: 26px 22px;
+  color: #20233a;
   text-align: center;
 }
+
 .sch-badge2__school {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
-  color: #A9BACC;
-  letter-spacing: .05em;
+  color: #4a5170;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-/* الصورة تتداخل مع الرأس — عمق بلا حركة */
+/* الصورة: دائرة بحلقة توهّج بيضاء وظلّ ناعم */
 .sch-badge2__photo {
-  width: 86px; height: 86px;
-  margin-top: -26px;
+  width: 112px; height: 112px;
+  margin-top: 14px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--sch-accent-soft);
-  display: flex; align-items: center; justify-content: center;
-  border: 3px solid var(--sch-surface);
-  box-shadow: var(--sch-e1);
+  flex: none;
+  background: linear-gradient(145deg, #c9cede, #aeb6cf);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, .7), 0 14px 30px -10px rgba(60, 70, 120, .4);
 }
-.sch-badge2__photo img { width: 100%; height: 100%; object-fit: cover; }
+.sch-badge2__photo img,
+.sch-badge2__photo svg { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .sch-badge2__name {
-  margin: 10px 12px 2px;
-  font-size: var(--sch-text-sm);
-  font-weight: 700;
-  line-height: 1.4;
-  text-align: center;
+  margin-top: 14px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .sch-badge2__class {
-  padding: 2px 11px;
+  margin-top: 8px;
+  padding: 4px 14px;
   border-radius: var(--sch-r-full);
-  background: var(--sch-accent-soft);
-  color: var(--sch-accent-dark);
-  font-size: 10.5px;
+  background: rgba(255, 255, 255, .7);
+  color: var(--sch-accent-ink);
+  font-size: 12px;
   font-weight: 700;
 }
 
+/* رمز الاستجابة داخل بلاطة زجاجية */
 .sch-badge2__qr {
   position: relative;
+  margin-top: auto;
   display: inline-flex;
-  margin: 12px 0 8px;
-  padding: 7px;
+  padding: 9px;
   border-radius: var(--sch-radius);
-  background: #fff;
-  border: 1px solid var(--sch-line);
+  background: rgba(255, 255, 255, .78);
+  color: #20233a;
 }
-.sch-badge2__qr svg { display: block; }
+.sch-badge2__qr svg { display: block; width: 84px; height: 84px; }
 /* الصورة ٢٠٪ من القطر وحولها حلقة بيضاء — داخل هامش تصحيح الخطأ */
 .sch-badge2__face {
   position: absolute;
@@ -2052,31 +2082,27 @@ tr.is-open .sch-expand {
 [dir="ltr"] .sch-badge2__face { transform: translate(-50%, -50%); }
 
 .sch-badge2__no {
-  font-size: 11px;
-  letter-spacing: .16em;
-  color: var(--sch-muted);
+  margin-top: 10px;
+  font-size: 12px;
+  letter-spacing: .18em;
+  color: #4a5170;
   font-variant-numeric: tabular-nums;
-}
-.sch-badge2__foot {
-  width: 100%; height: 5px;
-  margin-top: 12px;
-  background: var(--sch-accent);
 }
 
 /* التحديد */
 .sch-badge2__tick {
   position: absolute;
-  top: 8px; inset-inline-start: 8px;
-  width: 24px; height: 24px;
+  top: 10px; inset-inline-start: 10px;
+  width: 26px; height: 26px;
   border-radius: var(--sch-r-sm);
-  background: rgba(255, 255, 255, .22);
-  border: 1.5px solid rgba(255, 255, 255, .5);
+  background: rgba(255, 255, 255, .6);
+  border: 1.5px solid rgba(255, 255, 255, .85);
   color: transparent;
   display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px -3px rgba(40, 50, 90, .4);
 }
 .sch-badge2.is-picked .sch-badge2__card {
-  border-color: var(--sch-accent);
-  box-shadow: 0 0 0 2px var(--sch-accent), 0 12px 24px -14px var(--sch-accent-glow);
+  box-shadow: 0 0 0 2.5px var(--sch-accent), 0 24px 48px -20px var(--sch-accent-glow);
 }
 .sch-badge2.is-picked .sch-badge2__tick {
   background: var(--sch-accent);
@@ -2086,15 +2112,16 @@ tr.is-open .sch-expand {
 
 .sch-badge2__flag {
   position: absolute;
-  top: 8px; inset-inline-end: 8px;
-  padding: 2px 9px;
+  top: 10px; inset-inline-end: 10px;
+  padding: 3px 10px;
   border-radius: var(--sch-r-full);
   background: rgba(255, 255, 255, .92);
   color: var(--sch-muted);
   font-size: 9.5px;
   font-weight: 700;
+  box-shadow: 0 2px 8px -3px rgba(40, 50, 90, .4);
 }
-.sch-badge2.is-printed .sch-badge2__card { opacity: .78; }
+.sch-badge2.is-printed .sch-badge2__card { opacity: .82; }
 
 .sch-pickbar__n {
   min-width: 30px; padding: 2px 10px;
@@ -2108,28 +2135,44 @@ tr.is-open .sch-expand {
 .sch-pickbar__acts { margin-inline-start: auto; }
 .sch-pickbar__acts .sch-btn { margin: 0; }
 
-/* ---------- الطباعة: ست بطاقات في A4 ---------- */
+/* ---------- الطباعة: بطاقات بحجم CR80 الحقيقي، تسع في A4 ----------
+   صفحة مُسمّاة (page: sch-badges) فلا يتسرّب اتجاه صفحة الشهادات
+   الأفقي إليها، والزجاج المصنفر يُستبدل بسطح أبيض معتِم لأن
+   backdrop-filter لا يُطبَع. */
+
+.sch-badges { page: sch-badges; }
+@page sch-badges { size: A4 portrait; margin: 8mm; }
 
 @media print {
-  @page { size: A4; margin: 10mm; }
-
   .sch-noprint, .sch-top, .sch-title, .sch-sub, .sch-card { display: none !important; }
 
   .sch-badges {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6mm;
+    grid-template-columns: repeat(3, 54mm);
+    gap: 6mm 4mm;
+    justify-content: center;
+    margin: 0;
   }
+  .sch-badge2 { width: 54mm; max-width: none; }
   .sch-badge2.is-skip { display: none !important; }
+
   .sch-badge2__card {
+    width: 54mm; height: 85.6mm;
+    aspect-ratio: auto;
+    border-radius: 3mm;
     box-shadow: none;
-    border: 1px solid #C8D2DC;
+    border: 1px solid #c8d2dc;
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  .sch-badge2__top { background: #0F1720 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .sch-badge2__foot { background: var(--sch-accent) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .sch-badge2__class { background: var(--sch-accent-soft) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sch-badge2__glass {
+    background: rgba(255, 255, 255, .82) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .sch-badge2__in { padding: 6mm 5mm; }
+  .sch-badge2__photo { width: 22mm; height: 22mm; }
+  .sch-badge2__qr svg { width: 20mm; height: 20mm; }
   .sch-badge2.is-printed .sch-badge2__card { opacity: 1; }
 }
 
@@ -2687,9 +2730,12 @@ body.sch-locked { overflow: hidden; }
   box-shadow: inset 0 0 0 3px #A9B6CC;
 }
 
+/* صفحة مُسمّاة للشهادة (أفقية) حتى لا يتسرّب اتجاهها لبقية الطباعات */
+.sch-cert, .sch-cert--sheet { page: sch-cert; }
+@page sch-cert { size: A4 landscape; margin: 0; }
+
 @media print {
   .sch-noprint, .sch-top, .sch-back, .sch-head { display: none !important; }
-  @page { size: A4 landscape; margin: 0; }
   .sch-cert { box-shadow: none; border-radius: 0; }
   .sch-content { padding: 0 !important; }
 }

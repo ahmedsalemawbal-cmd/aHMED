@@ -97,33 +97,34 @@ $unprinted  = count(array_filter($list['items'], static fn (object $s): bool => 
                 <input type="checkbox" class="sch-badge2__pick" value="<?php echo esc_attr((string) $s->id); ?>">
 
                 <span class="sch-badge2__card">
-                    <span class="sch-badge2__top">
+                    <span class="sch-badge2__blob" aria-hidden="true"></span>
+                    <span class="sch-badge2__glass" aria-hidden="true"></span>
+
+                    <span class="sch-badge2__in">
                         <span class="sch-badge2__school"><?php echo esc_html($school); ?></span>
+
+                        <span class="sch-badge2__photo">
+                            <?php if ($photo) : ?>
+                                <img src="<?php echo esc_url($photo); ?>" alt="" width="112" height="112" loading="lazy">
+                            <?php else : ?>
+                                <?php echo sch_avatar_svg(mb_substr((string) $s->full_name, 0, 1), 112); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                            <?php endif; ?>
+                        </span>
+
+                        <b class="sch-badge2__name"><?php echo esc_html(SCH_Enrollment::full_name($s)); ?></b>
+                        <span class="sch-badge2__class">
+                            <?php echo esc_html(trim((string) $s->grade_level . ' / ' . (string) $s->section)); ?>
+                        </span>
+
+                        <span class="sch-badge2__qr">
+                            <?php echo SCH_QR::svg($token, 3, 1); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                            <?php if ($photo) : ?>
+                                <img class="sch-badge2__face" src="<?php echo esc_url($photo); ?>" alt="" width="26" height="26" loading="lazy">
+                            <?php endif; ?>
+                        </span>
+
+                        <span class="sch-badge2__no" dir="ltr"><?php echo esc_html($s->academic_no ?: ''); ?></span>
                     </span>
-
-                    <span class="sch-badge2__photo">
-                        <?php if ($photo) : ?>
-                            <img src="<?php echo esc_url($photo); ?>" alt="" width="86" height="86" loading="lazy">
-                        <?php else : ?>
-                            <?php echo sch_avatar_svg(mb_substr((string) $s->full_name, 0, 1), 86); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                        <?php endif; ?>
-                    </span>
-
-                    <b class="sch-badge2__name"><?php echo esc_html(SCH_Enrollment::full_name($s)); ?></b>
-                    <span class="sch-badge2__class">
-                        <?php echo esc_html(trim((string) $s->grade_level . ' / ' . (string) $s->section)); ?>
-                    </span>
-
-                    <span class="sch-badge2__qr">
-                        <?php echo SCH_QR::svg($token, 3, 1); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                        <?php if ($photo) : ?>
-                            <img class="sch-badge2__face" src="<?php echo esc_url($photo); ?>" alt="" width="26" height="26" loading="lazy">
-                        <?php endif; ?>
-                    </span>
-
-                    <span class="sch-badge2__no" dir="ltr"><?php echo esc_html($s->academic_no ?: ''); ?></span>
-
-                    <span class="sch-badge2__foot"></span>
                 </span>
 
                 <?php if ($printed) : ?>
