@@ -3372,6 +3372,9 @@ body.sch-locked { overflow: hidden; }
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
+/* حرج: display على الصنف يغلب خاصية hidden، فلا بدّ من إخفاء صريح
+   وإلا ظهرت اللوحة على كل تحميل ولم تُغلَق بـEsc أو النقر خارجها. */
+.sch-cmdk[hidden] { display: none; }
 body.sch-cmdk-on { overflow: hidden; }
 
 .sch-cmdk__box {
