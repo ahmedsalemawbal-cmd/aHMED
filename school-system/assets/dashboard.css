@@ -46,8 +46,8 @@ body.sch-body {
   background: var(--sch-surface);
   border: 0;
   border-radius: var(--sch-radius-lg);
-  padding: var(--sch-5);
-  margin-bottom: var(--sch-4);
+  padding: var(--sch-6);
+  margin-bottom: var(--sch-5);
   box-shadow: var(--sch-e1);
 }
 .sch-card > h2 { font-size: var(--sch-text-lg); margin-bottom: var(--sch-4); }
@@ -62,20 +62,19 @@ body.sch-body {
    فبطاقات <div class="sch-stat"> تطفو بلا سطح. */
 .sch-stat {
   background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
+  border: 0;
   border-radius: var(--sch-radius-lg);
   padding: var(--sch-5);
   box-shadow: var(--sch-e1);
 }
 .sch-body a.sch-stat {
   background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
+  border: 0;
   border-radius: var(--sch-radius-lg);
   padding: var(--sch-5);
   color: inherit;
-  transition: border-color .15s ease;
 }
-.sch-body a.sch-stat:hover { border-color: var(--sch-accent); text-decoration: none; }
+.sch-body a.sch-stat:hover { text-decoration: none; }
 .sch-stat__num {
   display: block;
   font-family: var(--sch-font-display);
@@ -1868,7 +1867,7 @@ tr.is-open .sch-expand {
 
 .sch-idcard {
   background: var(--sch-surface);
-  border: 1px solid var(--sch-line);
+  border: 0;
   border-radius: var(--sch-radius-lg);
   overflow: hidden;
   margin-bottom: var(--sch-5);
@@ -2983,15 +2982,15 @@ body.sch-locked { overflow: hidden; }
    ========================================================= */
 
 /* الصفحة تتنفّس: العرض الكامل بلا هامش يجعلها تبدو زحامًا */
-.sch-content { padding: var(--sch-5) var(--sch-6) var(--sch-7); }
+.sch-content { padding: var(--sch-6) var(--sch-6) var(--sch-7); }
 
-/* العنوان: قفزة حقيقية عن باقي النص */
+/* العنوان: قفزة بطولية — عنوان ضخم أسود كنموذج هوستنجر */
 .sch-title {
-  font-size: var(--sch-text-xl);
-  font-weight: 700;
-  letter-spacing: -.02em;
-  line-height: 1.35;
-  margin: 0 0 2px;
+  font-size: var(--sch-text-2xl);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.25;
+  margin: 0 0 4px;
 }
 .sch-sub:not(a) { font-size: var(--sch-text-sm); color: var(--sch-muted); margin: 0 0 var(--sch-5); }
 .sch-h2 { font-size: var(--sch-text-lg); font-weight: 700; margin: var(--sch-6) 0 var(--sch-3); }
@@ -3185,43 +3184,47 @@ body.sch-locked { overflow: hidden; }
    محفوظة — تُلوَّن تلقائيًا لأنها كلها ترث من هذه الرموز.
    ========================================================= */
 :root{
-  --sch-sbw: 264px;
+  --sch-sbw: 260px;
   --sch-font-display:'Cairo', system-ui, sans-serif;
   --sch-font-body:'Cairo', system-ui, sans-serif;
 
-  --sch-paper:#F4F4F7; --sch-surface:#FFFFFF; --sch-surface-alt:#EDEDF2; --sch-surface-2:#EDEDF2; --sch-bg:#EDEDF2;
-  --sch-sidebar:#14201B; --sch-sidebar-soft:#1D2C25;
-  --sch-chrome:#14201B; --sch-chrome-2:#1D2C25; --sch-chrome-ink:#EDEFEA; --sch-chrome-mut:#9BA79F;
-  --sch-ink:#1B1B26; --sch-ink-soft:#43434F; --sch-muted:#71717A;
-  --sch-line:#E7E7EE; --sch-line-strong:#DADAE3;
-  --sch-accent:#1F5F52; --sch-accent-ink:#184A40; --sch-accent-dark:#184A40; --sch-accent-hover:#267465;
-  --sch-accent-soft:#E8F0ED; --sch-accent-glow:rgba(31,95,82,.22);
+  /* v7.0 — هوية أسود/أبيض «ثلجية» + أكسنت رمادي مزرقّ نادر.
+     الزوايا أنعم والظلال أوسع فتطفو البطاقات فوق القماش البارد. */
+  --sch-radius: 11px; --sch-radius-lg: 16px; --sch-radius-xl: 22px;
+
+  --sch-paper:#F4F5F8; --sch-surface:#FFFFFF; --sch-surface-alt:#F0F1F5; --sch-surface-2:#EDEEF3; --sch-bg:#EDEEF3;
+  --sch-sidebar:#14161F; --sch-sidebar-soft:#1E2130;
+  --sch-chrome:#14161F; --sch-chrome-2:#1E2130; --sch-chrome-ink:#EEF0F5; --sch-chrome-mut:#A2A6B4;
+  --sch-ink:#0E0E16; --sch-ink-soft:#3E3E4A; --sch-muted:#7A7B87;
+  --sch-line:#ECECF2; --sch-line-strong:#E0E1E9;
+  --sch-accent:#5B6B8C; --sch-accent-ink:#3D4A64; --sch-accent-dark:#3D4A64; --sch-accent-hover:#4C5A78;
+  --sch-accent-soft:#EDF0F6; --sch-accent-glow:rgba(91,107,140,.20);
   --sch-on-accent:#fff; --sch-on-success:#fff; --sch-on-danger:#fff;
   --sch-success:#1E8E5A; --sch-success-soft:#E4F3EB; --sch-warn:#C77A15; --sch-warn-soft:#FBEFDC;
   --sch-danger:#D64545; --sch-danger-soft:#FBE9E9;
   --sch-gold:#B08512; --sch-gold-bright:#E6C56A; --sch-gold-soft:#F7EFD9; --sch-gold-ink:#7C6216;
-  --sch-glass:rgba(255,255,255,.86); --sch-glass-line:rgba(24,24,40,.07);
-  --sch-e1:0 1px 1px rgba(20,25,20,.04),0 1px 2px rgba(20,25,20,.06);
-  --sch-e2:0 2px 6px -2px rgba(20,25,20,.06),0 8px 20px -6px rgba(20,25,20,.10);
-  --sch-e3:0 8px 20px -6px rgba(20,25,20,.12),0 22px 44px -14px rgba(20,25,20,.18);
-  --sch-e4:0 16px 40px -8px rgba(20,25,20,.18),0 40px 80px -24px rgba(20,25,20,.26);
-  --sch-hair:inset 0 1px 0 rgba(255,255,255,.7);
+  --sch-glass:rgba(255,255,255,.82); --sch-glass-line:rgba(20,22,35,.06);
+  --sch-e1:0 1px 3px rgba(16,18,30,.04),0 10px 28px -12px rgba(16,18,30,.12);
+  --sch-e2:0 2px 8px -2px rgba(16,18,30,.06),0 18px 44px -14px rgba(16,18,30,.16);
+  --sch-e3:0 10px 26px -8px rgba(16,18,30,.14),0 30px 60px -18px rgba(16,18,30,.22);
+  --sch-e4:0 18px 46px -10px rgba(16,18,30,.20),0 50px 92px -28px rgba(16,18,30,.30);
+  --sch-hair:inset 0 1px 0 rgba(255,255,255,.6);
 }
 :root[data-theme="dark"]{
-  --sch-paper:#0F1116; --sch-surface:#1A1C22; --sch-surface-alt:#23262F; --sch-surface-2:#23262F; --sch-bg:#14161C;
-  --sch-sidebar:#161613; --sch-sidebar-soft:#232320;
-  --sch-chrome:#0F1613; --sch-chrome-2:#1B241F; --sch-chrome-ink:#EDEFEA; --sch-chrome-mut:#9BA79F;
-  --sch-ink:#F2F3F5; --sch-ink-soft:#C4C6CE; --sch-muted:#9AA0AB;
-  --sch-line:rgba(255,255,255,.08); --sch-line-strong:rgba(255,255,255,.14);
-  --sch-accent:#5AB89F; --sch-accent-ink:#8AD6C0; --sch-accent-dark:#8AD6C0; --sch-accent-hover:#7ACBB4;
-  --sch-accent-soft:rgba(90,184,159,.16); --sch-accent-glow:rgba(90,184,159,.40);
-  --sch-on-accent:#08120E; --sch-on-success:#08120E; --sch-on-danger:#2A0A0A;
+  --sch-paper:#0C0D12; --sch-surface:#16171E; --sch-surface-alt:#1E1F28; --sch-surface-2:#1E1F28; --sch-bg:#101119;
+  --sch-sidebar:#131420; --sch-sidebar-soft:#1C1E2B;
+  --sch-chrome:#0E0F16; --sch-chrome-2:#191B24; --sch-chrome-ink:#EEF0F5; --sch-chrome-mut:#A2A6B4;
+  --sch-ink:#F5F6FA; --sch-ink-soft:#C4C5CF; --sch-muted:#888995;
+  --sch-line:rgba(255,255,255,.07); --sch-line-strong:rgba(255,255,255,.12);
+  --sch-accent:#8A99B8; --sch-accent-ink:#B2BED6; --sch-accent-dark:#B2BED6; --sch-accent-hover:#9AA8C4;
+  --sch-accent-soft:rgba(138,153,184,.18); --sch-accent-glow:rgba(138,153,184,.40);
+  --sch-on-accent:#0C0D12; --sch-on-success:#08120E; --sch-on-danger:#2A0A0A;
   --sch-success:#35C489; --sch-success-soft:rgba(53,196,137,.15); --sch-warn:#E9B44C; --sch-warn-soft:rgba(233,180,76,.15);
   --sch-danger:#FF6B6B; --sch-danger-soft:rgba(255,107,107,.15);
   --sch-gold:#E6C56A; --sch-gold-bright:#F2D98C; --sch-gold-soft:rgba(230,197,106,.14); --sch-gold-ink:#F2D98C;
-  --sch-glass:rgba(27,27,23,.82); --sch-glass-line:rgba(255,255,255,.09);
-  --sch-e1:0 1px 2px rgba(0,0,0,.4); --sch-e2:0 4px 12px -2px rgba(0,0,0,.5);
-  --sch-e3:0 12px 28px -8px rgba(0,0,0,.6); --sch-e4:0 24px 56px -16px rgba(0,0,0,.72);
+  --sch-glass:rgba(18,19,26,.82); --sch-glass-line:rgba(255,255,255,.08);
+  --sch-e1:0 1px 2px rgba(0,0,0,.4),0 12px 30px -14px rgba(0,0,0,.6); --sch-e2:0 4px 14px -2px rgba(0,0,0,.5),0 20px 46px -16px rgba(0,0,0,.6);
+  --sch-e3:0 14px 32px -10px rgba(0,0,0,.6),0 34px 64px -20px rgba(0,0,0,.7); --sch-e4:0 26px 60px -16px rgba(0,0,0,.72);
   --sch-hair:inset 0 1px 0 rgba(255,255,255,.05);
 }
 
