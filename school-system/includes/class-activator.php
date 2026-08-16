@@ -24,6 +24,8 @@ final class SCH_Activator
 
     public static function deactivate(): void
     {
+        wp_clear_scheduled_hook('sch_guardian_tick');
+        wp_clear_scheduled_hook('sch_custody_nightly');
         flush_rewrite_rules();
     }
 

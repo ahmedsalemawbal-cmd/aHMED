@@ -502,6 +502,11 @@ final class SCH_Trips
         return $wpdb->get_results($wpdb->prepare(
             "SELECT s.id, s.full_name, s.stage,
                     st.id AS stop_id, st.name AS stop_name, st.sequence AS stop_seq,
+                    (SELECT g.phone
+                       FROM " . sch_table('guardian_student') . " gs
+                       INNER JOIN " . sch_table('guardians') . " g ON g.user_id = gs.guardian_user_id
+                      WHERE gs.student_id = s.id AND g.phone IS NOT NULL
+                      ORDER BY gs.is_primary DESC LIMIT 1) AS guardian_phone,
                     MAX(CASE WHEN e.type = 'board'  THEN e.occurred_at END) AS boarded_at,
                     MAX(CASE WHEN e.type = 'alight' THEN e.occurred_at END) AS alighted_at
              FROM " . sch_table('transport_subs') . " sub
@@ -743,7 +748,7 @@ final class SCH_Trips
         global $wpdb;
 
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT t.*, r.name AS route_name, b.plate, u.display_name AS driver_name
+            "SELECT t.*, r.name AS route_name, b.plate_no AS plate, u.display_name AS driver_name
              FROM " . sch_table('transport_subs') . " sub
              INNER JOIN " . sch_table('trips') . " t
                      ON t.route_id = sub.route_id AND t.status = 'running'

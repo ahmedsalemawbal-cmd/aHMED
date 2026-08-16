@@ -397,10 +397,19 @@ final class SCH_Custody
     {
         global $wpdb;
 
-        return (int) $wpdb->query(
-            "UPDATE " . sch_table('students') . "
-             SET custody_state = 'home'
-             WHERE custody_state <> 'home' AND status = 'active'"
-        );
+        // آمنة في أي وقت: تُصفّر فقط من لا حركة عهدة له اليوم (متبقٍّ من الأمس)،
+        // فلا تمسّ طالبًا مسح دخوله هذا الصباح لو تأخّر تشغيل المهمة عن موعدها.
+        $today = current_time('Y-m-d') . ' 00:00:00';
+
+        return (int) $wpdb->query($wpdb->prepare(
+            "UPDATE " . sch_table('students') . " s
+             SET s.custody_state = 'home'
+             WHERE s.custody_state <> 'home' AND s.status = 'active'
+               AND NOT EXISTS (
+                   SELECT 1 FROM " . sch_table('custody_events') . " e
+                   WHERE e.student_id = s.id AND e.occurred_at >= %s
+               )",
+            $today
+        ));
     }
 }

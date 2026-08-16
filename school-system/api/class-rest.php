@@ -284,11 +284,11 @@ final class SCH_Rest
             'student_id'  => (int) $m->id,
             'name'        => $m->full_name,
             'stop'        => $m->stop_name,
-            'phone'          => SCH_Guardians::primary_phone((int) $m->id),
-            'needs_receiver' => in_array((string) (SCH_Students::get((int) $m->id)->stage ?? ''), ['kg', 'primary'], true),
+            'phone'          => $m->guardian_phone ? (string) $m->guardian_phone : null,
+            'needs_receiver' => in_array((string) ($m->stage ?? ''), ['kg', 'primary'], true),
             'boarded_at'  => $m->boarded_at,
             'alighted_at' => $m->alighted_at,
-        ], SCH_Trips::manifest((int) $r->get_param('id'))));
+        ], SCH_Trips::manifest($trip_id)));
     }
 
     /** مسح الطالب — يقبل qr_token أو student_id، ويمنع التكرار بـclient_uuid. */

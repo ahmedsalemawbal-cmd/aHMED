@@ -16,6 +16,9 @@ final class SCH_Alerts
 {
     public const HOOK = 'sch_guardian_tick';
 
+    /** تصفير العهدة الليلي — يعيد حالة كل طالب إلى «المنزل» استعدادًا ليوم جديد. */
+    public const HOOK_NIGHTLY = 'sch_custody_nightly';
+
     public const SEVERITIES = [
         'medium'   => 'متوسطة',
         'high'     => 'عالية',
@@ -38,6 +41,17 @@ final class SCH_Alerts
 
         if (!wp_next_scheduled(self::HOOK)) {
             wp_schedule_event(time() + 300, 'sch_five_minutes', self::HOOK);
+        }
+
+        // تصفير العهدة الليلي — مرة كل ليلة نحو الثانية فجرًا بتوقيت الموقع.
+        // بدونه تبقى حالة الطالب «في المدرسة/في الباص» فيُرفض مسح الصباح
+        // ويُطلَق إنذار «بقي في الباص» كاذبًا كل يوم.
+        add_action(self::HOOK_NIGHTLY, ['SCH_Custody', 'nightly_reset']);
+
+        if (!wp_next_scheduled(self::HOOK_NIGHTLY)) {
+            $local_2am = strtotime('tomorrow 02:00:00', current_time('timestamp'));
+            $gmt_ts    = $local_2am - (int) (get_option('gmt_offset') * HOUR_IN_SECONDS);
+            wp_schedule_event($gmt_ts, 'daily', self::HOOK_NIGHTLY);
         }
 
         add_filter('cron_schedules', [self::class, 'add_interval']);
@@ -295,15 +309,25 @@ final class SCH_Alerts
         foreach ($open as $a) {
             $age = $now - strtotime((string) $a->opened_at);
 
+            // كل طبقة تُشعَر مرة واحدة لكل إنذار — بلا هذا يُنبَّه المدير كل ساعة
+            // إلى الأبد فيصمت عن الجرس (إشعار يتكرر يفقد قيمته).
             if ($age >= DAY_IN_SECONDS && $principal) {
-                SCH_Comms::notify($principal, __('إنذار مفتوح منذ يوم', 'school-system'), (string) $a->title, 'alert', (int) $a->id);
-                $moved++;
+                $key = 'sch_esc_pri_' . (int) $a->id;
+                if (!get_transient($key)) {
+                    SCH_Comms::notify($principal, __('إنذار مفتوح منذ يوم', 'school-system'), (string) $a->title, 'alert', (int) $a->id);
+                    set_transient($key, 1, 30 * DAY_IN_SECONDS);
+                    $moved++;
+                }
                 continue;
             }
 
             if ($age >= HOUR_IN_SECONDS && $deputy) {
-                SCH_Comms::notify($deputy, __('إنذار لم يُستلم', 'school-system'), (string) $a->title, 'alert', (int) $a->id);
-                $moved++;
+                $key = 'sch_esc_dep_' . (int) $a->id;
+                if (!get_transient($key)) {
+                    SCH_Comms::notify($deputy, __('إنذار لم يُستلم', 'school-system'), (string) $a->title, 'alert', (int) $a->id);
+                    set_transient($key, 1, 30 * DAY_IN_SECONDS);
+                    $moved++;
+                }
             }
         }
 
@@ -313,6 +337,22 @@ final class SCH_Alerts
     public static function open(string $rule, string $severity, ?int $student_id, ?int $trip_id, string $title, string $detail = ''): bool
     {
         global $wpdb;
+
+        // الإنذارات بلا طالب (مستوى المدرسة) لا يحميها القيد الفريد لأن MySQL
+        // يسمح بتكرار NULL — فنفحص وجود إنذار مفتوح لنفس القاعدة اليوم يدويًا،
+        // وإلا تكرّر «طلاب بلا رصد حضور» كل خمس دقائق طوال الصباح.
+        if ($student_id === null) {
+            $dupe = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM " . sch_table('alerts') . "
+                 WHERE rule_code = %s AND day_key = %s AND status = 'open' AND student_id IS NULL",
+                $rule,
+                current_time('Y-m-d')
+            ));
+
+            if ($dupe > 0) {
+                return false;
+            }
+        }
 
         $ok = $wpdb->insert(sch_table('alerts'), [
             'rule_code'  => $rule,
