@@ -36,15 +36,6 @@ $photo_url = $student->photo_file
 <a class="sch-back" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php esc_html_e('كل الطلاب', 'school-system'); ?></a>
 
 <!-- الهوية: بطاقة ثابتة تُقرأ ولا يُلعب بها -->
-<div class="sch-idbar">
-    <a class="sch-idbar__dl" target="_blank" rel="noopener"
-       href="<?php echo esc_url(add_query_arg('sch_doc', '1', SCH_Dashboard::url('students', $id))); ?>"
-       title="<?php esc_attr_e('تنزيل وثيقة A4', 'school-system'); ?>"
-       aria-label="<?php esc_attr_e('تنزيل وثيقة A4', 'school-system'); ?>">
-        <?php echo sch_icon('download', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-    </a>
-</div>
-
 <div class="sch-stage" id="sch-stage">
     <article class="sch-idc" id="sch-idc">
         <header class="sch-idc__head">
@@ -56,7 +47,15 @@ $photo_url = $student->photo_file
                 </g>
             </svg>
             <span class="sch-idc__school"><?php echo esc_html(sch_settings('school_name', get_bloginfo('name'))); ?></span>
-            <span class="sch-idc__doc">STUDENT IDENTITY</span>
+            <span class="sch-idc__end">
+                <span class="sch-idc__doc">STUDENT IDENTITY</span>
+                <a class="sch-idc__dl" target="_blank" rel="noopener"
+                   href="<?php echo esc_url(add_query_arg('sch_doc', '1', SCH_Dashboard::url('students', $id))); ?>"
+                   title="<?php esc_attr_e('تنزيل وثيقة A4', 'school-system'); ?>"
+                   aria-label="<?php esc_attr_e('تنزيل وثيقة A4', 'school-system'); ?>">
+                    <?php echo sch_icon('download', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </a>
+            </span>
         </header>
 
         <div class="sch-idc__body">

@@ -694,7 +694,40 @@ textarea[dir="ltr"] {
   overflow: hidden;
 }
 .sch-idc__school { font-weight: 700; font-size: var(--sch-text-lg); }
+.sch-idc__end { display: inline-flex; align-items: center; gap: var(--sch-3); }
 .sch-idc__doc { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); letter-spacing: .06em; }
+
+/* زر تنزيل الوثيقة داخل رأس البطاقة الداكن — بجانب STUDENT IDENTITY */
+.sch-body a.sch-idc__dl {
+  position: relative;
+  width: 32px; height: 32px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-sm);
+  border: 1px solid var(--sch-glass-line);
+  background: rgba(255, 255, 255, .08);
+  color: var(--sch-chrome-ink);
+  transition: background .15s ease, color .15s ease;
+}
+.sch-body a.sch-idc__dl:hover { background: rgba(255, 255, 255, .18); color: #fff; }
+.sch-idc__dl::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 7px);
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  padding: 3px 10px;
+  border-radius: var(--sch-r-sm);
+  background: var(--sch-chrome);
+  color: #fff;
+  border: 1px solid var(--sch-glass-line);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .14s ease;
+  z-index: 2;
+}
+.sch-idc__dl:hover::after { opacity: 1; }
 
 /* نقش أمني كوثائق الهوية الرسمية */
 .sch-guilloche { position: absolute; inset: 0; opacity: .16; pointer-events: none; }
@@ -845,7 +878,7 @@ textarea[dir="ltr"] {
   .sch-top, .sch-wiz__nav, .sch-permbar, .sch-permtools, .sch-prail { display: none; }
   .sch-main, .sch-content { padding: 0; }
   .sch-idc { box-shadow: var(--sch-e1); }
-  .sch-idbar, .sch-back { display: none; }
+  .sch-idc__dl, .sch-back { display: none; }
 }
 
 /* مقياس واحد للعناوين — لا مقاسات متقاربة تُربك العين */
@@ -2555,47 +2588,6 @@ body.sch-locked { overflow: hidden; }
 
 /* شريط بطاقة الهوية: أيقونة تنزيل وحدها — لا نص ولا مبدّل.
    البطاقة ثابتة: تُقرأ ولا يُلعب بها، والعمق من الظل لا من الحركة. */
-.sch-idbar {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: var(--sch-3);
-}
-.sch-body a.sch-idbar__dl {
-  position: relative;
-  width: 42px; height: 42px;
-  border-radius: var(--sch-radius);
-  border: 1px solid var(--sch-line);
-  background: var(--sch-surface);
-  color: var(--sch-ink-soft);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--sch-e2);
-  transition: background .15s ease, color .15s ease, transform .15s ease;
-}
-.sch-body a.sch-idbar__dl:hover {
-  background: var(--sch-accent);
-  border-color: var(--sch-accent);
-  color: #fff;
-  transform: translateY(-1px);
-}
-/* أيقونة بلا اسم تُحفظ بالتجربة لا بالنظر — فالتلميح ليس زينة */
-.sch-idbar__dl::after {
-  content: attr(title);
-  position: absolute;
-  bottom: calc(100% + 7px);
-  inset-inline-start: 50%;
-  transform: translateX(50%);
-  padding: 3px 10px;
-  border-radius: var(--sch-r-sm);
-  background: var(--sch-chrome);
-  color: #fff;
-  font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .14s ease;
-}
-.sch-idbar__dl:hover::after { opacity: 1; }
-
 /* البطاقة ثابتة تمامًا */
 .sch-idc { transform: none !important; }
 
