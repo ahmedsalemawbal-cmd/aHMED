@@ -601,6 +601,23 @@ final class SCH_Activator
             KEY idx_created (created_at)
         ) {$charset};";
 
+        // طابور تسليم الإشعارات عبر القنوات (بريد الآن، وPush/SMS لاحقًا) —
+        // يُرسَل بالكرون لا في الطلب، مع حالة وإعادة محاولة.
+        $sql[] = "CREATE TABLE {$p}deliveries (
+            id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            notification_id BIGINT UNSIGNED NOT NULL,
+            user_id         BIGINT UNSIGNED NOT NULL,
+            channel         VARCHAR(20)     NOT NULL DEFAULT 'email',
+            status          ENUM('queued','sent','failed','skipped') NOT NULL DEFAULT 'queued',
+            attempts        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            error           VARCHAR(190)    DEFAULT NULL,
+            created_at      DATETIME        NOT NULL,
+            updated_at      DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_status (status, attempts),
+            KEY idx_notif (notification_id)
+        ) {$charset};";
+
         // ===== المحاسبة =====
         $sql[] = "CREATE TABLE {$p}accounts (
             id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

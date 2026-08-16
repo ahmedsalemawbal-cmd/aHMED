@@ -181,7 +181,84 @@ final class SCH_Comms
             'created_at' => sch_now(),
         ]);
 
+        self::queue_delivery((int) $wpdb->insert_id, $user_id);
+
         return true;
+    }
+
+    /**
+     * يضع الإشعار في طابور التسليم عبر القنوات المفعّلة — يُرسَل لاحقًا بالكرون
+     * لا في الطلب، فبثّ لمئات الأولياء لا يرسل مئات الرسائل تباعًا فيُعلّق الطلب.
+     */
+    private static function queue_delivery(int $notification_id, int $user_id): void
+    {
+        global $wpdb;
+
+        if ($notification_id <= 0 || !sch_settings('notify_email', true)) {
+            return;
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user || !is_email((string) $user->user_email)) {
+            return;
+        }
+
+        $wpdb->insert(sch_table('deliveries'), [
+            'notification_id' => $notification_id,
+            'user_id'         => $user_id,
+            'channel'         => 'email',
+            'status'          => 'queued',
+            'attempts'        => 0,
+            'created_at'      => sch_now(),
+            'updated_at'      => sch_now(),
+        ]);
+    }
+
+    /**
+     * معالج الطابور — يُشغَّل بالكرون: يرسل دفعة عبر القناة ويعيد المحاولة حتى
+     * ثلاثًا ثم يعلّمها فاشلة. قنوات Push/SMS تُوصَّل هنا لاحقًا بمفاتيحها.
+     */
+    public static function process_deliveries(int $limit = 30): int
+    {
+        global $wpdb;
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT d.id, d.user_id, d.channel, d.attempts, n.title, n.body
+             FROM " . sch_table('deliveries') . " d
+             INNER JOIN " . sch_table('notifications') . " n ON n.id = d.notification_id
+             WHERE d.status = 'queued' AND d.attempts < 3
+             ORDER BY d.id ASC LIMIT %d",
+            max(1, $limit)
+        )) ?: [];
+
+        $sent = 0;
+
+        foreach ($rows as $d) {
+            $user = get_userdata((int) $d->user_id);
+            $ok   = false;
+
+            if ($d->channel === 'email' && $user && is_email((string) $user->user_email)) {
+                $ok = (bool) wp_mail(
+                    (string) $user->user_email,
+                    (string) $d->title,
+                    (string) ($d->body ?: $d->title)
+                );
+            }
+
+            $attempts = (int) $d->attempts + 1;
+
+            $wpdb->update(sch_table('deliveries'), [
+                'status'     => $ok ? 'sent' : ($attempts >= 3 ? 'failed' : 'queued'),
+                'attempts'   => $attempts,
+                'updated_at' => sch_now(),
+            ], ['id' => (int) $d->id]);
+
+            if ($ok) {
+                $sent++;
+            }
+        }
+
+        return $sent;
     }
 
     /** رسالة جماعية — تُخزَّن مرة وتُوزَّع إشعارات. */

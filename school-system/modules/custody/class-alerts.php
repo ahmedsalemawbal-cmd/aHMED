@@ -38,6 +38,8 @@ final class SCH_Alerts
     public static function init(): void
     {
         add_action(self::HOOK, [self::class, 'run']);
+        // طابور تسليم الإشعارات يُعالَج على نفس النبضة (كل خمس دقائق).
+        add_action(self::HOOK, ['SCH_Comms', 'process_deliveries']);
 
         if (!wp_next_scheduled(self::HOOK)) {
             wp_schedule_event(time() + 300, 'sch_five_minutes', self::HOOK);
