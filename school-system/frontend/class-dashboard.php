@@ -68,6 +68,7 @@ final class SCH_Dashboard
         'inventory'  => ['المستودع',        'sch_manage_assets',     'erp', 'العمليات',      'box'],
 
         'employees'  => ['الموظفون',        'sch_manage_staff',      'system', '',           'users'],
+        'staff-badges' => ['بطاقات الموظفين', 'sch_manage_staff',     'system', '',           'badge'],
         'visitors'   => ['الزوار',          'sch_manage_services',   'system', '',           'door'],
         'safety'     => ['الأمن والسلامة',  'sch_manage_services',   'system', '',           'shield'],
         'import'     => ['استيراد الطلاب',  'sch_manage_students',   'system', '',           'upload'],
@@ -251,6 +252,7 @@ final class SCH_Dashboard
             'bulk'             => ['read',                 'do_bulk'],
             'flow_mark'        => ['read',                 'do_flow_mark'],
             'print_badges'     => ['sch_manage_students',  'do_print_badges'],
+            'print_staff_badges' => ['sch_manage_staff',   'do_print_staff_badges'],
             'toggle_watch'     => ['sch_view_students',    'do_toggle_watch'],
             'issue_cert'       => ['sch_manage_students',  'do_issue_cert'],
             'issue_certs_bulk' => ['sch_manage_students',  'do_issue_certs_bulk'],
@@ -747,6 +749,18 @@ final class SCH_Dashboard
     {
         $ids = array_map('absint', explode(',', (string) ($d['ids'] ?? '')));
         $n   = SCH_Students::mark_printed($ids);
+
+        return ['msg' => sprintf(
+            /* translators: %d: عدد البطاقات */
+            _n('عُلّمت بطاقة واحدة كمطبوعة', 'عُلّمت %d بطاقة كمطبوعة', $n, 'school-system'),
+            $n
+        )];
+    }
+
+    private static function do_print_staff_badges(array $d, int $id): array
+    {
+        $ids = array_map('absint', explode(',', (string) ($d['ids'] ?? '')));
+        $n   = SCH_Staff::mark_printed($ids);
 
         return ['msg' => sprintf(
             /* translators: %d: عدد البطاقات */

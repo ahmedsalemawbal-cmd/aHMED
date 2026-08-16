@@ -85,6 +85,7 @@ final class SCH_Staff
             'phone'       => sanitize_text_field((string) ($input['phone'] ?? '')) ?: null,
             'national_id' => sanitize_text_field((string) ($input['national_id'] ?? '')) ?: null,
             'hire_date'   => self::sanitize_date($input['hire_date'] ?? null),
+            'badge_token' => sch_generate_qr_token(),
             'status'      => 'active',
             'created_at'  => $now,
             'updated_at'  => $now,
@@ -219,6 +220,61 @@ final class SCH_Staff
         }
 
         return ['items' => $items ?: [], 'total' => $total];
+    }
+
+    /**
+     * قائمة الموظفين لطباعة البطاقات — الموظفون النشطون فقط، بأسمائهم وأدوارهم،
+     * مرتّبين بالدور ثم الاسم فتُطبع كل مجموعة معًا. بلا ترقيم صفحات: بطاقات لا سجل.
+     *
+     * @return array<int,object>
+     */
+    public static function badges(array $args = []): array
+    {
+        global $wpdb;
+
+        $emp   = sch_table('employees');
+        $users = $wpdb->users;
+
+        $items = $wpdb->get_results(
+            "SELECT e.id, e.user_id, e.employee_no, e.job_title, e.department,
+                    e.badge_token, e.badge_printed_at, u.display_name
+             FROM {$emp} e
+             INNER JOIN {$users} u ON u.ID = e.user_id
+             WHERE e.status = 'active'
+             ORDER BY u.display_name ASC"
+        ) ?: [];
+
+        // الدور من ووردبريس لا من جدولنا — مصدر واحد للحقيقة.
+        foreach ($items as $item) {
+            $user       = get_user_by('id', (int) $item->user_id);
+            $item->role = $user instanceof WP_User ? (string) ($user->roles[0] ?? '') : '';
+        }
+
+        // تصفية اختيارية بالدور
+        $role = (string) ($args['role'] ?? '');
+        if ($role !== '') {
+            $items = array_values(array_filter($items, static fn (object $e): bool => $e->role === $role));
+        }
+
+        return $items;
+    }
+
+    /** تعليم بطاقات الموظفين كمطبوعة — كبطاقات الطلاب: نطبع ثم نُعلّم. */
+    public static function mark_printed(array $ids): int
+    {
+        global $wpdb;
+
+        $ids = array_values(array_filter(array_map('absint', $ids)));
+        if ($ids === []) {
+            return 0;
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '%d'));
+
+        return (int) $wpdb->query($wpdb->prepare(
+            'UPDATE ' . sch_table('employees') . " SET badge_printed_at = %s WHERE id IN ({$in})",
+            array_merge([sch_now()], $ids)
+        ));
     }
 
     public static function role_label(string $role): string

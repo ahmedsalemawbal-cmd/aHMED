@@ -223,11 +223,14 @@ final class SCH_Activator
             phone       VARCHAR(30)     DEFAULT NULL,
             national_id VARCHAR(20)     DEFAULT NULL,
             hire_date   DATE            DEFAULT NULL,
+            badge_token CHAR(32)        DEFAULT NULL,
+            badge_printed_at DATETIME   DEFAULT NULL,
             status      ENUM('active','suspended','left') NOT NULL DEFAULT 'active',
             created_at  DATETIME        NOT NULL,
             updated_at  DATETIME        NOT NULL,
             PRIMARY KEY (id),
             UNIQUE KEY uniq_user (user_id),
+            UNIQUE KEY uniq_badge (badge_token),
             KEY idx_status (status)
         ) {$charset};";
 
@@ -1273,6 +1276,15 @@ final class SCH_Activator
 
         foreach ($badgeless as $id) {
             $wpdb->update(sch_table('students'), ['badge_token' => sch_generate_qr_token()], ['id' => (int) $id]);
+        }
+
+        // بطاقة الموظف تحمل رمزًا عشوائيًا كبطاقة الطالب — لا رقمه الوظيفي المتسلسل.
+        $staff_badgeless = $wpdb->get_col(
+            'SELECT id FROM ' . sch_table('employees') . " WHERE badge_token IS NULL OR badge_token = ''"
+        ) ?: [];
+
+        foreach ($staff_badgeless as $id) {
+            $wpdb->update(sch_table('employees'), ['badge_token' => sch_generate_qr_token()], ['id' => (int) $id]);
         }
 
         $students = $wpdb->get_col(
