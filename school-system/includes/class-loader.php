@@ -56,6 +56,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'frontend/class-dashboard.php';
         require_once SCH_PATH . 'frontend/class-app.php';
         require_once SCH_PATH . 'frontend/class-portal.php';
+        require_once SCH_PATH . 'frontend/class-apps.php';
         require_once SCH_PATH . 'frontend/class-modal.php';
         require_once SCH_PATH . 'frontend/class-table.php';
         require_once SCH_PATH . 'api/class-bridge.php';
@@ -77,6 +78,7 @@ final class SCH_Loader
         SCH_Dashboard::init();
         SCH_App::init();
         SCH_Portal::init();
+        SCH_Apps::init();
         SCH_Bridge::init();
         SCH_Driver::init();
         SCH_Gate::init();

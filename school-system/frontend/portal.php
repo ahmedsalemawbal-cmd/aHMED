@@ -21,7 +21,18 @@ $school = sch_settings('school_name', get_bloginfo('name'));
     <meta name="robots" content="noindex, nofollow">
     <?php /* منع وميض السمة على بوابة الدخول — تتبع الجهاز/الاختيار المحفوظ */ ?>
     <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C0A16':'#FFFFFF';}}catch(e){}})();</script>
-    <title><?php echo esc_html($school); ?></title>
+    <?php
+    // حزمة التطبيق: بيانها وعامل خدمتها — فتُثبَّت الأيقونة من صفحة الدخول
+    $sch_pk = (string) ($sch_data['pack'] ?? '');
+    $sch_pl = $sch_pk !== '' ? (SCH_Apps::packs()[$sch_pk] ?? null) : null;
+    ?>
+    <title><?php echo esc_html($school . ($sch_pl ? ' — ' . $sch_pl['short'] : '')); ?></title>
+    <?php if ($sch_pl) : ?>
+        <link rel="manifest" href="<?php echo esc_url(SCH_Apps::url($sch_pk, 'manifest.webmanifest')); ?>">
+        <meta name="theme-color" content="<?php echo esc_attr((string) $sch_pl['color']); ?>">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="<?php echo esc_attr((string) $sch_pl['short']); ?>">
+    <?php endif; ?>
     <?php $sch_fav = SCH_Brand::favicon(); ?>
     <?php if ($sch_fav !== '') : ?>
         <link rel="icon" href="<?php echo esc_url($sch_fav); ?>">
@@ -85,5 +96,15 @@ $school = sch_settings('school_name', get_bloginfo('name'));
     </div>
 </div>
 
+<?php if ($sch_pl) : ?>
+<?php /* تسجيل عامل الخدمة من صفحة الدخول: يجعلها تطبيقًا قابلًا للتثبيت */ ?>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Apps::url($sch_pk, 'sw.js')); ?>, { scope: '/' });
+  });
+}
+</script>
+<?php endif; ?>
 </body>
 </html>

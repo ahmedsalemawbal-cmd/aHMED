@@ -188,7 +188,16 @@ final class SCH_Portal
 
     private static function render(string $error): never
     {
-        $sch_data  = ['error' => $error];
+        // الحزمة التي فُتحت منها البوابة — تُلوّن الشاشة وتُحمّل بيانها
+        // فيصير التثبيت من صفحة الدخول نفسها.
+        $sch_pack  = isset($_GET['pack']) ? sanitize_key(wp_unslash((string) $_GET['pack'])) : '';
+        $sch_packs = SCH_Apps::packs();
+
+        if (!isset($sch_packs[$sch_pack])) {
+            $sch_pack = '';
+        }
+
+        $sch_data  = ['error' => $error, 'pack' => $sch_pack];
         $sch_view  = 'portal';
 
         require SCH_PATH . 'frontend/portal.php';

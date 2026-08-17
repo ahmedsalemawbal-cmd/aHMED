@@ -129,6 +129,31 @@ $sch_cur = SCH_Years::current();
     </div>
 
     <aside class="sch-set2__side">
+        <?php /* روابط التطبيقين — هذه ما يُرفع للمتاجر وما يُرسل لأولياء الأمور */ ?>
+        <div class="sch-card">
+            <header class="sch-set__head">
+                <span class="sch-set__ic"><?php echo sch_icon('badge', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+                <div>
+                    <h2><?php esc_html_e('تطبيقا الجوال', 'school-system'); ?></h2>
+                    <p><?php esc_html_e('تطبيقان فقط: الأسرة والموظفون. هذه روابطهما للتثبيت وللرفع على المتاجر.', 'school-system'); ?></p>
+                </div>
+            </header>
+            <div class="sch-set__stat">
+                <?php foreach (SCH_Apps::packs() as $sch_pk => $sch_pv) : ?>
+                    <div class="sch-set__row">
+                        <span><?php echo esc_html((string) $sch_pv['short']); ?></span>
+                        <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(SCH_Apps::url($sch_pk)); ?>" target="_blank" rel="noopener">
+                            <?php esc_html_e('فتح', 'school-system'); ?>
+                        </a>
+                    </div>
+                    <div class="sch-set__row">
+                        <span class="sch-sub"><?php esc_html_e('الرابط', 'school-system'); ?></span>
+                        <code class="sch-code" dir="ltr"><?php echo esc_html(SCH_Apps::url($sch_pk)); ?></code>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <div class="sch-card">
             <header class="sch-set__head">
                 <span class="sch-set__ic"><?php echo sch_icon('shield', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
