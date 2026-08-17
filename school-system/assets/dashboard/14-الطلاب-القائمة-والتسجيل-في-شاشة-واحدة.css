@@ -1,0 +1,183 @@
+/* =========================================================
+   الطلاب — القائمة والتسجيل في شاشة واحدة.
+
+   التسجيل نافذة تُفتح فوق القائمة لا شاشة تنقلك عنها: الموظف الذي
+   يسجّل طالبًا متأخرًا يريد العودة لمكانه لا أن يبحث عن طريقه إليه.
+   ========================================================= */
+
+.sch-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sch-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sch-4);
+}
+.sch-head .sch-title { margin-bottom: 2px; }
+.sch-head .sch-sub { margin: 0; }
+
+/* رأس بطاقة: عنوان ووصف على جهة، وزر يفتح نافذة على الأخرى — بدل نموذج ثابت */
+.sch-cardhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sch-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sch-4);
+}
+.sch-cardhead > div { flex: 1; min-width: 0; }
+.sch-cardhead h2 { margin: 0 0 4px; }
+.sch-cardhead .sch-sub { margin: 0; }
+.sch-card > .sch-cardhead:last-child { margin-bottom: 0; }
+
+.sch-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+/* ---------- المرشّحات ---------- */
+
+.sch-filters { padding: var(--sch-4); }
+.sch-filters__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sch-3);
+}
+.sch-filters .sch-field { margin: 0; flex: 0 0 auto; min-width: 150px; }
+.sch-filters .sch-field--grow { flex: 1 1 240px; }
+.sch-filters .sch-field label { margin-bottom: 4px; font-size: var(--sch-text-xs); }
+.sch-filters__acts { display: flex; gap: var(--sch-2); margin-inline-start: auto; }
+.sch-filters__acts .sch-btn { margin: 0; }
+
+.sch-mono { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+
+/* ---------- النافذة ---------- */
+
+.sch-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--sch-4);
+  overflow-y: auto;
+}
+.sch-modal[hidden] { display: none; }
+
+.sch-modal__veil {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 21, 32, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: sch-veil .2s ease both;
+}
+@keyframes sch-veil { from { opacity: 0; } to { opacity: 1; } }
+
+.sch-modal__box {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: auto;
+  border-radius: var(--sch-r-xl);
+  /* أبيض كامل: الخلفية الرمادية داخل نافذة بيضاء تصنع طبقتين بلا معنى */
+  background: var(--sch-surface);
+  box-shadow: var(--sch-e4);
+  animation: sch-modal-in .26s cubic-bezier(.22, .8, .28, 1) both;
+  overflow: hidden;
+}
+@keyframes sch-modal-in {
+  from { opacity: 0; transform: translateY(18px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+.sch-modal__head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sch-3);
+  padding: var(--sch-4) var(--sch-5);
+  background: var(--sch-surface);
+  border-bottom: 1px solid var(--sch-line);
+}
+.sch-modal__head b { font-size: var(--sch-text-lg); }
+.sch-modal__x {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+  color: var(--sch-ink-soft);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .14s ease, color .14s ease;
+}
+.sch-modal__x:hover { background: var(--sch-danger-soft); color: var(--sch-danger); }
+
+.sch-modal__body { padding: var(--sch-4) var(--sch-5) var(--sch-5); background: var(--sch-surface); }
+
+/* البطاقات داخل النافذة بلا ظل ولا خلفية: النافذة هي البطاقة */
+.sch-modal__body .sch-card,
+.sch-modal__body .sch-step {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 var(--sch-4);
+}
+
+.sch-modal__foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--sch-2);
+  padding: var(--sch-3) var(--sch-5);
+  background: var(--sch-surface);
+  border-top: 1px solid var(--sch-line);
+}
+.sch-modal__foot .sch-btn { margin: 0; }
+/* عنوان الشاشة المستقلة لا يتكرر داخل النافذة — رأسها يحمله */
+.sch-modal__body > .sch-title { display: none; }
+
+/* شريط الخطوات: أبيض بحدود خفيفة لا خلفية رمادية */
+.sch-modal__body .sch-steps-bar {
+  background: transparent;
+  padding: 0 0 var(--sch-4);
+  margin: 0;
+  border-bottom: 1px solid var(--sch-line);
+}
+
+@media (max-width: 700px) {
+  .sch-modal { padding: 0; }
+  .sch-modal__box { max-width: none; min-height: 100dvh; border-radius: 0; margin: 0; }
+  .sch-filters__acts { margin-inline-start: 0; width: 100%; }
+  .sch-filters .sch-field { flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-modal__box, .sch-modal__veil { animation: none; }
+}
+
+/* الشريط الأسود الطافي يختفي خلف النافذة — طبقتان متنافستان تُربكان */
+.sch-modal:not([hidden]) ~ .sch-bulk,
+body:has(.sch-modal:not([hidden])) .sch-bulk { display: none; }
+
+/* رأس النافذة: أبيض بحد شعري وظل عند التمرير لا خلفية داكنة */
+.sch-modal__head {
+  box-shadow: var(--sch-e1);
+  border-bottom: 0;
+}
+.sch-modal__head b { letter-spacing: -.01em; }
+
+/* المعالج داخل النافذة: مساحة أوسع للحقول */
+.sch-modal__body .sch-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 var(--sch-4); }
+.sch-modal__body .sch-wizard__nav { padding-top: var(--sch-4); }
+

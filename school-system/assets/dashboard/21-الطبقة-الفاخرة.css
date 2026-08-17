@@ -1,0 +1,72 @@
+/* =========================================================
+   الطبقة الفاخرة — v5.0
+   لا تغيّر بنية؛ تضيف العمق والإضاءة التي ترفع الواجهة لمستوى المؤسسات:
+   توهّج للحيّ · زجاج للطافي · شريط تمرير راقٍ · مبدّل وضع.
+   ========================================================= */
+
+/* شريط تمرير يحترم الثيم — الافتراضي فاقع على الداكن */
+.sch-body { scrollbar-width: thin; scrollbar-color: var(--sch-line-strong) transparent; }
+.sch-body ::-webkit-scrollbar { width: 11px; height: 11px; }
+.sch-body ::-webkit-scrollbar-thumb {
+  background: var(--sch-line-strong);
+  border-radius: var(--sch-r-full);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+.sch-body ::-webkit-scrollbar-thumb:hover { background: var(--sch-muted); background-clip: padding-box; }
+
+/* مبدّل الوضع في الشريط العلوي — شمس ليلًا وقمر نهارًا */
+.sch-theme {
+  width: 38px; height: 38px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-full);
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+  color: var(--sch-ink-soft);
+  cursor: pointer;
+  transition: color var(--sch-fast) var(--sch-ease),
+              border-color var(--sch-fast) var(--sch-ease),
+              transform var(--sch-fast) var(--sch-ease);
+}
+.sch-theme:hover { color: var(--sch-accent); border-color: var(--sch-accent); }
+.sch-theme:active { transform: scale(.9); }
+.sch-theme__sun { display: none; }
+[data-theme="dark"] .sch-theme__sun  { display: block; }
+[data-theme="dark"] .sch-theme__moon { display: none; }
+
+/* البطاقة الإحصائية: ترتفع وتتوهّج عند التمرير — العمق دلالة على أنها فعل */
+.sch-body a.sch-stat {
+  position: relative;
+  box-shadow: var(--sch-e1);
+  transition: transform var(--sch-fast) var(--sch-ease),
+              box-shadow var(--sch-fast) var(--sch-ease),
+              border-color var(--sch-fast) var(--sch-ease);
+}
+.sch-body a.sch-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sch-e2), var(--sch-glow);
+  border-color: transparent;
+}
+
+/* التركيز: حلقة متوهّجة موحّدة عبر الداشبورد */
+.sch-body :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sch-accent);
+  outline-offset: 2px;
+}
+
+/* البطاقة والجدول: خيط ضوء علوي خفيف يمنح إحساس المادة (يظهر في الداكن) */
+.sch-card, .sch-setup, .sch-wiz, .sch-permbar, .sch-permtools {
+  box-shadow: var(--sch-e1), var(--sch-hair);
+}
+
+/* الشريط الجماعي والنافذة: زجاج بدل لون مصمت — رقيّ الأسطح الطافية */
+.sch-modal__veil { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+
+/* العنوان الرئيسي: خيط ذهبي دقيق أسفله — توقيع مؤسسي هادئ */
+.sch-page-title, .sch-hub__title { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-body a.sch-stat:hover { transform: none; }
+  .sch-theme:active { transform: none; }
+}
+

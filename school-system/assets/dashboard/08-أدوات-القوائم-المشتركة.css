@@ -1,0 +1,192 @@
+/* =========================================================
+   أدوات القوائم المشتركة.
+
+   تُكتب مرة وتفيد كل شاشة تعلن أفعالها: التحديد الجماعي · العروض المحفوظة ·
+   التصفية بزر مسح لكل حقل · التوسّع داخل الصف.
+   ========================================================= */
+
+/* ---------- مربع التحديد ---------- */
+
+.sch-ck { position: relative; display: inline-flex; cursor: pointer; vertical-align: middle; }
+.sch-ck input { position: absolute; opacity: 0; width: 0; height: 0; }
+.sch-ck span {
+  display: block;
+  width: 19px; height: 19px;
+  border-radius: 6px;
+  border: 1.6px solid var(--sch-line-strong);
+  background: var(--sch-surface);
+  position: relative;
+  transition: background .14s ease, border-color .14s ease;
+}
+.sch-ck input:checked + span { background: var(--sch-accent); border-color: var(--sch-accent); }
+.sch-ck input:checked + span::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 5.5px; top: 2px;
+  width: 5px; height: 10px;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.sch-ck input:indeterminate + span { background: var(--sch-accent); border-color: var(--sch-accent); }
+.sch-ck input:indeterminate + span::after {
+  content: "";
+  position: absolute;
+  inset-inline: 4px; top: 7.5px;
+  height: 2px; border-radius: 2px;
+  background: #fff;
+  transform: none;
+  border: 0;
+}
+.sch-ck input:focus-visible + span { outline: 2px solid var(--sch-accent); outline-offset: 2px; }
+
+tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
+
+/* ---------- شريط الأفعال الجماعية ---------- */
+
+.sch-bulk {
+  position: fixed;
+  inset-inline: 0; bottom: 22px;
+  margin: 0 auto;
+  width: max-content; max-width: 94vw;
+  z-index: 60;
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 14px;
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-chrome);
+  color: #EEF2F7;
+  box-shadow: var(--sch-e3);
+  overflow-x: auto;
+  animation: sch-bulk-in .24s cubic-bezier(.22, .8, .28, 1) both;
+}
+@keyframes sch-bulk-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.sch-bulk::-webkit-scrollbar { display: none; }
+
+.sch-bulk__n {
+  flex: 0 0 auto;
+  padding: 4px 13px;
+  border-radius: var(--sch-r-full);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-ink);
+  font-size: var(--sch-text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sch-bulk button {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 0; border-radius: var(--sch-radius);
+  background: rgba(255, 255, 255, .09);
+  color: #EEF2F7;
+  font-family: inherit; font-size: var(--sch-text-sm);
+  cursor: pointer; white-space: nowrap;
+  transition: background .14s ease;
+}
+.sch-bulk button:hover { background: rgba(255, 255, 255, .18); }
+.sch-bulk button[disabled] { opacity: .5; cursor: wait; }
+.sch-bulk__x { background: none !important; color: var(--sch-chrome-mut) !important; padding: 8px !important; }
+.sch-bulk__x:hover { color: var(--sch-danger) !important; }
+
+/* الشريط الجماعي معاكس للثيم: داكن على الوضع الفاتح (يبرز على المحتوى)،
+   ويَنقلب سطحًا فاتحًا في الوضع الداكن — لأنه كان داكنًا على داكن فيختفي. */
+[data-theme="dark"] .sch-bulk {
+  background: #FFFFFF; color: #1B1B26;
+  box-shadow: 0 16px 40px -8px rgba(0,0,0,.55), 0 40px 80px -24px rgba(0,0,0,.62);
+}
+[data-theme="dark"] .sch-bulk button { background: rgba(20,20,35,.06); color: #1B1B26; }
+[data-theme="dark"] .sch-bulk button:hover { background: rgba(20,20,35,.11); }
+[data-theme="dark"] .sch-bulk__n { background: #E8F0ED; color: #184A40; }
+[data-theme="dark"] .sch-bulk__x { color: #8A8A99 !important; }
+[data-theme="dark"] .sch-bulk__x:hover { color: #D64545 !important; }
+
+/* ---------- العروض المحفوظة ---------- */
+
+.sch-views {
+  display: flex; gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: var(--sch-4);
+  scrollbar-width: none;
+}
+.sch-views::-webkit-scrollbar { display: none; }
+
+/* شريحة العرض المحفوظ: حبّة نظيفة بعدّاد — لا رابط خام مسطّر.
+   تُكتب بـ.sch-body a.sch-view لتتغلّب على لون/تسطير .sch-body a. */
+.sch-body a.sch-view {
+  display: inline-flex; align-items: center; gap: var(--sch-2);
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: var(--sch-r-full);
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+  color: var(--sch-ink-soft);
+  font-size: var(--sch-text-sm); font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+  transition: background .15s var(--sch-ease), border-color .15s var(--sch-ease), color .15s var(--sch-ease);
+}
+.sch-body a.sch-view:hover {
+  background: var(--sch-surface-alt); border-color: var(--sch-line-strong);
+  color: var(--sch-ink); text-decoration: none;
+}
+.sch-view b {
+  min-width: 20px; height: 18px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-full);
+  background: var(--sch-surface-alt); color: var(--sch-muted);
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sch-body a.sch-view.is-on {
+  background: var(--sch-accent-soft);
+  border-color: var(--sch-accent);
+  color: var(--sch-accent-dark);
+  font-weight: 700;
+}
+.sch-view.is-on b { background: var(--sch-accent); color: var(--sch-on-accent); }
+.sch-filter.has select,
+.sch-filter.has input { color: var(--sch-accent-dark); font-weight: 700; }
+.sch-filter.has button { color: var(--sch-danger); }
+.is-open .sch-expand,
+tr.is-open .sch-expand {
+  transform: rotate(180deg);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent);
+  border-color: var(--sch-accent);
+}
+.sch-watch button.is-on { color: var(--sch-gold-ink); }
+.sch-watch button.is-on svg { fill: currentColor; }
+.sch-watch button.is-on[data-bell] { color: var(--sch-accent); }
+.sch-watch button.is-on[data-bell] svg { fill: none; }
+
+/* ---------- مجموعة أدوات الصف ---------- */
+
+/* أيقونة بلا اسم تُحفظ بالتجربة لا بالنظر — فالتلميح ليس زينة */
+.sch-rowacts [title]::after {
+  content: attr(title);
+  position: absolute; bottom: calc(100% + 7px); inset-inline-start: 50%;
+  transform: translateX(50%);
+  padding: 3px 9px; border-radius: var(--sch-r-sm);
+  background: var(--sch-chrome); color: #fff;
+  font-size: 11px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .14s ease;
+}
+.sch-rowacts [title]:hover::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-bulk { animation: none; }
+}
+
+/* شريط التحديد فوق القوائم غير الجدولية */
+.sch-pickbar {
+  display: flex; align-items: center; gap: var(--sch-3);
+  margin-bottom: var(--sch-3);
+  padding: 10px 14px;
+  border-radius: var(--sch-radius);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  font-size: var(--sch-text-sm);
+}
+.sch-pickbar .sch-sub { margin: 0; margin-inline-start: auto; font-size: var(--sch-text-xs); }
+
+.sch-th-pick { width: 42px; }
+.sch-alert__head .sch-ck { margin-inline-end: var(--sch-2); }
+

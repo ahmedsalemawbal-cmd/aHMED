@@ -1,0 +1,129 @@
+/* =========================================================
+   الطبقة النهائية — ما يجعل الواجهة تبدو مهنية.
+
+   المشكلة لم تكن اللون ولا الخط، بل **غياب نظام**: النظام كان يخلط
+   زوايا 4px مع 26px، و37 صيغة ظل، و`.sch-card` معرَّفة ثلاث مرات
+   في مواضع متباعدة. فنصف الواجهة يبدو قديمًا ونصفها حديثًا.
+   ========================================================= */
+
+/* الصفحة تتنفّس: العرض الكامل بلا هامش يجعلها تبدو زحامًا */
+.sch-content { padding: var(--sch-6) var(--sch-6) var(--sch-7); }
+
+/* العنوان: قفزة بطولية — عنوان ضخم أسود كنموذج هوستنجر */
+.sch-title {
+  font-size: var(--sch-text-2xl);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+.sch-sub:not(a) { font-size: var(--sch-text-sm); color: var(--sch-muted); margin: 0 0 var(--sch-5); }
+.sch-h2 { font-size: var(--sch-text-lg); font-weight: 700; margin: var(--sch-6) 0 var(--sch-3); }
+
+/* الجدول يعيش في بطاقة بلا حدّ */
+.sch-table-wrap {
+  border-radius: var(--sch-radius-lg);
+  overflow: hidden;
+  background: var(--sch-surface);
+  box-shadow: var(--sch-e1);
+  margin-bottom: var(--sch-4);
+}
+.sch-table tbody tr { transition: background var(--sch-fast) var(--sch-ease); }
+.sch-table tbody tr:hover { background: var(--sch-accent-soft); }
+.sch-name { font-weight: 700; color: var(--sch-ink); }
+.sch-name a { color: inherit; }
+.sch-body a.sch-name > a:hover { color: var(--sch-accent-ink); }
+
+/* الأزرار الثانوية: هادئة فلا تنافس الفعل الأساسي */
+.sch-btn--quiet {
+  background: var(--sch-surface);
+  color: var(--sch-ink-soft);
+  box-shadow: inset 0 0 0 1px var(--sch-line-strong);
+}
+.sch-btn--quiet:hover { background: var(--sch-surface-alt); }
+.sch-btn--danger { background: var(--sch-danger); }
+.sch-btn--danger:hover { filter: brightness(0.94); }
+.sch-btn--sm { min-height: 32px; min-width: 0; padding: 0 var(--sch-3); font-size: var(--sch-text-xs); }
+
+/* أفعال الصف: أيقونات هادئة تظهر عند المرور */
+.sch-rowacts { display: flex; gap: 2px; justify-content: flex-end; }
+.sch-rowacts a,
+.sch-rowacts button {
+  position: relative;
+  width: 32px; height: 32px;
+  border: 0;
+  border-radius: var(--sch-r-sm);
+  background: transparent;
+  color: var(--sch-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--sch-fast) var(--sch-ease), color var(--sch-fast) var(--sch-ease);
+}
+.sch-rowacts a:hover,
+.sch-rowacts button:hover { background: var(--sch-accent-soft); color: var(--sch-accent-ink); }
+.sch-rowacts form { display: contents; }
+
+/* الوسوم: خفيفة لا صاخبة */
+.sch-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--sch-r-full);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--sch-surface-alt);
+  color: var(--sch-ink-soft);
+}
+.sch-badge--ok     { background: var(--sch-success-soft); color: var(--sch-success); }
+.sch-badge--warn   { background: var(--sch-warn-soft);    color: var(--sch-warn); }
+.sch-badge--danger { background: var(--sch-danger-soft);  color: var(--sch-danger); }
+.sch-badge--muted  { background: var(--sch-surface-alt);  color: var(--sch-muted); }
+
+/* رقائق (chips): قوائم وسوم تلتفّ — كانت غير معرّفة فتظهر نصًّا سطريًا */
+.sch-chips { display: flex; flex-wrap: wrap; gap: var(--sch-2); }
+.sch-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--sch-r-full); background: var(--sch-surface-alt); color: var(--sch-muted); font-size: var(--sch-text-xs); }
+
+/* فاصل رأسي داخل الجدول — margin لا يعمل على خلايا الجدول، فالحشو المنطقي هو الصحيح */
+.sch-table td.sch-td-sep { padding-block-start: var(--sch-5); }
+
+/* عناوين الأقسام بمقياس الداشبورد — تجاوز تعريف shared-ui الأصغر (11px) */
+.sch-sect h2 { font-size: var(--sch-text-lg); letter-spacing: normal; color: var(--sch-ink); }
+.sch-sect span { color: var(--sch-muted); font-size: var(--sch-text-sm); }
+
+/* الحقول: ارتفاع الزر نفسه فتصطف معه */
+.sch-body :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+  min-height: 40px;
+  border-radius: var(--sch-radius);
+  border-color: var(--sch-line-strong);
+  font-size: var(--sch-text-sm);
+}
+.sch-body :is(input, select, textarea):focus {
+  border-color: var(--sch-accent);
+  box-shadow: 0 0 0 3px var(--sch-accent-soft);
+}
+.sch-field label { font-size: var(--sch-text-xs); font-weight: 400; color: var(--sch-muted); margin-bottom: 5px; }
+
+/* الحالة الفارغة: مساحة لا صندوق */
+.sch-blank {
+  text-align: center;
+  padding: var(--sch-7) var(--sch-5);
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-surface);
+  box-shadow: var(--sch-e1);
+}
+.sch-blank__ic {
+  width: 52px; height: 52px;
+  margin: 0 auto var(--sch-3);
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent);
+  display: flex; align-items: center; justify-content: center;
+}
+.sch-blank strong { display: block; font-size: var(--sch-text-lg); margin-bottom: 4px; }
+.sch-blank p { margin: 0; font-size: var(--sch-text-sm); color: var(--sch-muted); }
+
+@media (max-width: 900px) {
+  .sch-content { padding: var(--sch-4) var(--sch-4) var(--sch-6); }
+}
+

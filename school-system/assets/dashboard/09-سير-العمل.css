@@ -1,0 +1,51 @@
+/* =========================================================
+   سير العمل.
+
+   السجل الناقص لا يشتكي — فالنظام يشتكي عنه.
+   بطاقة تدفعك للتالي · قائمة تعمل بعد أسبوع · شاشة تجمع النواقص.
+   ========================================================= */
+
+/* ---------- بطاقة «التالي» ---------- */
+
+
+/* ---------- قائمة التحقق ---------- */
+
+/* النص يأخذ سطره الكامل على الضيق فلا تتراكب الأزرار فوقه */
+@media (max-width: 900px) {
+
+}
+
+/* ---------- الفجوات ---------- */
+
+.sch-gaps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--sch-3);
+  padding: 0 18px;
+}
+.sch-gap {
+  display: flex; align-items: center; gap: var(--sch-3);
+  padding: 16px 18px;
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-inline-start: 3px solid var(--sch-danger);
+  text-decoration: none;
+  box-shadow: var(--sch-e1);
+}
+.sch-gap:hover { background: var(--sch-bg); text-decoration: none; }
+.sch-gap b {
+  min-width: 44px; text-align: center;
+  font-size: 28px; font-weight: 700;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--sch-danger);
+}
+.sch-gap > span { display: block; font-size: var(--sch-text-sm); color: var(--sch-ink); }
+.sch-gap em { display: block; font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+
+@media (max-width: 700px) {
+  .sch-next { flex-wrap: wrap; }
+
+}
+

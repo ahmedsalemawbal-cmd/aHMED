@@ -1,0 +1,1009 @@
+/* =========================================================
+   Dashboard — نظام التصميم الكامل (v5.0)
+   مستند مستقل، لا يرث أي شيء من ووردبريس أو الثيم.
+
+   الرموز (الألوان/المسافات/الظلال/الخط) تأتي كلها من `shared-ui.css`
+   المحمَّل قبل هذا الملف — مصدر واحد للحقيقة، فاتح وداكن. لا تعرّف
+   رمزًا هنا: كان تعريفه مرتين بقيمتين مختلفتين يكسر الوضع الداكن.
+   ========================================================= */
+
+/* سلّم نقاط الكسر — خمس لا عشر:
+   700 جوال · 900 لوح · 1100 حاسوب · 1400 و1680 و1900 لكشف الأعمدة تدريجيًا. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* أساس المستند — كان مفقودًا: بلا خلفية على الجسم تصير الصفحة بيضاء
+   في الوضع الداكن. هنا يُرسى القماش والحبر والخط لكل الداشبورد. */
+body.sch-body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--sch-paper);
+  color: var(--sch-ink);
+  font-family: var(--sch-font-body);
+  font-size: var(--sch-text-base);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  accent-color: var(--sch-accent);
+  transition: background var(--sch-slow) var(--sch-ease), color var(--sch-slow) var(--sch-ease);
+}
+
+.sch-body :is(h1, h2, h3) { font-family: var(--sch-font-display); font-weight: 700; margin: 0; }
+.sch-block { display: block; }
+.sch-body a.sch-sub { color: var(--sch-muted); font-size: var(--sch-text-sm); }
+
+/* ---------- الهيكل ---------- */
+
+/* الشريط مثبّت بحدود الشاشة لا محسوبًا من تدفّق الصفحة.
+   بالتثبيت يصير ارتفاعه = ارتفاع الشاشة بالتعريف، فتغطي خلفيته الداكنة
+   كامل عموده مهما طالت القائمة أو قصرت — ويستحيل أن يظهر نصفه أبيض. */
+
+/* واجهة إنجليزية لاحقًا: العمود ينتقل لليسار */
+
+/* ---------- البطاقات والمؤشرات ---------- */
+
+.sch-card {
+  background: var(--sch-surface);
+  border: 0;
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-6);
+  margin-bottom: var(--sch-5);
+  box-shadow: var(--sch-e1);
+}
+.sch-card > h2 { font-size: var(--sch-text-lg); margin-bottom: var(--sch-4); }
+
+.sch-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sch-4);
+  margin-bottom: var(--sch-5);
+}
+/* أساس البطاقة الإحصائية — كانت الكسوة محصورة في a.sch-stat فقط،
+   فبطاقات <div class="sch-stat"> تطفو بلا سطح. */
+.sch-stat {
+  background: var(--sch-surface);
+  border: 0;
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-5);
+  box-shadow: var(--sch-e1);
+}
+.sch-body a.sch-stat {
+  background: var(--sch-surface);
+  border: 0;
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-5);
+  color: inherit;
+}
+.sch-body a.sch-stat:hover { text-decoration: none; }
+.sch-stat__num {
+  display: block;
+  font-family: var(--sch-font-display);
+  font-size: var(--sch-text-3xl);
+  line-height: 1.1;
+  color: var(--sch-accent);
+}
+.sch-stat__label { color: var(--sch-muted); font-size: var(--sch-text-sm); }
+
+/* ---------- الجداول ---------- */
+
+.sch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sch-text-sm);
+}
+.sch-table th {
+  text-align: start;
+  padding: var(--sch-3) var(--sch-4);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+  color: var(--sch-ink-soft);
+  letter-spacing: .02em;
+  white-space: nowrap;
+  background: var(--sch-surface-alt);
+  border: 0;
+}
+.sch-table thead tr:first-child th:first-child { border-start-start-radius: var(--sch-radius-lg); }
+.sch-table thead tr:first-child th:last-child  { border-start-end-radius: var(--sch-radius-lg); }
+.sch-table td {
+  padding: var(--sch-4);
+  border-bottom: 1px solid var(--sch-line);
+  vertical-align: middle;
+}
+.sch-table tbody tr:last-child td { border-bottom: 0; }
+.sch-table .sch-name { color: var(--sch-ink); font-weight: 700; }
+/* اسم داخل الجدول رابطًا: نصّ نظيف لا رابط خام مسطّر (يتغلّب على .sch-body a) */
+.sch-body .sch-table td.sch-name a { color: inherit; text-decoration: none; }
+.sch-body .sch-table td.sch-name a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+/* اتجاه القيم الإنجليزية (رقم/جوال/هوية/بريد/تاريخ) في تخطيط RTL:
+   dir="ltr" على عنصر عرض يجعل محاذاته للبداية اليسرى بينما تسميته يمين،
+   فتظهر القيمة تحت التسمية المجاورة = «لخبطة». الحل: text-align:end —
+   في عنصر LTR الـend = يمين، فتحاذي تسميتها تمامًا مع بقاء ترتيبها LTR.
+   قاعدة واحدة تصلح كل الجداول وبطاقات الملفات (dd) بلا لمس كل وسم. */
+.sch-body .sch-table td[dir="ltr"],
+.sch-body dd[dir="ltr"] { text-align: end; }
+.sch-table form { margin: 0; }
+
+/* ---------- العناصر ---------- */
+
+.sch-field { margin-bottom: var(--sch-4); }
+
+.sch-field :is(input, select) {
+  width: 100%;
+  padding: var(--sch-2) var(--sch-3);
+  font-family: inherit; font-size: var(--sch-text-base); color: var(--sch-ink);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  transition: border-color .15s ease;
+}
+.sch-field :is(input, select):focus {
+  outline: 2px solid var(--sch-accent); outline-offset: 1px;
+  border-color: var(--sch-accent);
+}
+
+.sch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 var(--sch-5);
+}
+
+.sch-check {
+  display: flex; align-items: center; gap: var(--sch-2);
+  font-size: var(--sch-text-sm); color: var(--sch-ink-soft);
+  margin-bottom: var(--sch-4);
+}
+
+.sch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sch-2);
+  min-height: 40px;
+  min-width: 96px;
+  padding: 0 var(--sch-4);
+  border: 0;
+  border-radius: var(--sch-radius);
+  background: var(--sch-accent);
+  color: var(--sch-on-accent);
+  font-family: inherit;
+  font-size: var(--sch-text-sm);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  text-align: center;
+  transition: background var(--sch-fast) var(--sch-ease), transform var(--sch-fast) var(--sch-ease);
+}
+
+.sch-btn:active { transform: translateY(1px); }
+.sch-btn:hover { background: var(--sch-accent-hover); }
+.sch-btn:focus-visible { outline: 2px solid var(--sch-ink); outline-offset: 2px; }
+.sch-btn--block { width: 100%; padding: var(--sch-3); }
+
+.sch-btn--quiet:hover { background: var(--sch-accent-soft); }
+
+.sch-link-danger {
+  background: none; border: 0; cursor: pointer; padding: 0;
+  color: var(--sch-danger); font-family: inherit; font-size: var(--sch-text-sm);
+}
+.sch-link-danger:hover { text-decoration: underline; }
+
+.sch-toolbar {
+  display: flex; gap: var(--sch-3); align-items: center;
+  flex-wrap: wrap; margin-bottom: var(--sch-4);
+}
+.sch-toolbar input[type="search"] {
+  flex: 1 1 240px; max-width: 340px;
+  padding: var(--sch-2) var(--sch-3);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  font-family: inherit; font-size: var(--sch-text-base);
+}
+
+.sch-empty { text-align: center; padding: var(--sch-7) var(--sch-5); color: var(--sch-muted); }
+.sch-empty strong {
+  display: block; font-family: var(--sch-font-display);
+  font-size: var(--sch-text-lg); color: var(--sch-ink); margin-bottom: var(--sch-1);
+}
+
+.sch-notice {
+  padding: var(--sch-3) var(--sch-4);
+  border-radius: var(--sch-radius);
+  margin-bottom: var(--sch-4);
+  border-inline-end: 3px solid var(--sch-accent);
+  background: var(--sch-accent-soft);
+}
+.sch-notice--error { border-inline-end-color: var(--sch-danger); background: var(--sch-danger-soft); }
+.sch-notice--ok    { border-inline-end-color: var(--sch-success); background: var(--sch-success-soft); }
+
+.sch-code {
+  display: inline-block; margin-inline-start: var(--sch-2);
+  padding: 2px var(--sch-2); background: var(--sch-surface-alt); color: var(--sch-ink);
+  border: 1px solid var(--sch-line-strong); border-radius: var(--sch-r-sm);
+  font-family: ui-monospace, monospace; direction: ltr;
+}
+
+/* ---------- بوابة الدخول ---------- */
+
+.sch-body--auth {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: var(--sch-5);
+  background: var(--sch-paper);
+}
+.sch-auth { width: 100%; max-width: 380px; }
+.sch-auth__card {
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  padding: var(--sch-6);
+}
+.sch-auth__title {
+  font-size: var(--sch-text-2xl);
+  text-align: center;
+}
+.sch-auth__sub {
+  text-align: center; color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+  margin: var(--sch-1) 0 var(--sch-6);
+}
+.sch-auth__note {
+  text-align: center; color: var(--sch-muted);
+  font-size: var(--sch-text-xs);
+  margin: var(--sch-5) 0 0;
+}
+
+/* ---------- الجوال ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ---------- المرحلة 2 ---------- */
+
+.sch-body a.sch-back {
+  display: inline-block;
+  margin-bottom: var(--sch-3);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+}
+.sch-body a.sch-back:hover { color: var(--sch-accent); }
+
+.sch-mt { margin-top: var(--sch-5); }
+
+/* قائمة تعريف — بيانات الطالب والموظف */
+.sch-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sch-4);
+  margin: 0;
+}
+.sch-dl > div {
+  min-width: 0;
+  padding-bottom: var(--sch-2);
+  border-bottom: 1px solid var(--sch-line);
+}
+.sch-dl dt {
+  font-size: var(--sch-text-xs);
+  color: var(--sch-muted);
+  margin-bottom: var(--sch-1);
+}
+.sch-dl dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sch-ink);
+  word-break: break-word;
+}
+
+/* شريط الإشغال */
+.sch-bar {
+  height: 8px;
+  background: var(--sch-accent-soft);
+  border-radius: var(--sch-r-full);
+  overflow: hidden;
+}
+.sch-bar span {
+  display: block;
+  height: 100%;
+  background: var(--sch-accent);
+}
+
+/* خطوات مرقّمة — الترتيب هنا يحمل معنى (فحص ثم تأكيد) */
+.sch-steps {
+  margin-block: 0 var(--sch-3); margin-inline-start: var(--sch-4);
+  padding: 0;
+  color: var(--sch-ink-soft);
+}
+.sch-steps li { margin-bottom: var(--sch-2); }
+
+.sch-errors {
+  margin: 0;
+  padding-inline-start: var(--sch-4);
+  color: var(--sch-danger);
+  font-size: var(--sch-text-sm);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.sch-errors li { margin-bottom: var(--sch-1); }
+
+.sch-toolbar select {
+  padding: var(--sch-2) var(--sch-3);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  font-family: inherit;
+  font-size: var(--sch-text-base);
+  background: var(--sch-surface);
+}
+.sch-toolbar .sch-check { margin-bottom: 0; }
+
+.sch-field input[type="file"] {
+  padding: var(--sch-2);
+  background: var(--sch-surface-alt);
+}
+
+/* بيانات دخول حساب جديد — تُعرض مرة واحدة */
+.sch-cred strong { display: block; font-family: var(--sch-font-display); font-size: var(--sch-text-lg); }
+.sch-cred p { margin: var(--sch-1) 0 var(--sch-3); }
+.sch-cred__row {
+  display: flex; align-items: center; gap: var(--sch-2);
+  padding: var(--sch-1) 0;
+}
+.sch-cred__row span {
+  min-width: 96px;
+  font-size: var(--sch-text-sm);
+  color: var(--sch-muted);
+}
+
+/* ---------- المرحلة 3 ---------- */
+
+.sch-timetable td { vertical-align: top; min-width: 120px; }
+.sch-timetable strong { font-size: var(--sch-text-sm); color: var(--sch-ink); }
+
+.sch-field textarea {
+  width: 100%;
+  padding: var(--sch-2) var(--sch-3);
+  font-family: inherit;
+  font-size: var(--sch-text-base);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  resize: vertical;
+}
+.sch-field textarea:focus { outline: 2px solid var(--sch-accent); outline-offset: 1px; }
+
+.sch-toolbar :is(input[type="text"], input[type="number"], input[type="date"], input[type="time"]) {
+  padding: var(--sch-2) var(--sch-3);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  font-family: inherit;
+  font-size: var(--sch-text-base);
+}
+
+/* ---------- شاشة الأقسام ---------- */
+
+.sch-hub { width: 100%; max-width: 880px; padding: var(--sch-6) var(--sch-4); }
+
+.sch-hub__title {
+  font-family: var(--sch-font-display);
+  font-size: var(--sch-text-3xl);
+  text-align: center;
+  margin: 0;
+}
+.sch-hub__sub {
+  text-align: center;
+  color: var(--sch-muted);
+  margin: var(--sch-2) 0 var(--sch-7);
+}
+
+.sch-hub__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sch-4);
+}
+
+.sch-body a.sch-hub__card {
+  position: relative;
+  display: block;
+  padding: var(--sch-5);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  color: inherit;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.sch-body a.sch-hub__card:hover {
+  border-color: var(--sch-accent);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.sch-hub__card:focus-visible { outline: 2px solid var(--sch-accent); outline-offset: 2px; }
+
+/* شريط علوي يميّز كل قسم بلون واحد من نفس العائلة */
+.sch-hub__mark {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: var(--sch-radius-lg) var(--sch-radius-lg) 0 0;
+  background: var(--sch-accent);
+}
+.sch-hub__card--transport .sch-hub__mark { background: var(--sch-accent); }
+.sch-hub__card--erp .sch-hub__mark       { background: var(--sch-accent); }
+.sch-hub__card--system .sch-hub__mark    { background: var(--sch-accent); }
+
+.sch-hub__name {
+  display: block;
+  font-family: var(--sch-font-display);
+  font-size: var(--sch-text-lg);
+  margin-bottom: var(--sch-1);
+}
+.sch-hub__desc {
+  display: block;
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+  line-height: 1.6;
+  min-height: 3em;
+}
+.sch-hub__count {
+  display: block;
+  margin-top: var(--sch-3);
+  font-size: var(--sch-text-xs);
+  color: var(--sch-accent);
+}
+
+.sch-body a.sch-hub__out {
+  display: block;
+  text-align: center;
+  margin-top: var(--sch-6);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+}
+.sch-body a.sch-hub__out:hover { color: var(--sch-accent); }
+
+.sch-mono { font-family: ui-monospace, SFMono-Regular, monospace; font-size: var(--sch-text-sm); }
+.sch-net {
+  margin-top: var(--sch-4);
+  padding-top: var(--sch-3);
+  border-top: 2px solid var(--sch-accent);
+  font-size: var(--sch-text-lg);
+}
+.sch-table select, .sch-table input { width: 100%; }
+
+/* ---------- الخطوط والأيقونات ---------- */
+
+.sch-icon {
+  flex: 0 0 auto;
+  opacity: .9;
+  vertical-align: -3px;
+}
+
+.sch-hub__card { padding-top: var(--sch-6); }
+.sch-hub__icon {
+  display: block;
+  color: var(--sch-accent);
+  margin-bottom: var(--sch-3);
+}
+
+.sch-title .sch-icon,
+.sch-card > h2 .sch-icon { margin-inline-end: var(--sch-2); color: var(--sch-accent); }
+
+/* ---------- المرحلتان 9 و10 ---------- */
+
+.sch-inline { display: flex; gap: var(--sch-2); align-items: center; }
+.sch-inline form { margin: 0; }
+
+.sch-kg-list { display: grid; gap: var(--sch-4); }
+.sch-kg-card {
+  padding: var(--sch-4);
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+}
+.sch-kg-name {
+  display: block;
+  font-family: var(--sch-font-display);
+  font-size: var(--sch-text-lg);
+  margin-bottom: var(--sch-3);
+}
+
+.sch-bar--inline { width: 140px; display: inline-block; vertical-align: middle; margin-inline-end: var(--sch-2); }
+
+/* مخطط أعمدة بسيط — بلا مكتبة رسوم */
+.sch-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sch-3);
+  height: 180px;
+  padding-top: var(--sch-4);
+}
+.sch-spark__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+}
+.sch-spark__bar {
+  width: 100%;
+  max-width: 56px;
+  background: var(--sch-accent);
+  border-radius: var(--sch-radius) var(--sch-radius) 0 0;
+  min-height: 4px;
+}
+.sch-spark__label { font-size: var(--sch-text-xs); color: var(--sch-muted); margin-top: var(--sch-2); }
+.sch-spark__val   { font-size: var(--sch-text-xs); color: var(--sch-ink-soft); }
+
+/* ---------- انضباط مؤسسي ---------- */
+
+/* أرقام متساوية العرض: الأعمدة المالية تصطف رأسيًا بلا اهتزاز */
+.sch-table td, .sch-stat__num, .sch-mono, .sch-code {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* العناوين بوزن الخط لا بعائلة مختلفة */
+.sch-title, .sch-page-title, .sch-card > h2, .sch-hub__title, .sch-hub__name, .sch-empty strong {
+  font-family: var(--sch-font-body);
+  letter-spacing: -.01em;
+}
+
+.sch-title, .sch-page-title {
+  font-weight: 700;
+  border-bottom: 0;
+  padding-bottom: 0;
+  display: block;
+}
+
+.sch-card > h2 { font-weight: 700; }
+
+/* الجداول: خط أفقي واحد، بلا حدود رأسية، ورأس هادئ */
+
+.sch-stat__num { font-family: var(--sch-font-body); font-weight: 700; letter-spacing: -.02em; }
+
+.sch-field :is(input, select, textarea) { border-radius: var(--sch-radius); }
+
+.sch-hub__card { border-radius: var(--sch-radius-lg); }
+.sch-body a.sch-hub__card:hover { transform: none; border-color: var(--sch-accent); box-shadow: 0 0 0 1px var(--sch-accent); }
+
+/* ---------- النموذج متعدد الخطوات ---------- */
+
+.sch-steps-bar {
+  display: flex;
+  gap: var(--sch-2);
+  list-style: none;
+  margin: 0 0 var(--sch-5);
+  padding: 0;
+  flex-wrap: wrap;
+}
+.sch-steps-bar li {
+  display: flex;
+  align-items: center;
+  gap: var(--sch-2);
+  padding: var(--sch-2) var(--sch-4);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+  cursor: pointer;
+}
+.sch-steps-bar li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sch-line);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+}
+.sch-steps-bar li.is-active {
+  border-color: var(--sch-accent);
+  color: var(--sch-ink);
+  font-weight: 700;
+}
+.sch-steps-bar li.is-active span { background: var(--sch-accent); color: var(--sch-on-accent); }
+.sch-steps-bar li.is-done span { background: var(--sch-success); color: var(--sch-on-success); }
+
+.sch-step { display: none; }
+.sch-step.is-active { display: block; }
+
+.sch-wizard__nav { display: flex; gap: var(--sch-3); }
+
+.sch-review {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sch-2) var(--sch-5);
+}
+.sch-review__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sch-3);
+  padding: var(--sch-2) 0;
+  border-bottom: 1px solid var(--sch-line);
+  font-size: var(--sch-text-sm);
+}
+.sch-review__row span { color: var(--sch-muted); }
+
+/* ---------- البحث بالرقم الأكاديمي ---------- */
+
+.sch-lookup__result {
+  padding: var(--sch-4);
+  margin: var(--sch-3) 0;
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+}
+.sch-lookup__result.is-bad {
+  background: var(--sch-danger-soft);
+  border-color: transparent;
+  color: var(--sch-danger);
+}
+.sch-lookup__result.is-found {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--sch-1) var(--sch-4);
+  background: var(--sch-accent-soft);
+  border-color: var(--sch-accent);
+  color: var(--sch-ink-soft);
+}
+.sch-lookup__result.is-found strong {
+  grid-column: 1 / -1;
+  font-size: var(--sch-text-lg);
+  font-weight: 700;
+  color: var(--sch-ink);
+}
+.sch-lookup__result em { font-style: normal; color: var(--sch-muted); }
+.sch-lookup__warn { grid-column: 1 / -1; color: var(--sch-danger); font-weight: 400; }
+
+/* ---------- تصحيح محاذاة العناصر ثنائية الاتجاه ---------- */
+/* dir="ltr" يضبط ترتيب المحارف، لكنه يغيّر المحاذاة الافتراضية إلى اليسار.
+   نعيدها لليمين حتى تبقى القيمة تحت عنوانها تمامًا. */
+
+td[dir="ltr"],
+th[dir="ltr"],
+dd[dir="ltr"],
+input[dir="ltr"],
+select[dir="ltr"],
+textarea[dir="ltr"] {
+  text-align: start;
+}
+.sch-seg button.is-on { background: var(--sch-accent); color: var(--sch-on-accent); font-weight: 700; }
+
+.sch-idc {
+  position: relative;
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  box-shadow: var(--sch-e3);
+}
+
+.sch-idc__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sch-4);
+  padding: var(--sch-4) var(--sch-5);
+  background: var(--sch-chrome);
+  color: var(--sch-chrome-ink);
+  border-radius: 14px 14px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+.sch-idc__school { font-weight: 700; font-size: var(--sch-text-lg); }
+.sch-idc__end { display: inline-flex; align-items: center; gap: var(--sch-3); }
+.sch-idc__doc { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); letter-spacing: .06em; }
+
+/* زر تنزيل الوثيقة داخل رأس البطاقة الداكن — بجانب STUDENT IDENTITY */
+.sch-body a.sch-idc__dl {
+  position: relative;
+  width: 32px; height: 32px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-sm);
+  border: 1px solid var(--sch-glass-line);
+  background: rgba(255, 255, 255, .08);
+  color: var(--sch-chrome-ink);
+  transition: background .15s ease, color .15s ease;
+}
+.sch-body a.sch-idc__dl:hover { background: rgba(255, 255, 255, .18); color: #fff; }
+.sch-idc__dl::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 7px);
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  padding: 3px 10px;
+  border-radius: var(--sch-r-sm);
+  background: var(--sch-chrome);
+  color: #fff;
+  border: 1px solid var(--sch-glass-line);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .14s ease;
+  z-index: 2;
+}
+.sch-idc__dl:hover::after { opacity: 1; }
+
+/* نقش أمني كوثائق الهوية الرسمية */
+.sch-guilloche { position: absolute; inset: 0; opacity: .16; pointer-events: none; }
+
+.sch-idc__body {
+  display: grid;
+  grid-template-columns: 170px 1fr 132px;
+  gap: var(--sch-6);
+  padding: var(--sch-6) var(--sch-5);
+}
+
+.sch-idc__photo { position: relative; }
+.sch-idc__frame {
+  width: 150px;
+  height: 186px;
+  border-radius: var(--sch-radius);
+  overflow: hidden;
+  background: var(--sch-accent-soft);
+  border: 1px solid var(--sch-line-strong);
+  box-shadow: var(--sch-e2);
+}
+.sch-idc__frame img { display: block; width: 150px; height: 186px; object-fit: cover; }
+.sch-idc__ring {
+  position: absolute;
+  inset: -7px;
+  border: 1.5px solid var(--sch-accent);
+  border-radius: var(--sch-radius-lg);
+  opacity: .35;
+  pointer-events: none;
+}
+.sch-idc__tag {
+  position: absolute;
+  bottom: -11px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  padding: 3px var(--sch-3);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-hover);
+  border-radius: var(--sch-r-full);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--sch-e1);
+}
+
+.sch-idc__who { margin-bottom: var(--sch-5); }
+.sch-idc__who h1 {
+  margin: 0;
+  font-size: var(--sch-text-2xl);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.25;
+}
+.sch-idc__who span {
+  display: block;
+  color: var(--sch-muted);
+  font-size: var(--sch-text-sm);
+  letter-spacing: .04em;
+  margin-top: 2px;
+  text-align: start;
+}
+
+.sch-idc__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sch-4) var(--sch-5);
+  margin: 0;
+  align-items: start;
+}
+.sch-idc__fields > div { min-width: 0; padding-bottom: var(--sch-2); border-bottom: 1px solid var(--sch-line); }
+.sch-idc__fields dt { font-size: var(--sch-text-xs); color: var(--sch-muted); margin-bottom: 3px; }
+.sch-idc__fields dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; word-break: break-word; }
+
+/* الرقم الأكاديمي محفور في البطاقة لا مطبوع عليها */
+.sch-emboss {
+  display: inline-block;
+  padding: 7px var(--sch-3);
+  border-radius: var(--sch-r-sm);
+  background: var(--sch-paper);
+  box-shadow: inset 0 1px 2px rgba(15,23,32,.14), inset 0 -1px 0 #fff;
+  font-family: ui-monospace, monospace;
+  font-size: 17px;
+  letter-spacing: .14em;
+  color: var(--sch-ink);
+}
+
+.sch-idc__qr { text-align: center; }
+.sch-idc__qrbox {
+  display: inline-block;
+  padding: 9px;
+  background: #fff;
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius);
+  box-shadow: var(--sch-e2);
+}
+.sch-idc__qrbox svg { display: block; width: 96px; height: 96px; }
+.sch-idc__qr span { display: block; margin-top: var(--sch-2); font-size: var(--sch-text-xs); color: var(--sch-muted); letter-spacing: .1em; }
+
+/* الرقم الأخضر البارز هو توقيع البطاقة — بلا شريط حافة تائه، وبلا
+   overflow:hidden الذي كان يقصّ أسماء المؤشرات الطويلة. */
+.sch-stat.sch-stat--warn .sch-stat__num { color: var(--sch-danger); }
+
+.sch-panels { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sch-4); margin-bottom: var(--sch-5); }
+.sch-panels .sch-card { margin-bottom: 0; }
+.sch-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sch-3);
+  padding: var(--sch-2) 0;
+  border-bottom: 1px solid var(--sch-line);
+  font-size: var(--sch-text-sm);
+}
+.sch-row:last-child { border-bottom: 0; }
+.sch-row span { color: var(--sch-muted); }
+.sch-row strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.sch-tl { position: relative; padding-inline-start: 18px; }
+.sch-tl::before { content: ""; position: absolute; inset-block: 6px; inset-inline-start: 4px; width: 1px; background: var(--sch-line-strong); }
+.sch-tl__i { position: relative; padding-bottom: var(--sch-4); }
+.sch-tl__i::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -18px;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sch-surface);
+  border: 2px solid var(--sch-accent);
+}
+.sch-tl__i:last-child { padding-bottom: 0; }
+.sch-tl__i strong { display: block; font-size: var(--sch-text-sm); font-weight: 700; }
+.sch-tl__i span { color: var(--sch-muted); font-size: var(--sch-text-xs); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 900px) {
+  .sch-idc__body { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .sch-idc__fields { text-align: start; }
+  .sch-panels { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+}
+
+/* الطباعة: تنبسط البطاقة فتخرج وثيقة نظيفة */
+@media print {
+  /* المتصفحات تحذف الخلفيات والصور افتراضيًا عند الطباعة */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* قشرة الداشبورد كاملةً لا تُطبع — الشريط الجانبي والعلوي والحجاب.
+     كانت تظهر لأن الطباعة تُخفي الصنف القديم (.sch-top) وحده. */
+  .sch-noprint,
+  .sch-side, .sch-topbar, .sch-scrim,
+  .sch-top, .sch-wiz__nav, .sch-permbar, .sch-permtools, .sch-prail { display: none !important; }
+  .sch-app { display: block; }
+  .sch-main, .sch-content { padding: 0; margin: 0; }
+  .sch-idc { box-shadow: var(--sch-e1); }
+  .sch-idc__dl, .sch-back { display: none; }
+}
+
+/* مقياس واحد للعناوين — لا مقاسات متقاربة تُربك العين */
+.sch-title,
+.sch-page-title {
+  font-size: var(--sch-text-xl);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 var(--sch-2);
+}
+
+.sch-card > h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: var(--sch-4);
+  padding-bottom: var(--sch-2);
+  border-bottom: 1px solid var(--sch-line);
+}
+
+/* البطاقات: حدّ واحد خفيف، بلا ظل — الفصل بالمسافة لا بالطبقات */
+
+/* الشريط الجانبي: العنصر النشط واحد وواضح، والباقي هادئ */
+
+/* الجداول: هدوء أكثر ومساحة تنفّس */
+
+/* الحقول: ارتفاع لمس مريح ومحاذاة واحدة */
+
+.sch-field :is(input, select, textarea) { padding: 9px var(--sch-3); font-size: 15px; }
+.sch-grid { gap: 0 var(--sch-5); }
+
+/* شريط علوي أهدأ */
+
+/* الفراغ ليس نقصًا — هو دعوة للتصرّف */
+.sch-empty { padding: var(--sch-7) var(--sch-5); }
+.sch-empty strong { font-size: 17px; font-weight: 700; margin-bottom: var(--sch-2); }
+
+/* لوحة العهدة */
+.sch-body a.sch-stat.is-on { border-color: var(--sch-accent); box-shadow: 0 0 0 1px var(--sch-accent); }
+
+/* الإنذارات */
+.sch-alert {
+  padding: var(--sch-4);
+  margin-bottom: var(--sch-3);
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-inline-start: 3px solid var(--sch-muted);
+  border-radius: var(--sch-radius);
+}
+.sch-alert--high { border-inline-start-color: var(--sch-warn); }
+.sch-alert--critical { border-inline-start-color: var(--sch-danger); background: var(--sch-danger-soft); }
+.sch-alert__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sch-3); }
+.sch-alert__head strong { font-size: var(--sch-text-lg); }
+.sch-alert .sch-sub { display: block; }
+
+/* (طباعة البطاقات مُعرَّفة بالكامل عند كتلة .sch-badges أدناه بصفحة مُسمّاة) */
+
+/* ---------- يوم الوكيل ---------- */
+
+.sch-daylist { display: grid; gap: var(--sch-2); margin-bottom: var(--sch-5); }
+.sch-day.is-clear { opacity: .55; border-inline-start-color: var(--sch-success); }
+
+/* الاحتياط المقترح */
+.sch-vacancy {
+  padding: var(--sch-4);
+  margin-bottom: var(--sch-3);
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius);
+}
+.sch-vacancy__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sch-3); }
+.sch-vacancy .sch-sub { display: block; }
+
+.sch-candidates { display: grid; gap: var(--sch-2); margin-top: var(--sch-3); }
+.sch-candidate.is-best { border-color: var(--sch-accent); }
+.sch-candidate__who { min-width: 0; }
+.sch-candidate__who strong { display: block; }
+.sch-candidate__who span { color: var(--sch-muted); font-size: var(--sch-text-xs); }
+
+/* ---------- شجرة الهيكل التنظيمي ---------- */
+
+.sch-tree { display: grid; justify-items: center; gap: 0; }
+
+.sch-tree__node {
+  min-width: 220px;
+  padding: var(--sch-3) var(--sch-4);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  text-align: center;
+}
+.sch-tree__node strong { display: block; }
+.sch-tree__node span { display: block; color: var(--sch-ink-soft); font-size: var(--sch-text-sm); }
+.sch-tree__node em { display: block; color: var(--sch-muted); font-size: var(--sch-text-xs); font-style: normal; margin-top: var(--sch-1); }
+.sch-tree__node--top { border-color: var(--sch-accent); }
+.sch-tree__node.is-empty { border-style: dashed; opacity: .7; }
+
+.sch-tree__link { width: 1px; height: var(--sch-4); background: var(--sch-line-strong); }
+
+.sch-tree__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sch-3);
+  width: 100%;
+  margin-top: var(--sch-1);
+}
+
+/* مسار الجدول: مسودة ← اعتماد ← نشر */
+
+.sch-h3 { font-size: var(--sch-text-base); font-weight: 700; margin: var(--sch-5) 0 var(--sch-2); }
+.sch-back { display: inline-block; margin-bottom: var(--sch-2); color: var(--sch-muted); font-size: var(--sch-text-sm); }
+.sch-field--wide { grid-column: 1 / -1; }
+.sch-field--wide textarea { width: 100%; font-family: ui-monospace, monospace; font-size: 13px; }
+
+/* رابط فتح ملف مرفق */
+.sch-body a.sch-thumb {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: var(--sch-2); padding: 5px 12px;
+  border-radius: var(--sch-r-full); background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  font-size: var(--sch-text-xs); color: var(--sch-accent);
+}
+.sch-thumb:hover { background: var(--sch-accent-soft); }
+

@@ -1,0 +1,82 @@
+/* =========================================================
+   التنقّل بالبلاطات العلوية.
+
+   عشر مجموعات بدل عمود جانبي بخمسة وأربعين قسمًا: بلاطة تختار المجموعة،
+   وشريحة تحتها تختار الشاشة — أربعة إلى ثمانية عناصر تُقرأ دفعة واحدة.
+   والشاشة تكسب عرض العمود كله (٢٥٢ بكسل) فتظهر أعمدة كانت تُخفى.
+   ========================================================= */
+
+.sch-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--sch-glass);
+  -webkit-backdrop-filter: var(--sch-glass-blur);
+  backdrop-filter: var(--sch-glass-blur);
+  border-bottom: 1px solid var(--sch-glass-line);
+  padding: 12px 26px 0;
+}
+@media (min-width: 1900px) { .sch-top { padding: 14px 40px 0; } }
+
+.sch-top__r { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.sch-top__sp { flex: 1; }
+.sch-top__date { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+
+.sch-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.sch-brand__mark {
+  width: 34px; height: 34px; border-radius: var(--sch-radius); flex: 0 0 auto;
+  background: var(--sch-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+.sch-brand__t b { display: block; font-size: var(--sch-text-base); color: var(--sch-ink); }
+.sch-brand__t span { display: block; font-size: 11px; color: var(--sch-muted); }
+.sch-top__ic.has-dot::after {
+  content: ""; position: absolute; top: 6px; inset-inline-start: 6px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--sch-danger); box-shadow: 0 0 0 2px var(--sch-surface);
+}
+
+.sch-me {
+  display: flex; align-items: center; gap: 9px; flex: 0 0 auto;
+  padding: 4px 13px 4px 4px;
+  border-radius: var(--sch-r-full);
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+}
+.sch-me i {
+  width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--sch-accent); color: #fff; font-style: normal;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.sch-me b { font-size: var(--sch-text-sm); }
+.sch-me a { display: flex; color: var(--sch-muted); }
+.sch-me a:hover { color: var(--sch-danger); }
+
+/* ---------- البلاطات ---------- */
+
+/* المجال بخط صغير: بلاطة تقول «السجلات» وتحتها «إدارة المدرسة».
+   لو كتبنا المسار كاملًا لقُرئت «إدارة المدرسة» أربع مرات في صف واحد. */
+
+/* ---------- شريحة الأقسام ---------- */
+
+/* ---------- المحتوى بعرض الشاشة ---------- */
+
+.sch-shell { display: block; }
+.sch-main { display: block; }
+
+@media (min-width: 1900px) { .sch-content { padding: 26px 40px 56px; } }
+
+@media (max-width: 700px) {
+  .sch-top { padding: 10px 16px 0; }
+  .sch-content { padding: 16px 16px 40px; }
+  .sch-top__date, .sch-brand__t span { display: none; }
+  .sch-me b { display: none; }
+}
+
+@media print {
+  .sch-top { display: none; }
+  .sch-content { padding: 0; }
+}
+

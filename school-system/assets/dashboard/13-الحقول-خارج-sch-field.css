@@ -1,0 +1,49 @@
+/* =========================================================
+   الحقول خارج `.sch-field`.
+
+   كانت الأنماط محصورة في `.sch-field` وحده، فأي حقل في شريط أدوات
+   أو مرشّح يظهر بمظهر المتصفح الخام: بلا حواف ولا ارتفاع ولا خط.
+   ========================================================= */
+
+.sch-body :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="submit"]) {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: var(--sch-text-sm);
+  line-height: 1.5;
+  color: var(--sch-ink);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line-strong);
+  border-radius: var(--sch-radius);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.sch-body :is(input, select, textarea):focus {
+  outline: 0;
+  border-color: var(--sch-accent);
+  box-shadow: 0 0 0 3px var(--sch-accent-soft);
+}
+
+/* شريط أدوات الصلاحيات: بطاقة واحدة لا حقول متناثرة */
+.sch-permtools,
+.sch-permbar {
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e2);
+}
+.sch-permtools__f label,
+.sch-permbar__f label { font-weight: 700; }
+
+/* بطاقة بيانات الدخول: الشرح على طرف والزر على الآخر */
+.sch-cred {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sch-4);
+  flex-wrap: wrap;
+}
+.sch-cred h2 { margin: 0 0 2px; }
+.sch-cred .sch-sub { margin: 0; max-width: 58ch; }
+.sch-cred form { flex: 0 0 auto; }
+.sch-cred .sch-btn { margin: 0; }
+

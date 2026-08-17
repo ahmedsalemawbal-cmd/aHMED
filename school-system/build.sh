@@ -52,6 +52,12 @@ esac
 VERSION="$(cur_version)"
 [[ -n "$VERSION" ]] || er "تعذّرت قراءة SCH_VERSION"
 
+# ---------- توليد ما يُولَّد ----------
+if [[ -f "$DIR/tools/css-split.py" ]]; then
+  python3 "$DIR/tools/css-split.py" build
+  python3 "$DIR/tools/css-split.py" check >/dev/null || er "dashboard.css لا يطابق أجزاءه"
+fi
+
 # ---------- الفحص قبل البناء ----------
 c "php -l …"
 bad=0

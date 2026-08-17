@@ -1,0 +1,69 @@
+/* =========================================================
+   شاشة الصلاحيات.
+
+   الدور قالب لا قيد. والشاشة تجيب سؤالين لا سؤالًا:
+   **ماذا يرى؟** و**على مَن؟** — والثاني لا يوجد في أنظمة الشركات
+   لأن مدرسة فيها ٤١٢ طالبًا ليست شركة فيها قائمة عملاء واحدة.
+   ========================================================= */
+
+.sch-permbar {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sch-4);
+  margin-bottom: var(--sch-5);
+  padding: var(--sch-4);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e2);
+}
+.sch-permbar__f { display: flex; flex-direction: column; gap: 5px; }
+.sch-permbar__f label { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-permbar__f select,
+.sch-permbar__f input { min-width: 160px; }
+.sch-permbar__acts { display: flex; gap: var(--sch-2); margin-inline-start: auto; }
+.sch-permbar__acts .sch-btn { margin: 0; }
+
+.sch-permbar__f--grow { flex: 1 1 220px; }
+.sch-permbar__f--grow input { width: 100%; }
+
+.sch-permgrid {
+  display: grid;
+  grid-template-columns: 200px 1fr 300px;
+  gap: var(--sch-5);
+  align-items: start;
+}
+/* داخل معالج الموظف لا ريل — عمودان فقط (القائمة + الملخّص) */
+.sch-permgrid--norail { grid-template-columns: 1fr 300px; }
+
+/* ريل الفئات — تنقّل سريع بين المجموعات (كنمط HighLevel) */
+.sch-prail {
+  position: sticky; top: 108px;
+  display: flex; flex-direction: column; gap: 2px;
+  max-height: calc(100vh - 150px); overflow-y: auto;
+  padding: var(--sch-2);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e1);
+}
+.sch-body a.sch-prail__i {
+  display: flex; align-items: center; gap: var(--sch-2);
+  padding: 8px 10px; border-radius: var(--sch-radius);
+  color: var(--sch-ink-soft); font-size: var(--sch-text-sm); font-weight: 600;
+  text-decoration: none; transition: background .14s var(--sch-ease), color .14s var(--sch-ease);
+}
+.sch-prail__i > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sch-prail__i b {
+  flex: 0 0 auto; min-width: 20px; height: 18px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--sch-r-full); background: var(--sch-accent-soft); color: var(--sch-accent-ink);
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sch-prail__i b.is-off { background: var(--sch-surface-alt); color: var(--sch-muted); }
+.sch-body a.sch-prail__i:hover { background: var(--sch-surface-alt); color: var(--sch-ink); text-decoration: none; }
+

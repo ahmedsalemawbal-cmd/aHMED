@@ -1,0 +1,65 @@
+/* =========================================================
+   بطاقة الهوية — ملف ولي الأمر.
+   كان أسلوبها يذهب مع حذف الشريط الجانبي فتظهر بلا تنسيق.
+   ========================================================= */
+
+.sch-idcard {
+  background: var(--sch-surface);
+  border: 0;
+  border-radius: var(--sch-radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--sch-5);
+  box-shadow: var(--sch-e2);
+}
+
+/* شريط أفعال الملف: زر «تعديل البيانات» يفتح نافذة بدل نموذج ثابت في الصفحة */
+.sch-profile-acts { display: flex; margin-bottom: var(--sch-5); }
+.sch-idcard__head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sch-3);
+  padding: var(--sch-3) var(--sch-5);
+  background: var(--sch-chrome);
+  color: #EEF2F7;
+}
+.sch-idcard__school { font-size: var(--sch-text-base); font-weight: 700; }
+.sch-idcard__doc {
+  padding: 3px 12px; border-radius: var(--sch-r-full);
+  background: rgba(94, 234, 212, .16); color: var(--sch-chrome-ink);
+  font-size: var(--sch-text-xs); font-weight: 700;
+}
+.sch-idcard__body {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: var(--sch-5);
+  padding: var(--sch-5);
+}
+.sch-idcard__body--wide { grid-template-columns: 1fr; }
+.sch-idcard__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sch-4);
+  margin: 0;
+}
+.sch-idcard__fields dt { font-size: var(--sch-text-xs); color: var(--sch-muted); margin-bottom: 2px; }
+.sch-idcard__fields dd {
+  margin: 0;
+  font-size: var(--sch-text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) { .sch-idcard__body { grid-template-columns: 1fr; } }
+
+/* رسالة الخطأ تُرى ولا تُفوَّت: تظهر بحركة وتلتصق أعلى المحتوى */
+.sch-notice--error {
+  position: sticky;
+  top: 8px;
+  z-index: 25;
+  border-inline-end: 4px solid var(--sch-danger);
+  animation: sch-notice-pop .3s cubic-bezier(.22, .8, .28, 1) both;
+  box-shadow: var(--sch-e3);
+}
+@keyframes sch-notice-pop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .sch-notice--error { animation: none; } }
+

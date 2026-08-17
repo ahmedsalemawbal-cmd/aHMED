@@ -1,0 +1,20 @@
+/* =========================================================
+   لون زر الرابط — إصلاح.
+
+   `.sch-body a { color: accent }` كان يطمس لون الزر الأبيض لأنه يأتي بعده،
+   فيصير نصًا أبيض على خلفية بارزة: موجود ولا يُرى. ولذلك يُثبَّت لونه صراحةً.
+   (كان هذا التعليق مفتوحًا بلا `/*` فابتلع القاعدة التالية بأكملها.)
+   ========================================================= */
+
+.sch-body a.sch-btn,
+.sch-body a.sch-btn:hover,
+.sch-body a.sch-btn:visited { color: var(--sch-on-accent); text-decoration: none; }
+
+.sch-body a.sch-btn--quiet,
+.sch-body a.sch-btn--quiet:hover,
+.sch-body a.sch-btn--quiet:visited { color: var(--sch-accent); }
+
+.sch-body a.sch-btn--sm { color: var(--sch-on-accent); }
+
+/* أي زر بلا نص مرئي عطل — نُظهره بحد أدنى للعرض حتى لا يختفي */
+

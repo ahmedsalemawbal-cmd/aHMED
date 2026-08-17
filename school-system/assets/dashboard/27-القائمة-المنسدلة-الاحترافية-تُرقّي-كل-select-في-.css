@@ -1,0 +1,74 @@
+/* ============================================================
+   القائمة المنسدلة الاحترافية — تُرقّي كل <select> في الداشبورد  (v8.0)
+   ============================================================ */
+.sch-sel { display: block; position: relative; }
+.sch-sel__native {
+  position: absolute; width: 1px; height: 1px; margin: 0;
+  opacity: 0; pointer-events: none; clip: rect(0 0 0 0);
+}
+.sch-body button.sch-sel__btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-width: 140px;
+  min-height: 46px; padding: 10px 14px; cursor: pointer;
+  font-family: inherit; font-size: var(--sch-text-base); font-weight: 600; color: var(--sch-ink);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line-strong); border-radius: var(--sch-radius);
+  text-align: start; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.sch-body button.sch-sel__btn:hover { border-color: var(--sch-muted); }
+.sch-body button.sch-sel__btn:disabled { opacity: .55; cursor: default; }
+.sch-sel.is-open button.sch-sel__btn,
+.sch-body button.sch-sel__btn:focus-visible {
+  outline: none; border-color: var(--sch-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sch-accent) 22%, transparent);
+}
+.sch-sel__val { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sch-sel__val.is-placeholder { color: var(--sch-muted); font-weight: 500; }
+.sch-sel__chev { flex: none; display: inline-flex; color: var(--sch-muted); transition: transform .2s var(--sch-ease); }
+.sch-sel.is-open .sch-sel__chev { transform: rotate(180deg); }
+
+/* اللوحة — مُلحقة بـ body وثابتة الإحداثيات فلا يقصّها جدول أو بطاقة */
+.sch-sel__panel {
+  position: fixed; z-index: 100000; box-sizing: border-box;
+  max-height: 300px; overflow-y: auto; padding: 6px;
+  background: var(--sch-surface); border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e3);
+  animation: sch-sel-in .15s var(--sch-ease);
+}
+@keyframes sch-sel-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.sch-sel__panel[hidden] { display: none; }
+
+.sch-sel__opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--sch-r-sm, 8px); cursor: pointer;
+  font-size: var(--sch-text-base); font-weight: 600; color: var(--sch-ink); line-height: 1.4;
+}
+.sch-sel__optt { flex: 1; min-width: 0; }
+.sch-sel__ck { flex: none; display: inline-flex; color: var(--sch-accent); opacity: 0; }
+.sch-sel__opt.is-active { background: var(--sch-surface-alt); }
+.sch-sel__opt.is-selected {
+  background: var(--sch-accent-soft); color: var(--sch-accent-ink, var(--sch-accent)); font-weight: 700;
+}
+.sch-sel__opt.is-selected .sch-sel__ck { opacity: 1; }
+.sch-sel__opt.is-disabled { opacity: .5; cursor: default; }
+
+/* شريط تمرير أنيق للوحة */
+.sch-sel__panel::-webkit-scrollbar { width: 10px; }
+.sch-sel__panel::-webkit-scrollbar-thumb { background: var(--sch-line-strong); border-radius: 999px; border: 3px solid var(--sch-surface); }
+.sch-sel__panel { scrollbar-width: thin; scrollbar-color: var(--sch-line-strong) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-sel__panel { animation: none; }
+  .sch-sel__chev { transition: none; }
+}
+
+/* ---------- تكامل مع مبدّل حالة الحضور: الزر يرث لون الحالة ---------- */
+.sch-att-pickw .sch-sel { display: inline-block; }
+.sch-att-pickw .sch-sel__btn { min-width: 162px; border-inline-start-width: 5px; font-weight: 800; }
+.sch-att-pickw:has(.sch-sel__btn)::after { display: none; }
+.sch-att-pickw[data-v="present"] .sch-sel__btn { border-inline-start-color: var(--sch-success); color: var(--sch-success); background: var(--sch-success-soft); }
+.sch-att-pickw[data-v="late"]    .sch-sel__btn { border-inline-start-color: var(--sch-warn);    color: var(--sch-warn);    background: var(--sch-warn-soft); }
+.sch-att-pickw[data-v="absent"]  .sch-sel__btn { border-inline-start-color: var(--sch-danger);  color: var(--sch-danger);  background: var(--sch-danger-soft); }
+.sch-att-pickw[data-v="excused"] .sch-sel__btn { border-inline-start-color: var(--sch-accent);  color: var(--sch-accent-ink, var(--sch-accent)); background: var(--sch-accent-soft); }
+.sch-att-pickw[data-v="leave"]   .sch-sel__btn { border-inline-start-color: #5b6b8c; color: #4b566f; background: rgba(91,107,140,.14); }
+.sch-att-pickw[data-v=""]        .sch-sel__btn { border-inline-start-color: var(--sch-line-strong); color: var(--sch-muted); }
+

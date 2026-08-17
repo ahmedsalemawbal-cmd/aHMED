@@ -79,7 +79,17 @@ def php() -> list[str]:
 
 
 def css() -> list[str]:
-    return files('.css')
+    """
+    ملفات CSS للفحص.
+
+    ‎assets/dashboard.css‎ **مولَّد** من ‎assets/dashboard/*.css‎ — فحصه مع
+    أجزائه يعدّ كل قاعدة مرتين ويُبلّغ عن «تكرار» بين الجزء ونسخته المولَّدة.
+    نفحص المصدر، ويتكفّل ‎CSS_PARTS_STALE‎ بأن المولَّد يطابقه.
+    """
+    generated = os.path.join(ROOT, 'assets/dashboard.css')
+    has_parts = os.path.exists(os.path.join(ROOT, 'assets/dashboard/_order.txt'))
+
+    return [p for p in files('.css') if not (has_parts and p == generated)]
 
 
 def lineno(src: str, pos: int) -> int:
@@ -608,10 +618,12 @@ def c_sch_token_home():
     # طبقات موثّقة لها نظامها: parent/admin مستقلّان (v5.0)، و dashboard.css
     # يحمل طبقة تخصيص تُحمَّل بعد shared-ui فتحكم صفحة الداشبورد وحدها (v6.0).
     # الفحص يبقى لكشف **ملف جديد** يبدأ بتعريف رموز --sch-* من نفسه.
-    INDEPENDENT = ('assets/parent.css', 'assets/admin.css', 'assets/dashboard.css')
+    INDEPENDENT = ('assets/parent.css', 'assets/admin.css')
     for p in css():
         r = rel(p)
-        if r == HOME or r in INDEPENDENT:
+        # طبقة الداشبورد (assets/dashboard/*) تُحمَّل بعد shared-ui فتحكم
+        # صفحة الداشبورد وحدها — تخصيص موثّق في v6.0.
+        if r == HOME or r in INDEPENDENT or r.startswith('assets/dashboard/'):
             continue
         src = strip_css_comments(read(p))
         for m in re.finditer(r'(--sch-[a-z0-9-]+)\s*:', src):
@@ -773,6 +785,32 @@ def c_table_unused():
     act = os.path.join(ROOT, 'includes/class-activator.php')
     for t in sorted(created - used):
         warn('TABLE_UNUSED', act, 0, f'الجدول «{t}» يُنشأ ولا يُستعمل في سطر واحد')
+
+
+@check('CSS_PARTS_STALE')
+def c_css_parts_stale():
+    """‎dashboard.css‎ لا يطابق أجزاءه في ‎assets/dashboard/‎.
+
+    الملف **مولَّد**: من عدّله مباشرةً يضيع تعديله عند أول ‎build‎.
+    عدّل الجزء، ثم ‎python3 tools/css-split.py build‎.
+    """
+    order = os.path.join(ROOT, 'assets/dashboard/_order.txt')
+    target = os.path.join(ROOT, 'assets/dashboard.css')
+    if not os.path.exists(order) or not os.path.exists(target):
+        return
+    names = [l.strip() for l in open(order, encoding='utf-8')
+             if l.strip() and not l.startswith('#')]
+    built = ''.join(read(os.path.join(ROOT, 'assets/dashboard', n)) for n in names)
+    if built != read(target):
+        fail('CSS_PARTS_STALE', target, 0,
+             'المولَّد لا يطابق أجزاءه — شغّل: python3 tools/css-split.py build')
+
+    # جزء موجود وغير مذكور في الترتيب يُتجاهَل **بصمت** — فيبدو التعديل ضائعًا
+    on_disk = {f for f in os.listdir(os.path.join(ROOT, 'assets/dashboard'))
+               if f.endswith('.css')}
+    for orphan in sorted(on_disk - set(names)):
+        fail('CSS_PARTS_STALE', os.path.join(ROOT, 'assets/dashboard', orphan), 0,
+             'جزء غير مذكور في _order.txt — يُتجاهَل بصمت عند البناء')
 
 
 @check('VERSION_SYNC')

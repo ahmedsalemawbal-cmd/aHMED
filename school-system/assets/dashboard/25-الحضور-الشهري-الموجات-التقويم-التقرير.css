@@ -1,0 +1,165 @@
+/* ============================================================
+   الحضور الشهري — الموجات · التقويم · التقرير  (v7.6)
+   ============================================================ */
+
+/* ---------- شريحة الحالة «الموجة» ---------- */
+.sch-wrow { display: flex; flex-wrap: wrap; gap: 10px; margin: var(--sch-4) 0; }
+
+.sch-wpill {
+  --wc: var(--sch-muted);
+  --wsoft: var(--sch-surface-alt);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  border-radius: var(--sch-r-full);
+  background: var(--wsoft);
+  color: var(--sch-ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.sch-wpill__dot { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--wc); flex: none; }
+.sch-wpill__t { color: var(--sch-ink-soft); }
+.sch-wpill__n { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--sch-ink); }
+
+.sch-wpill--present { --wc: var(--sch-success); --wsoft: var(--sch-success-soft); }
+.sch-wpill--late    { --wc: var(--sch-warn);    --wsoft: var(--sch-warn-soft); }
+.sch-wpill--absent  { --wc: var(--sch-danger);  --wsoft: var(--sch-danger-soft); }
+.sch-wpill--excused { --wc: var(--sch-accent);  --wsoft: var(--sch-accent-soft); }
+.sch-wpill--leave   { --wc: #5b6b8c;            --wsoft: rgba(91, 107, 140, .14); }
+.sch-wpill--rate    { --wc: var(--sch-gold);    --wsoft: var(--sch-gold-soft); }
+.sch-wpill--none    { --wc: var(--sch-muted);   --wsoft: var(--sch-surface-alt); }
+
+/* الموجة: حلقتان تتوسّعان من النقطة — النبض للحيّ وحده */
+.sch-wpill__dot::before,
+.sch-wpill__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--wc);
+  opacity: 0;
+}
+.sch-wpill.is-live .sch-wpill__dot::before { animation: sch-wave 2.4s ease-out infinite; }
+.sch-wpill.is-live .sch-wpill__dot::after  { animation: sch-wave 2.4s ease-out infinite 1.2s; }
+@keyframes sch-wave {
+  0%   { opacity: .55; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(3.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sch-wpill.is-live .sch-wpill__dot::before,
+  .sch-wpill.is-live .sch-wpill__dot::after { animation: none; }
+  .sch-wpill.is-live .sch-wpill__dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--wc) 28%, transparent); }
+}
+
+/* ---------- خريطة التقويم الشهرية ---------- */
+.sch-cal { margin-top: var(--sch-4); }
+.sch-cal__head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+.sch-cal__wd { text-align: center; font-size: 11px; font-weight: 700; color: var(--sch-muted); }
+.sch-cal__wd.is-weekend { color: var(--sch-danger); opacity: .55; }
+
+.sch-cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.sch-cal__pad { visibility: hidden; }
+
+.sch-cal__day {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 11px;
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+}
+.sch-cal__day b { font-size: 13px; font-weight: 700; color: var(--sch-ink-soft); font-variant-numeric: tabular-nums; }
+.sch-cal__i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.sch-cal__day.is-weekend { opacity: .5; }
+.sch-cal__day.is-today { outline: 2px solid var(--sch-accent); outline-offset: 1px; }
+
+.sch-cal__day--present { background: var(--sch-success-soft); border-color: transparent; }
+.sch-cal__day--present b { color: var(--sch-success); }
+.sch-cal__day--present .sch-cal__i { background: var(--sch-success); }
+.sch-cal__day--late { background: var(--sch-warn-soft); border-color: transparent; }
+.sch-cal__day--late b { color: var(--sch-warn); }
+.sch-cal__day--late .sch-cal__i { background: var(--sch-warn); }
+.sch-cal__day--absent { background: var(--sch-danger-soft); border-color: transparent; }
+.sch-cal__day--absent b { color: var(--sch-danger); }
+.sch-cal__day--absent .sch-cal__i { background: var(--sch-danger); }
+.sch-cal__day--excused { background: var(--sch-accent-soft); border-color: transparent; }
+.sch-cal__day--excused b { color: var(--sch-accent-ink, var(--sch-accent)); }
+.sch-cal__day--excused .sch-cal__i { background: var(--sch-accent); }
+.sch-cal__day--leave { background: rgba(91, 107, 140, .14); border-color: transparent; }
+.sch-cal__day--leave b { color: #4b566f; }
+.sch-cal__day--leave .sch-cal__i { background: #5b6b8c; }
+
+.sch-cal__key { display: flex; flex-wrap: wrap; gap: 14px; margin-top: var(--sch-4); }
+.sch-cal__keyi { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--sch-muted); }
+.sch-cal__sw { width: 14px; height: 14px; border-radius: 5px; display: inline-block; }
+
+/* ---------- حاوية التقرير القابلة للطباعة ---------- */
+.sch-report {
+  page: sch-report;
+  margin-top: var(--sch-4);
+  padding: var(--sch-6);
+  background: var(--sch-surface);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e1);
+}
+.sch-report__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sch-4);
+  padding-bottom: var(--sch-4);
+  margin-bottom: var(--sch-2);
+  border-bottom: 1px solid var(--sch-line);
+}
+.sch-report__school { display: block; font-size: 16px; font-weight: 800; color: var(--sch-ink); }
+.sch-report__meta { font-size: 12.5px; color: var(--sch-muted); }
+.sch-report__who { text-align: end; }
+.sch-report__who b { display: block; font-size: 15px; font-weight: 800; color: var(--sch-ink); }
+.sch-report__who span { font-size: 12px; color: var(--sch-muted); font-variant-numeric: tabular-nums; }
+
+.sch-table--report td.sch-num b { color: var(--sch-ink); }
+.sch-cell--present { color: var(--sch-success); font-weight: 700; }
+.sch-cell--late    { color: var(--sch-warn); font-weight: 700; }
+.sch-cell--absent  { color: var(--sch-danger); font-weight: 700; }
+.sch-cell--excused { color: var(--sch-accent); font-weight: 700; }
+.sch-cell--leave   { color: #5b6b8c; font-weight: 700; }
+
+.sch-toolbar__end { margin-inline-start: auto; display: inline-flex; gap: var(--sch-2); }
+.sch-backlink { margin: var(--sch-3) 0; }
+.sch-body a.sch-body-link { display: inline-flex; align-items: center; gap: 5px; color: var(--sch-accent-ink, var(--sch-accent)); font-weight: 600; }
+.sch-body a.sch-body-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sch-print-only { display: none; }
+
+/* ---------- طباعة التقرير: A4 عمودي، بلا زخرفة الشاشة ---------- */
+@page sch-report { size: A4 portrait; margin: 12mm; }
+
+@media print {
+  .sch-report {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sch-report .sch-cal__day,
+  .sch-report .sch-wpill,
+  .sch-report .sch-cell--present,
+  .sch-report .sch-cell--late,
+  .sch-report .sch-cell--absent,
+  .sch-report .sch-cell--excused,
+  .sch-report .sch-cell--leave { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sch-report .sch-wpill.is-live .sch-wpill__dot::before,
+  .sch-report .sch-wpill.is-live .sch-wpill__dot::after { animation: none; }
+  .sch-print-only { display: inline; }
+  .sch-backlink { display: none !important; }
+}
+

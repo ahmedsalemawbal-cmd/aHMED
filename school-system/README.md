@@ -110,7 +110,11 @@ api/
   class-auth.php           JWT بلا مكتبات + تدوير الرمز + حدّ المحاولات
   class-rest.php           مسارات school/v1
   class-bridge.php         جسر نور — استيراد بمفتاح مجزّأ
-assets/                    CSS/JS + الخط محليًا + Leaflet محليًا
+assets/
+  dashboard/*.css          **مصدر** تصميم الداشبورد — 31 طبقة، عدّل هنا
+  dashboard.css            **مولَّد** — لا تعدّله، يُبنى من الأجزاء
+  shared-ui.css            بيت رموز --sch-* الموحّد
+  fonts/ · fonts.css       الخط محليًا · vendor/leaflet  الخريطة محليًا
 languages/school-system.pot  1865 نصًّا للترجمة
 audit.py · dev.sh · build.sh · tools/   أدوات التطوير (لا تدخل الـZIP)
 ```
@@ -126,6 +130,10 @@ audit.py · dev.sh · build.sh · tools/   أدوات التطوير (لا تد�
   (و`parent.css`/`admin.css`/طبقة الداشبورد استثناءات موثّقة).
 - **عائلة خط واحدة** — تُبدَّل من سطرين في `shared-ui.css`.
 - **الخصائص المنطقية فقط** (`margin-inline-start` لا `margin-right`) — الواجهة RTL.
+- **`assets/dashboard.css` مولَّد.** عدّل الجزء في `assets/dashboard/` ثم
+  `python3 tools/css-split.py build` (و`./dev.sh sync` يفعلها عنك).
+  الترتيب في `_order.txt` **يحمل معنى**: الطبقة اللاحقة تطمس ما قبلها.
+  ويمسك `CSS_PARTS_STALE` أي مولَّد لا يطابق أجزاءه، وأي جزء خارج الترتيب.
 
 اقرأ `CLAUDE.md` قبل أي عمل: فيه سبب كل قرار، ومعه `WORKFLOW.md` لسير عمل
 الطالب والنقل، و`REDESIGN_v5.md` لنظام التصميم.

@@ -119,6 +119,9 @@ get_wp() {
 #
 # فالنسخ هو الصحيح، و‎./dev.sh sync‎ يعيده بعد كل تعديل (أقل من ثانية).
 sync_plugin() {
+  # الأجزاء أولًا: dashboard.css مولَّد من assets/dashboard/*.css
+  [[ -f "$PLUGIN_DIR/tools/css-split.py" ]] && python3 "$PLUGIN_DIR/tools/css-split.py" build >/dev/null
+
   local dest="$WP/wp-content/plugins/school-system"
   local tmp="$WP/wp-content/plugins/.school-system-new"
 

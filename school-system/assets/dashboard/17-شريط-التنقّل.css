@@ -1,0 +1,58 @@
+/* =========================================================
+   شريط التنقّل.
+
+   **ما كان خطأ:** عشر بطاقات بيضاء متساوية الوزن بحدود حول كل واحدة،
+   وسطر ثانٍ يكرّر «إدارة المدرسة» أربع مرات و«ERP» أربعًا — فلا هرمية
+   ولا شيء يقود العين، وطبقتان متشابهتان فوق بعضهما.
+
+   **الحل:** شريط واحد داكن، والنشط وحده بارز، والمجموعات تنفصل
+   بفراغ لا بحدود. والشريحة الثانية أخف من الأولى فلا تتنافسان.
+   ========================================================= */
+
+.sch-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  margin: 0 var(--sch-5);
+  border-radius: var(--sch-radius-lg);
+  background: var(--sch-sidebar);
+  box-shadow: var(--sch-e3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sch-nav::-webkit-scrollbar { display: none; }
+
+/* النشط وحده يحمل اللون — هو ما يقود العين */
+.sch-body a.sch-nav__i.is-on {
+  background: var(--sch-accent);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: var(--sch-e2);
+}
+.sch-nav__i.is-on svg { opacity: 1; }
+
+/* فاصل رفيع بين المجالات: يجمع المتشابه بلا حد حول كل عنصر */
+.sch-nav__cut {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background: rgba(255, 255, 255, .14);
+}
+
+/* ---------- الشريحة الثانية ---------- */
+
+.sch-sub::-webkit-scrollbar { display: none; }
+.sch-body a.sch-sub__i.is-on { color: var(--sch-accent-ink); font-weight: 700; }
+.sch-sub__i.is-on::after { transform: scaleX(1); }
+
+@media (max-width: 900px) {
+  .sch-nav { margin: 0 var(--sch-4); }
+  .sch-nav__i.is-on span { display: inline; }
+  .sch-sub { padding: 0 var(--sch-4); gap: var(--sch-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+}
+

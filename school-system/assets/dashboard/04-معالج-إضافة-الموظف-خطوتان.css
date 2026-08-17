@@ -1,0 +1,122 @@
+/* =========================================================
+   معالج إضافة الموظف — خطوتان.
+
+   بياناته ثم ما يظهر له. والصلاحيات جزء من الإنشاء لا شاشة
+   تُفتح بعده — من ينشئ موظفًا يعرف في تلك اللحظة ما يريده أن يرى.
+   ========================================================= */
+
+.sch-wiz {
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--sch-6);
+}
+.sch-wiz__head .sch-sub { margin: 0; }
+
+.sch-wiz__body { display: grid; grid-template-columns: 250px 1fr; }
+
+/* ---------- عمود الخطوتين ---------- */
+
+.sch-wiz__nav {
+  border-inline-end: 1px solid var(--sch-line);
+  background: var(--sch-surface-alt);
+  padding: var(--sch-4) var(--sch-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sch-2);
+}
+
+.sch-wiz__tab {
+  display: flex;
+  align-items: center;
+  gap: var(--sch-3);
+  padding: var(--sch-3);
+  border: 1px solid transparent;
+  border-radius: var(--sch-radius);
+  background: none;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease;
+}
+.sch-wiz__tab:hover { background: var(--sch-surface); }
+.sch-wiz__tab.is-on {
+  background: var(--sch-surface);
+  border-color: var(--sch-line);
+  box-shadow: var(--sch-e2);
+}
+.sch-wiz__tab b { display: block; font-size: var(--sch-text-sm); color: var(--sch-ink); }
+.sch-wiz__tab em { display: block; font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+
+.sch-wiz__n {
+  width: 28px; height: 28px; flex: 0 0 auto;
+  border-radius: var(--sch-r-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line-strong);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+}
+.sch-wiz__tab.is-on .sch-wiz__n {
+  background: var(--sch-accent);
+  border-color: var(--sch-accent);
+  color: #fff;
+}
+.sch-wiz__tab.is-done .sch-wiz__n {
+  background: var(--sch-success-soft);
+  border-color: var(--sch-success);
+  color: var(--sch-success);
+}
+
+/* ---------- الألواح ---------- */
+
+.sch-wiz__panes { padding: var(--sch-5); min-width: 0; }
+.sch-wiz__pane { display: none; }
+.sch-wiz__pane.is-on { display: block; animation: sch-fade .22s ease both; }
+@keyframes sch-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.sch-wiz__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sch-2);
+  margin-top: var(--sch-5);
+  padding-top: var(--sch-4);
+  border-top: 1px solid var(--sch-line);
+}
+.sch-wiz__foot .sch-btn { margin: 0; min-width: 130px; }
+
+.sch-req { color: var(--sch-danger); font-weight: 400; }
+
+/* ---------- شريط أدوات الصلاحيات ---------- */
+
+.sch-permtools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sch-3);
+  padding: var(--sch-4);
+  margin-bottom: var(--sch-3);
+  background: var(--sch-surface-alt);
+  border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius);
+}
+.sch-permtools__f { display: flex; flex-direction: column; gap: 5px; }
+.sch-permtools__f label { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-permtools__f--grow { flex: 1 1 200px; }
+.sch-permtools__acts { display: flex; gap: var(--sch-2); margin-inline-start: auto; }
+.sch-permtools__acts .sch-btn { margin: 0; }
+
+@media (max-width: 900px) {
+  .sch-wiz__body { grid-template-columns: 1fr; }
+  .sch-wiz__nav { flex-direction: row; border-inline-end: 0; border-bottom: 1px solid var(--sch-line); }
+  .sch-wiz__tab { flex: 1; }
+  .sch-wiz__tab em { display: none; }
+  .sch-wiz__panes { padding: var(--sch-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-wiz__pane.is-on { animation: none; }
+}
+

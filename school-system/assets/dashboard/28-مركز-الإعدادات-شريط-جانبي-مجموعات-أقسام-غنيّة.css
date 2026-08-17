@@ -1,0 +1,49 @@
+/* ============================================================
+   مركز الإعدادات — شريط جانبي مجموعات + أقسام غنيّة  (v8.1)
+   ============================================================ */
+.sch-set { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: var(--sch-6); align-items: start; margin-top: var(--sch-5); }
+
+.sch-set__rail { position: sticky; top: 80px; display: grid; gap: var(--sch-4); }
+.sch-set__grp { display: grid; gap: 2px; }
+.sch-set__glabel {
+  font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--sch-muted); padding: 0 12px 5px; border-bottom: 1px solid var(--sch-line); margin-bottom: 4px;
+}
+.sch-body a.sch-set__link {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+  color: var(--sch-ink-soft); font-weight: 600; font-size: 14px;
+}
+.sch-set__link .sch-icon { flex: none; color: var(--sch-muted); transition: color .15s; }
+.sch-body a.sch-set__link:hover { background: var(--sch-surface-alt); color: var(--sch-ink); text-decoration: none; }
+.sch-body a.sch-set__link.is-active { background: var(--sch-accent-soft); color: var(--sch-accent-ink, var(--sch-accent)); font-weight: 700; }
+.sch-body a.sch-set__link.is-active .sch-icon { color: var(--sch-accent); }
+
+.sch-set__main { display: grid; gap: var(--sch-6); min-width: 0; }
+.sch-set__sec { scroll-margin-top: 82px; }
+.sch-set__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: var(--sch-3); }
+.sch-set__ic {
+  width: 40px; height: 40px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  background: var(--sch-accent-soft); color: var(--sch-accent-ink, var(--sch-accent));
+}
+.sch-set__head h2 { margin: 0; font-size: 18px; font-weight: 800; }
+.sch-set__head p { margin: 3px 0 0; color: var(--sch-muted); font-size: 13.5px; line-height: 1.5; }
+
+.sch-set__row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 14px 4px; border-bottom: 1px solid var(--sch-line);
+}
+.sch-set__row:last-child { border-bottom: 0; }
+.sch-set__row > span { color: var(--sch-muted); font-size: 14px; }
+.sch-set__row > b { font-weight: 700; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; color: var(--sch-ink); }
+.sch-set__row > b.is-ok { color: var(--sch-success); }
+.sch-set__row > b.is-bad { color: var(--sch-danger); }
+
+@media (max-width: 900px) {
+  .sch-set { grid-template-columns: 1fr; }
+  .sch-set__rail { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: var(--sch-5); padding-bottom: 4px; }
+  .sch-set__glabel { white-space: nowrap; }
+}
+
+/* فاصل بين مجالات الشريط الجانبي الأربعة — يقرأها العين كأنظمة منفصلة  (v8.1) */
+.sch-side__grp.is-area { margin-top: var(--sch-4); padding-top: var(--sch-4); border-top: 1px solid var(--sch-nav-line); }
+
