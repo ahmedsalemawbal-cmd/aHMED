@@ -325,6 +325,9 @@ final class SCH_Dashboard
             'issue_cert'       => ['sch_manage_students',  'do_issue_cert'],
             'issue_certs_bulk' => ['sch_manage_students',  'do_issue_certs_bulk'],
             'revoke_cert'      => ['sch_manage_students',  'do_revoke_cert'],
+            'toggle_pickup'    => ['sch_manage_guardians', 'do_toggle_pickup'],
+            'delegate_pickup'  => ['sch_manage_guardians', 'do_delegate_pickup'],
+            'revoke_delegation' => ['sch_manage_guardians', 'do_revoke_delegation'],
             'issue_key'        => ['sch_manage_students',  'do_issue_key'],
             'revoke_key'       => ['sch_manage_students',  'do_revoke_key'],
             'update_employee'  => ['sch_manage_staff',     'do_update_employee'],
@@ -920,6 +923,47 @@ final class SCH_Dashboard
             __('صدرت الشهادة برقم %s', 'school-system'),
             $result['serial']
         )];
+    }
+
+    /** تبديل حقّ الاستلام لوليّ أمر على طفل بعينه. */
+    private static function do_toggle_pickup(array $d, int $id): array|WP_Error
+    {
+        $ok = SCH_Guardians::set_pickup(
+            $id,
+            absint($d['guardian_user_id'] ?? 0),
+            (string) ($d['on'] ?? '0') === '1'
+        );
+
+        if (is_wp_error($ok)) {
+            return $ok;
+        }
+
+        return ['msg' => (string) ($d['on'] ?? '0') === '1'
+            ? __('صار مخوَّلًا باستلام الطفل.', 'school-system')
+            : __('لم يعد مخوَّلًا باستلام الطفل.', 'school-system')];
+    }
+
+    /** تفويض بالغ باستلام الطفل إلى وقت محدَّد. */
+    private static function do_delegate_pickup(array $d, int $id): array|WP_Error
+    {
+        $r = SCH_Custody::delegate($d + ['student_id' => $id]);
+
+        if (is_wp_error($r)) {
+            return $r;
+        }
+
+        return ['msg' => __('سُجّل التفويض — يراه الحارس عند البوابة.', 'school-system')];
+    }
+
+    private static function do_revoke_delegation(array $d, int $id): array|WP_Error
+    {
+        $r = SCH_Custody::revoke_delegation(absint($d['delegation_id'] ?? 0));
+
+        if (is_wp_error($r)) {
+            return $r;
+        }
+
+        return ['msg' => __('سُحب التفويض.', 'school-system')];
     }
 
     /** سحب شهادة صدرت بالخطأ — بسبب مكتوب، والوثيقة تبقى مختومة «ملغاة». */

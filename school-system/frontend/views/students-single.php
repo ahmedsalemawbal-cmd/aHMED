@@ -219,6 +219,7 @@ $photo_url = $student->photo_file
                     <th><?php esc_html_e('الصلة', 'school-system'); ?></th>
                     <th><?php esc_html_e('الجوال', 'school-system'); ?></th>
                     <th><?php esc_html_e('أساسي', 'school-system'); ?></th>
+                    <th><?php esc_html_e('يستلم الطفل', 'school-system'); ?></th>
                     <th></th>
                 </tr></thead>
                 <tbody>
@@ -234,6 +235,27 @@ $photo_url = $student->photo_file
                         <td><?php echo esc_html(SCH_Guardians::relation_label($g->relation)); ?></td>
                         <td dir="ltr"><?php echo esc_html($g->phone ?: '—'); ?></td>
                         <td><?php echo $g->is_primary ? '<span class="sch-badge sch-badge--ok">' . esc_html__('نعم', 'school-system') . '</span>' : '—'; ?></td>
+                        <td>
+                            <?php /* البُعد الذي كان مخزَّنًا بلا إنفاذ: من يحقّ له أخذ الطفل */ ?>
+                            <?php if (current_user_can('sch_manage_guardians')) : ?>
+                                <form method="post" class="sch-inline">
+                                    <?php wp_nonce_field('sch_toggle_pickup', '_sch_nonce'); ?>
+                                    <input type="hidden" name="sch_action" value="toggle_pickup">
+                                    <input type="hidden" name="guardian_user_id" value="<?php echo esc_attr((string) $g->user_id); ?>">
+                                    <input type="hidden" name="on" value="<?php echo empty($g->can_pickup) ? '1' : '0'; ?>">
+                                    <button class="sch-badge <?php echo empty($g->can_pickup) ? 'sch-badge--muted' : 'sch-badge--ok'; ?>"
+                                            title="<?php esc_attr_e('اضغط للتبديل', 'school-system'); ?>">
+                                        <?php echo empty($g->can_pickup)
+                                            ? esc_html__('لا يستلم', 'school-system')
+                                            : esc_html__('يستلم', 'school-system'); ?>
+                                    </button>
+                                </form>
+                            <?php else : ?>
+                                <?php echo empty($g->can_pickup)
+                                    ? '<span class="sch-badge sch-badge--muted">' . esc_html__('لا يستلم', 'school-system') . '</span>'
+                                    : '<span class="sch-badge sch-badge--ok">' . esc_html__('يستلم', 'school-system') . '</span>'; ?>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <?php if (current_user_can('sch_manage_guardians')) : ?>
                                 <form method="post" onsubmit="return confirm('<?php esc_attr_e('فك الارتباط؟', 'school-system'); ?>');">
@@ -268,6 +290,77 @@ $photo_url = $student->photo_file
             </select>
             <label class="sch-check"><input type="checkbox" name="is_primary" value="1"> <?php esc_html_e('أساسي', 'school-system'); ?></label>
             <button class="sch-btn sch-btn--quiet"><?php esc_html_e('ربط', 'school-system'); ?></button>
+        </form>
+    <?php endif; ?>
+
+    <?php /* ── تفويض ليوم واحد: «خالته اليوم فقط» ──
+             حالة يوميّة في كل مدرسة تُحلّ اليوم باتصال هاتفي والحارس يقرّر
+             بعينه. هنا تصير سجلًّا: من أذن ولمن وإلى متى. */ ?>
+    <?php if (current_user_can('sch_manage_guardians')) :
+        $sch_del = SCH_Custody::delegations($id, 10);
+        $sch_now = current_time('Y-m-d\TH:i'); ?>
+
+        <h3 class="sch-h3 sch-mt"><?php esc_html_e('تفويض استلام مؤقّت', 'school-system'); ?></h3>
+        <p class="sch-sub"><?php esc_html_e('لمن ليس وليَّ أمر — يسري إلى وقت تحدّده، ويراه الحارس عند البوابة.', 'school-system'); ?></p>
+
+        <?php if ($sch_del !== []) : ?>
+            <div class="sch-table-wrap">
+                <table class="sch-table">
+                    <thead><tr>
+                        <th><?php esc_html_e('المفوَّض', 'school-system'); ?></th>
+                        <th><?php esc_html_e('الصلة', 'school-system'); ?></th>
+                        <th><?php esc_html_e('حتى', 'school-system'); ?></th>
+                        <th><?php esc_html_e('الحالة', 'school-system'); ?></th>
+                        <th></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($sch_del as $sch_dl) :
+                        $sch_live = ((string) $sch_dl->status === 'active'
+                            && strtotime((string) $sch_dl->valid_until) > time()); ?>
+                        <tr>
+                            <td class="sch-name"><?php echo esc_html((string) $sch_dl->person_name); ?></td>
+                            <td><?php echo esc_html((string) ($sch_dl->relation ?: '—')); ?></td>
+                            <td><?php echo esc_html(wp_date('j M · H:i', strtotime((string) $sch_dl->valid_until))); ?></td>
+                            <td><?php if ($sch_live) : ?>
+                                <span class="sch-badge sch-badge--ok"><?php esc_html_e('سارٍ', 'school-system'); ?></span>
+                            <?php elseif ((string) $sch_dl->status === 'revoked') : ?>
+                                <span class="sch-badge sch-badge--danger"><?php esc_html_e('مسحوب', 'school-system'); ?></span>
+                            <?php else : ?>
+                                <span class="sch-badge sch-badge--muted"><?php esc_html_e('انتهى', 'school-system'); ?></span>
+                            <?php endif; ?></td>
+                            <td>
+                                <?php if ($sch_live) : ?>
+                                    <form method="post" class="sch-inline">
+                                        <?php wp_nonce_field('sch_revoke_delegation', '_sch_nonce'); ?>
+                                        <input type="hidden" name="sch_action" value="revoke_delegation">
+                                        <input type="hidden" name="delegation_id" value="<?php echo esc_attr((string) $sch_dl->id); ?>">
+                                        <button class="sch-link-danger"><?php esc_html_e('سحب', 'school-system'); ?></button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+
+        <form method="post" class="sch-toolbar sch-mt">
+            <?php wp_nonce_field('sch_delegate_pickup', '_sch_nonce'); ?>
+            <input type="hidden" name="sch_action" value="delegate_pickup">
+            <input type="text" name="person_name" required maxlength="190"
+                   aria-label="<?php esc_attr_e('اسم المفوَّض', 'school-system'); ?>"
+                   placeholder="<?php esc_attr_e('اسم من سيستلم', 'school-system'); ?>">
+            <input type="text" name="relation" maxlength="60"
+                   aria-label="<?php esc_attr_e('صلة القرابة', 'school-system'); ?>"
+                   placeholder="<?php esc_attr_e('الصلة — خالته مثلًا', 'school-system'); ?>">
+            <input type="text" name="id_number" maxlength="40" dir="ltr"
+                   aria-label="<?php esc_attr_e('رقم الهوية', 'school-system'); ?>"
+                   placeholder="<?php esc_attr_e('رقم الهوية', 'school-system'); ?>">
+            <input type="datetime-local" name="valid_until" required dir="ltr"
+                   min="<?php echo esc_attr($sch_now); ?>"
+                   aria-label="<?php esc_attr_e('سارٍ حتى', 'school-system'); ?>">
+            <button class="sch-btn sch-btn--quiet"><?php esc_html_e('تفويض', 'school-system'); ?></button>
         </form>
     <?php endif; ?>
 </div>

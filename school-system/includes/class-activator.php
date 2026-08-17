@@ -247,6 +247,32 @@ final class SCH_Activator
         ) {$charset};";
 
         // ربط ولي الأمر بالطالب — ولي أمر واحد قد يكون له عدة أبناء والعكس.
+        /**
+         * تفويض استلام ليوم واحد.
+         *
+         * «خالته اليوم فقط» حالة يوميّة في كل مدرسة، وبلا مكان لها تُحلّ باتصال
+         * هاتفي والحارس يقرّر بعينه. هنا: وليّ الأمر الأساسي يفوّض بالغًا محدَّدًا
+         * إلى وقت محدَّد، والحارس يرى من أذن ولمن وإلى متى.
+         */
+        $sql[] = "CREATE TABLE {$p}pickup_delegations (
+            id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            student_id    BIGINT UNSIGNED NOT NULL,
+            person_name   VARCHAR(190)    NOT NULL,
+            relation      VARCHAR(60)     DEFAULT NULL,
+            id_number     VARCHAR(40)     DEFAULT NULL,
+            phone         VARCHAR(30)     DEFAULT NULL,
+            granted_by    BIGINT UNSIGNED NOT NULL,
+            valid_from    DATETIME        NOT NULL,
+            valid_until   DATETIME        NOT NULL,
+            status        VARCHAR(12)     NOT NULL DEFAULT 'active',
+            used_at       DATETIME        DEFAULT NULL,
+            created_at    DATETIME        NOT NULL,
+            updated_at    DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_student (student_id, valid_until),
+            KEY idx_status (status)
+        ) {$charset};";
+
         $sql[] = "CREATE TABLE {$p}guardian_student (
             id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             guardian_user_id  BIGINT UNSIGNED NOT NULL,
@@ -996,6 +1022,7 @@ final class SCH_Activator
             actor_user_id     BIGINT UNSIGNED DEFAULT NULL,
             receiver_name     VARCHAR(190)    DEFAULT NULL,
             receiver_relation VARCHAR(60)     DEFAULT NULL,
+            picked_by         VARCHAR(24)     DEFAULT NULL,
             reason            VARCHAR(255)    DEFAULT NULL,
             lat               DECIMAL(10,7)   DEFAULT NULL,
             lng               DECIMAL(10,7)   DEFAULT NULL,

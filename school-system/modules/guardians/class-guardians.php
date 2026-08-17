@@ -207,11 +207,45 @@ final class SCH_Guardians
             'student_id'       => $student_id,
             'relation'         => array_key_exists($relation, self::RELATIONS) ? $relation : 'guardian',
             'is_primary'       => $is_primary ? 1 : 0,
+            // الافتراض «يستلم» يبقى كما هو فلا ينكسر شيء قائم — والإدارة تضيّقه
+            // لمن لا يحقّ له. التوسيع الافتراضي أأمن من إقفال مدرسة على نفسها.
             'can_pickup'       => 1,
             'created_at'       => sch_now(),
         ]);
 
         sch_audit('guardian.linked', 'student', $student_id, ['guardian' => $guardian_user_id]);
+        return true;
+    }
+
+    /**
+     * منح حقّ استلام الطفل لوليّ أمر أو منعه.
+     *
+     * البُعد الذي كان مخزَّنًا في القاعدة منذ اليوم الأول ولا تقرأه شاشة ولا
+     * يفحصه حارس. وكل تغيير يُسجَّل: من منح حقّ أخذ طفل لمن ومتى.
+     */
+    public static function set_pickup(int $student_id, int $guardian_user_id, bool $on): bool|WP_Error
+    {
+        global $wpdb;
+
+        if ($student_id < 1 || $guardian_user_id < 1) {
+            return sch_api_error('bad_args', __('بيانات ناقصة.', 'school-system'), 422);
+        }
+
+        $done = $wpdb->update(
+            sch_table('guardian_student'),
+            ['can_pickup' => $on ? 1 : 0],
+            ['student_id' => $student_id, 'guardian_user_id' => $guardian_user_id]
+        );
+
+        if ($done === false) {
+            return sch_api_error('db_error', __('تعذّر تحديث حقّ الاستلام.', 'school-system'), 500);
+        }
+
+        sch_audit('pickup.right_changed', 'student', $student_id, [
+            'guardian' => $guardian_user_id,
+            'can'      => $on ? 1 : 0,
+        ]);
+
         return true;
     }
 

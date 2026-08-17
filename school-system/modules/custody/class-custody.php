@@ -49,6 +49,179 @@ final class SCH_Custody
 
     // ---------- القراءة ----------
 
+    /**
+     * من يحقّ له استلام هذا الطفل الآن.
+     *
+     * مصدران: أولياء الأمور المرتبطون بـ`can_pickup = 1`، والتفويضات السارية
+     * لهذه اللحظة. والعمود موجود في القاعدة منذ اليوم الأول **بصفر إنفاذ** —
+     * يُعرَّف ويُدرَج ولا يُفحَص، في أخطر لحظة في اليوم المدرسي.
+     *
+     * @return array<int,array{key:string,name:string,relation:string,source:string,until:?string}>
+     */
+    public static function pickers(int $student_id): array
+    {
+        global $wpdb;
+
+        $out = [];
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT gs.guardian_user_id, gs.relation, gs.is_primary, u.display_name
+               FROM ' . sch_table('guardian_student') . ' gs
+               INNER JOIN ' . $wpdb->users . ' u ON u.ID = gs.guardian_user_id
+              WHERE gs.student_id = %d AND gs.can_pickup = 1
+              ORDER BY gs.is_primary DESC, gs.id ASC',
+            $student_id
+        )) ?: [];
+
+        foreach ($rows as $r) {
+            $out[] = [
+                'key'      => 'g:' . (int) $r->guardian_user_id,
+                'name'     => (string) $r->display_name,
+                'relation' => (string) ($r->relation ?: __('ولي أمر', 'school-system')),
+                'source'   => 'guardian',
+                'until'    => null,
+            ];
+        }
+
+        $now = sch_now();
+
+        $del = $wpdb->get_results($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('pickup_delegations') . "
+              WHERE student_id = %d AND status = 'active'
+                AND valid_from <= %s AND valid_until >= %s
+              ORDER BY id DESC",
+            $student_id,
+            $now,
+            $now
+        )) ?: [];
+
+        foreach ($del as $r) {
+            $out[] = [
+                'key'      => 'd:' . (int) $r->id,
+                'name'     => (string) $r->person_name,
+                'relation' => (string) ($r->relation ?: __('مفوَّض', 'school-system')),
+                'source'   => 'delegate',
+                'until'    => (string) $r->valid_until,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * تفويض بالغ باستلام الطفل إلى وقت محدَّد.
+     *
+     * «خالته اليوم فقط» حالة يوميّة تُحلّ اليوم باتصال هاتفي والحارس يقرّر
+     * بعينه. هنا تصير سجلًّا: من أذن، ولمن، وإلى متى — ويراه الحارس.
+     */
+    public static function delegate(array $d): array|WP_Error
+    {
+        global $wpdb;
+
+        $student_id = absint($d['student_id'] ?? 0);
+        $person     = trim(sanitize_text_field((string) ($d['person_name'] ?? '')));
+        $until      = sch_sanitize_datetime($d['valid_until'] ?? null);
+
+        if (!SCH_Students::get($student_id)) {
+            return sch_api_error('no_student', __('الطالب غير موجود.', 'school-system'), 404);
+        }
+
+        if ($person === '') {
+            return sch_api_error('no_person', __('اكتب اسم من ستفوّضه.', 'school-system'), 422);
+        }
+
+        if ($until === null) {
+            return sch_api_error('no_until', __('حدّد وقت انتهاء التفويض.', 'school-system'), 422);
+        }
+
+        if (strtotime($until) <= strtotime(sch_now())) {
+            return sch_api_error('past', __('وقت الانتهاء يجب أن يكون في المستقبل.', 'school-system'), 422);
+        }
+
+        // سقف أسبوع: التفويض المفتوح يتحوّل إلى صلاحية دائمة بلا قرار —
+        // ومن يحتاج الدوام يُضاف وليَّ أمر بـ«يستلم».
+        if (strtotime($until) > strtotime('+7 days', strtotime(sch_now()))) {
+            return sch_api_error('too_long', __('أقصى مدة للتفويض أسبوع. للدوام أضِف ولي أمر بصلاحية الاستلام.', 'school-system'), 422);
+        }
+
+        $now = sch_now();
+        $ok  = $wpdb->insert(sch_table('pickup_delegations'), [
+            'student_id'  => $student_id,
+            'person_name' => $person,
+            'relation'    => sanitize_text_field((string) ($d['relation'] ?? '')) ?: null,
+            'id_number'   => sanitize_text_field((string) ($d['id_number'] ?? '')) ?: null,
+            'phone'       => sanitize_text_field((string) ($d['phone'] ?? '')) ?: null,
+            'granted_by'  => get_current_user_id() ?: null,
+            'valid_from'  => $now,
+            'valid_until' => $until,
+            'status'      => 'active',
+            'created_at'  => $now,
+            'updated_at'  => $now,
+        ]);
+
+        if ($ok === false) {
+            return sch_api_error('db_error', __('تعذّر حفظ التفويض.', 'school-system'), 500);
+        }
+
+        sch_audit('pickup.delegated', 'student', $student_id, ['person' => $person, 'until' => $until]);
+
+        return ['id' => (int) $wpdb->insert_id];
+    }
+
+    /** سحب تفويض قبل انتهائه. */
+    public static function revoke_delegation(int $id): true|WP_Error
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('pickup_delegations') . ' WHERE id = %d',
+            $id
+        ));
+
+        if (!$row) {
+            return sch_api_error('not_found', __('التفويض غير موجود.', 'school-system'), 404);
+        }
+
+        $wpdb->update(
+            sch_table('pickup_delegations'),
+            ['status' => 'revoked', 'updated_at' => sch_now()],
+            ['id' => $id]
+        );
+
+        sch_audit('pickup.delegation_revoked', 'student', (int) $row->student_id, ['person' => (string) $row->person_name]);
+
+        return true;
+    }
+
+    /** تفويضات الطالب — السارية أولًا. */
+    public static function delegations(int $student_id, int $limit = 20): array
+    {
+        global $wpdb;
+
+        return $wpdb->get_results($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('pickup_delegations') . '
+              WHERE student_id = %d ORDER BY id DESC LIMIT %d',
+            $student_id,
+            $limit
+        )) ?: [];
+    }
+
+    /** هل هذا المفتاح مخوَّل باستلام هذا الطفل الآن؟ */
+    public static function may_pick_up(int $student_id, string $picker_key): bool
+    {
+        if ($picker_key === '') {
+            return false;
+        }
+
+        foreach (self::pickers($student_id) as $p) {
+            if ($p['key'] === $picker_key) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function state_of(int $student_id): string
     {
         $student = SCH_Students::get($student_id);
@@ -182,6 +355,8 @@ final class SCH_Custody
             'actor_user_id'     => get_current_user_id() ?: null,
             'receiver_name'     => sanitize_text_field((string) ($d['receiver_name'] ?? '')) ?: null,
             'receiver_relation' => sanitize_text_field((string) ($d['receiver_relation'] ?? '')) ?: null,
+            // مفتاح المخوَّل الذي أُثبت حقّه لحظة التسليم — لا اسمًا حرًّا وحده
+            'picked_by'         => sanitize_text_field((string) ($d['picker'] ?? '')) ?: null,
             'reason'            => sanitize_text_field((string) ($d['reason'] ?? '')) ?: null,
             'lat'               => is_numeric($d['lat'] ?? null) ? number_format((float) $d['lat'], 7, '.', '') : null,
             'lng'               => is_numeric($d['lng'] ?? null) ? number_format((float) $d['lng'], 7, '.', '') : null,
@@ -263,6 +438,35 @@ final class SCH_Custody
                 __('%s غير مشترك في النقل المدرسي.', 'school-system'),
                 $name
             ), 409);
+        }
+
+        // ── التسليم اليدوي: من يستلم لا بدّ أن يكون مخوَّلًا ──
+        // نقاط التسليم الثلاث. الاسم الحرّ كان يُقبل كما هو: النظام يسجّل «من»
+        // ولا يسأل «هل يحقّ له» — وهذا هو الفرق بين دفتر وبين حارس.
+        $handover = in_array($checkpoint, ['gate_out', 'early_out', 'bus_alight'], true);
+
+        if ($handover && $to !== 'on_bus') {
+            $picker = sanitize_text_field((string) ($d['picker'] ?? ''));
+            $young  = in_array((string) $student->stage, ['kg', 'primary'], true);
+
+            // الصغار لا يخرجون بلا مستلم محدَّد من القائمة المخوَّلة
+            if ($picker === '' && $young) {
+                return sch_api_error('picker_required', sprintf(
+                    /* translators: %s: اسم الطالب */
+                    __('%s في مرحلة لا يُسلَّم فيها الطفل إلا لمخوَّل — اختر المستلم.', 'school-system'),
+                    $name
+                ), 422);
+            }
+
+            if ($picker !== '' && !self::may_pick_up($student_id, $picker)) {
+                self::log_rejection($student_id, $from, $to, $checkpoint);
+
+                return sch_api_error('not_authorized', sprintf(
+                    /* translators: %s: اسم الطالب */
+                    __('هذا الشخص غير مخوَّل باستلام %s. راجع الإدارة.', 'school-system'),
+                    $name
+                ), 403);
+            }
         }
 
         // الروضة والابتدائي: لا تسليم بلا تحديد المستلم.
