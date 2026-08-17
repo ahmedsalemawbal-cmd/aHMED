@@ -18,8 +18,13 @@ final class SCH_Activator
         SCH_Accounts::seed();
         update_option('sch_db_version', SCH_VERSION);
         update_option('sch_jwt_secret', self::ensure_secret(), false);
-        SCH_Dashboard::add_rewrite();
-        flush_rewrite_rules();
+
+        // لا تفريغ هنا: عند التفعيل لم يعمل خطاف `init` بعد، فلا واجهة سجّلت
+        // قاعدةً واحدة — والتفريغ في هذه اللحظة كان يخزّن جدولًا بلا قواعدنا
+        // (أو بقواعد الداشبورد وحدها) فتُصبح كل الواجهات 404.
+        // نمحو علامة النسخة، فيتولّى SCH_Loader::maybe_flush_rewrites()
+        // التفريغ على أول تحميل بعد التفعيل — وقتها كل القواعد مسجّلة.
+        delete_option('sch_rewrite_version');
     }
 
     public static function deactivate(): void
@@ -45,6 +50,9 @@ final class SCH_Activator
             }
 
             update_option('sch_db_version', SCH_VERSION);
+
+            // الترقية قد تضيف قسمًا أو واجهة — فتُعاد قواعد التوجيه كلها.
+            delete_option('sch_rewrite_version');
 
             self::purge_caches();
         }

@@ -83,10 +83,35 @@ final class SCH_Loader
         SCH_Files::init();
         SCH_Alerts::init();
 
+        // تفريغ قواعد التوجيه مرة واحدة لكل نسخة — **على init بأولوية 99**،
+        // أي بعد أن تسجّل كل واجهة قواعدها (كلها على init بالأولوية 10).
+        add_action('init', [self::class, 'maybe_flush_rewrites'], 99);
+
         // شاشات ووردبريس (للمدير فقط)
         if (is_admin()) {
             require_once SCH_PATH . 'admin/class-admin.php';
             SCH_Admin::init();
         }
+    }
+
+    /**
+     * تفريغ واحد يجمع قواعد كل الواجهات.
+     *
+     * كان التفريغ داخل `SCH_Dashboard::add_rewrite()` — وهي تعمل بالأولوية 10،
+     * فيُخزَّن الجدول قبل أن تُسجّل بقية الواجهات قواعدها. النتيجة: الداشبورد
+     * وحده يعمل، وستّ واجهات (ولي الأمر · السائق · البوابة · المعلم · الطالب ·
+     * بوابة الدخول) تُرجع 404 على تثبيت نظيف. ولا يظهر العطل على موقع قائم
+     * لأن أي حفظ لإعدادات الروابط الدائمة يفرّغ الجدول والقواعد كلها مسجّلة.
+     *
+     * الأولوية 99 تضمن أن كل `add_rewrite_rule` نُفِّذ قبل الحفظ.
+     */
+    public static function maybe_flush_rewrites(): void
+    {
+        if (get_option('sch_rewrite_version') === SCH_VERSION) {
+            return;
+        }
+
+        flush_rewrite_rules(false);
+        update_option('sch_rewrite_version', SCH_VERSION, false);
     }
 }

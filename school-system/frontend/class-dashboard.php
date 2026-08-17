@@ -104,10 +104,11 @@ final class SCH_Dashboard
         add_rewrite_rule("^{$b}/([^/]+)/?$", 'index.php?sch_dash=1&sch_section=$matches[1]', 'top');
         add_rewrite_rule("^{$b}/([^/]+)/(\d+)/?$", 'index.php?sch_dash=1&sch_section=$matches[1]&sch_id=$matches[2]', 'top');
 
-        if (get_option('sch_rewrite_version') !== SCH_VERSION) {
-            flush_rewrite_rules(false);
-            update_option('sch_rewrite_version', SCH_VERSION, false);
-        }
+        // التفريغ **لا يجري هنا**: كان يجري، فيُخزَّن جدول القواعد وفيه قواعد
+        // الداشبورد وحدها — لأن التطبيقات الستة تسجّل قواعدها على `init` بعدها.
+        // فكانت /app و/driver و/gate و/teacher و/student و/login تُرجع 404 دائمًا.
+        // التفريغ صار مرة واحدة في SCH_Loader::maybe_flush_rewrites() على init/99،
+        // بعد أن تسجّل كل الواجهات قواعدها.
     }
 
     public static function query_vars(array $vars): array
