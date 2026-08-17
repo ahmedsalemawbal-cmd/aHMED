@@ -234,7 +234,13 @@ try{if(localStorage.getItem('sch-rail')==='1'&&window.matchMedia('(min-width:981
                     echo '<div class="sch-notice sch-notice--error">' . esc_html($sch_msg) . '</div>';
                 }
                 if (isset($_GET['ok'])) {
-                    echo '<div class="sch-notice sch-notice--ok">' . esc_html__('تم الحفظ.', 'school-system') . '</div>';
+                    // المعالجات تُرجع رسالة تقول ما جرى بعدده («صدرت ٢٨ شهادة»)،
+                    // وكانت تُمرَّر في الرابط ثم تُرمى ويُطبع «تم الحفظ.» العامة.
+                    $sch_ok = isset($_GET['msg'])
+                        ? sanitize_text_field(wp_unslash((string) $_GET['msg']))
+                        : __('تم الحفظ.', 'school-system');
+
+                    echo '<div class="sch-toast" data-toast role="status">' . esc_html($sch_ok) . '</div>';
                 }
                 $sch_cred = isset($_GET['cred']) ? SCH_Dashboard::pull_credentials() : null;
                 if ($sch_cred) : ?>
@@ -381,6 +387,23 @@ if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open'
       }
     });
   }
+})();
+</script>
+<?php /* التوست: مكوّن مصمَّم بالكامل في shared-ui وبلا استعمال واحد حتى الآن.
+         يظهر ثم ينسحب، ويُنظَّف الرابط فلا يعود بالتحديث. */ ?>
+<script>
+(function () {
+  var t = document.querySelector('[data-toast]');
+  if (!t) { return; }
+  requestAnimationFrame(function () { t.classList.add('is-on'); });
+  setTimeout(function () { t.classList.remove('is-on'); }, 4200);
+  try {
+    var u = new URL(window.location.href);
+    if (u.searchParams.has('ok')) {
+      u.searchParams.delete('ok'); u.searchParams.delete('msg');
+      window.history.replaceState({}, '', u.toString());
+    }
+  } catch (e) {}
 })();
 </script>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>

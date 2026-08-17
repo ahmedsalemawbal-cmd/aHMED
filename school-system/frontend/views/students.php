@@ -26,8 +26,9 @@ $list = SCH_Students::list([
     'grade_level' => $grade,
     'class_id'    => $class_id,
     'view'        => $view,
-    'per_page'    => 100,
-]);
+    'per_page'    => 25,
+    'page'        => SCH_Table::page(),
+] + SCH_Table::order_args());
 
 $total = (int) ($list['total'] ?? count($list['items']));
 
@@ -155,8 +156,8 @@ SCH_Modal::head(
         <table class="sch-table">
             <thead><tr>
                 <th class="sch-th-pick"><?php SCH_Bulk::pick_all(); ?></th>
-                <th><?php esc_html_e('الطالب', 'school-system'); ?></th>
-                <th><?php esc_html_e('الشعبة', 'school-system'); ?></th>
+                <?php echo SCH_Table::th(__('الطالب', 'school-system'), 'name'); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php echo SCH_Table::th(__('الشعبة', 'school-system'), 'grade'); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                 <th class="sch-col--lg"><?php esc_html_e('ولي الأمر', 'school-system'); ?></th>
                 <th class="sch-col--xl"><?php esc_html_e('النقل', 'school-system'); ?></th>
                 <th><?php esc_html_e('الحالة الآن', 'school-system'); ?></th>
@@ -210,6 +211,8 @@ SCH_Modal::head(
             </tbody>
         </table>
     </div>
+
+    <?php echo SCH_Table::pager($total, 25); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 <?php endif; ?>
 
 <?php SCH_Bulk::bar('students'); ?>

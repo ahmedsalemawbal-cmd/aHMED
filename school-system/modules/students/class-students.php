@@ -248,9 +248,24 @@ final class SCH_Students
         }
 
         $clause = implode(' AND ', $where);
-        $per_page = min(100, max(1, (int) ($args['per_page'] ?? 20)));
+        // السقف ٥٠٠ لا ١٠٠: ستّ شاشات كانت تطلب ٣٠٠–٤٠٠ وتحصل على ١٠٠ **بلا
+        // رسالة**، فالطالب رقم ١٠١ غير موجود في القائمة ولا في طباعة البطاقات.
+        $per_page = min(500, max(1, (int) ($args['per_page'] ?? 20)));
         $page     = max(1, (int) ($args['page'] ?? 1));
         $offset   = ($page - 1) * $per_page;
+
+        // الفرز بقائمة بيضاء — لا يصل نصّ المستخدم إلى SQL أبدًا
+        $sortable = [
+            'name'    => 's.full_name',
+            'no'      => 's.academic_no',
+            'grade'   => 's.grade_level',
+            'created' => 's.id',
+            'status'  => 's.status',
+        ];
+        $ob  = $sortable[(string) ($args['orderby'] ?? '')] ?? 's.full_name';
+        $dir = strtoupper((string) ($args['order'] ?? '')) === 'DESC' ? 'DESC' : 'ASC';
+        // الاسم مفتاح ثانوي دائمًا فلا يتأرجح ترتيب المتساويين بين الصفحات
+        $order = $ob === 's.full_name' ? "s.full_name {$dir}" : "{$ob} {$dir}, s.full_name ASC";
 
         $table = sch_table('students');
 
@@ -261,7 +276,7 @@ final class SCH_Students
         // القائمة كانت تفتح 301 استعلامًا لمئة طالب: واحدًا لها وثلاثة لكل صف.
         // والضمّ يجعلها واحدًا. `with` تُطفأ لمن لا يحتاجها (مثل القوائم المنسدلة).
         if (empty($args['with']) && ($args['with'] ?? null) !== null) {
-            $list_sql = "SELECT s.* FROM {$table} s WHERE {$clause} ORDER BY s.full_name ASC LIMIT %d OFFSET %d";
+            $list_sql = "SELECT s.* FROM {$table} s WHERE {$clause} ORDER BY {$order} LIMIT %d OFFSET %d";
         } else {
             $en = sch_table('enrollments');
             $cl = sch_table('classes');
@@ -286,7 +301,7 @@ final class SCH_Students
                            LEFT JOIN {$en} e ON e.student_id = s.id AND e.status = 'active'
                            LEFT JOIN {$cl} c ON c.id = e.class_id
                           WHERE {$clause}
-                          ORDER BY s.full_name ASC LIMIT %d OFFSET %d";
+                          ORDER BY {$order} LIMIT %d OFFSET %d";
         }
 
         $items = $wpdb->get_results($wpdb->prepare($list_sql, ...[...$params, $per_page, $offset]));
