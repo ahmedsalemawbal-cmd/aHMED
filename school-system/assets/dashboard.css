@@ -3104,6 +3104,10 @@ body.sch-locked { overflow: hidden; }
 .sch-btn--sm { min-height: 32px; min-width: 0; padding: 0 var(--sch-3); font-size: var(--sch-text-xs); }
 
 /* أفعال الصف: أيقونات هادئة تظهر عند المرور */
+/* صفّ شهادة ملغاة: يبقى في السجل ويُقرأ أنه لم يعد ساريًا */
+.sch-table tbody tr.is-revoked td { opacity: .6; }
+.sch-table tbody tr.is-revoked td.sch-name { text-decoration: line-through; }
+
 .sch-rowacts { display: flex; gap: 2px; justify-content: flex-end; }
 .sch-rowacts a,
 .sch-rowacts button {

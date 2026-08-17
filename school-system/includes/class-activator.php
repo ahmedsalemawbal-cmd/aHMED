@@ -30,6 +30,76 @@ final class SCH_Activator
     }
 
     /** يُنادى عند كل تحميل — يشغّل الترحيل فقط عند اختلاف النسخة. */
+    /**
+     * قيد التفرّد على الشهادة: طالب واحد لا ينال النوع نفسه مرتين في السنة.
+     *
+     * الحارس في البيانات لا في الواجهة وحدها — فإعادة إرسال النموذج أو نقرتان
+     * أو موظفان يعملان اللحظة نفسها كانت تنتج شهادات مكرّرة بأرقام مختلفة
+     * وإشعارات مكرّرة لأولياء الأمور بلا وسيلة تراجع.
+     *
+     * `dbDelta` لا يضيف مفتاحًا فريدًا لجدول قائم، والقيد يفشل إن وُجد مكرّر —
+     * فتُطوى المكرّرات أولًا (يبقى الأقدم، ويُلغى ما بعده بسبب مكتوب لا يُحذف،
+     * فالحذف يزوّر الدفتر).
+     */
+    private static function guard_certificates(): void
+    {
+        global $wpdb;
+
+        $t = sch_table('certificates');
+
+        if ((string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $t)) !== $t) {
+            return;
+        }
+
+        $has = static fn (string $key): bool => (bool) $wpdb->get_var(
+            $wpdb->prepare("SHOW INDEX FROM `{$t}` WHERE Key_name = %s", $key)
+        );
+
+        if ($has('uniq_cert_valid')) {
+            return;
+        }
+
+        // المكرّرات الأقدم تبقى، وما بعدها يُعلَّم ملغًى بسبب يقول لماذا.
+        $wpdb->query(
+            "UPDATE `{$t}` c
+             JOIN (
+                 SELECT student_id, year_id, type, MIN(id) AS keep_id
+                 FROM `{$t}`
+                 GROUP BY student_id, year_id, type
+                 HAVING COUNT(*) > 1
+             ) d
+               ON c.student_id = d.student_id
+              AND c.year_id    = d.year_id
+              AND c.type       = d.type
+             SET c.status = 'revoked',
+                 c.revoke_reason = 'نسخة مكرّرة طُويت عند تفعيل قيد التفرّد',
+                 c.revoked_at = NOW()
+             WHERE c.id <> d.keep_id
+               AND c.status <> 'revoked'"
+        );
+
+        // القيد على الصالحة وحدها: عمود مشتق يساوي NULL متى أُلغيت الشهادة،
+        // وMySQL يعدّ كل NULL مختلفًا — فتتعدّد الملغاة (طالب أُلغيت شهادته
+        // مرتين مشروع) ولا تتعدّد الصالحة أبدًا. القيد على الأعمدة الأربعة
+        // مباشرةً كان سيتصادم عند إلغاءين لنفس الطالب والنوع.
+        $col = $wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM `{$t}` LIKE %s", 'valid_key'));
+
+        if ($col === null) {
+            $wpdb->query(
+                "ALTER TABLE `{$t}` ADD COLUMN valid_key VARCHAR(64)
+                 GENERATED ALWAYS AS (
+                     IF(status = 'valid', CONCAT(student_id, '-', year_id, '-', type), NULL)
+                 ) STORED"
+            );
+        }
+
+        // خادم قديم لا يدعم الأعمدة المشتقّة: يبقى حارس التطبيق في issue() وحده،
+        // ولا يُترك القيد نصفَ مُطبَّق.
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM `{$t}` LIKE %s", 'valid_key')) !== null) {
+            $wpdb->query("ALTER TABLE `{$t}` ADD UNIQUE KEY uniq_cert_valid (valid_key)");
+        }
+    }
+
     public static function maybe_upgrade(): void
     {
         if (get_option('sch_db_version') !== SCH_VERSION) {
@@ -43,6 +113,8 @@ final class SCH_Activator
             if (class_exists('SCH_Perms')) {
                 SCH_Perms::resync_all();
             }
+
+            self::guard_certificates();
 
             update_option('sch_db_version', SCH_VERSION);
 
@@ -1247,10 +1319,20 @@ final class SCH_Activator
             serial     VARCHAR(32)     NOT NULL,
             issued_by  BIGINT UNSIGNED DEFAULT NULL,
             issued_at  DATETIME        NOT NULL,
+            status     VARCHAR(12)     NOT NULL DEFAULT 'valid',
+            revoke_reason VARCHAR(255) DEFAULT NULL,
+            revoked_by BIGINT UNSIGNED DEFAULT NULL,
+            revoked_at DATETIME        DEFAULT NULL,
+            grade_snapshot   VARCHAR(40) DEFAULT NULL,
+            section_snapshot VARCHAR(40) DEFAULT NULL,
+            name_snapshot    VARCHAR(160) DEFAULT NULL,
+            created_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY uniq_serial (serial),
             KEY idx_student (student_id, id),
-            KEY idx_year (year_id, type)
+            KEY idx_year (year_id, type),
+            KEY idx_status (status)
         ) {$charset};";
 
         foreach ($sql as $statement) {

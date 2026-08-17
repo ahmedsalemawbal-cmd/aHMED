@@ -324,6 +324,7 @@ final class SCH_Dashboard
             'toggle_watch'     => ['sch_view_students',    'do_toggle_watch'],
             'issue_cert'       => ['sch_manage_students',  'do_issue_cert'],
             'issue_certs_bulk' => ['sch_manage_students',  'do_issue_certs_bulk'],
+            'revoke_cert'      => ['sch_manage_students',  'do_revoke_cert'],
             'issue_key'        => ['sch_manage_students',  'do_issue_key'],
             'revoke_key'       => ['sch_manage_students',  'do_revoke_key'],
             'update_employee'  => ['sch_manage_staff',     'do_update_employee'],
@@ -902,6 +903,12 @@ final class SCH_Dashboard
     /** تعديل بيانات موظف — الصلاحيات لها شاشتها المستقلة. */
     private static function do_issue_cert(array $d, int $id): array|WP_Error
     {
+        // النطاق يُفحص كما تفحصه الأفعال الجماعية: الدور وحده كان يترك موظفًا
+        // مقصورًا على مرحلة يُصدر شهادات لكل المدرسة.
+        if (!SCH_Perms::may('certificates', 'edit')) {
+            return sch_api_error('forbidden', __('لا تملك صلاحية إصدار الشهادات.', 'school-system'), 403);
+        }
+
         $result = SCH_Certificates::issue($d);
 
         if (is_wp_error($result)) {
@@ -915,9 +922,32 @@ final class SCH_Dashboard
         )];
     }
 
+    /** سحب شهادة صدرت بالخطأ — بسبب مكتوب، والوثيقة تبقى مختومة «ملغاة». */
+    private static function do_revoke_cert(array $d, int $id): array|WP_Error
+    {
+        if (!SCH_Perms::may('certificates', 'edit')) {
+            return sch_api_error('forbidden', __('لا تملك صلاحية إلغاء الشهادات.', 'school-system'), 403);
+        }
+
+        $result = SCH_Certificates::revoke(
+            absint($d['cert_id'] ?? 0),
+            (string) ($d['reason'] ?? '')
+        );
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return ['msg' => __('أُلغيت الشهادة، ووصل الخبر ولي الأمر.', 'school-system')];
+    }
+
     /** إصدار جماعي — الوكيل يمنح ثلاثين شهادة بضغطة لا بثلاثين. */
     private static function do_issue_certs_bulk(array $d, int $id): array|WP_Error
     {
+        if (!SCH_Perms::may('certificates', 'edit')) {
+            return sch_api_error('forbidden', __('لا تملك صلاحية إصدار الشهادات.', 'school-system'), 403);
+        }
+
         $ids  = array_values(array_filter(array_map('absint', explode(',', (string) ($d['ids'] ?? '')))));
         $type = sanitize_key((string) ($d['type'] ?? ''));
 
@@ -930,6 +960,7 @@ final class SCH_Dashboard
         }
 
         $done = 0;
+        $dupe = 0;
 
         foreach ($ids as $student_id) {
             $r = SCH_Certificates::issue([
@@ -941,14 +972,28 @@ final class SCH_Dashboard
 
             if (!is_wp_error($r)) {
                 $done++;
+            } elseif ($r->get_error_code() === 'duplicate') {
+                $dupe++;
             }
         }
 
-        return ['msg' => sprintf(
+        $msg = sprintf(
             /* translators: %s: العدد */
             _n('صدرت شهادة واحدة', 'صدرت %s شهادات', $done, 'school-system'),
             number_format_i18n($done)
-        )];
+        );
+
+        // المتخطّى يُقال لا يُبتلع: الوكيل الذي حدّد ٣٠ ورأى «صدرت ١٢» بلا سبب
+        // يظنّ النظام معطّلًا.
+        if ($dupe > 0) {
+            $msg .= ' · ' . sprintf(
+                /* translators: %s: العدد */
+                _n('وتُخطّي طالب نالها هذا العام', 'وتُخطّي %s نالوها هذا العام', $dupe, 'school-system'),
+                number_format_i18n($dupe)
+            );
+        }
+
+        return ['msg' => $msg];
     }
 
     private static function do_issue_key(array $d, int $id): array|WP_Error

@@ -277,16 +277,35 @@ $sch_on = array_filter($sch_f);
                 <th class="sch-col--lg"><?php esc_html_e('الشعبة', 'school-system'); ?></th>
                 <th><?php esc_html_e('الرقم', 'school-system'); ?></th>
                 <th class="sch-col--xl"><?php esc_html_e('التاريخ', 'school-system'); ?></th>
+                <th class="sch-col--xl"><?php esc_html_e('أصدرها', 'school-system'); ?></th>
                 <th></th>
             </tr></thead>
             <tbody>
-                <?php foreach ($sch_recent as $sch_r) : ?>
-                    <tr>
-                        <td class="sch-name"><?php echo esc_html((string) $sch_r->full_name); ?></td>
-                        <td><?php echo esc_html(SCH_Certificates::TYPES[$sch_r->type][0] ?? ''); ?></td>
-                        <td class="sch-col--lg"><?php echo esc_html(trim((string) $sch_r->grade_level . ' / ' . (string) $sch_r->section)); ?></td>
+                <?php foreach ($sch_recent as $sch_r) :
+                    $sch_gone = ((string) ($sch_r->status ?? 'valid') === 'revoked');
+                    // اللقطة المجمَّدة تُعرض كما طُبعت، لا صفّ الطالب اليوم
+                    $sch_kl = trim(((string) ($sch_r->grade_snapshot ?? '') !== ''
+                        ? (string) $sch_r->grade_snapshot . ' / ' . (string) $sch_r->section_snapshot
+                        : (string) $sch_r->grade_level . ' / ' . (string) $sch_r->section), ' /');
+                    $sch_by = (int) ($sch_r->issued_by ?? 0);
+                    ?>
+                    <tr<?php echo $sch_gone ? ' class="is-revoked"' : ''; ?>>
+                        <td class="sch-name"><?php echo esc_html((string) ($sch_r->name_snapshot ?: $sch_r->full_name)); ?></td>
+                        <td>
+                            <?php echo esc_html(SCH_Certificates::TYPES[$sch_r->type][0] ?? ''); ?>
+                            <?php if ($sch_gone) : ?>
+                                <span class="sch-badge sch-badge--danger" title="<?php echo esc_attr((string) ($sch_r->revoke_reason ?? '')); ?>">
+                                    <?php esc_html_e('ملغاة', 'school-system'); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="sch-col--lg"><?php echo esc_html($sch_kl); ?></td>
                         <td class="sch-mono"><?php echo esc_html((string) $sch_r->serial); ?></td>
                         <td class="sch-col--xl"><?php echo esc_html(wp_date('j M Y', strtotime((string) $sch_r->issued_at))); ?></td>
+                        <td class="sch-col--xl"><?php
+                            // من أخطأ يُعرَف: القيمة مخزَّنة منذ البداية ولم تكن تُعرض
+                            echo esc_html($sch_by > 0 ? (get_userdata($sch_by)->display_name ?? '—') : '—');
+                        ?></td>
                         <td>
                             <div class="sch-rowacts">
                                 <a href="<?php echo esc_url(add_query_arg('cert', (int) $sch_r->id, SCH_Dashboard::url('certificates'))); ?>"
@@ -294,6 +313,13 @@ $sch_on = array_filter($sch_f);
                                    aria-label="<?php esc_attr_e('عرض وطباعة', 'school-system'); ?>">
                                     <?php echo sch_icon('print', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 </a>
+                                <?php if (!$sch_gone) : ?>
+                                    <button type="button" data-modal-open="sch-revoke-<?php echo esc_attr((string) $sch_r->id); ?>"
+                                            title="<?php esc_attr_e('إلغاء الشهادة', 'school-system'); ?>"
+                                            aria-label="<?php esc_attr_e('إلغاء الشهادة', 'school-system'); ?>">
+                                        <?php echo sch_icon('x', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -301,6 +327,36 @@ $sch_on = array_filter($sch_f);
             </tbody>
         </table>
     </div>
+
+    <?php /* نافذة إلغاء لكل شهادة سارية — السبب إلزامي، والحذف ممنوع:
+             الحذف يزوّر الدفتر والإلغاء يوثّقه. */ ?>
+    <?php foreach ($sch_recent as $sch_rv) :
+        if ((string) ($sch_rv->status ?? 'valid') === 'revoked') { continue; } ?>
+        <?php SCH_Modal::open(
+            'sch-revoke-' . (int) $sch_rv->id,
+            __('إلغاء شهادة', 'school-system'),
+            (string) $sch_rv->serial . ' · ' . (string) ($sch_rv->name_snapshot ?: $sch_rv->full_name)
+        ); ?>
+            <form method="post">
+                <?php wp_nonce_field('sch_revoke_cert', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_action" value="revoke_cert">
+                <input type="hidden" name="cert_id" value="<?php echo esc_attr((string) $sch_rv->id); ?>">
+
+                <p class="sch-sub"><?php esc_html_e('تبقى الشهادة في السجل مختومة «ملغاة»، ويصل ولي الأمر خبر الإلغاء.', 'school-system'); ?></p>
+
+                <div class="sch-field">
+                    <label for="rv-<?php echo esc_attr((string) $sch_rv->id); ?>"><?php esc_html_e('سبب الإلغاء', 'school-system'); ?></label>
+                    <textarea id="rv-<?php echo esc_attr((string) $sch_rv->id); ?>" name="reason" rows="3" required
+                              placeholder="<?php esc_attr_e('صدرت لشعبة خطأ · خطأ في الاسم · قرار إداري', 'school-system'); ?>"></textarea>
+                </div>
+
+                <div class="sch-modal__foot">
+                    <button type="button" class="sch-btn sch-btn--quiet" data-modal-close><?php esc_html_e('تراجع', 'school-system'); ?></button>
+                    <button class="sch-btn sch-btn--danger"><?php esc_html_e('إلغاء الشهادة', 'school-system'); ?></button>
+                </div>
+            </form>
+        <?php SCH_Modal::close(); ?>
+    <?php endforeach; ?>
 <?php endif; ?>
 
 <?php SCH_Modal::open('sch-issue-cert', __('إصدار شهادة', 'school-system'), __('تصل تطبيق ولي الأمر فور إصدارها', 'school-system')); ?>

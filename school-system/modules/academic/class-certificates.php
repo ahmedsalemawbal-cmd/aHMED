@@ -62,7 +62,29 @@ final class SCH_Certificates
         }
 
         $year_id = SCH_Years::current_id();
-        $serial  = self::next_serial($year_id);
+
+        // حارس التكرار: طالب واحد لا ينال النوع نفسه مرتين في السنة.
+        // القيد الحقيقي في القاعدة (uniq_cert_valid)، وهذا يسبقه برسالة تُفهَم
+        // بدل خطأ قاعدة بيانات خام.
+        $dupe = (int) $wpdb->get_var($wpdb->prepare(
+            'SELECT id FROM ' . sch_table('certificates') . '
+             WHERE student_id = %d AND year_id = %d AND type = %s AND status = %s LIMIT 1',
+            $student_id,
+            $year_id,
+            $type,
+            'valid'
+        ));
+
+        if ($dupe > 0) {
+            return sch_api_error('duplicate', sprintf(
+                /* translators: 1: اسم الطالب 2: نوع الشهادة */
+                __('نال %1$s «%2$s» هذا العام بالفعل.', 'school-system'),
+                SCH_Enrollment::full_name($student),
+                self::TYPES[$type][0]
+            ), 409);
+        }
+
+        $serial = self::next_serial($year_id);
 
         $ok = $wpdb->insert(sch_table('certificates'), [
             'student_id' => $student_id,
@@ -74,6 +96,12 @@ final class SCH_Certificates
             'serial'     => $serial,
             'issued_by'  => get_current_user_id() ?: null,
             'issued_at'  => sch_now(),
+            'status'     => 'valid',
+            // لقطة لحظة الإصدار: الوثيقة كانت تقرأ صف الطالب حيًّا، فإعادة طباعة
+            // شهادة ١٤٤٧ بعد سنتين تطبع صفّه الجديد على وثيقة قديمة.
+            'grade_snapshot'   => (string) ($student->grade_level ?? ''),
+            'section_snapshot' => (string) ($student->section ?? ''),
+            'name_snapshot'    => SCH_Enrollment::full_name($student),
         ]);
 
         if ($ok === false) {
@@ -111,6 +139,74 @@ final class SCH_Certificates
         return ['id' => $id, 'serial' => $serial];
     }
 
+    /**
+     * إلغاء شهادة صدرت بالخطأ — بسبب مكتوب، ولا حذف.
+     *
+     * الحذف يزوّر الدفتر والإلغاء يوثّقه: الوثيقة تبقى برقمها التسلسلي وتُختَم
+     * «ملغاة»، ويصل ولي الأمر خبرُ الإلغاء كما وصله خبر الإصدار. وقبل هذا لم
+     * تكن في الوحدة كلها وسيلة سحب — الخطأ يخرج من المدرسة ولا يعود.
+     */
+    public static function revoke(int $id, string $reason): true|WP_Error
+    {
+        global $wpdb;
+
+        $reason = trim(sanitize_textarea_field($reason));
+
+        if ($reason === '') {
+            return sch_api_error('no_reason', __('اكتب سبب الإلغاء — الإلغاء الصامت لا يُراجَع.', 'school-system'), 422);
+        }
+
+        $cert = $wpdb->get_row($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('certificates') . ' WHERE id = %d',
+            $id
+        ));
+
+        if (!$cert) {
+            return sch_api_error('not_found', __('الشهادة غير موجودة.', 'school-system'), 404);
+        }
+
+        if ((string) $cert->status === 'revoked') {
+            return sch_api_error('already', __('الشهادة ملغاة أصلًا.', 'school-system'), 409);
+        }
+
+        $ok = $wpdb->update(
+            sch_table('certificates'),
+            [
+                'status'        => 'revoked',
+                'revoke_reason' => $reason,
+                'revoked_by'    => get_current_user_id() ?: null,
+                'revoked_at'    => sch_now(),
+            ],
+            ['id' => $id]
+        );
+
+        if ($ok === false) {
+            return sch_api_error('db_error', __('تعذّر إلغاء الشهادة.', 'school-system'), 500);
+        }
+
+        // من عَلِم بالإصدار يَعلم بالإلغاء — وإلا بقيت في تطبيقه شهادة مسحوبة.
+        foreach (SCH_Guardians::of_student((int) $cert->student_id) as $g) {
+            SCH_Comms::notify(
+                (int) $g->user_id,
+                __('إلغاء شهادة', 'school-system'),
+                sprintf(
+                    /* translators: %s: عنوان الشهادة */
+                    __('أُلغيت «%s». راجع إدارة المدرسة.', 'school-system'),
+                    (string) $cert->title
+                ),
+                'certificate',
+                $id
+            );
+        }
+
+        sch_audit('certificate.revoked', 'student', (int) $cert->student_id, [
+            'serial' => (string) $cert->serial,
+            'reason' => $reason,
+        ]);
+
+        return true;
+    }
+
     /** رقم تسلسلي لا يتكرر داخل السنة — الشهادة وثيقة تُراجَع. */
     private static function next_serial(int $year_id): string
     {
@@ -132,8 +228,10 @@ final class SCH_Certificates
     {
         global $wpdb;
 
+        // الملغاة لا تظهر لولي الأمر ولا في ملف الطالب — تبقى في الدفتر للمراجعة
         return $wpdb->get_results($wpdb->prepare(
-            'SELECT * FROM ' . sch_table('certificates') . ' WHERE student_id = %d ORDER BY id DESC',
+            'SELECT * FROM ' . sch_table('certificates') . "
+             WHERE student_id = %d AND status = 'valid' ORDER BY id DESC",
             $student_id
         )) ?: [];
     }
@@ -205,7 +303,8 @@ final class SCH_Certificates
                        s.academic_no, s.grade_level, s.section
                 FROM ' . sch_table('certificates') . ' c
                 INNER JOIN ' . sch_table('students') . ' s ON s.id = c.student_id
-                LEFT JOIN ' . sch_table('enrollments') . " e ON e.student_id = s.id AND e.status = 'active'
+                LEFT JOIN ' . sch_table('enrollments') . " e
+                       ON e.student_id = s.id AND e.status = 'active' AND e.year_id = c.year_id
                 WHERE " . implode(' AND ', $where) . ' ORDER BY c.id DESC LIMIT ' . $limit;
 
         return $wpdb->get_results($params === [] ? $sql : $wpdb->prepare($sql, $params)) ?: [];
@@ -282,8 +381,22 @@ final class SCH_Certificates
         $h = 794;
 
         $school = sch_settings('school_name', get_bloginfo('name'));
-        $name   = SCH_Enrollment::full_name($cert);
-        $klass  = trim((string) $cert->grade_level . ' / ' . (string) $cert->section);
+
+        // اللقطة المجمَّدة أولًا ثم الحيّ للشهادات السابقة لهذه الميزة: الوثيقة
+        // تحمل صاحبها وصفَّه كما كانا لحظة الإصدار، فلا يتبدّل متنها بعد سنتين.
+        $name  = (string) ($cert->name_snapshot ?? '') !== ''
+            ? (string) $cert->name_snapshot
+            : SCH_Enrollment::full_name($cert);
+
+        $grade = (string) ($cert->grade_snapshot ?? '') !== ''
+            ? (string) $cert->grade_snapshot
+            : (string) ($cert->grade_level ?? '');
+
+        $sect  = (string) ($cert->section_snapshot ?? '') !== ''
+            ? (string) $cert->section_snapshot
+            : (string) ($cert->section ?? '');
+
+        $klass  = trim($grade . ' / ' . $sect, ' /');
         $reason = (string) ($cert->reason ?: '');
         $title  = (string) ($cert->title ?: (self::TYPES[$cert->type][1] ?? ''));
         $serial = (string) $cert->serial;
@@ -295,6 +408,17 @@ final class SCH_Certificates
             'sapphire' => self::tpl_sapphire($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
             default   => self::tpl_royal($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
         };
+
+        // الملغاة تُختَم على وجهها: نسخة مطبوعة سابقًا قد تدور، والوثيقة نفسها
+        // يجب أن تقول إنها لم تعد سارية.
+        if ((string) ($cert->status ?? 'valid') === 'revoked') {
+            $body .= '<g transform="rotate(-24 ' . ($w / 2) . ' ' . ($h / 2) . ')" opacity=".38">'
+                . '<rect x="' . (($w / 2) - 300) . '" y="' . (($h / 2) - 62) . '" width="600" height="124" '
+                . 'fill="none" stroke="#B3261E" stroke-width="7" rx="12"/>'
+                . '<text x="' . ($w / 2) . '" y="' . (($h / 2) + 26) . '" text-anchor="middle" '
+                . 'fill="#B3261E" font-size="72" font-weight="700">'
+                . esc_html__('ملغاة', 'school-system') . '</text></g>';
+        }
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $w . ' ' . $h . '" '
             . ($print ? 'width="100%" height="100%" preserveAspectRatio="xMidYMid meet"' : 'class="sch-cert__svg"')
