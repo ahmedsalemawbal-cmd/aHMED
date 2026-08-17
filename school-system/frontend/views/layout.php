@@ -65,16 +65,19 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             <?php /* طيّ الشريط إلى عمود أيقونات — الحالة محفوظة في localStorage.
                      لا يظهر في سياق الإعدادات: تنقّله نصّي بلا أيقونات فلا يُقرأ مطويًّا. */ ?>
             <?php if (!$sch_in_set) : ?>
-                <button type="button" class="sch-rail" id="sch-rail"
+                <button type="button" class="sch-side__rail" id="sch-rail"
                         aria-controls="sch-side" aria-expanded="true"
                         aria-label="<?php esc_attr_e('طيّ الشريط الجانبي', 'school-system'); ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
                 </button>
             <?php endif; ?>
 
+            <?php /* علامة بلا نصّ: الحرف زينة، والاسم يُنطق من aria-label — أيقونة
+                     بلا اسم تُعرَف بالتجربة لا بالنظر (درس v3.4.2). */ ?>
             <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>"
-               title="<?php echo esc_attr($sch_school); ?>">
-                <span class="sch-side__mark"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
+               title="<?php echo esc_attr($sch_school); ?>"
+               aria-label="<?php echo esc_attr($sch_school); ?>">
+                <span class="sch-side__mark" aria-hidden="true"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
             </a>
 
             <?php /* بطاقة الحساب تحت العلامة مباشرة — كأنظمة SaaS الكبرى */ ?>
@@ -145,7 +148,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                 </nav>
                 <?php /* استعادة حالة طيّ المجموعات وطيّ الشريط قبل رسم بقية الصفحة — بلا وميض */ ?>
                 <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}
-try{if(localStorage.getItem('sch-rail')==='1'){var a=document.getElementById('sch-app');if(a){a.classList.add('is-rail');var r=document.getElementById('sch-rail');if(r)r.setAttribute('aria-expanded','false');}}}catch(e){}})();</script>
+try{if(localStorage.getItem('sch-rail')==='1'&&window.matchMedia('(min-width:981px)').matches){var a=document.getElementById('sch-app');if(a){a.classList.add('is-rail');var r=document.getElementById('sch-rail');if(r)r.setAttribute('aria-expanded','false');}}}catch(e){}})();</script>
 
                 <?php if ($sch_set_home !== '') : /* مدخل الإعدادات المثبّت أسفل التنقّل — كأنظمة SaaS */ ?>
                     <a class="sch-side__pin" href="<?php echo esc_url(SCH_Dashboard::url($sch_set_home)); ?>"
@@ -299,7 +302,7 @@ try{if(localStorage.getItem('sch-rail')==='1'){var a=document.getElementById('sc
 
 <?php /* تبديل السمة بالتفويض — بلا معالج مضمّن، فيصمد أمام أي CSP */ ?>
 <script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(b){var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}return;}
-var rl=e.target.closest('.sch-rail');var ap=document.getElementById('sch-app');
+var rl=e.target.closest('.sch-side__rail');var ap=document.getElementById('sch-app');
 if(rl&&ap){var on=ap.classList.toggle('is-rail');rl.setAttribute('aria-expanded',on?'false':'true');try{localStorage.setItem('sch-rail',on?'1':'0');}catch(_){}return;}
 var hh=e.target.closest('.sch-side__h');if(hh){var gg=hh.closest('.sch-side__grp');
 /* في وضع العمود: الضغط على أيقونة يفتح الشريط على مجموعتها بدل طيّها */

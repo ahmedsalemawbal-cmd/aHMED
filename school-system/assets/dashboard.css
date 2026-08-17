@@ -3240,6 +3240,8 @@ body.sch-locked { overflow: hidden; }
   --sch-nav-line: rgba(255,255,255,.09);
   --sch-nav-hover: rgba(255,255,255,.07);
   --sch-nav-hover-2: rgba(255,255,255,.12);
+  /* الأحمر على القشرة الداكنة: --sch-danger مضبوط على البطاقات البيضاء فيخفت هنا */
+  --sch-nav-danger: #FF7B7B;
   --sch-font-display:'Cairo', system-ui, sans-serif;
   --sch-font-body:'Cairo', system-ui, sans-serif;
 
@@ -3340,12 +3342,12 @@ body.sch-locked { overflow: hidden; }
 }
 .sch-side__link > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sch-body a.sch-side__link:hover{background:var(--sch-nav-hover);color:var(--sch-chrome-ink);text-decoration:none}
-.sch-body a.sch-side__link.is-on{background:var(--sch-accent);color:#fff;font-weight:500}
+.sch-body a.sch-side__link.is-on{background:var(--sch-accent);color:var(--sch-on-accent);font-weight:500}
 
 /* شارة عدّاد على عنصر التنقّل (الإنذارات المفتوحة) */
 .sch-side__badge{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:var(--sch-r-full);
   display:inline-flex;align-items:center;justify-content:center;
-  background:var(--sch-danger);color:#fff;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+  background:var(--sch-danger);color:var(--sch-on-danger);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 
 /* بطاقة المستخدم — تحت العلامة مباشرة (v8.3)، بنفس تركيبها فوق القشرة الداكنة */
 .sch-side__user{display:flex;align-items:center;gap:var(--sch-3);flex:0 0 auto;padding:9px;border-radius:var(--sch-radius-lg);border:1px solid var(--sch-nav-line);background:var(--sch-nav-hover)}
@@ -3354,7 +3356,7 @@ body.sch-locked { overflow: hidden; }
 .sch-side__ut b{display:block;font-size:12.5px;font-weight:700;color:var(--sch-chrome-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sch-side__ut span{display:block;font-size:11px;color:var(--sch-chrome-mut)}
 .sch-body a.sch-side__out{width:34px;height:34px;flex:0 0 auto;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--sch-chrome-mut)}
-.sch-body a.sch-side__out:hover{background:var(--sch-nav-hover-2);color:var(--sch-danger)}
+.sch-body a.sch-side__out:hover{background:var(--sch-nav-hover-2);color:var(--sch-nav-danger)}
 
 /* الشريط العلوي */
 .sch-topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:var(--sch-3);height:64px;padding:0 var(--sch-6);
@@ -3990,54 +3992,59 @@ body.sch-body {
    طيّ الشريط الجانبي إلى عمود أيقونات — بالسهم على الحافّة  (v8.3)
    ============================================================ */
 
-/* زرّ الطيّ: يجلس على الحافّة الداخلية بين الشريط والمحتوى */
-.sch-rail {
+/* زرّ الطيّ: يجلس على الحافّة الداخلية بين الشريط والمحتوى.
+   الاسم `sch-side__rail` لا `sch-rail` — الأخيرة مملوكة لـ«السكة» في
+   shared-ui.css، وهي محمّلة معنا على الصفحة نفسها. */
+.sch-side__rail {
   position: absolute; inset-block-start: 74px; inset-inline-end: -13px;
   width: 26px; height: 26px; padding: 0; z-index: 45;
-  border-radius: var(--sch-r-full); border: 3px solid var(--sch-paper);
-  background: var(--sch-accent); color: #fff; cursor: pointer;
-  display: grid; place-items: center; box-shadow: var(--sch-e2);
+  border-radius: var(--sch-r-full); border: 0;
+  background: var(--sch-accent); color: var(--sch-on-accent); cursor: pointer;
+  display: grid; place-items: center;
+  /* الهالة بلون القشرة نفسها — فتذوب في الشريط وتفصل الزرّ عن المحتوى في الوضعين */
+  box-shadow: 0 0 0 3px var(--sch-chrome), var(--sch-e2);
   transition: transform .18s var(--sch-ease);
 }
-.sch-rail:hover { transform: scale(1.1); }
-.sch-rail svg { width: 14px; height: 14px; transition: transform .28s var(--sch-ease); }
+.sch-side__rail:hover { transform: scale(1.1); }
+.sch-side__rail svg { width: 14px; height: 14px; transition: transform .28s var(--sch-ease); }
 /* السهم ينقلب ليقول «سأفتح» بدل «سأطوي» */
-.sch-app.is-rail .sch-rail svg { transform: rotate(180deg); }
+.sch-app.is-rail .sch-side__rail svg { transform: rotate(180deg); }
 
-/* عرض العمود يتقلّص — والشبكة تتبعه لأنها مبنيّة على المتغيّر نفسه */
+/* عرض العمود يتقلّص — والشبكة تتبعه لأنها مبنيّة على المتغيّر نفسه.
+   كل حالات الطيّ محصورة في الشاشات الكبيرة: دون 980px الشريط درج منزلق
+   بعرض كامل، فحالة محفوظة من سطح المكتب كانت ستفرغه من أسمائه. */
 .sch-app { transition: grid-template-columns .26s var(--sch-ease); }
-.sch-app.is-rail { grid-template-columns: var(--sch-sbw-rail) 1fr; }
-.sch-app.is-rail > .sch-side { padding-inline: 10px; }
 
-/* في وضع العمود: الأيقونات وحدها — كل نصّ يختفي */
-.sch-app.is-rail .sch-side__h { justify-content: center; padding: 0; gap: 0; }
-.sch-app.is-rail .sch-side__h > span,
-.sch-app.is-rail .sch-side__chev,
-.sch-app.is-rail .sch-side__ut,
-.sch-app.is-rail .sch-side__out,
-.sch-app.is-rail .sch-side__back > span,
-.sch-app.is-rail .sch-side__settl b,
-.sch-app.is-rail .sch-side__segl,
-.sch-app.is-rail .sch-side__pin > span,
-.sch-app.is-rail .sch-side__pinch { display: none; }
+@media (min-width: 981px) {
+  .sch-app.is-rail { grid-template-columns: var(--sch-sbw-rail) 1fr; }
+  .sch-app.is-rail > .sch-side { padding-inline: 10px; }
 
-/* الروابط الفرعية مطويّة دائمًا في وضع العمود — لا نصّ يتّسع لها */
-.sch-app.is-rail .sch-side__links { grid-template-rows: 0fr; }
-.sch-app.is-rail .sch-side__grp.is-area { margin-top: var(--sch-3); padding-top: var(--sch-3); }
+  /* في وضع العمود: الأيقونات وحدها — كل نصّ يختفي */
+  .sch-app.is-rail .sch-side__h { justify-content: center; padding: 0; gap: 0; }
+  .sch-app.is-rail .sch-side__h > span,
+  .sch-app.is-rail .sch-side__chev,
+  .sch-app.is-rail .sch-side__ut,
+  .sch-app.is-rail .sch-side__back > span,
+  .sch-app.is-rail .sch-side__settl b,
+  .sch-app.is-rail .sch-side__segl,
+  .sch-app.is-rail .sch-side__pin > span,
+  .sch-app.is-rail .sch-side__pinch { display: none; }
 
-/* بطاقة الحساب تنكمش إلى صورتها وحدها */
-.sch-app.is-rail .sch-side__user { justify-content: center; padding: 7px 0; background: none; border-color: transparent; }
-.sch-app.is-rail .sch-side__back { justify-content: center; padding: 0; }
-.sch-app.is-rail .sch-side__settl { justify-content: center; padding-inline: 0; }
-.sch-app.is-rail .sch-side__pin { justify-content: center; margin-inline: -10px; padding: 0; }
+  /* الروابط الفرعية مطويّة دائمًا في وضع العمود — لا نصّ يتّسع لها */
+  .sch-app.is-rail .sch-side__links { grid-template-rows: 0fr; }
+  .sch-app.is-rail .sch-side__grp.is-area { margin-top: var(--sch-3); padding-top: var(--sch-3); }
 
-/* الشريط العلوي يفتح مساحته حين ينكمش الجانبي */
-@media (max-width: 980px) {
-  .sch-rail { display: none; }
-  .sch-app.is-rail { grid-template-columns: 1fr; }
+  /* بطاقة الحساب تنكمش إلى صورتها — والخروج يبقى تحتها لا يُحذف:
+     فعل لا زينة، ولا مخرج غيره في القشرة كلها. */
+  .sch-app.is-rail .sch-side__user { flex-direction: column; gap: 6px; padding: 7px 0; background: none; border-color: transparent; }
+  .sch-app.is-rail .sch-side__back { justify-content: center; padding: 0; }
+  .sch-app.is-rail .sch-side__settl { justify-content: center; padding-inline: 0; }
+  .sch-app.is-rail .sch-side__pin { justify-content: center; margin-inline: -10px; padding: 0; }
 }
+
+@media (max-width: 980px) { .sch-side__rail { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .sch-app, .sch-rail, .sch-rail svg { transition: none; }
+  .sch-app, .sch-side__rail, .sch-side__rail svg { transition: none; }
 }
 
 /* صفحة الإعدادات الرئيسية: عمود محتوى + عمود جانبي للحالة */

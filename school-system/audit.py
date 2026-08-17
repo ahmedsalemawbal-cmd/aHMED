@@ -622,6 +622,8 @@ for path in glob.glob(os.path.join(ROOT, 'assets', '*.css')):
 LAYOUT_PROPS = {'display', 'flex-direction', 'position', 'width', 'height',
                 'grid-template-columns', 'flex'}
 
+css_layout = {}   # rel => {sel: props}
+
 for path in glob.glob(os.path.join(ROOT, 'assets', '*.css')):
     rel = os.path.relpath(path, ROOT)
     src = re.sub(r'/\*.*?\*/', '', open(path, encoding='utf-8').read(), flags=re.S)
@@ -649,6 +651,46 @@ for path in glob.glob(os.path.join(ROOT, 'assets', '*.css')):
                              f'({", ".join(sorted(seen[sel]))} ثم {", ".join(sorted(props))})')
 
         seen[sel] = seen.get(sel, set()) | props
+
+    css_layout[rel] = seen
+
+
+# ---------- اسم مكوّن مسروق من الأساس المشترك ----------
+# الفحص أعلاه يفحص كل ملف وحده، فملفان يُحمَّلان في الصفحة نفسها يمرّان نظيفَين.
+# وقع هذا مع «.sch-rail»: اسم «السكة» في shared-ui.css استُعمل ثانيةً لزرّ طيّ
+# الشريط في dashboard.css، والصفحة تحمّل الاثنين.
+#
+# وإعادة تعريف الصنف وحدها ليست عطلًا — الداشبورد يُعيد تلوين مكوّنات مشتركة
+# عمدًا (.sch-blank__ic بمقاس ورموز الداشبورد). العطل حين يكون الاسم **لمكوّن
+# آخر**، وعلامته أن الأساس يعلّق على الاسم عناصر زائفة أو أبناء: تلك القواعد
+# تبقى سارية فتحقن المكوّن الجديد بما ليس منه — «السكة» تحقن شريطها المتدرّج
+# داخل زرّ دائري 26px.
+BASE_CSS = 'assets/shared-ui.css'
+STANDALONE_CSS = {'assets/parent.css', 'assets/admin.css'}
+
+base_path = os.path.join(ROOT, BASE_CSS)
+base_sels = css_layout.get(BASE_CSS, {})
+
+if os.path.exists(base_path):
+    base_src = re.sub(r'/\*.*?\*/', '', open(base_path, encoding='utf-8').read(), flags=re.S)
+
+    for rel, sels in css_layout.items():
+        if rel == BASE_CSS or rel in STANDALONE_CSS:
+            continue
+
+        for sel in sels:
+            if sel not in base_sels:
+                continue
+
+            cls = re.escape(sel)
+            # هل يعلّق الأساس على هذا الاسم عنصرًا زائفًا أو ابنًا؟
+            leaks = re.findall(rf'{cls}\s*(::?[a-z-]+|>\s*\.[A-Za-z0-9_-]+)', base_src)
+            leaks = sorted({l.strip() for l in leaks if l.strip() not in (':hover', ':focus', ':active')})
+
+            if leaks:
+                add('CSS_CLASH_X', f'{sel} معرَّف في {BASE_CSS} و{rel} معًا، والأساس يعلّق '
+                                   f'عليه ({", ".join(leaks[:3])}) — والصفحة تحمّل الملفين، '
+                                   f'فتُحقن قواعد الأساس في مكوّن الداشبورد. غيّر الاسم.')
 
 
 if not issues:
