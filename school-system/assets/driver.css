@@ -1,0 +1,323 @@
+/* =========================================================
+   تطبيق السائق — يُستخدم داخل باص متحرك.
+   خلفية داكنة تقلّل الوهج، أزرار كبيرة، وحالة واحدة واضحة لكل طالب.
+   ========================================================= */
+
+:root {
+  --d-bg:      #0F1720;
+  --d-surface: #1B2733;
+  --d-line:    #2A3947;
+  --d-ink:     #F1F5F9;
+  --d-muted:   #94A3B8;
+  --d-accent:  #14B8A6;
+  --d-ok:      #10B981;
+  --d-warn:    #F59E0B;
+  --d-bad:     #F87171;
+  --d-display: 'Cairo', system-ui, sans-serif;
+  --d-body:    'Cairo', system-ui, sans-serif;
+  --d-r: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.schd {
+  margin: 0;
+  background: var(--d-bg);
+  color: var(--d-ink);
+  font-family: var(--d-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.schd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  background: var(--d-surface);
+  border-bottom: 1px solid var(--d-line);
+}
+.schd-top__who { font-family: var(--d-display); font-size: 18px; }
+.schd-top__out { color: var(--d-muted); font-size: 14px; text-decoration: none; }
+
+.schd-main { padding: 16px; max-width: 640px; margin: 0 auto; padding-bottom: 40px; }
+
+/* ---------- الحالة ---------- */
+
+.schd-status {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--d-surface);
+  border: 1px solid var(--d-line);
+  border-radius: var(--d-r);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.schd-status__row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.schd-pill {
+  padding: 3px 12px;
+  border-radius: 100px;
+  background: var(--d-line);
+  color: var(--d-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.schd-pill--ok   { background: rgba(16, 185, 129, .18);  color: #6EE7B7; }
+.schd-pill--warn { background: rgba(245, 158, 11, .18); color: #FCD34D; }
+.schd-pill--bad  { background: rgba(248, 113, 113, .18);  color: #FCA5A5; }
+
+.schd-trip__name { display: block; font-family: var(--d-display); font-size: 21px; }
+.schd-trip__counts { display: block; color: var(--d-muted); font-size: 14px; }
+
+/* ---------- قائمة الطلاب ---------- */
+
+.schd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--d-surface);
+  border: 1px solid var(--d-line);
+  border-radius: var(--d-r);
+  border-inline-start: 4px solid transparent;
+}
+.schd-row--board  { border-inline-start-color: var(--d-ok); }
+.schd-row--alight { border-inline-start-color: var(--d-muted); opacity: .65; }
+.schd-row--absent { border-inline-start-color: var(--d-bad); opacity: .7; }
+
+.schd-row__name { min-width: 0; }
+.schd-row__name strong { display: block; font-size: 17px; }
+.schd-row__name span { display: block; color: var(--d-muted); font-size: 13px; }
+
+.schd-row__actions { display: flex; gap: 6px; flex: 0 0 auto; }
+
+/* مساحة لمس كبيرة — تُضغط والباص يتحرك */
+.schd-act {
+  min-width: 58px;
+  min-height: 48px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--d-ink);
+  background: var(--d-line);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.schd-act:active { transform: scale(.96); }
+.schd-act--board.is-on  { background: var(--d-ok);     color: #fff; }
+.schd-act--alight.is-on { background: var(--d-muted);  color: #0F1720; }
+.schd-act--absent.is-on { background: var(--d-bad);    color: #fff; }
+
+.schd-loading, .schd-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--d-muted);
+}
+.schd-empty strong { display: block; font-family: var(--d-display); font-size: 19px; color: var(--d-ink); margin-bottom: 4px; }
+.schd-empty p { margin: 0; font-size: 14px; }
+
+/* ---------- المسار وبدء الرحلة ---------- */
+
+.schd-route {
+  background: var(--d-surface);
+  border: 1px solid var(--d-line);
+  border-radius: var(--d-r);
+  padding: 18px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.schd-route__label { display: block; color: var(--d-muted); font-size: 13px; }
+.schd-route__name { display: block; font-family: var(--d-display); font-size: 26px; }
+.schd-route__bus { display: block; color: var(--d-muted); font-size: 14px; }
+
+.schd-hint { color: var(--d-muted); font-size: 14px; text-align: center; }
+.schd-hint--sm { font-size: 13px; margin-top: 20px; }
+
+.schd-start { margin: 0 0 12px; }
+
+/* ---------- الأزرار ---------- */
+
+.schd-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--d-accent);
+  border: 0;
+  border-radius: var(--d-r);
+  cursor: pointer;
+  text-align: center;
+}
+.schd-btn:active { opacity: .85; }
+.schd-btn:disabled { opacity: .5; }
+.schd-btn--big { padding: 22px; font-size: 20px; }
+.schd-btn--danger { background: transparent; border: 1px solid var(--d-bad); color: #FCA5A5; margin-top: 20px; }
+
+/* ---------- الدخول ---------- */
+
+.schd--auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+.schd-auth { width: 100%; max-width: 380px; }
+.schd-auth__brand { text-align: center; margin-bottom: 24px; }
+.schd-auth__mark {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  background: var(--d-accent);
+  margin-bottom: 12px;
+}
+.schd-auth__brand h1 { font-family: var(--d-display); font-size: 30px; margin: 0; }
+.schd-auth__brand p { color: var(--d-muted); font-size: 14px; margin: 4px 0 0; }
+
+.schd-form {
+  background: var(--d-surface);
+  border: 1px solid var(--d-line);
+  border-radius: var(--d-r);
+  padding: 18px;
+}
+.schd-label { display: block; font-size: 14px; margin: 12px 0 4px; color: var(--d-muted); }
+.schd-input {
+  width: 100%;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 17px;
+  color: var(--d-ink);
+  background: var(--d-bg);
+  border: 1px solid var(--d-line);
+  border-radius: 10px;
+}
+.schd-input:focus { outline: 2px solid var(--d-accent); outline-offset: 1px; }
+.schd-form .schd-btn { margin-top: 18px; }
+
+.schd-alert {
+  padding: 12px 16px;
+  border-radius: var(--d-r);
+  margin-bottom: 12px;
+  background: rgba(248, 113, 113, .18);
+  color: #FCA5A5;
+}
+
+
+/* ---------- الشاشات الإضافية ---------- */
+
+.schd { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+
+.schd-back { display: inline-block; margin-bottom: 8px; color: var(--d-muted); font-size: 14px; text-decoration: none; }
+.schd-h1 { font-family: var(--d-display); font-size: 26px; margin: 0 0 4px; }
+
+.schd-num {
+  display: inline-block;
+  min-width: 24px; height: 24px;
+  margin-inline-end: 8px;
+  border-radius: 7px;
+  background: var(--d-line);
+  color: var(--d-muted);
+  font-size: 13px; line-height: 24px; text-align: center;
+}
+
+.schd-info { margin-top: 12px; }
+.schd-info .schd-row { border-inline-start-color: transparent; }
+
+.schd-act--go   { background: var(--d-accent); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.schd-act--call { background: var(--d-line); color: var(--d-ink); text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 20px; min-width: 48px; }
+
+.schd-alert--ok { background: rgba(16, 185, 129, .18); color: #6EE7B7; }
+
+select.schd-input { appearance: none; }
+textarea.schd-input { resize: vertical; font-family: inherit; }
+
+.schd-tabs {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  background: var(--d-surface);
+  border-top: 1px solid var(--d-line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.schd-tabs__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 12px;
+  color: var(--d-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+.schd-tabs__item.is-active { color: var(--d-accent); font-weight: 700; }
+.schd-tabs__item .sch-icon { opacity: .8; }
+.schd-tabs__item.is-active .sch-icon { opacity: 1; }
+
+
+.schd-h1, .schd-route__name, .schd-empty strong, .schd-auth__brand h1, .schd-trip__name {
+  font-family: var(--d-body);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.schd-row, .schd-pill, .schd-trip__counts { font-variant-numeric: tabular-nums; }
+
+
+/* ---------- تصحيح محاذاة العناصر ثنائية الاتجاه ---------- */
+/* dir="ltr" يضبط ترتيب المحارف، لكنه يغيّر المحاذاة الافتراضية إلى اليسار.
+   نعيدها لليمين حتى تبقى القيمة تحت عنوانها تمامًا. */
+
+td[dir="ltr"],
+th[dir="ltr"],
+dd[dir="ltr"],
+input[dir="ltr"],
+select[dir="ltr"],
+textarea[dir="ltr"] {
+  text-align: start;
+}
+
+
+.schd { font-size: 16px; line-height: 1.7; }
+.schd-h1 { font-size: 25px; font-weight: 700; }
+.schd-row__name strong { font-size: 17px; font-weight: 700; }
+.schd-act { font-weight: 700; }
+
+
+/* معذور اليوم — الباص لا يقف عند نقطته */
+.schd-row--excused { border-inline-start-color: var(--d-warn); opacity: .6; }
+.schd-row--excused .schd-row__name span { color: var(--d-warn); font-weight: 700; }
+
+
+/* النقطة القادمة تتقدّم الكشف */
+.schd-row--next { border-inline-start-color: var(--d-accent); box-shadow: var(--d-lift-2, 0 10px 22px -12px rgba(0,0,0,.7)); }
+.schd-stop-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin: 20px 0 8px; padding: 0 2px;
+}
+.schd-stop-head b { font-size: 15px; }
+.schd-stop-head span { font-size: 11px; color: var(--d-muted); letter-spacing: .1em; }
+
+
+/* أرقام الرحلة: على المتن · نزلوا · معذورون */
+.schd-stats { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.schd-stat { text-align: center; flex: 1; }
+.schd-stat b {
+  display: block; font-size: 26px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+}
+.schd-stat span { display: block; font-size: 11px; color: var(--d-muted); }
+.schd-stat--on b { color: var(--d-accent); }
+.schd-stat--exc b { color: var(--d-warn); }

@@ -1,0 +1,251 @@
+/* =========================================================
+   تطبيق المعلم «فصلي» — نظام تصميم (v5.0)
+   ─────────────────────────────────────────────────────────
+   أُعيد بناؤه: كان القالب يستدعي assets/app.css وهو محذوف منذ v3.0.0،
+   فكان التطبيق بلا تنسيق كليًا. هذا الملف يعيده — داكنًا فاخرًا متناسقًا
+   مع مكوّنات shared-ui (السكة · الحلقة · بند المشكلة · شبكة الوجوه).
+
+   البادئة `scha-` لكل ما يخصّ المعلم، والرموز كلها من shared-ui (--sch-*)
+   فيرث الوضع الداكن ولا يكرّر لونًا. دور المعلم عشر ثوانٍ: تصنيف + سطر.
+   ========================================================= */
+
+body.scha {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--sch-paper);
+  color: var(--sch-ink);
+  font-family: 'Cairo', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+body.scha a { color: inherit; text-decoration: none; }
+body.scha img { max-width: 100%; }
+
+body.scha--auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(24px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom));
+}
+
+.scha-main {
+  padding: 6px 0 calc(48px + env(safe-area-inset-bottom));
+}
+
+/* ---------- التنبيهات ---------- */
+
+.scha-alert {
+  margin: 12px 18px;
+  padding: 13px 16px;
+  border-radius: var(--sch-radius-lg);
+  border-inline-start: 3px solid var(--sch-accent);
+  background: var(--sch-surface);
+  box-shadow: var(--sch-e1);
+  font-size: 14px;
+}
+.scha-alert strong { display: block; }
+.scha-alert--ok    { border-inline-start-color: var(--sch-success); }
+.scha-alert--error { border-inline-start-color: var(--sch-danger); }
+
+/* ---------- البطاقات ---------- */
+
+.scha-card {
+  margin: 0 18px 14px;
+  padding: 18px;
+  background: var(--sch-surface);
+  border-radius: var(--sch-r-xl);
+  box-shadow: var(--sch-e1), var(--sch-hair);
+}
+
+.scha-pupil__head { display: flex; align-items: center; gap: 14px; }
+.scha-pupil__head img {
+  width: 64px; height: 80px; flex: 0 0 auto;
+  border-radius: var(--sch-radius);
+  object-fit: cover;
+  background: var(--sch-surface-alt);
+}
+.scha-card__name { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.scha-card__sub  { display: block; font-size: 13px; color: var(--sch-muted); }
+.scha-card__label {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--sch-muted);
+}
+
+/* ---------- تصنيف الملاحظة: أزرار كبيرة لا قائمة ---------- */
+
+.scha-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.scha-cat {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--sch-r-full);
+  border: 1px solid var(--sch-line-strong);
+  background: transparent;
+  color: var(--sch-ink-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--sch-fast) var(--sch-ease),
+              border-color var(--sch-fast) var(--sch-ease),
+              color var(--sch-fast) var(--sch-ease),
+              transform var(--sch-fast) var(--sch-ease);
+}
+.scha-cat:active { transform: scale(.96); }
+.scha-cat.is-on {
+  background: var(--sch-accent);
+  border-color: var(--sch-accent);
+  color: #fff;
+  box-shadow: 0 8px 20px -10px var(--sch-accent-glow);
+}
+
+/* ---------- الحقول ---------- */
+
+.scha-field-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--sch-muted); }
+.scha-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: var(--sch-radius);
+  border: 1px solid var(--sch-line-strong);
+  background: var(--sch-surface-alt);
+  color: var(--sch-ink);
+  font-family: inherit;
+  font-size: 16px;   /* ≥16 يمنع تكبير iOS التلقائي */
+  transition: border-color var(--sch-fast) var(--sch-ease), box-shadow var(--sch-fast) var(--sch-ease);
+}
+.scha-input:focus {
+  outline: 0;
+  border-color: var(--sch-accent);
+  box-shadow: 0 0 0 3px var(--sch-accent-soft);
+}
+
+/* ---------- شرح المسار: أين تذهب هذه الملاحظة ---------- */
+
+.scha-route {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 16px;
+  padding: 11px 13px;
+  border-radius: var(--sch-radius);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-ink);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+.scha-route svg { flex: 0 0 auto; margin-top: 2px; color: var(--sch-accent); }
+
+/* ---------- الأزرار ---------- */
+
+.scha-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: var(--sch-radius);
+  background: var(--sch-accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -12px var(--sch-accent-glow);
+  transition: background var(--sch-fast) var(--sch-ease), transform var(--sch-fast) var(--sch-ease);
+}
+.scha-btn:hover  { background: var(--sch-accent-hover); }
+.scha-btn:active { transform: scale(.98); }
+
+/* ---------- العناوين والقوائم ---------- */
+
+.scha-h1 { margin: 16px 18px 6px; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.scha-h2 { margin: 24px 18px 10px; font-size: 15px; font-weight: 700; }
+
+.scha-item {
+  margin: 0 18px 8px;
+  padding: 13px 15px;
+  background: var(--sch-surface);
+  border-radius: var(--sch-radius-lg);
+  box-shadow: var(--sch-e1);
+}
+.scha-item strong { display: block; font-size: 14px; }
+.scha-time { display: block; margin-top: 4px; font-size: 11px; color: var(--sch-muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- التنقّل والخروج ---------- */
+
+.scha-back {
+  display: inline-block;
+  margin: 6px 18px 8px;
+  color: var(--sch-muted);
+  font-size: 13px;
+}
+.scha-back:hover { color: var(--sch-accent); }
+
+.scha-logout {
+  display: block;
+  text-align: center;
+  margin: 26px 18px calc(20px + env(safe-area-inset-bottom));
+  color: var(--sch-danger);
+  font-size: 13px;
+}
+
+/* ---------- الوسوم ---------- */
+
+.scha-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: 6px;
+  padding: 2px 9px;
+  border-radius: var(--sch-r-full);
+  background: var(--sch-accent-soft);
+  color: var(--sch-accent-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.scha-chip--bad { background: var(--sch-warn-soft); color: var(--sch-warn); }
+
+/* ---------- الحالة الفارغة ---------- */
+
+.scha-empty { text-align: center; padding: 48px 24px; color: var(--sch-muted); }
+.scha-empty strong { display: block; margin-bottom: 4px; font-size: 17px; color: var(--sch-ink); }
+.scha-empty p { margin: 0; font-size: 13px; line-height: 1.75; }
+
+/* ---------- شاشة الدخول ---------- */
+
+.scha-auth { width: 100%; max-width: 360px; }
+.scha-auth__brand { text-align: center; margin-bottom: 26px; }
+.scha-auth__mark {
+  display: inline-flex;
+  width: 60px; height: 60px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  background: linear-gradient(150deg, var(--sch-accent), var(--sch-accent-hover));
+  box-shadow: 0 14px 30px -12px var(--sch-accent-glow);
+}
+.scha-auth__brand h1 { margin: 0; font-size: 24px; font-weight: 700; }
+.scha-auth__brand p  { margin: 4px 0 0; font-size: 13px; color: var(--sch-muted); }
+
+.scha-form {
+  padding: 24px;
+  background: var(--sch-surface);
+  border-radius: var(--sch-r-xl);
+  box-shadow: var(--sch-e2), var(--sch-hair);
+}
+.scha-form .scha-field-label { margin-top: 14px; }
+.scha-form .scha-field-label:first-child { margin-top: 0; }
+.scha-form .scha-btn { margin-top: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scha-cat, .scha-btn { transition: none; }
+  .scha-cat:active, .scha-btn:active { transform: none; }
+}

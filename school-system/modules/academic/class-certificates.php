@@ -1,0 +1,572 @@
+<?php
+declare(strict_types=1);
+
+defined('ABSPATH') || exit;
+
+/**
+ * الشهادات.
+ *
+ * الشهادة ورقة تُعلَّق على جدار البيت ويصوّرها الأب لأهله — فتصميمها ليس ترفًا.
+ * ولذلك بُنيت **رسمًا متجهًا (SVG)** لا صورة: تُطبع بأي حجم بلا تشوّه، وملفها
+ * خفيف يصل تطبيق ولي الأمر بلا انتظار.
+ *
+ * **وثلاثة أنواع تُقترح آليًا** — الحضور المثالي والتفوّق والتحسّن. فبدل أن يبحث
+ * الوكيل عن المستحقين، تفتح الشاشة فتجدهم. وهذا ما يجعل الميزة تُستخدم فعلًا
+ * لا تُنسى بعد أسبوع.
+ */
+final class SCH_Certificates
+{
+    /** الأنواع: التسمية · العنوان على الشهادة · القالب المقترح · هل يُقترح آليًا. */
+    public const TYPES = [
+        'excellence' => ['التفوّق الدراسي', 'شهادة تفوّق',        'royal',   true],
+        'attendance' => ['الحضور المثالي',  'لم يغب يومًا',       'modern',  true],
+        'progress'   => ['التحسّن الملحوظ', 'شهادة تقدّم',        'modern',  true],
+        'behavior'   => ['السلوك المتميّز', 'شهادة سلوك متميّز', 'classic', false],
+        'quran'      => ['الحفظ والتلاوة',  'شهادة تميّز',        'classic', false],
+        'activity'   => ['المشاركة والأنشطة', 'شهادة مشاركة',    'classic', false],
+        'thanks'     => ['شكر وتقدير',      'شهادة شكر وتقدير',  'classic', false],
+        'completion' => ['إتمام السنة',     'شهادة إتمام',        'sapphire', false],
+    ];
+
+    /** ثلاثة قوالب بصرية — لكل مناسبة ما يليق بها. */
+    public const TEMPLATES = [
+        'royal'   => 'الملكية — بنفسجية وذهب',
+        'classic' => 'الكلاسيكية — إطار ذهبي',
+        'modern'  => 'الحديثة — نظيفة بخط كبير',
+        'sapphire' => 'الياقوتية — نيلية وفضة',
+    ];
+
+    // ---------- الإصدار ----------
+
+    public static function issue(array $d): array|WP_Error
+    {
+        global $wpdb;
+
+        $student_id = absint($d['student_id'] ?? 0);
+        $type       = sanitize_key((string) ($d['type'] ?? ''));
+
+        if (!isset(self::TYPES[$type])) {
+            return sch_api_error('bad_type', __('نوع الشهادة غير معروف.', 'school-system'), 422);
+        }
+
+        $student = SCH_Students::get($student_id);
+
+        if (!$student) {
+            return sch_api_error('no_student', __('الطالب غير موجود.', 'school-system'), 404);
+        }
+
+        $template = sanitize_key((string) ($d['template'] ?? ''));
+
+        if (!isset(self::TEMPLATES[$template])) {
+            $template = self::TYPES[$type][2];
+        }
+
+        $year_id = SCH_Years::current_id();
+        $serial  = self::next_serial($year_id);
+
+        $ok = $wpdb->insert(sch_table('certificates'), [
+            'student_id' => $student_id,
+            'year_id'    => $year_id,
+            'type'       => $type,
+            'template'   => $template,
+            'title'      => sanitize_text_field((string) ($d['title'] ?? self::TYPES[$type][1])),
+            'reason'     => sanitize_textarea_field((string) ($d['reason'] ?? '')),
+            'serial'     => $serial,
+            'issued_by'  => get_current_user_id() ?: null,
+            'issued_at'  => sch_now(),
+        ]);
+
+        if ($ok === false) {
+            $why = trim((string) $wpdb->last_error);
+
+            return sch_api_error('db_error', $why !== ''
+                ? sprintf(
+                    /* translators: %s: رسالة قاعدة البيانات */
+                    __('تعذّر إصدار الشهادة — %s', 'school-system'),
+                    $why
+                )
+                : __('تعذّر إصدار الشهادة.', 'school-system'), 500);
+        }
+
+        $id = (int) $wpdb->insert_id;
+
+        // ولي الأمر يعرف فورًا — الشهادة خبر سارّ لا يُؤجَّل.
+        foreach (SCH_Guardians::of_student($student_id) as $g) {
+            SCH_Comms::notify(
+                (int) $g->user_id,
+                __('شهادة جديدة', 'school-system'),
+                sprintf(
+                    /* translators: 1: اسم الطالب 2: نوع الشهادة */
+                    __('حصل %1$s على %2$s', 'school-system'),
+                    SCH_Enrollment::full_name($student),
+                    self::TYPES[$type][0]
+                ),
+                'certificate',
+                $id
+            );
+        }
+
+        sch_audit('certificate.issued', 'student', $student_id, ['type' => $type, 'serial' => $serial]);
+
+        return ['id' => $id, 'serial' => $serial];
+    }
+
+    /** رقم تسلسلي لا يتكرر داخل السنة — الشهادة وثيقة تُراجَع. */
+    private static function next_serial(int $year_id): string
+    {
+        global $wpdb;
+
+        $n = (int) $wpdb->get_var($wpdb->prepare(
+            'SELECT COUNT(*) FROM ' . sch_table('certificates') . ' WHERE year_id = %d',
+            $year_id
+        ));
+
+        $year = SCH_Years::current();
+
+        return sprintf('SN-%s-%06d', $year->name ?? gmdate('Y'), $n + 1);
+    }
+
+    // ---------- القراءة ----------
+
+    public static function of_student(int $student_id): array
+    {
+        global $wpdb;
+
+        return $wpdb->get_results($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('certificates') . ' WHERE student_id = %d ORDER BY id DESC',
+            $student_id
+        )) ?: [];
+    }
+
+    public static function get(int $id): ?object
+    {
+        global $wpdb;
+
+        return $wpdb->get_row($wpdb->prepare(
+            'SELECT c.*, s.full_name, s.first_name, s.father_name, s.grand_name, s.family_name,
+                    s.academic_no, s.grade_level, s.section
+             FROM ' . sch_table('certificates') . ' c
+             INNER JOIN ' . sch_table('students') . ' s ON s.id = c.student_id
+             WHERE c.id = %d',
+            $id
+        )) ?: null;
+    }
+
+    /**
+     * بحث بالمرشّحات — الطالب أو الشعبة أو المرحلة أو النوع أو المدى.
+     *
+     * ولها استعمالان: عرض القائمة، وطباعة دفعة كاملة في ورقة لكل شهادة.
+     */
+    public static function search(array $args = []): array
+    {
+        global $wpdb;
+
+        $where  = ['1=1'];
+        $params = [];
+
+        if (!empty($args['student_id'])) {
+            $where[]  = 'c.student_id = %d';
+            $params[] = (int) $args['student_id'];
+        }
+
+        if (!empty($args['class_id'])) {
+            $where[]  = 'e.class_id = %d';
+            $params[] = (int) $args['class_id'];
+        }
+
+        if (!empty($args['stage'])) {
+            $where[]  = 's.stage = %s';
+            $params[] = (string) $args['stage'];
+        }
+
+        if (!empty($args['grade_level'])) {
+            $where[]  = 's.grade_level = %s';
+            $params[] = (string) $args['grade_level'];
+        }
+
+        if (!empty($args['type'])) {
+            $where[]  = 'c.type = %s';
+            $params[] = (string) $args['type'];
+        }
+
+        if (!empty($args['from'])) {
+            $where[]  = 'c.issued_at >= %s';
+            $params[] = (string) $args['from'] . ' 00:00:00';
+        }
+
+        if (!empty($args['to'])) {
+            $where[]  = 'c.issued_at <= %s';
+            $params[] = (string) $args['to'] . ' 23:59:59';
+        }
+
+        $limit = min(300, max(1, (int) ($args['limit'] ?? 60)));
+
+        $sql = 'SELECT c.*, s.full_name, s.first_name, s.father_name, s.grand_name, s.family_name,
+                       s.academic_no, s.grade_level, s.section
+                FROM ' . sch_table('certificates') . ' c
+                INNER JOIN ' . sch_table('students') . ' s ON s.id = c.student_id
+                LEFT JOIN ' . sch_table('enrollments') . " e ON e.student_id = s.id AND e.status = 'active'
+                WHERE " . implode(' AND ', $where) . ' ORDER BY c.id DESC LIMIT ' . $limit;
+
+        return $wpdb->get_results($params === [] ? $sql : $wpdb->prepare($sql, $params)) ?: [];
+    }
+
+    public static function recent(int $limit = 60): array
+    {
+        return self::search(['limit' => $limit]);
+    }
+
+    // ---------- الاقتراح الآلي ----------
+
+    /**
+     * من يستحقها الآن — النظام يبحث بدل الوكيل.
+     *
+     * @return array<string, array<int, object>>
+     */
+    public static function suggestions(): array
+    {
+        global $wpdb;
+
+        $year = SCH_Years::current_id();
+
+        // لا نقترح من نال الشهادة نفسها هذا العام.
+        $taken = static function (string $type) use ($wpdb, $year): string {
+            return $wpdb->prepare(
+                ' AND s.id NOT IN (SELECT student_id FROM ' . sch_table('certificates') . '
+                                   WHERE type = %s AND year_id = %d)',
+                $type,
+                $year
+            );
+        };
+
+        $out = [];
+
+        // ١) لم يغب يومًا خلال آخر ٦٠ يومًا دراسيًا.
+        $out['attendance'] = $wpdb->get_results(
+            "SELECT s.id, s.full_name, s.grade_level, s.section, s.academic_no
+             FROM " . sch_table('students') . " s
+             WHERE s.status = 'active'
+               AND EXISTS (SELECT 1 FROM " . sch_table('attendance') . " a
+                           WHERE a.student_id = s.id)
+               AND NOT EXISTS (SELECT 1 FROM " . sch_table('attendance') . " a
+                               WHERE a.student_id = s.id AND a.status IN ('absent','late'))"
+            . $taken('attendance') . ' ORDER BY s.full_name LIMIT 60'
+        ) ?: [];
+
+        // ٢) معدّل ٩٥٪ فأعلى.
+        $out['excellence'] = $wpdb->get_results(
+            "SELECT s.id, s.full_name, s.grade_level, s.section, s.academic_no,
+                    ROUND(AVG(r.score / NULLIF(e.max_score, 0)) * 100, 1) AS pct
+             FROM " . sch_table('students') . " s
+             INNER JOIN " . sch_table('exam_results') . " r ON r.student_id = s.id
+             INNER JOIN " . sch_table('exams') . " e ON e.id = r.exam_id
+             WHERE s.status = 'active' AND r.score IS NOT NULL"
+            . $taken('excellence') .
+            " GROUP BY s.id HAVING pct >= 95 ORDER BY pct DESC LIMIT 60"
+        ) ?: [];
+
+        return $out;
+    }
+
+    // ---------- الرسم ----------
+
+    /**
+     * الشهادة رسمًا متجهًا.
+     *
+     * تُطبع بأي حجم بلا تشوّه، وملفها خفيف. والنقش الحلزوني مرسوم بمعادلة
+     * رياضية لا صورة — فلا يُقلَّد بالنسخ.
+     */
+    public static function svg(object $cert, bool $print = false): string
+    {
+        $w = 1123;
+        $h = 794;
+
+        $school = sch_settings('school_name', get_bloginfo('name'));
+        $name   = SCH_Enrollment::full_name($cert);
+        $klass  = trim((string) $cert->grade_level . ' / ' . (string) $cert->section);
+        $reason = (string) ($cert->reason ?: '');
+        $title  = (string) ($cert->title ?: (self::TYPES[$cert->type][1] ?? ''));
+        $serial = (string) $cert->serial;
+        $date   = wp_date('j F Y', strtotime((string) $cert->issued_at));
+
+        $body = match ((string) $cert->template) {
+            'modern'  => self::tpl_modern($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
+            'classic' => self::tpl_classic($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
+            'sapphire' => self::tpl_sapphire($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
+            default   => self::tpl_royal($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
+        };
+
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $w . ' ' . $h . '" '
+            . ($print ? 'width="100%" height="100%" preserveAspectRatio="xMidYMid meet"' : 'class="sch-cert__svg"')
+            . ' role="img" aria-label="' . esc_attr($title . ' — ' . $name) . '">' . $body . '</svg>';
+    }
+
+    /** وردة سبيروغراف — نقش الأوراق المالية، بمعادلة لا بصورة. */
+    private static function rosette(float $cx, float $cy, float $R, float $r, float $d,
+                                    string $color, float $sw = .45, float $op = .3): string
+    {
+        $g     = self::gcd((int) $R, (int) $r);
+        $turns = max(1, (int) ($r / max(1, $g)));
+        $steps = 2600;
+        $pts   = [];
+
+        for ($i = 0; $i <= $steps; $i++) {
+            $t = $i / $steps * 2 * M_PI * $turns;
+            $x = ($R - $r) * cos($t) + $d * cos(($R - $r) / $r * $t);
+            $y = ($R - $r) * sin($t) - $d * sin(($R - $r) / $r * $t);
+            $pts[] = round($cx + $x, 1) . ',' . round($cy + $y, 1);
+        }
+
+        return '<polyline points="' . implode(' ', $pts) . '" fill="none" stroke="' . $color
+            . '" stroke-width="' . $sw . '" opacity="' . $op . '"/>';
+    }
+
+    private static function gcd(int $a, int $b): int
+    {
+        return $b === 0 ? max(1, $a) : self::gcd($b, $a % $b);
+    }
+
+    /** نجمة ثمانية — الوحدة الأساسية في الزخرفة الإسلامية. */
+    private static function star(float $cx, float $cy, float $r, string $color, float $sw = 1, float $op = .35): string
+    {
+        $mk = static function (int $off) use ($cx, $cy, $r): string {
+            $p = [];
+            for ($a = $off; $a < 360 + $off; $a += 90) {
+                $p[] = round($cx + $r * cos(deg2rad($a)), 1) . ',' . round($cy + $r * sin(deg2rad($a)), 1);
+            }
+
+            return implode(' ', $p);
+        };
+
+        return '<polygon points="' . $mk(0) . '" fill="none" stroke="' . $color . '" stroke-width="' . $sw . '" opacity="' . $op . '"/>'
+             . '<polygon points="' . $mk(45) . '" fill="none" stroke="' . $color . '" stroke-width="' . $sw . '" opacity="' . $op . '"/>';
+    }
+
+    /** ختم مسنّن — العنصر الذي يجعل الورقة تبدو صادرة من جهة. */
+    private static function seal(float $cx, float $cy, float $r, string $ring, string $core): string
+    {
+        $teeth = '';
+
+        for ($a = 0; $a < 360; $a += 5) {
+            $x1 = $cx + ($r + 2) * cos(deg2rad($a));
+            $y1 = $cy + ($r + 2) * sin(deg2rad($a));
+            $x2 = $cx + ($r + 9) * cos(deg2rad($a));
+            $y2 = $cy + ($r + 9) * sin(deg2rad($a));
+            $teeth .= '<line x1="' . round($x1, 1) . '" y1="' . round($y1, 1) . '" x2="' . round($x2, 1)
+                . '" y2="' . round($y2, 1) . '" stroke="' . $ring . '" stroke-width="1.5"/>';
+        }
+
+        return '<g>' . $teeth
+            . '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="' . $core . '"/>'
+            . '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . ($r - 6) . '" fill="none" stroke="' . $ring . '" stroke-width="1.1" opacity=".85"/>'
+            . self::star($cx, $cy, $r - 15, $ring, 1.3, .95)
+            . self::star($cx, $cy, $r - 22, $ring, .8, .6)
+            . '</g>';
+    }
+
+    /** خيط محبّب — يفصل بلا ثقل الخط المستقيم. */
+    private static function rope(float $x1, float $x2, float $y, string $color): string
+    {
+        $mid = ($x1 + $x2) / 2;
+
+        return '<line x1="' . $x1 . '" y1="' . $y . '" x2="' . $x2 . '" y2="' . $y . '" stroke="' . $color . '" stroke-width=".9"/>'
+            . '<circle cx="' . $mid . '" cy="' . $y . '" r="3.2" fill="' . $color . '"/>'
+            . '<circle cx="' . ($mid - 14) . '" cy="' . $y . '" r="1.6" fill="' . $color . '"/>'
+            . '<circle cx="' . ($mid + 14) . '" cy="' . $y . '" r="1.6" fill="' . $color . '"/>';
+    }
+
+    /** سطران على الأكثر — الشهادة لا تحتمل فقرة. */
+    private static function two_lines(string $text, int $per = 52): array
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return ['', ''];
+        }
+
+        if (mb_strlen($text) <= $per) {
+            return [$text, ''];
+        }
+
+        $words = preg_split('/\s+/u', $text) ?: [];
+        $a     = '';
+        $b     = '';
+
+        foreach ($words as $word) {
+            if (mb_strlen($a . ' ' . $word) <= $per) {
+                $a = trim($a . ' ' . $word);
+            } else {
+                $b = trim($b . ' ' . $word);
+            }
+        }
+
+        return [$a, mb_substr($b, 0, $per)];
+    }
+
+    private static function tpl_royal(int $w, int $h, string $school, string $name, string $klass,
+                                      string $title, string $reason, string $serial, string $date): string
+    {
+        [$l1, $l2] = self::two_lines($reason ?: 'لتفوّقه ومثابرته خلال الفصل الدراسي');
+        $c = $w / 2;
+
+        return '<defs>
+  <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#8C6A22"/><stop offset="30%" stop-color="#EFD89A"/>
+    <stop offset="52%" stop-color="#C9A44C"/><stop offset="78%" stop-color="#F0DCA4"/>
+    <stop offset="100%" stop-color="#7A5A1C"/>
+  </linearGradient>
+  <linearGradient id="cd" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#111A44"/><stop offset="60%" stop-color="#0A0F30"/><stop offset="100%" stop-color="#070B24"/>
+  </linearGradient>
+  <radialGradient id="ch" cx="50%" cy="42%" r="55%">
+    <stop offset="0%" stop-color="#243596" stop-opacity=".5"/><stop offset="100%" stop-color="#070B24" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="' . $w . '" height="' . $h . '" fill="url(#cd)"/>
+<rect width="' . $w . '" height="' . $h . '" fill="url(#ch)"/>'
+. self::rosette($c, 400, 250, 63, 145, '#C9A44C', .35, .16)
+. self::rosette($c, 400, 170, 47, 96, '#C9A44C', .3, .1)
+. '<rect x="24" y="24" width="' . ($w - 48) . '" height="' . ($h - 48) . '" fill="none" stroke="url(#cg)" stroke-width="3"/>
+<rect x="35" y="35" width="' . ($w - 70) . '" height="' . ($h - 70) . '" fill="none" stroke="#C9A44C" stroke-width=".7" opacity=".55"/>'
+. self::star(56, 56, 16, '#C9A44C', 1.2, .9) . self::star($w - 56, 56, 16, '#C9A44C', 1.2, .9)
+. self::star(56, $h - 56, 16, '#C9A44C', 1.2, .9) . self::star($w - 56, $h - 56, 16, '#C9A44C', 1.2, .9)
+. '<text x="' . $c . '" y="108" text-anchor="middle" fill="#9BB5AE" font-size="17">' . esc_html($school) . '</text>'
+. self::rope($c - 95, $c + 95, 126, '#C9A44C')
+. '<text x="' . $c . '" y="200" text-anchor="middle" fill="url(#cg)" font-size="54" font-weight="bold">' . esc_html($title) . '</text>
+<text x="' . $c . '" y="266" text-anchor="middle" fill="#8FA69F" font-size="17">تشهد إدارة المدرسة بأن الطالب</text>
+<text x="' . $c . '" y="348" text-anchor="middle" fill="#FFFFFF" font-size="50" font-weight="bold">' . esc_html($name) . '</text>'
+. self::rope($c - 240, $c + 240, 372, '#C9A44C')
+. '<text x="' . $c . '" y="418" text-anchor="middle" fill="#A9BEB8" font-size="18">' . esc_html($l1) . '</text>'
+. ($l2 !== '' ? '<text x="' . $c . '" y="450" text-anchor="middle" fill="#A9BEB8" font-size="18">' . esc_html($l2) . '</text>' : '')
+. '<text x="' . $c . '" y="' . ($l2 !== '' ? 492 : 460) . '" text-anchor="middle" fill="#7E938D" font-size="15">' . esc_html($klass) . '</text>'
+. self::seal($c, 596, 42, '#C9A44C', '#111A44')
+. '<line x1="175" y1="700" x2="375" y2="700" stroke="#5E7570" stroke-width="1"/>
+<text x="275" y="722" text-anchor="middle" fill="#8FA69F" font-size="13">مدير المدرسة</text>
+<line x1="' . ($w - 375) . '" y1="700" x2="' . ($w - 175) . '" y2="700" stroke="#5E7570" stroke-width="1"/>
+<text x="' . ($w - 275) . '" y="722" text-anchor="middle" fill="#8FA69F" font-size="13">المشرف التربوي</text>
+<text x="' . $c . '" y="752" text-anchor="middle" fill="#4F6660" font-size="11" letter-spacing="2">' . esc_html($serial) . '</text>';
+    }
+
+    private static function tpl_classic(int $w, int $h, string $school, string $name, string $klass,
+                                        string $title, string $reason, string $serial, string $date): string
+    {
+        [$l1, $l2] = self::two_lines($reason ?: 'لتميّزه ومشاركته الفاعلة في الأنشطة المدرسية');
+        $c = $w / 2;
+
+        return '<defs>
+  <linearGradient id="cb" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#9A7B33"/><stop offset="28%" stop-color="#E5CD8C"/>
+    <stop offset="55%" stop-color="#C0A055"/><stop offset="100%" stop-color="#8A6B26"/>
+  </linearGradient>
+</defs>
+<rect width="' . $w . '" height="' . $h . '" fill="#FDFBF5"/>'
+. '<g opacity=".09">' . self::rosette($c, $h / 2, 300, 71, 168, '#7A5A1C', .45, 1) . '</g>'
+. '<rect x="28" y="28" width="' . ($w - 56) . '" height="' . ($h - 56) . '" fill="none" stroke="url(#cb)" stroke-width="8"/>
+<rect x="44" y="44" width="' . ($w - 88) . '" height="' . ($h - 88) . '" fill="none" stroke="#B99A4E" stroke-width="1.2"/>
+<rect x="53" y="53" width="' . ($w - 106) . '" height="' . ($h - 106) . '" fill="none" stroke="#B99A4E" stroke-width=".6" opacity=".55"/>'
+. self::star(80, 80, 19, '#B99A4E', 1.3, .85) . self::star($w - 80, 80, 19, '#B99A4E', 1.3, .85)
+. self::star(80, $h - 80, 19, '#B99A4E', 1.3, .85) . self::star($w - 80, $h - 80, 19, '#B99A4E', 1.3, .85)
+. '<text x="' . $c . '" y="124" text-anchor="middle" fill="#7A6432" font-size="17">بسم الله الرحمن الرحيم</text>
+<text x="' . $c . '" y="188" text-anchor="middle" fill="#123F38" font-size="21">' . esc_html($school) . '</text>'
+. self::rope($c - 125, $c + 125, 208, '#B99A4E')
+. '<text x="' . $c . '" y="278" text-anchor="middle" fill="#0E332D" font-size="48" font-weight="bold">' . esc_html($title) . '</text>
+<text x="' . $c . '" y="342" text-anchor="middle" fill="#5A6B66" font-size="17">تتقدّم إدارة المدرسة بخالص الشكر والتقدير للطالب</text>
+<text x="' . $c . '" y="420" text-anchor="middle" fill="#0E332D" font-size="48" font-weight="bold">' . esc_html($name) . '</text>'
+. self::rope($c - 255, $c + 255, 444, '#B99A4E')
+. '<text x="' . $c . '" y="492" text-anchor="middle" fill="#5A6B66" font-size="17">' . esc_html($l1) . '</text>'
+. ($l2 !== '' ? '<text x="' . $c . '" y="524" text-anchor="middle" fill="#5A6B66" font-size="17">' . esc_html($l2) . '</text>' : '')
+. '<text x="' . $c . '" y="' . ($l2 !== '' ? 566 : 534) . '" text-anchor="middle" fill="#8A7440" font-size="16">سائلين الله له دوام التوفيق والسداد</text>'
+. self::seal($c, 638, 38, '#B99A4E', '#123F38')
+. '<line x1="150" y1="706" x2="340" y2="706" stroke="#C3B489" stroke-width="1"/>
+<text x="245" y="728" text-anchor="middle" fill="#7A6432" font-size="13">مدير المدرسة</text>
+<line x1="' . ($w - 340) . '" y1="706" x2="' . ($w - 150) . '" y2="706" stroke="#C3B489" stroke-width="1"/>
+<text x="' . ($w - 245) . '" y="728" text-anchor="middle" fill="#7A6432" font-size="13">رائد النشاط</text>
+<text x="' . $c . '" y="750" text-anchor="middle" fill="#A79761" font-size="11" letter-spacing="2">' . esc_html($serial) . '</text>';
+    }
+
+    private static function tpl_modern(int $w, int $h, string $school, string $name, string $klass,
+                                       string $title, string $reason, string $serial, string $date): string
+    {
+        [$l1, $l2] = self::two_lines($reason ?: 'تُمنح تقديرًا لالتزامه وحضوره كامل أيام الفصل', 54);
+        $c = $w / 2;
+
+        return '<defs>
+  <linearGradient id="cm" x1="1" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1B287A"/><stop offset="100%" stop-color="#7B92FF"/>
+  </linearGradient>
+</defs>
+<rect width="' . $w . '" height="' . $h . '" fill="#FBFAF7"/>
+
+<!-- شريط جانبي لا علوي: يترك المتن كاملًا للنص ويوازن الصفحة -->
+<path d="M' . ($w - 132) . ' 0 H' . $w . ' V' . $h . ' H' . ($w - 92) . ' Z" fill="url(#cm)"/>'
+. '<g opacity=".06">' . self::rosette($c - 40, 430, 250, 63, 145, '#5170FF', .5, 1) . '</g>'
+. '<text transform="translate(' . ($w - 52) . ' ' . ($h / 2) . ') rotate(90)" text-anchor="middle" fill="#D5DFFF" font-size="17" font-weight="bold">'
+. esc_html($school) . '</text>
+
+<rect x="70" y="70" width="' . ($w - 240) . '" height="' . ($h - 140) . '" fill="none" stroke="#E3DFD6" stroke-width="1.5"/>
+
+<text x="' . ($c - 44) . '" y="176" text-anchor="middle" fill="#5170FF" font-size="15">' . esc_html($klass) . '</text>
+<text x="' . ($c - 44) . '" y="266" text-anchor="middle" fill="#111C19" font-size="52" font-weight="bold">' . esc_html($title) . '</text>'
+. self::rope($c - 44 - 130, $c - 44 + 130, 300, '#7B92FF')
+. '<text x="' . ($c - 44) . '" y="360" text-anchor="middle" fill="#5A6B66" font-size="17">تُمنح هذه الشهادة للطالب</text>
+<text x="' . ($c - 44) . '" y="440" text-anchor="middle" fill="#1B287A" font-size="46" font-weight="bold">' . esc_html($name) . '</text>
+<line x1="' . ($c - 44 - 230) . '" y1="466" x2="' . ($c - 44 + 230) . '" y2="466" stroke="#E3DFD6" stroke-width="1.5"/>
+<text x="' . ($c - 44) . '" y="512" text-anchor="middle" fill="#5A6B66" font-size="17">' . esc_html($l1) . '</text>'
+. ($l2 !== '' ? '<text x="' . ($c - 44) . '" y="542" text-anchor="middle" fill="#5A6B66" font-size="17">' . esc_html($l2) . '</text>' : '')
+. self::seal($c - 44, 622, 34, '#7B92FF', '#1B287A')
+. '<line x1="150" y1="700" x2="330" y2="700" stroke="#C9C3B6" stroke-width="1"/>
+<text x="240" y="722" text-anchor="middle" fill="#8B9793" font-size="12">مدير المدرسة</text>
+<text x="' . ($w - 200) . '" y="704" text-anchor="middle" fill="#8B9793" font-size="12">' . esc_html($date) . '</text>
+<text x="' . ($w - 200) . '" y="724" text-anchor="middle" fill="#B0B9B5" font-size="11" letter-spacing="1">' . esc_html($serial) . '</text>';
+    }
+
+    /**
+     * الياقوتية — أزرق عميق وفضة.
+     *
+     * لون لا تجده في شهادات المدارس: يليق بالتخرّج وإتمام السنة، ويُميّز
+     * شهادتك عن كل ما رآه الأب من قبل.
+     */
+    private static function tpl_sapphire(int $w, int $h, string $school, string $name, string $klass,
+                                         string $title, string $reason, string $serial, string $date): string
+    {
+        [$l1, $l2] = self::two_lines($reason ?: 'لإتمامه العام الدراسي بنجاح وتميّز');
+        $c = $w / 2;
+
+        return '<defs>
+  <linearGradient id="sv" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#6E7B92"/><stop offset="28%" stop-color="#E6ECF5"/>
+    <stop offset="52%" stop-color="#A9B6CC"/><stop offset="78%" stop-color="#EEF3FA"/>
+    <stop offset="100%" stop-color="#5D6A80"/>
+  </linearGradient>
+  <linearGradient id="sd" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#16233F"/><stop offset="55%" stop-color="#0D1730"/><stop offset="100%" stop-color="#070E1F"/>
+  </linearGradient>
+  <radialGradient id="sh" cx="50%" cy="40%" r="58%">
+    <stop offset="0%" stop-color="#283C6B" stop-opacity=".55"/><stop offset="100%" stop-color="#070E1F" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="' . $w . '" height="' . $h . '" fill="url(#sd)"/>
+<rect width="' . $w . '" height="' . $h . '" fill="url(#sh)"/>'
+. self::rosette($c, 392, 262, 59, 152, '#8FA0C0', .35, .2)
+. self::rosette($c, 392, 178, 41, 98, '#8FA0C0', .3, .12)
+. '<rect x="24" y="24" width="' . ($w - 48) . '" height="' . ($h - 48) . '" fill="none" stroke="url(#sv)" stroke-width="3"/>
+<rect x="35" y="35" width="' . ($w - 70) . '" height="' . ($h - 70) . '" fill="none" stroke="#A9B6CC" stroke-width=".7" opacity=".5"/>'
+. self::star(56, 56, 16, '#C6D2E6', 1.2, .9) . self::star($w - 56, 56, 16, '#C6D2E6', 1.2, .9)
+. self::star(56, $h - 56, 16, '#C6D2E6', 1.2, .9) . self::star($w - 56, $h - 56, 16, '#C6D2E6', 1.2, .9)
+. '<text x="' . $c . '" y="108" text-anchor="middle" fill="#9FADC6" font-size="17">' . esc_html($school) . '</text>'
+. self::rope($c - 95, $c + 95, 126, '#A9B6CC')
+. '<text x="' . $c . '" y="200" text-anchor="middle" fill="url(#sv)" font-size="54" font-weight="bold">' . esc_html($title) . '</text>
+<text x="' . $c . '" y="266" text-anchor="middle" fill="#93A2BC" font-size="17">تشهد إدارة المدرسة بأن الطالب</text>
+<text x="' . $c . '" y="348" text-anchor="middle" fill="#FFFFFF" font-size="50" font-weight="bold">' . esc_html($name) . '</text>'
+. self::rope($c - 240, $c + 240, 372, '#A9B6CC')
+. '<text x="' . $c . '" y="418" text-anchor="middle" fill="#AFBCD4" font-size="18">' . esc_html($l1) . '</text>'
+. ($l2 !== '' ? '<text x="' . $c . '" y="450" text-anchor="middle" fill="#AFBCD4" font-size="18">' . esc_html($l2) . '</text>' : '')
+. '<text x="' . $c . '" y="' . ($l2 !== '' ? 492 : 460) . '" text-anchor="middle" fill="#7F8DA8" font-size="15">' . esc_html($klass) . '</text>'
+. self::seal($c, 596, 42, '#A9B6CC', '#16233F')
+. '<line x1="175" y1="700" x2="375" y2="700" stroke="#5A6884" stroke-width="1"/>
+<text x="275" y="722" text-anchor="middle" fill="#93A2BC" font-size="13">مدير المدرسة</text>
+<line x1="' . ($w - 375) . '" y1="700" x2="' . ($w - 175) . '" y2="700" stroke="#5A6884" stroke-width="1"/>
+<text x="' . ($w - 275) . '" y="722" text-anchor="middle" fill="#93A2BC" font-size="13">المشرف التربوي</text>
+<text x="' . $c . '" y="752" text-anchor="middle" fill="#54627C" font-size="11" letter-spacing="2">' . esc_html($serial) . '</text>';
+    }
+}

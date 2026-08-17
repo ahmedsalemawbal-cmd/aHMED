@@ -1,0 +1,246 @@
+/* =========================================================
+   تطبيق البوابة — يُستخدم واقفًا عند باب المدرسة.
+   خلفية داكنة تقلّل الوهج، مساحة مسح كبيرة، أزرار بحجم الإبهام.
+   ========================================================= */
+
+:root {
+  --g-bg:      #0F1720;
+  --g-surface: #1B2733;
+  --g-line:    #2A3947;
+  --g-ink:     #F1F5F9;
+  --g-muted:   #94A3B8;
+  --g-accent:  #14B8A6;
+  --g-ok:      #10B981;
+  --g-warn:    #F59E0B;
+  --g-bad:     #F87171;
+  --g-f: 'Cairo', system-ui, sans-serif;
+  --g-r: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.schg {
+  margin: 0;
+  background: var(--g-bg);
+  color: var(--g-ink);
+  font-family: var(--g-f);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.schg-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  background: var(--g-surface); border-bottom: 1px solid var(--g-line);
+}
+.schg-top__who { font-weight: 700; }
+.schg-top__out { color: var(--g-muted); font-size: 14px; text-decoration: none; }
+
+.schg-main { padding: 16px; max-width: 640px; margin: 0 auto 40px; }
+
+/* الحالة */
+.schg-status { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.schg-pill { padding: 3px 12px; border-radius: 100px; background: var(--g-line); color: var(--g-muted); font-size: 13px; }
+.schg-pill--ok   { background: rgba(16,185,129,.18);  color: #6EE7B7; }
+.schg-pill--warn { background: rgba(245,158,11,.18);  color: #FCD34D; }
+.schg-pill--bad  { background: rgba(248,113,113,.18); color: #FCA5A5; }
+.schg-counts { color: var(--g-muted); font-size: 14px; }
+
+/* ثلاثة أوضاع — أزرار كبيرة لا قائمة منسدلة */
+.schg-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.schg-mode {
+  padding: 16px 6px;
+  font-family: inherit; font-size: 16px; font-weight: 700;
+  color: var(--g-ink); background: var(--g-surface);
+  border: 1px solid var(--g-line); border-radius: var(--g-r);
+  cursor: pointer;
+}
+.schg-mode.is-on { background: var(--g-accent); border-color: var(--g-accent); color: #0F1720; }
+.schg-mode:active { transform: scale(.97); }
+
+/* مساحة المسح — تملأ نصف الشاشة */
+.schg-scan {
+  position: relative;
+  height: 46vh; min-height: 260px;
+  background: #0B1119;
+  border: 1px solid var(--g-line); border-radius: var(--g-r);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.schg-scan video { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .3s; }
+.schg-scan.is-live video { opacity: 1; }
+.schg-scan__frame {
+  position: absolute; inset: 20%;
+  border: 2px solid var(--g-accent); border-radius: var(--g-r);
+  opacity: .75; pointer-events: none;
+}
+.schg-scan__frame::before,
+.schg-scan__frame::after {
+  content: ""; position: absolute; inset-inline: -2px; height: 2px; background: var(--g-accent);
+}
+.schg-scan__frame::before { top: -2px; }
+.schg-scan__frame::after  { bottom: -2px; }
+
+/* خط ضوئي يخبر الحارس أن الكاميرا حيّة */
+.schg-scan::after {
+  content: ""; position: absolute; inset-inline: 22%; height: 2px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--g-accent), transparent);
+  animation: schg-sweep 2.4s ease-in-out infinite;
+}
+@keyframes schg-sweep { 0%, 100% { top: 24%; } 50% { top: 74%; } }
+.schg-scan__hint {
+  position: absolute; bottom: 12px; inset-inline: 12px;
+  margin: 0; text-align: center; font-size: 14px; color: var(--g-muted);
+}
+
+/* بطاقة التأكيد — الحارس يطابق الوجه */
+.schg-card {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 14px; padding: 14px;
+  background: rgba(16,185,129,.14);
+  border: 1px solid var(--g-ok); border-radius: var(--g-r);
+}
+.schg-card.is-bad { background: rgba(248,113,113,.14); border-color: var(--g-bad); }
+.schg-card img { border-radius: 8px; object-fit: cover; background: var(--g-line); }
+.schg-card__text { min-width: 0; }
+.schg-card__text strong { display: block; font-size: 19px; }
+.schg-card__text span { display: block; color: var(--g-muted); font-size: 14px; }
+.schg-card__state { color: var(--g-accent) !important; font-weight: 700; }
+
+/* البحث بالاسم */
+.schg-manual { margin-top: 16px; }
+.schg-manual input {
+  width: 100%; padding: 14px;
+  font-family: inherit; font-size: 17px;
+  color: var(--g-ink); background: var(--g-surface);
+  border: 1px solid var(--g-line); border-radius: var(--g-r);
+}
+.schg-manual input:focus { outline: 2px solid var(--g-accent); outline-offset: 1px; }
+.schg-results { display: grid; gap: 6px; margin-top: 8px; }
+.schg-result {
+  padding: 14px; text-align: start;
+  font-family: inherit; font-size: 16px; color: var(--g-ink);
+  background: var(--g-surface); border: 1px solid var(--g-line);
+  border-radius: var(--g-r); cursor: pointer;
+}
+.schg-result:active { background: var(--g-line); }
+
+/* آخر العمليات */
+.schg-h2 { font-size: 15px; font-weight: 700; color: var(--g-muted); margin: 22px 0 8px; }
+.schg-recent { display: grid; gap: 6px; }
+.schg-recent__i {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 14px; background: var(--g-surface);
+  border: 1px solid var(--g-line); border-radius: 10px; font-size: 14px;
+}
+.schg-recent__i span { color: var(--g-muted); font-size: 13px; }
+
+/* الدخول */
+.schg--auth { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+.schg-auth { width: 100%; max-width: 380px; }
+.schg-auth__brand { text-align: center; margin-bottom: 24px; }
+.schg-auth__mark { display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: var(--g-accent); margin-bottom: 12px; }
+.schg-auth__brand h1 { font-size: 28px; font-weight: 700; margin: 0; }
+.schg-auth__brand p { color: var(--g-muted); font-size: 14px; margin: 4px 0 0; }
+
+.schg-form { background: var(--g-surface); border: 1px solid var(--g-line); border-radius: var(--g-r); padding: 18px; }
+.schg-label { display: block; font-size: 14px; margin: 12px 0 4px; color: var(--g-muted); }
+.schg-input {
+  width: 100%; padding: 14px;
+  font-family: inherit; font-size: 17px; color: var(--g-ink);
+  background: var(--g-bg); border: 1px solid var(--g-line); border-radius: 10px;
+}
+.schg-input:focus { outline: 2px solid var(--g-accent); outline-offset: 1px; }
+
+.schg-btn {
+  display: block; width: 100%; margin-top: 18px; padding: 16px;
+  font-family: inherit; font-size: 18px; font-weight: 700;
+  color: #0F1720; background: var(--g-accent);
+  border: 0; border-radius: var(--g-r); cursor: pointer;
+}
+.schg-btn:active { opacity: .85; }
+
+.schg-alert { padding: 12px 16px; border-radius: var(--g-r); margin-bottom: 12px; background: rgba(248,113,113,.18); color: #FCA5A5; }
+
+input[dir="ltr"] { text-align: start; }
+
+
+/* بطاقة التأكيد: الحارس يطابق الوجه قبل أن يمضي */
+.schg-card { box-shadow: var(--lift-2, 0 18px 34px -16px rgba(0,0,0,.8)); }
+.schg-card__text strong { font-size: 19px; }
+.schg-card__state { font-weight: 700; }
+
+/* الموظف: هوية إردوازية · التأخّر: كهرمانية — بلمسة على حافة البطاقة */
+.schg-card.is-staff { background: rgba(91,107,140,.16); border-color: #7c88a8; }
+.schg-card.is-late  { background: rgba(245,165,36,.14); border-color: #f5a524; }
+.schg-card.is-late .schg-card__state { color: #f5a524 !important; }
+
+.schg-card__edge,
+.schg-card::after {
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px;
+  background: var(--g-ok);
+}
+.schg-card.is-bad::after   { background: var(--g-bad); }
+.schg-card.is-late::after  { background: #f5a524; }
+.schg-card.is-staff::after { background: #8a99b8; }
+
+/* الموجة: حلقة تتوسّع من جهة الصورة لحظة المسح — النبض للحيّ */
+.schg-card::before {
+  content: ""; position: absolute; top: 50%; inset-inline-start: 46px;
+  width: 44px; height: 44px; margin-top: -22px; border-radius: 50%;
+  border: 2px solid var(--g-ok); opacity: 0; pointer-events: none;
+  transform-origin: center;
+  animation: schg-wave 1.5s ease-out 2;
+}
+.schg-card.is-bad::before   { border-color: var(--g-bad); }
+.schg-card.is-late::before  { border-color: #f5a524; }
+.schg-card.is-staff::before { border-color: #8a99b8; }
+@keyframes schg-wave {
+  0%   { opacity: .6; transform: translate(50%, 0) scale(.5); }
+  100% { opacity: 0;  transform: translate(50%, 0) scale(2.8); }
+}
+[dir="ltr"] .schg-card::before { animation-name: schg-wave-ltr; }
+@keyframes schg-wave-ltr {
+  0%   { opacity: .6; transform: translate(-50%, 0) scale(.5); }
+  100% { opacity: 0;  transform: translate(-50%, 0) scale(2.8); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schg-scan::after { animation: none; opacity: 0; }
+  .schg-card::before { animation: none; opacity: 0; }
+}
+
+
+/* ---------- الزوّار ---------- */
+
+.schg-top__acts { display: flex; align-items: center; gap: 14px; }
+.schg-top__link { color: var(--g-accent); font-size: 14px; font-weight: 700; text-decoration: none; }
+.schg-top__link.is-on { color: var(--g-ink); }
+
+.schg-h1 { font-size: 26px; font-weight: 700; margin: 0 0 2px; }
+.schg-h2 { font-size: 17px; font-weight: 700; margin: 26px 0 10px; }
+.schg-sub { font-size: 14px; color: var(--g-muted); margin: 0 0 16px; }
+
+.schg-alert--ok { background: rgba(16,185,129,.16); color: #6EE7B7; }
+
+.schg-visitor {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 15px; margin-bottom: 8px;
+  background: var(--g-surface); border: 1px solid var(--g-line); border-radius: var(--g-r);
+}
+.schg-visitor__t strong { display: block; font-size: 16px; }
+.schg-visitor__t span { display: block; font-size: 12px; color: var(--g-muted); }
+
+.schg-mini {
+  min-width: 74px; min-height: 44px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  color: var(--g-ink); background: var(--g-line);
+  border: 0; border-radius: 10px; cursor: pointer;
+}
+.schg-mini:active { background: var(--g-accent); color: #0F1720; }
+
+.schg-empty { text-align: center; padding: 36px 16px; color: var(--g-muted); }
+.schg-empty strong { display: block; font-size: 17px; color: var(--g-ink); }
