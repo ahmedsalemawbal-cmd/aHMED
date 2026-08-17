@@ -141,6 +141,30 @@ final class SCH_App
 
         $action = sanitize_key((string) ($_POST['sch_app_action'] ?? ''));
 
+        // نداء الانصراف — الأب عند البوابة يطلب ابنه، والفحوص كلها في الطبقة.
+        if ($action === 'pickup_call' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_app_pickup')) {
+            $sid  = absint($_POST['student_id'] ?? 0);
+            $done = SCH_Pickup::call($sid, get_current_user_id(), (string) ($_POST['note'] ?? ''));
+
+            wp_safe_redirect(is_wp_error($done)
+                ? add_query_arg('err', $done->get_error_code(), self::url('child', $sid))
+                : self::url('child', $sid));
+            exit;
+        }
+
+        if ($action === 'pickup_cancel' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_app_pickup')) {
+            $sid  = absint($_POST['student_id'] ?? 0);
+            $call = SCH_Pickup::open_for($sid);
+
+            // لا يُلغي إلا صاحبه — لا يُلغى نداء غيرك بتخمين رقمه.
+            if ($call && (int) $call->caller_id === get_current_user_id()) {
+                SCH_Pickup::cancel((int) $call->id);
+            }
+
+            wp_safe_redirect(self::url('child', $sid));
+            exit;
+        }
+
         if ($action === 'read_alerts' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_read_alerts')) {
             SCH_Comms::mark_read(get_current_user_id());
             wp_safe_redirect(self::url('alerts'));
@@ -258,7 +282,9 @@ final class SCH_App
 
         header('Content-Type: ' . (str_ends_with($path, '.png') ? 'image/png' : 'image/jpeg'));
         header('Content-Length: ' . (string) filesize($path));
-        header('Cache-Control: private, max-age=600');
+        // العنوان يحمل بصمة الملف فمحتواه لا يتغيّر أبدًا — والكاش الطويل هنا
+        // يجعل الصورة تظهر بلا طلب، والجديدة تظهر فورًا لأن عنوانها عنوان آخر.
+        header('Cache-Control: private, max-age=31536000, immutable');
         readfile($path);
         exit;
     }
@@ -295,9 +321,109 @@ final class SCH_App
         return add_query_arg('sch_kid_photo', '1', self::url('child', $student_id));
     }
 
+    /**
+     * أيقونة الإشعار وصنف لونه من نوعه.
+     *
+     * كانت الخريطة تعرف سبعة أنواع من ستة عشر، والباقي يسقط على «ساعة» —
+     * فيرى وليّ الأمر ثماني ساعات متطابقة لا تفرّق شهادةً عن دواء عن إجازة.
+     * وهذه هي **كل** الأنواع التي يبثّها النظام فعلًا.
+     *
+     * @return array{0:string,1:string} [اسم الأيقونة، صنف النوع]
+     */
+    public static function alert_look(string $type): array
+    {
+        $map = [
+            'certificate'     => 'award',
+            'attendance'      => 'user-check',
+            'leave'           => 'check',
+            'med'             => 'pill',
+            'clinic'          => 'heart',
+            'custody'         => 'route',
+            'custody_silent'  => 'route',
+            'transport'       => 'bus',
+            'invoice'         => 'invoice',
+            'finance'         => 'wallet',
+            'payment'         => 'wallet',
+            'reversal'        => 'wallet',
+            'payroll'         => 'wallet',
+            'timetable'       => 'calendar',
+            'substitution'    => 'calendar',
+            'note'            => 'pen',
+            'message'         => 'mail',
+            'alert'           => 'clock',
+            'kg'              => 'sun',
+            'homework_silent' => 'book',
+        ];
+
+        // «الصامت» لاحقة توجيه داخلي لا نوعٌ آخر — يُعرض بأيقونة أصله.
+        $base = str_ends_with($type, '_silent') ? substr($type, 0, -7) : $type;
+
+        return [$map[$type] ?? $map[$base] ?? 'bell', isset($map[$base]) ? $base : 'message'];
+    }
+
+    /** «اليوم» · «أمس» · وإلا التاريخ — رأس مجموعة الإشعارات. */
+    public static function day_label(string $date): string
+    {
+        $today = current_time('Y-m-d');
+
+        if ($date === $today) {
+            return __('اليوم', 'school-system');
+        }
+
+        if ($date === gmdate('Y-m-d', strtotime($today) - DAY_IN_SECONDS)) {
+            return __('أمس', 'school-system');
+        }
+
+        return wp_date('j F', strtotime($date)) ?: $date;
+    }
+
+    /**
+     * وقت الحدث كما يقوله إنسان: «قبل ٢٢ دقيقة» لما قرُب، والساعة لما بَعُد.
+     * التاريخ الكامل في رأس المجموعة، فلا يُكرَّر في كل سطر.
+     */
+    public static function when_label(string $stamp): string
+    {
+        $t   = strtotime($stamp);
+        $now = (int) current_time('timestamp');
+
+        if ($t === false) {
+            return '';
+        }
+
+        if ($now - $t < 12 * HOUR_IN_SECONDS && $now >= $t) {
+            return sprintf(
+                /* translators: %s: مدة مثل «٢٢ دقيقة» */
+                __('قبل %s', 'school-system'),
+                human_time_diff($t, $now)
+            );
+        }
+
+        return wp_date('g:i a', $t) ?: '';
+    }
+
+    /**
+     * رابط صورة ولي الأمر — **فارغ لمن لا صورة له** فيظهر الحرف بديلًا.
+     *
+     * كانت تُرجع رابطًا دائمًا، فيمرّ شرط `if (avatar_url())` دومًا وتُطلب صورة
+     * تردّ 404 — فيرى كلُّ من لم يرفع صورةً أيقونةَ صورة مكسورة في رأس كل شاشة.
+     *
+     * **والبصمة في العنوان ليست زينة:** الملف يُخدَم بكاش، والعنوان الثابت
+     * يجعل المتصفح يعرض الصورة القديمة بعد تبديلها. البصمة تتغيّر مع الملف،
+     * فتظهر الجديدة فورًا ويبقى الكاش طويلًا لأن كل عنوان صار ثابت المحتوى.
+     */
     public static function avatar_url(): string
     {
-        return add_query_arg('sch_avatar', '1', self::url('account'));
+        $guardian = SCH_Guardians::by_user(get_current_user_id());
+        $file     = (string) ($guardian->photo_file ?? '');
+
+        if ($file === '') {
+            return '';
+        }
+
+        return add_query_arg([
+            'sch_avatar' => '1',
+            'v'          => substr(md5($file), 0, 10),
+        ], self::url('account'));
     }
 
     private static function change_password(): never

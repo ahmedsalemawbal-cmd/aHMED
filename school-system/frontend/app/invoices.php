@@ -51,8 +51,10 @@ $today    = current_time('Y-m-d');
 
             <span class="p-bill__k"><?php esc_html_e('المتبقي عليك', 'school-system'); ?></span>
             <b class="p-bill__v">
-                <span class="p-nm"><?php echo esc_html(number_format($left, 2)); ?></span>
-                <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
+                <span class="p-amt">
+                    <span class="p-nm"><?php echo esc_html(number_format($left, 2)); ?></span>
+                    <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
+                </span>
             </b>
 
             <!-- الشريط مقسّم بعدد الدفعات: الحالة تُقرأ بلمحة بلا رقم -->
@@ -112,29 +114,42 @@ $today    = current_time('Y-m-d');
 
         <div class="p-due<?php echo esc_attr($late ? ' is-late' : ($next ? '' : ' is-clear')); ?>">
             <div class="p-due__b">
-                <span class="p-due__i">
-                    <?php echo sch_icon($next ? 'clock' : 'check', 20); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                </span>
+                <div class="p-due__row">
+                    <span class="p-due__i">
+                        <?php echo sch_icon($next ? ($late ? 'flag' : 'clock') : 'check', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    </span>
 
-                <span class="p-due__t">
-                    <span><?php echo esc_html($next
-                        ? ($late ? __('دفعة متأخرة', 'school-system') : __('الدفعة القادمة', 'school-system'))
-                        : __('اكتمل السداد', 'school-system')); ?></span>
-                    <?php if ($next) : ?>
-                        <b>
-                            <span class="p-nm"><?php echo esc_html(number_format((float) $next->amount - (float) $next->paid, 2)); ?></span>
-                            <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
-                        </b>
-                    <?php else : ?>
-                        <b><?php esc_html_e('شكرًا لك', 'school-system'); ?></b>
-                    <?php endif; ?>
-                </span>
+                    <span class="p-due__t">
+                        <span><?php echo esc_html($next
+                            ? ($late ? __('دفعة متأخرة', 'school-system') : __('الدفعة القادمة', 'school-system'))
+                            : __('اكتمل السداد', 'school-system')); ?></span>
+
+                        <?php /* التأخير جملةً لا رقمًا معزولًا في عمود ثالث */ ?>
+                        <?php if ($next) : ?>
+                            <em><?php echo esc_html($late
+                                ? sprintf(
+                                    /* translators: %s: عدد الأيام */
+                                    _n('تأخّرت يومًا واحدًا', 'تأخّرت %s أيام', abs($days), 'school-system'),
+                                    number_format_i18n(abs($days))
+                                )
+                                : sprintf(
+                                    /* translators: %s: عدد الأيام */
+                                    _n('تستحق غدًا', 'تستحق بعد %s أيام', abs($days), 'school-system'),
+                                    number_format_i18n(abs($days))
+                                )); ?></em>
+                        <?php else : ?>
+                            <em><?php esc_html_e('شكرًا لك — لا مستحقات', 'school-system'); ?></em>
+                        <?php endif; ?>
+                    </span>
+                </div>
 
                 <?php if ($next) : ?>
-                    <span class="p-due__d">
-                        <b><?php echo esc_html(number_format_i18n(abs($days))); ?></b>
-                        <em><?php echo esc_html($late ? __('يومًا تأخرت', 'school-system') : __('يومًا', 'school-system')); ?></em>
-                    </span>
+                    <b class="p-due__v">
+                        <span class="p-amt">
+                            <span class="p-nm"><?php echo esc_html(number_format((float) $next->amount - (float) $next->paid, 2)); ?></span>
+                            <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
+                        </span>
+                    </b>
                 <?php endif; ?>
             </div>
 

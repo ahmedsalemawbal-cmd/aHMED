@@ -3232,6 +3232,48 @@ body.sch-locked { overflow: hidden; }
 /* رقائق (chips): قوائم وسوم تلتفّ — كانت غير معرّفة فتظهر نصًّا سطريًا */
 .sch-chips { display: flex; flex-wrap: wrap; gap: var(--sch-2); }
 .sch-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--sch-r-full); background: var(--sch-surface-alt); color: var(--sch-muted); font-size: var(--sch-text-xs); }
+.sch-chip--warn { background: var(--sch-warn-soft); color: var(--sch-warn); font-weight: 700; }
+
+/* ═══════════ لوحة نداء الانصراف ═══════════
+   تُقرأ من مسافة ذراع على جهاز عند الباب: الاسم كبير، وزمن الانتظار رقمٌ
+   يكبر لونه حين يطول. الترتيب بالأقدم — من ينتظر منذ عشر دقائق أولى بمن وصل. */
+.sch-calls { display: grid; gap: var(--sch-3); }
+.sch-call {
+  display: flex; align-items: center; gap: var(--sch-4);
+  padding: var(--sch-4);
+  border-radius: var(--sch-r-card);
+  background: var(--sch-surface);
+  border: 1px solid var(--sch-line);
+  box-shadow: var(--sch-e1);
+}
+.sch-call__no {
+  flex: 0 0 auto; min-inline-size: 66px; text-align: center;
+  font-size: var(--sch-text-2xl); font-weight: 700;
+  line-height: var(--sch-lh-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--sch-muted);
+}
+.sch-call__no em {
+  display: block; font-style: normal;
+  font-size: var(--sch-text-xs); font-weight: 600;
+}
+.sch-call.is-slow .sch-call__no { color: var(--sch-danger); }
+.sch-call.is-slow { border-color: var(--sch-danger); }
+.sch-call.is-onway { border-color: var(--sch-warn); }
+
+.sch-call__b { flex: 1; min-inline-size: 0; }
+.sch-call__b b { display: block; font-size: var(--sch-text-lg); font-weight: 700; line-height: var(--sch-lh-snug); }
+.sch-call__b span { display: block; font-size: var(--sch-text-sm); color: var(--sch-muted); }
+.sch-call__who { color: var(--sch-ink-soft); }
+.sch-call__note { font-style: italic; }
+
+.sch-call__acts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sch-2); flex: 0 0 auto; }
+.sch-call__acts form { margin: 0; }
+
+@media (max-width: 700px) {
+  .sch-call { flex-wrap: wrap; }
+  .sch-call__acts { inline-size: 100%; }
+}
 
 /* فاصل رأسي داخل الجدول — margin لا يعمل على خلايا الجدول، فالحشو المنطقي هو الصحيح */
 .sch-table td.sch-td-sep { padding-block-start: var(--sch-5); }

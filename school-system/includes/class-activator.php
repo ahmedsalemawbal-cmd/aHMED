@@ -728,6 +728,29 @@ final class SCH_Activator
             KEY idx_notif (notification_id)
         ) {$charset};";
 
+        // نداء الانصراف — وليّ الأمر واقف عند البوابة يطلب ابنه.
+        // «نداء واحد مفتوح لكل طالب» يُحرَس في `SCH_Pickup::call()` بإعادة النداء
+        // القائم بدل إنشاء ثانٍ، ويكفيه الفهرس `idx_student`: القيد الفريد هنا
+        // كان سيمنع نداءً ثانيًا **بعد** إغلاق الأول، وهو مطلوب في اليوم الواحد.
+        $sql[] = "CREATE TABLE {$p}pickup_calls (
+            id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            student_id   BIGINT UNSIGNED NOT NULL,
+            caller_id    BIGINT UNSIGNED NOT NULL,
+            caller_name  VARCHAR(150)    NOT NULL,
+            picker_key   VARCHAR(24)     NOT NULL,
+            note         VARCHAR(190)    DEFAULT NULL,
+            status       ENUM('open','onway','done','cancelled') NOT NULL DEFAULT 'open',
+            ack_by       BIGINT UNSIGNED DEFAULT NULL,
+            ack_at       DATETIME        DEFAULT NULL,
+            closed_by    BIGINT UNSIGNED DEFAULT NULL,
+            closed_at    DATETIME        DEFAULT NULL,
+            created_at   DATETIME        NOT NULL,
+            updated_at   DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_status (status, created_at),
+            KEY idx_student (student_id, status)
+        ) {$charset};";
+
         // اشتراكات الإشعارات الفورية — جهاز واحد = صف واحد، والمستخدم قد يملك أجهزة.
         // `endpoint` عنوان طويل جدًا لا يُفهرَس، فالتفرّد على بصمته (sha256).
         $sql[] = "CREATE TABLE {$p}push_subs (

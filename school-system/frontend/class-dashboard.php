@@ -33,6 +33,7 @@ final class SCH_Dashboard
         'certificates' => ['الشهادات',      'sch_manage_students',   'school', 'السجلات',     'award'],
 
         // اليوم الدراسي — ما يجري اليوم، بترتيب حدوثه
+        'pickup'     => ['نداء الانصراف',   'sch_scan_gate',         'school', 'اليوم الدراسي','bell'],
         'attendance' => ['الحضور',          'sch_manage_attendance', 'school', 'اليوم الدراسي','check'],
         'attendance-report' => ['تقرير الحضور الشهري', 'sch_manage_attendance', 'school', 'اليوم الدراسي','chart'],
         'timetable'  => ['بناء الجدول',     'sch_build_timetable',   'school', 'اليوم الدراسي','calendar'],
@@ -392,6 +393,9 @@ final class SCH_Dashboard
             'save_brand'       => ['sch_manage_settings',  'do_save_brand'],
             'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
             'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
+            'pickup_ack'       => ['sch_scan_gate',       'do_pickup_ack'],
+            'pickup_done'      => ['sch_scan_gate',       'do_pickup_done'],
+            'pickup_drop'      => ['sch_scan_gate',       'do_pickup_drop'],
             'push_keys'        => ['sch_manage_settings',  'do_push_keys'],
             'push_channel'     => ['sch_manage_settings',  'do_push_channel'],
             'push_test'        => ['sch_manage_settings',  'do_push_test'],
@@ -1524,6 +1528,29 @@ final class SCH_Dashboard
 
         sch_audit('settings.updated', 'settings', null, ['section' => 'alerts']);
         return true;
+    }
+
+    /** المشرفة تعلّم أنها في الطريق — فيتوقّف الأب عن التساؤل. */
+    private static function do_pickup_ack(array $d, int $id): array
+    {
+        SCH_Pickup::ack(absint($d['call_id'] ?? 0));
+
+        return ['msg' => __('عُلِّم أنك في الطريق.', 'school-system')];
+    }
+
+    /** التسليم — يمرّ بآلة العهدة فيُسجَّل خروجًا حقيقيًا باسم المستلم. */
+    private static function do_pickup_done(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_Pickup::deliver(absint($d['call_id'] ?? 0));
+
+        return is_wp_error($done) ? $done : ['msg' => __('سُلّم الطالب وسُجّل خروجه.', 'school-system')];
+    }
+
+    private static function do_pickup_drop(array $d, int $id): array
+    {
+        SCH_Pickup::cancel(absint($d['call_id'] ?? 0));
+
+        return ['msg' => __('أُلغي النداء.', 'school-system')];
     }
 
     /**

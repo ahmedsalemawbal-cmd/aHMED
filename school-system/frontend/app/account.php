@@ -16,18 +16,18 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
         <?php wp_nonce_field('sch_app_avatar', '_sch_nonce'); ?>
         <input type="hidden" name="sch_app_action" value="upload_avatar">
 
+        <?php $sch_av = SCH_App::avatar_url(); ?>
         <label class="p-av" for="p-av-file">
-            <?php if (SCH_App::avatar_url()) : ?>
-                <img src="<?php echo esc_url(SCH_App::avatar_url()); ?>" alt="" width="78" height="78">
+            <?php if ($sch_av !== '') : ?>
+                <img id="p-av-img" src="<?php echo esc_url($sch_av); ?>" alt="" width="78" height="78">
             <?php else : ?>
                 <?php echo sch_avatar_svg(mb_substr((string) $user->display_name, 0, 1), 78); // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php endif; ?>
-            <span class="p-av__cam"><?php echo sch_icon('badge', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <span class="p-av__cam"><?php echo sch_icon('image', 14); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
         </label>
 
         <input id="p-av-file" type="file" name="avatar" accept="image/jpeg,image/png" hidden
-               aria-label="<?php esc_attr_e('الصورة الشخصية', 'school-system'); ?>"
-               onchange="document.getElementById('p-av').submit()">
+               aria-label="<?php esc_attr_e('الصورة الشخصية', 'school-system'); ?>">
     </form>
 
     <b class="p-prof__name"><?php echo esc_html((string) $user->display_name); ?></b>
@@ -109,3 +109,37 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
         <span class="p-setrow__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
     </a>
 </div>
+
+<script>
+/* الصورة تتبدّل **قبل** أن تُرفع: نرسم الملف المختار محليًّا في اللحظة نفسها،
+   ثم يُرسَل النموذج في الخلفية. الانتظار الذي كان يظهر لم يكن رفعًا بطيئًا —
+   بل كاشًا يعرض القديمة، وقد صار العنوان يحمل بصمة الملف فانتهى. */
+(function () {
+  var input = document.getElementById('p-av-file');
+  var form  = document.getElementById('p-av');
+  if (!input || !form) { return; }
+
+  input.addEventListener('change', function () {
+    var file = input.files && input.files[0];
+    if (!file) { return; }
+
+    var label = form.querySelector('.p-av');
+    var img   = document.getElementById('p-av-img');
+
+    if (!img && label) {
+      // من لم يكن له صورة: نستبدل الحرف بصورة فورًا
+      var svg = label.querySelector('svg:not(.p-av__cam svg)');
+      img = document.createElement('img');
+      img.id = 'p-av-img';
+      img.width = 78; img.height = 78; img.alt = '';
+      if (svg && svg.parentNode === label) { label.replaceChild(img, svg); }
+      else { label.insertBefore(img, label.firstChild); }
+    }
+
+    if (img) { img.src = URL.createObjectURL(file); }
+    if (label) { label.classList.add('is-saving'); }
+
+    form.submit();
+  });
+}());
+</script>

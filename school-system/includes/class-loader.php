@@ -34,6 +34,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/custody/class-custody.php';
         require_once SCH_PATH . 'modules/custody/class-alerts.php';
         require_once SCH_PATH . 'modules/custody/class-pass.php';
+        require_once SCH_PATH . 'modules/custody/class-pickup.php';
         require_once SCH_PATH . 'modules/notes/class-notes.php';
         require_once SCH_PATH . 'modules/deputy/class-deputy.php';
         require_once SCH_PATH . 'modules/nerve/class-nerve.php';

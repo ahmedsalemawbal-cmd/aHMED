@@ -74,6 +74,36 @@ if ($leave) {
             </div>
         </div>
 
+        <?php
+        /* نداء الانصراف — الفعل الوحيد الذي يعني شيئًا وابنك داخل المدرسة.
+           «طلب إجازة» هنا لا معنى له: هو حاضر بالفعل. */
+        $sch_call = SCH_Pickup::open_for($id);
+        ?>
+        <?php if ($sch_call) : ?>
+            <div class="p-hero__call">
+                <span class="p-hero__call-s">
+                    <i></i><?php echo esc_html(SCH_Pickup::STATUSES[$sch_call->status] ?? ''); ?>
+                </span>
+                <p><?php esc_html_e('انتظر في مكانك — تُحضره المشرفة وتسلّمه لك.', 'school-system'); ?></p>
+                <form method="post">
+                    <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
+                    <input type="hidden" name="sch_app_action" value="pickup_cancel">
+                    <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+                    <button type="submit" class="p-hero__btn p-tap"><?php esc_html_e('إلغاء النداء', 'school-system'); ?></button>
+                </form>
+            </div>
+        <?php else : ?>
+            <form method="post" class="p-hero__cta">
+                <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_app_action" value="pickup_call">
+                <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+                <button type="submit" class="p-hero__btn is-solid p-tap">
+                    <?php echo sch_icon('bell', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <?php esc_html_e('أنا عند البوابة — أخرجوا ابني', 'school-system'); ?>
+                </button>
+            </form>
+        <?php endif; ?>
+
     <?php else : ?>
         <div class="p-hero__top">
             <span class="p-hero__badge"><?php echo esc_html($leave ? __('إجازة معتمدة', 'school-system') : __('في المنزل', 'school-system')); ?></span>
@@ -107,11 +137,11 @@ if ($leave) {
 <div class="p-duo">
     <a class="p-num p-num--pay p-tap" href="<?php echo esc_url(SCH_App::url('invoices', $id)); ?>">
         <span class="p-num__k"><?php esc_html_e('المستحق', 'school-system'); ?></span>
-        <b class="p-num__v"><span class="p-nm"><?php echo esc_html(number_format((float) $today['balance'], 0)); ?></span><i><?php esc_html_e('ر.س', 'school-system'); ?></i></b>
+        <b class="p-num__v"><span class="p-amt"><span class="p-nm"><?php echo esc_html(number_format((float) $today['balance'], 0)); ?></span><i class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></i></span></b>
     </a>
     <div class="p-num p-num--att">
         <span class="p-num__k"><?php esc_html_e('الحضور', 'school-system'); ?></span>
-        <b class="p-num__v"><span class="p-nm"><?php echo esc_html(number_format($rate, 0)); ?></span><i>٪</i></b>
+        <b class="p-num__v"><span class="p-amt"><span class="p-nm"><?php echo esc_html(number_format($rate, 0)); ?></span><i class="p-cur">٪</i></span></b>
         <span class="p-num__s"><?php esc_html_e('آخر ٦٠ يومًا', 'school-system'); ?></span>
     </div>
 </div>

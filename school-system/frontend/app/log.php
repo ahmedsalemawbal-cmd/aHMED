@@ -19,7 +19,6 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
 
 <?php if ($tab === 'att') :
     $days = SCH_Attendance::history($id, 60);
-    $rate = SCH_Attendance::rate($id);
 
     // إحصاء كل حالة مرة واحدة — يُقرأ الملخص من فوق قبل التفصيل.
     $tally = ['present' => 0, 'late' => 0, 'absent' => 0, 'excused' => 0];
@@ -29,8 +28,20 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
             $tally[$s]++;
         }
     }
-    // الحلقة: نصف قطر ٣٩ ⇒ محيط ٢٤٥ — القوس يمتلئ بنسبة الحضور.
-    $circ = 245.0;
+
+    $sch_total = count($days);
+    // **الإجازة المعتمدة لا تُحسب غيابًا.** النسبة العامة تقسم على كل الأيام،
+    // فطفلٌ في إجازة أذِنت بها المدرسة نفسها يظهر لأبيه بـ٤٦٪ كأنه متغيّب —
+    // وهذا نقضٌ لمعنى اعتماد الإجازة. هنا نقسم على **أيام الدوام المطلوبة**.
+    $sch_due     = max(0, $sch_total - $tally['excused']);
+    $sch_came    = $tally['present'] + $tally['late'];
+    $sch_pct     = $sch_due > 0 ? (int) round($sch_came / $sch_due * 100) : 100;
+    $sch_cols    = max(1, min(15, $sch_total));
+
+    // نِسَب الشريط المكدّس — على كل الأيام لأنه يعرض التركيب لا النسبة.
+    $sch_w = static fn (int $n): string => $sch_total > 0
+        ? (string) round($n / $sch_total * 100, 2) . '%'
+        : '0%';
     ?>
 
     <?php if ($days === []) : ?>
@@ -41,57 +52,85 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
         </div>
     <?php else : ?>
 
-        <!-- ملخص الحضور: حلقة كبيرة + أربع حالات -->
-        <div class="p-stat">
-            <span class="p-stat__ring">
-                <svg width="88" height="88" viewBox="0 0 88 88" aria-hidden="true">
-                    <circle cx="44" cy="44" r="39" fill="none" stroke="var(--p-alt)" stroke-width="8"/>
-                    <circle cx="44" cy="44" r="39" fill="none" stroke="var(--p-brand)" stroke-width="8" stroke-linecap="round"
-                            stroke-dasharray="<?php echo esc_attr((string) $circ); ?>"
-                            stroke-dashoffset="<?php echo esc_attr((string) round($circ * (1 - $rate / 100), 1)); ?>"
-                            transform="rotate(-90 44 44)"/>
-                </svg>
-                <b><?php echo esc_html(number_format($rate, 0)); ?><i>٪</i></b>
-            </span>
-            <div class="p-stat__grid">
-                <div class="p-stat__cell p-stat__cell--ok">
-                    <b class="p-nm"><?php echo esc_html(number_format_i18n($tally['present'])); ?></b>
-                    <span><?php echo esc_html(SCH_Attendance::STATUSES['present']); ?></span>
+        <!-- الحكم: رقم بطل + جملة تقولـه، ثم التركيب، ثم المفاتيح -->
+        <div class="p-score">
+            <div class="p-score__top">
+                <div class="p-score__n">
+                    <span class="p-amt"><span class="p-nm"><?php echo esc_html(number_format_i18n($sch_pct)); ?></span><i class="p-cur">٪</i></span>
                 </div>
-                <div class="p-stat__cell p-stat__cell--warn">
-                    <b class="p-nm"><?php echo esc_html(number_format_i18n($tally['late'])); ?></b>
-                    <span><?php echo esc_html(SCH_Attendance::STATUSES['late']); ?></span>
+                <div class="p-score__t">
+                    <b><?php echo esc_html(sprintf(
+                        /* translators: 1: أيام الحضور 2: أيام الدوام المطلوبة */
+                        __('حضر %1$s من %2$s أيام دوام', 'school-system'),
+                        number_format_i18n($sch_came),
+                        number_format_i18n($sch_due)
+                    )); ?></b>
+                    <span><?php echo esc_html($tally['excused'] > 0
+                        ? sprintf(
+                            /* translators: %s: عدد الأيام */
+                            _n('ويوم إجازة معتمدة لا يُحتسب غيابًا', 'و%s أيام إجازة معتمدة لا تُحتسب غيابًا', $tally['excused'], 'school-system'),
+                            number_format_i18n($tally['excused'])
+                        )
+                        : __('آخر ٦٠ يومًا', 'school-system')); ?></span>
                 </div>
-                <div class="p-stat__cell p-stat__cell--late">
-                    <b class="p-nm"><?php echo esc_html(number_format_i18n($tally['absent'])); ?></b>
-                    <span><?php echo esc_html(SCH_Attendance::STATUSES['absent']); ?></span>
-                </div>
-                <div class="p-stat__cell">
-                    <b class="p-nm"><?php echo esc_html(number_format_i18n($tally['excused'])); ?></b>
-                    <span><?php echo esc_html(SCH_Attendance::STATUSES['excused']); ?></span>
-                </div>
+            </div>
+
+            <div class="p-split" aria-hidden="true">
+                <?php if ($tally['present'] > 0) : ?><i class="is-ok" style="--w:<?php echo esc_attr($sch_w($tally['present'])); ?>"></i><?php endif; ?>
+                <?php if ($tally['late'] > 0) : ?><i class="is-warn" style="--w:<?php echo esc_attr($sch_w($tally['late'])); ?>"></i><?php endif; ?>
+                <?php if ($tally['absent'] > 0) : ?><i class="is-bad" style="--w:<?php echo esc_attr($sch_w($tally['absent'])); ?>"></i><?php endif; ?>
+                <?php if ($tally['excused'] > 0) : ?><i class="is-excused" style="--w:<?php echo esc_attr($sch_w($tally['excused'])); ?>"></i><?php endif; ?>
+            </div>
+
+            <div class="p-tally">
+                <?php foreach ([
+                    ['present', 'is-ok'],
+                    ['late',    'is-warn'],
+                    ['absent',  'is-bad'],
+                    ['excused', 'is-excused'],
+                ] as [$sch_k, $sch_cls]) : ?>
+                    <span class="p-tally__i <?php echo esc_attr($sch_cls); ?>">
+                        <i></i><?php echo esc_html(SCH_Attendance::STATUSES[$sch_k]); ?>
+                        <b><?php echo esc_html(number_format_i18n($tally[$sch_k])); ?></b>
+                    </span>
+                <?php endforeach; ?>
             </div>
         </div>
 
-        <!-- شبكة الأيام: لون كل مربّع يحكي حالته -->
-        <div class="p-sect"><h2 class="p-sect__h"><?php esc_html_e('كل يوم', 'school-system'); ?></h2></div>
-        <div class="p-grid60">
+        <!-- شريط الأيام: لون كل مربّع يحكي حالته، والأعمدة بعدد الأيام -->
+        <div class="p-sect">
+            <h2 class="p-sect__h"><?php esc_html_e('يومًا بيوم', 'school-system'); ?></h2>
+            <span class="p-sect__a"><?php echo esc_html(sprintf(
+                /* translators: 1: أول تاريخ 2: آخر تاريخ */
+                __('%1$s — %2$s', 'school-system'),
+                wp_date('j M', strtotime((string) end($days)->att_date)),
+                wp_date('j M', strtotime((string) $days[0]->att_date))
+            )); ?></span>
+        </div>
+        <div class="p-days" style="--n:<?php echo esc_attr((string) $sch_cols); ?>">
             <?php foreach (array_reverse($days) as $d) :
                 $tone = match ((string) $d->status) {
                     'present' => 'ok',
                     'late'    => 'warn',
                     'absent'  => 'late',
-                    default   => 'mute',
+                    default   => 'excused',
                 }; ?>
                 <i class="p-cell p-cell--<?php echo esc_attr($tone); ?>"
                    title="<?php echo esc_attr(wp_date('j M', strtotime((string) $d->att_date)) . ' · ' . (SCH_Attendance::STATUSES[$d->status] ?? '')); ?>"></i>
             <?php endforeach; ?>
         </div>
         <div class="p-legend">
-            <span><i style="background:var(--p-ok)"></i><?php echo esc_html(SCH_Attendance::STATUSES['present']); ?></span>
-            <span><i style="background:var(--p-warn)"></i><?php echo esc_html(SCH_Attendance::STATUSES['late']); ?></span>
-            <span><i style="background:var(--p-n3)"></i><?php echo esc_html(SCH_Attendance::STATUSES['absent']); ?></span>
-            <span><i style="background:var(--p-line-2)"></i><?php echo esc_html(SCH_Attendance::STATUSES['excused']); ?></span>
+            <?php /* لا يُعرض في الدليل إلا لونٌ ظهر فعلًا — الباقي تشويش */ ?>
+            <?php foreach ([
+                ['present', 'var(--p-ok)'],
+                ['late',    'var(--p-warn)'],
+                ['absent',  'var(--p-n3)'],
+                ['excused', 'var(--p-excused)'],
+            ] as [$sch_k, $sch_c]) : ?>
+                <?php if ($tally[$sch_k] > 0) : ?>
+                    <span><i style="background:<?php echo esc_attr($sch_c); ?>"></i><?php echo esc_html(SCH_Attendance::STATUSES[$sch_k]); ?></span>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
 
     <?php endif; ?>
