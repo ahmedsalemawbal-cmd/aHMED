@@ -82,13 +82,33 @@
   --sch-font-display: 'Cairo', system-ui, sans-serif;
   --sch-font-body:    'Cairo', system-ui, sans-serif;
 
-  --sch-text-xs:  11.5px;
-  --sch-text-sm:  13px;
-  --sch-text-base:14.5px;
-  --sch-text-lg:  17px;
-  --sch-text-xl:  22px;
-  --sch-text-2xl: 28px;
-  --sch-text-3xl: 38px;
+  /* ═══ سلّم الخط — ستّ درجات، كلٌّ عقد كامل لا رقم (v8.5) ═══
+     كان النظام يحمل ٢٣ مقاسًا، أكثرها محشور بين 9.5px و19px بقفزات نصف
+     بكسل لا تُرى — فتوقّف الحجم عن حمل الهرمية واستُنجد بالوزن بديلًا.
+     القاع مسطّح عمدًا: الفصل هناك بالوزن واللون، والقفزات تبدأ حيث تُرى. */
+  --sch-text-xs:  11.5px;   /* وسم · حالة · عدّاد */
+  --sch-text-sm:  13px;     /* نصّ ثانوي وتلميحات */
+  --sch-text-base:14.5px;   /* الأساس — الجداول والقوائم */
+  --sch-text-lg:  17px;     /* عنوان بطاقة أو قسم */
+  --sch-text-xl:  22px;     /* عنوان صفحة */
+  --sch-text-2xl: 28px;     /* رقم بطل */
+  --sch-text-3xl: 38px;     /* الرقم الأكبر وحده */
+
+  /* الأوزان: ثلاثة لا خمسة. العريض للأرقام والعناوين لا للنصّ الجاري. */
+  --sch-w-normal: 400;
+  --sch-w-medium: 600;
+  --sch-w-bold:   700;
+
+  /* ارتفاع السطر رمزًا مربوطًا بالدرجة — نصف الإحساس بـ«الكِبَر» كان هنا:
+     1.65 مفروضة على كل شيء تجعل رقمًا بـ28px يجلس في صندوق 46px.
+     والعربية تحتاج رصاصًا أكثر من اللاتينية للتشكيل والنزلات. */
+  --sch-lh-tight: 1.15;   /* الأرقام البطلة ≥22px */
+  --sch-lh-snug:  1.35;   /* العناوين */
+  --sch-lh-ui:    1.55;   /* الجداول والقوائم والتنقّل */
+  --sch-lh-read:  1.8;    /* النثر العربي */
+
+  /* حقول الجوال: دون 16px يُقرّب iOS الصفحة عند التركيز */
+  --sch-text-input: 16px;
 
   /* ═══ إيقاع من 4 ═══ */
   --sch-1: 4px;  --sch-2: 8px;  --sch-3: 12px;
@@ -218,8 +238,8 @@
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
 }
 .sch-hd__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.sch-hd__who b { display: block; font-size: 16px; letter-spacing: -.01em; }
-.sch-hd__who span { display: block; font-size: 11px; color: #8FA0B6; letter-spacing: .05em; }
+.sch-hd__who b { display: block; font-size: var(--sch-text-base); letter-spacing: -.01em; }
+.sch-hd__who span { display: block; font-size: var(--sch-text-xs); color: #8FA0B6; letter-spacing: .05em; }
 .sch-hd__act {
   width: 36px; height: 36px; border-radius: 11px; flex: 0 0 auto;
   background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
@@ -233,11 +253,11 @@
   display: flex; align-items: center; justify-content: center;
   background: rgba(45,212,191,.13); border: 1px solid rgba(45,212,191,.3);
 }
-.sch-now__no b { font-size: 19px; color: #9FB4FF; font-variant-numeric: tabular-nums; }
+.sch-now__no b { font-size: var(--sch-text-lg); color: #9FB4FF; font-variant-numeric: tabular-nums; }
 .sch-now__txt { flex: 1; min-width: 0; }
-.sch-now__txt b { display: block; font-size: 16px; }
-.sch-now__txt span { display: block; font-size: 11px; color: #8FA0B6; }
-.sch-now__pct { font-size: 11px; color: #9FB4FF; font-variant-numeric: tabular-nums; }
+.sch-now__txt b { display: block; font-size: var(--sch-text-base); }
+.sch-now__txt span { display: block; font-size: var(--sch-text-xs); color: #8FA0B6; }
+.sch-now__pct { font-size: var(--sch-text-xs); color: #9FB4FF; font-variant-numeric: tabular-nums; }
 .sch-now__bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,.1); margin-top: 12px; overflow: hidden; }
 .sch-now__bar i { display: block; height: 100%; background: #9FB4FF; border-radius: 99px; }
 
@@ -254,10 +274,10 @@
   background: var(--sch-surface, #fff); border: 1px solid var(--sch-line-strong, #DFE5EC);
   box-shadow: 0 1px 1px rgba(13,21,32,.04), 0 2px 6px -2px rgba(13,21,32,.1);
 }
-.sch-slot__dot b { font-size: 16px; color: var(--sch-ink-soft, #2C3A4B); font-variant-numeric: tabular-nums; }
+.sch-slot__dot b { font-size: var(--sch-text-base); color: var(--sch-ink-soft, #2C3A4B); font-variant-numeric: tabular-nums; }
 .sch-slot__txt { flex: 1; min-width: 0; }
-.sch-slot__txt b { display: block; font-size: 15px; }
-.sch-slot__txt span { display: block; font-size: 11px; color: var(--sch-muted, #71829A); font-variant-numeric: tabular-nums; }
+.sch-slot__txt b { display: block; font-size: var(--sch-text-base); }
+.sch-slot__txt span { display: block; font-size: var(--sch-text-xs); color: var(--sch-muted, #71829A); font-variant-numeric: tabular-nums; }
 .sch-slot--done { opacity: .42; }
 .sch-slot--done .sch-slot__dot { background: var(--sch-bg, #F7F8FA); box-shadow: none; }
 .sch-slot--now .sch-slot__dot {
@@ -276,7 +296,7 @@
 .sch-ring.is-warn .fg { stroke: var(--sch-warn, #B4690E); }
 .sch-ring b {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-variant-numeric: tabular-nums; color: var(--sch-ink-soft, #2C3A4B);
+  font-size: var(--sch-text-xs); font-variant-numeric: tabular-nums; color: var(--sch-ink-soft, #2C3A4B);
 }
 
 /* عنوان قسم */
@@ -286,7 +306,7 @@
 }
 /* بلا تتبّع موجب: التباعد يفكّ وصل الحروف العربية فتتوقّف الكلمة عن كونها كلمة */
 .sch-sect h2 { margin: 0; font-size: var(--sch-text-xs); color: var(--sch-muted, #9DAABC); font-weight: 600; }
-.sch-sect span { font-size: 11px; color: var(--sch-muted, #9DAABC); font-variant-numeric: tabular-nums; }
+.sch-sect span { font-size: var(--sch-text-xs); color: var(--sch-muted, #9DAABC); font-variant-numeric: tabular-nums; }
 
 /* بند مشكلة */
 .sch-prob {
@@ -300,7 +320,7 @@
 .sch-prob--t { border-inline-start-color: var(--sch-accent, #5170FF); }
 .sch-prob--clear { opacity: .5; border-inline-start-color: var(--sch-success, #0E7C56); }
 .sch-prob__n {
-  min-width: 38px; text-align: center; font-size: 26px; font-weight: 700;
+  min-width: 38px; text-align: center; font-size: var(--sch-text-2xl); font-weight: 700;
   font-variant-numeric: tabular-nums; letter-spacing: -.03em;
 }
 .sch-prob--r .sch-prob__n { color: var(--sch-danger, #B3251F); }
@@ -308,8 +328,8 @@
 .sch-prob--t .sch-prob__n { color: var(--sch-accent, #5170FF); }
 .sch-prob--clear .sch-prob__n { color: var(--sch-success, #0E7C56); }
 .sch-prob__t { flex: 1; min-width: 0; }
-.sch-prob__t b { display: block; font-size: 15px; }
-.sch-prob__t span { display: block; font-size: 13px; color: var(--sch-muted, #71829A); }
+.sch-prob__t b { display: block; font-size: var(--sch-text-base); }
+.sch-prob__t span { display: block; font-size: var(--sch-text-sm); color: var(--sch-muted, #71829A); }
 
 /* شبكة الوجوه */
 .sch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px; }
@@ -320,15 +340,15 @@
 .sch-tile__face {
   width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 9px; position: relative;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px; font-weight: 700; overflow: hidden;
+  font-size: var(--sch-text-xl); font-weight: 700; overflow: hidden;
   background: var(--sch-accent-soft, #EEF2FF); color: var(--sch-accent, #5170FF);
 }
 .sch-tile__face img { width: 100%; height: 100%; object-fit: cover; }
 .sch-tile--wait .sch-tile__face { box-shadow: 0 0 0 3px var(--sch-warn, #B4690E); }
-.sch-tile b { display: block; font-size: 13px; line-height: 1.45; }
+.sch-tile b { display: block; font-size: var(--sch-text-sm); line-height: 1.45; }
 .sch-tile__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
 .sch-mini {
-  padding: 10px 2px; font-family: inherit; font-size: 12px; font-weight: 700;
+  padding: 10px 2px; font-family: inherit; font-size: var(--sch-text-xs); font-weight: 700;
   border-radius: 10px; border: 1px solid var(--sch-line-strong, #DFE5EC);
   background: var(--sch-bg, #F7F8FA); cursor: pointer;
 }
@@ -336,7 +356,7 @@
 .sch-mini--n { color: var(--sch-danger, #B3251F); }
 .sch-state {
   display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
-  padding: 3px 11px; border-radius: 99px; font-size: 11px; font-weight: 700;
+  padding: 3px 11px; border-radius: 99px; font-size: var(--sch-text-xs); font-weight: 700;
 }
 .sch-state i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .sch-state--ok { background: var(--sch-success-soft, #E9F7F0); color: var(--sch-success, #0E7C56); }
@@ -353,8 +373,8 @@
 }
 .sch-memo__k { font-size: var(--sch-text-xs); color: #A9884A; font-weight: 600; }
 .sch-memo dl { margin: 12px 0 0; display: grid; gap: 11px; }
-.sch-memo dt { font-size: 11px; color: #A9884A; margin-bottom: 2px; }
-.sch-memo dd { margin: 0; font-size: 15px; color: #4A3A18; line-height: 1.65; }
+.sch-memo dt { font-size: var(--sch-text-xs); color: #A9884A; margin-bottom: 2px; }
+.sch-memo dd { margin: 0; font-size: var(--sch-text-base); color: #4A3A18; line-height: 1.65; }
 
 /* رسالة عابرة */
 .sch-toast {
@@ -362,12 +382,12 @@
   padding: 13px 18px; border-radius: 16px;
   background: var(--sch-chrome, #0D1520); color: #EEF2F7;
   box-shadow: 0 2px 4px rgba(13,21,32,.06), 0 22px 40px -18px rgba(13,21,32,.5);
-  font-size: 13px; text-align: center;
+  font-size: var(--sch-text-sm); text-align: center;
   opacity: 0; transform: translateY(12px);
   transition: opacity .25s, transform .25s; pointer-events: none;
 }
 .sch-toast.is-on { opacity: 1; transform: none; }
-.sch-toast b { display: block; font-size: 15px; margin-bottom: 1px; }
+.sch-toast b { display: block; font-size: var(--sch-text-base); margin-bottom: 1px; }
 
 @media (prefers-reduced-motion: reduce) {
   .sch-ring .fg, .sch-toast { transition: none; }
@@ -455,7 +475,7 @@
 .sch-pull {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   height: 0; overflow: hidden;
-  font-size: 12px; color: var(--sch-muted, #71829A);
+  font-size: var(--sch-text-xs); color: var(--sch-muted, #71829A);
   transition: height var(--sch-t-out);
 }
 .sch-pull.is-on { height: 38px; }
@@ -542,7 +562,7 @@
   border-radius: 0 0 12px 12px;
   background: var(--sch-chrome, #0D1520);
   color: #fff;
-  font-size: 14px;
+  font-size: var(--sch-text-base);
   text-decoration: none;
 
   width: 1px;
@@ -576,8 +596,8 @@
   background: var(--sch-accent-soft, #EEF2FF);
   color: var(--sch-accent, #5170FF);
 }
-.sch-blank strong { display: block; font-size: 17px; color: var(--sch-ink, #0D1520); margin-bottom: 4px; }
-.sch-blank p { margin: 0 0 14px; font-size: 13px; line-height: 1.8; }
+.sch-blank strong { display: block; font-size: var(--sch-text-lg); color: var(--sch-ink, #0D1520); margin-bottom: 4px; }
+.sch-blank p { margin: 0 0 14px; font-size: var(--sch-text-sm); line-height: 1.8; }
 
 @media (prefers-reduced-motion: reduce) {
   .is-sending::after { animation: none; }

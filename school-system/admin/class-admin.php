@@ -55,7 +55,7 @@ final class SCH_Admin
         // خطوط عربية: Amiri للعناوين، IBM Plex Sans Arabic للمحتوى.
         wp_enqueue_style(
             'sch-fonts',
-            'https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap',
+            'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap',
             [],
             null
         );
