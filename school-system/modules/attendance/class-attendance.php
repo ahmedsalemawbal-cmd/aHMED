@@ -112,7 +112,7 @@ final class SCH_Attendance
         global $wpdb;
 
         return $wpdb->get_results($wpdb->prepare(
-            'SELECT s.id, s.full_name, a.status, a.method, a.note
+            'SELECT s.id, s.full_name, a.status, a.method, a.note, a.checked_in_at, a.minutes_late
              FROM ' . sch_table('enrollments') . ' e
              INNER JOIN ' . sch_table('students') . ' s ON s.id = e.student_id
              LEFT JOIN ' . sch_table('attendance') . ' a ON a.student_id = s.id AND a.att_date = %s
