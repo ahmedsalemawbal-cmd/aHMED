@@ -41,14 +41,28 @@ final class SCH_Auth
 
     public static function login(WP_REST_Request $req): WP_REST_Response|WP_Error
     {
-        $user = wp_authenticate(
-            sanitize_user((string) $req->get_param('username')),
-            (string) $req->get_param('password')
-        );
+        $username = sanitize_user((string) $req->get_param('username'));
+
+        // شاشة الداشبورد تقفل بعد خمس محاولات، وهذا المسار كان بلا أي حدّ —
+        // فصار الطريق الجانبي المفتوح لتجربة كلمات المرور، يتجاوز القفل تمامًا.
+        if (self::is_throttled($username)) {
+            return sch_api_error(
+                'too_many_attempts',
+                __('محاولات كثيرة. انتظر ربع ساعة ثم أعد المحاولة.', 'school-system'),
+                429
+            );
+        }
+
+        $user = wp_authenticate($username, (string) $req->get_param('password'));
 
         if (is_wp_error($user)) {
+            self::count_failure($username);
+
+            // رسالة واحدة لكل فشل: «اسم غير موجود» تكشف من هو مسجَّل ومن ليس.
             return sch_api_error('invalid_credentials', __('بيانات الدخول غير صحيحة.', 'school-system'), 401);
         }
+
+        self::clear_failures($username);
 
         $device_id = sanitize_text_field((string) $req->get_param('device_id'));
         $refresh   = self::issue_refresh_token($user->ID, $device_id, (string) $req->get_param('device_name'));
@@ -83,9 +97,26 @@ final class SCH_Auth
             return sch_api_error('invalid_refresh_token', __('الجلسة منتهية. سجّل الدخول من جديد.', 'school-system'), 401);
         }
 
+        // صاحب الرمز قد يكون حُذف أو أُوقف بعد إصداره — والرمز يعيش ٣٠ يومًا.
+        $user_id = (int) $row->user_id;
+        if (!get_userdata($user_id)) {
+            $wpdb->update(sch_table('refresh_tokens'), ['revoked_at' => sch_now()], ['id' => (int) $row->id]);
+
+            return sch_api_error('invalid_refresh_token', __('الجلسة منتهية. سجّل الدخول من جديد.', 'school-system'), 401);
+        }
+
+        // **تدوير الرمز:** الرمز المستهلك يُلغى ويُصدر بديله. بلا تدوير يبقى
+        // رمز مسروق صالحًا شهرًا كاملًا بلا أثر ولا طريقة لكشف الاستخدام المزدوج.
+        $fresh = self::issue_refresh_token(
+            $user_id,
+            (string) $row->device_id,
+            (string) ($row->device_name ?? '')
+        );
+
         return new WP_REST_Response([
-            'access_token' => self::issue_access_token((int) $row->user_id),
-            'expires_in'   => self::ACCESS_TTL,
+            'access_token'  => self::issue_access_token($user_id),
+            'refresh_token' => $fresh,
+            'expires_in'    => self::ACCESS_TTL,
         ]);
     }
 
@@ -171,29 +202,89 @@ final class SCH_Auth
         return $token;
     }
 
+    // ---------- حدّ المحاولات ----------
+
+    private const MAX_ATTEMPTS = 5;
+    private const LOCK_MINUTES = 15;
+
+    /** مفتاح العدّاد: الاسم + IP — فلا يُقفل حساب موظف بمحاولات من شبكة أخرى. */
+    private static function throttle_key(string $username): string
+    {
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+
+        return 'sch_api_try_' . md5(strtolower($username) . '|' . $ip);
+    }
+
+    private static function is_throttled(string $username): bool
+    {
+        return (int) get_transient(self::throttle_key($username)) >= self::MAX_ATTEMPTS;
+    }
+
+    private static function count_failure(string $username): void
+    {
+        $key = self::throttle_key($username);
+
+        set_transient($key, (int) get_transient($key) + 1, self::LOCK_MINUTES * MINUTE_IN_SECONDS);
+    }
+
+    private static function clear_failures(string $username): void
+    {
+        delete_transient(self::throttle_key($username));
+    }
+
+    // ---------- التوقيع ----------
+
+    /**
+     * مفتاح التوقيع — **ويُولَّد إن غاب**.
+     *
+     * كان يُولَّد في `SCH_Activator::activate()` وحدها. ومن نسخ مجلد الإضافة
+     * يدويًا بلا تفعيل (وهذا ما يحدث عند التسليم بملف ZIP)، أو حُذف الخيار من
+     * قاعدته، يصير المفتاح نصًّا فارغًا — و`hash_hmac` بمفتاح فارغ نتيجة
+     * **يستطيع أي أحد حسابها**، فيُوقّع رمزًا صالحًا لأي مستخدم بما فيه المدير.
+     *
+     * الآن: يُولَّد عند أول حاجة، ويُرفض التوقيع والتحقق إن كان أقصر من 32 بايتًا.
+     */
     private static function secret(): string
     {
-        return (string) get_option('sch_jwt_secret', '');
+        $secret = (string) get_option('sch_jwt_secret', '');
+
+        if (strlen($secret) < 32) {
+            $secret = wp_generate_password(64, true, true);
+            update_option('sch_jwt_secret', $secret, false);
+            sch_audit('auth.secret_generated', 'system');
+        }
+
+        return $secret;
     }
 
     private static function encode(array $payload): string
     {
+        $secret = self::secret();
+        if (strlen($secret) < 32) {
+            return '';
+        }
+
         $header = self::b64(wp_json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
         $body   = self::b64(wp_json_encode($payload));
-        $sig    = self::b64(hash_hmac('sha256', "{$header}.{$body}", self::secret(), true));
+        $sig    = self::b64(hash_hmac('sha256', "{$header}.{$body}", $secret, true));
 
         return "{$header}.{$body}.{$sig}";
     }
 
     private static function decode(string $jwt): ?array
     {
+        $secret = self::secret();
+        if (strlen($secret) < 32) {
+            return null; // بلا مفتاح صالح لا يُقبل أي رمز — الرفض أسلم من القبول.
+        }
+
         $parts = explode('.', $jwt);
         if (count($parts) !== 3) {
             return null;
         }
         [$header, $body, $sig] = $parts;
 
-        $expected = self::b64(hash_hmac('sha256', "{$header}.{$body}", self::secret(), true));
+        $expected = self::b64(hash_hmac('sha256', "{$header}.{$body}", $secret, true));
         if (!hash_equals($expected, $sig)) {
             return null;
         }

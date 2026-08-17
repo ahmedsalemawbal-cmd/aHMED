@@ -51,6 +51,11 @@ final class SCH_Activator
 
             update_option('sch_db_version', SCH_VERSION);
 
+            // المفتاح كان يُضبط عند التفعيل وحده — فمن رقّى نسخةً نُسخت يدويًا
+            // بلا تفعيل يبقى بلا مفتاح. و`SCH_Auth::secret()` تولّده أيضًا عند
+            // أول حاجة، وهذه الطبقة الثانية تضمنه قبل أول طلب API.
+            update_option('sch_jwt_secret', self::ensure_secret(), false);
+
             // الترقية قد تضيف قسمًا أو واجهة — فتُعاد قواعد التوجيه كلها.
             delete_option('sch_rewrite_version');
 
