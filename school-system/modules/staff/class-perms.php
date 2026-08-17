@@ -29,7 +29,17 @@ final class SCH_Perms
         'own'   => 'فصوله وطلابه فقط',
     ];
 
-    /** أقسام لا تُمنح لأحد إطلاقًا، ومعها سببها. */
+    /**
+     * أقسام **سجلّها غير قابل للتعديل**، ومعها سببها.
+     *
+     * القفل هنا على **الكتابة** لا على القراءة: كلا السببين يقول «للقراءة فقط».
+     * ولا تُمنح في طبقة الصلاحيات المخصصة إطلاقًا — القراءة تأتي من صلاحية
+     * الدور (`sch_view_custody` · `sch_view_audit`) كما تنصّ عليه `SECTIONS`.
+     *
+     * كان `may()` يرفض هذين القسمين في القراءة أيضًا، فصارا **يردّان 403 على
+     * الجميع بما فيهم المدير** — قسمان في التنقّل بملف عرض لا يُفتحان أبدًا.
+     * ولوحة العهدة هي قلب سلسلة العهدة، وسجل النظام لا قيمة له إن لم يُقرأ.
+     */
     public const LOCKED = [
         'custody' => 'سجل العهدة لا يُعدَّل — الخطأ يُصحَّح بحدث مضاد لا بمحو، وسجل يُمحى لا يصلح دليلًا',
         'audit'   => 'سجل النظام للقراءة فقط — تعديله يُبطل قيمته كسجل',
@@ -94,7 +104,13 @@ final class SCH_Perms
     /**
      * هل يملك المستخدم هذا القسم؟
      *
-     * المقفل يُرفض دائمًا ولو مُنح بالخطأ — الحماية في القراءة لا في الكتابة وحدها.
+     * **قفلان مختلفان لا قفل واحد:**
+     * · `LOCKED_FOR` جدار بيانات على الدور (الحارس والسائق لا يريان صحيًا ولا سلوكيًا)
+     *   — يُرفض في القراءة والكتابة معًا.
+     * · `LOCKED` سجل غير قابل للتعديل (العهدة والتدقيق) — يُرفض في **الكتابة وحدها**،
+     *   والقراءة تحكمها صلاحية الدور التي فحصها الموجّه قبل هذا النداء.
+     *
+     * دمجهما في فحص واحد كان يُغلق قسمَي «لوحة العهدة» و«سجل النظام» على الجميع.
      */
     public static function may(string $section, string $mode = 'view', ?int $user_id = null): bool
     {
@@ -104,8 +120,14 @@ final class SCH_Perms
             return false;
         }
 
-        if (self::is_locked($section, $user_id)) {
+        // جدار الدور: لا قراءة ولا كتابة.
+        if (self::is_denied_for_role($section, $user_id)) {
             return false;
+        }
+
+        // سجل غير قابل للتعديل: الكتابة مرفوضة دائمًا، والقراءة من صلاحية الدور.
+        if (isset(self::LOCKED[$section])) {
+            return $mode !== 'edit';
         }
 
         if (self::expired($user_id)) {
@@ -126,12 +148,13 @@ final class SCH_Perms
         return $mode === 'edit' ? $map[$section]['edit'] : $map[$section]['view'];
     }
 
-    public static function is_locked(string $section, ?int $user_id = null): bool
+    /**
+     * هل هذا القسم **ممنوع على دور هذا المستخدم**؟ (جدار بيانات)
+     *
+     * منفصل عن `LOCKED` عمدًا: هذا يمنع الرؤية، وذاك يمنع التعديل وحده.
+     */
+    public static function is_denied_for_role(string $section, ?int $user_id = null): bool
     {
-        if (isset(self::LOCKED[$section])) {
-            return true;
-        }
-
         $user = get_userdata($user_id ?? get_current_user_id());
 
         if (!$user) {
@@ -145,6 +168,18 @@ final class SCH_Perms
         }
 
         return false;
+    }
+
+    /**
+     * هل هذا القسم **لا يُمنح في طبقة الصلاحيات المخصصة**؟
+     *
+     * تجمع الحالتين: سجل غير قابل للتعديل، أو جدار بيانات على الدور.
+     * تخدم شاشة الصلاحيات (تعرضه رماديًا ومعه سببه) و`save()` (لا تخزّن له صفًا).
+     * **لا تستعملها بوابةً للقراءة** — لذلك `may()` وحدها.
+     */
+    public static function is_locked(string $section, ?int $user_id = null): bool
+    {
+        return isset(self::LOCKED[$section]) || self::is_denied_for_role($section, $user_id);
     }
 
     /** سبب القفل — يُعرض في الشاشة فيفهم الموظف لماذا مُنع. */
