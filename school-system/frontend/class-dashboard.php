@@ -283,6 +283,7 @@ final class SCH_Dashboard
             'close_note'       => ['sch_handle_notes',     'do_close_note'],
             'contact_parent'   => ['sch_handle_notes',     'do_contact_parent'],
             'mark_staff'       => ['sch_supervise_stage',  'do_mark_staff'],
+            'mark_staff_bulk'  => ['sch_supervise_stage',  'do_mark_staff_bulk'],
             'assign_sub'       => ['sch_supervise_stage',  'do_assign_sub'],
             'submit_timetable' => ['sch_build_timetable',  'do_submit_timetable'],
             'publish_timetable'=> ['sch_approve_timetable','do_publish_timetable'],
@@ -715,6 +716,25 @@ final class SCH_Dashboard
             (string) ($d['status'] ?? ''),
             (string) ($d['note'] ?? '')
         );
+    }
+
+    /** حفظ كشف حضور الموظفين دفعةً واحدة — نفس نمط رصد الطلاب. */
+    private static function do_mark_staff_bulk(array $d, int $id): bool|WP_Error
+    {
+        $statuses = (array) ($d['status'] ?? []);
+
+        foreach ($statuses as $user_id => $status) {
+            $status = (string) $status;
+            if ($status === '') {
+                continue; // «لم يُرصد» يُترك كما هو، لا يُكتب
+            }
+            $result = SCH_Deputy::mark_staff(absint($user_id), $status);
+            if (is_wp_error($result)) {
+                return $result;
+            }
+        }
+
+        return true;
     }
 
     private static function do_assign_sub(array $d, int $id): bool|WP_Error
