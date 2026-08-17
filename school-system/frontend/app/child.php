@@ -147,7 +147,9 @@ if ($leave) {
 </div>
 
 <!-- ═════ خيط اليوم — القلب: ما مضى، وأين هو الآن، وما بقي ═════ -->
-<div class="p-sect"><h2 class="p-sect__h"><?php esc_html_e('يومه', 'school-system'); ?></h2><a class="p-sect__a" href="<?php echo esc_url(SCH_App::url('log', $id)); ?>"><?php esc_html_e('كل السجل', 'school-system'); ?></a></div>
+<?php /* بلا رابط «كل السجل»: تبويب «السجل» في الشريط السفلي يذهب إليه نفسه،
+         ومدخلان لمكان واحد في شاشة واحدة حشوٌ يزاحم العنوان. */ ?>
+<div class="p-sect"><h2 class="p-sect__h"><?php esc_html_e('يومه', 'school-system'); ?></h2></div>
 
 <ol class="p-thr">
     <?php foreach ($thread as $ev) : ?>

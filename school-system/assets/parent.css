@@ -1571,7 +1571,10 @@ textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui);
 /* ---------- عنوان قسم ---------- */
 .p-sect { display: flex; align-items: baseline; justify-content: space-between; margin: var(--p-5) 2px var(--p-3); }
 .p-sect__h { font-size: var(--p-t3); font-weight: 700; }
-.p-body a.p-sect__a { font-size: var(--p-t5); color: var(--p-brand-ink); font-weight: 600; }
+/* الطرف الثاني من رأس القسم: تعليقٌ هادئ أيًّا كان عنصره — و`a` وحدها
+   تحتاج المحدِّد المؤهَّل لتغلب `body.p-body a { color: inherit }`. */
+.p-sect__a { font-size: var(--p-t5); color: var(--p-faint); font-weight: 600; }
+.p-body a.p-sect__a { color: var(--p-brand-ink); }
 
 /* ═════ «خيط اليوم» — قلب الشاشة ═════
 
