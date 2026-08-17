@@ -236,6 +236,8 @@
         if (ok) {
           showMsg('ok', 'تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.');
           form.reset();
+          // حدث تحويل لبكسل تيك توك (تحسين الحملة الإعلانية)
+          if (window.ttq) { try { ttq.track('CompleteRegistration'); } catch (e) {} }
         } else {
           // رجوع لواتساب حتى لا يضيع الطلب.
           var wa = data.whatsapp ? 'https://wa.me/' + data.whatsapp + '?text=' + encodeURIComponent(buildWaText(payload)) : null;

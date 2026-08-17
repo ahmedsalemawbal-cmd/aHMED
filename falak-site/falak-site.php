@@ -3,7 +3,7 @@
  * Plugin Name:       مدرسة الفلك المنير — Al-Falak Al-Munir Quran School
  * Plugin URI:        https://alfalak-almunir.com
  * Description:        موقع «مدرسة الفلك المنير» (مدرسة عامة) — واجهة عربية RTL كاملة + داش بورد مستقلة ببوابة دخول لإدارة التسجيلات والمعرض والمعلمين والتقييمات، ونظام تسجيل طلاب احترافي بمراحل ديناميكية حسب النوع، وسلايدرات معرض وتقييمات. مبنية على نمط إضافة «أصول البناء».
- * Version:           2.1.0
+ * Version:           2.2.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            مدرسة الفلك المنير
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // حماية من التحميل المزدوج.
 if ( defined( 'FALAK_VERSION' ) ) { return; }
 
-define( 'FALAK_VERSION', '2.1.0' );
+define( 'FALAK_VERSION', '2.2.0' );
 define( 'FALAK_FILE', __FILE__ );
 define( 'FALAK_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FALAK_URL', plugin_dir_url( __FILE__ ) );
@@ -40,6 +40,7 @@ $falak_modules = array(
 	'inc/pages.php',         // إنشاء صفحات ووردبريس المطلوبة
 	'inc/performance.php',   // تحميل الأصول + تلميحات الموارد + تنظيف
 	'inc/seo.php',           // ميتا، canonical، schema.org
+	'inc/tracking.php',      // بكسل تيك توك + أحداث التحويل
 	'inc/favicon.php',       // أيقونة الموقع (favicon)
 	'inc/header.php',        // ترويسة الموقع
 	'inc/footer.php',        // تذييل الموقع + الأزرار العائمة
