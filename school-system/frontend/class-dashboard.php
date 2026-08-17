@@ -304,6 +304,8 @@ final class SCH_Dashboard
             'add_year'         => ['sch_manage_settings',  'do_add_year'],
             'set_year'         => ['sch_manage_settings',  'do_set_year'],
             'save_settings'    => ['sch_manage_settings',  'do_save_settings'],
+            'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
+            'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
             'import_students'  => ['sch_manage_students',  'do_import'],
 
             'mark_attendance'  => ['sch_manage_attendance', 'do_mark_attendance'],
@@ -1170,9 +1172,19 @@ final class SCH_Dashboard
         return SCH_Years::set_current(absint($d['year_id'] ?? 0));
     }
 
+    /** دمج مفاتيح في إعدادات المدرسة بلا مسح البقية — لكل قسم نموذجه. */
+    private static function merge_settings(array $patch): void
+    {
+        $s = sch_settings();
+        if (!is_array($s)) {
+            $s = [];
+        }
+        update_option('sch_settings', array_merge($s, $patch));
+    }
+
     private static function do_save_settings(array $d, int $id): bool
     {
-        update_option('sch_settings', [
+        self::merge_settings([
             'school_name'  => sanitize_text_field((string) ($d['school_name'] ?? '')),
             'school_phone' => sch_normalize_phone((string) ($d['school_phone'] ?? '')),
             'school_email' => sanitize_email((string) ($d['school_email'] ?? '')),
@@ -1180,7 +1192,41 @@ final class SCH_Dashboard
             'moe_id'       => sanitize_text_field((string) ($d['moe_id'] ?? '')),
         ]);
 
-        sch_audit('settings.updated');
+        sch_audit('settings.updated', 'settings', null, ['section' => 'school']);
+        return true;
+    }
+
+    /** مواعيد اليوم الدراسي — تُغذّي حساب الحضور والتأخّر. */
+    private static function do_save_timing(array $d, int $id): bool
+    {
+        $time = static fn (mixed $v): string => preg_match('/^\d{2}:\d{2}$/', (string) $v) ? (string) $v : '';
+
+        self::merge_settings([
+            'attendance_student_in' => $time($d['attendance_student_in'] ?? ''),
+            'attendance_staff_in'   => $time($d['attendance_staff_in'] ?? ''),
+            'attendance_grace'      => (string) max(0, min(120, absint($d['attendance_grace'] ?? 10))),
+            'attendance_day_end'    => $time($d['attendance_day_end'] ?? ''),
+        ]);
+
+        sch_audit('settings.updated', 'settings', null, ['section' => 'timing']);
+        return true;
+    }
+
+    /** حدود الإنذارات — تُغذّي الحارس الآلي (SCH_Alerts). */
+    private static function do_save_alerts(array $d, int $id): bool
+    {
+        $time = static fn (mixed $v): string => preg_match('/^\d{2}:\d{2}$/', (string) $v) ? (string) $v : '';
+
+        self::merge_settings([
+            'alert_bus_no_board_at'  => $time($d['alert_bus_no_board_at'] ?? ''),
+            'alert_bus_arrival_by'   => $time($d['alert_bus_arrival_by'] ?? ''),
+            'alert_attendance_by'    => $time($d['alert_attendance_by'] ?? ''),
+            'alert_dismissal_at'     => $time($d['alert_dismissal_at'] ?? ''),
+            'alert_still_at_school'  => (string) max(0, min(180, absint($d['alert_still_at_school'] ?? 30))),
+            'alert_referral_minutes' => (string) max(1, min(120, absint($d['alert_referral_minutes'] ?? 10))),
+        ]);
+
+        sch_audit('settings.updated', 'settings', null, ['section' => 'alerts']);
         return true;
     }
 

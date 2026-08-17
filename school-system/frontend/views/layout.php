@@ -70,8 +70,11 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             </a>
 
             <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الأقسام', 'school-system'); ?>">
-                <?php $sch_i = 0; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++; ?>
-                    <div class="sch-side__grp" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
+                <?php $sch_i = 0; $sch_parea = ''; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++;
+                    $sch_area = (string) explode('|', (string) $sch_key)[0];
+                    $sch_area_new = ($sch_area !== $sch_parea && $sch_i > 1);
+                    $sch_parea = $sch_area; ?>
+                    <div class="sch-side__grp<?php echo $sch_area_new ? ' is-area' : ''; ?>" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
                         <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
                             <?php echo sch_icon((string) $sch_g['icon'], 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                             <span><?php echo esc_html($sch_g['label']); ?></span>
