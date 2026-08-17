@@ -17,6 +17,7 @@ final class SCH_Staff
         'sch_content'              => 'منسق المحتوى التعليمي',
         'sch_teacher'              => 'معلم',
         'sch_accountant'           => 'محاسب',
+        'sch_hr'                   => 'مسؤول الموارد البشرية والعمليات',
         'sch_transport_supervisor' => 'مشرف نقل',
         'sch_driver'               => 'سائق',
         'sch_guard'                => 'حارس البوابة',

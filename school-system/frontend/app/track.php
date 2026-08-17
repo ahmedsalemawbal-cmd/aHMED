@@ -70,6 +70,19 @@ $trip  = $today['trip'];
     <span hidden id="trk-kid-s"></span>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<?php
+/**
+ * Leaflet مستضاف محليًا (‎assets/vendor/leaflet/‎ — 1.9.4، 192 KB).
+ *
+ * كان يُحمَّل من ‎unpkg.com‎ بلا SRI وبلا بديل. وشاشة التتبع الحي هي
+ * «الميزة المميزة للمنتج» بنص الوثيقة — فتعليقها على CDN خارجي يعني:
+ * · شبكة مدرسة مُرشَّحة أو انقطاع عند unpkg = **خريطة بيضاء** لكل أب،
+ *   في اللحظة التي يريد فيها معرفة أين ابنه.
+ * · وبلا SRI، أي تغيير في الملف عند الطرف الثالث يُنفَّذ في متصفح الأب.
+ *
+ * البلاطات تبقى من OpenStreetMap (قرار موثّق) — والمكتبة عندنا.
+ */
+?>
+<link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/vendor/leaflet/leaflet.css')); ?>">
+<script src="<?php echo esc_url(sch_asset('assets/vendor/leaflet/leaflet.js')); ?>" defer></script>
 <script src="<?php echo esc_url(sch_asset('assets/track.js')); ?>" defer></script>

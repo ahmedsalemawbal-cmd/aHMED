@@ -21,8 +21,13 @@ final class SCH_Org
         'sch_supervisor' => 40,
         'sch_counselor'  => 30,
         'sch_content'    => 30,
-        'sch_transport'  => 30,
+        // الاسم الصحيح للدور ‎sch_transport_supervisor‎ — وكان مكتوبًا
+        // ‎sch_transport‎ فيقرأ ‎level_of()‎ صفرًا، و‎can_create()‎ يشترط
+        // مستوى أكبر من صفر: فلم يستطع **أحد** إنشاء مشرف نقل إلا المدير
+        // العام (يتجاوز الفحص بـ‎manage_options‎). خطأ اسم لا خطأ منطق.
+        'sch_transport_supervisor' => 30,
         'sch_accountant' => 30,
+        'sch_hr'         => 30,
         'sch_staff'      => 20,
         'sch_teacher'    => 20,
         'sch_guard'      => 10,

@@ -1453,6 +1453,20 @@ final class SCH_Activator
                 'label' => __('موظف إداري', 'school-system'),
                 'caps'  => ['read', 'sch_view_students', 'sch_manage_students', 'sch_manage_guardians', 'sch_manage_services', 'sch_view_health', 'sch_manage_docs', 'sch_handle_notes', 'sch_manage_meds'],
             ],
+            /**
+             * مسؤول الموارد البشرية والعمليات.
+             *
+             * ‎sch_manage_hr‎ و‎sch_manage_assets‎ كانتا على ‎administrator‎ وحده،
+             * ولا دور ‎sch_*‎ يملكهما — فأربعة أقسام مبنية كاملة (العقود والإجازات ·
+             * الرواتب · الأصول والصيانة · المستودع) لا يفتحها إلا حساب المدير،
+             * ولا يوجد دور يُوكَل إليه هذا العمل. والدور قالب لا قيد: من احتاج
+             * أقلّ منه تُضيَّق صلاحياته من شاشة الصلاحيات.
+             */
+            'sch_hr' => [
+                'label' => __('مسؤول الموارد البشرية والعمليات', 'school-system'),
+                'caps'  => ['read', 'sch_view_students', 'sch_manage_hr', 'sch_manage_assets',
+                            'sch_manage_staff', 'sch_send_messages'],
+            ],
         ];
 
         foreach ($roles as $slug => $data) {
