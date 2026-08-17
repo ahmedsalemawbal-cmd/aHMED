@@ -60,19 +60,41 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
     <!-- التنقّل بشريط جانبي (يمين): مجموعات وأقسام تُقرأ رأسيًا،
          والشاشة تحتفظ بعمق ثابت للمسار والأدوات في الأعلى. -->
-    <div class="sch-app">
+    <div class="sch-app" id="sch-app">
         <aside class="sch-side<?php echo $sch_in_set ? ' sch-side--set' : ''; ?>" id="sch-side">
-            <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>">
+            <?php /* طيّ الشريط إلى عمود أيقونات — الحالة محفوظة في localStorage.
+                     لا يظهر في سياق الإعدادات: تنقّله نصّي بلا أيقونات فلا يُقرأ مطويًّا. */ ?>
+            <?php if (!$sch_in_set) : ?>
+                <button type="button" class="sch-rail" id="sch-rail"
+                        aria-controls="sch-side" aria-expanded="true"
+                        aria-label="<?php esc_attr_e('طيّ الشريط الجانبي', 'school-system'); ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+            <?php endif; ?>
+
+            <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>"
+               title="<?php echo esc_attr($sch_school); ?>">
                 <span class="sch-side__mark"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
-                <span class="sch-side__bt">
-                    <b><?php echo esc_html($sch_school); ?></b>
-                    <span><?php esc_html_e('لوحة الإدارة', 'school-system'); ?></span>
-                </span>
             </a>
+
+            <?php /* بطاقة الحساب تحت العلامة مباشرة — كأنظمة SaaS الكبرى */ ?>
+            <div class="sch-side__user">
+                <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
+                <span class="sch-side__ut">
+                    <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
+                    <span><?php esc_html_e('حساب الإدارة', 'school-system'); ?></span>
+                </span>
+                <a class="sch-side__out" href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>"
+                   aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
+                    <?php echo sch_icon('route', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </a>
+            </div>
+            <div class="sch-side__sep"></div>
 
             <?php if ($sch_in_set) : /* ── سياق الإعدادات: يستولي على الشريط الجانبي ── */ ?>
                 <?php $sch_back = current_user_can('sch_view_students') ? SCH_Dashboard::url('overview') : SCH_Dashboard::url(); ?>
-                <a class="sch-side__back" href="<?php echo esc_url($sch_back); ?>">
+                <a class="sch-side__back" href="<?php echo esc_url($sch_back); ?>"
+                   title="<?php esc_attr_e('رجوع إلى النظام', 'school-system'); ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     <span><?php esc_html_e('رجوع إلى النظام', 'school-system'); ?></span>
                 </a>
@@ -101,7 +123,8 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                         $sch_area_new = ($sch_area !== $sch_parea && $sch_i > 1);
                         $sch_parea = $sch_area; ?>
                         <div class="sch-side__grp<?php echo $sch_area_new ? ' is-area' : ''; ?>" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
-                            <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
+                            <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>"
+                                    title="<?php echo esc_attr((string) $sch_g['label']); ?>">
                                 <?php echo sch_icon((string) $sch_g['icon'], 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                                 <span><?php echo esc_html($sch_g['label']); ?></span>
                                 <svg class="sch-side__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -120,11 +143,13 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                         </div>
                     <?php endforeach; ?>
                 </nav>
-                <?php /* استعادة حالة طيّ المجموعات قبل رسم بقية الصفحة — بلا وميض */ ?>
-                <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}})();</script>
+                <?php /* استعادة حالة طيّ المجموعات وطيّ الشريط قبل رسم بقية الصفحة — بلا وميض */ ?>
+                <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}
+try{if(localStorage.getItem('sch-rail')==='1'){var a=document.getElementById('sch-app');if(a){a.classList.add('is-rail');var r=document.getElementById('sch-rail');if(r)r.setAttribute('aria-expanded','false');}}}catch(e){}})();</script>
 
                 <?php if ($sch_set_home !== '') : /* مدخل الإعدادات المثبّت أسفل التنقّل — كأنظمة SaaS */ ?>
-                    <a class="sch-side__pin" href="<?php echo esc_url(SCH_Dashboard::url($sch_set_home)); ?>">
+                    <a class="sch-side__pin" href="<?php echo esc_url(SCH_Dashboard::url($sch_set_home)); ?>"
+                       title="<?php esc_attr_e('الإعدادات', 'school-system'); ?>">
                         <?php echo sch_icon('cog', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                         <span><?php esc_html_e('الإعدادات', 'school-system'); ?></span>
                         <svg class="sch-side__pinch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
@@ -132,17 +157,6 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                 <?php endif; ?>
             <?php endif; ?>
 
-            <div class="sch-side__user">
-                <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
-                <span class="sch-side__ut">
-                    <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
-                    <span><?php esc_html_e('حساب الإدارة', 'school-system'); ?></span>
-                </span>
-                <a class="sch-side__out" href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>"
-                   aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
-                    <?php echo sch_icon('route', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                </a>
-            </div>
         </aside>
 
         <div class="sch-main">
@@ -285,7 +299,14 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
 <?php /* تبديل السمة بالتفويض — بلا معالج مضمّن، فيصمد أمام أي CSP */ ?>
 <script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(b){var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}return;}
-var hh=e.target.closest('.sch-side__h');if(hh){var gg=hh.closest('.sch-side__grp');if(gg){var col=gg.classList.toggle('is-collapsed');hh.setAttribute('aria-expanded',col?'false':'true');try{var k=gg.getAttribute('data-grp'),s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');s=s.filter(function(x){return x!==k;});if(col)s.push(k);localStorage.setItem('sch-side-collapsed',JSON.stringify(s));}catch(_){}}return;}
+var rl=e.target.closest('.sch-rail');var ap=document.getElementById('sch-app');
+if(rl&&ap){var on=ap.classList.toggle('is-rail');rl.setAttribute('aria-expanded',on?'false':'true');try{localStorage.setItem('sch-rail',on?'1':'0');}catch(_){}return;}
+var hh=e.target.closest('.sch-side__h');if(hh){var gg=hh.closest('.sch-side__grp');
+/* في وضع العمود: الضغط على أيقونة يفتح الشريط على مجموعتها بدل طيّها */
+if(ap&&ap.classList.contains('is-rail')){ap.classList.remove('is-rail');try{localStorage.setItem('sch-rail','0');}catch(_){}var rb=document.getElementById('sch-rail');if(rb)rb.setAttribute('aria-expanded','true');
+if(gg&&gg.classList.contains('is-collapsed')){gg.classList.remove('is-collapsed');hh.setAttribute('aria-expanded','true');try{var k2=gg.getAttribute('data-grp'),s2=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');localStorage.setItem('sch-side-collapsed',JSON.stringify(s2.filter(function(x){return x!==k2;})));}catch(_){}}
+return;}
+if(gg){var col=gg.classList.toggle('is-collapsed');hh.setAttribute('aria-expanded',col?'false':'true');try{var k=gg.getAttribute('data-grp'),s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');s=s.filter(function(x){return x!==k;});if(col)s.push(k);localStorage.setItem('sch-side-collapsed',JSON.stringify(s));}catch(_){}}return;}
 var nm=e.target.closest('[data-ns-more]');if(nm){var sec=nm.closest('.sch-ns'),w=sec&&sec.querySelector('[data-ns-morewrap]');if(w){var hid=w.hasAttribute('hidden');w.toggleAttribute('hidden',!hid);nm.setAttribute('aria-expanded',hid?'true':'false');}return;}
 var nd=e.target.closest('[data-ns-done]');if(nd){var box=nd.parentElement.querySelector('.sch-ns__chips');if(box){var hid2=box.hasAttribute('hidden');box.toggleAttribute('hidden',!hid2);nd.setAttribute('aria-expanded',hid2?'true':'false');nd.closest('.sch-ns__done').classList.toggle('is-open',hid2);}return;}
 var bg=e.target.closest('.sch-burger'),sc=e.target.closest('.sch-scrim');var side=document.getElementById('sch-side'),scrim=document.getElementById('sch-scrim');

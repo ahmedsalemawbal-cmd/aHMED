@@ -3234,6 +3234,12 @@ body.sch-locked { overflow: hidden; }
    ========================================================= */
 :root{
   --sch-sbw: 260px;
+  /* عرض الشريط حين يُطوى إلى أيقونات فقط (v8.3) */
+  --sch-sbw-rail: 76px;
+  /* أسطح الشريط الجانبي فوق القشرة الداكنة — قيم شفّافة فتصلح للوضعين */
+  --sch-nav-line: rgba(255,255,255,.09);
+  --sch-nav-hover: rgba(255,255,255,.07);
+  --sch-nav-hover-2: rgba(255,255,255,.12);
   --sch-font-display:'Cairo', system-ui, sans-serif;
   --sch-font-body:'Cairo', system-ui, sans-serif;
 
@@ -3280,19 +3286,20 @@ body.sch-locked { overflow: hidden; }
 /* ---------- الهيكل: شريط جانبي (يمين) + عمود محتوى ---------- */
 .sch-app{display:grid;grid-template-columns:var(--sch-sbw) 1fr;min-height:100vh}
 .sch-app > .sch-side{
-  grid-column:1;position:sticky;top:0;height:100vh;overflow-y:auto;
+  grid-column:1;position:sticky;top:0;height:100vh;overflow:visible;
   display:flex;flex-direction:column;gap:var(--sch-2);
   padding:var(--sch-4) var(--sch-3);
-  background:var(--sch-surface);border-inline-end:1px solid var(--sch-line);z-index:40;
+  background:var(--sch-chrome);border-inline-end:1px solid var(--sch-nav-line);z-index:40;
 }
 .sch-app > .sch-main{grid-column:2;min-width:0;display:flex;flex-direction:column}
 
-/* العلامة */
-.sch-body a.sch-side__brand{display:flex;align-items:center;gap:var(--sch-3);height:60px;padding:var(--sch-2) var(--sch-2) var(--sch-4);color:inherit}
-.sch-side__mark{width:40px;height:40px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;
-  background:linear-gradient(145deg,var(--sch-accent-hover),var(--sch-accent))}
-.sch-side__bt b{display:block;font-size:15px;font-weight:700;color:var(--sch-ink);letter-spacing:-.01em;line-height:1.3}
-.sch-side__bt span{display:block;font-size:11px;color:var(--sch-muted)}
+/* العلامة — أيقونة وحدها بلا نص، فالاسم مكرّر في المسار العلوي (v8.3) */
+.sch-body a.sch-side__brand{display:flex;align-items:center;justify-content:center;height:52px;flex:0 0 auto;padding:var(--sch-1) 0 var(--sch-2);color:inherit}
+.sch-side__mark{width:42px;height:42px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;
+  background:linear-gradient(145deg,var(--sch-accent-hover),var(--sch-accent));box-shadow:0 6px 18px -6px var(--sch-accent-glow)}
+
+/* فاصل تحت بطاقة الحساب */
+.sch-side__sep{height:1px;flex:0 0 auto;background:var(--sch-nav-line);margin:var(--sch-2) var(--sch-2) var(--sch-1)}
 
 /* المجموعات والروابط */
 .sch-side__nav{flex:1;overflow-y:auto;margin:0 calc(var(--sch-1) * -1);padding:0 var(--sch-1) var(--sch-3)}
@@ -3305,13 +3312,13 @@ body.sch-locked { overflow: hidden; }
   padding:0 var(--sch-3);margin:0 0 2px;
   background:none;border:0;cursor:pointer;text-align:start;border-radius:var(--sch-radius);
   font-family:inherit;font-size:14px;font-weight:500;letter-spacing:0;
-  color:var(--sch-ink-soft);transition:color .16s var(--sch-ease),background .16s var(--sch-ease);
+  color:var(--sch-chrome-mut);transition:color .16s var(--sch-ease),background .16s var(--sch-ease);
 }
-.sch-body button.sch-side__h:hover{color:var(--sch-ink);background:var(--sch-surface-alt)}
-.sch-side__h .sch-icon{flex:0 0 auto;width:20px;height:20px;color:var(--sch-muted);transition:color .16s}
-.sch-body button.sch-side__h:hover .sch-icon{color:var(--sch-ink-soft)}
+.sch-body button.sch-side__h:hover{color:var(--sch-chrome-ink);background:var(--sch-nav-hover)}
+.sch-side__h .sch-icon{flex:0 0 auto;width:20px;height:20px;color:var(--sch-chrome-mut);transition:color .16s}
+.sch-body button.sch-side__h:hover .sch-icon{color:var(--sch-chrome-ink)}
 .sch-side__h > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-side__chev{width:14px;height:14px;flex:0 0 auto;color:var(--sch-muted);transition:transform .24s var(--sch-ease)}
+.sch-side__chev{width:14px;height:14px;flex:0 0 auto;color:var(--sch-chrome-mut);opacity:.75;transition:transform .24s var(--sch-ease)}
 .sch-side__grp.is-collapsed .sch-side__chev{transform:rotate(-90deg)}
 
 /* حاوية الروابط: طيّ سلس (0fr↔1fr) + خطّ ربط عمودي رفيع تحت أيقونة الأب */
@@ -3320,34 +3327,34 @@ body.sch-locked { overflow: hidden; }
 .sch-side__linksin{
   overflow:hidden;min-height:0;
   margin-inline-start:21px;
-  border-inline-start:1px solid var(--sch-line-strong);
+  border-inline-start:1px solid var(--sch-nav-line);
 }
 
 /* عنصر فرعي: نصّ فقط بلا أيقونة — خطّ خفيف كالنموذج (النشط أثقل قليلًا) */
 .sch-body a.sch-side__link{
   display:flex;align-items:center;gap:var(--sch-2);height:40px;
   padding:0 16px;margin-inline-start:10px;margin-bottom:1px;
-  border-radius:9px;color:var(--sch-muted);font-size:13.5px;font-weight:400;
+  border-radius:9px;color:var(--sch-chrome-mut);font-size:13.5px;font-weight:400;
   text-decoration:none;
   transition:background .15s var(--sch-ease),color .15s var(--sch-ease);
 }
 .sch-side__link > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sch-body a.sch-side__link:hover{background:var(--sch-surface-alt);color:var(--sch-ink-soft);text-decoration:none}
-.sch-body a.sch-side__link.is-on{background:var(--sch-accent-soft);color:var(--sch-ink);font-weight:500}
+.sch-body a.sch-side__link:hover{background:var(--sch-nav-hover);color:var(--sch-chrome-ink);text-decoration:none}
+.sch-body a.sch-side__link.is-on{background:var(--sch-accent);color:#fff;font-weight:500}
 
 /* شارة عدّاد على عنصر التنقّل (الإنذارات المفتوحة) */
 .sch-side__badge{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:var(--sch-r-full);
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--sch-danger);color:#fff;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 
-/* بطاقة المستخدم */
-.sch-side__user{display:flex;align-items:center;gap:var(--sch-3);padding:var(--sch-3);border-radius:var(--sch-radius-lg);border:1px solid var(--sch-line);background:var(--sch-surface-alt)}
-.sch-side__user > i{width:36px;height:36px;flex:0 0 auto;border-radius:50%;background:var(--sch-accent);color:#fff;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+/* بطاقة المستخدم — تحت العلامة مباشرة (v8.3)، بنفس تركيبها فوق القشرة الداكنة */
+.sch-side__user{display:flex;align-items:center;gap:var(--sch-3);flex:0 0 auto;padding:9px;border-radius:var(--sch-radius-lg);border:1px solid var(--sch-nav-line);background:var(--sch-nav-hover)}
+.sch-side__user > i{width:38px;height:38px;flex:0 0 auto;border-radius:50%;background:var(--sch-accent);color:#fff;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700}
 .sch-side__ut{min-width:0;flex:1}
-.sch-side__ut b{display:block;font-size:12.5px;font-weight:700;color:var(--sch-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sch-side__ut span{display:block;font-size:11px;color:var(--sch-muted)}
-.sch-body a.sch-side__out{width:34px;height:34px;flex:0 0 auto;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--sch-muted)}
-.sch-body a.sch-side__out:hover{background:var(--sch-surface);color:var(--sch-danger)}
+.sch-side__ut b{display:block;font-size:12.5px;font-weight:700;color:var(--sch-chrome-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-side__ut span{display:block;font-size:11px;color:var(--sch-chrome-mut)}
+.sch-body a.sch-side__out{width:34px;height:34px;flex:0 0 auto;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--sch-chrome-mut)}
+.sch-body a.sch-side__out:hover{background:var(--sch-nav-hover-2);color:var(--sch-danger)}
 
 /* الشريط العلوي */
 .sch-topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:var(--sch-3);height:64px;padding:0 var(--sch-6);
@@ -3557,10 +3564,10 @@ body.sch-body {
 /* 2) عناوين الصفحات أحدّ: وزن ٨٠٠ (مُحمَّل الآن) وتراصّ خفيف */
 .sch-title, .sch-page-title { font-weight: 800; letter-spacing: -.02em; }
 
-/* 3) الشريط الجانبي: تدرّج رأسي هامس يمنحه عمقًا بدل السطح الأبيض المسطّح،
-      والعنصر النشط يقوده مؤشّر جانبي بلون الهوية ووزن أثقل */
-.sch-app > .sch-side { background: linear-gradient(180deg, var(--sch-surface), var(--sch-paper)); }
-.sch-body a.sch-side__link.is-on { font-weight: 700; box-shadow: inset 3px 0 0 var(--sch-accent); }
+/* 3) الشريط الجانبي: قشرة داكنة ثابتة في الوضعين (v8.3) بتدرّج رأسي هامس
+      يمنحها عمقًا، والعنصر النشط حبّة ممتلئة بلون الهوية ووزن أثقل */
+.sch-app > .sch-side { background: linear-gradient(180deg, var(--sch-chrome), var(--sch-chrome-2)); }
+.sch-body a.sch-side__link.is-on { font-weight: 700; box-shadow: 0 6px 16px -8px var(--sch-accent-glow); }
 
 /* 4) الشريط العلوي زجاجي يطفو فوق المحتوى */
 .sch-topbar {
@@ -3929,7 +3936,7 @@ body.sch-body {
 }
 
 /* فاصل بين مجالات الشريط الجانبي الأربعة — يقرأها العين كأنظمة منفصلة  (v8.1) */
-.sch-side__grp.is-area { margin-top: var(--sch-4); padding-top: var(--sch-4); border-top: 1px solid var(--sch-line); }
+.sch-side__grp.is-area { margin-top: var(--sch-4); padding-top: var(--sch-4); border-top: 1px solid var(--sch-nav-line); }
 
 /* ============================================================
    سياق الإعدادات — يستولي على الشريط الجانبي كأنظمة SaaS (v8.2)
@@ -3939,45 +3946,99 @@ body.sch-body {
 /* زرّ الرجوع أعلى السياق */
 .sch-body a.sch-side__back {
   display: flex; align-items: center; gap: 10px; height: 42px; margin-bottom: var(--sch-3);
-  padding: 0 12px; border-radius: var(--sch-radius);
-  background: var(--sch-surface-alt); border: 1px solid var(--sch-line);
-  color: var(--sch-ink-soft); font-size: 13.5px; font-weight: 600;
+  padding: 0 12px; border-radius: var(--sch-radius); flex: 0 0 auto;
+  background: var(--sch-nav-hover); border: 1px solid var(--sch-nav-line);
+  color: var(--sch-chrome-mut); font-size: 13.5px; font-weight: 600;
   transition: background .15s var(--sch-ease), color .15s var(--sch-ease);
 }
-.sch-body a.sch-side__back:hover { background: var(--sch-accent-soft); color: var(--sch-ink); text-decoration: none; }
-.sch-side__back svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--sch-muted); }
-.sch-body a.sch-side__back:hover svg { color: var(--sch-accent); }
+.sch-body a.sch-side__back:hover { background: var(--sch-nav-hover-2); color: var(--sch-chrome-ink); text-decoration: none; }
+.sch-side__back svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--sch-chrome-mut); }
+.sch-body a.sch-side__back:hover svg { color: var(--sch-chrome-ink); }
 
 /* عنوان «الإعدادات» */
-.sch-side__settl { display: flex; align-items: center; gap: 10px; padding: 0 6px var(--sch-3); }
-.sch-side__settl .sch-icon { width: 22px; height: 22px; flex: 0 0 auto; color: var(--sch-accent); }
-.sch-side__settl b { font-size: 19px; font-weight: 800; color: var(--sch-ink); letter-spacing: -.01em; }
+.sch-side__settl { display: flex; align-items: center; gap: 10px; padding: 0 6px var(--sch-3); flex: 0 0 auto; }
+.sch-side__settl .sch-icon { width: 22px; height: 22px; flex: 0 0 auto; color: var(--sch-chrome-ink); }
+.sch-side__settl b { font-size: 19px; font-weight: 800; color: var(--sch-chrome-ink); letter-spacing: -.01em; }
 
 /* مجموعة إعدادات: عنوان صغير يتبعه خطّ يمتدّ لآخر السطر */
 .sch-side__seg { margin-top: var(--sch-4); }
 .sch-side__seg:first-of-type { margin-top: 0; }
 .sch-side__segl {
   display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; margin-bottom: 2px;
-  font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--sch-muted); white-space: nowrap;
+  font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--sch-chrome-mut); white-space: nowrap;
 }
-.sch-side__segl::after { content: ""; flex: 1; height: 1px; background: var(--sch-line); }
+.sch-side__segl::after { content: ""; flex: 1; height: 1px; background: var(--sch-nav-line); }
 
 /* روابط الإعدادات: نصّ فقط بمحاذاة تامّة (بلا خطّ ربط الأب في التنقّل الرئيسي) */
 .sch-side--set .sch-side__link { margin-inline-start: 0; }
 
 /* مدخل الإعدادات المثبّت أسفل التنقّل الرئيسي */
 .sch-body a.sch-side__pin {
-  display: flex; align-items: center; gap: 12px; height: 48px;
+  display: flex; align-items: center; gap: 12px; height: 48px; flex: 0 0 auto;
   margin: var(--sch-1) calc(var(--sch-3) * -1) 0; padding: 0 var(--sch-3);
-  border-top: 1px solid var(--sch-line);
-  color: var(--sch-ink-soft); font-size: 14px; font-weight: 600;
+  border-top: 1px solid var(--sch-nav-line);
+  color: var(--sch-chrome-mut); font-size: 14px; font-weight: 600;
   transition: background .15s var(--sch-ease), color .15s var(--sch-ease);
 }
-.sch-body a.sch-side__pin:hover { background: var(--sch-surface-alt); color: var(--sch-ink); text-decoration: none; }
-.sch-side__pin .sch-icon { width: 20px; height: 20px; flex: 0 0 auto; color: var(--sch-muted); }
-.sch-body a.sch-side__pin:hover .sch-icon { color: var(--sch-accent); }
+.sch-body a.sch-side__pin:hover { background: var(--sch-nav-hover); color: var(--sch-chrome-ink); text-decoration: none; }
+.sch-side__pin .sch-icon { width: 20px; height: 20px; flex: 0 0 auto; color: var(--sch-chrome-mut); }
+.sch-body a.sch-side__pin:hover .sch-icon { color: var(--sch-chrome-ink); }
 .sch-side__pin > span { flex: 1; min-width: 0; }
-.sch-side__pinch { width: 15px; height: 15px; flex: 0 0 auto; color: var(--sch-muted); }
+.sch-side__pinch { width: 15px; height: 15px; flex: 0 0 auto; color: var(--sch-chrome-mut); }
+
+/* ============================================================
+   طيّ الشريط الجانبي إلى عمود أيقونات — بالسهم على الحافّة  (v8.3)
+   ============================================================ */
+
+/* زرّ الطيّ: يجلس على الحافّة الداخلية بين الشريط والمحتوى */
+.sch-rail {
+  position: absolute; inset-block-start: 74px; inset-inline-end: -13px;
+  width: 26px; height: 26px; padding: 0; z-index: 45;
+  border-radius: var(--sch-r-full); border: 3px solid var(--sch-paper);
+  background: var(--sch-accent); color: #fff; cursor: pointer;
+  display: grid; place-items: center; box-shadow: var(--sch-e2);
+  transition: transform .18s var(--sch-ease);
+}
+.sch-rail:hover { transform: scale(1.1); }
+.sch-rail svg { width: 14px; height: 14px; transition: transform .28s var(--sch-ease); }
+/* السهم ينقلب ليقول «سأفتح» بدل «سأطوي» */
+.sch-app.is-rail .sch-rail svg { transform: rotate(180deg); }
+
+/* عرض العمود يتقلّص — والشبكة تتبعه لأنها مبنيّة على المتغيّر نفسه */
+.sch-app { transition: grid-template-columns .26s var(--sch-ease); }
+.sch-app.is-rail { grid-template-columns: var(--sch-sbw-rail) 1fr; }
+.sch-app.is-rail > .sch-side { padding-inline: 10px; }
+
+/* في وضع العمود: الأيقونات وحدها — كل نصّ يختفي */
+.sch-app.is-rail .sch-side__h { justify-content: center; padding: 0; gap: 0; }
+.sch-app.is-rail .sch-side__h > span,
+.sch-app.is-rail .sch-side__chev,
+.sch-app.is-rail .sch-side__ut,
+.sch-app.is-rail .sch-side__out,
+.sch-app.is-rail .sch-side__back > span,
+.sch-app.is-rail .sch-side__settl b,
+.sch-app.is-rail .sch-side__segl,
+.sch-app.is-rail .sch-side__pin > span,
+.sch-app.is-rail .sch-side__pinch { display: none; }
+
+/* الروابط الفرعية مطويّة دائمًا في وضع العمود — لا نصّ يتّسع لها */
+.sch-app.is-rail .sch-side__links { grid-template-rows: 0fr; }
+.sch-app.is-rail .sch-side__grp.is-area { margin-top: var(--sch-3); padding-top: var(--sch-3); }
+
+/* بطاقة الحساب تنكمش إلى صورتها وحدها */
+.sch-app.is-rail .sch-side__user { justify-content: center; padding: 7px 0; background: none; border-color: transparent; }
+.sch-app.is-rail .sch-side__back { justify-content: center; padding: 0; }
+.sch-app.is-rail .sch-side__settl { justify-content: center; padding-inline: 0; }
+.sch-app.is-rail .sch-side__pin { justify-content: center; margin-inline: -10px; padding: 0; }
+
+/* الشريط العلوي يفتح مساحته حين ينكمش الجانبي */
+@media (max-width: 980px) {
+  .sch-rail { display: none; }
+  .sch-app.is-rail { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sch-app, .sch-rail, .sch-rail svg { transition: none; }
+}
 
 /* صفحة الإعدادات الرئيسية: عمود محتوى + عمود جانبي للحالة */
 .sch-set2 { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sch-5); align-items: start; margin-top: var(--sch-4); }
