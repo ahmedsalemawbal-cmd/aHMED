@@ -197,8 +197,8 @@ final class SCH_Teacher
             'orientation'      => 'portrait',
             'lang'             => 'ar',
             'dir'              => 'rtl',
-            'background_color' => '#F8FAFC',
-            'theme_color'      => '#0F1720',
+            'background_color' => '#F1F4F3',
+            'theme_color'      => '#1B3A57',
             'icons'            => [
                 ['src' => SCH_URL . 'assets/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
                 ['src' => SCH_URL . 'assets/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],

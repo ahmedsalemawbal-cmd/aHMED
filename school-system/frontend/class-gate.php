@@ -217,8 +217,8 @@ final class SCH_Gate
             'orientation'      => 'portrait',
             'lang'             => 'ar',
             'dir'              => 'rtl',
-            'background_color' => '#0F1720',
-            'theme_color'      => '#0F1720',
+            'background_color' => '#080F0D',
+            'theme_color'      => '#080F0D',
             'icons'            => [
                 ['src' => SCH_URL . 'assets/icon-gate-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
                 ['src' => SCH_URL . 'assets/icon-gate-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],

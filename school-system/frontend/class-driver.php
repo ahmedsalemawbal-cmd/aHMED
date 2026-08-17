@@ -229,8 +229,8 @@ final class SCH_Driver
             'orientation'      => 'portrait',
             'lang'             => 'ar',
             'dir'              => 'rtl',
-            'background_color' => '#2A251E',
-            'theme_color'      => '#2A251E',
+            'background_color' => '#080F0D',
+            'theme_color'      => '#080F0D',
             'icons'            => [
                 ['src' => SCH_URL . 'assets/icon-driver-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
                 ['src' => SCH_URL . 'assets/icon-driver-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],

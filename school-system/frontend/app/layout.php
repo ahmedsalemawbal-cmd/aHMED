@@ -26,12 +26,12 @@ $p_hour  = (int) current_time('G');
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#FFFFFF">
+    <meta name="theme-color" content="#F1F4F3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="robots" content="noindex, nofollow">
     <?php /* منع وميض السمة: تُضبط قبل أول رسم. تطبيق المستهلك يتبع الجهاز افتراضيًا. */ ?>
-    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C0A16':'#FFFFFF';}}catch(e){}})();</script>
+    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#080F0D':'#F1F4F3';}}catch(e){}})();</script>
 
     <title><?php echo esc_html(sch_settings('school_name', get_bloginfo('name'))); ?></title>
     <?php $sch_fav = SCH_Brand::favicon(); ?>
@@ -45,7 +45,7 @@ $p_hour  = (int) current_time('G');
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/parent.css')); ?>">
 </head>
 
@@ -207,7 +207,7 @@ $p_hour  = (int) current_time('G');
       r.setAttribute('data-theme', n);
       try { localStorage.setItem('sch-theme', n); } catch (_) {}
       var m = document.querySelector('meta[name=theme-color]');
-      if (m) { m.content = n === 'dark' ? '#0C0A16' : '#FFFFFF'; }
+      if (m) { m.content = n === 'dark' ? '#080F0D' : '#F1F4F3'; }
     });
 
     if ('serviceWorker' in navigator) {

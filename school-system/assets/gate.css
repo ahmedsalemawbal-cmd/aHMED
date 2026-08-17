@@ -1,18 +1,23 @@
 /* =========================================================
    تطبيق البوابة — يُستخدم واقفًا عند باب المدرسة.
    خلفية داكنة تقلّل الوهج، مساحة مسح كبيرة، أزرار بحجم الإبهام.
+
+   **وهو شاشة داخل تطبيق الموظفين لا تطبيق مستقلّ** — فألوان الحالة
+   هنا هي نفسها في شاشة المعلم حرفيًا: أخضران مختلفان لمعنى «سليم»
+   في تطبيق واحد يجعل الحارس يتردّد لحظة، ولحظة عند البوابة كثيرة.
    ========================================================= */
 
 :root {
-  --g-bg:      #0F1720;
-  --g-surface: #1B2733;
-  --g-line:    #2A3947;
-  --g-ink:     #F1F5F9;
-  --g-muted:   #94A3B8;
-  --g-accent:  #14B8A6;
-  --g-ok:      #10B981;
-  --g-warn:    #F59E0B;
-  --g-bad:     #F87171;
+  --g-bg:      #080F0D;
+  --g-surface: #101A18;
+  --g-line:    #1F2E2A;
+  --g-ink:     #E9F0ED;
+  --g-muted:   #9BACA7;
+  --g-accent:  #6C9DCB;   /* «ليل» في الوضع الداكن — هوية تطبيق الموظفين */
+  --g-on:      #08131C;   /* فوق اللون: البارز فاتح هنا، فالأبيض عليه ينهار */
+  --g-ok:      #2FA97A;
+  --g-warn:    #CE9A4A;
+  --g-bad:     #DE6459;
   --g-f: 'Cairo', system-ui, sans-serif;
   --g-r: 12px;
 }
@@ -57,7 +62,7 @@
   border: 1px solid var(--g-line); border-radius: var(--g-r);
   cursor: pointer;
 }
-.schg-mode.is-on { background: var(--g-accent); border-color: var(--g-accent); color: #0F1720; }
+.schg-mode.is-on { background: var(--g-accent); border-color: var(--g-accent); color: var(--g-on); }
 .schg-mode:active { transform: scale(.97); }
 
 /* مساحة المسح — تملأ نصف الشاشة */
@@ -158,7 +163,7 @@
 .schg-btn {
   display: block; width: 100%; margin-top: 18px; padding: 16px;
   font-family: inherit; font-size: 18px; font-weight: 700;
-  color: #0F1720; background: var(--g-accent);
+  color: var(--g-on); background: var(--g-accent);
   border: 0; border-radius: var(--g-r); cursor: pointer;
 }
 .schg-btn:active { opacity: .85; }
@@ -240,7 +245,7 @@ input[dir="ltr"] { text-align: start; }
   color: var(--g-ink); background: var(--g-line);
   border: 0; border-radius: 10px; cursor: pointer;
 }
-.schg-mini:active { background: var(--g-accent); color: #0F1720; }
+.schg-mini:active { background: var(--g-accent); color: var(--g-on); }
 
 .schg-empty { text-align: center; padding: 36px 16px; color: var(--g-muted); }
 .schg-empty strong { display: block; font-size: 17px; color: var(--g-ink); }

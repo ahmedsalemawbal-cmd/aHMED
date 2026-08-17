@@ -428,8 +428,8 @@ final class SCH_App
             'orientation'      => 'portrait',
             'lang'             => 'ar',
             'dir'              => 'rtl',
-            'background_color' => '#F4F7FA',
-            'theme_color'      => '#5170FF',
+            'background_color' => '#F1F4F3',
+            'theme_color'      => '#0F6E8C',
             'icons'            => [
                 ['src' => SCH_URL . 'assets/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
                 ['src' => SCH_URL . 'assets/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],
@@ -662,6 +662,78 @@ JS;
         usort($rows, static fn (array $a, array $b): int => strcmp((string) $a['_s'], (string) $b['_s']));
 
         return $rows;
+    }
+
+    /**
+     * «خيط اليوم» — يوم الطفل كاملًا لا ما مضى منه فقط.
+     *
+     * الخط الزمني وحده يعرض ما **حدث**، فالأب يقرأ آخر سطر ولا يعرف أين ينتهي
+     * اليوم. والخيط يضيف المحطّات المتبقّية مفرَّغةً، فيُقرأ موضع الطفل من
+     * موضع النقطة قبل أن تُقرأ كلمة واحدة:
+     *
+     * - `done` ما مضى · `now` أين هو الآن · `next` ما بقي.
+     *
+     * والمحطّات المتبقّية **مشتقّة لا مخزَّنة**: نهاية الدوام من الإعدادات،
+     * والوصول للمنزل يظهر لراكب الباص وحده — فمن لا يركبه لا يُوعَد بمحطّة
+     * لا تأتي.
+     *
+     * @return list<array{time:string,kind:string,title:string,detail:string,state:string}>
+     */
+    public static function day_thread(int $student_id): array
+    {
+        $past = self::today_timeline($student_id);
+        $out  = [];
+
+        foreach ($past as $i => $ev) {
+            unset($ev['_s']);
+            // آخر ما حدث هو «الآن»: هناك الطفل حتى يقع الحدث التالي.
+            $ev['state'] = ($i === count($past) - 1) ? 'now' : 'done';
+            $out[]       = $ev;
+        }
+
+        $student = SCH_Students::get($student_id);
+        $state   = (string) ($student->custody_state ?? '');
+        $rides   = SCH_Routes::subscription_of($student_id) !== null;
+        $end     = (string) sch_settings('attendance_day_end', '13:00');
+
+        // يوم لم يبدأ: محطّة واحدة تقول ذلك — **ولا محطّات قادمة**.
+        // «الانصراف ١:٠٠» أمام طفل ما زال في سريره وعدٌ لا خبر، ويوم الجمعة
+        // يجعله وعدًا كاذبًا.
+        if ($out === []) {
+            return [[
+                'time'   => '',
+                'kind'   => 'check',
+                'title'  => __('لم يبدأ يومه بعد', 'school-system'),
+                'detail' => __('تظهر أول محطّة فور صعوده الباص أو دخوله البوابة', 'school-system'),
+                'state'  => 'now',
+            ]];
+        }
+
+        $seen = array_column($out, 'kind');
+
+        // الانصراف: لمن هو في المدرسة الآن ولم يخرج بعد.
+        if ($state === 'at_school' && !in_array('logout', $seen, true)) {
+            $out[] = [
+                'time'   => $end,
+                'kind'   => 'logout',
+                'title'  => __('الانصراف', 'school-system'),
+                'detail' => __('يخرج من البوابة', 'school-system'),
+                'state'  => 'next',
+            ];
+        }
+
+        // الوصول للمنزل: لراكب الباص وحده — فمن لا يركبه لا يُوعَد بمحطّة لا تأتي.
+        if ($rides && $state !== 'home' && !in_array('home', $seen, true)) {
+            $out[] = [
+                'time'   => '',
+                'kind'   => 'home',
+                'title'  => __('يصل المنزل', 'school-system'),
+                'detail' => __('بعد رحلة العودة', 'school-system'),
+                'state'  => 'next',
+            ];
+        }
+
+        return $out;
     }
 
     /**

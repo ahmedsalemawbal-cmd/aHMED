@@ -16,7 +16,7 @@ $today    = SCH_App::today($id);
 $trip     = $today['trip'];
 $leave    = SCH_StudentLeave::on_leave_today($id);
 $rate     = SCH_Attendance::rate($id);
-$timeline = SCH_App::today_timeline($id);
+$thread   = SCH_App::day_thread($id);
 $first    = $student->first_name ?: SCH_Enrollment::full_name($student);
 
 // نوع البطل: حالة واحدة تُقرأ في لحظة.
@@ -116,35 +116,28 @@ if ($leave) {
     </div>
 </div>
 
-<!-- ═════ الخط الزمني ليوم الطفل — القلب ═════ -->
+<!-- ═════ خيط اليوم — القلب: ما مضى، وأين هو الآن، وما بقي ═════ -->
 <div class="p-sect"><h2 class="p-sect__h"><?php esc_html_e('يومه', 'school-system'); ?></h2><a class="p-sect__a" href="<?php echo esc_url(SCH_App::url('log', $id)); ?>"><?php esc_html_e('كل السجل', 'school-system'); ?></a></div>
 
-<?php if ($timeline !== []) : ?>
-    <div class="p-tl">
-        <?php
-        $kind_icon = [
-            'bus' => 'bus', 'login' => 'check', 'logout' => 'route', 'home' => 'home',
-            'check' => 'check', 'alert' => 'clock', 'star' => 'award',
-        ];
-        foreach ($timeline as $ev) : ?>
-            <div class="p-tevt p-tevt--<?php echo esc_attr($ev['kind']); ?>">
-                <span class="p-tevt__node"><?php echo sch_icon($kind_icon[$ev['kind']] ?? 'check', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-                <div class="p-tevt__b">
-                    <div class="p-tevt__h"><b><?php echo esc_html($ev['title']); ?></b><time dir="ltr"><?php echo esc_html($ev['time']); ?></time></div>
-                    <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?>
-                        <p><?php echo esc_html($ev['detail']); ?></p>
+<ol class="p-thr">
+    <?php foreach ($thread as $ev) : ?>
+        <li class="p-thr__i is-<?php echo esc_attr($ev['state']); ?>">
+            <span class="p-thr__d" aria-hidden="true"></span>
+            <span class="p-thr__b">
+                <b><?php echo esc_html($ev['title']); ?></b>
+                <span>
+                    <?php if ($ev['time'] !== '') : ?>
+                        <time dir="ltr"><?php echo esc_html($ev['time']); ?></time>
+                        <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?> · <?php endif; ?>
                     <?php endif; ?>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    </div>
-<?php else : ?>
-    <div class="p-tl__empty">
-        <span class="p-tl__ic"><?php echo sch_icon('sun', 22); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <b><?php esc_html_e('لم يبدأ يومه بعد', 'school-system'); ?></b>
-        <span><?php esc_html_e('ستظهر أحداث اليوم هنا فور صعوده الباص أو دخوله المدرسة.', 'school-system'); ?></span>
-    </div>
-<?php endif; ?>
+                    <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?>
+                        <?php echo esc_html($ev['detail']); ?>
+                    <?php endif; ?>
+                </span>
+            </span>
+        </li>
+    <?php endforeach; ?>
+</ol>
 
 <?php
 // بطاقات ثانوية: الشهادات · تقرير الروضة · الكتب المتأخرة.

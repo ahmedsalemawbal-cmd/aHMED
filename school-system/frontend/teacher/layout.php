@@ -11,12 +11,12 @@ $sch_user     = wp_get_current_user();
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#FFFFFF">
+    <meta name="theme-color" content="#F1F4F3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="<?php esc_attr_e('فصلي', 'school-system'); ?>">
     <?php /* منع وميض السمة — تُضبط قبل أول رسم، وتتبع الجهاز افتراضيًا مع خيار التبديل. */ ?>
-    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C0A16':'#FFFFFF';}}catch(e){}})();</script>
+    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#080F0D':'#F1F4F3';}}catch(e){}})();</script>
 
     <link rel="apple-touch-icon" href="<?php echo esc_url(SCH_URL . 'assets/icon-192.png'); ?>">
     <link rel="manifest" href="<?php echo esc_url(SCH_Teacher::url('manifest.webmanifest')); ?>">
@@ -112,7 +112,7 @@ $sch_user     = wp_get_current_user();
         r.setAttribute('data-theme', n);
         try { localStorage.setItem('sch-theme', n); } catch (_) {}
         var m = document.querySelector('meta[name=theme-color]');
-        if (m) { m.content = n === 'dark' ? '#0C0A16' : '#FFFFFF'; }
+        if (m) { m.content = n === 'dark' ? '#080F0D' : '#F1F4F3'; }
     });
 
     /* عامل الخدمة كان مبنيًّا ولا يُسجَّل — فالمعلم وحده بلا تثبيت ولا إشعار. */

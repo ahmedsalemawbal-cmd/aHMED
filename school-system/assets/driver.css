@@ -1,18 +1,22 @@
 /* =========================================================
    تطبيق السائق — يُستخدم داخل باص متحرك.
    خلفية داكنة تقلّل الوهج، أزرار كبيرة، وحالة واحدة واضحة لكل طالب.
+
+   شاشة داخل تطبيق الموظفين — بألوان الحالة نفسها التي يراها المعلم
+   والحارس، فـ«صعد» أخضر واحد في التطبيق كلّه.
    ========================================================= */
 
 :root {
-  --d-bg:      #0F1720;
-  --d-surface: #1B2733;
-  --d-line:    #2A3947;
-  --d-ink:     #F1F5F9;
-  --d-muted:   #94A3B8;
-  --d-accent:  #14B8A6;
-  --d-ok:      #10B981;
-  --d-warn:    #F59E0B;
-  --d-bad:     #F87171;
+  --d-bg:      #080F0D;
+  --d-surface: #101A18;
+  --d-line:    #1F2E2A;
+  --d-ink:     #E9F0ED;
+  --d-muted:   #9BACA7;
+  --d-accent:  #6C9DCB;   /* «ليل» في الوضع الداكن */
+  --d-on:      #08131C;
+  --d-ok:      #2FA97A;
+  --d-warn:    #CE9A4A;
+  --d-bad:     #DE6459;
   --d-display: 'Cairo', system-ui, sans-serif;
   --d-body:    'Cairo', system-ui, sans-serif;
   --d-r: 10px;
@@ -112,9 +116,9 @@
   cursor: pointer;
 }
 .schd-act:active { transform: scale(.96); }
-.schd-act--board.is-on  { background: var(--d-ok);     color: #fff; }
-.schd-act--alight.is-on { background: var(--d-muted);  color: #0F1720; }
-.schd-act--absent.is-on { background: var(--d-bad);    color: #fff; }
+.schd-act--board.is-on  { background: var(--d-ok);     color: var(--d-on); }
+.schd-act--alight.is-on { background: var(--d-muted);  color: var(--d-on); }
+.schd-act--absent.is-on { background: var(--d-bad);    color: var(--d-on); }
 
 .schd-loading, .schd-empty {
   text-align: center;
@@ -152,7 +156,7 @@
   font-family: inherit;
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: var(--d-on);
   background: var(--d-accent);
   border: 0;
   border-radius: var(--d-r);
@@ -234,7 +238,7 @@
 .schd-info { margin-top: 12px; }
 .schd-info .schd-row { border-inline-start-color: transparent; }
 
-.schd-act--go   { background: var(--d-accent); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.schd-act--go   { background: var(--d-accent); color: var(--d-on); text-decoration: none; display: flex; align-items: center; justify-content: center; }
 .schd-act--call { background: var(--d-line); color: var(--d-ink); text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 20px; min-width: 48px; }
 
 .schd-alert--ok { background: rgba(16, 185, 129, .18); color: #6EE7B7; }
