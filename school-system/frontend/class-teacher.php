@@ -267,7 +267,7 @@ JS;
         return $wpdb->get_results($wpdb->prepare(
             'SELECT DISTINCT c.* FROM ' . sch_table('classes') . ' c
              WHERE c.year_id = %d AND (
-                   c.homeroom_user_id = %d
+                   c.homeroom_teacher_id = %d
                 OR c.id IN (SELECT cs.class_id FROM ' . sch_table('class_subjects') . ' cs WHERE cs.teacher_user_id = %d)
                 OR c.id IN (SELECT t.class_id FROM ' . sch_table('timetable') . ' t WHERE t.teacher_user_id = %d)
              )

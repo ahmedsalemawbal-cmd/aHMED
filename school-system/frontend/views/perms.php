@@ -4,7 +4,10 @@ defined('ABSPATH') || exit;
 
 $target_id = isset($_GET['user_id']) ? absint($_GET['user_id']) : 0;
 $target    = $target_id > 0 ? get_userdata($target_id) : null;
-$staff     = SCH_Staff::list(['status' => 'active']);
+
+// SCH_Staff::list() ترجع ['items' => [...], 'total' => n] لا قائمة مسطّحة.
+// قراءتها مباشرةً كانت تمرّ على 'items' و'total' فتقرأ خاصية على مصفوفة وعلى عدد.
+$staff = SCH_Staff::list(['status' => 'active'])['items'];
 
 if (!$target) : ?>
 

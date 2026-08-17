@@ -7,7 +7,6 @@ $plans    = SCH_Finance::plans();
 $overdue  = SCH_Finance::overdue_list(30);
 $inv_id   = isset($_GET['inv']) ? absint($_GET['inv']) : 0;
 $invoice  = $inv_id > 0 ? SCH_Finance::get_invoice($inv_id) : null;
-$students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
 $list     = SCH_Finance::invoices(['status' => isset($_GET['st']) ? sanitize_key(wp_unslash((string) $_GET['st'])) : '']);
 
 // قائمة الأسماء للقوائم المنسدلة: تُستدعى مرة لا مرة لكل قائمة،

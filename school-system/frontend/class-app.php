@@ -295,8 +295,22 @@ final class SCH_App
         return add_query_arg('sch_kid_photo', '1', self::url('child', $student_id));
     }
 
+    /**
+     * رابط صورة ولي الأمر — **أو نص فارغ إن لم يرفع صورة**.
+     *
+     * القوالب تكتب `if (SCH_App::avatar_url())` ثم `<img>` وإلا حرف الاسم
+     * (`sch_avatar_svg`). وكانت الدالة تُرجع رابطًا دائمًا لأن `add_query_arg`
+     * لا تُرجع فراغًا أبدًا — فالشرط صحيح دائمًا، فتُرسم صورة مكسورة في كل
+     * شاشة من التطبيق، وبديل الحرف لا يظهر أبدًا. الفراغ يُصلح الشرطين معًا.
+     */
     public static function avatar_url(): string
     {
+        $guardian = SCH_Guardians::by_user(get_current_user_id());
+
+        if (!$guardian || empty($guardian->photo_file)) {
+            return '';
+        }
+
         return add_query_arg('sch_avatar', '1', self::url('account'));
     }
 
