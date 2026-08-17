@@ -2787,36 +2787,58 @@ body.sch-locked { overflow: hidden; }
 .sch-sugg__foot .sch-btn { margin: 0; }
 
 /* اختيار القالب: معاينة مصغّرة لا اسم وحده */
-.sch-tpls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sch-3); }
-.sch-tpl { position: relative; cursor: pointer; text-align: center; }
-.sch-tpl input { position: absolute; opacity: 0; width: 0; height: 0; }
-.sch-tpl__v {
-  display: block;
-  height: 84px;
-  border-radius: var(--sch-radius);
-  border: 2px solid var(--sch-line);
-  margin-bottom: 6px;
-  transition: border-color .16s ease, transform .16s ease;
-}
-.sch-tpl b { font-size: var(--sch-text-xs); font-weight: 400; color: var(--sch-muted); }
-.sch-tpl input:checked ~ b { color: var(--sch-ink); font-weight: 700; }
-.sch-tpl input:checked + .sch-tpl__v { border-color: var(--sch-accent); transform: translateY(-2px); }
+/* ============================================================
+   مكتبة القوالب — تصنيفات وبحث ومعاينة حقيقية  (v8.7)
+   حلّت محل أربع حبّات تدرّج لوني لا تُظهر شكل الوثيقة.
+   ============================================================ */
+.sch-lib { border: 1px solid var(--sch-line); border-radius: var(--sch-radius-lg); overflow: hidden; background: var(--sch-surface); }
 
-.sch-tpl--royal .sch-tpl__v {
-  background: linear-gradient(152deg, #111A44 0%, #0A0F30 60%, #070B24 100%);
-  box-shadow: inset 0 0 0 3px #C9A44C;
+.sch-lib__bar {
+  display: flex; align-items: center; gap: var(--sch-3); flex-wrap: wrap;
+  padding: var(--sch-3); border-bottom: 1px solid var(--sch-line); background: var(--sch-surface-alt);
 }
-.sch-tpl--classic .sch-tpl__v {
-  background: #FDFBF5;
-  box-shadow: inset 0 0 0 6px #C0A055, inset 0 0 0 8px #FDFBF5, inset 0 0 0 9px #B99A4E;
+.sch-lib__cats { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.sch-body button.sch-lib__cat {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px;
+  border: 1px solid transparent; border-radius: var(--sch-r-full); background: none;
+  font-family: inherit; font-size: var(--sch-text-sm); font-weight: 400;
+  color: var(--sch-ink-soft); cursor: pointer;
+  transition: background var(--sch-fast) var(--sch-ease), color var(--sch-fast) var(--sch-ease);
 }
-.sch-tpl--modern .sch-tpl__v {
-  background: linear-gradient(90deg, #1B287A 0 12%, #FBFAF7 12% 100%);
+.sch-body button.sch-lib__cat:hover { background: var(--sch-surface); color: var(--sch-ink); }
+.sch-body button.sch-lib__cat.is-on { background: var(--sch-accent); color: var(--sch-on-accent); font-weight: 600; }
+.sch-lib__cat > span { font-size: var(--sch-text-xs); opacity: .7; font-variant-numeric: tabular-nums; }
+.sch-lib__q { min-height: 34px; max-width: 220px; }
+
+.sch-lib__grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: var(--sch-3); padding: var(--sch-3); max-height: 420px; overflow-y: auto;
 }
-.sch-tpl--sapphire .sch-tpl__v {
-  background: linear-gradient(152deg, #16233F 0%, #0D1730 55%, #070E1F 100%);
-  box-shadow: inset 0 0 0 3px #A9B6CC;
+.sch-lib__item { position: relative; cursor: pointer; display: grid; gap: 7px; }
+.sch-lib__item[hidden] { display: none; }
+.sch-lib__item input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+/* المعاينة: الوثيقة نفسها مصغَّرة — لا مربّع لون يشبه كل المربعات */
+.sch-lib__thumb {
+  display: block; aspect-ratio: 1123 / 794; overflow: hidden;
+  border-radius: var(--sch-radius); border: 2px solid var(--sch-line);
+  background: var(--sch-surface-alt);
+  transition: border-color var(--sch-fast) var(--sch-ease), transform var(--sch-fast) var(--sch-ease);
 }
+.sch-lib__thumb svg { display: block; width: 100%; height: 100%; }
+.sch-lib__item:hover .sch-lib__thumb { transform: translateY(-2px); }
+.sch-lib__item input:checked + .sch-lib__thumb {
+  border-color: var(--sch-accent); box-shadow: 0 0 0 3px var(--sch-accent-soft);
+}
+.sch-lib__item input:focus-visible + .sch-lib__thumb { outline: 2px solid var(--sch-accent); outline-offset: 2px; }
+
+.sch-lib__meta { display: grid; gap: 1px; text-align: center; }
+.sch-lib__meta b { font-size: var(--sch-text-sm); font-weight: 400; color: var(--sch-muted); }
+.sch-lib__item input:checked ~ .sch-lib__meta b { color: var(--sch-ink); font-weight: 600; }
+.sch-lib__meta em { font-size: var(--sch-text-xs); font-style: normal; color: var(--sch-muted); opacity: .8; }
+.sch-lib__none { padding: var(--sch-5); text-align: center; color: var(--sch-muted); font-size: var(--sch-text-sm); }
+
+@media (prefers-reduced-motion: reduce) { .sch-lib__thumb { transition: none; } }
 
 /* صفحة مُسمّاة للشهادة (أفقية) حتى لا يتسرّب اتجاهها لبقية الطباعات */
 .sch-cert, .sch-cert--sheet { page: sch-cert; }

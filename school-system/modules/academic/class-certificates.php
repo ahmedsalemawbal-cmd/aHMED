@@ -29,12 +29,147 @@ final class SCH_Certificates
     ];
 
     /** ثلاثة قوالب بصرية — لكل مناسبة ما يليق بها. */
-    public const TEMPLATES = [
-        'royal'   => 'الملكية — بنفسجية وذهب',
-        'classic' => 'الكلاسيكية — إطار ذهبي',
-        'modern'  => 'الحديثة — نظيفة بخط كبير',
-        'sapphire' => 'الياقوتية — نيلية وفضة',
+    /** سقف الطباعة في الصفحة الواحدة — القالب المزخرف ~٧٠ كيلوبايت. */
+    public const PRINT_BATCH = 50;
+
+    /** تصنيفات المكتبة — سكّة التصفية في نافذة اختيار القالب. */
+    public const CATEGORIES = [
+        'formal'  => 'رسمية',
+        'grad'    => 'تخرّج وإتمام',
+        'honor'   => 'تكريم وتفوّق',
+        'young'   => 'طفولة ورياض',
+        'sport'   => 'رياضية وأنشطة',
+        'quran'   => 'قرآنية',
     ];
+
+    /**
+     * سجلّ القوالب — لا ثابت من أربعة أسطر.
+     *
+     * كان كل قالب دالةً بأربعين سطرًا من SVG، فالقالب العشرون يعني ثمانمئة سطر
+     * تُكتب يدويًا. الآن: القوالب الأربعة الأولى تحتفظ بدالّتها الخاصة (ميزة
+     * معتمدة لا تُمسّ)، وما بعدها **وصف** تبنيه آلة واحدة من لوحة ألوان وتخطيط
+     * وزخارف — فالقالب الجديد اثنا عشر سطرًا لا أربعون.
+     *
+     * المفاتيح: الاسم · التصنيف · وسوم البحث · التخطيط · اللوحة · الزخارف · دالة خاصة
+     */
+    public const TEMPLATES = [
+        'royal' => [
+            'name' => 'الملكية', 'cat' => 'formal', 'tags' => 'ذهب داكن فخم رسمي',
+            'fn' => 'tpl_royal',
+        ],
+        'classic' => [
+            'name' => 'الكلاسيكية', 'cat' => 'grad', 'tags' => 'إطار ذهبي تقليدي',
+            'fn' => 'tpl_classic',
+        ],
+        'modern' => [
+            'name' => 'الحديثة', 'cat' => 'honor', 'tags' => 'نظيفة خط كبير شريط جانبي',
+            'fn' => 'tpl_modern',
+        ],
+        'sapphire' => [
+            'name' => 'الياقوتية', 'cat' => 'formal', 'tags' => 'نيلي فضة عميق',
+            'fn' => 'tpl_sapphire',
+        ],
+
+        // ── مبنيّة بالآلة: لوحة + تخطيط + زخارف ──
+        'obsidian' => [
+            'name' => 'السبج', 'cat' => 'formal', 'tags' => 'أسود فضة رصين',
+            'layout' => 'centered', 'orn' => ['frame2', 'corners', 'seal', 'rope'],
+            'pal' => ['bg' => '#0B0D12', 'bg2' => '#14171F', 'ink' => '#FFFFFF',
+                      'soft' => '#9AA3B2', 'dim' => '#5C6472', 'gold' => '#C7CCD6'],
+        ],
+        'pearl' => [
+            'name' => 'اللؤلؤية', 'cat' => 'formal', 'tags' => 'أبيض فاتح راقٍ بسيط',
+            'layout' => 'minimal', 'orn' => ['rule', 'seal'],
+            'pal' => ['bg' => '#FBFAF7', 'bg2' => '#F3F1EA', 'ink' => '#1A1A18',
+                      'soft' => '#6B6A62', 'dim' => '#9A968C', 'gold' => '#A98F4C'],
+        ],
+        'laurel' => [
+            'name' => 'الغار', 'cat' => 'grad', 'tags' => 'أخضر تخرّج إكليل',
+            'layout' => 'centered', 'orn' => ['frame2', 'rosette', 'seal', 'rope'],
+            'pal' => ['bg' => '#08221B', 'bg2' => '#0E3227', 'ink' => '#FFFFFF',
+                      'soft' => '#9CC3B4', 'dim' => '#5F8577', 'gold' => '#CBA85A'],
+        ],
+        'crimson' => [
+            'name' => 'القرمزية', 'cat' => 'honor', 'tags' => 'أحمر عنّابي تكريم',
+            'layout' => 'band', 'orn' => ['seal', 'corners'],
+            'pal' => ['bg' => '#FFFFFF', 'bg2' => '#7A1723', 'ink' => '#1B1013',
+                      'soft' => '#6B4A50', 'dim' => '#9B858A', 'gold' => '#B08640'],
+        ],
+        'emerald' => [
+            'name' => 'الزمردية', 'cat' => 'honor', 'tags' => 'أخضر زمرد تفوّق',
+            'layout' => 'band', 'orn' => ['seal', 'rule'],
+            'pal' => ['bg' => '#FFFFFF', 'bg2' => '#0B5140', 'ink' => '#0E1A16',
+                      'soft' => '#4A6A60', 'dim' => '#8FA39B', 'gold' => '#C2A253'],
+        ],
+        'sunny' => [
+            'name' => 'الشمسية', 'cat' => 'young', 'tags' => 'أصفر مرح أطفال روضة',
+            'layout' => 'playful', 'orn' => ['confetti', 'seal'],
+            'pal' => ['bg' => '#FFFDF4', 'bg2' => '#FFE9A8', 'ink' => '#3A2C06',
+                      'soft' => '#8A7326', 'dim' => '#B8A45E', 'gold' => '#E8A317'],
+        ],
+        'bloom' => [
+            'name' => 'الزهرية', 'cat' => 'young', 'tags' => 'وردي بنفسجي لطيف أطفال',
+            'layout' => 'playful', 'orn' => ['confetti', 'seal'],
+            'pal' => ['bg' => '#FFFAFD', 'bg2' => '#FBD9EC', 'ink' => '#3B1430',
+                      'soft' => '#8A5378', 'dim' => '#BC94AE', 'gold' => '#C86FA6'],
+        ],
+        'track' => [
+            'name' => 'المضمار', 'cat' => 'sport', 'tags' => 'رياضة نشاط أزرق حيوي',
+            'layout' => 'band', 'orn' => ['corners', 'rule'],
+            'pal' => ['bg' => '#FFFFFF', 'bg2' => '#14346E', 'ink' => '#0C1526',
+                      'soft' => '#46587A', 'dim' => '#8D99AE', 'gold' => '#2E8BC0'],
+        ],
+        'mushaf' => [
+            'name' => 'المصحفية', 'cat' => 'quran', 'tags' => 'قرآن حفظ تلاوة زخرفة',
+            'layout' => 'centered', 'orn' => ['frame2', 'rosette', 'corners', 'seal'],
+            'pal' => ['bg' => '#0D2A21', 'bg2' => '#123A2D', 'ink' => '#F6F1E0',
+                      'soft' => '#B9C9AE', 'dim' => '#6F8A78', 'gold' => '#D8B75F'],
+        ],
+        'ivory' => [
+            'name' => 'العاجية', 'cat' => 'grad', 'tags' => 'عاجي هادئ إتمام سنة',
+            'layout' => 'minimal', 'orn' => ['rule', 'corners'],
+            'pal' => ['bg' => '#FCFBF6', 'bg2' => '#EFEADC', 'ink' => '#22201A',
+                      'soft' => '#6A6558', 'dim' => '#9E9787', 'gold' => '#9C7F3F'],
+        ],
+    ];
+
+    /** اسم القالب — السجلّ يحمل مصفوفة، والشاشات تريد نصًّا. */
+    public static function template_name(string $key): string
+    {
+        return (string) (self::TEMPLATES[$key]['name'] ?? $key);
+    }
+
+    /**
+     * كم مرة استُعمل كل قالب في هذه المدرسة — مفتاح => عدد.
+     *
+     * «الأكثر استخدامًا» يُشتق من تاريخ المدرسة نفسها لا من قائمة نكتبها،
+     * فالترتيب يعكس ذوقها هي. والنتيجة مخزَّنة دقيقة: تُقرأ في كل فتح للمكتبة.
+     */
+    public static function template_usage(): array
+    {
+        $cached = get_transient('sch_tpl_usage');
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        global $wpdb;
+
+        $rows = $wpdb->get_results(
+            'SELECT template, COUNT(*) AS n FROM ' . sch_table('certificates') . "
+             WHERE status = 'valid' GROUP BY template"
+        ) ?: [];
+
+        $out = [];
+
+        foreach ($rows as $r) {
+            $out[(string) $r->template] = (int) $r->n;
+        }
+
+        set_transient('sch_tpl_usage', $out, 60);
+
+        return $out;
+    }
 
     // ---------- الإصدار ----------
 
@@ -297,7 +432,8 @@ final class SCH_Certificates
             $params[] = (string) $args['to'] . ' 23:59:59';
         }
 
-        $limit = min(300, max(1, (int) ($args['limit'] ?? 60)));
+        $limit  = min(300, max(1, (int) ($args['limit'] ?? 60)));
+        $offset = max(0, (int) ($args['offset'] ?? 0));
 
         $sql = 'SELECT c.*, s.full_name, s.first_name, s.father_name, s.grand_name, s.family_name,
                        s.academic_no, s.grade_level, s.section
@@ -305,7 +441,8 @@ final class SCH_Certificates
                 INNER JOIN ' . sch_table('students') . ' s ON s.id = c.student_id
                 LEFT JOIN ' . sch_table('enrollments') . " e
                        ON e.student_id = s.id AND e.status = 'active' AND e.year_id = c.year_id
-                WHERE " . implode(' AND ', $where) . ' ORDER BY c.id DESC LIMIT ' . $limit;
+                WHERE " . implode(' AND ', $where) . ' ORDER BY c.id DESC LIMIT ' . $limit
+              . ($offset > 0 ? ' OFFSET ' . $offset : '');
 
         return $wpdb->get_results($params === [] ? $sql : $wpdb->prepare($sql, $params)) ?: [];
     }
@@ -402,12 +539,17 @@ final class SCH_Certificates
         $serial = (string) $cert->serial;
         $date   = wp_date('j F Y', strtotime((string) $cert->issued_at));
 
-        $body = match ((string) $cert->template) {
-            'modern'  => self::tpl_modern($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
-            'classic' => self::tpl_classic($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
-            'sapphire' => self::tpl_sapphire($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
-            default   => self::tpl_royal($w, $h, $school, $name, $klass, $title, $reason, $serial, $date),
-        };
+        // القوالب الأربعة الأولى لها دوالّها الخاصة (ميزة معتمدة لا تُمسّ)،
+        // وما بعدها يبنيه المحرّك من وصفه في السجلّ.
+        $key = (string) $cert->template;
+        $tpl = self::TEMPLATES[$key] ?? self::TEMPLATES['royal'];
+
+        if (isset($tpl['fn']) && method_exists(self::class, (string) $tpl['fn'])) {
+            $fn   = (string) $tpl['fn'];
+            $body = self::$fn($w, $h, $school, $name, $klass, $title, $reason, $serial, $date);
+        } else {
+            $body = self::tpl_auto($tpl, $w, $h, $school, $name, $klass, $title, $reason, $serial, $date);
+        }
 
         // الملغاة تُختَم على وجهها: نسخة مطبوعة سابقًا قد تدور، والوثيقة نفسها
         // يجب أن تقول إنها لم تعد سارية.
@@ -423,6 +565,151 @@ final class SCH_Certificates
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $w . ' ' . $h . '" '
             . ($print ? 'width="100%" height="100%" preserveAspectRatio="xMidYMid meet"' : 'class="sch-cert__svg"')
             . ' role="img" aria-label="' . esc_attr($title . ' — ' . $name) . '">' . $body . '</svg>';
+    }
+
+    /**
+     * الآلة: تبني قالبًا كاملًا من وصفه — لوحة ألوان وتخطيط وزخارف.
+     *
+     * أربعة تخطيطات تغطّي ما تحتاجه مدرسة: `centered` رسمي متمركز ·
+     * `band` بشريط جانبي ملوّن · `minimal` بمساحة بيضاء وخطوط رفيعة ·
+     * `playful` للصغار. والزخارف تُركَّب من المساعدات القائمة نفسها.
+     */
+    private static function tpl_auto(array $tpl, int $w, int $h, string $school, string $name,
+                                     string $klass, string $title, string $reason,
+                                     string $serial, string $date): string
+    {
+        $p   = $tpl['pal'];
+        $orn = (array) ($tpl['orn'] ?? []);
+        $lay = (string) ($tpl['layout'] ?? 'centered');
+        $c   = $w / 2;
+        $has = static fn (string $k): bool => in_array($k, $orn, true);
+
+        [$l1, $l2] = self::two_lines($reason ?: 'تقديرًا لجهده والتزامه خلال العام الدراسي');
+
+        $dark = $lay !== 'band' && $lay !== 'minimal';
+        $svg  = '';
+
+        // ── الأرضية ──
+        if ($lay === 'band') {
+            // شريط جانبي ملوّن يترك المتن كاملًا للنص (يبدأ من اليمين — RTL)
+            $bw   = 168;
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 . '<rect x="' . ($w - $bw) . '" y="0" width="' . $bw . '" height="' . $h . '" fill="' . $p['bg2'] . '"/>'
+                 . '<rect x="' . ($w - $bw - 5) . '" y="0" width="5" height="' . $h . '" fill="' . $p['gold'] . '"/>';
+        } elseif ($lay === 'playful') {
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 . '<rect x="26" y="26" width="' . ($w - 52) . '" height="' . ($h - 52) . '" rx="34" fill="' . $p['bg2'] . '" opacity=".55"/>'
+                 . '<rect x="26" y="26" width="' . ($w - 52) . '" height="' . ($h - 52) . '" rx="34" fill="none" stroke="' . $p['gold'] . '" stroke-width="3"/>';
+        } else {
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>';
+            if ($lay === 'centered') {
+                $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg2'] . '" opacity=".55"/>';
+            }
+        }
+
+        // ── الزخارف ──
+        if ($has('rosette')) {
+            $svg .= self::rosette($c, 400, 250, 63, 145, $p['gold'], .3, .13)
+                 .  self::rosette($c, 400, 170, 47, 96, $p['gold'], .26, .09);
+        }
+
+        if ($has('confetti')) {
+            // نقاط ثابتة لا عشوائية — الوثيقة نفسها تُطبع مرتين فتتطابق
+            $dots = [[92, 120], [1030, 150], [140, 660], [980, 690], [70, 380],
+                     [1050, 420], [230, 92], [890, 706], [320, 700], [800, 96]];
+            foreach ($dots as $i => [$dx, $dy]) {
+                $svg .= '<circle cx="' . $dx . '" cy="' . $dy . '" r="' . (6 + ($i % 3) * 3)
+                     . '" fill="' . ($i % 2 ? $p['gold'] : $p['soft']) . '" opacity=".38"/>';
+            }
+        }
+
+        if ($has('frame2')) {
+            $svg .= '<rect x="24" y="24" width="' . ($w - 48) . '" height="' . ($h - 48) . '" fill="none" stroke="' . $p['gold'] . '" stroke-width="3"/>'
+                 .  '<rect x="35" y="35" width="' . ($w - 70) . '" height="' . ($h - 70) . '" fill="none" stroke="' . $p['gold'] . '" stroke-width=".7" opacity=".5"/>';
+        }
+
+        if ($has('corners')) {
+            foreach ([[56, 56], [$w - 56, 56], [56, $h - 56], [$w - 56, $h - 56]] as [$sx, $sy]) {
+                if ($lay === 'band' && $sx > $w - 200) { continue; }
+                $svg .= self::star($sx, $sy, 15, $p['gold'], 1.1, .8);
+            }
+        }
+
+        // ── النص ──
+        $tx    = ($lay === 'band') ? (($w - 168) / 2) : $c;
+        $inkc  = $p['ink'];
+        $softc = $p['soft'];
+
+        $svg .= '<text x="' . $tx . '" y="112" text-anchor="middle" fill="' . $softc . '" font-size="17">' . esc_html($school) . '</text>';
+
+        if ($has('rope')) {
+            $svg .= self::rope($tx - 95, $tx + 95, 132, $p['gold']);
+        }
+
+        if ($has('rule')) {
+            $svg .= '<line x1="' . ($tx - 120) . '" y1="132" x2="' . ($tx + 120) . '" y2="132" stroke="' . $p['gold'] . '" stroke-width="1.4"/>';
+        }
+
+        $svg .= '<text x="' . $tx . '" y="206" text-anchor="middle" fill="' . $p['gold'] . '" font-size="52" font-weight="bold">' . esc_html($title) . '</text>'
+             .  '<text x="' . $tx . '" y="270" text-anchor="middle" fill="' . $softc . '" font-size="17">تشهد إدارة المدرسة بأن الطالب</text>'
+             .  '<text x="' . $tx . '" y="350" text-anchor="middle" fill="' . $inkc . '" font-size="50" font-weight="bold">' . esc_html($name) . '</text>';
+
+        if ($has('rope')) {
+            $svg .= self::rope($tx - 230, $tx + 230, 374, $p['gold']);
+        } else {
+            $svg .= '<line x1="' . ($tx - 200) . '" y1="374" x2="' . ($tx + 200) . '" y2="374" stroke="' . $p['dim'] . '" stroke-width="1"/>';
+        }
+
+        $svg .= '<text x="' . $tx . '" y="420" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l1) . '</text>';
+
+        if ($l2 !== '') {
+            $svg .= '<text x="' . $tx . '" y="452" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l2) . '</text>';
+        }
+
+        $svg .= '<text x="' . $tx . '" y="' . ($l2 !== '' ? 494 : 462) . '" text-anchor="middle" fill="' . $p['dim'] . '" font-size="15">' . esc_html($klass) . '</text>';
+
+        if ($has('seal')) {
+            $svg .= self::seal($tx, 596, 40, $p['gold'], $dark ? $p['bg'] : $p['bg2']);
+        }
+
+        // ── التوقيعات والرقم ──
+        $sy   = 700;
+        $lft  = ($lay === 'band') ? 150 : 175;
+        $rgt  = ($lay === 'band') ? ($w - 168 - 150) : ($w - 175);
+
+        $svg .= '<line x1="' . $lft . '" y1="' . $sy . '" x2="' . ($lft + 200) . '" y2="' . $sy . '" stroke="' . $p['dim'] . '" stroke-width="1"/>'
+             .  '<text x="' . ($lft + 100) . '" y="' . ($sy + 22) . '" text-anchor="middle" fill="' . $softc . '" font-size="13">مدير المدرسة</text>'
+             .  '<line x1="' . ($rgt - 200) . '" y1="' . $sy . '" x2="' . $rgt . '" y2="' . $sy . '" stroke="' . $p['dim'] . '" stroke-width="1"/>'
+             .  '<text x="' . ($rgt - 100) . '" y="' . ($sy + 22) . '" text-anchor="middle" fill="' . $softc . '" font-size="13">المشرف التربوي</text>'
+             .  '<text x="' . $tx . '" y="752" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($serial) . '</text>'
+             .  '<text x="' . $tx . '" y="772" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($date) . '</text>';
+
+        return $svg;
+    }
+
+    /**
+     * معاينة القالب ببيانات نموذجية — القالب الحقيقي لا مربّع تدرّج لوني.
+     *
+     * أول رؤية للوثيقة كانت تأتي **بعد** الإصدار؛ وهذه تجعلها قبله.
+     */
+    public static function preview_svg(string $template): string
+    {
+        $key = isset(self::TEMPLATES[$template]) ? $template : array_key_first(self::TEMPLATES);
+
+        $sample = (object) [
+            'template'      => $key,
+            'title'         => 'شهادة تفوّق',
+            'reason'        => 'لتفوّقه ومثابرته خلال الفصل الدراسي',
+            'serial'        => '1447-0001',
+            'issued_at'     => sch_now(),
+            'status'        => 'valid',
+            'name_snapshot' => 'محمد عبدالله الأحمد',
+            'grade_snapshot'   => 'الصف الأول',
+            'section_snapshot' => 'أ',
+            'type'          => 'excellence',
+        ];
+
+        return self::svg($sample);
     }
 
     /** وردة سبيروغراف — نقش الأوراق المالية، بمعادلة لا بصورة. */

@@ -21,23 +21,41 @@ if (isset($_GET['sheet'])) {
         'type'        => isset($_GET['type']) ? sanitize_key(wp_unslash((string) $_GET['type'])) : '',
         'from'        => isset($_GET['from']) ? sch_sanitize_date($_GET['from']) : '',
         'to'          => isset($_GET['to']) ? sch_sanitize_date($_GET['to']) : '',
-        'limit'       => 300,
+        // خمسون في الصفحة لا ثلاثمئة: القالب المزخرف ~٧٠ كيلوبايت، فثلاثمئة
+        // شهادة ≈ ٢١ ميغابايت HTML يتجمّد المتصفح قبل أن يصل أمر الطباعة.
+        'limit'       => SCH_Certificates::PRINT_BATCH,
+        'offset'      => isset($_GET['off']) ? absint($_GET['off']) : 0,
     ]);
-    
+
+    $sch_off  = isset($_GET['off']) ? absint($_GET['off']) : 0;
+    $sch_more = (count($sch_batch) === SCH_Certificates::PRINT_BATCH);
 ?>
     <div class="sch-head sch-noprint">
         <div>
             <h1 class="sch-title"><?php esc_html_e('طباعة الشهادات', 'school-system'); ?></h1>
             <p class="sch-sub"><?php echo esc_html(sprintf(
-                /* translators: %s: العدد */
-                __('%s شهادة — ورقة لكل واحدة', 'school-system'),
-                number_format_i18n(count($sch_batch))
+                /* translators: 1: من 2: إلى */
+                __('شهادات %1$s–%2$s — ورقة لكل واحدة', 'school-system'),
+                number_format_i18n($sch_off + 1),
+                number_format_i18n($sch_off + count($sch_batch))
             )); ?></p>
         </div>
-        <button type="button" class="sch-btn" onclick="window.print()">
-            <?php echo sch_icon('print', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('طباعة', 'school-system'); ?>
-        </button>
+        <div class="sch-head__acts">
+            <?php if ($sch_more) : ?>
+                <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg(
+                    'off',
+                    $sch_off + SCH_Certificates::PRINT_BATCH
+                )); ?>"><?php echo esc_html(sprintf(
+                    /* translators: %s: العدد */
+                    __('التالية %s', 'school-system'),
+                    number_format_i18n(SCH_Certificates::PRINT_BATCH)
+                )); ?></a>
+            <?php endif; ?>
+            <button type="button" class="sch-btn" onclick="window.print()">
+                <?php echo sch_icon('print', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('طباعة', 'school-system'); ?>
+            </button>
+        </div>
     </div>
 
     <?php if ($sch_batch === []) : ?>
@@ -52,7 +70,11 @@ if (isset($_GET['sheet'])) {
         </div>
     <?php endforeach; ?>
 
-    <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 400); });</script>
+    <?php /* الطباعة التلقائية للدفعات الصغيرة وحدها — دفعة كاملة تُطبع بالخطأ
+             ورقٌ لا يُستعاد. فوق العشرين يضغط الموظف الزرّ بنفسه. */ ?>
+    <?php if (count($sch_batch) > 0 && count($sch_batch) <= 20 && $sch_off === 0) : ?>
+        <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 400); });</script>
+    <?php endif; ?>
     <?php
     return;
 }
@@ -401,17 +423,69 @@ $sch_on = array_filter($sch_f);
                    placeholder="<?php esc_attr_e('لتفوّقه في مادة الرياضيات وحصوله على المركز الأول', 'school-system'); ?>">
         </div>
 
+        <?php
+        // مكتبة القوالب: تصنيفات وبحث ومعاينة حقيقية بالقالب نفسه.
+        // «الأكثر استخدامًا» يُشتق من شهادات هذه المدرسة لا من قائمة نكتبها —
+        // فالترتيب تاريخُها لا ذوقُنا.
+        $sch_used = SCH_Certificates::template_usage();
+        $sch_cats = SCH_Certificates::CATEGORIES;
+        ?>
         <h3 class="sch-lbl"><?php esc_html_e('القالب', 'school-system'); ?></h3>
 
-        <div class="sch-tpls">
-            <?php foreach (SCH_Certificates::TEMPLATES as $sch_slug => $sch_label) : ?>
-                <label class="sch-tpl sch-tpl--<?php echo esc_attr($sch_slug); ?>">
-                    <input type="radio" name="template" value="<?php echo esc_attr($sch_slug); ?>"
-                           <?php checked($sch_slug, 'royal'); ?>>
-                    <span class="sch-tpl__v"></span>
-                    <b><?php echo esc_html($sch_label); ?></b>
-                </label>
-            <?php endforeach; ?>
+        <div class="sch-lib" data-lib>
+            <div class="sch-lib__bar">
+                <div class="sch-lib__cats" role="tablist">
+                    <button type="button" class="sch-lib__cat is-on" data-cat="" role="tab" aria-selected="true">
+                        <?php esc_html_e('الكل', 'school-system'); ?>
+                        <span><?php echo esc_html(number_format_i18n(count(SCH_Certificates::TEMPLATES))); ?></span>
+                    </button>
+                    <?php if (array_sum($sch_used) > 0) : ?>
+                        <button type="button" class="sch-lib__cat" data-cat="__used" role="tab" aria-selected="false">
+                            <?php esc_html_e('الأكثر استخدامًا', 'school-system'); ?>
+                        </button>
+                    <?php endif; ?>
+                    <?php foreach ($sch_cats as $sch_ck => $sch_cl) :
+                        $sch_n = count(array_filter(
+                            SCH_Certificates::TEMPLATES,
+                            static fn (array $t): bool => (string) ($t['cat'] ?? '') === $sch_ck
+                        ));
+                        if ($sch_n === 0) { continue; } ?>
+                        <button type="button" class="sch-lib__cat" data-cat="<?php echo esc_attr($sch_ck); ?>" role="tab" aria-selected="false">
+                            <?php echo esc_html($sch_cl); ?>
+                            <span><?php echo esc_html(number_format_i18n($sch_n)); ?></span>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+                <input type="search" class="sch-lib__q" data-lib-q
+                       placeholder="<?php esc_attr_e('ابحث في القوالب…', 'school-system'); ?>"
+                       aria-label="<?php esc_attr_e('بحث في القوالب', 'school-system'); ?>">
+            </div>
+
+            <div class="sch-lib__grid">
+                <?php foreach (SCH_Certificates::TEMPLATES as $sch_slug => $sch_t) : ?>
+                    <label class="sch-lib__item"
+                           data-cat="<?php echo esc_attr((string) ($sch_t['cat'] ?? '')); ?>"
+                           data-used="<?php echo esc_attr((string) ($sch_used[$sch_slug] ?? 0)); ?>"
+                           data-find="<?php echo esc_attr((string) $sch_t['name'] . ' ' . (string) ($sch_t['tags'] ?? '')); ?>">
+                        <input type="radio" name="template" value="<?php echo esc_attr($sch_slug); ?>"
+                               <?php checked($sch_slug, 'royal'); ?>>
+                        <span class="sch-lib__thumb">
+                            <?php echo SCH_Certificates::preview_svg($sch_slug); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                        </span>
+                        <span class="sch-lib__meta">
+                            <b><?php echo esc_html((string) $sch_t['name']); ?></b>
+                            <?php if ((int) ($sch_used[$sch_slug] ?? 0) > 0) : ?>
+                                <em><?php echo esc_html(sprintf(
+                                    /* translators: %s: العدد */
+                                    _n('استُخدم مرة', 'استُخدم %s مرات', (int) $sch_used[$sch_slug], 'school-system'),
+                                    number_format_i18n((int) $sch_used[$sch_slug])
+                                )); ?></em>
+                            <?php endif; ?>
+                        </span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+            <p class="sch-lib__none" data-lib-none hidden><?php esc_html_e('لا قالب يطابق بحثك.', 'school-system'); ?></p>
         </div>
 
         <button class="sch-btn"><?php esc_html_e('إصدار الشهادة', 'school-system'); ?></button>
@@ -435,6 +509,49 @@ $sch_on = array_filter($sch_f);
     type.addEventListener('change', fill);
     fill();
   }
+
+  /* مكتبة القوالب: تصنيف + بحث. الفلترة محليّة — القوالب اثنا عشر لا مئة. */
+  document.querySelectorAll('[data-lib]').forEach(function (lib) {
+    var items = Array.prototype.slice.call(lib.querySelectorAll('.sch-lib__item'));
+    var cats  = Array.prototype.slice.call(lib.querySelectorAll('.sch-lib__cat'));
+    var q     = lib.querySelector('[data-lib-q]');
+    var none  = lib.querySelector('[data-lib-none]');
+    var cat   = '';
+
+    function norm(s) { return (s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه'); }
+
+    function run() {
+      var term = norm(q ? q.value.trim() : '');
+      var shown = 0;
+
+      items.forEach(function (it) {
+        var okCat = !cat
+          || (cat === '__used' && parseInt(it.dataset.used || '0', 10) > 0)
+          || it.dataset.cat === cat;
+        var okQ = !term || norm(it.dataset.find).indexOf(term) > -1;
+        var on = okCat && okQ;
+        it.hidden = !on;
+        if (on) { shown++; }
+      });
+
+      if (none) { none.hidden = shown > 0; }
+    }
+
+    cats.forEach(function (b) {
+      b.addEventListener('click', function () {
+        cat = b.dataset.cat || '';
+        cats.forEach(function (x) {
+          var on = x === b;
+          x.classList.toggle('is-on', on);
+          x.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        run();
+      });
+    });
+
+    if (q) { q.addEventListener('input', run); }
+    run();
+  });
 
   /* الاقتراحات: العدّاد يتحرك والقائمة تُرسل كمعرّفات */
   document.querySelectorAll('[data-sugg]').forEach(function (form) {
