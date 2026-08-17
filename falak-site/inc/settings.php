@@ -32,7 +32,7 @@ function falak_default_opts() {
 		'logo'          => 'https://ahmedawbal.com/wp-content/uploads/2026/07/%D8%AA%D8%B5%D9%85%D9%8A%D9%85-%D8%A8%D8%AF%D9%88%D9%86-%D8%B9%D9%86%D9%88%D8%A7%D9%86-89.png',
 		'favicon'       => '',
 		'about_image'   => 'https://alfalakalmuneer.com/wp-content/uploads/2026/08/doha24net-1755349731.jpg',
-		'tiktok_pixel'  => 'DA1CILRC77UDGUKDUV1G', // معرّف بكسل تيك توك (قابل للتعديل من الإعدادات)
+		'tiktok_pixel'  => 'DA1D3LRC77UDGUKDUVIG', // معرّف بكسل تيك توك (قابل للتعديل من الإعدادات)
 		// إحصائيات الواجهة الرئيسية.
 		'stat_students' => '850',
 		'stat_grads'    => '320',
