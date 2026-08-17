@@ -348,6 +348,45 @@ body.sch-body {
 }
 .sch-steps li { margin-bottom: var(--sch-2); }
 
+/* سكّة خطوات مرقّمة: المنجَز هادئ والحالي بارز — تُقرأ الحالة قبل النص */
+.sch-steps:has(.sch-steps__i) { list-style: none; margin-inline-start: 0; }
+.sch-steps__i {
+  display: flex;
+  align-items: center;
+  gap: var(--sch-3);
+  font-size: var(--sch-text-sm);
+  line-height: var(--sch-lh-ui);
+}
+.sch-steps__n {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--sch-line);
+  background: var(--sch-surface);
+  color: var(--sch-muted);
+  font-size: var(--sch-text-xs);
+  font-weight: 700;
+}
+.sch-steps__i.is-done { color: var(--sch-ink-soft); }
+.sch-steps__i.is-done .sch-steps__n {
+  background: var(--sch-success);
+  border-color: var(--sch-success);
+  color: var(--sch-on-success);
+}
+.sch-steps__i.is-now { color: var(--sch-ink); font-weight: 600; }
+.sch-steps__i.is-now .sch-steps__n {
+  background: var(--sch-accent);
+  border-color: var(--sch-accent);
+  color: var(--sch-on-accent);
+}
+
+/* زر الإشعارات يقول حالته بلونه: مفعّل أخضر، محجوب باهت لا يُضغط */
+[data-sch-push][data-sch-push-state="on"] { color: var(--sch-success); border-color: var(--sch-success); }
+[data-sch-push][data-sch-push-state="blocked"] { opacity: .6; cursor: not-allowed; }
+
 .sch-errors {
   margin: 0;
   padding-inline-start: var(--sch-4);

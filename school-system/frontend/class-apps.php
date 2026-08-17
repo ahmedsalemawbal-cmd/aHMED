@@ -221,33 +221,10 @@ self.addEventListener('fetch', function (e) {
   if (A.indexOf(new URL(r.url).pathname) === -1 && A.indexOf(r.url) === -1) { return; }
   e.respondWith(caches.match(r).then(function (hit) { return hit || fetch(r); }));
 });
-
-/* الإشعار الفوري: يصل والتطبيق مغلق، والضغط عليه يفتح الشاشة المقصودة. */
-self.addEventListener('push', function (e) {
-  var d = {};
-  try { d = e.data ? e.data.json() : {}; } catch (_) { d = {}; }
-  e.waitUntil(self.registration.showNotification(d.title || 'مدرستي', {
-    body: d.body || '',
-    icon: d.icon || '/wp-content/plugins/school-system/assets/icon-192.png',
-    badge: d.icon || '/wp-content/plugins/school-system/assets/icon-192.png',
-    dir: 'rtl',
-    lang: 'ar',
-    tag: d.tag || 'sch',
-    data: { url: d.url || '/' }
-  }));
-});
-
-self.addEventListener('notificationclick', function (e) {
-  e.notification.close();
-  var url = (e.notification.data && e.notification.data.url) || '/';
-  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (ws) {
-    for (var i = 0; i < ws.length; i++) {
-      if ('focus' in ws[i]) { ws[i].navigate(url); return ws[i].focus(); }
-    }
-    return clients.openWindow(url);
-  }));
-});
 JS;
+
+        // الإشعار الفوري: يصل والتطبيق مغلق، والضغط عليه يفتح الشاشة المقصودة.
+        SCH_Push::sw_handlers();
 
         exit;
     }

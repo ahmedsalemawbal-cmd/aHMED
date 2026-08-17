@@ -426,5 +426,6 @@ if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open'
 </script>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
 <script src="<?php echo esc_url(sch_asset('assets/select.js')); ?>" defer></script>
+<?php SCH_Push::boot(home_url('/' . SCH_Dashboard::BASE . '/sw.js')); // زر «تفعيل الإشعارات» في الإعدادات ?>
 </body>
 </html>

@@ -1544,6 +1544,12 @@ img { max-width: 100%; }
 .p-setrow--out .p-setrow__t { color: var(--p-n3); }
 .p-setrow__e { flex: 0 0 auto; color: var(--p-faint); display: flex; align-items: center; gap: 6px; font-size: var(--p-t5); }
 
+/* الإشعارات: الأيقونة تقول الحالة — رمادية قبل، خضراء بعد، باهتة إن حجبها المتصفح */
+[data-sch-push] .p-setrow__i { background: var(--p-n2); }
+[data-sch-push][data-sch-push-state="on"] .p-setrow__i { background: var(--p-ok); }
+[data-sch-push][data-sch-push-state="blocked"] { opacity: .6; }
+[data-sch-push][data-sch-push-state="blocked"] .p-setrow__i { background: var(--p-faint); }
+
 /* ═══════════════ البطاقة الفاخرة — ترويسة أميثيست + خيط معدني ═══════════════ */
 .p-id::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;

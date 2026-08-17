@@ -728,6 +728,25 @@ final class SCH_Activator
             KEY idx_notif (notification_id)
         ) {$charset};";
 
+        // اشتراكات الإشعارات الفورية — جهاز واحد = صف واحد، والمستخدم قد يملك أجهزة.
+        // `endpoint` عنوان طويل جدًا لا يُفهرَس، فالتفرّد على بصمته (sha256).
+        $sql[] = "CREATE TABLE {$p}push_subs (
+            id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            user_id       BIGINT UNSIGNED NOT NULL,
+            endpoint      TEXT            NOT NULL,
+            endpoint_hash CHAR(64)        NOT NULL,
+            p256dh        VARCHAR(190)    NOT NULL,
+            auth          VARCHAR(64)     NOT NULL,
+            device        VARCHAR(190)    DEFAULT NULL,
+            status        ENUM('active','stale') NOT NULL DEFAULT 'active',
+            last_sent_at  DATETIME        DEFAULT NULL,
+            created_at    DATETIME        NOT NULL,
+            updated_at    DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_endpoint (endpoint_hash),
+            KEY idx_user (user_id, status)
+        ) {$charset};";
+
         // ===== المحاسبة =====
         $sql[] = "CREATE TABLE {$p}accounts (
             id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

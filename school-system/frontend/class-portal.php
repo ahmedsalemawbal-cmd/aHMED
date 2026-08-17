@@ -56,7 +56,10 @@ final class SCH_Portal
         }
 
         // من له مجال في الداشبورد مكانه الداشبورد — المدير والوكيل والمحاسب.
-        if (SCH_Dashboard::allowed_areas() !== []) {
+        // و`allowed_areas()` تقرأ **المستخدم الحالي**، فلا تُسأل إلا عنه: النداء
+        // نيابةً عن غيره (بناء رابط إشعار في الكرون) كان سيعطي كلَّ الناس
+        // داشبورد من يشغّل الطلب.
+        if ($user_id === get_current_user_id() && SCH_Dashboard::allowed_areas() !== []) {
             return SCH_Dashboard::url();
         }
 

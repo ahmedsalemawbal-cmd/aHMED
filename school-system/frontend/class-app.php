@@ -493,6 +493,9 @@ self.addEventListener('fetch', (e) => {
   );
 });
 JS;
+
+        // مستمعا الإشعار الفوري — نصّ واحد لكل عوامل الخدمة.
+        SCH_Push::sw_handlers();
         exit;
     }
 

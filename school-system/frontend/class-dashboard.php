@@ -79,6 +79,7 @@ final class SCH_Dashboard
         'settings'   => ['بيانات المدرسة',  'sch_manage_settings',   'system', '',           'cog'],
         'settings-years' => ['السنوات الدراسية', 'sch_manage_settings', 'system', '',        'calendar'],
         'settings-day'   => ['مواعيد الحضور والتنبيهات', 'sch_manage_settings', 'system', '', 'clock'],
+        'settings-push'  => ['الإشعارات الفورية', 'sch_manage_settings', 'system', '',        'bell'],
         'rollover'   => ['ترقية العام',     'sch_manage_settings',   'system', '',           'calendar'],
         'audit'      => ['سجل النظام',      'sch_view_audit',        'system', '',           'clock'],
     ];
@@ -132,6 +133,19 @@ final class SCH_Dashboard
         return self::SECTIONS;
     }
 
+    /** عامل خدمة الداشبورد: مستقبِل إشعارات فقط — لا `fetch` ولا ذاكرة. */
+    private static function send_push_worker(): never
+    {
+        header('Content-Type: application/javascript; charset=utf-8');
+
+        echo "self.addEventListener('install', function () { self.skipWaiting(); });\n";
+        echo "self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });\n";
+
+        SCH_Push::sw_handlers();
+
+        exit;
+    }
+
     public static function areas(): array
     {
         return self::AREAS;
@@ -164,7 +178,7 @@ final class SCH_Dashboard
      */
     private const SETTINGS_NAV = [
         'المدرسة'           => ['settings', 'settings-years', 'rollover'],
-        'اليوم الدراسي'     => ['settings-day'],
+        'اليوم والتنبيهات'  => ['settings-day', 'settings-push'],
         'الفريق والصلاحيات' => ['employees', 'staff-badges', 'perms'],
         'البيانات والنظام'  => ['import', 'audit'],
     ];
@@ -378,6 +392,9 @@ final class SCH_Dashboard
             'save_brand'       => ['sch_manage_settings',  'do_save_brand'],
             'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
             'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
+            'push_keys'        => ['sch_manage_settings',  'do_push_keys'],
+            'push_channel'     => ['sch_manage_settings',  'do_push_channel'],
+            'push_test'        => ['sch_manage_settings',  'do_push_test'],
             'import_students'  => ['sch_manage_students',  'do_import'],
 
             'mark_attendance'  => ['sch_manage_attendance', 'do_mark_attendance'],
@@ -439,6 +456,14 @@ final class SCH_Dashboard
         }
 
         self::no_cache_headers();
+
+        // عامل خدمة للإشعارات وحدها — **بلا تخزين إطلاقًا**: الداشبورد لا يعمل
+        // بلا إنترنت وشاشاته فيها بيانات طلاب. وجوده لسبب واحد: أن يستقبل
+        // المدير الإشعار التجريبي على جهازه، فبلا مستقبِل لا يصل شيء.
+        // (`sanitize_key` تبتلع النقطة، فيُقرأ المتغيّر خامًا قبلها.)
+        if ((string) get_query_var('sch_section') === 'sw.js') {
+            self::send_push_worker();
+        }
 
         $section = sanitize_key((string) get_query_var('sch_section'));
         $id      = absint(get_query_var('sch_id'));
@@ -1499,6 +1524,72 @@ final class SCH_Dashboard
 
         sch_audit('settings.updated', 'settings', null, ['section' => 'alerts']);
         return true;
+    }
+
+    /**
+     * توليد مفاتيح الإشعارات الفورية.
+     *
+     * **مرة واحدة لا أكثر.** إعادة التوليد تُبطل كل اشتراك قائم فيصمت كل
+     * الأجهزة بلا رسالة، فالإعادة تحتاج تأكيدًا صريحًا مكتوبًا.
+     */
+    private static function do_push_keys(array $d, int $id): array|WP_Error
+    {
+        $force = ($d['confirm_reset'] ?? '') === 'RESET';
+
+        if (SCH_Push::ready() && !$force) {
+            return sch_api_error(
+                'push_exists',
+                __('المفاتيح موجودة. إعادة توليدها تُبطل كل الأجهزة المشتركة — اكتب RESET للتأكيد.', 'school-system'),
+                422
+            );
+        }
+
+        $done = SCH_Push::generate_keys($force);
+
+        if (is_wp_error($done)) {
+            return $done;
+        }
+
+        return ['msg' => $force
+            ? __('وُلّدت مفاتيح جديدة — على الأجهزة إعادة التفعيل.', 'school-system')
+            : __('جاهز. فعّل الإشعارات من جوالك لتجربتها.', 'school-system')];
+    }
+
+    /** تشغيل القناة أو إيقافها — الإيقاف لا يمسّ المفاتيح ولا الاشتراكات. */
+    private static function do_push_channel(array $d, int $id): array
+    {
+        $on = !empty($d['notify_push']);
+
+        self::merge_settings(['notify_push' => $on ? '1' : '']);
+        sch_audit('settings.updated', 'settings', null, ['section' => 'push', 'on' => $on]);
+
+        return ['msg' => $on
+            ? __('قناة الإشعارات الفورية مفعّلة.', 'school-system')
+            : __('قناة الإشعارات الفورية موقوفة.', 'school-system')];
+    }
+
+    /** إشعار تجريبي لنفسي — الدليل الوحيد أن السلسلة كلها تعمل. */
+    private static function do_push_test(array $d, int $id): array|WP_Error
+    {
+        if (!SCH_Push::ready()) {
+            return sch_api_error('push_keys', __('ولّد المفاتيح أولًا.', 'school-system'), 422);
+        }
+
+        $sent = SCH_Push::test_to_self();
+
+        if ($sent === 0) {
+            return sch_api_error(
+                'push_none',
+                __('لا جهاز مشترك لحسابك. افتح التطبيق على جوالك واضغط «تفعيل الإشعارات» ثم أعد المحاولة.', 'school-system'),
+                422
+            );
+        }
+
+        return ['msg' => sprintf(
+            /* translators: %d: عدد الأجهزة */
+            _n('أُرسل إشعار تجريبي لجهاز واحد.', 'أُرسل إشعار تجريبي إلى %d أجهزة.', $sent, 'school-system'),
+            $sent
+        )];
     }
 
     private static function do_import(array $d, int $id): array|WP_Error

@@ -259,6 +259,9 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
 });
 JS;
+
+        // مستمعا الإشعار الفوري — نصّ واحد لكل عوامل الخدمة.
+        SCH_Push::sw_handlers();
         exit;
     }
 

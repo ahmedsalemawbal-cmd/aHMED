@@ -320,41 +320,53 @@ final class SCH_Comms
     /**
      * يضع الإشعار في طابور التسليم عبر القنوات المفعّلة — يُرسَل لاحقًا بالكرون
      * لا في الطلب، فبثّ لمئات الأولياء لا يرسل مئات الرسائل تباعًا فيُعلّق الطلب.
+     *
+     * القناتان مستقلّتان: من له جهاز مشترك يصله الإشعار الفوري، ومن له بريد
+     * يصله البريد، **ومن له الاثنان يصله الاثنان**. الرسالة التي تخصّ طفلًا
+     * لا يُقامَر على وصولها بقناة واحدة.
      */
     private static function queue_delivery(int $notification_id, int $user_id): void
     {
         global $wpdb;
 
-        if ($notification_id <= 0 || !sch_settings('notify_email', true)) {
+        if ($notification_id <= 0) {
             return;
         }
 
-        $user = get_userdata($user_id);
-        if (!$user || !is_email((string) $user->user_email)) {
-            return;
+        $channels = [];
+        $user     = get_userdata($user_id);
+
+        if (sch_settings('notify_email', true) && $user && is_email((string) $user->user_email)) {
+            $channels[] = 'email';
         }
 
-        $wpdb->insert(sch_table('deliveries'), [
-            'notification_id' => $notification_id,
-            'user_id'         => $user_id,
-            'channel'         => 'email',
-            'status'          => 'queued',
-            'attempts'        => 0,
-            'created_at'      => sch_now(),
-            'updated_at'      => sch_now(),
-        ]);
+        if (sch_settings('notify_push', true) && SCH_Push::ready() && SCH_Push::has_sub($user_id)) {
+            $channels[] = 'push';
+        }
+
+        foreach ($channels as $channel) {
+            $wpdb->insert(sch_table('deliveries'), [
+                'notification_id' => $notification_id,
+                'user_id'         => $user_id,
+                'channel'         => $channel,
+                'status'          => 'queued',
+                'attempts'        => 0,
+                'created_at'      => sch_now(),
+                'updated_at'      => sch_now(),
+            ]);
+        }
     }
 
     /**
      * معالج الطابور — يُشغَّل بالكرون: يرسل دفعة عبر القناة ويعيد المحاولة حتى
-     * ثلاثًا ثم يعلّمها فاشلة. قنوات Push/SMS تُوصَّل هنا لاحقًا بمفاتيحها.
+     * ثلاثًا ثم يعلّمها فاشلة. قناة SMS تُوصَّل هنا لاحقًا بمفاتيحها.
      */
     public static function process_deliveries(int $limit = 30): int
     {
         global $wpdb;
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT d.id, d.user_id, d.channel, d.attempts, n.title, n.body
+            "SELECT d.id, d.user_id, d.channel, d.attempts, n.title, n.body, n.ref_type, n.ref_id
              FROM " . sch_table('deliveries') . " d
              INNER JOIN " . sch_table('notifications') . " n ON n.id = d.notification_id
              WHERE d.status = 'queued' AND d.attempts < 3
@@ -374,6 +386,16 @@ final class SCH_Comms
                     (string) $d->title,
                     (string) ($d->body ?: $d->title)
                 );
+            }
+
+            if ($d->channel === 'push') {
+                // الضغطة تفتح شاشة الشخص نفسه — ولي الأمر لا يُرمى على شاشة موظف.
+                $ok = SCH_Push::to_user((int) $d->user_id, [
+                    'title' => (string) $d->title,
+                    'body'  => (string) ($d->body ?: ''),
+                    'url'   => SCH_Portal::home_for((int) $d->user_id),
+                    'tag'   => 'sch-' . (string) ($d->ref_type ?: 'n'),
+                ]) > 0;
             }
 
             $attempts = (int) $d->attempts + 1;

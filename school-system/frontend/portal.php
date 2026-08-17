@@ -106,5 +106,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <?php endif; ?>
+<?php SCH_Push::boot(); // الإشعارات الفورية — بعد تسجيل عامل الخدمة ?>
 </body>
 </html>

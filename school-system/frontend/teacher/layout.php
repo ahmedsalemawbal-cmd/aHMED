@@ -114,10 +114,18 @@ $sch_user     = wp_get_current_user();
         var m = document.querySelector('meta[name=theme-color]');
         if (m) { m.content = n === 'dark' ? '#0C0A16' : '#FFFFFF'; }
     });
+
+    /* عامل الخدمة كان مبنيًّا ولا يُسجَّل — فالمعلم وحده بلا تثبيت ولا إشعار. */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Teacher::url('sw.js')); ?>).catch(function () {});
+        });
+    }
     </script>
 
 <?php endif; ?>
 
+<?php SCH_Push::boot(); // الإشعارات الفورية — بعد تسجيل عامل الخدمة ?>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
 </body>
 </html>

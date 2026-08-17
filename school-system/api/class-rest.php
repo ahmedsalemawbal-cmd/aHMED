@@ -16,6 +16,8 @@ final class SCH_Rest
         self::route('/me', 'GET', 'me', static fn (): bool => is_user_logged_in());
         self::route('/me/notifications', 'GET', 'notifications', static fn (): bool => is_user_logged_in());
         self::route('/me/notifications/read', 'POST', 'read_notifications', static fn (): bool => is_user_logged_in());
+        self::route('/me/push/subscribe', 'POST', 'push_subscribe', static fn (): bool => is_user_logged_in());
+        self::route('/me/push/unsubscribe', 'POST', 'push_unsubscribe', static fn (): bool => is_user_logged_in());
 
         // ===== ولي الأمر =====
         self::route('/me/children', 'GET', 'my_children', static fn (): bool => current_user_can('sch_view_own_children'));
@@ -90,6 +92,26 @@ final class SCH_Rest
     public static function read_notifications(WP_REST_Request $r): WP_REST_Response
     {
         SCH_Comms::mark_read(get_current_user_id(), absint($r->get_param('id')));
+        return new WP_REST_Response(['ok' => true]);
+    }
+
+    /** تسجيل جهاز للإشعارات الفورية — الاشتراك يخصّ صاحب الجلسة لا مَن يُرسله. */
+    public static function push_subscribe(WP_REST_Request $r): WP_REST_Response|WP_Error
+    {
+        $done = SCH_Push::subscribe(get_current_user_id(), [
+            'endpoint' => (string) $r->get_param('endpoint'),
+            'p256dh'   => (string) $r->get_param('p256dh'),
+            'auth'     => (string) $r->get_param('auth'),
+            'device'   => (string) $r->get_param('device'),
+        ]);
+
+        return is_wp_error($done) ? $done : new WP_REST_Response(['ok' => true]);
+    }
+
+    public static function push_unsubscribe(WP_REST_Request $r): WP_REST_Response
+    {
+        SCH_Push::unsubscribe(esc_url_raw((string) $r->get_param('endpoint')), get_current_user_id());
+
         return new WP_REST_Response(['ok' => true]);
     }
 

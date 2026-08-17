@@ -83,6 +83,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<?php SCH_Push::boot(); // الإشعارات الفورية — بعد تسجيل عامل الخدمة ?>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
 </body>
 </html>
