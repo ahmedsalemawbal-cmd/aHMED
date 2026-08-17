@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       School System
  * Description:       نظام إدارة مدرسة — طلاب، نقل، حضور، مالية. يشمل REST API للتطبيقات.
- * Version:           8.9.0
+ * Version:           9.0.0
  * Requires at least: 6.4
  * Requires PHP:      8.2
  * Text Domain:       school-system
@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('SCH_VERSION', '8.9.0');
+define('SCH_VERSION', '9.0.0');
 define('SCH_FILE', __FILE__);
 define('SCH_PATH', plugin_dir_path(__FILE__));
 define('SCH_URL', plugin_dir_url(__FILE__));

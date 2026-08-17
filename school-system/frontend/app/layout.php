@@ -34,6 +34,11 @@ $p_hour  = (int) current_time('G');
     <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#0C0A16':'#FFFFFF';}}catch(e){}})();</script>
 
     <title><?php echo esc_html(sch_settings('school_name', get_bloginfo('name'))); ?></title>
+    <?php $sch_fav = SCH_Brand::favicon(); ?>
+    <?php if ($sch_fav !== '') : ?>
+        <link rel="icon" href="<?php echo esc_url($sch_fav); ?>">
+        <link rel="apple-touch-icon" href="<?php echo esc_url($sch_fav); ?>">
+    <?php endif; ?>
 
     <link rel="apple-touch-icon" href="<?php echo esc_url(SCH_URL . 'assets/icon-192.png'); ?>">
     <link rel="manifest" href="<?php echo esc_url(SCH_App::url('manifest.webmanifest')); ?>">

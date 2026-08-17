@@ -48,6 +48,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/learning/class-content.php';
         require_once SCH_PATH . 'modules/learning/class-homework.php';
         require_once SCH_PATH . 'includes/class-files.php';
+        require_once SCH_PATH . 'includes/class-brand.php';
 
         // الـAPI والداشبورد
         require_once SCH_PATH . 'api/class-auth.php';

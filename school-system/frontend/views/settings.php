@@ -51,6 +51,81 @@ $sch_cur = SCH_Years::current();
                 <button class="sch-btn sch-mt"><?php esc_html_e('حفظ البيانات', 'school-system'); ?></button>
             </form>
         </div>
+
+        <?php /* الهوية المرئية: الشعار يظهر في الشريط الجانبي وصفحة الدخول،
+                 والأيقونة في تبويب المتصفح. */ ?>
+        <div class="sch-card">
+            <header class="sch-set__head">
+                <span class="sch-set__ic"><?php echo sch_icon('badge', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+                <div>
+                    <h2><?php esc_html_e('الشعار وأيقونة التبويب', 'school-system'); ?></h2>
+                    <p><?php esc_html_e('الشعار يحلّ محل الحرف في الشريط الجانبي، والأيقونة تظهر في تبويب المتصفح.', 'school-system'); ?></p>
+                </div>
+            </header>
+
+            <form method="post" enctype="multipart/form-data">
+                <?php wp_nonce_field('sch_save_brand', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_action" value="save_brand">
+
+                <div class="sch-blogogrid">
+                    <?php
+                    $sch_logo = SCH_Brand::logo();
+                    $sch_fav  = SCH_Brand::favicon();
+                    $sch_mark = mb_substr((string) sch_settings('school_name', get_bloginfo('name')), 0, 1);
+                    ?>
+
+                    <div class="sch-blogo">
+                        <span class="sch-blogo__prev sch-blogo__prev--lg">
+                            <?php if ($sch_logo !== '') : ?>
+                                <img src="<?php echo esc_url($sch_logo); ?>" alt="<?php esc_attr_e('شعار المدرسة', 'school-system'); ?>">
+                            <?php else : ?>
+                                <i aria-hidden="true"><?php echo esc_html($sch_mark); ?></i>
+                            <?php endif; ?>
+                        </span>
+                        <div class="sch-blogo__b">
+                            <label class="sch-field">
+                                <span><?php esc_html_e('شعار المدرسة', 'school-system'); ?></span>
+                                <input type="file" name="logo" accept="image/png,image/jpeg,image/webp"
+                                       aria-label="<?php esc_attr_e('ملف شعار المدرسة', 'school-system'); ?>">
+                            </label>
+                            <p class="sch-sub"><?php esc_html_e('PNG أو JPG أو WEBP · مربّع يفضَّل · حتى ٢ ميجابايت', 'school-system'); ?></p>
+                            <?php if ($sch_logo !== '') : ?>
+                                <label class="sch-check">
+                                    <input type="checkbox" name="drop_logo" value="1">
+                                    <?php esc_html_e('إزالة الشعار', 'school-system'); ?>
+                                </label>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="sch-blogo">
+                        <span class="sch-blogo__prev">
+                            <?php if ($sch_fav !== '') : ?>
+                                <img src="<?php echo esc_url($sch_fav); ?>" alt="<?php esc_attr_e('أيقونة التبويب', 'school-system'); ?>">
+                            <?php else : ?>
+                                <i aria-hidden="true"><?php echo esc_html($sch_mark); ?></i>
+                            <?php endif; ?>
+                        </span>
+                        <div class="sch-blogo__b">
+                            <label class="sch-field">
+                                <span><?php esc_html_e('أيقونة التبويب', 'school-system'); ?></span>
+                                <input type="file" name="favicon" accept="image/png,image/x-icon,image/webp"
+                                       aria-label="<?php esc_attr_e('ملف أيقونة التبويب', 'school-system'); ?>">
+                            </label>
+                            <p class="sch-sub"><?php esc_html_e('PNG أو ICO · مربّعة ٥١٢×٥١٢ أو أصغر', 'school-system'); ?></p>
+                            <?php if ($sch_fav !== '') : ?>
+                                <label class="sch-check">
+                                    <input type="checkbox" name="drop_favicon" value="1">
+                                    <?php esc_html_e('إزالة الأيقونة', 'school-system'); ?>
+                                </label>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="sch-btn sch-mt"><?php esc_html_e('حفظ الهوية', 'school-system'); ?></button>
+            </form>
+        </div>
     </div>
 
     <aside class="sch-set2__side">

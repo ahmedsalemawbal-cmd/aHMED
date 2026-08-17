@@ -3389,6 +3389,10 @@ body.sch-locked { overflow: hidden; }
 .sch-side__mark{width:42px;height:42px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;font-size: var(--sch-text-lg);
   background:linear-gradient(145deg,var(--sch-accent-hover),var(--sch-accent));box-shadow:0 6px 18px -6px var(--sch-accent-glow)}
 
+/* الشعار المرفوع يحلّ محل الحرف — بلا تدرّج، فالصورة هي الهوية */
+.sch-side__mark--img { background: #fff; padding: 3px; box-shadow: var(--sch-e1); }
+.sch-side__mark--img img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 9px; }
+
 /* فاصل تحت بطاقة الحساب */
 .sch-side__sep{height:1px;flex:0 0 auto;background:var(--sch-nav-line);margin:var(--sch-2) var(--sch-2) var(--sch-1)}
 
@@ -4140,6 +4144,23 @@ body.sch-body {
 @media (prefers-reduced-motion: reduce) {
   .sch-app, .sch-side__rail, .sch-side__rail svg { transition: none; }
 }
+
+/* ── رفع الشعار وأيقونة التبويب  (v9.0) ── */
+.sch-brandgrid { display: grid; gap: var(--sch-4); }
+.sch-blogo { display: flex; align-items: flex-start; gap: var(--sch-4); }
+.sch-blogo__prev {
+  width: 56px; height: 56px; flex: none; border-radius: var(--sch-radius);
+  border: 1px solid var(--sch-line); background: var(--sch-surface-alt);
+  display: grid; place-items: center; overflow: hidden;
+}
+.sch-blogo__prev--lg { width: 76px; height: 76px; border-radius: var(--sch-radius-lg); }
+.sch-blogo__prev img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sch-blogo__prev i {
+  font-style: normal; font-size: var(--sch-text-xl); font-weight: 700; color: var(--sch-muted);
+}
+.sch-blogo__b { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.sch-blogo__b .sch-sub { margin: 0; }
+@media (min-width: 701px) { .sch-brandgrid { grid-template-columns: 1fr 1fr; } }
 
 /* صفحة الإعدادات الرئيسية: عمود محتوى + عمود جانبي للحالة */
 .sch-set2 { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sch-5); align-items: start; margin-top: var(--sch-4); }

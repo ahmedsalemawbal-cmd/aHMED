@@ -22,6 +22,11 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html(get_bloginfo('name')); ?> — <?php esc_html_e('نظام المدرسة', 'school-system'); ?></title>
+    <?php $sch_fav = SCH_Brand::favicon(); ?>
+    <?php if ($sch_fav !== '') : ?>
+        <link rel="icon" href="<?php echo esc_url($sch_fav); ?>">
+        <link rel="apple-touch-icon" href="<?php echo esc_url($sch_fav); ?>">
+    <?php endif; ?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,10 +79,17 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 
             <?php /* علامة بلا نصّ: الحرف زينة، والاسم يُنطق من aria-label — أيقونة
                      بلا اسم تُعرَف بالتجربة لا بالنظر (درس v3.4.2). */ ?>
+            <?php $sch_logo = SCH_Brand::logo(); ?>
             <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>"
                title="<?php echo esc_attr($sch_school); ?>"
                aria-label="<?php echo esc_attr($sch_school); ?>">
-                <span class="sch-side__mark" aria-hidden="true"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
+                <?php if ($sch_logo !== '') : ?>
+                    <span class="sch-side__mark sch-side__mark--img" aria-hidden="true">
+                        <img src="<?php echo esc_url($sch_logo); ?>" alt="">
+                    </span>
+                <?php else : ?>
+                    <span class="sch-side__mark" aria-hidden="true"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
+                <?php endif; ?>
             </a>
 
             <?php /* بطاقة الحساب تحت العلامة مباشرة — كأنظمة SaaS الكبرى */ ?>

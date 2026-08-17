@@ -23,6 +23,11 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
     <link rel="manifest" href="<?php echo esc_url(SCH_Student::url('manifest.webmanifest')); ?>">
 
     <title><?php esc_html_e('تعلّم', 'school-system'); ?></title>
+    <?php $sch_fav = SCH_Brand::favicon(); ?>
+    <?php if ($sch_fav !== '') : ?>
+        <link rel="icon" href="<?php echo esc_url($sch_fav); ?>">
+        <link rel="apple-touch-icon" href="<?php echo esc_url($sch_fav); ?>">
+    <?php endif; ?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

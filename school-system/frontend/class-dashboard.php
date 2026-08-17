@@ -374,6 +374,7 @@ final class SCH_Dashboard
             'add_year'         => ['sch_manage_settings',  'do_add_year'],
             'set_year'         => ['sch_manage_settings',  'do_set_year'],
             'save_settings'    => ['sch_manage_settings',  'do_save_settings'],
+            'save_brand'       => ['sch_manage_settings',  'do_save_brand'],
             'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
             'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
             'import_students'  => ['sch_manage_students',  'do_import'],
@@ -1352,6 +1353,47 @@ final class SCH_Dashboard
     }
 
     /** مواعيد اليوم الدراسي — تُغذّي حساب الحضور والتأخّر. */
+    /**
+     * الشعار وأيقونة التبويب — رفع أو إزالة.
+     *
+     * نموذج واحد يحمل الخانتين: الموظف يرفع ما عنده ويترك الباقي، فلا يُمحى
+     * ما لم يُختَر له بديل.
+     */
+    private static function do_save_brand(array $d, int $id): array|WP_Error
+    {
+        $done = [];
+
+        foreach (['logo', 'favicon'] as $slot) {
+            // الإزالة أولًا: من ضغط «إزالة» لا يُنتظر منه رفع ملف
+            if (!empty($d['drop_' . $slot])) {
+                $r = SCH_Brand::remove($slot);
+
+                if (is_wp_error($r)) {
+                    return $r;
+                }
+
+                $done[] = $slot;
+                continue;
+            }
+
+            if (!empty($_FILES[$slot]['tmp_name'])) {
+                $r = SCH_Brand::save($slot, $_FILES[$slot]);
+
+                if (is_wp_error($r)) {
+                    return $r;
+                }
+
+                $done[] = $slot;
+            }
+        }
+
+        if ($done === []) {
+            return sch_api_error('no_file', __('اختر صورة أو اضغط إزالة.', 'school-system'), 422);
+        }
+
+        return ['msg' => __('حُدّثت هوية المدرسة.', 'school-system')];
+    }
+
     private static function do_save_timing(array $d, int $id): bool
     {
         $time = static fn (mixed $v): string => preg_match('/^\d{2}:\d{2}$/', (string) $v) ? (string) $v : '';
