@@ -56,8 +56,12 @@ final class SCH_Accounts
             return sch_api_error('duplicate_code', __('رمز الحساب مستخدم.', 'school-system'), 409);
         }
 
-        sch_audit('account.created', 'account', (int) $wpdb->insert_id, ['code' => $code]);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('account.created', 'account', $new_id, ['code' => $code]);
+        return ['id' => $new_id];
     }
 
     public static function get(int $id): ?object

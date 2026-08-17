@@ -42,8 +42,12 @@ final class SCH_Finance
             'created_at'   => sch_now(),
         ]);
 
-        sch_audit('fee_plan.created', 'fee_plan', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('fee_plan.created', 'fee_plan', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function plans(): array

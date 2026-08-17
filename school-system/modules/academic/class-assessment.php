@@ -26,8 +26,12 @@ final class SCH_Subjects
             return sch_api_error('duplicate_code', __('رمز المادة مستخدم.', 'school-system'), 409);
         }
 
-        sch_audit('subject.created', 'subject', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('subject.created', 'subject', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function all(?string $stage = null): array
@@ -235,8 +239,10 @@ final class SCH_Assessment
             'created_at' => sch_now(),
         ]);
 
-        sch_audit('exam.created', 'exam', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('exam.created', 'exam', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function get_exam(int $id): ?object

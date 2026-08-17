@@ -60,8 +60,12 @@ final class SCH_HR
             'updated_at'    => sch_now(),
         ]);
 
-        sch_audit('contract.created', 'contract', (int) $wpdb->insert_id, ['user' => $user_id]);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('contract.created', 'contract', $new_id, ['user' => $user_id]);
+        return ['id' => $new_id];
     }
 
     public static function active_contract(int $user_id): ?object
@@ -144,8 +148,10 @@ final class SCH_HR
             'created_at' => sch_now(),
         ]);
 
-        sch_audit('leave.requested', 'leave', (int) $wpdb->insert_id, ['user' => $user_id, 'days' => $days]);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('leave.requested', 'leave', $new_id, ['user' => $user_id, 'days' => $days]);
+        return ['id' => $new_id];
     }
 
     public static function decide_leave(int $id, string $decision): bool|WP_Error

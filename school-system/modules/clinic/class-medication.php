@@ -431,9 +431,13 @@ final class SCH_StudentLeave
             'created_at'   => sch_now(),
         ]);
 
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
         sch_audit('leave.student_requested', 'student', $student_id, ['reason' => $reason]);
 
-        return ['id' => (int) $wpdb->insert_id];
+        return ['id' => $new_id];
     }
 
     public static function decide(int $id, string $decision, string $note = ''): bool|WP_Error

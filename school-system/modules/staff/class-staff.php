@@ -91,9 +91,13 @@ final class SCH_Staff
             'updated_at'  => $now,
         ]);
 
-        sch_audit('employee.created', 'employee', (int) $wpdb->insert_id, ['role' => $role]);
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
 
-        return ['id' => (int) $wpdb->insert_id, 'user_id' => (int) $user_id, 'login' => $login, 'password' => $password, 'name' => $name];
+        sch_audit('employee.created', 'employee', $new_id, ['role' => $role]);
+
+        return ['id' => $new_id, 'user_id' => (int) $user_id, 'login' => $login, 'password' => $password, 'name' => $name];
     }
 
     public static function update(int $id, array $input): bool|WP_Error

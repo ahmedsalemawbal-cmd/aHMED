@@ -208,9 +208,13 @@ final class SCH_Enrollment
             'created_at'  => sch_now(),
         ]);
 
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
         sch_audit('doc.uploaded', 'student', $student_id, ['type' => $doc_type]);
 
-        return (int) $wpdb->insert_id;
+        return $new_id;
     }
 
     public static function docs(int $student_id): array

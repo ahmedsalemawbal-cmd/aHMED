@@ -44,8 +44,12 @@ final class SCH_Clinic
             );
         }
 
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
         sch_audit('clinic.visit', 'student', $student_id);
-        return ['id' => (int) $wpdb->insert_id];
+        return ['id' => $new_id];
     }
 
     public static function visits(int $limit = 100): array
@@ -215,8 +219,10 @@ final class SCH_Security
             'created_at'   => sch_now(),
         ]);
 
-        sch_audit('visitor.in', 'visitor', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('visitor.in', 'visitor', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function check_out(int $id): bool
@@ -271,8 +277,10 @@ final class SCH_Security
             'created_at'    => sch_now(),
         ]);
 
-        sch_audit('incident.reported', 'incident', (int) $wpdb->insert_id, ['severity' => $d['severity'] ?? 'low']);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('incident.reported', 'incident', $new_id, ['severity' => $d['severity'] ?? 'low']);
+        return ['id' => $new_id];
     }
 
     public static function close_incident(int $id): bool
@@ -336,8 +344,10 @@ final class SCH_Assets
             return sch_api_error('duplicate_code', __('رمز الأصل مستخدم.', 'school-system'), 409);
         }
 
-        sch_audit('asset.created', 'asset', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('asset.created', 'asset', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function all(): array
@@ -366,8 +376,10 @@ final class SCH_Assets
             'created_at'  => sch_now(),
         ]);
 
-        sch_audit('maintenance.reported', 'maintenance', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('maintenance.reported', 'maintenance', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function set_work_status(int $id, string $status): bool|WP_Error

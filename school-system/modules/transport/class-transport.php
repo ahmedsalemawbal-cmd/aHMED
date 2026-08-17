@@ -31,8 +31,12 @@ final class SCH_Buses
             return sch_api_error('duplicate_plate', __('رقم اللوحة مسجّل لباص آخر.', 'school-system'), 409);
         }
 
-        sch_audit('bus.created', 'bus', (int) $wpdb->insert_id, ['plate' => $plate]);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('bus.created', 'bus', $new_id, ['plate' => $plate]);
+        return ['id' => $new_id];
     }
 
     public static function get(int $id): ?object
@@ -101,8 +105,10 @@ final class SCH_Routes
             'updated_at' => sch_now(),
         ]);
 
-        sch_audit('route.created', 'route', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('route.created', 'route', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function get(int $id): ?object

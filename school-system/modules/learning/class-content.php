@@ -99,9 +99,13 @@ final class SCH_Content
             'updated_at'   => sch_now(),
         ]);
 
-        sch_audit('content.created', 'content', (int) $wpdb->insert_id, ['type' => $type]);
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
 
-        return ['id' => (int) $wpdb->insert_id];
+        sch_audit('content.created', 'content', $new_id, ['type' => $type]);
+
+        return ['id' => $new_id];
     }
 
     /**

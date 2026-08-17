@@ -131,8 +131,12 @@ final class SCH_Classes
             return sch_api_error('duplicate_class', __('هذه الشعبة موجودة في هذه السنة.', 'school-system'), 409);
         }
 
-        sch_audit('class.created', 'class', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
+        // insert_id يُحتجَز قبل sch_audit(): التدقيق يُدرج صفًا بنفسه
+        // فيصير insert_id رقم صف السجل لا رقم السجل المُنشأ.
+        $new_id = (int) $wpdb->insert_id;
+
+        sch_audit('class.created', 'class', $new_id);
+        return ['id' => $new_id];
     }
 
     public static function get(int $id): ?object
