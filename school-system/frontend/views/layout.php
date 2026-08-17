@@ -312,5 +312,6 @@ if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open'
 })();
 </script>
 <script src="<?php echo esc_url(sch_asset('assets/list-tools.js')); ?>" defer></script>
+<script src="<?php echo esc_url(sch_asset('assets/select.js')); ?>" defer></script>
 </body>
 </html>
