@@ -80,8 +80,6 @@ $school = sch_settings('school_name', get_bloginfo('name'));
             aria-label="<?php esc_attr_e('عرض الرمز بملء الشاشة', 'school-system'); ?>"></button>
 </article>
 
-<p class="p-sub"><?php esc_html_e('هذا رمز البطاقة المطبوعة. أما ابنك فيعرض من تطبيقه رمزًا متجددًا لا يصلح تصويره.', 'school-system'); ?></p>
-
 <div class="p-full" id="p-full" hidden>
     <div class="p-full__box">
         <span class="p-full__n"><?php echo esc_html(SCH_Enrollment::full_name($student)); ?></span>
