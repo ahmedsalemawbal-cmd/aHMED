@@ -320,6 +320,8 @@ try{if(localStorage.getItem('sch-rail')==='1'&&window.matchMedia('(min-width:981
 
 <?php /* تبديل السمة بالتفويض — بلا معالج مضمّن، فيصمد أمام أي CSP */ ?>
 <script>document.addEventListener('click',function(e){var b=e.target.closest('.sch-theme');if(b){var r=document.documentElement;var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('sch-theme',n);}catch(_){}return;}
+/* المنسدلات: <details> لا تُغلق بالنقر خارجها ولا بـEsc من نفسها */
+document.querySelectorAll('[data-menu][open]').forEach(function(m){if(!m.contains(e.target))m.removeAttribute('open');});
 var rl=e.target.closest('.sch-side__rail');var ap=document.getElementById('sch-app');
 if(rl&&ap){var on=ap.classList.toggle('is-rail');rl.setAttribute('aria-expanded',on?'false':'true');try{localStorage.setItem('sch-rail',on?'1':'0');}catch(_){}return;}
 var hh=e.target.closest('.sch-side__h');if(hh){var gg=hh.closest('.sch-side__grp');
@@ -370,6 +372,10 @@ if((sc||(!e.target.closest('.sch-side')&&side&&side.classList.contains('is-open'
     }
 
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var om = document.querySelectorAll('[data-menu][open]');
+        if (om.length) { om.forEach(function (m) { m.removeAttribute('open'); }); return; }
+      }
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); root.hidden ? openK() : closeK(); return; }
       if (root.hidden) { return; }
       if (e.key === 'Escape') { e.preventDefault(); closeK(); }

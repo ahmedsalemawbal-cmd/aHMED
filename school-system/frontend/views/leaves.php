@@ -4,10 +4,14 @@ defined('ABSPATH') || exit;
 
 $pending = SCH_StudentLeave::pending();
 ?>
-<h1 class="sch-title"><?php echo sch_icon('check', 22); ?><?php esc_html_e('إجازات الطلاب', 'school-system'); ?></h1>
-<p class="sch-sub"><?php esc_html_e('الاعتماد يُسكت إنذار الصباح، ويعفي الباص من الانتظار، ويرصد «غياب بعذر» تلقائيًا.', 'school-system'); ?></p>
-
-<?php SCH_Views::render('leaves'); ?>
+<?php $sch_view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : ''; ?>
+<div class="sch-head">
+    <div class="sch-head__t">
+        <h1 class="sch-title"><?php echo sch_icon('check', 22); ?><?php esc_html_e('إجازات الطلاب', 'school-system'); ?></h1>
+        <p class="sch-sub"><?php esc_html_e('الاعتماد يُسكت إنذار الصباح، ويعفي الباص من الانتظار، ويرصد «غياب بعذر» تلقائيًا.', 'school-system'); ?></p>
+    </div>
+    <div class="sch-head__acts"><?php echo SCH_Views::menu('leaves', $sch_view); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+</div>
 
 <?php if ($pending !== []) : ?>
     <div class="sch-pickbar">

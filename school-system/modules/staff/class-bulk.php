@@ -453,6 +453,62 @@ final class SCH_Views
         };
     }
 
+    /**
+     * العروض قائمة منسدلة لا صفًّا من الحبّات.
+     *
+     * الحبّات كانت تأكل سطرًا كاملًا بعرض الشاشة لتقول ما يقوله زرّ واحد،
+     * وتزدحم كلما زاد عدد العروض. المنسدلة تعرض **العرض النشط وعدده** وتُخفي
+     * البقية حتى تُطلَب — والعدد يبقى ظاهرًا فلا تضيع المعلومة.
+     */
+    public static function menu(string $screen, string $active = ''): string
+    {
+        $views = self::of($screen);
+
+        if ($views === []) {
+            return '';
+        }
+
+        $counts = [];
+        $label  = '';
+
+        foreach ($views as $slug => [$text, $counter]) {
+            $counts[$slug] = ['label' => (string) $text, 'n' => is_callable($counter) ? (int) call_user_func($counter) : 0];
+
+            if ($slug === $active) {
+                $label = (string) $text;
+            }
+        }
+
+        if ($label === '') {
+            $label = (string) ($views[''][0] ?? __('الكل', 'school-system'));
+        }
+
+        $now = $counts[$active] ?? reset($counts);
+
+        $out = '<details class="sch-menu" data-menu>'
+            . '<summary class="sch-menu__b">'
+            . '<span>' . esc_html($label) . '</span>'
+            . '<b>' . esc_html(number_format_i18n((int) $now['n'])) . '</b>'
+            . '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"'
+            . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+            . '</summary><div class="sch-menu__p">';
+
+        foreach ($counts as $slug => $row) {
+            $url = $slug === ''
+                ? SCH_Dashboard::url($screen)
+                : add_query_arg('view', $slug, SCH_Dashboard::url($screen));
+
+            $out .= '<a class="sch-menu__i' . ($slug === $active ? ' is-on' : '') . '" href="' . esc_url($url) . '">'
+                . '<svg class="sch-menu__ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"'
+                . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5 9.5 17 4 11.5"/></svg>'
+                . '<span>' . esc_html($row['label']) . '</span>'
+                . '<b>' . esc_html(number_format_i18n((int) $row['n'])) . '</b>'
+                . '</a>';
+        }
+
+        return $out . '</div></details>';
+    }
+
     public static function render(string $screen, string $active = ''): void
     {
         $views = self::of($screen);

@@ -43,6 +43,14 @@ ksort($grades);
 ?>
 
 <?php
+// صفّ واحد: العنوان · منسدلة العروض · التصدير · الفعل الأساسي.
+// كانت ثلاثة أسطر تدفع الجدول تحت الطيّة.
+$sch_tools = SCH_Views::menu('students', $view)
+    . '<a class="sch-btn sch-btn--quiet sch-noprint" href="' . esc_url(add_query_arg('sch_export', 'csv')) . '">'
+    . sch_icon('upload', 15)
+    . esc_html__('تصدير CSV', 'school-system')
+    . '</a>';
+
 SCH_Modal::head(
     __('الطلاب', 'school-system'),
     sprintf(
@@ -51,18 +59,11 @@ SCH_Modal::head(
         number_format_i18n($total)
     ),
     $classes !== [] ? 'sch-enroll' : '',
-    __('تسجيل طالب', 'school-system')
+    __('تسجيل طالب', 'school-system'),
+    'plus',
+    $sch_tools
 );
 ?>
-
-<?php SCH_Views::render('students', $view); ?>
-
-<p class="sch-noprint">
-    <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg('sch_export', 'csv')); ?>">
-        <?php echo sch_icon('upload', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <?php esc_html_e('تصدير CSV', 'school-system'); ?>
-    </a>
-</p>
 
 <!-- المرشّحات في بطاقة واحدة: يبحث الموظف بما يعرفه لا بما نرتّبه له -->
 <form method="get" class="sch-card sch-filters">

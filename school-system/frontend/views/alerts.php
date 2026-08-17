@@ -5,10 +5,14 @@ defined('ABSPATH') || exit;
 $alerts = SCH_Alerts::open_alerts();
 $health = SCH_Alerts::health();
 ?>
-<h1 class="sch-title"><?php echo sch_icon('clock', 22); ?><?php esc_html_e('الإنذارات', 'school-system'); ?></h1>
-<p class="sch-sub"><?php esc_html_e('الحارس الآلي يفحص كل خمس دقائق ويبحث عن الحدث الغائب — لا عن الحدث المسجَّل.', 'school-system'); ?></p>
-
-<?php SCH_Views::render('alerts'); ?>
+<?php $sch_view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : ''; ?>
+<div class="sch-head">
+    <div class="sch-head__t">
+        <h1 class="sch-title"><?php echo sch_icon('clock', 22); ?><?php esc_html_e('الإنذارات', 'school-system'); ?></h1>
+        <p class="sch-sub"><?php esc_html_e('الحارس الآلي يفحص كل خمس دقائق ويبحث عن الحدث الغائب — لا عن الحدث المسجَّل.', 'school-system'); ?></p>
+    </div>
+    <div class="sch-head__acts"><?php echo SCH_Views::menu('alerts', $sch_view); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+</div>
 
 <div class="sch-pickbar">
     <?php SCH_Bulk::pick_all(); ?>

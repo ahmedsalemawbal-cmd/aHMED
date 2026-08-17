@@ -4145,6 +4145,56 @@ body.sch-body {
   .sch-app, .sch-side__rail, .sch-side__rail svg { transition: none; }
 }
 
+/* ============================================================
+   منسدلة العروض — بدل صفّ حبّات يأكل سطرًا كاملًا  (v9.1)
+   ============================================================ */
+.sch-menu { position: relative; }
+.sch-menu__b {
+  display: inline-flex; align-items: center; gap: var(--sch-2);
+  min-height: 40px; padding: 0 var(--sch-3); cursor: pointer; list-style: none;
+  border: 1px solid var(--sch-line-strong); border-radius: var(--sch-radius);
+  background: var(--sch-surface); color: var(--sch-ink-soft);
+  font-size: var(--sch-text-sm); font-weight: 600; white-space: nowrap;
+  transition: border-color var(--sch-fast) var(--sch-ease), background var(--sch-fast) var(--sch-ease);
+}
+.sch-menu__b::-webkit-details-marker { display: none; }
+.sch-menu__b:hover { border-color: var(--sch-muted); }
+.sch-menu[open] .sch-menu__b { border-color: var(--sch-accent); background: var(--sch-accent-soft); color: var(--sch-ink); }
+.sch-menu__b > b {
+  min-width: 20px; padding: 1px 7px; border-radius: var(--sch-r-full);
+  background: var(--sch-surface-alt); color: var(--sch-ink-soft);
+  font-size: var(--sch-text-xs); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sch-menu[open] .sch-menu__b > b { background: var(--sch-accent); color: var(--sch-on-accent); }
+.sch-menu__b > svg { width: 15px; height: 15px; color: var(--sch-muted); transition: transform .2s var(--sch-ease); }
+.sch-menu[open] .sch-menu__b > svg { transform: rotate(180deg); }
+
+.sch-menu__p {
+  position: absolute; z-index: 60; inset-block-start: calc(100% + 6px); inset-inline-start: 0;
+  min-width: 240px; padding: 6px;
+  background: var(--sch-surface); border: 1px solid var(--sch-line);
+  border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e3);
+  animation: sch-sel-in .15s var(--sch-ease);
+}
+.sch-body a.sch-menu__i {
+  display: flex; align-items: center; gap: var(--sch-2);
+  padding: 10px 12px; border-radius: var(--sch-r-sm);
+  color: var(--sch-ink-soft); font-size: var(--sch-text-base); font-weight: 400; text-decoration: none;
+}
+.sch-body a.sch-menu__i:hover { background: var(--sch-surface-alt); color: var(--sch-ink); text-decoration: none; }
+.sch-body a.sch-menu__i.is-on { background: var(--sch-accent-soft); color: var(--sch-ink); font-weight: 600; }
+.sch-menu__i > span { flex: 1; min-width: 0; }
+.sch-menu__ck { width: 16px; height: 16px; flex: none; color: var(--sch-accent); opacity: 0; }
+.sch-menu__i.is-on .sch-menu__ck { opacity: 1; }
+.sch-menu__i > b {
+  font-size: var(--sch-text-xs); font-weight: 700; color: var(--sch-muted);
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sch-menu__p { animation: none; }
+  .sch-menu__b > svg { transition: none; }
+}
+
 /* ── رفع الشعار وأيقونة التبويب  (v9.0) ── */
 .sch-brandgrid { display: grid; gap: var(--sch-4); }
 .sch-blogo { display: flex; align-items: flex-start; gap: var(--sch-4); }

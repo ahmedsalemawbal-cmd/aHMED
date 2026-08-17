@@ -75,19 +75,33 @@ final class SCH_Modal
      * رأس الشاشة: عنوان وعدّاد على طرف، وزر الإضافة على الآخر.
      * يُوحّد شكل كل شاشة فلا تختلف واحدة عن أخرى بلا سبب.
      */
-    public static function head(string $title, string $count = '', string $btn_id = '', string $btn_label = '', string $icon = 'plus'): void
+    /**
+     * رأس الشاشة — صفّ واحد.
+     *
+     * كان العنوان سطرًا، والعروض سطرًا، والتصدير سطرًا ثالثًا: ثلاثة أسطر
+     * لثلاث معلومات صغيرة، والجدول يُدفع تحت الطيّة. الأدوات (`$tools`) تدخل
+     * الصفّ نفسه بين العنوان والفعل الأساسي.
+     *
+     * @param string $tools HTML مُهرَّب مسبقًا من مكوّنات النظام (منسدلة العروض، روابط التصدير)
+     */
+    public static function head(string $title, string $count = '', string $btn_id = '', string $btn_label = '', string $icon = 'plus', string $tools = ''): void
     {
         ?>
         <div class="sch-head">
-            <div>
+            <div class="sch-head__t">
                 <h1 class="sch-title"><?php echo esc_html($title); ?></h1>
                 <?php if ($count !== '') : ?>
                     <p class="sch-sub"><?php echo esc_html($count); ?></p>
                 <?php endif; ?>
             </div>
 
-            <?php if ($btn_id !== '') : ?>
-                <?php self::button($btn_id, $btn_label, $icon); ?>
+            <?php if ($tools !== '' || $btn_id !== '') : ?>
+                <div class="sch-head__acts">
+                    <?php echo $tools; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <?php if ($btn_id !== '') : ?>
+                        <?php self::button($btn_id, $btn_label, $icon); ?>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
         <?php

@@ -194,7 +194,7 @@ for path, src in sources.items():
         continue
     for m in re.finditer(r'<\?php\s+echo\s+([^;]{1,200});\s*(?://[^\n]*)?\?>', src):
         frag = m.group(1).strip()
-        if frag.startswith(("esc_", "sch_icon", "sch_avatar_svg", "sch_money_html", "sch_attendance_calendar", "sch_wave_pill", "SCH_QR::svg", "SCH_Certificates::svg", "SCH_Certificates::preview_svg", "SCH_Table::th", "SCH_Table::pager", "$qr", "wp_", "'", '"')):
+        if frag.startswith(("esc_", "sch_icon", "sch_avatar_svg", "sch_money_html", "sch_attendance_calendar", "sch_wave_pill", "SCH_QR::svg", "SCH_Certificates::svg", "SCH_Certificates::preview_svg", "SCH_Table::th", "SCH_Table::pager", "SCH_Views::menu", "$qr", "wp_", "'", '"')):
             continue
         # التعبير الشرطي آمن إذا كان كل فرع منه نصًا حرفيًا أو مهرَّبًا
         branches = re.split(r'\?|:', frag.split('?', 1)[1]) if '?' in frag else [frag]
