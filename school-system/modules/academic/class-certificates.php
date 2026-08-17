@@ -133,6 +133,30 @@ final class SCH_Certificates
         ],
     ];
 
+    /**
+     * من نال هذا النوع في السنة الحالية — معرّف الطالب => صحيح.
+     *
+     * تُستدعى مرة للدفعة كلها لا مرة لكل طالب: مراجعة أربعمئة طالب كانت
+     * ستفتح أربعمئة استعلام.
+     */
+    public static function holders(string $type): array
+    {
+        global $wpdb;
+
+        if (!isset(self::TYPES[$type])) {
+            return [];
+        }
+
+        $rows = $wpdb->get_col($wpdb->prepare(
+            'SELECT student_id FROM ' . sch_table('certificates') . "
+              WHERE type = %s AND year_id = %d AND status = 'valid'",
+            $type,
+            SCH_Years::current_id()
+        )) ?: [];
+
+        return array_fill_keys(array_map('intval', $rows), true);
+    }
+
     /** اسم القالب — السجلّ يحمل مصفوفة، والشاشات تريد نصًّا. */
     public static function template_name(string $key): string
     {

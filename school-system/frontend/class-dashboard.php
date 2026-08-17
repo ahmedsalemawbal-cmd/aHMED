@@ -324,6 +324,7 @@ final class SCH_Dashboard
             'toggle_watch'     => ['sch_view_students',    'do_toggle_watch'],
             'issue_cert'       => ['sch_manage_students',  'do_issue_cert'],
             'issue_certs_bulk' => ['sch_manage_students',  'do_issue_certs_bulk'],
+            'issue_certs_scope' => ['sch_manage_students', 'do_issue_certs_scope'],
             'revoke_cert'      => ['sch_manage_students',  'do_revoke_cert'],
             'toggle_pickup'    => ['sch_manage_guardians', 'do_toggle_pickup'],
             'delegate_pickup'  => ['sch_manage_guardians', 'do_delegate_pickup'],
@@ -965,6 +966,79 @@ final class SCH_Dashboard
         }
 
         return ['msg' => __('سُحب التفويض.', 'school-system')];
+    }
+
+    /**
+     * إصدار لنطاق كامل — صفّ أو شعبة أو مرحلة أو المدرسة كلها.
+     *
+     * الإصدار واحدًا واحدًا لا يصلح لمدرسة: شعبة من ثلاثين تعني ثلاثين نافذة.
+     * والنطاق يُحلّ في الخادم فلا تُرسل ثلاثمئة معرّف في الرابط.
+     */
+    private static function do_issue_certs_scope(array $d, int $id): array|WP_Error
+    {
+        if (!SCH_Perms::may('certificates', 'edit')) {
+            return sch_api_error('forbidden', __('لا تملك صلاحية إصدار الشهادات.', 'school-system'), 403);
+        }
+
+        $type = sanitize_key((string) ($d['type'] ?? ''));
+
+        $roster = SCH_Students::list([
+            'status'      => 'active',
+            'stage'       => sanitize_key((string) ($d['scope_stage'] ?? '')),
+            'class_id'    => absint($d['scope_class'] ?? 0),
+            'per_page'    => 300,
+            'with'        => false,
+        ])['items'];
+
+        if ($roster === []) {
+            return sch_api_error('empty_scope', __('لا طلاب في هذا النطاق.', 'school-system'), 422);
+        }
+
+        // من ناله هذا العام يُستبعَد قبل المحاولة — استعلام واحد لا واحد لكل طالب
+        $held = SCH_Certificates::holders($type);
+        $done = 0;
+        $skip = 0;
+
+        foreach ($roster as $st) {
+            if (!empty($held[(int) $st->id])) {
+                $skip++;
+                continue;
+            }
+
+            $r = SCH_Certificates::issue([
+                'student_id' => (int) $st->id,
+                'type'       => $type,
+                'template'   => (string) ($d['template'] ?? ''),
+                'title'      => (string) ($d['title'] ?? ''),
+                'reason'     => (string) ($d['reason'] ?? ''),
+            ]);
+
+            if (!is_wp_error($r)) {
+                $done++;
+            } elseif ($r->get_error_code() === 'duplicate') {
+                $skip++;
+            }
+        }
+
+        if ($done === 0 && $skip > 0) {
+            return sch_api_error('all_held', __('كل من في النطاق نال هذه الشهادة هذا العام.', 'school-system'), 409);
+        }
+
+        $msg = sprintf(
+            /* translators: %s: العدد */
+            _n('صدرت شهادة واحدة', 'صدرت %s شهادات', $done, 'school-system'),
+            number_format_i18n($done)
+        );
+
+        if ($skip > 0) {
+            $msg .= ' · ' . sprintf(
+                /* translators: %s: العدد */
+                _n('وتُخطّي طالب ناله هذا العام', 'وتُخطّي %s نالوه هذا العام', $skip, 'school-system'),
+                number_format_i18n($skip)
+            );
+        }
+
+        return ['msg' => $msg];
     }
 
     /** سحب شهادة صدرت بالخطأ — بسبب مكتوب، والوثيقة تبقى مختومة «ملغاة». */

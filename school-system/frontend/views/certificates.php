@@ -119,6 +119,45 @@ $sch_sugg   = SCH_Certificates::suggestions();
 // قائمة الأسماء للقوائم المنسدلة: تُستدعى مرة لا مرة لكل قائمة،
 // و`with => false` تُطفئ الضمّ فلا نجلب شعبة وولي أمر لا نعرضهما.
 $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' => false])['items'];
+
+// ═══ الإصدار الجماعي حسب النطاق ═══
+// الإصدار واحدًا واحدًا لا يصلح لمدرسة: صفّ من ثلاثين يعني ثلاثين نافذة.
+// النطاق يُختار (مرحلة · صف · شعبة) فتُعرض قائمته للمراجعة ثم تُصدر دفعةً.
+// والحالة كلها في معاملات الرابط: يُشارَك ويعمل معه زر الرجوع.
+$bt = isset($_GET['bt']) ? sanitize_key(wp_unslash((string) $_GET['bt'])) : '';
+$bs = isset($_GET['bs']) ? sanitize_key(wp_unslash((string) $_GET['bs'])) : '';
+$bg = isset($_GET['bg']) ? sanitize_text_field(wp_unslash((string) $_GET['bg'])) : '';
+$bc = isset($_GET['bc']) ? absint($_GET['bc']) : 0;
+
+$sch_scoped = ($bt !== '' && isset(SCH_Certificates::TYPES[$bt]));
+$sch_roster = [];
+$sch_held   = [];
+$sch_scopel = '';
+
+if ($sch_scoped) {
+    $sch_roster = SCH_Students::list([
+        'status'      => 'active',
+        'stage'       => $bs,
+        'grade_level' => $bg,
+        'class_id'    => $bc,
+        // ٣٠٠ حدّ العملية الجماعية في النظام — نعرض ما يمكن إصداره فعلًا
+        // لا أربعمئة يرفض المعالج آخرها بلا سبب مفهوم.
+        'per_page'    => 300,
+    ])['items'];
+
+    $sch_held = SCH_Certificates::holders($bt);
+
+    // وصف النطاق بالكلمات لا بالمعرّفات — الشعبة الخطأ تُرى قبل أن تُصدَر
+    $sch_bits = [];
+    if ($bs !== '') { $sch_bits[] = SCH_Classes::STAGES[$bs] ?? $bs; }
+    if ($bg !== '') { $sch_bits[] = $bg; }
+    if ($bc > 0) {
+        foreach (SCH_Classes::list() as $sch_cx) {
+            if ((int) $sch_cx->id === $bc) { $sch_bits[] = SCH_Classes::label($sch_cx); }
+        }
+    }
+    $sch_scopel = $sch_bits === [] ? __('كل المدرسة', 'school-system') : implode(' / ', $sch_bits);
+}
 ?>
 
 <?php
@@ -382,17 +421,55 @@ $sch_on = array_filter($sch_f);
 <?php endif; ?>
 
 <?php SCH_Modal::open('sch-issue-cert', __('إصدار شهادة', 'school-system'), __('تصل تطبيق ولي الأمر فور إصدارها', 'school-system')); ?>
-    <form method="post">
-        <?php wp_nonce_field('sch_issue_cert', '_sch_nonce'); ?>
-        <input type="hidden" name="sch_action" value="issue_cert">
+    <?php /* مدخل واحد لا اثنان: قائمة تختار «طالب واحد» أو «مجموعة»،
+             وتُفتح حقول ما اخترته وحدها. الباقي (النوع والعنوان والسبب
+             والقالب) مشترك بين الحالتين فلا يُكتب مرتين. */ ?>
+    <form method="post" data-issue-form>
+        <?php /* لكل فعل نونسه — والمعطَّل لا يُرسل، فيصل الخادم نونس الوضع المختار وحده */ ?>
+        <span data-when="one"><?php wp_nonce_field('sch_issue_cert', '_sch_nonce'); ?></span>
+        <span data-when="many" hidden>
+            <input type="hidden" name="_sch_nonce" disabled
+                   value="<?php echo esc_attr(wp_create_nonce('sch_issue_certs_scope')); ?>">
+        </span>
+        <input type="hidden" name="sch_action" value="issue_cert" data-act>
 
         <div class="sch-grid">
-            <div class="sch-field">
+            <div class="sch-field sch-field--wide">
+                <label for="c-mode"><?php esc_html_e('الإصدار لـ', 'school-system'); ?></label>
+                <select id="c-mode" data-mode>
+                    <option value="one"><?php esc_html_e('طالب واحد', 'school-system'); ?></option>
+                    <option value="many"><?php esc_html_e('مجموعة — صف أو شعبة أو مرحلة', 'school-system'); ?></option>
+                </select>
+            </div>
+
+            <div class="sch-field" data-when="one">
                 <label for="c-student"><?php esc_html_e('الطالب', 'school-system'); ?></label>
                 <select id="c-student" name="student_id" required>
                     <?php foreach ($sch_pick as $sch_st) : ?>
                         <option value="<?php echo esc_attr((string) $sch_st->id); ?>">
                             <?php echo esc_html(SCH_Enrollment::full_name($sch_st)); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="sch-field" data-when="many" hidden>
+                <label for="c-stage"><?php esc_html_e('المرحلة', 'school-system'); ?></label>
+                <select id="c-stage" name="scope_stage" disabled>
+                    <option value=""><?php esc_html_e('كل المراحل', 'school-system'); ?></option>
+                    <?php foreach (SCH_Classes::STAGES as $sch_k => $sch_l) : ?>
+                        <option value="<?php echo esc_attr($sch_k); ?>"><?php echo esc_html($sch_l); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="sch-field" data-when="many" hidden>
+                <label for="c-class"><?php esc_html_e('الشعبة', 'school-system'); ?></label>
+                <select id="c-class" name="scope_class" disabled>
+                    <option value=""><?php esc_html_e('كل الشعب', 'school-system'); ?></option>
+                    <?php foreach (SCH_Classes::list() as $sch_cl) : ?>
+                        <option value="<?php echo esc_attr((string) $sch_cl->id); ?>">
+                            <?php echo esc_html(SCH_Classes::label($sch_cl)); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -488,7 +565,10 @@ $sch_on = array_filter($sch_f);
             <p class="sch-lib__none" data-lib-none hidden><?php esc_html_e('لا قالب يطابق بحثك.', 'school-system'); ?></p>
         </div>
 
-        <button class="sch-btn"><?php esc_html_e('إصدار الشهادة', 'school-system'); ?></button>
+        <p class="sch-sub" data-mode-note hidden>
+            <?php esc_html_e('سيُصدَر لكل طالب في النطاق المختار، ويُتخطّى من ناله هذا العام — ويصل إشعار إلى ولي أمر كل واحد.', 'school-system'); ?>
+        </p>
+        <button class="sch-btn" data-issue-btn><?php esc_html_e('إصدار الشهادة', 'school-system'); ?></button>
     </form>
 <?php SCH_Modal::close(); ?>
 
@@ -509,6 +589,39 @@ $sch_on = array_filter($sch_f);
     type.addEventListener('change', fill);
     fill();
   }
+
+  /* وضع الإصدار: طالب واحد أو مجموعة — الحقول تتبع الاختيار.
+     والمعطَّلة لا تُرسل أصلًا (disabled) فلا يصل الخادم نطاقٌ لم يُختَر. */
+  document.querySelectorAll('[data-issue-form]').forEach(function (form) {
+    var mode = form.querySelector('[data-mode]');
+    var act  = form.querySelector('[data-act]');
+    var note = form.querySelector('[data-mode-note]');
+    var btn  = form.querySelector('[data-issue-btn]');
+    if (!mode) { return; }
+
+    function apply() {
+      var many = mode.value === 'many';
+
+      form.querySelectorAll('[data-when]').forEach(function (box) {
+        var on = (box.dataset.when === (many ? 'many' : 'one'));
+        box.hidden = !on;
+        box.querySelectorAll('select, input').forEach(function (f) {
+          f.disabled = !on;
+          if (f.hasAttribute('required') || f.dataset.req) {
+            f.dataset.req = '1';
+            f.required = on && box.dataset.when === 'one';
+          }
+        });
+      });
+
+      if (act)  { act.value = many ? 'issue_certs_scope' : 'issue_cert'; }
+      if (note) { note.hidden = !many; }
+      if (btn)  { btn.textContent = many ? 'إصدار للمجموعة' : 'إصدار الشهادة'; }
+    }
+
+    mode.addEventListener('change', apply);
+    apply();
+  });
 
   /* مكتبة القوالب: تصنيف + بحث. الفلترة محليّة — القوالب اثنا عشر لا مئة. */
   document.querySelectorAll('[data-lib]').forEach(function (lib) {
