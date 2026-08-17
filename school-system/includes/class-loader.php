@@ -107,7 +107,18 @@ final class SCH_Loader
      */
     public static function maybe_flush_rewrites(): void
     {
-        if (get_option('sch_rewrite_version') === SCH_VERSION) {
+        // **الحكم على وجود القواعد فعلًا، لا على رقم النسخة وحده.**
+        //
+        // مقارنة النسخة وحدها لا تكفي: أي شيء يُعيد توليد جدول القواعد بينما
+        // إضافتنا غير محمّلة (تعطيل مؤقت · نسخ مجلد الإضافة أثناء طلب · إضافة
+        // أخرى تفرّغ الجدول) يمحو قواعدنا **ويبقى الرقم مطابقًا** — فلا يُعاد
+        // التفريغ أبدًا، وتظل كل الواجهات 404 حتى يُحفظ رابط دائم يدويًا.
+        // وقع هذا فعلًا في الاختبار: صفر قاعدة والرقم 8.3.0.
+        $rules = get_option('rewrite_rules');
+        $known = '^' . SCH_Dashboard::BASE . '/?$';
+        $present = is_array($rules) && isset($rules[$known]);
+
+        if ($present && get_option('sch_rewrite_version') === SCH_VERSION) {
             return;
         }
 
