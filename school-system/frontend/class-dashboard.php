@@ -71,10 +71,14 @@ final class SCH_Dashboard
 
         'employees'  => ['الموظفون',        'sch_manage_staff',      'system', '',           'users'],
         'staff-badges' => ['بطاقات الموظفين', 'sch_manage_staff',     'system', '',           'badge'],
-        'visitors'   => ['الزوار',          'sch_manage_services',   'system', '',           'door'],
-        'safety'     => ['الأمن والسلامة',  'sch_manage_services',   'system', '',           'shield'],
-        'import'     => ['استيراد الطلاب',  'sch_manage_students',   'system', '',           'upload'],
-        'settings'   => ['الإعدادات',       'sch_manage_settings',   'system', '',           'cog'],
+        // الأمن والزوّار عمليّات يوميّة — نُقلا من «النظام» لمجموعة ظاهرة في التنقّل.
+        'visitors'   => ['الزوار',          'sch_manage_services',   'school', 'الأمن',       'door'],
+        'safety'     => ['الأمن والسلامة',  'sch_manage_services',   'school', 'الأمن',       'shield'],
+        'import'     => ['استيراد البيانات','sch_manage_students',   'system', '',           'upload'],
+        // الإعدادات وأخواتها سياق مستقلّ يستولي على الشريط الجانبي (SETTINGS_NAV).
+        'settings'   => ['بيانات المدرسة',  'sch_manage_settings',   'system', '',           'cog'],
+        'settings-years' => ['السنوات الدراسية', 'sch_manage_settings', 'system', '',        'calendar'],
+        'settings-day'   => ['مواعيد الحضور والتنبيهات', 'sch_manage_settings', 'system', '', 'clock'],
         'rollover'   => ['ترقية العام',     'sch_manage_settings',   'system', '',           'calendar'],
         'audit'      => ['سجل النظام',      'sch_view_audit',        'system', '',           'clock'],
     ];
@@ -144,6 +148,7 @@ final class SCH_Dashboard
         'school|السجلات'       => ['السجلات',        'badge'],
         'school|اليوم الدراسي' => ['اليوم الدراسي',  'calendar'],
         'school|الخدمات'       => ['الخدمات',        'heart'],
+        'school|الأمن'         => ['الأمن والزوّار', 'shield'],
         'transport|'           => ['النقل',          'bus'],
         'erp|المالية'          => ['المالية',        'wallet'],
         'erp|المحاسبة'         => ['المحاسبة',       'chart'],
@@ -151,6 +156,63 @@ final class SCH_Dashboard
         'erp|العمليات'         => ['العمليات',       'grid'],
         'system|'              => ['النظام',         'cog'],
     ];
+
+    /**
+     * سياق الإعدادات — يستولي على الشريط الجانبي كأنظمة SaaS الكبرى:
+     * زر رجوع، عنوان «الإعدادات»، ومجموعات بعناوين صغيرة. أقسامه تُستبعَد من
+     * التنقّل الرئيسي وتظهر هنا وحدها، فيبقى التنقّل الرئيسي نظيفًا للعمل اليومي.
+     */
+    private const SETTINGS_NAV = [
+        'المدرسة'           => ['settings', 'settings-years', 'rollover'],
+        'اليوم الدراسي'     => ['settings-day'],
+        'الفريق والصلاحيات' => ['employees', 'staff-badges', 'perms'],
+        'البيانات والنظام'  => ['import', 'audit'],
+    ];
+
+    /** هل هذا القسم ضمن سياق الإعدادات؟ */
+    public static function is_settings(string $section): bool
+    {
+        foreach (self::SETTINGS_NAV as $slugs) {
+            if (in_array($section, $slugs, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** تنقّل الإعدادات مجمّعًا — مُصفّى بصلاحيات المستخدم كالتنقّل الرئيسي. */
+    public static function settings_nav(): array
+    {
+        $out = [];
+        foreach (self::SETTINGS_NAV as $label => $slugs) {
+            $items = [];
+            foreach ($slugs as $slug) {
+                $meta = self::SECTIONS[$slug] ?? null;
+                if ($meta === null) {
+                    continue;
+                }
+                if (!current_user_can((string) $meta[1]) || !SCH_Perms::may($slug, 'view')) {
+                    continue;
+                }
+                $items[$slug] = $meta;
+            }
+            if ($items !== []) {
+                $out[$label] = $items;
+            }
+        }
+
+        return $out;
+    }
+
+    /** أول قسم إعدادات متاح — مقصد زرّ «الإعدادات» المثبّت في التنقّل الرئيسي. */
+    public static function settings_home(): string
+    {
+        foreach (self::settings_nav() as $items) {
+            return (string) array_key_first($items);
+        }
+
+        return '';
+    }
 
     /** المجموعات التي يملك المستخدم قسمًا واحدًا فيها على الأقل. */
     public static function groups(): array
@@ -163,6 +225,10 @@ final class SCH_Dashboard
 
             foreach (self::SECTIONS as $slug => $meta) {
                 if ((string) $meta[2] !== $area || (string) ($meta[3] ?? '') !== $group) {
+                    continue;
+                }
+                // أقسام الإعدادات لها سياقها الجانبي المستقل — تُستبعَد من التنقّل الرئيسي.
+                if (self::is_settings($slug)) {
                     continue;
                 }
                 if (!current_user_can((string) $meta[1]) || !SCH_Perms::may($slug, 'view')) {

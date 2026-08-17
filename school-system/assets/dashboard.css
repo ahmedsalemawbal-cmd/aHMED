@@ -3930,3 +3930,58 @@ body.sch-body {
 
 /* فاصل بين مجالات الشريط الجانبي الأربعة — يقرأها العين كأنظمة منفصلة  (v8.1) */
 .sch-side__grp.is-area { margin-top: var(--sch-4); padding-top: var(--sch-4); border-top: 1px solid var(--sch-line); }
+
+/* ============================================================
+   سياق الإعدادات — يستولي على الشريط الجانبي كأنظمة SaaS (v8.2)
+   زر رجوع + عنوان + مجموعات بعناوين صغيرة بخطّ يمتد (توقيع HighLevel).
+   ============================================================ */
+
+/* زرّ الرجوع أعلى السياق */
+.sch-body a.sch-side__back {
+  display: flex; align-items: center; gap: 10px; height: 42px; margin-bottom: var(--sch-3);
+  padding: 0 12px; border-radius: var(--sch-radius);
+  background: var(--sch-surface-alt); border: 1px solid var(--sch-line);
+  color: var(--sch-ink-soft); font-size: 13.5px; font-weight: 600;
+  transition: background .15s var(--sch-ease), color .15s var(--sch-ease);
+}
+.sch-body a.sch-side__back:hover { background: var(--sch-accent-soft); color: var(--sch-ink); text-decoration: none; }
+.sch-side__back svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--sch-muted); }
+.sch-body a.sch-side__back:hover svg { color: var(--sch-accent); }
+
+/* عنوان «الإعدادات» */
+.sch-side__settl { display: flex; align-items: center; gap: 10px; padding: 0 6px var(--sch-3); }
+.sch-side__settl .sch-icon { width: 22px; height: 22px; flex: 0 0 auto; color: var(--sch-accent); }
+.sch-side__settl b { font-size: 19px; font-weight: 800; color: var(--sch-ink); letter-spacing: -.01em; }
+
+/* مجموعة إعدادات: عنوان صغير يتبعه خطّ يمتدّ لآخر السطر */
+.sch-side__seg { margin-top: var(--sch-4); }
+.sch-side__seg:first-of-type { margin-top: 0; }
+.sch-side__segl {
+  display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; margin-bottom: 2px;
+  font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--sch-muted); white-space: nowrap;
+}
+.sch-side__segl::after { content: ""; flex: 1; height: 1px; background: var(--sch-line); }
+
+/* روابط الإعدادات: نصّ فقط بمحاذاة تامّة (بلا خطّ ربط الأب في التنقّل الرئيسي) */
+.sch-side--set .sch-side__link { margin-inline-start: 0; }
+
+/* مدخل الإعدادات المثبّت أسفل التنقّل الرئيسي */
+.sch-body a.sch-side__pin {
+  display: flex; align-items: center; gap: 12px; height: 48px;
+  margin: var(--sch-1) calc(var(--sch-3) * -1) 0; padding: 0 var(--sch-3);
+  border-top: 1px solid var(--sch-line);
+  color: var(--sch-ink-soft); font-size: 14px; font-weight: 600;
+  transition: background .15s var(--sch-ease), color .15s var(--sch-ease);
+}
+.sch-body a.sch-side__pin:hover { background: var(--sch-surface-alt); color: var(--sch-ink); text-decoration: none; }
+.sch-side__pin .sch-icon { width: 20px; height: 20px; flex: 0 0 auto; color: var(--sch-muted); }
+.sch-body a.sch-side__pin:hover .sch-icon { color: var(--sch-accent); }
+.sch-side__pin > span { flex: 1; min-width: 0; }
+.sch-side__pinch { width: 15px; height: 15px; flex: 0 0 auto; color: var(--sch-muted); }
+
+/* صفحة الإعدادات الرئيسية: عمود محتوى + عمود جانبي للحالة */
+.sch-set2 { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sch-5); align-items: start; margin-top: var(--sch-4); }
+.sch-set2__main { min-width: 0; display: grid; gap: var(--sch-5); }
+.sch-set2__side { display: grid; gap: var(--sch-5); }
+.sch-set__stat { display: grid; }
+@media (max-width: 1100px) { .sch-set2 { grid-template-columns: 1fr; } }

@@ -40,27 +40,28 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
 <?php else : ?>
 
     <?php
-    $sch_groups  = SCH_Dashboard::groups();
-    $sch_active  = SCH_Dashboard::group_of($sch_current);
-    $sch_user_ob = wp_get_current_user();
+    $sch_groups   = SCH_Dashboard::groups();
+    $sch_in_set   = SCH_Dashboard::is_settings($sch_current);
+    $sch_setnav   = SCH_Dashboard::settings_nav();
+    $sch_set_home = SCH_Dashboard::settings_home();
+    $sch_user_ob  = wp_get_current_user();
     ?>
 
     <?php
-    $sch_open  = SCH_Alerts::open_count();
+    $sch_open   = SCH_Alerts::open_count();
     $sch_school = sch_settings('school_name', get_bloginfo('name'));
-    // عنوان الشاشة الحالية للمسار العلوي (breadcrumb)
-    $sch_title = __('لوحة التحكم', 'school-system');
-    foreach ($sch_groups as $sch_g) {
-        foreach ($sch_g['sections'] as $sch_s => $sch_m) {
-            if ($sch_s === $sch_current) { $sch_title = (string) $sch_m[0]; }
-        }
-    }
+    // عنوان الشاشة الحالية للمسار العلوي (breadcrumb) — من تعريف القسم مباشرة،
+    // فأقسام الإعدادات لم تعد ضمن مجموعات التنقّل الرئيسي.
+    $sch_secs  = SCH_Dashboard::sections();
+    $sch_title = isset($sch_secs[$sch_current])
+        ? (string) $sch_secs[$sch_current][0]
+        : __('لوحة التحكم', 'school-system');
     ?>
 
     <!-- التنقّل بشريط جانبي (يمين): مجموعات وأقسام تُقرأ رأسيًا،
          والشاشة تحتفظ بعمق ثابت للمسار والأدوات في الأعلى. -->
     <div class="sch-app">
-        <aside class="sch-side" id="sch-side">
+        <aside class="sch-side<?php echo $sch_in_set ? ' sch-side--set' : ''; ?>" id="sch-side">
             <a class="sch-side__brand" href="<?php echo esc_url(SCH_Dashboard::url()); ?>">
                 <span class="sch-side__mark"><?php echo esc_html(mb_substr($sch_school, 0, 1)); ?></span>
                 <span class="sch-side__bt">
@@ -69,33 +70,67 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                 </span>
             </a>
 
-            <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الأقسام', 'school-system'); ?>">
-                <?php $sch_i = 0; $sch_parea = ''; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++;
-                    $sch_area = (string) explode('|', (string) $sch_key)[0];
-                    $sch_area_new = ($sch_area !== $sch_parea && $sch_i > 1);
-                    $sch_parea = $sch_area; ?>
-                    <div class="sch-side__grp<?php echo $sch_area_new ? ' is-area' : ''; ?>" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
-                        <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
-                            <?php echo sch_icon((string) $sch_g['icon'], 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                            <span><?php echo esc_html($sch_g['label']); ?></span>
-                            <svg class="sch-side__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                        </button>
-                        <div class="sch-side__links" id="sch-grp-<?php echo esc_attr((string) $sch_i); ?>"><div class="sch-side__linksin">
-                        <?php foreach ($sch_g['sections'] as $sch_slug => $sch_meta) : ?>
-                            <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
-                               href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
-                                <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
-                                <?php if ($sch_slug === 'alerts' && $sch_open > 0) : ?>
-                                    <span class="sch-side__badge"><?php echo esc_html((string) $sch_open); ?></span>
-                                <?php endif; ?>
-                            </a>
-                        <?php endforeach; ?>
-                        </div></div>
-                    </div>
-                <?php endforeach; ?>
-            </nav>
-            <?php /* استعادة حالة طيّ المجموعات قبل رسم بقية الصفحة — بلا وميض */ ?>
-            <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}})();</script>
+            <?php if ($sch_in_set) : /* ── سياق الإعدادات: يستولي على الشريط الجانبي ── */ ?>
+                <?php $sch_back = current_user_can('sch_view_students') ? SCH_Dashboard::url('overview') : SCH_Dashboard::url(); ?>
+                <a class="sch-side__back" href="<?php echo esc_url($sch_back); ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    <span><?php esc_html_e('رجوع إلى النظام', 'school-system'); ?></span>
+                </a>
+                <div class="sch-side__settl">
+                    <?php echo sch_icon('cog', 20); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <b><?php esc_html_e('الإعدادات', 'school-system'); ?></b>
+                </div>
+                <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الإعدادات', 'school-system'); ?>">
+                    <?php foreach ($sch_setnav as $sch_gl => $sch_items) : ?>
+                        <div class="sch-side__seg">
+                            <span class="sch-side__segl"><?php echo esc_html((string) $sch_gl); ?></span>
+                            <?php foreach ($sch_items as $sch_slug => $sch_meta) : ?>
+                                <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
+                                   href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
+                                    <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </nav>
+
+            <?php else : /* ── التنقّل الرئيسي للعمل اليومي ── */ ?>
+                <nav class="sch-side__nav" aria-label="<?php esc_attr_e('الأقسام', 'school-system'); ?>">
+                    <?php $sch_i = 0; $sch_parea = ''; foreach ($sch_groups as $sch_key => $sch_g) : $sch_i++;
+                        $sch_area = (string) explode('|', (string) $sch_key)[0];
+                        $sch_area_new = ($sch_area !== $sch_parea && $sch_i > 1);
+                        $sch_parea = $sch_area; ?>
+                        <div class="sch-side__grp<?php echo $sch_area_new ? ' is-area' : ''; ?>" data-grp="<?php echo esc_attr((string) $sch_key); ?>">
+                            <button type="button" class="sch-side__h" aria-expanded="true" aria-controls="sch-grp-<?php echo esc_attr((string) $sch_i); ?>">
+                                <?php echo sch_icon((string) $sch_g['icon'], 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                <span><?php echo esc_html($sch_g['label']); ?></span>
+                                <svg class="sch-side__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div class="sch-side__links" id="sch-grp-<?php echo esc_attr((string) $sch_i); ?>"><div class="sch-side__linksin">
+                            <?php foreach ($sch_g['sections'] as $sch_slug => $sch_meta) : ?>
+                                <a class="sch-side__link<?php echo $sch_slug === $sch_current ? ' is-on' : ''; ?>"
+                                   href="<?php echo esc_url(SCH_Dashboard::url($sch_slug)); ?>">
+                                    <span><?php echo esc_html((string) $sch_meta[0]); ?></span>
+                                    <?php if ($sch_slug === 'alerts' && $sch_open > 0) : ?>
+                                        <span class="sch-side__badge"><?php echo esc_html((string) $sch_open); ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            <?php endforeach; ?>
+                            </div></div>
+                        </div>
+                    <?php endforeach; ?>
+                </nav>
+                <?php /* استعادة حالة طيّ المجموعات قبل رسم بقية الصفحة — بلا وميض */ ?>
+                <script>(function(){try{var s=JSON.parse(localStorage.getItem('sch-side-collapsed')||'[]');document.querySelectorAll('.sch-side__grp').forEach(function(g){if(s.indexOf(g.getAttribute('data-grp'))>-1){g.classList.add('is-collapsed');var h=g.querySelector('.sch-side__h');if(h)h.setAttribute('aria-expanded','false');}});}catch(e){}})();</script>
+
+                <?php if ($sch_set_home !== '') : /* مدخل الإعدادات المثبّت أسفل التنقّل — كأنظمة SaaS */ ?>
+                    <a class="sch-side__pin" href="<?php echo esc_url(SCH_Dashboard::url($sch_set_home)); ?>">
+                        <?php echo sch_icon('cog', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                        <span><?php esc_html_e('الإعدادات', 'school-system'); ?></span>
+                        <svg class="sch-side__pinch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
 
             <div class="sch-side__user">
                 <i><?php echo esc_html(mb_substr($sch_user_ob->display_name, 0, 1)); ?></i>
@@ -216,6 +251,16 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             $sch_cmdk[] = [
                 'label' => (string) $sch_cm[0],
                 'group' => (string) $sch_cg['label'],
+                'url'   => SCH_Dashboard::url((string) $sch_cs),
+            ];
+        }
+    }
+    // أقسام الإعدادات ما زالت قابلة للوصول عبر ⌘K رغم خروجها من التنقّل الرئيسي.
+    foreach ($sch_setnav as $sch_sgl => $sch_sitems) {
+        foreach ($sch_sitems as $sch_cs => $sch_cm) {
+            $sch_cmdk[] = [
+                'label' => (string) $sch_cm[0],
+                'group' => __('الإعدادات', 'school-system') . ' · ' . (string) $sch_sgl,
                 'url'   => SCH_Dashboard::url((string) $sch_cs),
             ];
         }
