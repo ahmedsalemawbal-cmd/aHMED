@@ -966,16 +966,12 @@ final class SCH_Dashboard
         return SCH_Perms::copy_from(absint($d['source_id'] ?? 0), absint($d['user_id'] ?? 0));
     }
 
-    /** العودة لصلاحيات الدور: حذف الصفوف يعيده لسلوكه الافتراضي. */
+    /** العودة لصلاحيات الدور: حذف الصفوف وإزالة التوسيع يعيده لسلوكه الافتراضي. */
     private static function do_reset_perms(array $d, int $id): bool
     {
-        global $wpdb;
-
         $user_id = absint($d['user_id'] ?? 0);
 
-        $wpdb->delete(sch_table('user_perms'), ['user_id' => $user_id]);
-        $wpdb->delete(sch_table('user_scope'), ['user_id' => $user_id]);
-
+        SCH_Perms::reset($user_id);
         sch_audit('perms.reset', 'user', $user_id);
 
         return true;

@@ -37,6 +37,13 @@ final class SCH_Activator
             self::create_tables();
             self::register_roles();
             SCH_Accounts::seed();
+
+            // بعد تثبيت قدرات الأدوار: أعِد مزامنة قدرات أصحاب الصلاحيات المخصصة
+            // كي تسري الأقسام الممنوحة التي كان دور صاحبها لا يحمل قدرتها.
+            if (class_exists('SCH_Perms')) {
+                SCH_Perms::resync_all();
+            }
+
             update_option('sch_db_version', SCH_VERSION);
 
             self::purge_caches();

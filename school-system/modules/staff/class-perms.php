@@ -268,8 +268,9 @@ final class SCH_Perms
             return sch_api_error('forbidden', __('لا تملك صلاحية تعديل صلاحيات هذا الموظف.', 'school-system'), 403);
         }
 
-        $before = self::map($user_id);
-        $added  = [];
+        $before  = self::map($user_id);
+        $added   = [];
+        $granted = [];
 
         $wpdb->delete(sch_table('user_perms'), ['user_id' => $user_id]);
 
@@ -294,10 +295,17 @@ final class SCH_Perms
                 'can_edit' => $edit ? 1 : 0,
             ]);
 
+            $granted[] = $slug;
+
             if (in_array($slug, self::SENSITIVE, true) && empty($before[$slug]['view'])) {
                 $added[] = SCH_Dashboard::sections()[$slug][0];
             }
         }
+
+        // توسيع لا مجرد تضييق: القسم الممنوح يحتاج قدرة دوره الأساسية كي يعبر فحص
+        // `current_user_can` في الموجّه والشريط الجانبي. بلا هذا يُمنَح القسم في القاعدة
+        // ثم يُحجب لأن دور الموظف لا يحمل القدرة — فتبدو الصلاحيات «ناقصة» عمّا مُنح.
+        self::sync_caps($target, $granted);
 
         $wpdb->replace(sch_table('user_scope'), [
             'user_id'    => $user_id,
@@ -343,6 +351,80 @@ final class SCH_Perms
         }
 
         return self::save($target_id, $map, self::scope($source_id));
+    }
+
+    /**
+     * مزامنة قدرات ووردبريس للمستخدم مع أقسامه الممنوحة.
+     *
+     * القسم الممنوح يكسب قدرة دوره الأساسية على مستوى المستخدم (توسيع يعبر
+     * `current_user_can`)، وما لم يُمنح تُزال إضافته على مستوى المستخدم فيعود
+     * لأصل دوره — بلا مسّ قدرات الدور نفسه (طبقة فوق لا بديلًا عنه).
+     *
+     * @param string[] $granted_slugs
+     */
+    private static function sync_caps(WP_User $user, array $granted_slugs): void
+    {
+        $sections = SCH_Dashboard::sections();
+
+        $need = [];
+        foreach ($granted_slugs as $slug) {
+            $cap = (string) ($sections[$slug][1] ?? '');
+            if ($cap !== '') {
+                $need[$cap] = true;
+            }
+        }
+
+        $managed = [];
+        foreach ($sections as $meta) {
+            $cap = (string) ($meta[1] ?? '');
+            if ($cap !== '') {
+                $managed[$cap] = true;
+            }
+        }
+
+        foreach (array_keys($managed) as $cap) {
+            if (isset($need[$cap])) {
+                $user->add_cap($cap, true);   // توسيع: القدرة تُمنح على مستوى المستخدم
+            } else {
+                $user->remove_cap($cap);      // إزالة توسيع سابق — يعود لأصل الدور
+            }
+        }
+    }
+
+    /** العودة لصلاحيات الدور: حذف الصفوف وإزالة أي توسيع مُنح على مستوى المستخدم. */
+    public static function reset(int $user_id): void
+    {
+        global $wpdb;
+
+        $wpdb->delete(sch_table('user_perms'), ['user_id' => $user_id]);
+        $wpdb->delete(sch_table('user_scope'), ['user_id' => $user_id]);
+
+        $user = get_userdata($user_id);
+        if ($user instanceof WP_User) {
+            self::sync_caps($user, []);
+        }
+    }
+
+    /**
+     * إعادة مزامنة قدرات كل من له صلاحيات مخصصة — تُستدعى مرة عند الترقية،
+     * فتسري الأقسام الممنوحة قبل هذا الإصلاح بلا حاجة لإعادة حفظها يدويًا.
+     */
+    public static function resync_all(): void
+    {
+        global $wpdb;
+
+        if (!class_exists('SCH_Dashboard')) {
+            return;
+        }
+
+        $ids = $wpdb->get_col('SELECT DISTINCT user_id FROM ' . sch_table('user_perms'));
+
+        foreach ($ids ?: [] as $uid) {
+            $user = get_userdata((int) $uid);
+            if ($user instanceof WP_User) {
+                self::sync_caps($user, array_keys(self::map((int) $uid)));
+            }
+        }
     }
 
     /** قالب الدور: ما يفتحه الدور افتراضيًا — نقطة بداية لا قيد. */
