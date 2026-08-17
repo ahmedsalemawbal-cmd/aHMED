@@ -21,7 +21,7 @@
   --s-warn:    #FBBF24;
   --s-bad:     #F87171;
 
-  --s-f: 'Cairo', system-ui, sans-serif;
+  --s-f: var(--sch-font-body);
   --s-r: 16px;
 
   --t-hero: 34px;

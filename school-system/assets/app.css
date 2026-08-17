@@ -14,7 +14,7 @@ body.scha {
   min-height: 100dvh;
   background: var(--sch-paper);
   color: var(--sch-ink);
-  font-family: 'Cairo', system-ui, sans-serif;
+  font-family: var(--sch-font-body);
   font-size: 15px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;

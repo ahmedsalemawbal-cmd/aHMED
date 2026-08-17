@@ -300,7 +300,7 @@ final class SCH_Content
              . '<meta http-equiv="Content-Security-Policy" content="' . esc_attr($csp) . '">'
              . '<meta name="viewport" content="width=device-width,initial-scale=1">'
              . '<style>html,body{margin:0;height:100%;background:#0F1720;color:#F1F5F9;'
-             . "font-family:'Cairo',system-ui,sans-serif;overflow:hidden}</style>"
+             . "font-family:system-ui,sans-serif;overflow:hidden}</style>"
              . '<script>'
              // القناة الوحيدة للخروج: النتيجة. لا شيء غيرها يُقبل.
              . 'window.schScore=function(v){try{parent.postMessage('

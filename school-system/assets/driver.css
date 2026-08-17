@@ -13,8 +13,8 @@
   --d-ok:      #10B981;
   --d-warn:    #F59E0B;
   --d-bad:     #F87171;
-  --d-display: 'Cairo', system-ui, sans-serif;
-  --d-body:    'Cairo', system-ui, sans-serif;
+  --d-display: var(--sch-font-body);
+  --d-body:    var(--sch-font-body);
   --d-r: 10px;
 }
 

@@ -23,9 +23,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html(get_bloginfo('name')); ?> — <?php esc_html_e('نظام المدرسة', 'school-system'); ?></title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/fonts.css')); ?>">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/shared-ui.css')); ?>">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/dashboard.css')); ?>">
 </head>

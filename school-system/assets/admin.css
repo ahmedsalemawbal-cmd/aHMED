@@ -24,8 +24,8 @@
   --sch-danger:       #B91C1C;
 
   /* الخطوط */
-  --sch-font-display: 'Cairo', system-ui, sans-serif;
-  --sch-font-body:    'Cairo', system-ui, sans-serif;
+  --sch-font-display: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sch-font-body:    'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --sch-text-xs:  12px;
   --sch-text-sm:  13px;

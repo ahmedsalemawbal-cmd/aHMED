@@ -79,8 +79,12 @@
   --sch-glass-blur:   saturate(180%) blur(20px);
 
   /* ═══ الخط ═══ */
-  --sch-font-display: 'Cairo', system-ui, sans-serif;
-  --sch-font-body:    'Cairo', system-ui, sans-serif;
+  /* البيت الوحيد لعائلة الخط في النظام. تبديلها من هنا وحدها.
+     كانت معرَّفة في shared-ui و dashboard و admin بثلاث نسخ — والنسخة
+     الأخيرة المحمَّلة تطمس ما قبلها، فيختلف الخط بين شاشة وشاشة. */
+  --sch-font-display: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sch-font-body:    'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sch-mono:         ui-monospace, 'SFMono-Regular', 'Cascadia Mono', monospace;
 
   --sch-text-xs:  11.5px;
   --sch-text-sm:  13px;

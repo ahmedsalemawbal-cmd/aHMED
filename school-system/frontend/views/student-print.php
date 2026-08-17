@@ -33,10 +33,6 @@ $photo_url = $student->photo_file
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($full . ' — ' . ($student->academic_no ?: '')); ?></title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
     @page { size: A4 portrait; margin: 14mm 14mm 12mm; }
 
@@ -51,7 +47,7 @@ $photo_url = $student->photo_file
       margin: 0;
       background: #E9EEF3;
       color: var(--ink);
-      font-family: 'Cairo', system-ui, sans-serif;
+      font-family: var(--sch-font-body);
       font-size: 11pt;
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
@@ -105,7 +101,7 @@ $photo_url = $student->photo_file
       background: var(--paper); border: 1px solid var(--line2); border-radius: 1.5mm;
       font-family: ui-monospace, monospace; font-size: 13pt; letter-spacing: .12em;
     }
-    .idbox small { display: block; font-family: 'Cairo', sans-serif; font-size: 7.5pt; letter-spacing: 0; color: var(--muted); }
+    .idbox small { display: block; font-family: var(--sch-font-body); font-size: 7.5pt; letter-spacing: 0; color: var(--muted); }
 
     .qr { text-align: center; }
     .qr svg { width: 28mm; height: 28mm; display: block; }
@@ -145,6 +141,7 @@ $photo_url = $student->photo_file
       .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
     }
     </style>
+    <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/fonts.css')); ?>">
 </head>
 <body>
 

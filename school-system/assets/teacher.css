@@ -17,7 +17,8 @@
   --t-danger:#DC2660; --t-danger-s:rgba(220,38,96,.10); --t-gold:#C79A3E;
   --t-av-bg:#EDE7FB; --t-av-ink:#7C3AED;
 
-  --t-font:'Cairo', system-ui, -apple-system, sans-serif;
+  /* العائلة من shared-ui.css — لا اسم عائلة في ملف واجهة. */
+  --t-font: var(--sch-font-body);
   --t-t1:30px; --t-t2:20px; --t-t3:15px; --t-t4:14px; --t-t5:12.5px; --t-t6:10.5px;
   --t-1:4px; --t-2:8px; --t-3:12px; --t-4:16px; --t-5:22px; --t-6:30px;
   --t-r1:12px; --t-r2:16px; --t-r3:20px; --t-r4:26px;

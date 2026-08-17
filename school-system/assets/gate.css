@@ -13,7 +13,7 @@
   --g-ok:      #10B981;
   --g-warn:    #F59E0B;
   --g-bad:     #F87171;
-  --g-f: 'Cairo', system-ui, sans-serif;
+  --g-f: var(--sch-font-body);
   --g-r: 12px;
 }
 
