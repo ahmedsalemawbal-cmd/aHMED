@@ -1,0 +1,8566 @@
+# Copyright (C) 2026 
+# This file is distributed under the same license as the School System plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: School System 8.3.0\n"
+"Report-Msgid-Bugs-To: https://github.com/ahmedsalemawbal-cmd/aHMED/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Arabic\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-17T17:43:26+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: school-system\n"
+
+#. Plugin Name of the plugin
+#: school-system.php
+msgid "School System"
+msgstr ""
+
+#. Description of the plugin
+#: school-system.php
+msgid "نظام إدارة مدرسة — طلاب، نقل، حضور، مالية. يشمل REST API للتطبيقات."
+msgstr ""
+
+#: admin/class-admin.php:23
+#: admin/class-admin.php:24
+#: frontend/views/layout.php:24
+#: frontend/views/login.php:11
+msgid "نظام المدرسة"
+msgstr ""
+
+#: admin/class-admin.php:34
+#: admin/class-admin.php:35
+#: admin/views/students.php:16
+#: frontend/views/students.php:46
+msgid "الطلاب"
+msgstr ""
+
+#: admin/class-admin.php:83
+msgid "لا تملك صلاحية إضافة طالب."
+msgstr ""
+
+#: admin/views/students.php:19
+msgid "أُضيف الطالب."
+msgstr ""
+
+#: admin/views/students.php:24
+msgid "تعذّر الحفظ. تأكد من الاسم ومن أن رقم الهوية غير مسجّل لطالب آخر."
+msgstr ""
+
+#: admin/views/students.php:35
+msgid "ابحث بالاسم أو رقم الهوية"
+msgstr ""
+
+#: admin/views/students.php:36
+#: frontend/views/employees.php:139
+#: frontend/views/guardians-single.php:55
+#: frontend/views/guardians.php:24
+#: frontend/views/perms.php:149
+#: frontend/views/students.php:72
+msgid "بحث"
+msgstr ""
+
+#. translators: %s: عدد الطلاب
+#: admin/views/students.php:41
+#, php-format
+msgid "%s طالب"
+msgstr ""
+
+#: admin/views/students.php:50
+msgid "لا يوجد طلاب بعد"
+msgstr ""
+
+#: admin/views/students.php:51
+msgid "أضف أول طالب من النموذج أدناه، أو استورد قائمة من ملف Excel."
+msgstr ""
+
+#: admin/views/students.php:57
+#: frontend/class-dashboard.php:1674
+#: frontend/class-dashboard.php:1720
+#: frontend/class-dashboard.php:1739
+#: frontend/views/employees.php:154
+#: frontend/views/guardians.php:37
+#: frontend/views/student-print.php:215
+#: frontend/views/students-single.php:218
+msgid "الاسم"
+msgstr ""
+
+#: admin/views/students.php:58
+#: admin/views/students.php:99
+#: frontend/class-dashboard.php:1675
+#: frontend/views/certificates.php:195
+#: frontend/views/classes.php:36
+#: frontend/views/classes.php:87
+#: frontend/views/content.php:61
+#: frontend/views/content.php:119
+#: frontend/views/rollover.php:73
+#: frontend/views/student-print.php:204
+#: frontend/views/students-single.php:94
+#: frontend/views/students.php:78
+msgid "المرحلة"
+msgstr ""
+
+#: admin/views/students.php:59
+#: admin/views/students.php:109
+#: frontend/class-dashboard.php:1675
+#: frontend/views/classes.php:37
+#: frontend/views/classes.php:95
+#: frontend/views/custody.php:56
+#: frontend/views/guardians-single.php:95
+#: frontend/views/guardians-single.php:184
+#: frontend/views/insights.php:50
+#: frontend/views/nerve.php:48
+#: frontend/views/students.php:90
+#: frontend/views/transport-single.php:104
+msgid "الصف"
+msgstr ""
+
+#: admin/views/students.php:60
+#: admin/views/students.php:114
+#: frontend/class-dashboard.php:1676
+#: frontend/views/attendance-report.php:29
+#: frontend/views/attendance-report.php:30
+#: frontend/views/attendance.php:41
+#: frontend/views/attendance.php:42
+#: frontend/views/badges.php:32
+#: frontend/views/certificates.php:207
+#: frontend/views/certificates.php:272
+#: frontend/views/classes.php:38
+#: frontend/views/classes.php:99
+#: frontend/views/exams.php:72
+#: frontend/views/exams.php:109
+#: frontend/views/homework.php:171
+#: frontend/views/insights.php:85
+#: frontend/views/students-single.php:195
+#: frontend/views/students.php:102
+#: frontend/views/students.php:148
+msgid "الشعبة"
+msgstr ""
+
+#: admin/views/students.php:61
+#: frontend/app/child.php:73
+#: frontend/class-dashboard.php:1676
+#: frontend/views/alerts.php:23
+#: frontend/views/assets.php:22
+#: frontend/views/assets.php:106
+#: frontend/views/attendance.php:76
+#: frontend/views/content.php:63
+#: frontend/views/custody.php:91
+#: frontend/views/employees.php:98
+#: frontend/views/employees.php:159
+#: frontend/views/finance.php:60
+#: frontend/views/finance.php:201
+#: frontend/views/guardians.php:41
+#: frontend/views/homework.php:54
+#: frontend/views/hr.php:45
+#: frontend/views/hr.php:125
+#: frontend/views/journal.php:20
+#: frontend/views/journal.php:80
+#: frontend/views/meds.php:67
+#: frontend/views/payroll.php:20
+#: frontend/views/payroll.php:71
+#: frontend/views/safety.php:30
+#: frontend/views/staff-day.php:48
+#: frontend/views/student-print.php:203
+#: frontend/views/timetable.php:88
+#: frontend/views/trips.php:24
+msgid "الحالة"
+msgstr ""
+
+#: admin/views/students.php:71
+#: frontend/views/guardians.php:55
+#: frontend/views/student-print.php:203
+msgid "نشط"
+msgstr ""
+
+#: admin/views/students.php:81
+msgid "إضافة طالب"
+msgstr ""
+
+#: admin/views/students.php:89
+#: frontend/views/employees.php:51
+#: frontend/views/employees.php:271
+msgid "الاسم الكامل"
+msgstr ""
+
+#: admin/views/students.php:94
+#: frontend/app/card.php:52
+#: frontend/gate/visitors.php:30
+#: frontend/views/employees.php:92
+#: frontend/views/guardians-single.php:29
+#: frontend/views/guardians-single.php:145
+#: frontend/views/guardians.php:39
+#: frontend/views/guardians.php:101
+#: frontend/views/partials/enroll-form.php:57
+#: frontend/views/partials/enroll-form.php:58
+#: frontend/views/student-print.php:199
+#: frontend/views/student-print.php:218
+#: frontend/views/students-single.php:90
+#: frontend/views/visitors.php:77
+msgid "رقم الهوية"
+msgstr ""
+
+#: admin/views/students.php:101
+msgid "رياض أطفال"
+msgstr ""
+
+#: admin/views/students.php:102
+msgid "ابتدائي"
+msgstr ""
+
+#: admin/views/students.php:103
+#: frontend/views/insights.php:68
+msgid "متوسط"
+msgstr ""
+
+#: admin/views/students.php:104
+msgid "ثانوي"
+msgstr ""
+
+#: admin/views/students.php:119
+msgid "حفظ الطالب"
+msgstr ""
+
+#: api/class-auth.php:51
+msgid "محاولات كثيرة. انتظر ربع ساعة ثم أعد المحاولة."
+msgstr ""
+
+#: api/class-auth.php:62
+#: frontend/class-driver.php:180
+#: frontend/class-gate.php:169
+#: frontend/class-portal.php:115
+#: frontend/class-teacher.php:176
+msgid "بيانات الدخول غير صحيحة."
+msgstr ""
+
+#: api/class-auth.php:97
+#: api/class-auth.php:105
+msgid "الجلسة منتهية. سجّل الدخول من جديد."
+msgstr ""
+
+#: api/class-bridge.php:65
+msgid "لا تملك صلاحية إصدار مفتاح."
+msgstr ""
+
+#: api/class-bridge.php:73
+msgid "لديك عشرة مفاتيح — ألغِ واحدًا قبل إصدار جديد."
+msgstr ""
+
+#: api/class-bridge.php:78
+msgid "جهاز بلا اسم"
+msgstr ""
+
+#: api/class-bridge.php:123
+msgid "مفتاح الربط مفقود."
+msgstr ""
+
+#: api/class-bridge.php:140
+msgid "مفتاح الربط غير صحيح."
+msgstr ""
+
+#: api/class-bridge.php:144
+msgid "انتهت صلاحية المفتاح — أصدر مفتاحًا جديدًا."
+msgstr ""
+
+#: api/class-bridge.php:151
+msgid "صاحب المفتاح لم يعد يملك صلاحية الاستيراد."
+msgstr ""
+
+#: api/class-bridge.php:199
+msgid "لم تصل صفوف."
+msgstr ""
+
+#: api/class-rest.php:265
+msgid "لا يوجد مسار مُسنَد لك."
+msgstr ""
+
+#: api/class-rest.php:318
+msgid "الإحداثيات غير صحيحة."
+msgstr ""
+
+#: api/class-rest.php:429
+msgid "لا تملك صلاحية هذا الطالب."
+msgstr ""
+
+#: api/class-rest.php:482
+#: api/class-rest.php:500
+msgid "لا يوجد سجل طالب."
+msgstr ""
+
+#: frontend/app/account.php:11
+msgid "حسابي"
+msgstr ""
+
+#: frontend/app/account.php:29
+msgid "الصورة الشخصية"
+msgstr ""
+
+#: frontend/app/account.php:35
+#: frontend/portal.php:65
+#: frontend/views/overview.php:84
+#: includes/class-activator.php:1412
+#: modules/guardians/class-guardians.php:335
+msgid "ولي أمر"
+msgstr ""
+
+#: frontend/app/account.php:43
+msgid "المعلومات"
+msgstr ""
+
+#: frontend/app/account.php:46
+#: frontend/gate/visitors.php:33
+#: frontend/views/employees.php:80
+#: frontend/views/employees.php:157
+#: frontend/views/employees.php:300
+#: frontend/views/guardians-single.php:30
+#: frontend/views/guardians.php:38
+#: frontend/views/student-print.php:217
+#: frontend/views/students-single.php:220
+#: frontend/views/visitors.php:81
+msgid "الجوال"
+msgstr ""
+
+#: frontend/app/account.php:50
+msgid "الهوية"
+msgstr ""
+
+#: frontend/app/account.php:54
+#: frontend/views/guardians-single.php:33
+#: frontend/views/guardians-single.php:149
+#: frontend/views/guardians.php:113
+msgid "المدينة"
+msgstr ""
+
+#: frontend/app/account.php:60
+#: frontend/views/classes.php:20
+#: frontend/views/layout.php:101
+#: frontend/views/layout.php:103
+#: frontend/views/layout.php:150
+#: frontend/views/layout.php:152
+#: frontend/views/layout.php:275
+#: frontend/views/overview.php:33
+msgid "الإعدادات"
+msgstr ""
+
+#: frontend/app/account.php:64
+msgid "المظهر"
+msgstr ""
+
+#: frontend/app/account.php:73
+#: frontend/app/login.php:31
+#: frontend/driver/login.php:26
+#: frontend/gate/login.php:25
+#: frontend/portal.php:54
+#: frontend/student/login.php:25
+#: frontend/teacher/login.php:26
+#: frontend/views/layout.php:248
+#: frontend/views/login.php:28
+msgid "كلمة المرور"
+msgstr ""
+
+#: frontend/app/account.php:79
+msgid "الحالية"
+msgstr ""
+
+#: frontend/app/account.php:83
+msgid "الجديدة"
+msgstr ""
+
+#: frontend/app/account.php:87
+msgid "تأكيدها"
+msgstr ""
+
+#: frontend/app/account.php:91
+#: frontend/teacher/student.php:90
+#: frontend/views/clinic.php:98
+#: frontend/views/homework.php:89
+#: frontend/views/students-single.php:446
+msgid "حفظ"
+msgstr ""
+
+#: frontend/app/account.php:98
+#: frontend/app/denied.php:17
+#: frontend/student/me.php:34
+#: frontend/teacher/home.php:88
+#: frontend/views/hub.php:38
+msgid "تسجيل الخروج"
+msgstr ""
+
+#: frontend/app/alerts.php:22
+#: frontend/app/layout.php:90
+msgid "الإشعارات"
+msgstr ""
+
+#: frontend/app/alerts.php:27
+msgid "لا إشعارات"
+msgstr ""
+
+#: frontend/app/alerts.php:28
+msgid "نُشعرك عند الاستثناء فقط — لا عند كل حدث."
+msgstr ""
+
+#: frontend/app/card.php:19
+#: frontend/app/layout.php:134
+#: frontend/views/students.php:191
+#: frontend/views/students.php:192
+msgid "البطاقة"
+msgstr ""
+
+#: frontend/app/card.php:24
+msgid "بطاقة طالب"
+msgstr ""
+
+#: frontend/app/card.php:41
+msgid "بلا شعبة"
+msgstr ""
+
+#: frontend/app/card.php:46
+#: frontend/class-dashboard.php:1674
+#: frontend/class-dashboard.php:1720
+#: frontend/student/me.php:30
+#: frontend/views/custody.php:54
+#: frontend/views/guardians-single.php:93
+#: frontend/views/guardians-single.php:183
+#: frontend/views/student-print.php:186
+#: frontend/views/students-single.php:87
+msgid "الرقم الأكاديمي"
+msgstr ""
+
+#: frontend/app/card.php:56
+#: frontend/views/guardians-single.php:185
+#: frontend/views/partials/enroll-form.php:72
+#: frontend/views/partials/enroll-form.php:73
+#: frontend/views/student-print.php:201
+#: frontend/views/students-single.php:92
+msgid "تاريخ الميلاد"
+msgstr ""
+
+#: frontend/app/card.php:60
+#: frontend/views/students-single.php:492
+#: frontend/views/students.php:150
+msgid "النقل"
+msgstr ""
+
+#: frontend/app/card.php:61
+#: frontend/views/students-single.php:153
+msgid "لا يوجد"
+msgstr ""
+
+#: frontend/app/card.php:64
+#: frontend/app/track.php:23
+#: frontend/views/students.php:151
+msgid "الحالة الآن"
+msgstr ""
+
+#: frontend/app/card.php:76
+msgid "اضغط لعرضه كاملًا"
+msgstr ""
+
+#: frontend/app/card.php:80
+msgid "عرض الرمز بملء الشاشة"
+msgstr ""
+
+#: frontend/app/card.php:83
+msgid "هذا رمز البطاقة المطبوعة. أما ابنك فيعرض من تطبيقه رمزًا متجددًا لا يصلح تصويره."
+msgstr ""
+
+#: frontend/app/card.php:95
+msgid "اضغط للإغلاق"
+msgstr ""
+
+#: frontend/app/certificates.php:14
+#: frontend/app/clinic.php:19
+#: frontend/app/kg.php:13
+#: frontend/app/leave.php:13
+#: frontend/app/schedule.php:17
+#: frontend/app/track.php:15
+#: frontend/app/transport.php:13
+#: frontend/driver/bus.php:9
+#: frontend/driver/history.php:7
+#: frontend/driver/issue.php:8
+#: frontend/driver/stops.php:8
+#: frontend/views/employees.php:446
+msgid "رجوع"
+msgstr ""
+
+#: frontend/app/certificates.php:29
+msgid "حفظ أو طباعة"
+msgstr ""
+
+#: frontend/app/certificates.php:35
+#: frontend/app/child.php:161
+#: frontend/views/certificates.php:66
+#: frontend/views/certificates.php:104
+msgid "الشهادات"
+msgstr ""
+
+#: frontend/app/certificates.php:40
+#: frontend/views/certificates.php:263
+msgid "لا شهادات بعد"
+msgstr ""
+
+#: frontend/app/certificates.php:41
+msgid "تظهر هنا فور منح المدرسة أي شهادة لابنك."
+msgstr ""
+
+#: frontend/app/child.php:40
+msgid "مباشر"
+msgstr ""
+
+#: frontend/app/child.php:41
+#: frontend/views/transport-single.php:22
+msgid "رحلة الذهاب"
+msgstr ""
+
+#: frontend/app/child.php:41
+#: frontend/views/transport-single.php:22
+msgid "رحلة العودة"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:43
+#, php-format
+msgid "%s في الباص"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:44
+msgid "الرحلة جارية الآن"
+msgstr ""
+
+#: frontend/app/child.php:49
+msgid "المدرسة"
+msgstr ""
+
+#: frontend/app/child.php:49
+msgid "الآن"
+msgstr ""
+
+#: frontend/app/child.php:49
+msgid "المنزل"
+msgstr ""
+
+#: frontend/app/child.php:52
+msgid "التتبّع على الخريطة"
+msgstr ""
+
+#: frontend/app/child.php:57
+msgid "في المدرسة"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:59
+#, php-format
+msgid "%s بأمان في المدرسة"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:60
+msgid "سُجّل دخوله وحضوره مؤكّد"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:60
+msgid "سُجّل دخوله من البوابة"
+msgstr ""
+
+#: frontend/app/child.php:72
+#: frontend/app/child.php:113
+#: frontend/app/log.php:15
+#: frontend/views/insights.php:51
+msgid "الحضور"
+msgstr ""
+
+#: frontend/app/child.php:79
+#: frontend/views/staff-day.php:68
+msgid "إجازة معتمدة"
+msgstr ""
+
+#: frontend/app/child.php:79
+msgid "في المنزل"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:82
+#, php-format
+msgid "%s في المنزل"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:83
+msgid "الباص لا ينتظره اليوم — أُبلغت المدرسة تلقائيًا"
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: frontend/app/child.php:83
+msgid "خارج عهدة المدرسة الآن"
+msgstr ""
+
+#: frontend/app/child.php:85
+#: frontend/app/leave.php:16
+msgid "طلبات الإجازات"
+msgstr ""
+
+#: frontend/app/child.php:86
+msgid "جدول الغد"
+msgstr ""
+
+#: frontend/app/child.php:94
+msgid "الجدول"
+msgstr ""
+
+#: frontend/app/child.php:95
+msgid "أين ابني"
+msgstr ""
+
+#: frontend/app/child.php:96
+msgid "الصحة"
+msgstr ""
+
+#: frontend/app/child.php:97
+msgid "الإجازات"
+msgstr ""
+
+#: frontend/app/child.php:109
+#: frontend/views/finance.php:168
+msgid "المستحق"
+msgstr ""
+
+#: frontend/app/child.php:110
+#: frontend/app/invoices.php:55
+#: frontend/app/invoices.php:126
+#: includes/functions.php:104
+#: includes/functions.php:139
+msgid "ر.س"
+msgstr ""
+
+#: frontend/app/child.php:115
+msgid "آخر ٦٠ يومًا"
+msgstr ""
+
+#: frontend/app/child.php:120
+msgid "يومه"
+msgstr ""
+
+#: frontend/app/child.php:120
+msgid "كل السجل"
+msgstr ""
+
+#: frontend/app/child.php:144
+msgid "لم يبدأ يومه بعد"
+msgstr ""
+
+#: frontend/app/child.php:145
+msgid "ستظهر أحداث اليوم هنا فور صعوده الباص أو دخوله المدرسة."
+msgstr ""
+
+#: frontend/app/child.php:161
+msgid "شهادة واحدة"
+msgid_plural "%s شهادات"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/app/child.php:169
+#: frontend/app/kg.php:16
+#: frontend/views/kg.php:22
+#: modules/kg/class-kg.php:68
+msgid "التقرير اليومي"
+msgstr ""
+
+#: frontend/app/child.php:169
+msgid "الوجبة والنوم والنشاط"
+msgstr ""
+
+#: frontend/app/child.php:176
+msgid "كتاب متأخر لم يُرجَع"
+msgid_plural "%d كتب متأخرة لم تُرجَع"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/app/clinic.php:22
+#: frontend/views/clinic.php:30
+#: frontend/views/inbox.php:16
+#: frontend/views/nerve.php:81
+msgid "الصحة المدرسية"
+msgstr ""
+
+#: frontend/app/clinic.php:27
+msgid "الحساسية"
+msgstr ""
+
+#: frontend/app/clinic.php:28
+msgid "لا توجد"
+msgstr ""
+
+#: frontend/app/clinic.php:31
+#: frontend/views/partials/enroll-form.php:113
+#: frontend/views/students-single.php:370
+msgid "فصيلة الدم"
+msgstr ""
+
+#: frontend/app/clinic.php:32
+#: frontend/app/transport.php:38
+#: frontend/views/partials/enroll-form.php:115
+#: frontend/views/students-single.php:372
+#: frontend/views/transport-single.php:146
+msgid "غير محددة"
+msgstr ""
+
+#: frontend/app/clinic.php:38
+#: frontend/views/partials/enroll-form.php:122
+#: frontend/views/students-single.php:379
+msgid "أمراض مزمنة"
+msgstr ""
+
+#: frontend/app/clinic.php:43
+msgid "أذونات الأدوية"
+msgstr ""
+
+#: frontend/app/clinic.php:48
+msgid "لا أدوية مسجّلة"
+msgstr ""
+
+#: frontend/app/clinic.php:49
+msgid "اطلب إذنًا إن كان ابنك يحتاج دواءً في المدرسة."
+msgstr ""
+
+#: frontend/app/clinic.php:69
+msgid "الزيارات الصحية"
+msgstr ""
+
+#: frontend/app/denied.php:9
+msgid "لا صلاحية"
+msgstr ""
+
+#: frontend/app/denied.php:10
+msgid "هذا التطبيق لأولياء الأمور."
+msgstr ""
+
+#: frontend/app/denied.php:14
+msgid "حسابك ليس حساب ولي أمر. تواصل مع إدارة المدرسة إن كان هذا خطأ."
+msgstr ""
+
+#: frontend/app/home.php:9
+msgid "لا يوجد أبناء مرتبطون بحسابك"
+msgstr ""
+
+#: frontend/app/home.php:10
+msgid "تواصل مع إدارة المدرسة لربط أبنائك برقم جوالك."
+msgstr ""
+
+#: frontend/app/install.php:9
+msgid "ثبّت التطبيق"
+msgstr ""
+
+#: frontend/app/install.php:10
+msgid "ليفتح من شاشتك الرئيسية كأي تطبيق."
+msgstr ""
+
+#: frontend/app/install.php:14
+msgid "افتح قائمة المتصفح (النقاط الثلاث)"
+msgstr ""
+
+#: frontend/app/install.php:15
+msgid "اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»"
+msgstr ""
+
+#: frontend/app/install.php:16
+msgid "أكّد — تظهر الأيقونة على شاشتك"
+msgstr ""
+
+#: frontend/app/install.php:20
+msgid "تثبيت الآن"
+msgstr ""
+
+#: frontend/app/install.php:24
+msgid "لاحقًا"
+msgstr ""
+
+#: frontend/app/invoices.php:12
+#: frontend/app/layout.php:133
+#: frontend/views/finance.php:455
+#: frontend/views/students-single.php:496
+msgid "الرسوم"
+msgstr ""
+
+#: frontend/app/invoices.php:17
+msgid "لا توجد رسوم"
+msgstr ""
+
+#: frontend/app/invoices.php:18
+msgid "لم تُصدَر فاتورة لهذه السنة بعد."
+msgstr ""
+
+#: frontend/app/invoices.php:44
+#: frontend/views/finance.php:405
+msgid "دفعة واحدة"
+msgstr ""
+
+#. translators: %s: عدد الدفعات
+#: frontend/app/invoices.php:47
+#, php-format
+msgid "%s دفعات"
+msgstr ""
+
+#: frontend/app/invoices.php:52
+msgid "المتبقي عليك"
+msgstr ""
+
+#: frontend/app/invoices.php:68
+msgid "دفعت"
+msgstr ""
+
+#: frontend/app/invoices.php:70
+#: frontend/views/hr.php:41
+#: frontend/views/hr.php:122
+#: frontend/views/hr.php:195
+#: frontend/views/reports.php:20
+#: frontend/views/settings-years.php:20
+msgid "من"
+msgstr ""
+
+#. translators: 1: النسبة 2: المبلغ
+#: frontend/app/invoices.php:80
+#, php-format
+msgid "خصم %1$s٪ · وفّرت %2$s"
+msgstr ""
+
+#: frontend/app/invoices.php:89
+msgid "الدفعات"
+msgstr ""
+
+#: frontend/app/invoices.php:121
+msgid "دفعة متأخرة"
+msgstr ""
+
+#: frontend/app/invoices.php:121
+msgid "الدفعة القادمة"
+msgstr ""
+
+#: frontend/app/invoices.php:122
+msgid "اكتمل السداد"
+msgstr ""
+
+#: frontend/app/invoices.php:129
+msgid "شكرًا لك"
+msgstr ""
+
+#: frontend/app/invoices.php:136
+msgid "يومًا تأخرت"
+msgstr ""
+
+#: frontend/app/invoices.php:136
+msgid "يومًا"
+msgstr ""
+
+#: frontend/app/invoices.php:144
+msgid "الدفع من التطبيق — قريبًا"
+msgstr ""
+
+#: frontend/app/kg.php:21
+msgid "لا تقارير بعد"
+msgstr ""
+
+#: frontend/app/kg.php:22
+msgid "تكتبه المعلمة في نهاية كل يوم."
+msgstr ""
+
+#: frontend/app/kg.php:29
+#: frontend/views/kg.php:61
+msgid "الوجبة"
+msgstr ""
+
+#: frontend/app/kg.php:30
+msgid "النوم"
+msgstr ""
+
+#: frontend/app/kg.php:30
+#: frontend/student/home.php:32
+msgid "دقيقة"
+msgstr ""
+
+#: frontend/app/kg.php:31
+#: frontend/views/kg.php:52
+msgid "المزاج"
+msgstr ""
+
+#: frontend/app/kg.php:32
+msgid "النشاط"
+msgstr ""
+
+#: frontend/app/layout.php:47
+#: frontend/student/layout.php:34
+#: frontend/teacher/layout.php:30
+#: frontend/views/layout.php:31
+msgid "تخطَّ إلى المحتوى"
+msgstr ""
+
+#. translators: %s: الاسم الأول
+#: frontend/app/layout.php:69
+#, php-format
+msgid "صباح الخير %s"
+msgstr ""
+
+#. translators: %s: الاسم الأول
+#: frontend/app/layout.php:69
+#, php-format
+msgid "مساء الخير %s"
+msgstr ""
+
+#. translators: %d: عدد الأبناء
+#: frontend/app/layout.php:74
+#, php-format
+msgid "%d ابن"
+msgid_plural "%d أبناء"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/app/layout.php:81
+#: frontend/teacher/layout.php:61
+#: frontend/views/layout.php:217
+msgid "تبديل الوضع الفاتح/الداكن"
+msgstr ""
+
+#: frontend/app/layout.php:86
+#: frontend/app/messages.php:17
+#: frontend/views/messages.php:8
+msgid "الرسائل"
+msgstr ""
+
+#: frontend/app/layout.php:101
+#: frontend/views/guardians-single.php:82
+#: frontend/views/guardians.php:40
+msgid "الأبناء"
+msgstr ""
+
+#: frontend/app/layout.php:129
+msgid "التنقّل"
+msgstr ""
+
+#: frontend/app/layout.php:131
+#: frontend/app/schedule.php:57
+#: frontend/driver/layout.php:47
+msgid "اليوم"
+msgstr ""
+
+#: frontend/app/layout.php:132
+#: frontend/app/log.php:11
+msgid "السجل"
+msgstr ""
+
+#: frontend/app/leave.php:17
+msgid "الطلب المعتمد يُسكت إنذار الصباح ولا ينتظره الباص."
+msgstr ""
+
+#: frontend/app/leave.php:25
+#: frontend/views/audit.php:41
+#: frontend/views/certificates.php:231
+msgid "من تاريخ"
+msgstr ""
+
+#: frontend/app/leave.php:31
+#: frontend/views/audit.php:42
+#: frontend/views/certificates.php:236
+msgid "إلى تاريخ"
+msgstr ""
+
+#: frontend/app/leave.php:37
+#: frontend/views/finance.php:126
+#: frontend/views/hr.php:203
+#: frontend/views/visitors.php:34
+msgid "السبب"
+msgstr ""
+
+#: frontend/app/leave.php:46
+msgid "ملاحظة (اختيارية)"
+msgstr ""
+
+#: frontend/app/leave.php:50
+msgid "إرسال الطلب"
+msgstr ""
+
+#: frontend/app/leave.php:54
+msgid "طلباتك"
+msgstr ""
+
+#: frontend/app/leave.php:67
+msgid "السبب:"
+msgstr ""
+
+#: frontend/app/log.php:17
+msgid "الدرجات"
+msgstr ""
+
+#: frontend/app/log.php:39
+msgid "لا سجل حضور بعد"
+msgstr ""
+
+#: frontend/app/log.php:40
+msgid "يظهر هنا بعد أول يوم دراسي."
+msgstr ""
+
+#: frontend/app/log.php:77
+msgid "كل يوم"
+msgstr ""
+
+#: frontend/app/log.php:117
+msgid "لا درجات بعد"
+msgstr ""
+
+#: frontend/app/log.php:118
+msgid "تظهر هنا بعد رصد أول اختبار."
+msgstr ""
+
+#: frontend/app/log.php:135
+#: frontend/views/students-single.php:146
+msgid "المعدل العام"
+msgstr ""
+
+#. translators: 1: عدد المواد 2: التقدير
+#: frontend/app/log.php:138
+#, php-format
+msgid "%1$s مادة · %2$s"
+msgstr ""
+
+#: frontend/app/log.php:146
+msgid "المواد"
+msgstr ""
+
+#. translators: %s: عدد الاختبارات
+#: frontend/app/log.php:165
+#, php-format
+msgid "%s اختبارًا"
+msgstr ""
+
+#: frontend/app/login.php:12
+msgid "تطبيق ولي الأمر"
+msgstr ""
+
+#: frontend/app/login.php:24
+#: frontend/views/guardians-single.php:137
+#: frontend/views/guardians.php:105
+msgid "رقم الجوال"
+msgstr ""
+
+#: frontend/app/login.php:36
+#: frontend/driver/login.php:30
+#: frontend/gate/login.php:28
+#: frontend/portal.php:59
+#: frontend/student/login.php:28
+#: frontend/teacher/login.php:29
+#: frontend/views/login.php:37
+#: modules/attendance/class-staff-attendance.php:337
+msgid "دخول"
+msgstr ""
+
+#: frontend/app/login.php:40
+msgid "بياناتك تصلك من إدارة المدرسة عند تسجيل ابنك."
+msgstr ""
+
+#: frontend/app/messages.php:22
+msgid "لا رسائل"
+msgstr ""
+
+#: frontend/app/messages.php:23
+msgid "تصلك هنا رسائل الأخصائية والصحة المدرسية والإدارة."
+msgstr ""
+
+#: frontend/app/schedule.php:20
+msgid "الجدول الدراسي"
+msgstr ""
+
+#: frontend/app/schedule.php:24
+msgid "اختبارات قادمة"
+msgstr ""
+
+#: frontend/app/schedule.php:41
+msgid "الحصص"
+msgstr ""
+
+#: frontend/app/schedule.php:46
+msgid "لم يُعتمد الجدول بعد"
+msgstr ""
+
+#: frontend/app/schedule.php:47
+msgid "يظهر هنا فور اعتماده من المدرسة."
+msgstr ""
+
+#: frontend/app/track.php:18
+#: frontend/app/transport.php:45
+msgid "أين ابني الآن"
+msgstr ""
+
+#: frontend/app/track.php:25
+msgid "غير مشترك في النقل — تُرصد حالته عند البوابة"
+msgstr ""
+
+#: frontend/app/track.php:33
+msgid "لا توجد رحلة جارية"
+msgstr ""
+
+#: frontend/app/track.php:34
+msgid "تظهر الخريطة فور انطلاق الباص، وتختفي عند إغلاق الرحلة."
+msgstr ""
+
+#: frontend/app/track.php:44
+msgid "رحلة جارية"
+msgstr ""
+
+#: frontend/app/track.php:46
+msgid "انقطع البث"
+msgstr ""
+
+#: frontend/app/track.php:63
+msgid "جارٍ التحديث…"
+msgstr ""
+
+#: frontend/app/transport.php:16
+#: frontend/views/student-print.php:234
+#: frontend/views/students-single.php:154
+#: frontend/views/transport.php:12
+#: modules/staff/class-flow.php:58
+msgid "النقل المدرسي"
+msgstr ""
+
+#: frontend/app/transport.php:21
+msgid "غير مشترك في النقل"
+msgstr ""
+
+#: frontend/app/transport.php:22
+msgid "تواصل مع الإدارة إن رغبت في الاشتراك."
+msgstr ""
+
+#: frontend/app/transport.php:32
+#: frontend/driver/bus.php:27
+#: frontend/driver/layout.php:46
+#: frontend/views/layout.php:165
+#: frontend/views/student-print.php:236
+#: frontend/views/students-single.php:494
+#: frontend/views/transport.php:68
+#: frontend/views/trips.php:21
+#: modules/staff/class-bulk.php:41
+msgid "المسار"
+msgstr ""
+
+#: frontend/app/transport.php:39
+msgid "نقطة الالتقاء"
+msgstr ""
+
+#: frontend/class-app.php:371
+#: frontend/class-driver.php:161
+#: frontend/class-gate.php:150
+#: frontend/class-portal.php:95
+#: frontend/class-student.php:178
+#: frontend/class-teacher.php:158
+msgid "انتهت صلاحية الصفحة. حدّثها وحاول مرة أخرى."
+msgstr ""
+
+#: frontend/class-app.php:378
+#: frontend/class-driver.php:168
+#: frontend/class-gate.php:157
+#: frontend/class-student.php:185
+#: frontend/class-teacher.php:165
+msgid "محاولات كثيرة. أعد المحاولة بعد 15 دقيقة."
+msgstr ""
+
+#: frontend/class-app.php:393
+msgid "رقم الجوال أو كلمة المرور غير صحيحة."
+msgstr ""
+
+#: frontend/class-app.php:437
+msgid "مدرستي"
+msgstr ""
+
+#: frontend/class-app.php:438
+msgid "متابعة الأبناء: الباص، الحضور، الدرجات، الرسوم."
+msgstr ""
+
+#: frontend/class-app.php:624
+msgid "تحديث الحالة"
+msgstr ""
+
+#. translators: %s: اسم المستلم
+#: frontend/class-app.php:626
+#, php-format
+msgid "سُلّم إلى %s"
+msgstr ""
+
+#: frontend/class-app.php:650
+msgid "حضور مؤكّد"
+msgstr ""
+
+#: frontend/class-app.php:650
+msgid "غياب"
+msgstr ""
+
+#: frontend/class-app.php:651
+msgid "رصده المعلم في الفصل"
+msgstr ""
+
+#: frontend/class-app.php:668
+#: frontend/views/inventory.php:70
+msgid "ملاحظة"
+msgstr ""
+
+#: frontend/class-app.php:705
+#: modules/enrollment/class-enrollment.php:510
+msgid "صعد إلى الباص"
+msgstr ""
+
+#: frontend/class-app.php:706
+#: modules/enrollment/class-enrollment.php:511
+msgid "نزل من الباص"
+msgstr ""
+
+#: frontend/class-app.php:707
+msgid "تم التسليم"
+msgstr ""
+
+#: frontend/class-app.php:708
+#: modules/enrollment/class-enrollment.php:513
+msgid "لم يحضر للباص"
+msgstr ""
+
+#: frontend/class-app.php:709
+msgid "لم يُسجَّل صعوده بعد"
+msgstr ""
+
+#: frontend/class-dashboard.php:548
+msgid "انتهت صلاحية النموذج. حدّث الصفحة وأعد المحاولة."
+msgstr ""
+
+#: frontend/class-dashboard.php:556
+msgid "لا تملك صلاحية هذه العملية."
+msgstr ""
+
+#: frontend/class-dashboard.php:714
+msgid "اختر ملفًا."
+msgstr ""
+
+#. translators: %d: عدد البطاقات
+#: frontend/class-dashboard.php:846
+#: frontend/class-dashboard.php:858
+msgid "عُلّمت بطاقة واحدة كمطبوعة"
+msgid_plural "عُلّمت %d بطاقة كمطبوعة"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: الرقم التسلسلي
+#: frontend/class-dashboard.php:914
+#, php-format
+msgid "صدرت الشهادة برقم %s"
+msgstr ""
+
+#: frontend/class-dashboard.php:926
+msgid "لم تحدد طلابًا."
+msgstr ""
+
+#: frontend/class-dashboard.php:930
+msgid "حدّد ٣٠٠ طالب أو أقل في المرة الواحدة."
+msgstr ""
+
+#. translators: %s: العدد
+#: frontend/class-dashboard.php:950
+msgid "صدرت شهادة واحدة"
+msgid_plural "صدرت %s شهادات"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/class-dashboard.php:966
+msgid "صدر المفتاح — انسخه الآن، لن يظهر مرة أخرى."
+msgstr ""
+
+#: frontend/class-dashboard.php:973
+msgid "أُلغي المفتاح."
+msgstr ""
+
+#: frontend/class-dashboard.php:1000
+msgid "حُفظت التعديلات."
+msgstr ""
+
+#: frontend/class-dashboard.php:1105
+msgid "إدخال إداري"
+msgstr ""
+
+#: frontend/class-dashboard.php:1138
+#: frontend/class-dashboard.php:1159
+#: modules/guardians/class-guardians.php:148
+msgid "ولي الأمر غير موجود."
+msgstr ""
+
+#: frontend/class-dashboard.php:1164
+msgid "لا يوجد طالب بهذا الرقم."
+msgstr ""
+
+#: frontend/class-dashboard.php:1303
+msgid "اختر ملف CSV أولًا."
+msgstr ""
+
+#: frontend/class-dashboard.php:1307
+#: modules/enrollment/class-enrollment.php:130
+msgid "حجم الملف يتجاوز 5 ميجابايت."
+msgstr ""
+
+#: frontend/class-dashboard.php:1316
+msgid "الملف يحتوي أخطاء. راجع التقرير أدناه."
+msgstr ""
+
+#: frontend/class-dashboard.php:1322
+msgid "الملف سليم. أعد الرفع مع تفعيل «تأكيد الاستيراد» لإتمام العملية."
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: frontend/class-dashboard.php:1327
+#, php-format
+msgid "اُستورد %d طالبًا."
+msgstr ""
+
+#: frontend/class-dashboard.php:1608
+msgid "انتهت صلاحية النموذج. حدّث الصفحة وحاول مرة أخرى."
+msgstr ""
+
+#. translators: %d: عدد الدقائق
+#: frontend/class-dashboard.php:1618
+#, php-format
+msgid "تم إيقاف المحاولات مؤقتًا. أعد المحاولة بعد %d دقيقة."
+msgstr ""
+
+#: frontend/class-dashboard.php:1632
+#: frontend/class-student.php:196
+msgid "اسم المستخدم أو كلمة المرور غير صحيحة."
+msgstr ""
+
+#: frontend/class-dashboard.php:1638
+#: frontend/class-driver.php:186
+#: frontend/class-gate.php:175
+msgid "هذا الحساب موقوف. راجع إدارة المدرسة."
+msgstr ""
+
+#: frontend/class-dashboard.php:1697
+#: frontend/views/audit.php:59
+#: frontend/views/clinic.php:46
+#: frontend/views/custody.php:88
+#: frontend/views/messages.php:62
+#: frontend/views/safety.php:29
+#: frontend/views/transport-single.php:44
+msgid "الوقت"
+msgstr ""
+
+#: frontend/class-dashboard.php:1697
+#: frontend/views/audit.php:60
+msgid "المستخدم"
+msgstr ""
+
+#: frontend/class-dashboard.php:1698
+#: frontend/views/audit.php:61
+msgid "العملية"
+msgstr ""
+
+#: frontend/class-dashboard.php:1698
+#: frontend/views/audit.php:62
+msgid "الهدف"
+msgstr ""
+
+#: frontend/class-dashboard.php:1721
+#: frontend/class-dashboard.php:1740
+#: frontend/views/attendance-report.php:101
+#: frontend/views/attendance-report.php:158
+#: frontend/views/attendance.php:30
+#: frontend/views/staff-day.php:25
+#: frontend/views/staff-report.php:73
+#: frontend/views/staff-report.php:89
+#: frontend/views/staff-report.php:133
+#: includes/functions.php:200
+#: includes/functions.php:243
+msgid "حاضر"
+msgstr ""
+
+#: frontend/class-dashboard.php:1721
+#: frontend/class-dashboard.php:1740
+#: frontend/views/attendance-report.php:101
+#: frontend/views/attendance-report.php:159
+#: frontend/views/attendance.php:31
+#: frontend/views/library.php:43
+#: frontend/views/staff-day.php:26
+#: frontend/views/staff-report.php:74
+#: frontend/views/staff-report.php:89
+#: frontend/views/staff-report.php:134
+#: includes/functions.php:201
+#: includes/functions.php:244
+msgid "متأخر"
+msgstr ""
+
+#: frontend/class-dashboard.php:1722
+#: frontend/class-dashboard.php:1741
+#: frontend/driver/layout.php:73
+#: frontend/teacher/klass.php:60
+#: frontend/views/attendance-report.php:101
+#: frontend/views/attendance-report.php:160
+#: frontend/views/attendance.php:32
+#: frontend/views/staff-day.php:27
+#: frontend/views/staff-report.php:75
+#: frontend/views/staff-report.php:89
+#: frontend/views/staff-report.php:135
+#: includes/functions.php:202
+#: includes/functions.php:245
+msgid "غائب"
+msgstr ""
+
+#: frontend/class-dashboard.php:1722
+#: frontend/views/attendance-report.php:90
+#: frontend/views/attendance-report.php:101
+#: frontend/views/attendance-report.php:147
+#: frontend/views/attendance-report.php:161
+#: frontend/views/attendance.php:33
+msgid "بعذر"
+msgstr ""
+
+#: frontend/class-dashboard.php:1723
+#: frontend/class-dashboard.php:1742
+#: frontend/views/attendance-report.php:162
+#: frontend/views/staff-report.php:137
+msgid "دقائق التأخّر"
+msgstr ""
+
+#: frontend/class-dashboard.php:1723
+msgid "نسبة الحضور %"
+msgstr ""
+
+#: frontend/class-dashboard.php:1739
+#: frontend/views/employees.php:57
+#: frontend/views/employees.php:155
+#: frontend/views/employees.php:281
+#: frontend/views/perms.php:27
+#: frontend/views/staff-badges.php:36
+#: frontend/views/staff-badges.php:37
+#: frontend/views/staff-report.php:132
+msgid "الدور"
+msgstr ""
+
+#: frontend/class-dashboard.php:1741
+#: frontend/views/staff-day.php:28
+#: frontend/views/staff-report.php:76
+#: frontend/views/staff-report.php:89
+#: frontend/views/staff-report.php:136
+#: includes/functions.php:247
+msgid "إجازة"
+msgstr ""
+
+#: frontend/class-driver.php:98
+#, php-format
+msgid "الباص %s"
+msgstr ""
+
+#: frontend/class-driver.php:98
+#: frontend/class-driver.php:225
+#: frontend/driver/layout.php:18
+#: frontend/views/attendance.php:24
+#: frontend/views/transport.php:69
+#: frontend/views/transport.php:135
+#: frontend/views/trips.php:23
+msgid "الباص"
+msgstr ""
+
+#: frontend/class-driver.php:224
+msgid "باص المدرسة — السائق"
+msgstr ""
+
+#: frontend/class-gate.php:212
+#: frontend/gate/layout.php:21
+#: frontend/gate/login.php:10
+msgid "بوابة المدرسة"
+msgstr ""
+
+#: frontend/class-gate.php:213
+#: frontend/gate/layout.php:17
+msgid "البوابة"
+msgstr ""
+
+#: frontend/class-modal.php:49
+#: frontend/student/pass.php:37
+#: frontend/views/alerts.php:84
+#: frontend/views/inbox.php:101
+#: frontend/views/safety.php:51
+#: modules/staff/class-bulk.php:79
+msgid "إغلاق"
+msgstr ""
+
+#: frontend/class-modal.php:66
+#: frontend/views/import.php:103
+msgid "إلغاء"
+msgstr ""
+
+#: frontend/class-portal.php:102
+msgid "محاولات كثيرة. أعد المحاولة بعد ١٥ دقيقة."
+msgstr ""
+
+#: frontend/class-student.php:100
+msgid "حسابك غير مرتبط بسجل طالب."
+msgstr ""
+
+#: frontend/class-student.php:212
+msgid "تعلّم — الطالب"
+msgstr ""
+
+#: frontend/class-student.php:213
+#: frontend/student/layout.php:21
+#: frontend/student/layout.php:25
+#: frontend/student/login.php:10
+msgid "تعلّم"
+msgstr ""
+
+#: frontend/class-student.php:297
+msgid "أهلًا بك"
+msgstr ""
+
+#: frontend/class-student.php:298
+msgid "اكتشف"
+msgstr ""
+
+#: frontend/class-student.php:299
+#: frontend/student/play.php:16
+msgid "العب وتعلّم"
+msgstr ""
+
+#: frontend/class-student.php:300
+msgid "مهامي"
+msgstr ""
+
+#: frontend/class-student.php:303
+msgid "جاهز؟"
+msgstr ""
+
+#: frontend/class-student.php:304
+#: frontend/student/library.php:20
+#: frontend/views/content.php:35
+#: frontend/views/library.php:12
+msgid "المكتبة"
+msgstr ""
+
+#: frontend/class-student.php:305
+msgid "التحديات"
+msgstr ""
+
+#: frontend/class-student.php:306
+#: frontend/class-student.php:312
+#: frontend/student/homework.php:27
+#: frontend/student/homework.php:94
+msgid "واجباتي"
+msgstr ""
+
+#: frontend/class-student.php:309
+msgid "يومك"
+msgstr ""
+
+#: frontend/class-student.php:310
+msgid "المصادر"
+msgstr ""
+
+#: frontend/class-student.php:311
+msgid "تدريب"
+msgstr ""
+
+#: frontend/class-teacher.php:192
+msgid "فصلي — المعلم"
+msgstr ""
+
+#: frontend/class-teacher.php:193
+#: frontend/teacher/layout.php:17
+#: frontend/teacher/layout.php:24
+#: frontend/teacher/login.php:9
+msgid "فصلي"
+msgstr ""
+
+#: frontend/driver/bus.php:10
+#: frontend/driver/layout.php:49
+msgid "باصي"
+msgstr ""
+
+#: frontend/driver/bus.php:13
+msgid "لا يوجد باص مُسنَد لك"
+msgstr ""
+
+#: frontend/driver/bus.php:16
+#: frontend/views/transport.php:162
+msgid "رقم اللوحة"
+msgstr ""
+
+#: frontend/driver/bus.php:23
+#: frontend/views/classes.php:40
+#: frontend/views/transport.php:103
+#: frontend/views/transport.php:170
+msgid "السعة"
+msgstr ""
+
+#: frontend/driver/bus.php:31
+#: frontend/views/transport.php:105
+#: frontend/views/transport.php:183
+msgid "انتهاء الاستمارة"
+msgstr ""
+
+#: frontend/driver/bus.php:35
+msgid "قاربت الانتهاء"
+msgstr ""
+
+#: frontend/driver/history.php:8
+#: frontend/views/transport.php:34
+msgid "رحلات اليوم"
+msgstr ""
+
+#: frontend/driver/history.php:11
+#: frontend/views/trips.php:14
+msgid "لا توجد رحلات اليوم"
+msgstr ""
+
+#: frontend/driver/history.php:16
+#: frontend/driver/trip.php:14
+#: frontend/views/transport.php:81
+#: frontend/views/trips.php:33
+msgid "ذهاب"
+msgstr ""
+
+#: frontend/driver/history.php:16
+#: frontend/driver/trip.php:14
+#: frontend/views/transport.php:81
+#: frontend/views/trips.php:33
+msgid "عودة"
+msgstr ""
+
+#: frontend/driver/history.php:20
+#: frontend/views/trips.php:37
+msgid "جارية"
+msgstr ""
+
+#: frontend/driver/history.php:20
+#, php-format
+msgid "%d صعدوا"
+msgstr ""
+
+#: frontend/driver/home.php:9
+msgid "لا يوجد مسار مُسنَد لك"
+msgstr ""
+
+#: frontend/driver/home.php:10
+msgid "تحتاج الإدارة أن تربطك بباص، وتربط الباص بمسار."
+msgstr ""
+
+#: frontend/driver/home.php:14
+msgid "مسارك"
+msgstr ""
+
+#: frontend/driver/home.php:19
+msgid "اختر نوع الرحلة لتبدأ. سيُطلب منك السماح بالوصول للموقع."
+msgstr ""
+
+#: frontend/driver/home.php:21
+msgid "بدء رحلة الذهاب"
+msgstr ""
+
+#: frontend/driver/home.php:21
+msgid "بدء رحلة العودة"
+msgstr ""
+
+#: frontend/driver/issue.php:9
+msgid "بلاغ عطل"
+msgstr ""
+
+#: frontend/driver/issue.php:10
+msgid "يصل البلاغ فورًا إلى أوامر الصيانة في الإدارة."
+msgstr ""
+
+#: frontend/driver/issue.php:13
+msgid "أُرسل البلاغ."
+msgstr ""
+
+#: frontend/driver/issue.php:16
+msgid "تعذّر الإرسال. تأكد من كتابة العنوان."
+msgstr ""
+
+#: frontend/driver/issue.php:23
+msgid "العطل"
+msgstr ""
+
+#: frontend/driver/issue.php:25
+msgid "مثال: صوت في الفرامل"
+msgstr ""
+
+#: frontend/driver/issue.php:27
+#: frontend/views/assets.php:21
+#: frontend/views/assets.php:81
+#: frontend/views/insights.php:54
+msgid "الأولوية"
+msgstr ""
+
+#: frontend/driver/issue.php:34
+msgid "تفاصيل"
+msgstr ""
+
+#: frontend/driver/issue.php:37
+msgid "إرسال البلاغ"
+msgstr ""
+
+#: frontend/driver/layout.php:22
+#: frontend/driver/login.php:10
+msgid "باص المدرسة"
+msgstr ""
+
+#: frontend/driver/layout.php:33
+#: frontend/gate/layout.php:39
+#: frontend/gate/visitors.php:59
+#: frontend/views/layout.php:86
+#: frontend/views/visitors.php:54
+#: modules/attendance/class-staff-attendance.php:337
+msgid "خروج"
+msgstr ""
+
+#: frontend/driver/layout.php:45
+msgid "الرحلة"
+msgstr ""
+
+#: frontend/driver/layout.php:48
+msgid "بلاغ"
+msgstr ""
+
+#: frontend/driver/layout.php:71
+msgid "صعد"
+msgstr ""
+
+#: frontend/driver/layout.php:72
+msgid "نزل"
+msgstr ""
+
+#: frontend/driver/layout.php:74
+#: frontend/views/hr.php:148
+#: frontend/views/meds.php:92
+msgid "بانتظار"
+msgstr ""
+
+#: frontend/driver/layout.php:75
+#: frontend/gate/layout.php:57
+msgid "محفوظ — سيُرسل عند عودة الشبكة"
+msgstr ""
+
+#: frontend/driver/layout.php:76
+msgid "تمت المزامنة"
+msgstr ""
+
+#: frontend/driver/layout.php:77
+#: frontend/gate/layout.php:56
+msgid "لا يوجد اتصال"
+msgstr ""
+
+#: frontend/driver/layout.php:78
+msgid "يُرسل الموقع"
+msgstr ""
+
+#: frontend/driver/layout.php:79
+#: frontend/driver/trip.php:11
+msgid "الموقع متوقف"
+msgstr ""
+
+#: frontend/driver/layout.php:80
+msgid "صلاحية الموقع مرفوضة"
+msgstr ""
+
+#: frontend/driver/layout.php:81
+msgid "إنهاء الرحلة؟"
+msgstr ""
+
+#: frontend/driver/layout.php:82
+#: frontend/gate/layout.php:62
+msgid "من استلم الطالب؟"
+msgstr ""
+
+#: frontend/driver/layout.php:83
+msgid "لا يمكن الإنهاء قبل تسجيل نزول كل من صعد."
+msgstr ""
+
+#: frontend/driver/login.php:11
+msgid "تسجيل صعود ونزول الطلاب وبثّ موقع الباص."
+msgstr ""
+
+#: frontend/driver/login.php:22
+#: frontend/gate/login.php:22
+msgid "رقم الجوال أو اسم المستخدم"
+msgstr ""
+
+#: frontend/driver/stops.php:9
+msgid "نقاط المسار"
+msgstr ""
+
+#: frontend/driver/stops.php:13
+#: frontend/views/transport-single.php:37
+msgid "لا توجد نقاط توقف"
+msgstr ""
+
+#: frontend/driver/stops.php:14
+msgid "تُضيفها الإدارة من لوحة النقل."
+msgstr ""
+
+#: frontend/driver/stops.php:26
+msgid "اذهب"
+msgstr ""
+
+#: frontend/driver/trip.php:10
+#: frontend/gate/home.php:9
+#: frontend/gate/layout.php:58
+msgid "متصل"
+msgstr ""
+
+#: frontend/driver/trip.php:20
+msgid "جارٍ تحميل قائمة الطلاب…"
+msgstr ""
+
+#: frontend/driver/trip.php:24
+msgid "إنهاء الرحلة"
+msgstr ""
+
+#: frontend/driver/trip.php:28
+msgid "أبقِ الشاشة مفتوحة والجوال على الشاحن أثناء الرحلة. كل تسجيل يُحفظ حتى لو انقطعت الشبكة."
+msgstr ""
+
+#. translators: 1: عدد من في المدرسة 2: الإجمالي
+#: frontend/gate/home.php:13
+#, php-format
+msgid "في المدرسة %1$s من %2$s"
+msgstr ""
+
+#: frontend/gate/home.php:33
+#: frontend/gate/layout.php:60
+msgid "وجّه الكاميرا نحو الباركود"
+msgstr ""
+
+#: frontend/gate/home.php:49
+msgid "أو ابحث بالاسم أو الرقم الأكاديمي"
+msgstr ""
+
+#: frontend/gate/home.php:54
+msgid "آخر العمليات"
+msgstr ""
+
+#: frontend/gate/layout.php:36
+msgid "المسح"
+msgstr ""
+
+#: frontend/gate/layout.php:37
+#: frontend/gate/visitors.php:10
+#: frontend/views/visitors.php:10
+msgid "الزوّار"
+msgstr ""
+
+#: frontend/gate/layout.php:59
+msgid "البطاقة غير معروفة"
+msgstr ""
+
+#: frontend/gate/layout.php:61
+msgid "الكاميرا غير متاحة — استخدم البحث بالاسم"
+msgstr ""
+
+#: frontend/gate/layout.php:63
+msgid "سبب الخروج المبكر"
+msgstr ""
+
+#: frontend/gate/login.php:11
+msgid "تسجيل دخول وخروج الطلاب"
+msgstr ""
+
+#. translators: %d: عدد الزوار
+#: frontend/gate/visitors.php:14
+msgid "زائر واحد بالداخل الآن"
+msgid_plural "%d زوّار بالداخل الآن"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/gate/visitors.php:20
+msgid "سُجّل دخول الزائر."
+msgstr ""
+
+#: frontend/gate/visitors.php:27
+#: frontend/views/visitors.php:73
+msgid "اسم الزائر"
+msgstr ""
+
+#: frontend/gate/visitors.php:36
+#: frontend/views/visitors.php:85
+msgid "سبب الزيارة"
+msgstr ""
+
+#: frontend/gate/visitors.php:38
+msgid "مثال: مقابلة الأخصائية"
+msgstr ""
+
+#: frontend/gate/visitors.php:40
+#: frontend/views/visitors.php:98
+msgid "تسجيل الدخول"
+msgstr ""
+
+#: frontend/gate/visitors.php:43
+msgid "بالداخل الآن"
+msgstr ""
+
+#: frontend/gate/visitors.php:46
+msgid "لا يوجد زوّار"
+msgstr ""
+
+#: frontend/portal.php:36
+msgid "بوابة الدخول"
+msgstr ""
+
+#: frontend/portal.php:48
+msgid "رقم الجوال أو الرقم الأكاديمي"
+msgstr ""
+
+#: frontend/portal.php:66
+#: includes/class-activator.php:1416
+msgid "طالب"
+msgstr ""
+
+#: frontend/portal.php:67
+#: includes/class-activator.php:1396
+msgid "معلم"
+msgstr ""
+
+#: frontend/portal.php:68
+#: includes/class-activator.php:1408
+msgid "سائق"
+msgstr ""
+
+#: frontend/portal.php:69
+msgid "حارس"
+msgstr ""
+
+#: frontend/portal.php:76
+msgid "بياناتك تصلك من إدارة المدرسة. وولي الأمر يدخل بجواله، والطالب برقمه الأكاديمي."
+msgstr ""
+
+#: frontend/student/home.php:20
+msgid "واجبات تنتظرك"
+msgstr ""
+
+#: frontend/student/home.php:24
+#: frontend/student/me.php:31
+msgid "حضورك"
+msgstr ""
+
+#: frontend/student/home.php:31
+msgid "تعلّمت هذا الأسبوع"
+msgstr ""
+
+#: frontend/student/home.php:36
+#, php-format
+msgid "+%s عن الأسبوع الماضي"
+msgstr ""
+
+#: frontend/student/home.php:37
+#, php-format
+msgid "-%s عن الأسبوع الماضي"
+msgstr ""
+
+#: frontend/student/home.php:45
+msgid "ما فاتك"
+msgstr ""
+
+#. translators: %d: رقم الحصة
+#: frontend/student/home.php:53
+#: frontend/views/subjects.php:122
+#, php-format
+msgid "الحصة %d"
+msgstr ""
+
+#: frontend/student/home.php:73
+msgid "واجبات هذا الأسبوع"
+msgstr ""
+
+#: frontend/student/home.php:85
+msgid "لا شيء ينتظرك"
+msgstr ""
+
+#: frontend/student/home.php:86
+msgid "افتح المكتبة وتعلّم شيئًا جديدًا."
+msgstr ""
+
+#: frontend/student/homework.php:13
+#: frontend/student/library.php:14
+msgid "غير متاح"
+msgstr ""
+
+#: frontend/student/homework.php:38
+msgid "فتح مرفق الواجب"
+msgstr ""
+
+#: frontend/student/homework.php:43
+msgid "سلّمت هذا الواجب."
+msgstr ""
+
+#: frontend/student/homework.php:46
+msgid "درجتك"
+msgstr ""
+
+#: frontend/student/homework.php:64
+msgid "ارسم إجابتك"
+msgstr ""
+
+#: frontend/student/homework.php:72
+#: frontend/views/students-single.php:474
+msgid "تراجع"
+msgstr ""
+
+#: frontend/student/homework.php:73
+#: frontend/views/audit.php:46
+#: frontend/views/certificates.php:248
+#: frontend/views/students.php:119
+msgid "مسح"
+msgstr ""
+
+#: frontend/student/homework.php:77
+msgid "أرفق ملفك"
+msgstr ""
+
+#: frontend/student/homework.php:80
+msgid "إجابتك"
+msgstr ""
+
+#: frontend/student/homework.php:84
+msgid "تسليم"
+msgstr ""
+
+#: frontend/student/homework.php:95
+#: frontend/student/me.php:21
+#: frontend/views/homework.php:131
+msgid "هذا الأسبوع"
+msgstr ""
+
+#: frontend/student/homework.php:98
+msgid "لا واجبات هذا الأسبوع"
+msgstr ""
+
+#: frontend/student/homework.php:106
+msgid "سُلّم"
+msgstr ""
+
+#: frontend/student/homework.php:114
+#: frontend/views/homework.php:131
+msgid "السابقة"
+msgstr ""
+
+#: frontend/student/layout.php:58
+msgid "تصريحي"
+msgstr ""
+
+#: frontend/student/layout.php:66
+msgid "أحسنت — وصلت إجابتك."
+msgstr ""
+
+#: frontend/student/library.php:46
+msgid "فتح الكتاب"
+msgstr ""
+
+#: frontend/student/library.php:50
+msgid "فتح المصدر"
+msgstr ""
+
+#: frontend/student/library.php:53
+msgid "المصدر غير متاح"
+msgstr ""
+
+#: frontend/student/library.php:63
+msgid "كتب وفيديوهات وألعاب لمرحلتك"
+msgstr ""
+
+#: frontend/student/library.php:67
+#: modules/staff/class-bulk.php:437
+msgid "الكل"
+msgstr ""
+
+#: frontend/student/library.php:78
+msgid "لا يوجد محتوى بعد"
+msgstr ""
+
+#: frontend/student/library.php:79
+msgid "سيضيفه منسق المحتوى قريبًا."
+msgstr ""
+
+#: frontend/student/login.php:11
+msgid "واجباتك ومكتبتك وألعابك"
+msgstr ""
+
+#: frontend/student/login.php:22
+#: frontend/teacher/login.php:21
+#: frontend/views/layout.php:244
+msgid "اسم المستخدم"
+msgstr ""
+
+#: frontend/student/login.php:31
+msgid "اسم المستخدم يبدأ بحرف s متبوعًا برقمك الأكاديمي."
+msgstr ""
+
+#: frontend/student/me.php:19
+msgid "دقائق التعلّم"
+msgstr ""
+
+#: frontend/student/me.php:24
+msgid "واجبات سلّمتها"
+msgstr ""
+
+#: frontend/student/pass.php:33
+msgid "الرمز يتغيّر كل نصف دقيقة — لقطة الشاشة تنتهي صلاحيتها فلا يستطيع أحد الدخول باسمك."
+msgstr ""
+
+#: frontend/student/play.php:12
+msgid "تدريبات قصيرة على ما تحتاجه"
+msgstr ""
+
+#: frontend/student/play.php:14
+msgid "تحدَّ نفسك وفصلك"
+msgstr ""
+
+#: frontend/student/play.php:21
+msgid "لا توجد ألعاب بعد"
+msgstr ""
+
+#: frontend/student/play.php:22
+msgid "ستُضاف قريبًا."
+msgstr ""
+
+#: frontend/student/play.php:38
+msgid "تحدي الفصول"
+msgstr ""
+
+#: frontend/student/play.php:40
+msgid "مجموع نقاط فصلك يظهر هنا حين تبدأ التحديات."
+msgstr ""
+
+#: frontend/teacher/home.php:12
+msgid "سكة اليوم"
+msgstr ""
+
+#. translators: %d: عدد الحصص
+#: frontend/teacher/home.php:15
+msgid "حصة"
+msgid_plural "%d حصص"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/home.php:30
+msgid "جارية الآن"
+msgstr ""
+
+#: frontend/teacher/home.php:30
+msgid "احتياط"
+msgstr ""
+
+#: frontend/teacher/home.php:38
+#: frontend/teacher/klass.php:16
+msgid "فصولي"
+msgstr ""
+
+#: frontend/teacher/home.php:44
+msgid "لا توجد فصول مسندة إليك"
+msgstr ""
+
+#: frontend/teacher/home.php:45
+msgid "تواصل مع وكيل الشؤون التعليمية."
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: frontend/teacher/home.php:71
+#, php-format
+msgid "%d طالب"
+msgid_plural "%d طلاب"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/home.php:74
+msgid "اكتمل الرصد"
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: frontend/teacher/home.php:77
+#, php-format
+msgid "%d بانتظار الرصد"
+msgid_plural "%d بانتظار الرصد"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/klass.php:9
+msgid "الفصل غير موجود"
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: frontend/teacher/klass.php:23
+#, php-format
+msgid "لم يُرصد دخول %d طالب — راجعه"
+msgid_plural "لم يُرصد دخول %d طلاب — راجعهم"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/klass.php:26
+msgid "المسح هو الأصل وأنت المصحّح: انظر أمامك وحدّد الموجود من الغائب."
+msgstr ""
+
+#: frontend/teacher/klass.php:31
+msgid "رصد الحضور"
+msgstr ""
+
+#: frontend/teacher/klass.php:33
+msgid "اكتمل"
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: frontend/teacher/klass.php:36
+#, php-format
+msgid "%d بانتظارك"
+msgid_plural "%d بانتظارك"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/klass.php:60
+msgid "موجود"
+msgstr ""
+
+#. translators: %d: عدد الحصص
+#: frontend/teacher/layout.php:56
+msgid "حصة واحدة اليوم"
+msgid_plural "%d حصص اليوم"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/teacher/layout.php:67
+msgid "الداشبورد — الدرجات والاختبارات"
+msgstr ""
+
+#: frontend/teacher/layout.php:68
+msgid "الداشبورد"
+msgstr ""
+
+#: frontend/teacher/layout.php:79
+msgid "حصتك القادمة"
+msgstr ""
+
+#: frontend/teacher/layout.php:88
+msgid "حُفظت الملاحظة."
+msgstr ""
+
+#: frontend/teacher/login.php:10
+msgid "الحضور والملاحظات من داخل الفصل"
+msgstr ""
+
+#: frontend/teacher/student.php:9
+#: frontend/views/students-single.php:9
+msgid "الطالب غير موجود"
+msgstr ""
+
+#: frontend/teacher/student.php:19
+#: frontend/views/partials/enroll-form.php:77
+#: frontend/views/students-single.php:191
+msgid "الفصل"
+msgstr ""
+
+#. translators: %s: اسم السنة الدراسية
+#: frontend/teacher/student.php:44
+#, php-format
+msgid "من معلم العام السابق — %s"
+msgstr ""
+
+#: frontend/teacher/student.php:50
+#: frontend/views/students-single.php:429
+msgid "ينفع معه"
+msgstr ""
+
+#: frontend/teacher/student.php:53
+#: frontend/views/students-single.php:435
+msgid "تجنّب"
+msgstr ""
+
+#: frontend/teacher/student.php:56
+#: frontend/views/students-single.php:440
+msgid "ما يجب معرفته"
+msgstr ""
+
+#: frontend/teacher/student.php:64
+msgid "تسجيل ملاحظة"
+msgstr ""
+
+#: frontend/teacher/student.php:81
+msgid "سطر واحد محدد"
+msgstr ""
+
+#: frontend/teacher/student.php:83
+msgid "مثال: شرح الدرس لزملائه اليوم"
+msgstr ""
+
+#: frontend/teacher/student.php:87
+#: frontend/teacher/student.php:114
+msgid "يصل لولي الأمر صامتًا في خطه الزمني — بلا إزعاج."
+msgstr ""
+
+#: frontend/teacher/student.php:95
+msgid "آخر الملاحظات"
+msgstr ""
+
+#: frontend/teacher/student.php:115
+msgid "تصل لولي الأمر صامتة — بلا إزعاج."
+msgstr ""
+
+#: frontend/teacher/student.php:116
+msgid "تذهب لصندوق الأخصائية · ولو تُركت ٣ أيام تُرفع للوكيل."
+msgstr ""
+
+#: frontend/teacher/student.php:117
+msgid "تذهب للعيادة فورًا · ولو لم تُفتح خلال ١٠ دقائق تُرفع للوكيل."
+msgstr ""
+
+#: frontend/views/403.php:3
+msgid "لا تملك صلاحية هذه الصفحة"
+msgstr ""
+
+#: frontend/views/403.php:4
+msgid "راجع إدارة المدرسة إذا كنت تحتاج الوصول إليها."
+msgstr ""
+
+#: frontend/views/404.php:3
+msgid "الصفحة غير موجودة"
+msgstr ""
+
+#: frontend/views/404.php:4
+msgid "العودة للرئيسية"
+msgstr ""
+
+#: frontend/views/accounts.php:13
+msgid "دليل الحسابات"
+msgstr ""
+
+#: frontend/views/accounts.php:16
+#: frontend/views/accounts.php:57
+#: frontend/views/accounts.php:58
+msgid "إضافة حساب"
+msgstr ""
+
+#: frontend/views/accounts.php:28
+#: frontend/views/accounts.php:64
+#: frontend/views/assets.php:101
+#: frontend/views/assets.php:127
+#: frontend/views/inventory.php:81
+#: frontend/views/reports.php:69
+msgid "الرمز"
+msgstr ""
+
+#: frontend/views/accounts.php:29
+#: frontend/views/journal.php:26
+#: frontend/views/journal.php:126
+#: frontend/views/reports.php:70
+msgid "الحساب"
+msgstr ""
+
+#: frontend/views/accounts.php:30
+#: frontend/views/inventory.php:39
+#: frontend/views/ledger.php:49
+msgid "الرصيد"
+msgstr ""
+
+#: frontend/views/accounts.php:40
+msgid "نظامي"
+msgstr ""
+
+#: frontend/views/accounts.php:46
+msgid "الأستاذ"
+msgstr ""
+
+#: frontend/views/accounts.php:57
+msgid "في دليل الحسابات"
+msgstr ""
+
+#: frontend/views/accounts.php:59
+msgid "الحسابات النظامية يعتمد عليها الترحيل التلقائي ولا تُحذف."
+msgstr ""
+
+#: frontend/views/accounts.php:65
+msgid "اسم الحساب"
+msgstr ""
+
+#: frontend/views/accounts.php:71
+#: frontend/views/inventory.php:85
+#: frontend/views/subjects.php:167
+msgid "إضافة"
+msgstr ""
+
+#: frontend/views/alerts.php:8
+#: frontend/views/nerve.php:83
+msgid "الإنذارات"
+msgstr ""
+
+#: frontend/views/alerts.php:9
+msgid "الحارس الآلي يفحص كل خمس دقائق ويبحث عن الحدث الغائب — لا عن الحدث المسجَّل."
+msgstr ""
+
+#: frontend/views/alerts.php:15
+#: frontend/views/badges.php:74
+#: frontend/views/leaves.php:15
+#: frontend/views/staff-badges.php:78
+#: frontend/views/students.php:138
+msgid "تحديد الكل"
+msgstr ""
+
+#: frontend/views/alerts.php:19
+msgid "حالة الحارس الآلي"
+msgstr ""
+
+#: frontend/views/alerts.php:21
+msgid "آخر فحص"
+msgstr ""
+
+#: frontend/views/alerts.php:25
+msgid "متوقف"
+msgstr ""
+
+#: frontend/views/alerts.php:26
+msgid "يعمل"
+msgstr ""
+
+#: frontend/views/alerts.php:27
+msgid "مؤقت حقيقي"
+msgstr ""
+
+#: frontend/views/alerts.php:29
+msgid "مفعّل"
+msgstr ""
+
+#: frontend/views/alerts.php:30
+msgid "غير مفعّل"
+msgstr ""
+
+#: frontend/views/alerts.php:34
+msgid "مؤقت ووردبريس يعمل عند زيارة الموقع فقط. شغّل Cron من لوحة الاستضافة كل خمس دقائق على wp-cron.php، وأضف في wp-config.php:"
+msgstr ""
+
+#: frontend/views/alerts.php:41
+msgid "إنذارات مفتوحة"
+msgstr ""
+
+#: frontend/views/alerts.php:45
+msgid "لا توجد إنذارات"
+msgstr ""
+
+#: frontend/views/alerts.php:46
+msgid "كل طالب في مكانه المتوقع."
+msgstr ""
+
+#: frontend/views/alerts.php:62
+msgid "فتح ملف الطالب"
+msgstr ""
+
+#: frontend/views/alerts.php:72
+msgid "استلمته"
+msgstr ""
+
+#: frontend/views/alerts.php:75
+msgid "قيد المعالجة"
+msgstr ""
+
+#: frontend/views/alerts.php:83
+msgid "سبب الإغلاق — إجباري"
+msgstr ""
+
+#: frontend/views/assets.php:8
+msgid "الأصول والصيانة"
+msgstr ""
+
+#: frontend/views/assets.php:11
+msgid "أوامر الصيانة"
+msgstr ""
+
+#: frontend/views/assets.php:13
+msgid "لا توجد أوامر"
+msgstr ""
+
+#: frontend/views/assets.php:13
+msgid "سجّل بلاغ صيانة ليظهر هنا مرتبًا حسب الأولوية."
+msgstr ""
+
+#: frontend/views/assets.php:18
+#: frontend/views/safety.php:26
+msgid "البلاغ"
+msgstr ""
+
+#: frontend/views/assets.php:19
+#: frontend/views/assets.php:68
+#: frontend/views/assets.php:102
+msgid "الأصل"
+msgstr ""
+
+#: frontend/views/assets.php:20
+#: frontend/views/assets.php:77
+#: frontend/views/assets.php:104
+#: frontend/views/assets.php:130
+msgid "الموقع"
+msgstr ""
+
+#: frontend/views/assets.php:48
+#: frontend/views/reports.php:24
+msgid "تحديث"
+msgstr ""
+
+#: frontend/views/assets.php:64
+msgid "عنوان البلاغ"
+msgstr ""
+
+#: frontend/views/assets.php:70
+msgid "غير مرتبط بأصل"
+msgstr ""
+
+#: frontend/views/assets.php:89
+#: frontend/views/safety.php:12
+#: frontend/views/safety.php:64
+msgid "تسجيل بلاغ"
+msgstr ""
+
+#: frontend/views/assets.php:94
+msgid "سجل الأصول"
+msgstr ""
+
+#: frontend/views/assets.php:96
+msgid "لا توجد أصول"
+msgstr ""
+
+#: frontend/views/assets.php:103
+#: frontend/views/assets.php:129
+msgid "الفئة"
+msgstr ""
+
+#: frontend/views/assets.php:105
+#: frontend/views/assets.php:131
+msgid "التكلفة"
+msgstr ""
+
+#: frontend/views/assets.php:128
+msgid "اسم الأصل"
+msgstr ""
+
+#: frontend/views/assets.php:132
+msgid "إضافة أصل"
+msgstr ""
+
+#: frontend/views/attendance-report.php:16
+msgid "تقرير الحضور الشهري"
+msgstr ""
+
+#: frontend/views/attendance-report.php:17
+msgid "حضور الطلاب شهرًا كاملًا — عدّادات ونِسَب وخريطة تقويم لكل طالب. للطباعة والتصدير."
+msgstr ""
+
+#: frontend/views/attendance-report.php:24
+#: frontend/views/attendance-report.php:25
+#: frontend/views/staff-report.php:21
+#: frontend/views/staff-report.php:22
+msgid "الشهر"
+msgstr ""
+
+#: frontend/views/attendance-report.php:31
+#: frontend/views/badges.php:33
+#: frontend/views/homework.php:117
+msgid "اختر الشعبة…"
+msgstr ""
+
+#: frontend/views/attendance-report.php:40
+#: frontend/views/badges.php:41
+#: frontend/views/homework.php:124
+#: frontend/views/kg.php:34
+#: frontend/views/ledger.php:25
+#: frontend/views/staff-badges.php:47
+#: frontend/views/staff-report.php:25
+#: frontend/views/subjects.php:35
+msgid "عرض"
+msgstr ""
+
+#: frontend/views/attendance-report.php:44
+#: frontend/views/certificates.php:39
+#: frontend/views/certificates.php:76
+#: frontend/views/staff-report.php:28
+msgid "طباعة"
+msgstr ""
+
+#: frontend/views/attendance-report.php:45
+#: frontend/views/audit.php:48
+#: frontend/views/staff-report.php:29
+#: frontend/views/students.php:62
+msgid "تصدير CSV"
+msgstr ""
+
+#: frontend/views/attendance-report.php:54
+msgid "اختر شعبة وشهرًا"
+msgstr ""
+
+#: frontend/views/attendance-report.php:55
+msgid "يظهر هنا تقرير الحضور الشهري لكل طلاب الشعبة، مع خريطة تقويم لكل طالب."
+msgstr ""
+
+#: frontend/views/attendance-report.php:70
+msgid "عودة لكشف الشعبة"
+msgstr ""
+
+#: frontend/views/attendance-report.php:87
+#: frontend/views/attendance-report.php:144
+msgid "أيام حضور"
+msgstr ""
+
+#: frontend/views/attendance-report.php:88
+#: frontend/views/attendance-report.php:145
+msgid "أيام تأخّر"
+msgstr ""
+
+#: frontend/views/attendance-report.php:89
+#: frontend/views/attendance-report.php:146
+msgid "أيام غياب"
+msgstr ""
+
+#: frontend/views/attendance-report.php:92
+#: frontend/views/insights.php:87
+msgid "نسبة الحضور"
+msgstr ""
+
+#: frontend/views/attendance-report.php:94
+#: frontend/views/staff-report.php:82
+msgid "مجموع دقائق التأخّر"
+msgstr ""
+
+#. translators: %s: عدد الطلاب
+#: frontend/views/attendance-report.php:136
+#, php-format
+msgid "%s طالبًا"
+msgstr ""
+
+#: frontend/views/attendance-report.php:152
+msgid "لا طلاب في هذه الشعبة"
+msgstr ""
+
+#: frontend/views/attendance-report.php:157
+#: frontend/views/attendance.php:74
+#: frontend/views/certificates.php:270
+#: frontend/views/certificates.php:308
+#: frontend/views/clinic.php:47
+#: frontend/views/clinic.php:77
+#: frontend/views/custody.php:55
+#: frontend/views/custody.php:89
+#: frontend/views/exams.php:39
+#: frontend/views/finance.php:166
+#: frontend/views/finance.php:197
+#: frontend/views/finance.php:365
+#: frontend/views/guardians-single.php:94
+#: frontend/views/homework.php:53
+#: frontend/views/insights.php:49
+#: frontend/views/library.php:29
+#: frontend/views/library.php:73
+#: frontend/views/meds.php:65
+#: frontend/views/nerve.php:47
+#: frontend/views/students.php:147
+#: frontend/views/transport-single.php:103
+#: frontend/views/transport-single.php:135
+#: frontend/views/trips.php:69
+#: frontend/views/visitors.php:35
+msgid "الطالب"
+msgstr ""
+
+#: frontend/views/attendance-report.php:163
+msgid "النسبة"
+msgstr ""
+
+#: frontend/views/attendance.php:24
+msgid "بوابة"
+msgstr ""
+
+#: frontend/views/attendance.php:24
+msgid "يدوي"
+msgstr ""
+
+#: frontend/views/attendance.php:26
+msgid "حضور الطلاب"
+msgstr ""
+
+#: frontend/views/attendance.php:27
+msgid "البوابة رصدت الأغلب — لا عليك إلا الاستثناءات. غيّر الحالة من القائمة ثم احفظ."
+msgstr ""
+
+#: frontend/views/attendance.php:34
+#: frontend/views/staff-day.php:29
+#: includes/functions.php:205
+msgid "لم يُرصد"
+msgstr ""
+
+#: frontend/views/attendance.php:51
+#: frontend/views/attendance.php:52
+#: frontend/views/certificates.php:274
+#: frontend/views/exams.php:74
+#: frontend/views/exams.php:133
+#: frontend/views/finance.php:103
+#: frontend/views/journal.php:17
+#: frontend/views/journal.php:77
+#: frontend/views/journal.php:114
+#: frontend/views/ledger.php:44
+msgid "التاريخ"
+msgstr ""
+
+#: frontend/views/attendance.php:54
+msgid "عرض الكشف"
+msgstr ""
+
+#: frontend/views/attendance.php:61
+msgid "لا يوجد طلاب في هذه الشعبة"
+msgstr ""
+
+#: frontend/views/attendance.php:62
+msgid "سجّل طلابًا في الشعبة أولًا من صفحة الطلاب."
+msgstr ""
+
+#: frontend/views/attendance.php:75
+msgid "المصدر"
+msgstr ""
+
+#: frontend/views/attendance.php:77
+#: frontend/views/staff-day.php:49
+msgid "التحديث اليدوي"
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#. translators: %s: اسم الموظف
+#: frontend/views/attendance.php:108
+#: frontend/views/staff-day.php:84
+#, php-format
+msgid "تحديث حالة %s"
+msgstr ""
+
+#: frontend/views/attendance.php:111
+#: frontend/views/staff-day.php:87
+msgid "— حدّث —"
+msgstr ""
+
+#: frontend/views/attendance.php:127
+#: frontend/views/staff-day.php:104
+msgid "حفظ الكشف"
+msgstr ""
+
+#: frontend/views/audit.php:21
+msgid "سجل النظام"
+msgstr ""
+
+#. translators: %s: عدد العمليات
+#: frontend/views/audit.php:24
+#, php-format
+msgid "%s عملية مسجّلة — غير قابلة للتعديل أو الحذف."
+msgstr ""
+
+#: frontend/views/audit.php:32
+msgid "بحث في العملية…"
+msgstr ""
+
+#: frontend/views/audit.php:34
+msgid "نوع الهدف"
+msgstr ""
+
+#: frontend/views/audit.php:35
+msgid "كل الأهداف"
+msgstr ""
+
+#: frontend/views/audit.php:44
+#: frontend/views/certificates.php:241
+#: frontend/views/content.php:50
+#: frontend/views/students.php:116
+msgid "تصفية"
+msgstr ""
+
+#: frontend/views/audit.php:54
+msgid "لا نتائج مطابقة"
+msgstr ""
+
+#: frontend/views/audit.php:82
+#: frontend/views/partials/enroll-form.php:166
+msgid "السابق"
+msgstr ""
+
+#. translators: 1: الصفحة الحالية 2: عدد الصفحات
+#: frontend/views/audit.php:86
+#, php-format
+msgid "صفحة %1$s من %2$s"
+msgstr ""
+
+#: frontend/views/audit.php:91
+#: frontend/views/employees.php:329
+#: frontend/views/partials/enroll-form.php:167
+msgid "التالي"
+msgstr ""
+
+#: frontend/views/badges.php:23
+msgid "بطاقات الطلاب"
+msgstr ""
+
+#: frontend/views/badges.php:24
+msgid "الباركود يحمل رمزًا عشوائيًا لا الرقم الأكاديمي — لأن البطاقة تُرى في الشارع وتُصوَّر."
+msgstr ""
+
+#. translators: %d: عدد البطاقات
+#: frontend/views/badges.php:50
+#: frontend/views/staff-badges.php:56
+#, php-format
+msgid "غير المطبوعة فقط (%d)"
+msgstr ""
+
+#: frontend/views/badges.php:61
+#: frontend/views/staff-badges.php:67
+msgid "لا بطاقات هنا"
+msgstr ""
+
+#: frontend/views/badges.php:63
+msgid "كل بطاقات هذه الشعبة طُبعت من قبل."
+msgstr ""
+
+#: frontend/views/badges.php:64
+msgid "لا طلاب في هذه الشعبة."
+msgstr ""
+
+#: frontend/views/badges.php:83
+#: frontend/views/staff-badges.php:87
+msgid "طباعة المحدد"
+msgstr ""
+
+#. translators: %s: التاريخ
+#: frontend/views/badges.php:134
+#: frontend/views/staff-badges.php:139
+#, php-format
+msgid "طُبعت %s"
+msgstr ""
+
+#: frontend/views/certificates.php:30
+msgid "طباعة الشهادات"
+msgstr ""
+
+#. translators: %s: العدد
+#: frontend/views/certificates.php:33
+#, php-format
+msgid "%s شهادة — ورقة لكل واحدة"
+msgstr ""
+
+#: frontend/views/certificates.php:45
+msgid "لا شهادات تطابق التصفية"
+msgstr ""
+
+#. translators: %s: العدد
+#: frontend/views/certificates.php:107
+#, php-format
+msgid "%s شهادة صادرة"
+msgstr ""
+
+#: frontend/views/certificates.php:111
+#: frontend/views/certificates.php:301
+#: modules/staff/class-bulk.php:44
+msgid "إصدار شهادة"
+msgstr ""
+
+#. translators: 1: العدد 2: نوع الشهادة
+#: frontend/views/certificates.php:127
+#, php-format
+msgid "%1$s طالبًا يستحقون شهادة %2$s"
+msgstr ""
+
+#: frontend/views/certificates.php:131
+msgid "راجعهم ثم أصدرها لمن تختار"
+msgstr ""
+
+#: frontend/views/certificates.php:157
+msgid "إصدار للمحددين"
+msgstr ""
+
+#: frontend/views/certificates.php:163
+msgid "الشهادات الصادرة"
+msgstr ""
+
+#: frontend/views/certificates.php:183
+#: frontend/views/certificates.php:319
+#: modules/staff/class-bulk.php:45
+msgid "نوع الشهادة"
+msgstr ""
+
+#: frontend/views/certificates.php:185
+#: frontend/views/content.php:45
+msgid "كل الأنواع"
+msgstr ""
+
+#: frontend/views/certificates.php:197
+#: frontend/views/content.php:39
+#: frontend/views/students.php:80
+#: frontend/views/subjects.php:162
+msgid "كل المراحل"
+msgstr ""
+
+#: frontend/views/certificates.php:209
+#: frontend/views/students.php:104
+msgid "كل الشعب"
+msgstr ""
+
+#: frontend/views/certificates.php:219
+msgid "طالب بعينه"
+msgstr ""
+
+#: frontend/views/certificates.php:221
+#: frontend/views/students-single.php:36
+msgid "كل الطلاب"
+msgstr ""
+
+#: frontend/views/certificates.php:245
+msgid "طباعة المصفّى"
+msgstr ""
+
+#: frontend/views/certificates.php:253
+msgid "طباعة الكل"
+msgstr ""
+
+#: frontend/views/certificates.php:264
+msgid "أصدر أول شهادة بالزر أعلى الشاشة، أو من الاقتراحات."
+msgstr ""
+
+#: frontend/views/certificates.php:271
+msgid "الشهادة"
+msgstr ""
+
+#: frontend/views/certificates.php:273
+msgid "الرقم"
+msgstr ""
+
+#: frontend/views/certificates.php:288
+#: frontend/views/certificates.php:289
+msgid "عرض وطباعة"
+msgstr ""
+
+#: frontend/views/certificates.php:301
+msgid "تصل تطبيق ولي الأمر فور إصدارها"
+msgstr ""
+
+#: frontend/views/certificates.php:332
+msgid "العنوان على الشهادة"
+msgstr ""
+
+#: frontend/views/certificates.php:338
+msgid "السبب — يظهر على الشهادة"
+msgstr ""
+
+#: frontend/views/certificates.php:340
+msgid "لتفوّقه في مادة الرياضيات وحصوله على المركز الأول"
+msgstr ""
+
+#: frontend/views/certificates.php:343
+msgid "القالب"
+msgstr ""
+
+#: frontend/views/certificates.php:356
+msgid "إصدار الشهادة"
+msgstr ""
+
+#: frontend/views/classes.php:10
+#: modules/staff/class-flow.php:152
+msgid "الصفوف والشعب"
+msgstr ""
+
+#: frontend/views/classes.php:11
+#, php-format
+msgid "%s شعبة"
+msgid_plural "%s شعب"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/classes.php:13
+#: frontend/views/classes.php:80
+#: frontend/views/classes.php:81
+msgid "إضافة شعبة"
+msgstr ""
+
+#: frontend/views/classes.php:19
+msgid "لا توجد سنة دراسية نشطة. أنشئ سنة من الإعدادات أولًا."
+msgstr ""
+
+#: frontend/views/classes.php:25
+#, php-format
+msgid "شعب السنة %s"
+msgstr ""
+
+#: frontend/views/classes.php:29
+msgid "لا توجد شعب بعد"
+msgstr ""
+
+#: frontend/views/classes.php:30
+msgid "أنشئ أول شعبة بالزر أعلى الشاشة، ثم سجّل الطلاب فيها."
+msgstr ""
+
+#: frontend/views/classes.php:39
+msgid "المسجَّلون"
+msgstr ""
+
+#: frontend/views/classes.php:57
+msgid "مكتملة"
+msgstr ""
+
+#: frontend/views/classes.php:61
+msgid "حذف هذه الشعبة؟"
+msgstr ""
+
+#: frontend/views/classes.php:65
+#: frontend/views/students-single.php:318
+#: frontend/views/transport-single.php:60
+msgid "حذف"
+msgstr ""
+
+#: frontend/views/classes.php:80
+msgid "المرحلة تحدد مشرفها تلقائيًا"
+msgstr ""
+
+#: frontend/views/classes.php:96
+msgid "الرابع"
+msgstr ""
+
+#: frontend/views/classes.php:100
+msgid "أ"
+msgstr ""
+
+#: frontend/views/classes.php:103
+msgid "السعة القصوى"
+msgstr ""
+
+#: frontend/views/classes.php:107
+msgid "حفظ الشعبة"
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: frontend/views/clinic.php:19
+#, php-format
+msgid "إحالة: %s"
+msgstr ""
+
+#: frontend/views/clinic.php:23
+#: frontend/views/meds.php:77
+#: frontend/views/referrals.php:32
+msgid "حساسية:"
+msgstr ""
+
+#: frontend/views/clinic.php:33
+#: frontend/views/clinic.php:68
+#: frontend/views/clinic.php:69
+msgid "تسجيل زيارة"
+msgstr ""
+
+#: frontend/views/clinic.php:39
+#: frontend/views/visitors.php:26
+msgid "سجل الزيارات"
+msgstr ""
+
+#: frontend/views/clinic.php:41
+#: frontend/views/visitors.php:28
+msgid "لا توجد زيارات"
+msgstr ""
+
+#: frontend/views/clinic.php:48
+#: frontend/views/clinic.php:86
+msgid "الشكوى"
+msgstr ""
+
+#: frontend/views/clinic.php:49
+msgid "الإجراء"
+msgstr ""
+
+#: frontend/views/clinic.php:50
+msgid "غادر"
+msgstr ""
+
+#: frontend/views/clinic.php:59
+#: frontend/views/guardians-single.php:112
+#: frontend/views/students-single.php:236
+msgid "نعم"
+msgstr ""
+
+#: frontend/views/clinic.php:68
+msgid "يصل إشعار لولي الأمر فور التسجيل"
+msgstr ""
+
+#: frontend/views/clinic.php:70
+msgid "يصل إشعار لولي الأمر فور التسجيل."
+msgstr ""
+
+#: frontend/views/clinic.php:79
+#: frontend/views/homework.php:173
+#: frontend/views/hr.php:75
+#: frontend/views/rollover.php:43
+msgid "اختر…"
+msgstr ""
+
+#: frontend/views/clinic.php:90
+msgid "الإجراء المتخذ"
+msgstr ""
+
+#: frontend/views/clinic.php:96
+msgid "طُلب من ولي الأمر استلام الطالب"
+msgstr ""
+
+#: frontend/views/content.php:13
+msgid "المحتوى التعليمي"
+msgstr ""
+
+#: frontend/views/content.php:16
+#: frontend/views/content.php:101
+#: frontend/views/content.php:102
+msgid "إضافة محتوى"
+msgstr ""
+
+#: frontend/views/content.php:20
+msgid "اختر المرحلة وأضف كتابًا أو فيديو أو لعبة. المكتبات تموت بالتراكم لا بالنقص — راجع ما لا يُفتح."
+msgstr ""
+
+#. translators: %d: عدد العناصر
+#: frontend/views/content.php:26
+msgid "عنصر واحد يحتاج مراجعة"
+msgid_plural "%d عناصر تحتاج مراجعة"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/content.php:29
+msgid "مضت سنة على نشره — جدّده أو أرشفه."
+msgstr ""
+
+#: frontend/views/content.php:54
+msgid "لا يوجد محتوى"
+msgstr ""
+
+#: frontend/views/content.php:59
+#: frontend/views/content.php:138
+#: frontend/views/exams.php:105
+#: frontend/views/guardians-single.php:34
+#: frontend/views/guardians-single.php:153
+#: frontend/views/guardians.php:117
+#: frontend/views/homework.php:137
+#: frontend/views/homework.php:191
+#: frontend/views/library.php:93
+#: frontend/views/library.php:115
+#: frontend/views/messages.php:20
+#: frontend/views/messages.php:59
+#: frontend/views/safety.php:70
+#: frontend/views/settings.php:48
+#: frontend/views/settings.php:49
+msgid "العنوان"
+msgstr ""
+
+#: frontend/views/content.php:60
+#: frontend/views/content.php:110
+#: frontend/views/exams.php:73
+#: frontend/views/exams.php:125
+#: frontend/views/hr.php:40
+#: frontend/views/hr.php:121
+#: frontend/views/safety.php:27
+#: frontend/views/safety.php:74
+msgid "النوع"
+msgstr ""
+
+#: frontend/views/content.php:62
+msgid "فُتح"
+msgstr ""
+
+#: frontend/views/content.php:80
+msgid "نشر"
+msgstr ""
+
+#: frontend/views/content.php:80
+msgid "أرشفة"
+msgstr ""
+
+#: frontend/views/content.php:101
+msgid "كتاب أو فيديو أو لعبة معزولة"
+msgstr ""
+
+#: frontend/views/content.php:128
+#: frontend/views/exams.php:71
+#: frontend/views/exams.php:117
+#: frontend/views/homework.php:138
+#: frontend/views/homework.php:181
+#: frontend/views/subjects.php:42
+msgid "المادة"
+msgstr ""
+
+#: frontend/views/content.php:130
+msgid "— بلا مادة —"
+msgstr ""
+
+#: frontend/views/content.php:143
+msgid "وصف مختصر"
+msgstr ""
+
+#: frontend/views/content.php:148
+msgid "رابط الفيديو أو المصدر"
+msgstr ""
+
+#: frontend/views/content.php:153
+msgid "ملف الكتاب"
+msgstr ""
+
+#: frontend/views/content.php:159
+msgid "كود اللعبة"
+msgstr ""
+
+#: frontend/views/content.php:163
+msgid "الصق كود HTML/JS كاملًا. يعمل في صندوق معزول بلا اتصال بالإنترنت ولا وصول لبيانات التطبيق — فحتى الكود الخبيث لا يجد ما يسرقه."
+msgstr ""
+
+#: frontend/views/content.php:165
+msgid "لإرسال النتيجة من اللعبة استدعِ:"
+msgstr ""
+
+#: frontend/views/content.php:170
+msgid "حفظ كمسودة"
+msgstr ""
+
+#: frontend/views/custody.php:10
+msgid "لوحة العهدة"
+msgstr ""
+
+#: frontend/views/custody.php:11
+msgid "كل طالب في عهدة جهة معلومة. الرقم الأحمر هو ما يحتاج تدخلًا الآن."
+msgstr ""
+
+#: frontend/views/custody.php:15
+msgid "الحارس الآلي متوقف"
+msgstr ""
+
+#: frontend/views/custody.php:18
+#, php-format
+msgid "آخر فحص: %s"
+msgstr ""
+
+#: frontend/views/custody.php:19
+msgid "لم يعمل بعد."
+msgstr ""
+
+#: frontend/views/custody.php:20
+msgid "شغّل Cron حقيقيًا من لوحة الاستضافة كل خمس دقائق على wp-cron.php."
+msgstr ""
+
+#: frontend/views/custody.php:28
+#: frontend/views/overview.php:73
+msgid "طالب نشط"
+msgstr ""
+
+#: frontend/views/custody.php:40
+#: frontend/views/deputy.php:18
+#: includes/functions.php:165
+msgid "إنذار حرج مفتوح"
+msgstr ""
+
+#: frontend/views/custody.php:49
+msgid "لا يوجد طلاب في هذه الحالة"
+msgstr ""
+
+#: frontend/views/custody.php:57
+msgid "منذ"
+msgstr ""
+
+#: frontend/views/custody.php:80
+msgid "آخر حركات اليوم"
+msgstr ""
+
+#: frontend/views/custody.php:83
+msgid "لا توجد حركات اليوم"
+msgstr ""
+
+#: frontend/views/custody.php:90
+#: frontend/views/transport-single.php:43
+#: frontend/views/trips.php:70
+msgid "النقطة"
+msgstr ""
+
+#: frontend/views/custody.php:92
+msgid "المستلم"
+msgstr ""
+
+#: frontend/views/deputy.php:10
+msgid "يوم الوكيل"
+msgstr ""
+
+#: frontend/views/deputy.php:11
+msgid "قائمة ما ينتظرك، لا قائمة أقسام."
+msgstr ""
+
+#: frontend/views/deputy.php:17
+#: includes/functions.php:164
+#: modules/deputy/class-deputy.php:183
+msgid "حصص بلا معلم"
+msgstr ""
+
+#: frontend/views/deputy.php:17
+msgid "اعتمد المقترحات أدناه"
+msgstr ""
+
+#: frontend/views/deputy.php:18
+#: includes/functions.php:165
+msgid "يحتاج تدخلًا فوريًا"
+msgstr ""
+
+#: frontend/views/deputy.php:19
+#: modules/custody/class-alerts.php:275
+msgid "موظفون بلا رصد حضور"
+msgstr ""
+
+#: frontend/views/deputy.php:19
+msgid "حدّدهم في الكشف أدناه"
+msgstr ""
+
+#: frontend/views/deputy.php:20
+#: includes/functions.php:166
+msgid "إحالة صحية مفتوحة"
+msgstr ""
+
+#: frontend/views/deputy.php:20
+msgid "راجع صندوق الصحة المدرسية"
+msgstr ""
+
+#: frontend/views/deputy.php:21
+#: includes/functions.php:167
+msgid "طلب إجازة بانتظار القرار"
+msgstr ""
+
+#: frontend/views/deputy.php:21
+#: includes/functions.php:167
+msgid "اعتمد أو ارفض بسبب"
+msgstr ""
+
+#: frontend/views/deputy.php:22
+msgid "إذن دواء بانتظار الصحة المدرسية"
+msgstr ""
+
+#: frontend/views/deputy.php:22
+#: includes/functions.php:168
+msgid "راجعه واعتمده"
+msgstr ""
+
+#: frontend/views/deputy.php:23
+#: includes/functions.php:169
+msgid "ملاحظة بانتظار الأخصائية"
+msgstr ""
+
+#: frontend/views/deputy.php:23
+#: frontend/views/inbox.php:10
+#: includes/functions.php:169
+msgid "صندوق المتابعة"
+msgstr ""
+
+#: frontend/views/deputy.php:40
+#: frontend/views/overview.php:54
+msgid "لا شيء ينتظرك هنا"
+msgstr ""
+
+#: frontend/views/deputy.php:52
+msgid "الاحتياط اليوم"
+msgstr ""
+
+#: frontend/views/deputy.php:56
+msgid "لا توجد حصص شاغرة"
+msgstr ""
+
+#: frontend/views/deputy.php:57
+msgid "تظهر تلقائيًا عند اعتماد إجازة أو رصد غياب معلم."
+msgstr ""
+
+#. translators: 1: رقم الحصة 2: الشعبة 3: المادة
+#: frontend/views/deputy.php:66
+#, php-format
+msgid "الحصة %1$d — %2$s — %3$s"
+msgstr ""
+
+#: frontend/views/deputy.php:74
+#, php-format
+msgid "البديل: %s"
+msgstr ""
+
+#: frontend/views/deputy.php:75
+msgid "يحتاج بديلًا"
+msgstr ""
+
+#. translators: 1: اسم المعلم 2: السبب
+#: frontend/views/deputy.php:82
+#, php-format
+msgid "المعلم الأصلي: %1$s — %2$s"
+msgstr ""
+
+#: frontend/views/deputy.php:101
+msgid "نفس المادة"
+msgstr ""
+
+#. translators: %d: عدد الحصص
+#: frontend/views/deputy.php:104
+#, php-format
+msgid "نصابه %d حصة"
+msgstr ""
+
+#. translators: %d: عدد حصص الاحتياط
+#: frontend/views/deputy.php:110
+#, php-format
+msgid "أخذ %d احتياط اليوم"
+msgstr ""
+
+#: frontend/views/deputy.php:119
+msgid "اعتمد"
+msgstr ""
+
+#: frontend/views/deputy.php:126
+msgid "لا يوجد معلم متفرغ في هذه الحصة."
+msgstr ""
+
+#: frontend/views/deputy.php:137
+#: frontend/views/overview.php:98
+msgid "ملفات ناقصة"
+msgstr ""
+
+#: frontend/views/deputy.php:138
+msgid "السجل الناقص لا يشتكي"
+msgstr ""
+
+#: frontend/views/employees.php:11
+#: frontend/views/employees.php:37
+#: frontend/views/payroll.php:69
+msgid "الموظفون"
+msgstr ""
+
+#: frontend/views/employees.php:18
+#: frontend/views/employees.php:245
+msgid "إضافة موظف"
+msgstr ""
+
+#: frontend/views/employees.php:25
+#: frontend/views/employees.php:130
+msgid "خطوات تجهيز الموظف"
+msgstr ""
+
+#: frontend/views/employees.php:41
+msgid "تعديل بيانات الموظف. الصلاحيات لها شاشتها المستقلة."
+msgstr ""
+
+#: frontend/views/employees.php:68
+#: frontend/views/employees.php:156
+#: frontend/views/employees.php:290
+msgid "المسمى الوظيفي"
+msgstr ""
+
+#: frontend/views/employees.php:74
+#: frontend/views/employees.php:295
+msgid "القسم"
+msgstr ""
+
+#: frontend/views/employees.php:86
+#: frontend/views/employees.php:305
+msgid "الرقم الوظيفي"
+msgstr ""
+
+#: frontend/views/employees.php:101
+#: frontend/views/employees.php:190
+msgid "على رأس العمل"
+msgstr ""
+
+#: frontend/views/employees.php:102
+#: frontend/views/employees.php:192
+#: frontend/views/guardians.php:57
+msgid "موقوف"
+msgstr ""
+
+#: frontend/views/employees.php:103
+msgid "انتهت خدمته"
+msgstr ""
+
+#: frontend/views/employees.php:113
+#: frontend/views/guardians-single.php:162
+msgid "حفظ التعديلات"
+msgstr ""
+
+#: frontend/views/employees.php:120
+msgid "صلاحيات هذا الموظف"
+msgstr ""
+
+#: frontend/views/employees.php:121
+msgid "ما يظهر له في النظام، وعلى مَن يرى البيانات."
+msgstr ""
+
+#: frontend/views/employees.php:125
+msgid "فتح الصلاحيات"
+msgstr ""
+
+#: frontend/views/employees.php:138
+msgid "ابحث بالاسم أو البريد أو الرقم الوظيفي"
+msgstr ""
+
+#: frontend/views/employees.php:140
+#: frontend/views/overview.php:91
+#: frontend/views/staff-badges.php:106
+msgid "موظف"
+msgstr ""
+
+#: frontend/views/employees.php:145
+msgid "لا يوجد موظفون بعد"
+msgstr ""
+
+#: frontend/views/employees.php:146
+msgid "أضف أول موظف من النموذج أدناه. سيصله حساب دخول خاص به."
+msgstr ""
+
+#: frontend/views/employees.php:158
+#: frontend/views/employees.php:199
+#: frontend/views/employees.php:200
+#: frontend/views/employees.php:260
+#: frontend/views/perms.php:14
+#: frontend/views/perms.php:28
+#: frontend/views/perms.php:107
+msgid "الصلاحيات"
+msgstr ""
+
+#: frontend/views/employees.php:180
+#: frontend/views/perms.php:43
+msgid "انتهت المدة"
+msgstr ""
+
+#: frontend/views/employees.php:182
+#: frontend/views/perms.php:45
+msgid "مخصصة"
+msgstr ""
+
+#: frontend/views/employees.php:184
+#: frontend/views/perms.php:47
+msgid "صلاحيات دوره"
+msgstr ""
+
+#: frontend/views/employees.php:205
+#: frontend/views/employees.php:206
+#: frontend/views/guardians-single.php:43
+#: frontend/views/guardians-single.php:130
+msgid "تعديل البيانات"
+msgstr ""
+
+#: frontend/views/employees.php:211
+msgid "إيقاف وصول هذا الموظف للنظام؟ لا يُحذف — يمكنك إعادته لاحقًا."
+msgstr ""
+
+#: frontend/views/employees.php:215
+msgid "إيقاف"
+msgstr ""
+
+#: frontend/views/employees.php:225
+#: modules/staff/class-bulk.php:87
+msgid "إعادة للعمل"
+msgstr ""
+
+#: frontend/views/employees.php:245
+msgid "بياناته ثم ما يظهر له في النظام"
+msgstr ""
+
+#: frontend/views/employees.php:255
+#: modules/staff/class-flow.php:79
+msgid "بيانات الموظف"
+msgstr ""
+
+#: frontend/views/employees.php:256
+msgid "الاسم والبريد والدور"
+msgstr ""
+
+#: frontend/views/employees.php:261
+msgid "ما يظهر له في النظام"
+msgstr ""
+
+#: frontend/views/employees.php:276
+#: frontend/views/guardians.php:109
+#: frontend/views/settings.php:44
+#: frontend/views/settings.php:45
+msgid "البريد الإلكتروني"
+msgstr ""
+
+#: frontend/views/employees.php:310
+msgid "نطاق الإشراف"
+msgstr ""
+
+#: frontend/views/employees.php:319
+msgid "النصاب الأسبوعي"
+msgstr ""
+
+#: frontend/views/employees.php:325
+msgid "لا يُنشئ أحد من هو في مستواه أو فوقه — لذلك لا ترى كل الأدوار في القائمة."
+msgstr ""
+
+#: frontend/views/employees.php:337
+msgid "على مَن يرى البيانات؟"
+msgstr ""
+
+#: frontend/views/employees.php:346
+msgid "تنتهي صلاحياته في"
+msgstr ""
+
+#: frontend/views/employees.php:351
+msgid "ابحث في القائمة"
+msgstr ""
+
+#: frontend/views/employees.php:352
+msgid "مثال: حضور"
+msgstr ""
+
+#: frontend/views/employees.php:356
+#: frontend/views/perms.php:154
+msgid "فتح الكل"
+msgstr ""
+
+#: frontend/views/employees.php:357
+#: frontend/views/perms.php:155
+msgid "إغلاق الكل"
+msgstr ""
+
+#: frontend/views/employees.php:362
+msgid "اختيار الدور يفتح مفاتيحه تلقائيًا — عدّل ما تشاء بعده."
+msgstr ""
+
+#: frontend/views/employees.php:374
+#: frontend/views/perms.php:179
+msgid "طيّ أو فتح المجموعة"
+msgstr ""
+
+#: frontend/views/employees.php:379
+#: frontend/views/perms.php:184
+msgid "تفعيل أو تعطيل المجموعة كاملة"
+msgstr ""
+
+#: frontend/views/employees.php:399
+#: frontend/views/perms.php:208
+msgid "مقفل"
+msgstr ""
+
+#: frontend/views/employees.php:414
+#: frontend/views/perms.php:222
+msgid "يصل إشعار للمدير عند منحها"
+msgstr ""
+
+#: frontend/views/employees.php:415
+#: frontend/views/perms.php:223
+msgid "حسّاس"
+msgstr ""
+
+#: frontend/views/employees.php:419
+#: frontend/views/perms.php:227
+msgid "يعدّل — تحكّم كامل"
+msgstr ""
+
+#: frontend/views/employees.php:422
+#: frontend/views/perms.php:230
+msgid "يعدّل"
+msgstr ""
+
+#: frontend/views/employees.php:434
+#: frontend/views/perms.php:242
+msgid "ما سيراه"
+msgstr ""
+
+#: frontend/views/employees.php:447
+msgid "حفظ الموظف"
+msgstr ""
+
+#: frontend/views/exams.php:14
+msgid "الاختبارات"
+msgstr ""
+
+#: frontend/views/exams.php:17
+#: frontend/views/exams.php:98
+#: frontend/views/exams.php:99
+msgid "إنشاء اختبار"
+msgstr ""
+
+#: frontend/views/exams.php:23
+msgid "كل الاختبارات"
+msgstr ""
+
+#. translators: 1: الصف 2: الشعبة 3: الدرجة العظمى
+#: frontend/views/exams.php:27
+#, php-format
+msgid "%1$s / %2$s — الدرجة العظمى %3$s"
+msgstr ""
+
+#: frontend/views/exams.php:40
+#: frontend/views/homework.php:56
+msgid "الدرجة"
+msgstr ""
+
+#: frontend/views/exams.php:58
+msgid "حفظ الدرجات"
+msgstr ""
+
+#: frontend/views/exams.php:65
+msgid "لا توجد اختبارات"
+msgstr ""
+
+#: frontend/views/exams.php:65
+msgid "أنشئ اختبارًا ثم ارصد درجاته."
+msgstr ""
+
+#: frontend/views/exams.php:70
+msgid "الاختبار"
+msgstr ""
+
+#: frontend/views/exams.php:75
+msgid "مرصود"
+msgstr ""
+
+#: frontend/views/exams.php:98
+msgid "يظهر في تطبيق الطالب وولي الأمر فور إنشائه"
+msgstr ""
+
+#: frontend/views/exams.php:137
+msgid "الدرجة العظمى"
+msgstr ""
+
+#: frontend/views/exams.php:141
+msgid "الوزن %"
+msgstr ""
+
+#: frontend/views/exams.php:145
+msgid "إنشاء"
+msgstr ""
+
+#: frontend/views/finance.php:18
+msgid "المالية"
+msgstr ""
+
+#: frontend/views/finance.php:19
+msgid "الفواتير والأقساط والتحصيل"
+msgstr ""
+
+#: frontend/views/finance.php:22
+#: frontend/views/finance.php:335
+msgid "خطة رسوم"
+msgstr ""
+
+#: frontend/views/finance.php:23
+#: frontend/views/finance.php:355
+#: frontend/views/finance.php:356
+msgid "إصدار فاتورة"
+msgstr ""
+
+#: frontend/views/finance.php:28
+msgid "كل الفواتير"
+msgstr ""
+
+#: frontend/views/finance.php:33
+msgid "الخطة"
+msgstr ""
+
+#: frontend/views/finance.php:34
+#: frontend/views/finance.php:198
+#: frontend/views/finance.php:457
+#: frontend/views/journal.php:19
+#: frontend/views/payroll.php:19
+#: frontend/views/payroll.php:70
+#: frontend/views/reports.php:85
+msgid "الإجمالي"
+msgstr ""
+
+#: frontend/views/finance.php:35
+#: frontend/views/finance.php:59
+#: frontend/views/finance.php:199
+msgid "المدفوع"
+msgstr ""
+
+#: frontend/views/finance.php:36
+#: frontend/views/finance.php:152
+#: frontend/views/finance.php:200
+msgid "المتبقي"
+msgstr ""
+
+#: frontend/views/finance.php:39
+msgid "فاتورة ملغاة"
+msgstr ""
+
+#: frontend/views/finance.php:41
+msgid "إلغاء هذه الفاتورة وعكس قيدها المحاسبي؟ لا رجعة."
+msgstr ""
+
+#: frontend/views/finance.php:45
+msgid "سبب الإلغاء — إجباري"
+msgstr ""
+
+#: frontend/views/finance.php:46
+msgid "إلغاء الفاتورة"
+msgstr ""
+
+#: frontend/views/finance.php:52
+msgid "الأقساط"
+msgstr ""
+
+#: frontend/views/finance.php:57
+#: frontend/views/finance.php:88
+#: frontend/views/finance.php:104
+#: frontend/views/finance.php:349
+#: frontend/views/journal.php:79
+msgid "المبلغ"
+msgstr ""
+
+#: frontend/views/finance.php:58
+msgid "الاستحقاق"
+msgstr ""
+
+#: frontend/views/finance.php:71
+msgid "مسدّد"
+msgstr ""
+
+#: frontend/views/finance.php:71
+msgid "جزئي"
+msgstr ""
+
+#: frontend/views/finance.php:71
+msgid "مستحق"
+msgstr ""
+
+#: frontend/views/finance.php:82
+msgid "تسجيل دفعة"
+msgstr ""
+
+#: frontend/views/finance.php:94
+msgid "رقم المرجع"
+msgstr ""
+
+#: frontend/views/finance.php:95
+msgid "تسجيل"
+msgstr ""
+
+#: frontend/views/finance.php:105
+msgid "الطريقة"
+msgstr ""
+
+#: frontend/views/finance.php:106
+msgid "المرجع"
+msgstr ""
+
+#: frontend/views/finance.php:107
+msgid "استلمها"
+msgstr ""
+
+#: frontend/views/finance.php:120
+msgid "مستردّة"
+msgstr ""
+
+#: frontend/views/finance.php:122
+msgid "استرداد هذه الدفعة وعكس قيدها المحاسبي؟"
+msgstr ""
+
+#: frontend/views/finance.php:127
+msgid "استرداد"
+msgstr ""
+
+#: frontend/views/finance.php:144
+msgid "إجمالي المفوتر"
+msgstr ""
+
+#: frontend/views/finance.php:148
+msgid "المحصّل"
+msgstr ""
+
+#: frontend/views/finance.php:156
+msgid "متأخر السداد"
+msgstr ""
+
+#: frontend/views/finance.php:162
+msgid "أقساط متأخرة"
+msgstr ""
+
+#: frontend/views/finance.php:167
+msgid "القسط"
+msgstr ""
+
+#: frontend/views/finance.php:169
+#: frontend/views/library.php:79
+msgid "تاريخ الاستحقاق"
+msgstr ""
+
+#: frontend/views/finance.php:179
+msgid "الفاتورة"
+msgstr ""
+
+#: frontend/views/finance.php:189
+msgid "الفواتير"
+msgstr ""
+
+#: frontend/views/finance.php:191
+msgid "لا توجد فواتير"
+msgstr ""
+
+#: frontend/views/finance.php:191
+msgid "أنشئ خطة رسوم ثم أصدر فواتير الطلاب."
+msgstr ""
+
+#: frontend/views/finance.php:216
+msgid "مسدّدة"
+msgstr ""
+
+#: frontend/views/finance.php:217
+msgid "سداد جزئي"
+msgstr ""
+
+#: frontend/views/finance.php:218
+msgid "ملغاة"
+msgstr ""
+
+#: frontend/views/finance.php:219
+msgid "مفتوحة"
+msgstr ""
+
+#: frontend/views/finance.php:335
+msgid "اسمها ومبلغها وعدد أقساطها الافتراضي"
+msgstr ""
+
+#: frontend/views/finance.php:336
+msgid "خطط الرسوم"
+msgstr ""
+
+#: frontend/views/finance.php:348
+msgid "اسم الخطة"
+msgstr ""
+
+#: frontend/views/finance.php:350
+msgid "عدد الأقساط"
+msgstr ""
+
+#: frontend/views/finance.php:351
+msgid "إضافة خطة"
+msgstr ""
+
+#: frontend/views/finance.php:355
+msgid "الأصل دفعة واحدة — والتقسيط امتياز يُمنَح"
+msgstr ""
+
+#: frontend/views/finance.php:357
+msgid "الأصل دفعة واحدة. وتقسيط المدرسة امتياز يُمنَح بسبب مكتوب، لا خيار يُفتح للجميع."
+msgstr ""
+
+#: frontend/views/finance.php:376
+msgid "خطة الرسوم"
+msgstr ""
+
+#: frontend/views/finance.php:388
+msgid "الخصم ٪"
+msgstr ""
+
+#: frontend/views/finance.php:393
+msgid "تاريخ أول دفعة"
+msgstr ""
+
+#: frontend/views/finance.php:399
+msgid "كيف يدفع؟"
+msgstr ""
+
+#: frontend/views/finance.php:406
+msgid "المبلغ كاملًا — الأصل"
+msgstr ""
+
+#: frontend/views/finance.php:413
+msgid "تابي أو تمارا"
+msgstr ""
+
+#: frontend/views/finance.php:414
+msgid "المدرسة تقبض كاملًا والشركة تُحصّل من الأب"
+msgstr ""
+
+#: frontend/views/finance.php:422
+msgid "تقسيط على المدرسة"
+msgstr ""
+
+#: frontend/views/finance.php:423
+msgid "امتياز يُمنَح — والمخاطرة على المدرسة"
+msgstr ""
+
+#: frontend/views/finance.php:432
+msgid "عدد الدفعات"
+msgstr ""
+
+#: frontend/views/finance.php:445
+msgid "سبب المنح"
+msgstr ""
+
+#: frontend/views/finance.php:447
+msgid "ظرف مادي · أخوة في المدرسة · قرار المدير"
+msgstr ""
+
+#: frontend/views/finance.php:448
+msgid "يذكّرك بعد سنة لماذا وافقت، ويحمي المحاسب من السؤال."
+msgstr ""
+
+#: frontend/views/finance.php:456
+msgid "الخصم"
+msgstr ""
+
+#: frontend/views/finance.php:462
+msgid "إصدار الفاتورة"
+msgstr ""
+
+#: frontend/views/guardians-single.php:10
+msgid "ولي الأمر غير موجود"
+msgstr ""
+
+#: frontend/views/guardians-single.php:18
+msgid "كل أولياء الأمور"
+msgstr ""
+
+#: frontend/views/guardians-single.php:23
+msgid "ملف ولي أمر"
+msgstr ""
+
+#: frontend/views/guardians-single.php:28
+#: frontend/views/guardians.php:36
+msgid "رقم ولي الأمر"
+msgstr ""
+
+#: frontend/views/guardians-single.php:31
+#: frontend/views/guardians-single.php:141
+#: frontend/views/guardians.php:125
+msgid "جوال بديل"
+msgstr ""
+
+#: frontend/views/guardians-single.php:32
+msgid "البريد"
+msgstr ""
+
+#: frontend/views/guardians-single.php:35
+#: frontend/views/guardians-single.php:157
+#: frontend/views/guardians.php:121
+msgid "جهة العمل"
+msgstr ""
+
+#: frontend/views/guardians-single.php:36
+msgid "اسم الدخول للتطبيق"
+msgstr ""
+
+#: frontend/views/guardians-single.php:37
+msgid "عدد الأبناء"
+msgstr ""
+
+#: frontend/views/guardians-single.php:48
+msgid "إضافة ابن"
+msgstr ""
+
+#: frontend/views/guardians-single.php:49
+msgid "اكتب الرقم الأكاديمي للطالب — يظهر لك اسمه وصفه للتأكد قبل الربط."
+msgstr ""
+
+#: frontend/views/guardians-single.php:54
+msgid "14470001"
+msgstr ""
+
+#: frontend/views/guardians-single.php:66
+#: frontend/views/student-print.php:216
+#: frontend/views/students-single.php:264
+msgid "صلة القرابة"
+msgstr ""
+
+#: frontend/views/guardians-single.php:73
+msgid "ولي الأمر الأساسي"
+msgstr ""
+
+#: frontend/views/guardians-single.php:75
+msgid "ربط الطالب"
+msgstr ""
+
+#: frontend/views/guardians-single.php:86
+msgid "لا يوجد أبناء مرتبطون"
+msgstr ""
+
+#: frontend/views/guardians-single.php:87
+msgid "بلا ربط لن يرى ولي الأمر شيئًا في التطبيق."
+msgstr ""
+
+#: frontend/views/guardians-single.php:96
+#: frontend/views/students-single.php:219
+msgid "الصلة"
+msgstr ""
+
+#: frontend/views/guardians-single.php:97
+#: frontend/views/students-single.php:221
+#: frontend/views/students-single.php:269
+msgid "أساسي"
+msgstr ""
+
+#: frontend/views/guardians-single.php:114
+msgid "فك ارتباط هذا الطالب؟"
+msgstr ""
+
+#: frontend/views/guardians-single.php:119
+#: frontend/views/students-single.php:243
+msgid "فك"
+msgstr ""
+
+#: frontend/views/guardians-single.php:130
+msgid "حدّث جوّال ولي الأمر وعنوانه وبياناته"
+msgstr ""
+
+#: frontend/views/guardians-single.php:179
+msgid "جارٍ البحث…"
+msgstr ""
+
+#: frontend/views/guardians-single.php:180
+msgid "لا يوجد طالب بهذا الرقم. تأكد من الرقم الأكاديمي."
+msgstr ""
+
+#: frontend/views/guardians-single.php:181
+msgid "هذا الطالب مرتبط بولي الأمر مسبقًا."
+msgstr ""
+
+#: frontend/views/guardians-single.php:182
+msgid "تعذّر البحث. تحقق من الاتصال."
+msgstr ""
+
+#: frontend/views/guardians.php:10
+#: frontend/views/student-print.php:209
+#: frontend/views/students-single.php:208
+#: modules/staff/class-flow.php:188
+msgid "أولياء الأمور"
+msgstr ""
+
+#. translators: %s: العدد
+#: frontend/views/guardians.php:13
+#, php-format
+msgid "%s ولي أمر"
+msgstr ""
+
+#: frontend/views/guardians.php:17
+#: frontend/views/guardians.php:68
+#: frontend/views/guardians.php:69
+msgid "إضافة ولي أمر"
+msgstr ""
+
+#: frontend/views/guardians.php:23
+msgid "ابحث بالاسم أو الجوال أو الهوية"
+msgstr ""
+
+#: frontend/views/guardians.php:29
+msgid "لا يوجد أولياء أمور بعد"
+msgstr ""
+
+#: frontend/views/guardians.php:30
+msgid "أضفه بالزر أعلى الشاشة، أو استورد الطلاب مع بيانات أولياء أمورهم."
+msgstr ""
+
+#: frontend/views/guardians.php:68
+msgid "يُنشأ حسابه فورًا، وكلمة المرور تظهر مرة واحدة"
+msgstr ""
+
+#: frontend/views/guardians.php:70
+msgid "رقم الجوال هو اسم الدخول للتطبيق. تظهر كلمة المرور مرة واحدة بعد الحفظ."
+msgstr ""
+
+#: frontend/views/guardians.php:77
+#: frontend/views/partials/enroll-form.php:29
+#: frontend/views/partials/enroll-form.php:30
+msgid "الاسم الأول"
+msgstr ""
+
+#: frontend/views/guardians.php:81
+#: frontend/views/partials/enroll-form.php:33
+#: frontend/views/partials/enroll-form.php:34
+msgid "اسم الأب"
+msgstr ""
+
+#: frontend/views/guardians.php:85
+#: frontend/views/partials/enroll-form.php:37
+#: frontend/views/partials/enroll-form.php:38
+msgid "اسم الجد"
+msgstr ""
+
+#: frontend/views/guardians.php:89
+#: frontend/views/partials/enroll-form.php:41
+#: frontend/views/partials/enroll-form.php:42
+msgid "اسم العائلة"
+msgstr ""
+
+#: frontend/views/guardians.php:93
+#: frontend/views/partials/enroll-form.php:49
+#: frontend/views/partials/enroll-form.php:50
+msgid "نوع الهوية"
+msgstr ""
+
+#: frontend/views/guardians.php:129
+msgid "حفظ ولي الأمر"
+msgstr ""
+
+#: frontend/views/homework.php:15
+msgid "الواجب غير موجود"
+msgstr ""
+
+#: frontend/views/homework.php:19
+#: frontend/views/homework.php:20
+#: frontend/views/homework.php:109
+msgid "الواجبات"
+msgstr ""
+
+#: frontend/views/homework.php:29
+msgid "سلّموا"
+msgstr ""
+
+#: frontend/views/homework.php:33
+msgid "لم يسلّموا"
+msgstr ""
+
+#: frontend/views/homework.php:37
+msgid "منهم كانوا غائبين يوم الشرح"
+msgstr ""
+
+#: frontend/views/homework.php:43
+msgid "فرق مهم"
+msgstr ""
+
+#: frontend/views/homework.php:44
+msgid "طالب لم يحضر الشرح ليس كطالب كسِل — عامِلهما مختلفَين."
+msgstr ""
+
+#: frontend/views/homework.php:49
+#: frontend/views/homework.php:139
+msgid "التسليم"
+msgstr ""
+
+#: frontend/views/homework.php:55
+msgid "الإجابة"
+msgstr ""
+
+#: frontend/views/homework.php:66
+msgid "كان غائبًا يوم الشرح"
+msgstr ""
+
+#: frontend/views/homework.php:68
+msgid "لم يسلّم"
+msgstr ""
+
+#: frontend/views/homework.php:77
+msgid "فتح الإجابة"
+msgstr ""
+
+#: frontend/views/homework.php:109
+msgid "أسبوعية: تنزل آخر الأسبوع إلى «السابقة» ولا تُحذف — الغائب يحتاجها وأنت تحتاج سجلها."
+msgstr ""
+
+#: frontend/views/homework.php:109
+#: frontend/views/homework.php:162
+#: frontend/views/homework.php:163
+#: modules/learning/class-homework.php:83
+msgid "واجب جديد"
+msgstr ""
+
+#: frontend/views/homework.php:113
+msgid "واجبات الشعبة"
+msgstr ""
+
+#: frontend/views/homework.php:128
+msgid "لا توجد واجبات"
+msgstr ""
+
+#: frontend/views/homework.php:150
+msgid "التسليمات"
+msgstr ""
+
+#: frontend/views/homework.php:162
+msgid "يظهر في تطبيق الطالب فور نشره"
+msgstr ""
+
+#: frontend/views/homework.php:183
+msgid "— اختياري —"
+msgstr ""
+
+#: frontend/views/homework.php:196
+msgid "نوع الإجابة"
+msgstr ""
+
+#: frontend/views/homework.php:205
+msgid "تاريخ التسليم"
+msgstr ""
+
+#: frontend/views/homework.php:210
+msgid "يوم شرح الدرس"
+msgstr ""
+
+#: frontend/views/homework.php:216
+msgid "نص الواجب"
+msgstr ""
+
+#: frontend/views/homework.php:221
+msgid "مرفق"
+msgstr ""
+
+#: frontend/views/homework.php:225
+msgid "يوم الشرح يجعل النظام يميّز من لم يحضر الدرس عمّن تكاسل."
+msgstr ""
+
+#: frontend/views/homework.php:227
+msgid "نشر الواجب"
+msgstr ""
+
+#: frontend/views/hr.php:13
+msgid "العقود والإجازات"
+msgstr ""
+
+#: frontend/views/hr.php:14
+msgid "العقد يدخل الموظف في مسير الرواتب"
+msgstr ""
+
+#: frontend/views/hr.php:17
+#: frontend/views/hr.php:110
+msgid "طلب إجازة"
+msgstr ""
+
+#: frontend/views/hr.php:18
+#: frontend/views/hr.php:31
+msgid "إضافة عقد"
+msgstr ""
+
+#: frontend/views/hr.php:24
+msgid "عقود تنتهي خلال 60 يومًا"
+msgstr ""
+
+#: frontend/views/hr.php:31
+msgid "بدونه لا يدخل الموظف في مسير الرواتب"
+msgstr ""
+
+#: frontend/views/hr.php:32
+msgid "العقود"
+msgstr ""
+
+#: frontend/views/hr.php:34
+msgid "لا توجد عقود"
+msgstr ""
+
+#: frontend/views/hr.php:34
+msgid "أضف عقدًا لكل موظف ليدخل في مسير الرواتب."
+msgstr ""
+
+#: frontend/views/hr.php:39
+#: frontend/views/hr.php:73
+#: frontend/views/hr.php:120
+#: frontend/views/hr.php:179
+#: frontend/views/payroll.php:26
+#: frontend/views/perms.php:26
+#: frontend/views/perms.php:72
+#: frontend/views/staff-day.php:46
+#: frontend/views/staff-report.php:131
+msgid "الموظف"
+msgstr ""
+
+#: frontend/views/hr.php:42
+#: frontend/views/hr.php:123
+#: frontend/views/hr.php:199
+#: frontend/views/reports.php:22
+#: frontend/views/settings-years.php:21
+msgid "إلى"
+msgstr ""
+
+#: frontend/views/hr.php:43
+#: frontend/views/payroll.php:27
+msgid "الأساسي"
+msgstr ""
+
+#: frontend/views/hr.php:44
+#: frontend/views/hr.php:102
+#: frontend/views/payroll.php:28
+msgid "البدلات"
+msgstr ""
+
+#: frontend/views/hr.php:58
+msgid "ساري"
+msgstr ""
+
+#: frontend/views/hr.php:58
+msgid "منتهٍ"
+msgstr ""
+
+#: frontend/views/hr.php:82
+msgid "نوع العقد"
+msgstr ""
+
+#: frontend/views/hr.php:90
+msgid "بداية العقد"
+msgstr ""
+
+#: frontend/views/hr.php:94
+msgid "نهاية العقد"
+msgstr ""
+
+#: frontend/views/hr.php:98
+msgid "الراتب الأساسي"
+msgstr ""
+
+#: frontend/views/hr.php:106
+msgid "حفظ العقد"
+msgstr ""
+
+#: frontend/views/hr.php:110
+msgid "يُرفع للمدير للاعتماد"
+msgstr ""
+
+#: frontend/views/hr.php:111
+msgid "طلبات الإجازة"
+msgstr ""
+
+#: frontend/views/hr.php:112
+#, php-format
+msgid "%d طلب بانتظار القرار."
+msgstr ""
+
+#: frontend/views/hr.php:115
+#: frontend/views/leaves.php:22
+msgid "لا توجد طلبات"
+msgstr ""
+
+#: frontend/views/hr.php:124
+msgid "الأيام"
+msgstr ""
+
+#: frontend/views/hr.php:146
+msgid "معتمدة"
+msgstr ""
+
+#: frontend/views/hr.php:147
+msgid "مرفوضة"
+msgstr ""
+
+#: frontend/views/hr.php:155
+#: frontend/views/leaves.php:58
+#: frontend/views/meds.php:40
+#: modules/staff/class-bulk.php:55
+msgid "اعتماد"
+msgstr ""
+
+#: frontend/views/hr.php:155
+#: frontend/views/leaves.php:68
+#: frontend/views/meds.php:47
+#: modules/staff/class-bulk.php:59
+msgid "رفض"
+msgstr ""
+
+#: frontend/views/hr.php:187
+msgid "نوع الإجازة"
+msgstr ""
+
+#: frontend/views/hr.php:207
+msgid "تقديم الطلب"
+msgstr ""
+
+#. translators: %s: اسم المستخدم
+#: frontend/views/hub.php:13
+#, php-format
+msgid "أهلًا %s — اختر القسم الذي تريد العمل فيه."
+msgstr ""
+
+#. translators: %d: عدد الشاشات
+#: frontend/views/hub.php:29
+#, php-format
+msgid "%d شاشة"
+msgid_plural "%d شاشات"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/import.php:8
+msgid "استيراد الطلاب"
+msgstr ""
+
+#: frontend/views/import.php:11
+msgid "كيف يعمل"
+msgstr ""
+
+#: frontend/views/import.php:13
+msgid "نزّل القالب وعبّئه في Excel، ثم احفظه بصيغة CSV UTF-8."
+msgstr ""
+
+#: frontend/views/import.php:14
+msgid "ارفعه بدون تأكيد أولًا — النظام يفحص كل سطر ويعرض الأخطاء."
+msgstr ""
+
+#: frontend/views/import.php:15
+msgid "بعد اختفاء الأخطاء، ارفعه مع تفعيل «تأكيد الاستيراد»."
+msgstr ""
+
+#: frontend/views/import.php:17
+msgid "لا يوجد استيراد جزئي: إما ينجح الملف كاملًا أو يُرفض كاملًا."
+msgstr ""
+
+#: frontend/views/import.php:18
+msgid "تنزيل القالب"
+msgstr ""
+
+#: frontend/views/import.php:23
+msgid "تقرير الأخطاء"
+msgstr ""
+
+#: frontend/views/import.php:33
+msgid "رفع الملف"
+msgstr ""
+
+#: frontend/views/import.php:38
+msgid "ملف CSV"
+msgstr ""
+
+#: frontend/views/import.php:43
+msgid "تأكيد الاستيراد (بدونها يتم الفحص فقط)"
+msgstr ""
+
+#: frontend/views/import.php:45
+#: frontend/views/students-single.php:347
+msgid "رفع"
+msgstr ""
+
+#: frontend/views/import.php:49
+msgid "الجسر — الاستيراد من نور"
+msgstr ""
+
+#: frontend/views/import.php:51
+msgid "إضافة متصفح تقرأ الجدول المعروض أمامك في نور وترسله هنا. تقرأ ولا تكتب، وتعمل بضغطتك لا في الخلفية."
+msgstr ""
+
+#: frontend/views/import.php:58
+msgid "مفتاح الربط — انسخه الآن"
+msgstr ""
+
+#: frontend/views/import.php:59
+msgid "لن يظهر مرة أخرى. الصقه في الإضافة داخل المتصفح."
+msgstr ""
+
+#: frontend/views/import.php:61
+#: frontend/views/perms.php:269
+msgid "نسخ"
+msgstr ""
+
+#: frontend/views/import.php:78
+msgid "لا مفاتيح بعد."
+msgstr ""
+
+#: frontend/views/import.php:83
+msgid "الجهاز"
+msgstr ""
+
+#: frontend/views/import.php:84
+#: frontend/views/perms.php:134
+msgid "تنتهي في"
+msgstr ""
+
+#: frontend/views/import.php:85
+msgid "آخر استخدام"
+msgstr ""
+
+#: frontend/views/import.php:96
+msgid "لم يُستخدم"
+msgstr ""
+
+#: frontend/views/import.php:99
+msgid "إلغاء هذا المفتاح؟ سيتوقف الجهاز عن الإرسال فورًا."
+msgstr ""
+
+#: frontend/views/import.php:117
+msgid "اسم الجهاز — جهاز الوكيل مثلًا"
+msgstr ""
+
+#: frontend/views/import.php:118
+msgid "اسم الجهاز"
+msgstr ""
+
+#: frontend/views/import.php:119
+msgid "إصدار مفتاح"
+msgstr ""
+
+#: frontend/views/inbox.php:14
+#: frontend/views/nerve.php:79
+msgid "الأخصائية"
+msgstr ""
+
+#: frontend/views/inbox.php:18
+msgid "ما رفعه المعلمون، الأقدم أولًا. قابل الطالب أولًا ثم قرّر: تعالج، أو تتواصل، أو الاثنان."
+msgstr ""
+
+#: frontend/views/inbox.php:23
+msgid "الصندوق فارغ"
+msgstr ""
+
+#: frontend/views/inbox.php:24
+msgid "لا توجد ملاحظات بانتظار المعالجة."
+msgstr ""
+
+#. translators: 1: اسم المعلم 2: الشعبة
+#: frontend/views/inbox.php:46
+#: modules/attendance/class-staff-attendance.php:325
+#, php-format
+msgid "%1$s · %2$s"
+msgstr ""
+
+#. translators: %d: عدد الأيام
+#: frontend/views/inbox.php:54
+#, php-format
+msgid "مضى %d يوم"
+msgid_plural "مضى %d أيام"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/inbox.php:63
+msgid "ولي الأمر يعرف السبب"
+msgstr ""
+
+#: frontend/views/inbox.php:64
+msgid "ولي الأمر يطلب التواصل"
+msgstr ""
+
+#: frontend/views/inbox.php:65
+msgid "ولي الأمر لا يعرف السبب"
+msgstr ""
+
+#: frontend/views/inbox.php:79
+msgid "قابلتُ الطالب"
+msgstr ""
+
+#: frontend/views/inbox.php:89
+msgid "رسالة لولي الأمر — بصياغتك"
+msgstr ""
+
+#: frontend/views/inbox.php:90
+msgid "تواصل"
+msgstr ""
+
+#: frontend/views/inbox.php:100
+msgid "ما فعلته — يُقاس أثره بعد أسبوعين"
+msgstr ""
+
+#: frontend/views/insights.php:15
+msgid "حضور اليوم"
+msgstr ""
+
+#: frontend/views/insights.php:19
+#: modules/attendance/class-attendance.php:274
+msgid "غياب اليوم"
+msgstr ""
+
+#: frontend/views/insights.php:23
+msgid "نسبة التحصيل"
+msgstr ""
+
+#: frontend/views/insights.php:27
+msgid "مشترك في النقل"
+msgstr ""
+
+#: frontend/views/insights.php:31
+msgid "أوامر صيانة مفتوحة"
+msgstr ""
+
+#: frontend/views/insights.php:35
+msgid "بلاغات سلامة مفتوحة"
+msgstr ""
+
+#: frontend/views/insights.php:40
+msgid "طلاب يحتاجون متابعة"
+msgstr ""
+
+#: frontend/views/insights.php:41
+msgid "مبني على ثلاثة مؤشرات: الحضور، الأداء، السداد. القائمة أداة متابعة لا حكم على الطالب."
+msgstr ""
+
+#: frontend/views/insights.php:44
+msgid "لا يوجد طلاب ضمن مؤشرات المتابعة"
+msgstr ""
+
+#: frontend/views/insights.php:52
+msgid "المعدل"
+msgstr ""
+
+#: frontend/views/insights.php:53
+#: frontend/views/nerve.php:88
+msgid "المؤشرات"
+msgstr ""
+
+#: frontend/views/insights.php:68
+msgid "عاجل"
+msgstr ""
+
+#: frontend/views/insights.php:68
+msgid "منخفض"
+msgstr ""
+
+#: frontend/views/insights.php:81
+msgid "حضور الشعب — الأدنى أولًا"
+msgstr ""
+
+#: frontend/views/insights.php:86
+msgid "أيام مرصودة"
+msgstr ""
+
+#: frontend/views/insights.php:109
+msgid "التحصيل الشهري"
+msgstr ""
+
+#: frontend/views/inventory.php:10
+msgid "المستودع"
+msgstr ""
+
+#: frontend/views/inventory.php:13
+#: frontend/views/inventory.php:76
+#: frontend/views/inventory.php:77
+msgid "إضافة صنف"
+msgstr ""
+
+#: frontend/views/inventory.php:20
+msgid "أصناف تحت الحد الأدنى"
+msgstr ""
+
+#: frontend/views/inventory.php:28
+msgid "الأصناف"
+msgstr ""
+
+#: frontend/views/inventory.php:29
+msgid "الرصيد يُحسب من الحركات ولا يُدخل يدويًا."
+msgstr ""
+
+#: frontend/views/inventory.php:32
+msgid "المستودع فارغ"
+msgstr ""
+
+#: frontend/views/inventory.php:32
+msgid "أضف صنفًا ثم سجّل حركة إدخال."
+msgstr ""
+
+#: frontend/views/inventory.php:37
+msgid "الصنف"
+msgstr ""
+
+#: frontend/views/inventory.php:38
+#: frontend/views/inventory.php:83
+msgid "الوحدة"
+msgstr ""
+
+#: frontend/views/inventory.php:40
+#: frontend/views/inventory.php:84
+msgid "الحد الأدنى"
+msgstr ""
+
+#: frontend/views/inventory.php:59
+msgid "الصنف…"
+msgstr ""
+
+#: frontend/views/inventory.php:65
+msgid "إدخال"
+msgstr ""
+
+#: frontend/views/inventory.php:66
+msgid "صرف"
+msgstr ""
+
+#: frontend/views/inventory.php:67
+msgid "جرد (ضبط الرصيد)"
+msgstr ""
+
+#: frontend/views/inventory.php:69
+msgid "الكمية"
+msgstr ""
+
+#: frontend/views/inventory.php:71
+msgid "تسجيل الحركة"
+msgstr ""
+
+#: frontend/views/inventory.php:76
+msgid "يدخل المستودع بكميته الابتدائية"
+msgstr ""
+
+#: frontend/views/inventory.php:82
+msgid "اسم الصنف"
+msgstr ""
+
+#: frontend/views/journal.php:9
+msgid "القيود اليومية"
+msgstr ""
+
+#: frontend/views/journal.php:12
+msgid "كل القيود"
+msgstr ""
+
+#: frontend/views/journal.php:18
+#: frontend/views/journal.php:29
+#: frontend/views/journal.php:78
+#: frontend/views/journal.php:118
+#: frontend/views/ledger.php:46
+msgid "البيان"
+msgstr ""
+
+#: frontend/views/journal.php:20
+#: frontend/views/journal.php:93
+#: frontend/views/payroll.php:20
+#: frontend/views/payroll.php:85
+msgid "مرحّل"
+msgstr ""
+
+#: frontend/views/journal.php:20
+#: frontend/views/journal.php:93
+#: frontend/views/payroll.php:20
+#: frontend/views/payroll.php:85
+msgid "مسودة"
+msgstr ""
+
+#: frontend/views/journal.php:27
+#: frontend/views/journal.php:127
+#: frontend/views/ledger.php:47
+#: frontend/views/reports.php:71
+msgid "مدين"
+msgstr ""
+
+#: frontend/views/journal.php:28
+#: frontend/views/journal.php:128
+#: frontend/views/ledger.php:48
+#: frontend/views/reports.php:72
+msgid "دائن"
+msgstr ""
+
+#: frontend/views/journal.php:50
+msgid "ترحيل القيد"
+msgstr ""
+
+#: frontend/views/journal.php:53
+msgid "سيُنشأ قيد عكسي. القيود المرحّلة لا تُحذف. متابعة؟"
+msgstr ""
+
+#: frontend/views/journal.php:57
+msgid "عكس القيد"
+msgstr ""
+
+#: frontend/views/journal.php:69
+msgid "لا توجد قيود"
+msgstr ""
+
+#: frontend/views/journal.php:70
+msgid "القيود تُنشأ تلقائيًا عند إصدار فاتورة أو تسجيل دفعة، أو أدخلها يدويًا أدناه."
+msgstr ""
+
+#: frontend/views/journal.php:76
+msgid "رقم القيد"
+msgstr ""
+
+#: frontend/views/journal.php:105
+msgid "قيد يدوي"
+msgstr ""
+
+#: frontend/views/journal.php:106
+msgid "مجموع المدين يجب أن يساوي مجموع الدائن، وإلا رُفض القيد."
+msgstr ""
+
+#: frontend/views/journal.php:129
+msgid "بيان السطر"
+msgstr ""
+
+#: frontend/views/journal.php:136
+#: frontend/views/kg.php:54
+#: frontend/views/kg.php:63
+#: frontend/views/messages.php:34
+#: frontend/views/visitors.php:91
+msgid "—"
+msgstr ""
+
+#: frontend/views/journal.php:153
+msgid "حفظ كمسودة بلا ترحيل"
+msgstr ""
+
+#: frontend/views/journal.php:156
+msgid "حفظ القيد"
+msgstr ""
+
+#: frontend/views/kg.php:10
+msgid "رياض الأطفال"
+msgstr ""
+
+#: frontend/views/kg.php:15
+msgid "لا توجد شعب لرياض الأطفال"
+msgstr ""
+
+#: frontend/views/kg.php:16
+msgid "أنشئ شعبة بمرحلة «رياض أطفال» من الصفوف والشعب."
+msgstr ""
+
+#: frontend/views/kg.php:23
+msgid "لا درجات ولا اختبارات — وجبة، نوم، مزاج، نشاط. يصل إشعار لولي الأمر عند أول حفظ."
+msgstr ""
+
+#: frontend/views/kg.php:38
+msgid "لا يوجد أطفال في هذه الشعبة"
+msgstr ""
+
+#: frontend/views/kg.php:70
+msgid "النوم (دقيقة)"
+msgstr ""
+
+#: frontend/views/kg.php:75
+msgid "الأنشطة"
+msgstr ""
+
+#: frontend/views/kg.php:81
+msgid "ملاحظة لولي الأمر"
+msgstr ""
+
+#: frontend/views/kg.php:85
+msgid "حفظ التقرير"
+msgstr ""
+
+#: frontend/views/layout.php:56
+msgid "لوحة التحكم"
+msgstr ""
+
+#: frontend/views/layout.php:68
+msgid "طيّ الشريط الجانبي"
+msgstr ""
+
+#: frontend/views/layout.php:83
+msgid "حساب الإدارة"
+msgstr ""
+
+#: frontend/views/layout.php:95
+#: frontend/views/layout.php:97
+msgid "رجوع إلى النظام"
+msgstr ""
+
+#: frontend/views/layout.php:118
+msgid "الأقسام"
+msgstr ""
+
+#: frontend/views/layout.php:162
+msgid "القائمة"
+msgstr ""
+
+#: frontend/views/layout.php:171
+msgid "بحث وتنقّل سريع"
+msgstr ""
+
+#: frontend/views/layout.php:173
+msgid "ابحث أو انتقل…"
+msgstr ""
+
+#: frontend/views/layout.php:189
+#: frontend/views/layout.php:194
+msgid "ما ينتظرك"
+msgstr ""
+
+#: frontend/views/layout.php:200
+msgid "لا صلاحيات متابعة لديك."
+msgstr ""
+
+#: frontend/views/layout.php:201
+msgid "كل شيء تحت السيطرة — لا مهمة عاجلة."
+msgstr ""
+
+#: frontend/views/layout.php:228
+msgid "تعذّر إتمام العملية. راجع الحقول وحاول مرة أخرى."
+msgstr ""
+
+#: frontend/views/layout.php:232
+msgid "تم الحفظ."
+msgstr ""
+
+#: frontend/views/layout.php:237
+msgid "بيانات دخول الحساب الجديد"
+msgstr ""
+
+#. translators: %s: اسم صاحب الحساب
+#: frontend/views/layout.php:240
+#, php-format
+msgid "سلّمها الآن إلى %s. لن تظهر مرة أخرى، ولا يمكن استرجاعها لاحقًا."
+msgstr ""
+
+#: frontend/views/layout.php:282
+msgid "لوحة الأوامر"
+msgstr ""
+
+#: frontend/views/layout.php:286
+msgid "اكتب اسم قسم للانتقال…"
+msgstr ""
+
+#: frontend/views/layout.php:287
+msgid "بحث وتنقّل"
+msgstr ""
+
+#: frontend/views/layout.php:323
+msgid "لا نتائج"
+msgstr ""
+
+#: frontend/views/leaves.php:7
+msgid "إجازات الطلاب"
+msgstr ""
+
+#: frontend/views/leaves.php:8
+msgid "الاعتماد يُسكت إنذار الصباح، ويعفي الباص من الانتظار، ويرصد «غياب بعذر» تلقائيًا."
+msgstr ""
+
+#: frontend/views/leaves.php:16
+msgid "أو اضغط أولها ثم Shift مع آخرها لتحديد المدى"
+msgstr ""
+
+#: frontend/views/leaves.php:48
+msgid "فتح التقرير الطبي"
+msgstr ""
+
+#: frontend/views/leaves.php:67
+#: modules/staff/class-bulk.php:61
+msgid "سبب الرفض — إجباري"
+msgstr ""
+
+#: frontend/views/ledger.php:12
+msgid "دفتر الأستاذ"
+msgstr ""
+
+#: frontend/views/ledger.php:29
+msgid "لا توجد حسابات"
+msgstr ""
+
+#: frontend/views/ledger.php:32
+msgid "لا حركة على هذا الحساب"
+msgstr ""
+
+#: frontend/views/ledger.php:33
+msgid "تظهر الحركات هنا بعد ترحيل قيود تخصّه."
+msgstr ""
+
+#: frontend/views/ledger.php:38
+msgid "الرصيد الحالي:"
+msgstr ""
+
+#: frontend/views/ledger.php:45
+msgid "القيد"
+msgstr ""
+
+#: frontend/views/library.php:15
+#: frontend/views/library.php:85
+#: frontend/views/library.php:118
+msgid "إضافة كتاب"
+msgstr ""
+
+#: frontend/views/library.php:21
+msgid "الإعارات المفتوحة"
+msgstr ""
+
+#: frontend/views/library.php:23
+msgid "لا توجد إعارات"
+msgstr ""
+
+#: frontend/views/library.php:28
+#: frontend/views/library.php:65
+msgid "الكتاب"
+msgstr ""
+
+#: frontend/views/library.php:30
+msgid "تاريخ الإعارة"
+msgstr ""
+
+#: frontend/views/library.php:31
+msgid "الإرجاع"
+msgstr ""
+
+#: frontend/views/library.php:51
+msgid "إرجاع"
+msgstr ""
+
+#: frontend/views/library.php:66
+msgid "الكتاب…"
+msgstr ""
+
+#: frontend/views/library.php:74
+msgid "الطالب…"
+msgstr ""
+
+#: frontend/views/library.php:80
+msgid "إعارة"
+msgstr ""
+
+#: frontend/views/library.php:85
+msgid "يدخل المكتبة ويصير متاحًا للإعارة"
+msgstr ""
+
+#: frontend/views/library.php:86
+msgid "الكتب"
+msgstr ""
+
+#: frontend/views/library.php:88
+msgid "لا توجد كتب"
+msgstr ""
+
+#: frontend/views/library.php:88
+msgid "أضف كتابًا لتبدأ الإعارة."
+msgstr ""
+
+#: frontend/views/library.php:94
+#: frontend/views/library.php:116
+msgid "المؤلف"
+msgstr ""
+
+#: frontend/views/library.php:95
+msgid "النسخ"
+msgstr ""
+
+#: frontend/views/library.php:96
+msgid "المتاح"
+msgstr ""
+
+#: frontend/views/library.php:117
+msgid "عدد النسخ"
+msgstr ""
+
+#: frontend/views/login.php:12
+msgid "بوابة دخول الإدارة والموظفين"
+msgstr ""
+
+#: frontend/views/login.php:23
+msgid "اسم المستخدم أو البريد"
+msgstr ""
+
+#: frontend/views/login.php:34
+msgid "أبقني مسجّلًا"
+msgstr ""
+
+#: frontend/views/login.php:41
+msgid "نسيت كلمة المرور؟ راجع إدارة المدرسة لإعادة تعيينها."
+msgstr ""
+
+#: frontend/views/meds.php:14
+msgid "أدوية الطلاب"
+msgstr ""
+
+#: frontend/views/meds.php:15
+msgid "لا يُعطى الطفل دواء بلا إذن سارٍ من وليّه. وكل إعطاء يُسجَّل باسم من أعطاه."
+msgstr ""
+
+#: frontend/views/meds.php:19
+msgid "أذونات بانتظار المراجعة"
+msgstr ""
+
+#: frontend/views/meds.php:31
+msgid "فتح صورة الوصفة"
+msgstr ""
+
+#: frontend/views/meds.php:46
+msgid "سبب الرفض"
+msgstr ""
+
+#: frontend/views/meds.php:56
+msgid "جرعات اليوم"
+msgstr ""
+
+#: frontend/views/meds.php:59
+msgid "لا توجد جرعات اليوم"
+msgstr ""
+
+#: frontend/views/meds.php:64
+msgid "الموعد"
+msgstr ""
+
+#: frontend/views/meds.php:66
+msgid "الدواء"
+msgstr ""
+
+#: frontend/views/meds.php:90
+msgid "متأخرة"
+msgstr ""
+
+#: frontend/views/meds.php:102
+msgid "أُعطي"
+msgstr ""
+
+#: frontend/views/messages.php:11
+msgid "رسالة جديدة"
+msgstr ""
+
+#: frontend/views/messages.php:12
+msgid "تصل كإشعار داخل التطبيق لكل من تختاره."
+msgstr ""
+
+#: frontend/views/messages.php:24
+#: frontend/views/messages.php:60
+msgid "المستهدفون"
+msgstr ""
+
+#: frontend/views/messages.php:32
+msgid "الشعبة (عند اختيار شعبة)"
+msgstr ""
+
+#: frontend/views/messages.php:43
+#: modules/staff/class-bulk.php:37
+msgid "نص الرسالة"
+msgstr ""
+
+#: frontend/views/messages.php:47
+msgid "إرسال"
+msgstr ""
+
+#: frontend/views/messages.php:52
+msgid "الرسائل المرسلة"
+msgstr ""
+
+#: frontend/views/messages.php:54
+msgid "لم تُرسل رسائل بعد"
+msgstr ""
+
+#: frontend/views/messages.php:61
+msgid "المرسل"
+msgstr ""
+
+#: frontend/views/nerve.php:9
+msgid "المتابعة العميقة"
+msgstr ""
+
+#: frontend/views/nerve.php:15
+msgid "حالة اكتشفها النظام"
+msgstr ""
+
+#: frontend/views/nerve.php:19
+msgid "عولجت"
+msgstr ""
+
+#: frontend/views/nerve.php:23
+msgid "تحسّنت بعد المتابعة"
+msgstr ""
+
+#: frontend/views/nerve.php:27
+msgid "طالب بلا التفات"
+msgstr ""
+
+#: frontend/views/nerve.php:33
+msgid "طلاب لم يُذكروا منذ ثلاثة أسابيع"
+msgstr ""
+
+#: frontend/views/nerve.php:35
+msgid "في كل فصل طفل لا يشاغب فيُعاقَب ولا يتفوق فيُكرَّم. هذه قائمة انتباه لا قائمة اتهام — لا تظهر للمعلم ولا لولي الأمر."
+msgstr ""
+
+#: frontend/views/nerve.php:40
+msgid "لا يوجد طالب بلا التفات"
+msgstr ""
+
+#: frontend/views/nerve.php:41
+msgid "كل طالب ذُكر مرة على الأقل خلال ثلاثة أسابيع."
+msgstr ""
+
+#: frontend/views/nerve.php:49
+msgid "متوسط زملائه"
+msgstr ""
+
+#: frontend/views/nerve.php:62
+msgid "صفر تفاعل"
+msgstr ""
+
+#: frontend/views/nerve.php:73
+msgid "زمن الاستجابة"
+msgstr ""
+
+#: frontend/views/nerve.php:75
+msgid "من ظهور الإشارة إلى أول تصرف. يُعرض كوسيط لا كقائمة أفراد — الهدف كشف الاختناق لا محاسبة شخص."
+msgstr ""
+
+#: frontend/views/overview.php:20
+msgid "صباح الخير"
+msgstr ""
+
+#: frontend/views/overview.php:21
+msgid "طاب يومك"
+msgstr ""
+
+#: frontend/views/overview.php:21
+msgid "مساء الخير"
+msgstr ""
+
+#: frontend/views/overview.php:24
+msgid "إليك ما ينتظرك اليوم."
+msgstr ""
+
+#: frontend/views/overview.php:27
+msgid "إعداد النظام"
+msgstr ""
+
+#: frontend/views/overview.php:32
+msgid "لا توجد سنة دراسية نشطة — أنشئها من الإعدادات قبل أي شيء آخر."
+msgstr ""
+
+#: frontend/views/overview.php:41
+msgid "ما ينتظرك اليوم"
+msgstr ""
+
+#: frontend/views/overview.php:65
+msgid "كل شيء تحت السيطرة — لا مهمة عاجلة تنتظرك."
+msgstr ""
+
+#: frontend/views/overview.php:78
+msgid "شعبة"
+msgstr ""
+
+#: frontend/views/overview.php:99
+msgid "السجل الناقص لا يشتكي — فالنظام يشتكي عنه."
+msgstr ""
+
+#: frontend/views/overview.php:116
+msgid "إشغال الشعب"
+msgstr ""
+
+#. translators: 1: المشغول 2: السعة
+#: frontend/views/overview.php:120
+#, php-format
+msgid "%1$s من %2$s مقعدًا مشغول."
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:17
+#: frontend/views/partials/enroll-form.php:25
+msgid "بيانات الطالب"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:18
+#: frontend/views/partials/enroll-form.php:92
+#: frontend/views/students-single.php:279
+msgid "المستندات"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:19
+#: frontend/views/partials/enroll-form.php:107
+msgid "بيانات إضافية"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:20
+msgid "المراجعة"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:45
+#: frontend/views/partials/enroll-form.php:46
+msgid "الاسم بالإنجليزية"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:61
+#: frontend/views/partials/enroll-form.php:62
+#: frontend/views/student-print.php:200
+#: frontend/views/students-single.php:91
+msgid "الجنسية"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:65
+#: frontend/views/partials/enroll-form.php:66
+#: frontend/views/student-print.php:202
+#: frontend/views/students-single.php:93
+msgid "الجنس"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:67
+#: frontend/views/student-print.php:202
+#: frontend/views/students-single.php:93
+msgid "ذكر"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:68
+#: frontend/views/student-print.php:202
+#: frontend/views/students-single.php:93
+msgid "أنثى"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:76
+msgid "المرحلة والصف والفصل"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:84
+msgid "صورة الطالب"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:93
+msgid "JPG أو PNG أو PDF، وحتى 5 ميجابايت للملف. تُحفظ في مجلد محمي لا يُفتح برابط مباشر."
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:108
+msgid "كلها اختيارية. البيانات الصحية يراها المدير والصحة المدرسية فقط، وكل اطلاع عليها يُسجَّل."
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:126
+#: frontend/views/students-single.php:383
+msgid "حساسية"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:130
+#: frontend/views/students-single.php:387
+msgid "احتياجات خاصة"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:138
+msgid "الاشتراك في النقل"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:140
+msgid "غير مشترك"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:147
+#: frontend/views/transport-single.php:153
+msgid "رسوم النقل السنوية"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:153
+msgid "ملاحظات"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:160
+msgid "مراجعة البيانات"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:161
+msgid "عند الحفظ يُولَّد الرقم الأكاديمي ورقم الطالب ورمز QR والملف الشخصي الدائم."
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:168
+msgid "حفظ وتسجيل الطالب"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:227
+msgid "الملفات المرفقة"
+msgstr ""
+
+#: frontend/views/partials/enroll-form.php:229
+msgid "ملف"
+msgstr ""
+
+#: frontend/views/payroll.php:10
+msgid "الرواتب"
+msgstr ""
+
+#: frontend/views/payroll.php:13
+msgid "كل المسيّرات"
+msgstr ""
+
+#: frontend/views/payroll.php:18
+msgid "عدد الموظفين"
+msgstr ""
+
+#: frontend/views/payroll.php:29
+msgid "الخصومات"
+msgstr ""
+
+#: frontend/views/payroll.php:30
+msgid "الصافي"
+msgstr ""
+
+#: frontend/views/payroll.php:47
+msgid "الترحيل ينشئ قيدًا محاسبيًا ولا يمكن التراجع عنه. متابعة؟"
+msgstr ""
+
+#: frontend/views/payroll.php:51
+msgid "ترحيل المسير محاسبيًا"
+msgstr ""
+
+#: frontend/views/payroll.php:61
+msgid "لا توجد مسيّرات"
+msgstr ""
+
+#: frontend/views/payroll.php:62
+msgid "ولّد مسير الشهر من العقود النشطة."
+msgstr ""
+
+#: frontend/views/payroll.php:68
+msgid "الفترة"
+msgstr ""
+
+#: frontend/views/payroll.php:97
+msgid "توليد مسير"
+msgstr ""
+
+#: frontend/views/payroll.php:98
+msgid "يُحسب من العقود النشطة، وتُخصم أيام الإجازة بدون راتب تلقائيًا."
+msgstr ""
+
+#: frontend/views/payroll.php:110
+msgid "توليد"
+msgstr ""
+
+#: frontend/views/perms.php:15
+msgid "الدور قالب لا قيد: تختاره فتُفتح مفاتيحه، ثم تعدّل ما تشاء لهذا الشخص وحده."
+msgstr ""
+
+#: frontend/views/perms.php:18
+msgid "اختر موظفًا"
+msgstr ""
+
+#: frontend/views/perms.php:21
+#: frontend/views/staff-day.php:35
+msgid "لا يوجد موظفون"
+msgstr ""
+
+#: frontend/views/perms.php:29
+msgid "النطاق"
+msgstr ""
+
+#: frontend/views/perms.php:53
+msgid "تعديل"
+msgstr ""
+
+#: frontend/views/perms.php:67
+msgid "سجل تغييرات الصلاحيات"
+msgstr ""
+
+#: frontend/views/perms.php:68
+msgid "من منح ماذا لمن ومتى — في نظام فيه بيانات أطفال هذا ليس ترفًا."
+msgstr ""
+
+#: frontend/views/perms.php:73
+msgid "مُنح"
+msgstr ""
+
+#: frontend/views/perms.php:74
+msgid "سُحب"
+msgstr ""
+
+#: frontend/views/perms.php:75
+msgid "بيد"
+msgstr ""
+
+#: frontend/views/perms.php:76
+msgid "متى"
+msgstr ""
+
+#: frontend/views/perms.php:112
+msgid "صلاحيات مخصصة"
+msgstr ""
+
+#: frontend/views/perms.php:112
+msgid "يعمل بصلاحيات دوره"
+msgstr ""
+
+#: frontend/views/perms.php:123
+msgid "على مَن؟"
+msgstr ""
+
+#: frontend/views/perms.php:139
+msgid "ابدأ من قالب"
+msgstr ""
+
+#: frontend/views/perms.php:141
+msgid "— لا تغيير —"
+msgstr ""
+
+#: frontend/views/perms.php:150
+msgid "ابحث عن صلاحية…"
+msgstr ""
+
+#: frontend/views/perms.php:156
+msgid "حفظ الصلاحيات"
+msgstr ""
+
+#: frontend/views/perms.php:161
+msgid "الفئات"
+msgstr ""
+
+#: frontend/views/perms.php:253
+msgid "أدوات سريعة"
+msgstr ""
+
+#: frontend/views/perms.php:260
+msgid "انسخ صلاحيات من…"
+msgstr ""
+
+#: frontend/views/perms.php:272
+msgid "سيعود لصلاحيات دوره الافتراضية. متابعة؟"
+msgstr ""
+
+#: frontend/views/perms.php:276
+msgid "العودة لصلاحيات الدور"
+msgstr ""
+
+#: frontend/views/referrals.php:7
+msgid "إحالات الصحة المدرسية"
+msgstr ""
+
+#: frontend/views/referrals.php:8
+msgid "الإحالة ليست إشعارًا — لا يخرج شيء لولي الأمر حتى ترى الممرضة الطالب."
+msgstr ""
+
+#: frontend/views/referrals.php:12
+msgid "لا توجد إحالات"
+msgstr ""
+
+#. translators: %d: عدد الدقائق
+#: frontend/views/referrals.php:23
+#, php-format
+msgid "منذ %d دقيقة"
+msgid_plural "منذ %d دقيقة"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/referrals.php:36
+msgid "فصيلة الدم:"
+msgstr ""
+
+#. translators: %s: اسم المعلم
+#: frontend/views/referrals.php:48
+#, php-format
+msgid "أحاله: %s"
+msgstr ""
+
+#: frontend/views/referrals.php:57
+msgid "تسجيل الزيارة"
+msgstr ""
+
+#: frontend/views/referrals.php:67
+msgid "النتيجة — بلا تشخيص ولا اسم مرض"
+msgstr ""
+
+#: frontend/views/referrals.php:68
+msgid "إغلاق الإحالة"
+msgstr ""
+
+#: frontend/views/reports.php:16
+msgid "التقارير المالية"
+msgstr ""
+
+#: frontend/views/reports.php:29
+msgid "قائمة الدخل"
+msgstr ""
+
+#: frontend/views/reports.php:32
+msgid "لا توجد حركة في الفترة"
+msgstr ""
+
+#: frontend/views/reports.php:37
+msgid "الإيرادات"
+msgstr ""
+
+#: frontend/views/reports.php:41
+msgid "إجمالي الإيرادات"
+msgstr ""
+
+#: frontend/views/reports.php:43
+msgid "المصروفات"
+msgstr ""
+
+#: frontend/views/reports.php:47
+msgid "إجمالي المصروفات"
+msgstr ""
+
+#: frontend/views/reports.php:53
+msgid "صافي الربح"
+msgstr ""
+
+#: frontend/views/reports.php:53
+msgid "صافي الخسارة"
+msgstr ""
+
+#: frontend/views/reports.php:60
+msgid "ميزان المراجعة"
+msgstr ""
+
+#: frontend/views/reports.php:61
+msgid "حتى تاريخ"
+msgstr ""
+
+#: frontend/views/reports.php:64
+msgid "لا توجد قيود مرحّلة"
+msgstr ""
+
+#: frontend/views/reports.php:95
+msgid "الميزان غير متوازن — راجع القيود المرحّلة."
+msgstr ""
+
+#: frontend/views/reports.php:98
+msgid "الميزان متوازن."
+msgstr ""
+
+#: frontend/views/rollover.php:22
+msgid "ترقية العام الدراسي"
+msgstr ""
+
+#: frontend/views/rollover.php:23
+msgid "افتح عامًا جديدًا ورقِّ الطلاب دفعةً واحدة — بدل إعادة تسجيل كل طالب يدويًا."
+msgstr ""
+
+#: frontend/views/rollover.php:26
+msgid "عملية كبيرة تُنشئ تسجيلات العام الجديد ولا تمسّ العام الحالي. جرّبها على نسخة احتياطية أولًا، وهي آمنة للإعادة — من رُقّي لا يُكرَّر."
+msgstr ""
+
+#: frontend/views/rollover.php:33
+#: frontend/views/rollover.php:34
+msgid "من سنة"
+msgstr ""
+
+#: frontend/views/rollover.php:41
+#: frontend/views/rollover.php:42
+msgid "إلى سنة"
+msgstr ""
+
+#: frontend/views/rollover.php:49
+msgid "معاينة"
+msgstr ""
+
+#: frontend/views/rollover.php:55
+msgid "تحتاج سنتين دراسيتين"
+msgstr ""
+
+#: frontend/views/rollover.php:56
+msgid "أنشئ سنة العام القادم من الإعدادات ثم عُد لهذه الشاشة."
+msgstr ""
+
+#: frontend/views/rollover.php:59
+msgid "سنة المصدر والهدف متطابقتان — اختر سنتين مختلفتين."
+msgstr ""
+
+#: frontend/views/rollover.php:61
+msgid "تنفيذ الترقية الآن؟ تأكّد أنك اخترت السنة الصحيحة."
+msgstr ""
+
+#: frontend/views/rollover.php:67
+msgid "خريطة الترقية"
+msgstr ""
+
+#: frontend/views/rollover.php:68
+msgid "لكل صف: اكتب اسمه في العام القادم (مثلًا «الأول» ← «الثاني»)، أو علّم «يتخرّج» للصف المنتهي فلا يُرقَّى."
+msgstr ""
+
+#: frontend/views/rollover.php:74
+msgid "الصف الحالي"
+msgstr ""
+
+#: frontend/views/rollover.php:75
+msgid "طلاب"
+msgstr ""
+
+#: frontend/views/rollover.php:76
+#: frontend/views/rollover.php:88
+msgid "الصف في العام القادم"
+msgstr ""
+
+#: frontend/views/rollover.php:77
+msgid "يتخرّج"
+msgstr ""
+
+#: frontend/views/rollover.php:102
+msgid "تنفيذ الترقية"
+msgstr ""
+
+#: frontend/views/rollover.php:105
+msgid "لا صفوف في سنة المصدر"
+msgstr ""
+
+#: frontend/views/safety.php:9
+msgid "الأمن والسلامة"
+msgstr ""
+
+#: frontend/views/safety.php:19
+msgid "البلاغات"
+msgstr ""
+
+#: frontend/views/safety.php:21
+msgid "لا توجد بلاغات"
+msgstr ""
+
+#: frontend/views/safety.php:28
+#: frontend/views/safety.php:82
+msgid "الخطورة"
+msgstr ""
+
+#: frontend/views/safety.php:42
+msgid "مغلق"
+msgstr ""
+
+#: frontend/views/safety.php:42
+msgid "مفتوح"
+msgstr ""
+
+#: frontend/views/safety.php:63
+msgid "تسجيل بلاغ سلامة"
+msgstr ""
+
+#: frontend/views/safety.php:63
+msgid "يصل للمدير فورًا"
+msgstr ""
+
+#: frontend/views/safety.php:91
+msgid "التفاصيل"
+msgstr ""
+
+#: frontend/views/safety.php:94
+msgid "حفظ البلاغ"
+msgstr ""
+
+#: frontend/views/settings-day.php:11
+msgid "مواعيد الحضور والتنبيهات"
+msgstr ""
+
+#: frontend/views/settings-day.php:12
+msgid "التوقيت هو ما يجعل النظام يحسب التأخّر ويطلق الإنذارات وحده — دون تدخّل يومي."
+msgstr ""
+
+#: frontend/views/settings-day.php:18
+msgid "مواعيد الحضور"
+msgstr ""
+
+#: frontend/views/settings-day.php:19
+msgid "من تجاوز الموعد + دقائق التسامح يُسجَّل «متأخرًا» عند المسح تلقائيًا."
+msgstr ""
+
+#: frontend/views/settings-day.php:26
+#: frontend/views/settings-day.php:27
+msgid "بدء دوام الطالب"
+msgstr ""
+
+#: frontend/views/settings-day.php:28
+#: frontend/views/settings-day.php:29
+msgid "بدء دوام الموظف"
+msgstr ""
+
+#: frontend/views/settings-day.php:30
+#: frontend/views/settings-day.php:31
+msgid "دقائق التسامح"
+msgstr ""
+
+#: frontend/views/settings-day.php:32
+#: frontend/views/settings-day.php:33
+msgid "نهاية الدوام"
+msgstr ""
+
+#: frontend/views/settings-day.php:35
+msgid "حفظ المواعيد"
+msgstr ""
+
+#: frontend/views/settings-day.php:43
+msgid "الإنذارات والتنبيهات"
+msgstr ""
+
+#: frontend/views/settings-day.php:44
+msgid "حدود الحارس الآلي: متى يُنبَّه على من لم يصعد الباص، أو لم يدخل، أو لم يُرصد حضوره."
+msgstr ""
+
+#: frontend/views/settings-day.php:51
+#: frontend/views/settings-day.php:52
+msgid "آخر موعد لصعود الباص"
+msgstr ""
+
+#: frontend/views/settings-day.php:53
+#: frontend/views/settings-day.php:54
+msgid "يجب الوصول للمدرسة قبل"
+msgstr ""
+
+#: frontend/views/settings-day.php:55
+#: frontend/views/settings-day.php:56
+msgid "يجب رصد الحضور قبل"
+msgstr ""
+
+#: frontend/views/settings-day.php:57
+#: frontend/views/settings-day.php:58
+msgid "وقت الانصراف"
+msgstr ""
+
+#: frontend/views/settings-day.php:59
+msgid "تنبيه «ما زال في المدرسة» بعد (دقيقة)"
+msgstr ""
+
+#: frontend/views/settings-day.php:60
+msgid "تنبيه ما زال في المدرسة بعد كم دقيقة"
+msgstr ""
+
+#: frontend/views/settings-day.php:61
+msgid "مهلة إحالة العيادة (دقيقة)"
+msgstr ""
+
+#: frontend/views/settings-day.php:62
+msgid "مهلة إحالة العيادة بالدقائق"
+msgstr ""
+
+#: frontend/views/settings-day.php:64
+msgid "حفظ الحدود"
+msgstr ""
+
+#: frontend/views/settings-years.php:8
+msgid "السنوات الدراسية"
+msgstr ""
+
+#: frontend/views/settings-years.php:9
+msgid "كل شعبة وتسجيل مرتبط بسنة. السنة النشطة هي التي تعمل عليها كل الشاشات."
+msgstr ""
+
+#: frontend/views/settings-years.php:13
+msgid "لا توجد سنة دراسية"
+msgstr ""
+
+#: frontend/views/settings-years.php:14
+msgid "أنشئ السنة الحالية لتبدأ في إضافة الشعب والطلاب."
+msgstr ""
+
+#: frontend/views/settings-years.php:19
+msgid "السنة"
+msgstr ""
+
+#: frontend/views/settings-years.php:32
+#: frontend/views/settings.php:83
+msgid "السنة النشطة"
+msgstr ""
+
+#: frontend/views/settings-years.php:38
+msgid "تفعيل"
+msgstr ""
+
+#: frontend/views/settings-years.php:53
+msgid "اسم السنة"
+msgstr ""
+
+#: frontend/views/settings-years.php:55
+#: frontend/views/settings-years.php:56
+msgid "تاريخ البداية"
+msgstr ""
+
+#: frontend/views/settings-years.php:57
+#: frontend/views/settings-years.php:58
+msgid "تاريخ النهاية"
+msgstr ""
+
+#: frontend/views/settings-years.php:60
+msgid "إضافة سنة"
+msgstr ""
+
+#: frontend/views/settings.php:11
+msgid "بيانات المدرسة"
+msgstr ""
+
+#: frontend/views/settings.php:12
+msgid "تظهر هذه البيانات على البطاقات والشهادات والتقارير المطبوعة، وفي رأس كل شاشة."
+msgstr ""
+
+#. translators: %d: عدد الجداول
+#: frontend/views/settings.php:18
+msgid "جدول واحد لم يُنشأ في قاعدة البيانات"
+msgid_plural "%d جداول لم تُنشأ في قاعدة البيانات"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/settings.php:21
+msgid "كل عملية على هذه الجداول ستفشل. حدّث الإضافة أو راجع صلاحيات قاعدة البيانات."
+msgstr ""
+
+#: frontend/views/settings.php:32
+msgid "الملف التعريفي"
+msgstr ""
+
+#: frontend/views/settings.php:33
+msgid "اسم المدرسة ووسائل التواصل والرقم الوزاري."
+msgstr ""
+
+#: frontend/views/settings.php:40
+#: frontend/views/settings.php:41
+#: modules/staff/class-flow.php:140
+msgid "اسم المدرسة"
+msgstr ""
+
+#: frontend/views/settings.php:42
+#: frontend/views/settings.php:43
+msgid "جوال المدرسة"
+msgstr ""
+
+#: frontend/views/settings.php:46
+#: frontend/views/settings.php:47
+msgid "الرقم الوزاري"
+msgstr ""
+
+#: frontend/views/settings.php:51
+msgid "حفظ البيانات"
+msgstr ""
+
+#: frontend/views/settings.php:61
+msgid "حالة النظام"
+msgstr ""
+
+#: frontend/views/settings.php:62
+msgid "لمحة سريعة على سلامة التركيب."
+msgstr ""
+
+#: frontend/views/settings.php:67
+msgid "إصدار النظام"
+msgstr ""
+
+#: frontend/views/settings.php:71
+msgid "قاعدة البيانات"
+msgstr ""
+
+#: frontend/views/settings.php:73
+msgid "سليمة"
+msgstr ""
+
+#. translators: %d: عدد الجداول
+#: frontend/views/settings.php:77
+msgid "جدول ناقص"
+msgid_plural "%d جداول ناقصة"
+msgstr[0] ""
+msgstr[1] ""
+
+#: frontend/views/staff-badges.php:28
+msgid "بطاقات الموظفين"
+msgstr ""
+
+#: frontend/views/staff-badges.php:29
+msgid "بطاقة كبطاقة الطالب — يمسحها الموظف عند البوابة فيُسجَّل حضوره. الباركود يحمل رمزًا عشوائيًا لا رقمه الوظيفي."
+msgstr ""
+
+#: frontend/views/staff-badges.php:38
+msgid "كل الأدوار"
+msgstr ""
+
+#: frontend/views/staff-badges.php:69
+msgid "كل بطاقات الموظفين طُبعت من قبل."
+msgstr ""
+
+#: frontend/views/staff-badges.php:70
+msgid "لا موظفين نشطين لعرض بطاقاتهم."
+msgstr ""
+
+#: frontend/views/staff-badges.php:127
+msgid "لا رمز"
+msgstr ""
+
+#: frontend/views/staff-day.php:21
+msgid "حضور المعلمين"
+msgstr ""
+
+#: frontend/views/staff-day.php:22
+msgid "البوابة رصدت الأغلب برمز البطاقة — غيّر الاستثناءات من القائمة ثم احفظ. رصد الغياب يولّد مقترحات الاحتياط تلقائيًا."
+msgstr ""
+
+#: frontend/views/staff-day.php:47
+msgid "الوظيفة"
+msgstr ""
+
+#: frontend/views/staff-day.php:78
+msgid "إجازة معتمدة — لا تُعدّل هنا"
+msgstr ""
+
+#: frontend/views/staff-report.php:13
+msgid "تقرير حضور الموظفين"
+msgstr ""
+
+#: frontend/views/staff-report.php:14
+msgid "انضباط الموظفين شهرًا كاملًا. الأرقام لكل موظف مع نفسه — لا ترتيب ولا مقارنة تُشهِّر بأحد."
+msgstr ""
+
+#: frontend/views/staff-report.php:56
+msgid "عودة للكشف"
+msgstr ""
+
+#: frontend/views/staff-report.php:79
+msgid "متوسط وقت الحضور"
+msgstr ""
+
+#: frontend/views/staff-report.php:115
+msgid "كل الموظفين"
+msgstr ""
+
+#. translators: 1: عدد الموظفين 2: وسيط دقائق التأخّر
+#: frontend/views/staff-report.php:118
+#, php-format
+msgid "%1$s موظفًا · وسيط التأخّر %2$s د"
+msgstr ""
+
+#: frontend/views/staff-report.php:126
+msgid "لا موظفين نشطين"
+msgstr ""
+
+#: frontend/views/student-print.php:149
+msgid "طباعة أو حفظ PDF"
+msgstr ""
+
+#: frontend/views/student-print.php:150
+msgid "رجوع للملف"
+msgstr ""
+
+#: frontend/views/student-print.php:151
+msgid "من نافذة الطباعة اختر «حفظ كـPDF» للتحميل"
+msgstr ""
+
+#: frontend/views/student-print.php:159
+msgid "ملف الطالب — وثيقة رسمية"
+msgstr ""
+
+#: frontend/views/student-print.php:196
+msgid "البيانات الأساسية"
+msgstr ""
+
+#: frontend/views/student-print.php:198
+#: frontend/views/students-single.php:89
+msgid "رقم الطالب"
+msgstr ""
+
+#: frontend/views/student-print.php:205
+#: frontend/views/students-single.php:95
+msgid "الصف والفصل"
+msgstr ""
+
+#: frontend/views/student-print.php:206
+#: frontend/views/students-single.php:96
+msgid "تاريخ التسجيل"
+msgstr ""
+
+#: frontend/views/student-print.php:211
+msgid "لا يوجد ولي أمر مرتبط."
+msgstr ""
+
+#: frontend/views/student-print.php:237
+#: frontend/views/students-single.php:495
+#: frontend/views/transport-single.php:105
+#: frontend/views/transport-single.php:144
+msgid "نقطة التوقف"
+msgstr ""
+
+#: frontend/views/student-print.php:238
+msgid "الرسوم السنوية"
+msgstr ""
+
+#: frontend/views/student-print.php:243
+msgid "توقيع ولي الأمر"
+msgstr ""
+
+#: frontend/views/student-print.php:244
+msgid "ختم وتوقيع إدارة المدرسة"
+msgstr ""
+
+#: frontend/views/students-single.php:54
+#: frontend/views/students-single.php:55
+msgid "تنزيل وثيقة A4"
+msgstr ""
+
+#: frontend/views/students-single.php:76
+msgid "غير مسجَّل"
+msgstr ""
+
+#: frontend/views/students-single.php:114
+msgid "دخول الطالب للتطبيق"
+msgstr ""
+
+#: frontend/views/students-single.php:117
+msgid "اسم المستخدم هو حرف s متبوعًا برقمه الأكاديمي. ولّد كلمة مرور جديدة وسلّمها له."
+msgstr ""
+
+#: frontend/views/students-single.php:118
+msgid "لا حساب لهذا الطالب بعد — ستُنشئه الضغطة."
+msgstr ""
+
+#: frontend/views/students-single.php:128
+msgid "كلمة مرور جديدة"
+msgstr ""
+
+#: frontend/views/students-single.php:129
+msgid "إنشاء حساب الطالب"
+msgstr ""
+
+#: frontend/views/students-single.php:135
+msgid "خطوات إكمال الملف"
+msgstr ""
+
+#: frontend/views/students-single.php:142
+msgid "نسبة الحضور — 60 يومًا"
+msgstr ""
+
+#: frontend/views/students-single.php:150
+msgid "المتبقي من الرسوم (ر.س)"
+msgstr ""
+
+#: frontend/views/students-single.php:162
+msgid "الأداء بالمواد"
+msgstr ""
+
+#: frontend/views/students-single.php:174
+msgid "الخط الزمني"
+msgstr ""
+
+#: frontend/views/students-single.php:202
+msgid "نقل"
+msgstr ""
+
+#: frontend/views/students-single.php:211
+msgid "لا يوجد ولي أمر مرتبط"
+msgstr ""
+
+#: frontend/views/students-single.php:212
+msgid "بلا ربط لن يستطيع أحد متابعة الطالب من التطبيق."
+msgstr ""
+
+#: frontend/views/students-single.php:239
+msgid "فك الارتباط؟"
+msgstr ""
+
+#: frontend/views/students-single.php:258
+#: frontend/views/students.php:149
+msgid "ولي الأمر"
+msgstr ""
+
+#: frontend/views/students-single.php:259
+msgid "اختر ولي أمر…"
+msgstr ""
+
+#: frontend/views/students-single.php:270
+msgid "ربط"
+msgstr ""
+
+#: frontend/views/students-single.php:280
+msgid "مخزّنة خارج المجلد العام. كل فتح لمستند يُسجَّل في سجل النظام."
+msgstr ""
+
+#: frontend/views/students-single.php:282
+#: frontend/views/students-single.php:330
+msgid "رفع مستند"
+msgstr ""
+
+#: frontend/views/students-single.php:288
+msgid "المستند"
+msgstr ""
+
+#: frontend/views/students-single.php:289
+#: frontend/views/students-single.php:344
+#: frontend/views/students.php:186
+#: frontend/views/students.php:187
+msgid "الملف"
+msgstr ""
+
+#: frontend/views/students-single.php:290
+msgid "الحجم"
+msgstr ""
+
+#: frontend/views/students-single.php:308
+msgid "غير مرفوع"
+msgstr ""
+
+#: frontend/views/students-single.php:314
+msgid "حذف المستند؟"
+msgstr ""
+
+#: frontend/views/students-single.php:330
+msgid "يُخزَّن خارج المجلد العام، ويُسجَّل كل فتح له في سجل النظام"
+msgstr ""
+
+#: frontend/views/students-single.php:336
+msgid "نوع المستند"
+msgstr ""
+
+#: frontend/views/students-single.php:356
+#: frontend/views/students-single.php:363
+msgid "السجل الصحي"
+msgstr ""
+
+#: frontend/views/students-single.php:357
+msgid "يراه المدير والصحة المدرسية فقط — لا المعلم ولا السائق ولا المحاسب."
+msgstr ""
+
+#: frontend/views/students-single.php:359
+msgid "تعديل السجل الصحي"
+msgstr ""
+
+#: frontend/views/students-single.php:363
+msgid "يراه المدير والصحة المدرسية فقط"
+msgstr ""
+
+#: frontend/views/students-single.php:391
+msgid "حفظ السجل الصحي"
+msgstr ""
+
+#: frontend/views/students-single.php:402
+#: frontend/views/students-single.php:422
+msgid "الذاكرة عبر السنوات"
+msgstr ""
+
+#: frontend/views/students-single.php:403
+msgid "ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم — بدل ثلاثة أشهر تكتشفها فيها."
+msgstr ""
+
+#: frontend/views/students-single.php:405
+msgid "تعديل الذاكرة"
+msgstr ""
+
+#. translators: %s: اسم السنة
+#: frontend/views/students-single.php:412
+#, php-format
+msgid "من العام السابق — %s"
+msgstr ""
+
+#: frontend/views/students-single.php:422
+msgid "ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم"
+msgstr ""
+
+#: frontend/views/students-single.php:432
+msgid "مثال: يستجيب للمدح الفردي أمام مجموعة صغيرة"
+msgstr ""
+
+#: frontend/views/students-single.php:445
+msgid "وقائعية لا وصفية: «يستجيب للمدح الفردي» نعم، «طفل صعب» لا."
+msgstr ""
+
+#: frontend/views/students-single.php:454
+msgid "الملاحظات"
+msgstr ""
+
+#: frontend/views/students-single.php:458
+msgid "التصنيف"
+msgstr ""
+
+#: frontend/views/students-single.php:459
+msgid "الملاحظة"
+msgstr ""
+
+#: frontend/views/students-single.php:460
+msgid "كاتبها"
+msgstr ""
+
+#: frontend/views/students-single.php:461
+msgid "الأثر"
+msgstr ""
+
+#: frontend/views/students-single.php:473
+msgid "تحسّن"
+msgstr ""
+
+#: frontend/views/students-single.php:475
+msgid "كما هو"
+msgstr ""
+
+#. translators: %s: عدد الطلاب
+#: frontend/views/students.php:49
+#, php-format
+msgid "%s طالبًا نشطًا"
+msgstr ""
+
+#: frontend/views/students.php:53
+msgid "تسجيل طالب"
+msgstr ""
+
+#: frontend/views/students.php:74
+msgid "الاسم أو الرقم الأكاديمي أو رقم الهوية"
+msgstr ""
+
+#: frontend/views/students.php:92
+msgid "كل الصفوف"
+msgstr ""
+
+#: frontend/views/students.php:129
+msgid "لا طلاب هنا"
+msgstr ""
+
+#: frontend/views/students.php:131
+msgid "لا نتائج تطابق التصفية. جرّب مسحها."
+msgstr ""
+
+#: frontend/views/students.php:132
+msgid "سجّل أول طالب لتبدأ."
+msgstr ""
+
+#: frontend/views/students.php:139
+msgid "أو اضغط أولها ثم Shift مع آخرها"
+msgstr ""
+
+#: frontend/views/students.php:207
+msgid "تسجيل طالب جديد"
+msgstr ""
+
+#: frontend/views/students.php:207
+msgid "أربع خطوات — والملف يُكمَل لاحقًا"
+msgstr ""
+
+#: frontend/views/subjects.php:14
+#: frontend/views/subjects.php:145
+#: modules/staff/class-flow.php:158
+msgid "المواد الدراسية"
+msgstr ""
+
+#: frontend/views/subjects.php:17
+#: frontend/views/subjects.php:144
+msgid "إضافة مادة"
+msgstr ""
+
+#: frontend/views/subjects.php:25
+msgid "مواد الشعبة ومعلموها"
+msgstr ""
+
+#: frontend/views/subjects.php:43
+#: frontend/views/timetable.php:85
+msgid "المعلم"
+msgstr ""
+
+#: frontend/views/subjects.php:62
+msgid "المادة…"
+msgstr ""
+
+#: frontend/views/subjects.php:68
+#: frontend/views/subjects.php:133
+msgid "بلا معلم"
+msgstr ""
+
+#: frontend/views/subjects.php:73
+msgid "إسناد"
+msgstr ""
+
+#: frontend/views/subjects.php:78
+msgid "الجدول الأسبوعي"
+msgstr ""
+
+#: frontend/views/subjects.php:79
+msgid "النظام يمنع إسناد المعلم لشعبتين في نفس الحصة."
+msgstr ""
+
+#: frontend/views/subjects.php:84
+msgid "الحصة"
+msgstr ""
+
+#: frontend/views/subjects.php:138
+msgid "وضع الحصة"
+msgstr ""
+
+#: frontend/views/subjects.php:144
+#: modules/staff/class-flow.php:159
+msgid "تُربط بالجدول والدرجات والواجبات"
+msgstr ""
+
+#: frontend/views/subjects.php:147
+msgid "لا توجد مواد"
+msgstr ""
+
+#: frontend/views/subjects.php:147
+msgid "أضف المواد ثم أسندها للشعب."
+msgstr ""
+
+#: frontend/views/subjects.php:159
+msgid "اسم المادة"
+msgstr ""
+
+#: frontend/views/subjects.php:160
+msgid "الرمز (اختياري)"
+msgstr ""
+
+#: frontend/views/timetable.php:10
+msgid "بناء الجدول"
+msgstr ""
+
+#: frontend/views/timetable.php:11
+msgid "مسودة ← اعتماد المدير ← نشر. لا يراه المعلمون قبل النشر — فلا يستيقظ أحد على جدول تغيّر ثلاث مرات ليلًا."
+msgstr ""
+
+#: frontend/views/timetable.php:26
+msgid "جاهزية الجدول"
+msgstr ""
+
+#: frontend/views/timetable.php:31
+msgid "حصة مجدولة"
+msgstr ""
+
+#: frontend/views/timetable.php:35
+msgid "تعارض معلم"
+msgstr ""
+
+#: frontend/views/timetable.php:39
+msgid "حصة بلا معلم"
+msgstr ""
+
+#: frontend/views/timetable.php:48
+msgid "إرسال للاعتماد"
+msgstr ""
+
+#: frontend/views/timetable.php:50
+msgid "يُرفض الإرسال إن بقي تعارض أو حصة بلا معلم."
+msgstr ""
+
+#: frontend/views/timetable.php:57
+msgid "اعتماد ونشر"
+msgstr ""
+
+#: frontend/views/timetable.php:62
+msgid "سيعود الجدول لمسودة ويختفي عن المعلمين. متابعة؟"
+msgstr ""
+
+#: frontend/views/timetable.php:65
+msgid "إعادة لمسودة"
+msgstr ""
+
+#: frontend/views/timetable.php:76
+msgid "النصاب"
+msgstr ""
+
+#: frontend/views/timetable.php:77
+msgid "تكتشف الظلم وأنت تبني، لا بعد شهرين من الشكاوى."
+msgstr ""
+
+#: frontend/views/timetable.php:80
+msgid "لا توجد حصص مجدولة"
+msgstr ""
+
+#: frontend/views/timetable.php:86
+msgid "حصصه"
+msgstr ""
+
+#: frontend/views/timetable.php:87
+msgid "نصابه"
+msgstr ""
+
+#: frontend/views/timetable.php:99
+msgid "فوق النصاب"
+msgstr ""
+
+#: frontend/views/timetable.php:101
+msgid "ضمن النصاب"
+msgstr ""
+
+#: frontend/views/timetable.php:112
+msgid "تحرير الجدول الأسبوعي"
+msgstr ""
+
+#: frontend/views/transport-single.php:7
+msgid "المسار غير موجود"
+msgstr ""
+
+#: frontend/views/transport-single.php:15
+msgid "كل المسارات"
+msgstr ""
+
+#: frontend/views/transport-single.php:19
+msgid "تشغيل رحلة اليوم"
+msgstr ""
+
+#: frontend/views/transport-single.php:20
+msgid "فتح الرحلة يسمح للسائق بمسح الطلاب من تطبيقه."
+msgstr ""
+
+#: frontend/views/transport-single.php:35
+#: frontend/views/transport.php:71
+#: modules/staff/class-flow.php:112
+msgid "نقاط التوقف"
+msgstr ""
+
+#: frontend/views/transport-single.php:37
+msgid "أضف النقاط بالترتيب الذي يمر به الباص."
+msgstr ""
+
+#: frontend/views/transport-single.php:45
+msgid "الإحداثيات"
+msgstr ""
+
+#: frontend/views/transport-single.php:56
+msgid "حذف النقطة؟"
+msgstr ""
+
+#: frontend/views/transport-single.php:75
+msgid "اسم النقطة"
+msgstr ""
+
+#: frontend/views/transport-single.php:79
+msgid "وقت المرور"
+msgstr ""
+
+#: frontend/views/transport-single.php:83
+msgid "خط العرض"
+msgstr ""
+
+#: frontend/views/transport-single.php:87
+msgid "خط الطول"
+msgstr ""
+
+#: frontend/views/transport-single.php:91
+msgid "إضافة نقطة"
+msgstr ""
+
+#: frontend/views/transport-single.php:96
+msgid "الطلاب المشتركون"
+msgstr ""
+
+#: frontend/views/transport-single.php:98
+msgid "لا يوجد مشتركون"
+msgstr ""
+
+#: frontend/views/transport-single.php:119
+msgid "إلغاء الاشتراك"
+msgstr ""
+
+#: frontend/views/transport-single.php:137
+msgid "اختر طالبًا…"
+msgstr ""
+
+#: frontend/views/transport-single.php:157
+msgid "اشتراك"
+msgstr ""
+
+#. translators: 1: عدد المسارات 2: عدد الباصات
+#: frontend/views/transport.php:16
+#, php-format
+msgid "%1$s مسارًا · %2$s باصًا"
+msgstr ""
+
+#: frontend/views/transport.php:24
+#: frontend/views/transport.php:156
+#: frontend/views/transport.php:187
+msgid "إضافة باص"
+msgstr ""
+
+#: frontend/views/transport.php:25
+#: frontend/views/transport.php:125
+#: frontend/views/transport.php:152
+msgid "إضافة مسار"
+msgstr ""
+
+#: frontend/views/transport.php:32
+msgid "المسارات والباصات"
+msgstr ""
+
+#: frontend/views/transport.php:45
+msgid "خطوات تجهيز المسار"
+msgstr ""
+
+#: frontend/views/transport.php:50
+msgid "استمارات على وشك الانتهاء"
+msgstr ""
+
+#: frontend/views/transport.php:58
+msgid "المسارات"
+msgstr ""
+
+#: frontend/views/transport.php:61
+msgid "لا توجد مسارات"
+msgstr ""
+
+#: frontend/views/transport.php:62
+msgid "أضف باصًا ثم مسارًا بالأزرار أعلى الشاشة، ثم اشترك الطلاب فيه."
+msgstr ""
+
+#: frontend/views/transport.php:70
+#: frontend/views/transport.php:144
+#: frontend/views/trips.php:22
+msgid "الاتجاه"
+msgstr ""
+
+#: frontend/views/transport.php:72
+msgid "المشتركون"
+msgstr ""
+
+#: frontend/views/transport.php:81
+#: frontend/views/transport.php:146
+msgid "ذهاب وعودة"
+msgstr ""
+
+#: frontend/views/transport.php:94
+msgid "الباصات"
+msgstr ""
+
+#: frontend/views/transport.php:96
+msgid "لا توجد باصات"
+msgstr ""
+
+#: frontend/views/transport.php:101
+msgid "اللوحة"
+msgstr ""
+
+#: frontend/views/transport.php:102
+#: frontend/views/transport.php:166
+msgid "الموديل"
+msgstr ""
+
+#: frontend/views/transport.php:104
+#: frontend/views/transport.php:174
+msgid "السائق"
+msgstr ""
+
+#: frontend/views/transport.php:125
+msgid "النقاط وإحداثياتها تُضاف بعد الإنشاء"
+msgstr ""
+
+#: frontend/views/transport.php:131
+msgid "اسم المسار"
+msgstr ""
+
+#: frontend/views/transport.php:132
+msgid "حي النرجس"
+msgstr ""
+
+#: frontend/views/transport.php:137
+msgid "بلا باص"
+msgstr ""
+
+#: frontend/views/transport.php:147
+msgid "ذهاب فقط"
+msgstr ""
+
+#: frontend/views/transport.php:148
+msgid "عودة فقط"
+msgstr ""
+
+#: frontend/views/transport.php:156
+msgid "اللوحة والسعة والسائق"
+msgstr ""
+
+#: frontend/views/transport.php:176
+msgid "بلا سائق"
+msgstr ""
+
+#: frontend/views/trips.php:15
+msgid "افتح رحلة من صفحة المسار."
+msgstr ""
+
+#: frontend/views/trips.php:39
+msgid "منتهية"
+msgstr ""
+
+#: frontend/views/trips.php:44
+msgid "ستُغلق الرحلة. تأكد أن كل الطلاب نزلوا. متابعة؟"
+msgstr ""
+
+#: frontend/views/trips.php:48
+msgid "إنهاء"
+msgstr ""
+
+#: frontend/views/trips.php:62
+msgid "كشف الرحلة"
+msgstr ""
+
+#: frontend/views/trips.php:64
+msgid "آخر موقع:"
+msgstr ""
+
+#: frontend/views/trips.php:71
+msgid "الصعود"
+msgstr ""
+
+#: frontend/views/trips.php:72
+msgid "النزول"
+msgstr ""
+
+#: frontend/views/trips.php:79
+msgid "لم يصعد"
+msgstr ""
+
+#: frontend/views/visitors.php:13
+msgid "تسجيل زائر"
+msgstr ""
+
+#: frontend/views/visitors.php:20
+msgid "زائر داخل المدرسة الآن"
+msgstr ""
+
+#: frontend/views/visitors.php:33
+msgid "الزائر"
+msgstr ""
+
+#: frontend/views/visitors.php:36
+msgid "الدخول"
+msgstr ""
+
+#: frontend/views/visitors.php:37
+msgid "الخروج"
+msgstr ""
+
+#: frontend/views/visitors.php:66
+#: frontend/views/visitors.php:67
+msgid "تسجيل دخول زائر"
+msgstr ""
+
+#: frontend/views/visitors.php:66
+msgid "يُسجَّل خروجه بضغطة عند مغادرته"
+msgstr ""
+
+#: frontend/views/visitors.php:89
+msgid "الطالب المعني"
+msgstr ""
+
+#: includes/class-activator.php:1400
+msgid "محاسب"
+msgstr ""
+
+#: includes/class-activator.php:1404
+msgid "مشرف نقل"
+msgstr ""
+
+#: includes/class-activator.php:1420
+#: modules/staff/class-flow.php:164
+msgid "مدير المدرسة"
+msgstr ""
+
+#: includes/class-activator.php:1426
+msgid "مشرف مرحلة"
+msgstr ""
+
+#: includes/class-activator.php:1432
+msgid "وكيل الشؤون التعليمية"
+msgstr ""
+
+#: includes/class-activator.php:1440
+msgid "منسق المحتوى التعليمي"
+msgstr ""
+
+#: includes/class-activator.php:1444
+msgid "أخصائي اجتماعي"
+msgstr ""
+
+#: includes/class-activator.php:1449
+msgid "حارس البوابة"
+msgstr ""
+
+#: includes/class-activator.php:1453
+msgid "موظف إداري"
+msgstr ""
+
+#: includes/class-activator.php:1466
+msgid "مسؤول الموارد البشرية والعمليات"
+msgstr ""
+
+#: includes/functions.php:164
+msgid "اعتمد الاحتياط المقترح"
+msgstr ""
+
+#: includes/functions.php:166
+msgid "صندوق الصحة المدرسية"
+msgstr ""
+
+#: includes/functions.php:168
+msgid "إذن دواء بانتظار العيادة"
+msgstr ""
+
+#: includes/functions.php:203
+#: includes/functions.php:246
+msgid "غياب بعذر"
+msgstr ""
+
+#: includes/functions.php:204
+msgid "في إجازة"
+msgstr ""
+
+#: includes/functions.php:251
+msgid "أحد"
+msgstr ""
+
+#: includes/functions.php:251
+msgid "اثنين"
+msgstr ""
+
+#: includes/functions.php:251
+msgid "ثلاثاء"
+msgstr ""
+
+#: includes/functions.php:252
+msgid "أربعاء"
+msgstr ""
+
+#: includes/functions.php:252
+msgid "خميس"
+msgstr ""
+
+#: includes/functions.php:252
+msgid "جمعة"
+msgstr ""
+
+#: includes/functions.php:252
+msgid "سبت"
+msgstr ""
+
+#: modules/academic/class-academic.php:18
+msgid "اسم السنة وتاريخا البداية والنهاية مطلوبة."
+msgstr ""
+
+#: modules/academic/class-academic.php:21
+msgid "تاريخ البداية يجب أن يسبق تاريخ النهاية."
+msgstr ""
+
+#: modules/academic/class-academic.php:33
+msgid "هذه السنة مسجّلة مسبقًا."
+msgstr ""
+
+#: modules/academic/class-academic.php:113
+msgid "أنشئ سنة دراسية أولًا من الإعدادات."
+msgstr ""
+
+#: modules/academic/class-academic.php:116
+msgid "المرحلة والصف والشعبة مطلوبة."
+msgstr ""
+
+#: modules/academic/class-academic.php:131
+msgid "هذه الشعبة موجودة في هذه السنة."
+msgstr ""
+
+#: modules/academic/class-academic.php:210
+msgid "لا يمكن حذف شعبة فيها طلاب. انقلهم أولًا."
+msgstr ""
+
+#: modules/academic/class-assessment.php:15
+msgid "اسم المادة مطلوب."
+msgstr ""
+
+#: modules/academic/class-assessment.php:26
+msgid "رمز المادة مستخدم."
+msgstr ""
+
+#: modules/academic/class-assessment.php:66
+#: modules/academic/class-assessment.php:129
+msgid "الشعبة أو المادة غير موجودة."
+msgstr ""
+
+#: modules/academic/class-assessment.php:126
+msgid "اليوم أو رقم الحصة غير صحيح."
+msgstr ""
+
+#. translators: 1: الصف 2: الشعبة
+#: modules/academic/class-assessment.php:149
+#, php-format
+msgid "المعلم مشغول في هذه الحصة مع %1$s / %2$s."
+msgstr ""
+
+#: modules/academic/class-assessment.php:228
+msgid "العنوان والشعبة والمادة مطلوبة."
+msgstr ""
+
+#: modules/academic/class-assessment.php:332
+msgid "الاختبار غير موجود."
+msgstr ""
+
+#. translators: %s: الدرجة العظمى
+#: modules/academic/class-assessment.php:345
+#, php-format
+msgid "الدرجة يجب أن تكون بين 0 و %s."
+msgstr ""
+
+#: modules/academic/class-assessment.php:408
+msgid "ممتاز مرتفع"
+msgstr ""
+
+#: modules/academic/class-assessment.php:409
+msgid "ممتاز"
+msgstr ""
+
+#: modules/academic/class-assessment.php:410
+msgid "جيد جدًا مرتفع"
+msgstr ""
+
+#: modules/academic/class-assessment.php:411
+msgid "جيد جدًا"
+msgstr ""
+
+#: modules/academic/class-assessment.php:412
+msgid "جيد مرتفع"
+msgstr ""
+
+#: modules/academic/class-assessment.php:413
+msgid "جيد"
+msgstr ""
+
+#: modules/academic/class-assessment.php:414
+msgid "مقبول"
+msgstr ""
+
+#: modules/academic/class-assessment.php:415
+msgid "راسب"
+msgstr ""
+
+#: modules/academic/class-certificates.php:49
+msgid "نوع الشهادة غير معروف."
+msgstr ""
+
+#: modules/academic/class-certificates.php:55
+#: modules/clinic/class-medication.php:41
+#: modules/clinic/class-medication.php:376
+#: modules/enrollment/class-enrollment.php:636
+#: modules/finance/class-finance.php:81
+#: modules/guardians/class-guardians.php:188
+#: modules/kg/class-kg.php:35
+#: modules/notes/class-notes.php:54
+#: modules/services/class-services.php:17
+msgid "الطالب غير موجود."
+msgstr ""
+
+#. translators: %s: رسالة قاعدة البيانات
+#: modules/academic/class-certificates.php:85
+#, php-format
+msgid "تعذّر إصدار الشهادة — %s"
+msgstr ""
+
+#: modules/academic/class-certificates.php:88
+msgid "تعذّر إصدار الشهادة."
+msgstr ""
+
+#: modules/academic/class-certificates.php:97
+msgid "شهادة جديدة"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: نوع الشهادة
+#: modules/academic/class-certificates.php:100
+#, php-format
+msgid "حصل %1$s على %2$s"
+msgstr ""
+
+#: modules/academic/class-rollover.php:52
+msgid "اختر سنة مصدر وسنة هدف مختلفتين."
+msgstr ""
+
+#: modules/academic/class-rollover.php:57
+msgid "لا صفوف في سنة المصدر."
+msgstr ""
+
+#: modules/academic/class-rollover.php:118
+msgid "تعذّر إنشاء شعبة الهدف."
+msgstr ""
+
+#: modules/academic/class-rollover.php:140
+msgid "تعذّر ترقية أحد الطلاب."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:42
+msgid "الرمز والاسم والنوع مطلوبة."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:56
+msgid "رمز الحساب مستخدم."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:221
+msgid "وصف القيد مطلوب."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:237
+msgid "السطر الواحد إما مدين أو دائن، لا الاثنين."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:240
+msgid "حساب غير موجود في أحد السطور."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:255
+msgid "القيد يحتاج سطرين على الأقل."
+msgstr ""
+
+#. translators: 1: مجموع المدين 2: مجموع الدائن
+#: modules/accounting/class-accounting.php:260
+#, php-format
+msgid "القيد غير متوازن: المدين %1$s والدائن %2$s."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:300
+msgid "تعذّر إنشاء القيد — أعد المحاولة."
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/accounting/class-accounting.php:312
+#, php-format
+msgid "تعذّر حفظ سطور القيد: %s"
+msgstr ""
+
+#: modules/accounting/class-accounting.php:331
+#: modules/accounting/class-accounting.php:352
+msgid "القيد غير موجود."
+msgstr ""
+
+#: modules/accounting/class-accounting.php:355
+msgid "القيد غير مرحّل."
+msgstr ""
+
+#. translators: %s: رقم القيد الأصلي
+#: modules/accounting/class-accounting.php:372
+#, php-format
+msgid "عكس القيد رقم %s"
+msgstr ""
+
+#. translators: %d: رقم الفاتورة
+#: modules/accounting/class-accounting.php:532
+#, php-format
+msgid "إثبات رسوم — فاتورة رقم %d"
+msgstr ""
+
+#. translators: %d: رقم الفاتورة
+#: modules/accounting/class-accounting.php:559
+#, php-format
+msgid "تحصيل دفعة — فاتورة رقم %d"
+msgstr ""
+
+#: modules/attendance/class-attendance.php:64
+#: modules/attendance/class-staff-attendance.php:159
+msgid "حالة الحضور غير صحيحة."
+msgstr ""
+
+#: modules/attendance/class-attendance.php:67
+msgid "التاريخ غير صحيح."
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: التاريخ
+#: modules/attendance/class-attendance.php:277
+#, php-format
+msgid "سُجّل غياب %1$s بتاريخ %2$s."
+msgstr ""
+
+#: modules/attendance/class-attendance.php:405
+msgid "العنوان والنص مطلوبان."
+msgstr ""
+
+#: modules/attendance/class-attendance.php:408
+msgid "الفئة المستهدفة غير صحيحة."
+msgstr ""
+
+#. translators: %d: عدد المستقبلين
+#: modules/attendance/class-attendance.php:433
+#, php-format
+msgid "أُرسلت الرسالة إلى %d مستخدمًا."
+msgstr ""
+
+#: modules/attendance/class-staff-attendance.php:316
+#, php-format
+msgid "انصرف · %s"
+msgstr ""
+
+#. translators: 1: الحالة 2: دقائق التأخّر
+#: modules/attendance/class-staff-attendance.php:320
+#, php-format
+msgid "%1$s · %2$s د"
+msgstr ""
+
+#: modules/clinic/class-medication.php:44
+msgid "اسم الدواء والجرعة مطلوبان."
+msgstr ""
+
+#: modules/clinic/class-medication.php:47
+msgid "اختر موعدًا واحدًا على الأقل."
+msgstr ""
+
+#: modules/clinic/class-medication.php:83
+msgid "إذن دواء بانتظار المراجعة"
+msgstr ""
+
+#: modules/clinic/class-medication.php:99
+msgid "الإذن غير موجود."
+msgstr ""
+
+#: modules/clinic/class-medication.php:129
+msgid "اعتُمد إذن الدواء"
+msgstr ""
+
+#: modules/clinic/class-medication.php:155
+msgid "لم يُعتمد إذن الدواء"
+msgstr ""
+
+#: modules/clinic/class-medication.php:200
+msgid "الجرعة غير موجودة."
+msgstr ""
+
+#: modules/clinic/class-medication.php:203
+msgid "الإذن غير سارٍ."
+msgstr ""
+
+#. translators: %s: وقت الإعطاء
+#: modules/clinic/class-medication.php:208
+#, php-format
+msgid "أُعطيت هذه الجرعة الساعة %s."
+msgstr ""
+
+#: modules/clinic/class-medication.php:221
+msgid "أُعطي الدواء"
+msgstr ""
+
+#: modules/clinic/class-medication.php:263
+msgid "جرعة دواء تأخرت"
+msgstr ""
+
+#: modules/clinic/class-medication.php:379
+msgid "اختر سبب الإجازة."
+msgstr ""
+
+#: modules/clinic/class-medication.php:386
+msgid "تواريخ الإجازة غير صحيحة."
+msgstr ""
+
+#. translators: %d: عدد الأيام
+#: modules/clinic/class-medication.php:393
+#, php-format
+msgid "يمكن تقديم العذر خلال %d أيام من الغياب."
+msgstr ""
+
+#: modules/clinic/class-medication.php:408
+msgid "يوجد طلب يغطي هذه الفترة."
+msgstr ""
+
+#: modules/clinic/class-medication.php:448
+#: modules/hr/class-hr.php:162
+msgid "القرار غير صحيح."
+msgstr ""
+
+#: modules/clinic/class-medication.php:453
+#: modules/hr/class-hr.php:167
+msgid "الطلب غير موجود."
+msgstr ""
+
+#: modules/clinic/class-medication.php:456
+#: modules/staff/class-bulk.php:292
+msgid "اكتب سبب الرفض — الرفض الصامت يدفع ولي الأمر للاتصال."
+msgstr ""
+
+#: modules/clinic/class-medication.php:481
+msgid "اعتُمدت الإجازة"
+msgstr ""
+
+#: modules/clinic/class-medication.php:482
+msgid "لم تُعتمد الإجازة"
+msgstr ""
+
+#: modules/custody/class-alerts.php:66
+msgid "كل خمس دقائق"
+msgstr ""
+
+#: modules/custody/class-alerts.php:156
+msgid "لم يُسجَّل صعوده للباص"
+msgstr ""
+
+#: modules/custody/class-alerts.php:163
+msgid "لم يصعد الباص"
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: modules/custody/class-alerts.php:166
+#, php-format
+msgid "لم يُسجَّل صعود %s للباص. هل هو معك اليوم؟"
+msgstr ""
+
+#: modules/custody/class-alerts.php:197
+msgid "صعد الباص ولم يدخل المدرسة"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: وقت الصعود
+#: modules/custody/class-alerts.php:200
+#, php-format
+msgid "%1$s — آخر رصد: %2$s. تحقّق من الباص فورًا."
+msgstr ""
+
+#: modules/custody/class-alerts.php:230
+msgid "طلاب بلا رصد حضور"
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: modules/custody/class-alerts.php:233
+#, php-format
+msgid "%d طالب لم يُرصد حضوره ولا غيابه."
+msgid_plural "%d طلاب لم يُرصد حضورهم ولا غيابهم."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: عدد الموظفين
+#: modules/custody/class-alerts.php:278
+#, php-format
+msgid "%d موظف لم يُسجَّل حضوره بعد."
+msgid_plural "%d موظفين لم يُسجَّل حضورهم بعد."
+msgstr[0] ""
+msgstr[1] ""
+
+#: modules/custody/class-alerts.php:295
+msgid "ما زال في المدرسة بعد الانصراف"
+msgstr ""
+
+#: modules/custody/class-alerts.php:330
+msgid "إحالة صحية لم تُفتح"
+msgstr ""
+
+#: modules/custody/class-alerts.php:365
+msgid "إنذار مفتوح منذ يوم"
+msgstr ""
+
+#: modules/custody/class-alerts.php:375
+msgid "إنذار لم يُستلم"
+msgstr ""
+
+#: modules/custody/class-alerts.php:435
+msgid "زال السبب تلقائيًا"
+msgstr ""
+
+#: modules/custody/class-alerts.php:466
+msgid "اكتب سبب الإغلاق."
+msgstr ""
+
+#: modules/custody/class-custody.php:122
+msgid "نقطة التحقق غير معروفة."
+msgstr ""
+
+#: modules/custody/class-custody.php:125
+#: modules/transport/class-transport.php:383
+msgid "client_uuid مطلوب."
+msgstr ""
+
+#: modules/custody/class-custody.php:135
+msgid "انتهت صلاحية الرمز — اطلب من الطالب تحديث شاشته."
+msgstr ""
+
+#: modules/custody/class-custody.php:136
+#: modules/transport/class-transport.php:391
+msgid "لم يُتعرَّف على الطالب."
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/custody/class-custody.php:213
+#, php-format
+msgid "تعذّر تسجيل الحركة: %s"
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/custody/class-custody.php:227
+#, php-format
+msgid "تعذّر تحديث حالة الطالب: %s"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: الحالة الحالية
+#: modules/custody/class-custody.php:252
+#, php-format
+msgid "%1$s حالته الآن «%2$s» — هذه العملية غير ممكنة."
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: modules/custody/class-custody.php:263
+#, php-format
+msgid "%s غير مشترك في النقل المدرسي."
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: modules/custody/class-custody.php:274
+#, php-format
+msgid "%s في مرحلة تتطلب تحديد من استلمه."
+msgstr ""
+
+#: modules/custody/class-custody.php:280
+msgid "الخروج المبكر يتطلب تحديد المستلم."
+msgstr ""
+
+#: modules/custody/class-custody.php:308
+#: modules/transport/class-transport.php:807
+msgid "تم تسليم الطالب"
+msgstr ""
+
+#: modules/custody/class-custody.php:310
+msgid "خروج مبكر"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: اسم المستلم
+#: modules/custody/class-custody.php:313
+#, php-format
+msgid "غادر %1$s المدرسة — استلمه: %2$s"
+msgstr ""
+
+#: modules/custody/class-custody.php:320
+msgid "خرج من البوابة"
+msgstr ""
+
+#. translators: 1: عدد الحصص 2: النطاق
+#: modules/deputy/class-deputy.php:186
+#, php-format
+msgid "%1$d حصة في %2$s تحتاج بديلًا."
+msgstr ""
+
+#: modules/deputy/class-deputy.php:195
+msgid "حصص تحتاج بديلًا"
+msgstr ""
+
+#. translators: %d: عدد الحصص
+#: modules/deputy/class-deputy.php:198
+msgid "حصة واحدة في نطاقك."
+msgid_plural "%d حصص في نطاقك."
+msgstr[0] ""
+msgstr[1] ""
+
+#: modules/deputy/class-deputy.php:263
+msgid "الحصة غير موجودة."
+msgstr ""
+
+#: modules/deputy/class-deputy.php:266
+msgid "اختر معلمًا."
+msgstr ""
+
+#: modules/deputy/class-deputy.php:279
+msgid "حصة احتياط"
+msgstr ""
+
+#. translators: 1: الحصة 2: الشعبة
+#: modules/deputy/class-deputy.php:282
+#, php-format
+msgid "أُسندت إليك الحصة %1$d — %2$s اليوم."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:125
+msgid "لم يُرفع ملف."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:138
+msgid "الملفات المقبولة: JPG أو PNG أو PDF."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:146
+msgid "تعذّر حفظ الملف."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:310
+msgid "لا تملك صلاحية السجل الصحي."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:364
+msgid "أجزاء الاسم الأربعة مطلوبة."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:370
+#: modules/guardians/class-guardians.php:66
+msgid "رقم الهوية أو الإقامة يجب أن يكون 10 أرقام."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:375
+msgid "تاريخ الميلاد غير صحيح."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:380
+msgid "اختر الفصل الدراسي."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:435
+msgid "تعذّر توليد رقم أكاديمي فريد — أعد المحاولة."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:512
+msgid "تم تسليمه"
+msgstr ""
+
+#. translators: %s: حالة الحضور
+#: modules/enrollment/class-enrollment.php:529
+#, php-format
+msgid "الحضور: %s"
+msgstr ""
+
+#. translators: %s: المبلغ
+#: modules/enrollment/class-enrollment.php:568
+#, php-format
+msgid "سداد دفعة — %s"
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:578
+msgid "تسجيل في المدرسة"
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:653
+msgid "تعذّر إنشاء حساب الطالب."
+msgstr ""
+
+#: modules/enrollment/class-enrollment.php:663
+msgid "حساب الطالب غير موجود."
+msgstr ""
+
+#: modules/finance/class-finance.php:30
+#: modules/nerve/class-nerve.php:395
+#: modules/org/class-org.php:263
+#: modules/transport/class-transport.php:193
+msgid "لا توجد سنة دراسية نشطة."
+msgstr ""
+
+#: modules/finance/class-finance.php:33
+msgid "اسم الخطة ومبلغ أكبر من صفر مطلوبان."
+msgstr ""
+
+#: modules/finance/class-finance.php:84
+msgid "خطة الرسوم غير موجودة."
+msgstr ""
+
+#: modules/finance/class-finance.php:96
+msgid "للطالب فاتورة قائمة بنفس الخطة لهذه السنة."
+msgstr ""
+
+#: modules/finance/class-finance.php:120
+msgid "تقسيط المدرسة يمنحه المدير أو الوكيل — لا يُفتح من المحاسبة."
+msgstr ""
+
+#: modules/finance/class-finance.php:127
+msgid "اكتب سبب منح التقسيط."
+msgstr ""
+
+#: modules/finance/class-finance.php:161
+msgid "تعذّر إصدار الفاتورة."
+msgstr ""
+
+#: modules/finance/class-finance.php:193
+msgid "تعذّر إنشاء الأقساط."
+msgstr ""
+
+#: modules/finance/class-finance.php:306
+#: modules/finance/class-finance.php:352
+#: modules/finance/class-finance.php:481
+#: modules/finance/class-finance.php:563
+msgid "الفاتورة غير موجودة."
+msgstr ""
+
+#: modules/finance/class-finance.php:309
+#: modules/finance/class-finance.php:356
+msgid "الفاتورة ملغاة."
+msgstr ""
+
+#: modules/finance/class-finance.php:312
+msgid "المبلغ يجب أن يكون أكبر من صفر."
+msgstr ""
+
+#. translators: %s: المبلغ المتبقي
+#: modules/finance/class-finance.php:319
+#: modules/finance/class-finance.php:364
+#, php-format
+msgid "المبلغ يتجاوز المتبقي (%s ر.س)."
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/finance/class-finance.php:396
+#, php-format
+msgid "تعذّر تسجيل الدفعة: %s"
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/finance/class-finance.php:425
+#, php-format
+msgid "تعذّر توزيع الدفعة: %s"
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/finance/class-finance.php:443
+#: modules/finance/class-finance.php:614
+#, php-format
+msgid "تعذّر تحديث الفاتورة: %s"
+msgstr ""
+
+#: modules/finance/class-finance.php:469
+msgid "سبب الإلغاء مطلوب."
+msgstr ""
+
+#: modules/finance/class-finance.php:485
+msgid "الفاتورة ملغاة أصلًا."
+msgstr ""
+
+#: modules/finance/class-finance.php:489
+msgid "لا تُلغى فاتورة عليها دفعات — استردّها أولًا."
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/finance/class-finance.php:501
+#, php-format
+msgid "تعذّر إلغاء الفاتورة: %s"
+msgstr ""
+
+#: modules/finance/class-finance.php:538
+msgid "سبب الاسترداد مطلوب."
+msgstr ""
+
+#: modules/finance/class-finance.php:550
+msgid "الدفعة غير موجودة."
+msgstr ""
+
+#: modules/finance/class-finance.php:554
+msgid "الدفعة مستردّة أصلًا."
+msgstr ""
+
+#. translators: %s: رسالة الخطأ من القاعدة
+#: modules/finance/class-finance.php:577
+#, php-format
+msgid "تعذّر الاسترداد: %s"
+msgstr ""
+
+#: modules/finance/class-finance.php:584
+msgid "تعذّر تحديث الأقساط."
+msgstr ""
+
+#: modules/finance/class-finance.php:599
+msgid "تعذّر إعادة توزيع الأقساط."
+msgstr ""
+
+#: modules/finance/class-finance.php:721
+msgid "استلام دفعة"
+msgstr ""
+
+#. translators: 1: المبلغ المدفوع 2: المتبقي
+#: modules/finance/class-finance.php:724
+#, php-format
+msgid "استُلم مبلغ %1$s ر.س. المتبقي %2$s ر.س."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:55
+msgid "اسم ولي الأمر مطلوب."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:58
+msgid "رقم الجوال مطلوب — هو وسيلة الدخول للتطبيق."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:61
+msgid "رقم الجوال مسجّل لولي أمر آخر."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:69
+msgid "رقم الهوية مسجّل لولي أمر آخر."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:77
+#: modules/staff/class-staff.php:53
+msgid "البريد مسجّل لمستخدم آخر."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:134
+msgid "تعذّر إنشاء وليّ الأمر — أعد المحاولة."
+msgstr ""
+
+#: modules/guardians/class-guardians.php:198
+msgid "ولي الأمر مرتبط بهذا الطالب مسبقًا."
+msgstr ""
+
+#: modules/hr/class-hr.php:32
+#: modules/staff/class-perms.php:298
+#: modules/staff/class-staff.php:110
+#: modules/staff/class-staff.php:152
+msgid "الموظف غير موجود."
+msgstr ""
+
+#: modules/hr/class-hr.php:35
+msgid "تاريخ بداية العقد مطلوب."
+msgstr ""
+
+#: modules/hr/class-hr.php:40
+msgid "تاريخ النهاية يجب أن يلي تاريخ البداية."
+msgstr ""
+
+#: modules/hr/class-hr.php:118
+msgid "تاريخا الإجازة مطلوبان."
+msgstr ""
+
+#: modules/hr/class-hr.php:121
+msgid "تاريخ النهاية قبل البداية."
+msgstr ""
+
+#: modules/hr/class-hr.php:137
+msgid "توجد إجازة متداخلة مع هذه الفترة."
+msgstr ""
+
+#: modules/hr/class-hr.php:178
+msgid "اعتُمدت إجازتك"
+msgstr ""
+
+#: modules/hr/class-hr.php:178
+msgid "رُفض طلب إجازتك"
+msgstr ""
+
+#: modules/hr/class-hr.php:234
+msgid "الشهر أو السنة غير صحيحة."
+msgstr ""
+
+#: modules/hr/class-hr.php:244
+msgid "مسير هذا الشهر مرحّل ولا يُعاد توليده."
+msgstr ""
+
+#: modules/hr/class-hr.php:255
+msgid "لا توجد عقود نشطة."
+msgstr ""
+
+#: modules/hr/class-hr.php:313
+msgid "المسير غير موجود."
+msgstr ""
+
+#. translators: 1: الشهر 2: السنة
+#: modules/hr/class-hr.php:332
+#, php-format
+msgid "مسير رواتب %1$s %2$d"
+msgstr ""
+
+#: modules/import/class-import.php:76
+msgid "لا صفوف صالحة."
+msgstr ""
+
+#: modules/import/class-import.php:80
+msgid "حد الدفعة 500 صف."
+msgstr ""
+
+#: modules/import/class-import.php:96
+msgid "تعذّر قراءة الملف."
+msgstr ""
+
+#: modules/import/class-import.php:101
+msgid "تعذّر فتح الملف."
+msgstr ""
+
+#: modules/import/class-import.php:116
+msgid "الملف فارغ."
+msgstr ""
+
+#: modules/import/class-import.php:131
+msgid "العمود «اسم الطالب» غير موجود في الملف."
+msgstr ""
+
+#. translators: %d: الحد الأقصى للصفوف
+#: modules/import/class-import.php:149
+#, php-format
+msgid "الملف يتجاوز الحد الأقصى (%d صف). قسّمه إلى ملفات أصغر."
+msgstr ""
+
+#: modules/import/class-import.php:171
+#, php-format
+msgid "السطر %d: اسم الطالب فارغ."
+msgstr ""
+
+#: modules/import/class-import.php:177
+#, php-format
+msgid "السطر %d: رقم الهوية مكرر داخل الملف."
+msgstr ""
+
+#: modules/import/class-import.php:186
+#, php-format
+msgid "السطر %d: رقم الهوية مسجّل مسبقًا في النظام."
+msgstr ""
+
+#: modules/import/class-import.php:192
+#, php-format
+msgid "السطر %d: المرحلة غير معروفة (رياض أطفال / ابتدائي / متوسط / ثانوي)."
+msgstr ""
+
+#: modules/import/class-import.php:197
+#, php-format
+msgid "السطر %d: رقم جوال ولي الأمر غير صحيح."
+msgstr ""
+
+#: modules/kg/class-kg.php:38
+msgid "التقرير اليومي لطلاب رياض الأطفال فقط."
+msgstr ""
+
+#. translators: %s: اسم الطفل
+#: modules/kg/class-kg.php:71
+#, php-format
+msgid "جاهز تقرير %s لهذا اليوم."
+msgstr ""
+
+#. translators: %s: نسبة الحضور
+#: modules/kg/class-kg.php:204
+#, php-format
+msgid "حضور %s%%"
+msgstr ""
+
+#. translators: %d: عدد المواد
+#: modules/kg/class-kg.php:224
+#, php-format
+msgid "%d مادة دون 60%%"
+msgid_plural "%d مواد دون 60%%"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: المبلغ المتأخر
+#: modules/kg/class-kg.php:243
+#, php-format
+msgid "متأخرات %s"
+msgstr ""
+
+#: modules/learning/class-content.php:45
+msgid "نوع المحتوى غير معروف."
+msgstr ""
+
+#: modules/learning/class-content.php:48
+msgid "عنوان المحتوى مطلوب."
+msgstr ""
+
+#: modules/learning/class-content.php:60
+msgid "الصق كود اللعبة."
+msgstr ""
+
+#: modules/learning/class-content.php:66
+msgid "رابط المصدر مطلوب."
+msgstr ""
+
+#: modules/learning/class-content.php:80
+msgid "ارفع ملفًا أو ضع رابطًا."
+msgstr ""
+
+#: modules/learning/class-content.php:137
+msgid "الحالة غير معروفة."
+msgstr ""
+
+#: modules/learning/class-homework.php:42
+msgid "اختر الشعبة."
+msgstr ""
+
+#: modules/learning/class-homework.php:45
+msgid "عنوان الواجب مطلوب."
+msgstr ""
+
+#: modules/learning/class-homework.php:165
+msgid "الواجب غير موجود."
+msgstr ""
+
+#: modules/learning/class-homework.php:170
+msgid "هذا الواجب ليس لشعبتك."
+msgstr ""
+
+#: modules/learning/class-homework.php:187
+msgid "اكتب إجابتك أو أرفق رسمك."
+msgstr ""
+
+#: modules/nerve/class-nerve.php:135
+msgid "تدخّل لم يُثمر"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: مقارنة الأرقام
+#: modules/nerve/class-nerve.php:138
+#, php-format
+msgid "%1$s — بعد أسبوعين من المعالجة: %2$s"
+msgstr ""
+
+#. translators: 1: نسبة قبل 2: نسبة بعد
+#: modules/nerve/class-nerve.php:200
+#, php-format
+msgid "الحضور %1$s%% ← %2$s%%"
+msgstr ""
+
+#. translators: 1: نسبة قبل 2: نسبة بعد
+#: modules/nerve/class-nerve.php:210
+#, php-format
+msgid "الملاحظات الإيجابية %1$s%% ← %2$s%%"
+msgstr ""
+
+#: modules/nerve/class-nerve.php:218
+msgid "لا بيانات كافية للمقارنة"
+msgstr ""
+
+#. translators: %d: عدد الدقائق
+#: modules/nerve/class-nerve.php:292
+#, php-format
+msgid "%d دقيقة"
+msgid_plural "%d دقيقة"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: عدد الساعات
+#: modules/nerve/class-nerve.php:299
+#, php-format
+msgid "%s ساعة"
+msgstr ""
+
+#. translators: %s: عدد الأيام
+#: modules/nerve/class-nerve.php:306
+#, php-format
+msgid "%s يوم"
+msgstr ""
+
+#: modules/nerve/class-nerve.php:406
+msgid "اكتب سطرًا واحدًا على الأقل."
+msgstr ""
+
+#: modules/notes/class-notes.php:57
+msgid "التصنيف غير معروف."
+msgstr ""
+
+#: modules/notes/class-notes.php:60
+msgid "اكتب سطرًا واحدًا محددًا — القالب الجاهز يفقد قيمته من المرة الثالثة."
+msgstr ""
+
+#: modules/notes/class-notes.php:84
+msgid "ملاحظة تحتاج متابعة"
+msgstr ""
+
+#: modules/notes/class-notes.php:122
+msgid "تكرار ملاحظات المتابعة"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: عدد الملاحظات
+#: modules/notes/class-notes.php:125
+#, php-format
+msgid "%1$s — %2$d ملاحظات متابعة خلال شهر."
+msgstr ""
+
+#: modules/notes/class-notes.php:191
+msgid "اكتب ما فعلته — بلا ذلك لا نعرف لاحقًا ما نفع."
+msgstr ""
+
+#: modules/notes/class-notes.php:196
+#: modules/notes/class-notes.php:220
+#: modules/notes/class-notes.php:255
+msgid "الملاحظة غير موجودة."
+msgstr ""
+
+#: modules/notes/class-notes.php:225
+#: modules/staff/class-bulk.php:206
+msgid "اكتب نص الرسالة."
+msgstr ""
+
+#: modules/notes/class-notes.php:231
+msgid "رسالة من المدرسة"
+msgstr ""
+
+#: modules/notes/class-notes.php:250
+msgid "الرد غير معروف."
+msgstr ""
+
+#: modules/notes/class-notes.php:260
+msgid "لا تملك صلاحية هذه الملاحظة."
+msgstr ""
+
+#: modules/notes/class-notes.php:278
+msgid "ولي أمر يطلب التواصل"
+msgstr ""
+
+#: modules/notes/class-notes.php:279
+msgid "ولي أمر يعرف السبب"
+msgstr ""
+
+#: modules/notes/class-notes.php:342
+msgid "ملاحظة متروكة بلا إجراء"
+msgstr ""
+
+#. translators: 1: اسم الطالب 2: عدد الأيام
+#: modules/notes/class-notes.php:345
+#, php-format
+msgid "%1$s — مضى %2$d أيام بلا معالجة."
+msgstr ""
+
+#. translators: %s: اسم الدور
+#: modules/org/class-org.php:112
+#, php-format
+msgid "لا تملك صلاحية إنشاء «%s» — لا يُنشأ من هو في مستواك أو فوقه."
+msgstr ""
+
+#. translators: %d: عدد التعارضات
+#: modules/org/class-org.php:271
+#, php-format
+msgid "يوجد %d تعارض في الجدول — عالجها قبل الإرسال."
+msgstr ""
+
+#. translators: %d: عدد الحصص
+#: modules/org/class-org.php:279
+#, php-format
+msgid "%d حصة بلا معلم — أسندها أو احذفها."
+msgstr ""
+
+#: modules/org/class-org.php:294
+msgid "جدول الحصص بانتظار اعتمادك"
+msgstr ""
+
+#: modules/org/class-org.php:295
+msgid "أرسله الوكيل للمراجعة."
+msgstr ""
+
+#: modules/org/class-org.php:315
+msgid "الجدول ليس بانتظار الاعتماد."
+msgstr ""
+
+#: modules/org/class-org.php:328
+msgid "نُشر جدول الحصص"
+msgstr ""
+
+#: modules/org/class-org.php:329
+msgid "افتح تطبيقك لترى حصصك."
+msgstr ""
+
+#: modules/services/class-services.php:20
+msgid "وصف الحالة مطلوب."
+msgstr ""
+
+#: modules/services/class-services.php:40
+msgid "زيارة صحية — طلب استلام الطالب"
+msgstr ""
+
+#: modules/services/class-services.php:40
+msgid "زيارة صحية"
+msgstr ""
+
+#: modules/services/class-services.php:87
+msgid "عنوان الكتاب مطلوب."
+msgstr ""
+
+#: modules/services/class-services.php:123
+msgid "الكتاب أو الطالب غير موجود."
+msgstr ""
+
+#: modules/services/class-services.php:132
+msgid "لا توجد نسخ متاحة من هذا الكتاب."
+msgstr ""
+
+#: modules/services/class-services.php:208
+msgid "اسم الزائر مطلوب."
+msgstr ""
+
+#: modules/services/class-services.php:266
+#: modules/services/class-services.php:365
+msgid "عنوان البلاغ مطلوب."
+msgstr ""
+
+#: modules/services/class-services.php:329
+msgid "رمز الأصل واسمه مطلوبان."
+msgstr ""
+
+#: modules/services/class-services.php:344
+msgid "رمز الأصل مستخدم."
+msgstr ""
+
+#: modules/services/class-services.php:390
+msgid "الحالة غير صحيحة."
+msgstr ""
+
+#: modules/services/class-services.php:423
+msgid "اسم الصنف مطلوب."
+msgstr ""
+
+#: modules/services/class-services.php:437
+msgid "رمز الصنف مستخدم."
+msgstr ""
+
+#: modules/services/class-services.php:454
+msgid "الصنف غير موجود."
+msgstr ""
+
+#: modules/services/class-services.php:457
+msgid "نوع الحركة أو الكمية غير صحيحة."
+msgstr ""
+
+#. translators: %s: الرصيد المتاح
+#: modules/services/class-services.php:470
+#, php-format
+msgid "الرصيد المتاح %s فقط."
+msgstr ""
+
+#: modules/staff/class-bulk.php:33
+msgid "طباعة البطاقات"
+msgstr ""
+
+#: modules/staff/class-bulk.php:36
+msgid "مراسلة أولياء الأمور"
+msgstr ""
+
+#: modules/staff/class-bulk.php:40
+msgid "إسناد لمسار"
+msgstr ""
+
+#: modules/staff/class-bulk.php:48
+msgid "رصد حضور اليوم"
+msgstr ""
+
+#: modules/staff/class-bulk.php:49
+#, php-format
+msgid "سيُرصد حضور %d طالبًا اليوم. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:56
+#, php-format
+msgid "ستُعتمد %d إجازة. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:60
+#, php-format
+msgid "سترفض %d إجازة. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:67
+msgid "تذكير أولياء الأمور"
+msgstr ""
+
+#: modules/staff/class-bulk.php:70
+msgid "طباعة الفواتير"
+msgstr ""
+
+#: modules/staff/class-bulk.php:76
+msgid "استلام"
+msgstr ""
+
+#: modules/staff/class-bulk.php:80
+#, php-format
+msgid "سيُغلق %d إنذارًا. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:81
+msgid "ماذا فُعل؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:88
+#, php-format
+msgid "سيُعاد %d موظفًا إلى العمل. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:91
+msgid "إيقاف عن العمل"
+msgstr ""
+
+#: modules/staff/class-bulk.php:92
+#, php-format
+msgid "سيُوقَف %d موظفًا عن العمل — لا يُحذف، ويمكن إعادته لاحقًا. متابعة؟"
+msgstr ""
+
+#: modules/staff/class-bulk.php:141
+msgid "لا تملك صلاحية هذا الإجراء."
+msgstr ""
+
+#: modules/staff/class-bulk.php:147
+msgid "لم تحدد شيئًا."
+msgstr ""
+
+#: modules/staff/class-bulk.php:152
+msgid "حدّد ٣٠٠ سجل أو أقل في المرة الواحدة."
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: modules/staff/class-bulk.php:223
+#, php-format
+msgid "رسالة بخصوص %s"
+msgstr ""
+
+#: modules/staff/class-bulk.php:240
+msgid "اختر المسار."
+msgstr ""
+
+#: modules/staff/class-bulk.php:262
+msgid "اختر نوع الشهادة."
+msgstr ""
+
+#: modules/staff/class-bulk.php:327
+msgid "تذكير برسوم مستحقة"
+msgstr ""
+
+#: modules/staff/class-bulk.php:392
+msgid "إلغاء التحديد"
+msgstr ""
+
+#: modules/staff/class-bulk.php:438
+msgid "لم يُرصد حضورهم"
+msgstr ""
+
+#: modules/staff/class-bulk.php:439
+msgid "متأخرو الرسوم"
+msgstr ""
+
+#: modules/staff/class-bulk.php:440
+msgid "مشتركو النقل"
+msgstr ""
+
+#: modules/staff/class-bulk.php:441
+msgid "تحت المتابعة"
+msgstr ""
+
+#: modules/staff/class-bulk.php:444
+msgid "بانتظار القرار"
+msgstr ""
+
+#: modules/staff/class-bulk.php:447
+msgid "المفتوحة"
+msgstr ""
+
+#: modules/staff/class-bulk.php:461
+msgid "العروض"
+msgstr ""
+
+#: modules/staff/class-flow.php:34
+msgid "تسجيل الطالب"
+msgstr ""
+
+#: modules/staff/class-flow.php:35
+msgid "يتولّد الرقم الأكاديمي ورمز البطاقة وحساب دخوله"
+msgstr ""
+
+#: modules/staff/class-flow.php:40
+msgid "تحديد الصف والشعبة"
+msgstr ""
+
+#: modules/staff/class-flow.php:41
+msgid "بدونه لا حضور ولا جدول ولا معلم — النظام لا يعرف أين يضعه"
+msgstr ""
+
+#: modules/staff/class-flow.php:46
+msgid "ربط ولي الأمر"
+msgstr ""
+
+#: modules/staff/class-flow.php:47
+msgid "بدونه لا إشعار ولا تطبيق ولا من يستلمه عند البوابة"
+msgstr ""
+
+#: modules/staff/class-flow.php:52
+msgid "الرسوم الدراسية"
+msgstr ""
+
+#: modules/staff/class-flow.php:53
+msgid "تُولَّد الفاتورة وأقساطها"
+msgstr ""
+
+#: modules/staff/class-flow.php:59
+msgid "اختياري — كثير من الطلاب يأتون بسيارة الأهل"
+msgstr ""
+
+#: modules/staff/class-flow.php:64
+msgid "تفعيل التطبيق"
+msgstr ""
+
+#: modules/staff/class-flow.php:65
+msgid "سلّم اسم المستخدم وكلمة المرور لولي الأمر ليدخل التطبيق"
+msgstr ""
+
+#: modules/staff/class-flow.php:70
+msgid "طباعة البطاقة"
+msgstr ""
+
+#: modules/staff/class-flow.php:71
+msgid "تحمل الصف والشعبة — فلا تُطبع قبل تحديدهما"
+msgstr ""
+
+#: modules/staff/class-flow.php:80
+msgid "اسمه وبريده ودوره"
+msgstr ""
+
+#: modules/staff/class-flow.php:85
+msgid "ضبط الصلاحيات"
+msgstr ""
+
+#: modules/staff/class-flow.php:86
+msgid "ما يظهر له في النظام — بلاها يعمل بصلاحيات دوره كاملة"
+msgstr ""
+
+#: modules/staff/class-flow.php:91
+msgid "تحديد النطاق"
+msgstr ""
+
+#: modules/staff/class-flow.php:92
+msgid "على مَن يرى البيانات: كل المدرسة أم مرحلته أم فصوله"
+msgstr ""
+
+#: modules/staff/class-flow.php:97
+msgid "تسليم كلمة المرور"
+msgstr ""
+
+#: modules/staff/class-flow.php:98
+msgid "تظهر مرة واحدة ولا تُسترجَع — سلّمها الآن"
+msgstr ""
+
+#: modules/staff/class-flow.php:106
+msgid "إنشاء المسار"
+msgstr ""
+
+#: modules/staff/class-flow.php:107
+msgid "اسمه واتجاهه"
+msgstr ""
+
+#: modules/staff/class-flow.php:113
+msgid "بترتيبها — منها يعرف النظام من ينزل أولًا"
+msgstr ""
+
+#: modules/staff/class-flow.php:118
+msgid "إحداثيات النقاط"
+msgstr ""
+
+#: modules/staff/class-flow.php:119
+msgid "بدونها لا تظهر الخريطة لولي الأمر إطلاقًا"
+msgstr ""
+
+#: modules/staff/class-flow.php:124
+msgid "إسناد حافلة"
+msgstr ""
+
+#: modules/staff/class-flow.php:125
+msgid "بلا حافلة لا تبدأ رحلة"
+msgstr ""
+
+#: modules/staff/class-flow.php:130
+msgid "اشتراك الطلاب"
+msgstr ""
+
+#: modules/staff/class-flow.php:131
+msgid "من يركب هذا المسار"
+msgstr ""
+
+#: modules/staff/class-flow.php:141
+msgid "يظهر في البطاقات والتطبيقات والتقارير"
+msgstr ""
+
+#: modules/staff/class-flow.php:146
+msgid "السنة الدراسية"
+msgstr ""
+
+#: modules/staff/class-flow.php:147
+msgid "بدونها لن يعمل شيء — الشعب والجداول والاشتراكات كلها مرتبطة بها"
+msgstr ""
+
+#: modules/staff/class-flow.php:153
+msgid "ومرحلة كل شعبة — منها يعرف النظام مشرفها تلقائيًا"
+msgstr ""
+
+#: modules/staff/class-flow.php:165
+msgid "أنت وحدك من يستطيع إنشاءه"
+msgstr ""
+
+#: modules/staff/class-flow.php:170
+msgid "الوكيل"
+msgstr ""
+
+#: modules/staff/class-flow.php:171
+msgid "يُنشأ من حساب المدير — يبني الجدول ويضيف المشرفين"
+msgstr ""
+
+#: modules/staff/class-flow.php:176
+msgid "مشرفو المراحل"
+msgstr ""
+
+#: modules/staff/class-flow.php:177
+msgid "واحد لكل مرحلة — إليهم تذهب الحصص الشاغرة"
+msgstr ""
+
+#: modules/staff/class-flow.php:182
+msgid "تسجيل الطلاب"
+msgstr ""
+
+#: modules/staff/class-flow.php:183
+msgid "أو استيرادهم دفعة من ملف"
+msgstr ""
+
+#: modules/staff/class-flow.php:189
+msgid "واربط كل طالب بوليّه"
+msgstr ""
+
+#: modules/staff/class-flow.php:194
+msgid "الحافلات والمسارات"
+msgstr ""
+
+#: modules/staff/class-flow.php:195
+msgid "اختياري — لو كانت مدرستك بلا نقل"
+msgstr ""
+
+#: modules/staff/class-flow.php:200
+msgid "نشر جدول الحصص"
+msgstr ""
+
+#: modules/staff/class-flow.php:201
+msgid "قبل النشر لا يرى المعلمون حصصهم"
+msgstr ""
+
+#: modules/staff/class-flow.php:206
+msgid "تفعيل المؤقت"
+msgstr ""
+
+#: modules/staff/class-flow.php:207
+msgid "بدونه لن يصلك إنذار واحد — الإنذارات والأدوية وإشعار الباص كلها به"
+msgstr ""
+
+#: modules/staff/class-flow.php:212
+msgid "استثناء صفحات النظام من الكاش"
+msgstr ""
+
+#: modules/staff/class-flow.php:213
+msgid "لولاه سيرى الحارس كشفًا قديمًا"
+msgstr ""
+
+#: modules/staff/class-flow.php:218
+msgid "إعداد البريد"
+msgstr ""
+
+#: modules/staff/class-flow.php:219
+msgid "لتصل رسائل استعادة كلمة المرور"
+msgstr ""
+
+#: modules/staff/class-flow.php:403
+msgid "طالبًا بلا شعبة"
+msgstr ""
+
+#: modules/staff/class-flow.php:404
+msgid "لا حضور ولا جدول لهم"
+msgstr ""
+
+#: modules/staff/class-flow.php:415
+msgid "بلا ولي أمر"
+msgstr ""
+
+#: modules/staff/class-flow.php:416
+msgid "لا يصلهم إشعار ولا يستلمهم أحد"
+msgstr ""
+
+#: modules/staff/class-flow.php:424
+msgid "نقطة توقف بلا إحداثيات"
+msgstr ""
+
+#: modules/staff/class-flow.php:425
+msgid "لا تظهر خريطة الباص لأوليائهم"
+msgstr ""
+
+#: modules/staff/class-flow.php:435
+msgid "بلا رسوم"
+msgstr ""
+
+#: modules/staff/class-flow.php:436
+msgid "لن تُولَّد فواتيرهم"
+msgstr ""
+
+#: modules/staff/class-flow.php:464
+msgid "خطوات الإكمال"
+msgstr ""
+
+#: modules/staff/class-flow.php:488
+msgid "مكتمل"
+msgstr ""
+
+#. translators: %s: عنوان القائمة
+#: modules/staff/class-flow.php:491
+#, php-format
+msgid "اكتمل %s"
+msgstr ""
+
+#. translators: %s: العدد الكلي
+#: modules/staff/class-flow.php:496
+#, php-format
+msgid "أنجزت كل الخطوات (%s) — كل شيء جاهز."
+msgstr ""
+
+#. translators: 1: رقم الخطوة 2: الإجمالي
+#: modules/staff/class-flow.php:504
+#, php-format
+msgid "الخطوة %1$s من %2$s · التالية"
+msgstr ""
+
+#: modules/staff/class-flow.php:512
+msgid "ابدأ الآن"
+msgstr ""
+
+#: modules/staff/class-flow.php:514
+msgid "علّمه تمّ"
+msgstr ""
+
+#. translators: 1: المنجَز 2: الإجمالي
+#: modules/staff/class-flow.php:532
+#, php-format
+msgid "أنجزت %1$s من %2$s"
+msgstr ""
+
+#. translators: %s: عدد الخطوات المتبقّية
+#: modules/staff/class-flow.php:539
+#, php-format
+msgid "عرض بقية الخطوات (%s)"
+msgstr ""
+
+#: modules/staff/class-flow.php:553
+msgid "اختياري"
+msgstr ""
+
+#: modules/staff/class-flow.php:557
+msgid "ابدأ"
+msgstr ""
+
+#: modules/staff/class-flow.php:559
+msgid "تمّ"
+msgstr ""
+
+#: modules/staff/class-flow.php:562
+msgid "لا ينطبق"
+msgstr ""
+
+#: modules/staff/class-flow.php:575
+msgid "خطوات مكتملة"
+msgstr ""
+
+#: modules/staff/class-perms.php:293
+msgid "لا تعدّل صلاحيات حسابك — اطلب ذلك ممن هو أعلى منك."
+msgstr ""
+
+#: modules/staff/class-perms.php:303
+msgid "لا تملك صلاحية تعديل صلاحيات هذا الموظف."
+msgstr ""
+
+#: modules/staff/class-perms.php:362
+msgid "مُنحت صلاحية حساسة"
+msgstr ""
+
+#. translators: 1: من منح 2: لمن 3: الأقسام
+#: modules/staff/class-perms.php:365
+#, php-format
+msgid "%1$s منح %2$s: %3$s"
+msgstr ""
+
+#: modules/staff/class-perms.php:385
+msgid "الموظف المصدر يعمل بصلاحيات دوره، فلا شيء يُنسخ."
+msgstr ""
+
+#: modules/staff/class-staff.php:37
+msgid "اسم الموظف مطلوب."
+msgstr ""
+
+#: modules/staff/class-staff.php:40
+msgid "البريد الإلكتروني غير صحيح."
+msgstr ""
+
+#: modules/staff/class-staff.php:43
+msgid "الدور المحدد غير معروف."
+msgstr ""
+
+#: modules/staff/class-staff.php:288
+msgid "مدير النظام"
+msgstr ""
+
+#: modules/students/class-students.php:19
+msgid "اسم الطالب مطلوب."
+msgstr ""
+
+#: modules/students/class-students.php:24
+msgid "رقم الهوية مسجّل لطالب آخر."
+msgstr ""
+
+#. translators: %s: رسالة قاعدة البيانات
+#: modules/students/class-students.php:53
+#, php-format
+msgid "تعذّر حفظ الطالب — %s"
+msgstr ""
+
+#: modules/students/class-students.php:56
+msgid "تعذّر حفظ الطالب."
+msgstr ""
+
+#: modules/students/class-students.php:88
+msgid "تعذّر تحديث الطالب."
+msgstr ""
+
+#: modules/students/class-students.php:360
+msgid "الشعبة غير موجودة."
+msgstr ""
+
+#: modules/students/class-students.php:363
+msgid "الشعبة مكتملة العدد."
+msgstr ""
+
+#: modules/transport/class-transport.php:15
+msgid "رقم اللوحة مطلوب."
+msgstr ""
+
+#: modules/transport/class-transport.php:31
+msgid "رقم اللوحة مسجّل لباص آخر."
+msgstr ""
+
+#: modules/transport/class-transport.php:94
+msgid "اسم المسار مطلوب."
+msgstr ""
+
+#: modules/transport/class-transport.php:146
+msgid "المسار واسم نقطة التوقف مطلوبان."
+msgstr ""
+
+#: modules/transport/class-transport.php:196
+msgid "الطالب أو المسار غير موجود."
+msgstr ""
+
+#: modules/transport/class-transport.php:209
+msgid "الباص مكتمل العدد على هذا المسار."
+msgstr ""
+
+#: modules/transport/class-transport.php:318
+msgid "المسار غير موجود."
+msgstr ""
+
+#: modules/transport/class-transport.php:321
+msgid "اتجاه الرحلة غير صحيح."
+msgstr ""
+
+#: modules/transport/class-transport.php:380
+msgid "نوع الحدث غير صحيح."
+msgstr ""
+
+#: modules/transport/class-transport.php:388
+msgid "الرحلة غير مفتوحة."
+msgstr ""
+
+#: modules/transport/class-transport.php:452
+msgid "الرحلة غير موجودة."
+msgstr ""
+
+#. translators: %d: عدد الطلاب
+#: modules/transport/class-transport.php:473
+#, php-format
+msgid "لا يمكن إنهاء الرحلة: %d طالبًا لم يُسجَّل نزولهم."
+msgstr ""
+
+#: modules/transport/class-transport.php:734
+msgid "الباص يقترب"
+msgstr ""
+
+#. translators: %s: اسم الطالب
+#: modules/transport/class-transport.php:737
+#, php-format
+msgid "على بعد نقطة واحدة منكم — استعدّ لاستقبال %s."
+msgstr ""
+
+#: modules/transport/class-transport.php:804
+msgid "صعد الطالب إلى الباص"
+msgstr ""
+
+#: modules/transport/class-transport.php:805
+msgid "نزل الطالب من الباص"
+msgstr ""
+
+#: modules/transport/class-transport.php:806
+msgid "لم يحضر الطالب للباص"
+msgstr ""
+
+#: modules/transport/class-transport.php:813
+msgid "تحديث النقل"
+msgstr ""
