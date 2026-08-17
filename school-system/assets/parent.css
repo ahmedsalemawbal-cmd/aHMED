@@ -1264,6 +1264,8 @@ img { max-width: 100%; }
 .p-certcard--royal .p-certcard__i { background: linear-gradient(140deg, #111A44, #14574E); }
 .p-certcard--classic .p-certcard__i { background: linear-gradient(140deg, #9A7B33, #C0A055); }
 .p-certcard--modern .p-certcard__i { background: linear-gradient(140deg, #1B287A, #7B92FF); }
+/* الياقوتية — القالب الرابع كان يُصدَر ويُعرض ببطاقة بلا لون */
+.p-certcard--sapphire .p-certcard__i { background: linear-gradient(140deg, #16255C, #5C6E96); }
 
 @media print {
   .p-top, .p-tabs, .p-back, .p-h1, .p-sub, .p-btn { display: none !important; }

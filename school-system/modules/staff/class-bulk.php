@@ -40,8 +40,11 @@ final class SCH_Bulk
                     __('إسناد لمسار', 'school-system'), 'route', 'sch_manage_transport', '',
                     ['select', __('المسار', 'school-system'), [self::class, 'route_options']],
                 ],
+                // الشهادة تخرج من المدرسة ولا تعود، ويصل إشعارها لولي الأمر —
+                // فهي أولى الأفعال بالسؤال لا آخرها. كان حقل التأكيد فارغًا وحده.
                 'issue_cert' => [
-                    __('إصدار شهادة', 'school-system'), 'award', 'sch_manage_students', '',
+                    __('إصدار شهادة', 'school-system'), 'award', 'sch_manage_students',
+                    __('ستصدر %d شهادة، ويصل إشعار إلى ولي أمر كل طالب. متابعة؟', 'school-system'),
                     ['select', __('نوع الشهادة', 'school-system'), [self::class, 'cert_options']],
                 ],
                 'mark_present' => [

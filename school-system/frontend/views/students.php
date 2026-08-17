@@ -127,9 +127,20 @@ SCH_Modal::head(
     <div class="sch-blank">
         <span class="sch-blank__ic"><?php echo sch_icon('users', 26); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
         <strong><?php esc_html_e('لا طلاب هنا', 'school-system'); ?></strong>
-        <p><?php echo esc_html($q !== '' || $stage !== '' || $grade !== '' || $class_id > 0
+        <?php $sch_filtered = ($q !== '' || $stage !== '' || $grade !== '' || $class_id > 0); ?>
+        <p><?php echo esc_html($sch_filtered
             ? __('لا نتائج تطابق التصفية. جرّب مسحها.', 'school-system')
             : __('سجّل أول طالب لتبدأ.', 'school-system')); ?></p>
+        <?php /* حالة فارغة تقول «افعل» تحتاج ما يُضغط — والفاتح معرَّف في هذا الملف */ ?>
+        <?php if ($sch_filtered) : ?>
+            <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>">
+                <?php esc_html_e('مسح التصفية', 'school-system'); ?>
+            </a>
+        <?php elseif ($classes !== []) : ?>
+            <button type="button" class="sch-btn" data-modal-open="sch-enroll">
+                <?php esc_html_e('سجّل أول طالب', 'school-system'); ?>
+            </button>
+        <?php endif; ?>
     </div>
 <?php else : ?>
     <div class="sch-card sch-noprint">

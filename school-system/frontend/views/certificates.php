@@ -142,7 +142,9 @@ SCH_Modal::head(
             <div class="sch-sugg__list">
                 <?php foreach ($sch_students as $sch_s) : ?>
                     <label class="sch-pill">
-                        <input type="checkbox" value="<?php echo esc_attr((string) $sch_s->id); ?>" data-pick-s checked>
+                        <?php /* تبدأ فارغة: الاختيار فعل واعٍ. وصولها محدَّدة مسبقًا كان
+                                 يعني إصدار عشرات الشهادات بضغطة واحدة بلا مراجعة. */ ?>
+                        <input type="checkbox" value="<?php echo esc_attr((string) $sch_s->id); ?>" data-pick-s>
                         <span>
                             <b><?php echo esc_html((string) $sch_s->full_name); ?></b>
                             <em><?php echo esc_html(trim((string) $sch_s->grade_level . ' / ' . (string) $sch_s->section)); ?><?php
@@ -153,8 +155,11 @@ SCH_Modal::head(
             </div>
 
             <div class="sch-sugg__foot">
+                <button type="button" class="sch-btn sch-btn--quiet" data-pick-all
+                        aria-pressed="false"><?php esc_html_e('تحديد الكل', 'school-system'); ?></button>
                 <span class="sch-sugg__n" data-count></span>
-                <button class="sch-btn"><?php esc_html_e('إصدار للمحددين', 'school-system'); ?></button>
+                <?php /* الزرّ يحمل العدد نصًّا فلا يُضغط بالعادة العضلية */ ?>
+                <button class="sch-btn" data-issue><?php esc_html_e('إصدار', 'school-system'); ?></button>
             </div>
         </form>
     </section>
@@ -377,14 +382,32 @@ $sch_on = array_filter($sch_f);
 
   /* الاقتراحات: العدّاد يتحرك والقائمة تُرسل كمعرّفات */
   document.querySelectorAll('[data-sugg]').forEach(function (form) {
-    var out = form.querySelector('[data-ids]');
-    var num = form.querySelector('[data-count]');
+    var out  = form.querySelector('[data-ids]');
+    var num  = form.querySelector('[data-count]');
+    var go   = form.querySelector('[data-issue]');
+    var all  = form.querySelector('[data-pick-all]');
+    var boxes = form.querySelectorAll('[data-pick-s]');
 
     function sync() {
       var on = form.querySelectorAll('[data-pick-s]:checked');
       out.value = Array.prototype.map.call(on, function (c) { return c.value; }).join(',');
-      num.textContent = on.length + ' محدد';
-      form.querySelector('button').disabled = on.length === 0;
+      num.textContent = on.length ? (on.length + ' من ' + boxes.length) : 'لم يُحدَّد أحد';
+      go.disabled = on.length === 0;
+      /* الزرّ يقول ما سيفعله بعدده — لا كلمة «تأكيد» مجرّدة */
+      go.textContent = on.length ? ('أصدر ' + on.length + ' شهادة') : 'إصدار';
+      if (all) {
+        var full = on.length === boxes.length && boxes.length > 0;
+        all.setAttribute('aria-pressed', full ? 'true' : 'false');
+        all.textContent = full ? 'إلغاء التحديد' : 'تحديد الكل';
+      }
+    }
+
+    if (all) {
+      all.addEventListener('click', function () {
+        var full = all.getAttribute('aria-pressed') === 'true';
+        Array.prototype.forEach.call(boxes, function (b) { b.checked = !full; });
+        sync();
+      });
     }
 
     form.addEventListener('change', sync);

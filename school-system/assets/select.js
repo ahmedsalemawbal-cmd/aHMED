@@ -179,20 +179,46 @@
   };
 
   Widget.prototype.position = function () {
-    var r = this.btn.getBoundingClientRect();
     var p = this.panel;
-    p.style.minWidth = r.width + 'px';
-    p.style.insetInlineStart = 'auto';
-    p.style.left = r.left + 'px';
-    p.style.width = r.width + 'px';
 
-    // القياس بعد الإظهار ثم القرار: أسفل الزر أو فوقه إن ضاق المكان
+    // تصفير قياسات الفتحة السابقة قبل القياس — وإلا قِيست اللوحة بعرضها القديم
+    // بعد أن يُعيد المراقب بناء خياراتها وهي مفتوحة.
+    p.style.width = '';
+    p.style.maxHeight = '';
+    p.style.insetInlineStart = 'auto';
+    p.style.insetInlineEnd = 'auto';
     p.style.top = '-9999px';
-    var h = p.offsetHeight;
+    p.style.left = '0px';
+
+    var r  = this.btn.getBoundingClientRect();
+    var vw = document.documentElement.clientWidth;
     var vh = window.innerHeight;
-    var below = r.bottom + 6;
-    var above = r.top - h - 6;
-    p.style.top = (below + h <= vh || above < 8) ? (below + 'px') : (above + 'px');
+
+    // عرض الزرّ أرضية لا سقفًا: تتمدّد اللوحة لتسع أطول خيار ثم تتوقّف عند حدّها.
+    // كان تثبيتها على عرض الزرّ يجعل «وكيل الشؤون التعليمية» ينكسر ثلاثة أسطر.
+    p.style.minWidth = r.width + 'px';
+
+    // القرار أولًا بالارتفاع الطبيعي، ثم تُقصّ اللوحة على الجهة المختارة
+    // فتُمرَّر داخل نفسها بدل أن تُدفع خارج الشاشة.
+    var natural = p.offsetHeight;
+    var gap     = 6;
+    var edge    = 8;
+    var room_dn = vh - (r.bottom + gap) - edge;
+    var room_up = r.top - gap - edge;
+    var up      = (natural > room_dn) && (room_up > room_dn);
+
+    p.style.maxHeight = Math.max(120, up ? room_up : room_dn) + 'px';
+
+    var w = p.offsetWidth;
+    var h = p.offsetHeight;
+
+    // المحاذاة بالحافّة المنطقية: في RTL تُثبَّت الحافّة اليمنى فتنمو اللوحة يسارًا.
+    // تثبيت left وحده كان يدفعها خارج الشاشة كلما زاد عرضها عن الزرّ.
+    var rtl  = (getComputedStyle(this.btn).direction === 'rtl');
+    var left = rtl ? (r.right - w) : r.left;
+
+    p.style.left = Math.max(edge, Math.min(left, vw - w - edge)) + 'px';
+    p.style.top  = (up ? (r.top - h - gap) : (r.bottom + gap)) + 'px';
   };
 
   Widget.prototype.setActive = function (i, scroll) {

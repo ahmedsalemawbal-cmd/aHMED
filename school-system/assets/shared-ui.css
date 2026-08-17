@@ -284,7 +284,8 @@
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
   margin: 24px 0 12px; padding: 0 18px;
 }
-.sch-sect h2 { margin: 0; font-size: 11px; letter-spacing: .13em; color: var(--sch-muted, #9DAABC); font-weight: 700; }
+/* بلا تتبّع موجب: التباعد يفكّ وصل الحروف العربية فتتوقّف الكلمة عن كونها كلمة */
+.sch-sect h2 { margin: 0; font-size: var(--sch-text-xs); color: var(--sch-muted, #9DAABC); font-weight: 600; }
 .sch-sect span { font-size: 11px; color: var(--sch-muted, #9DAABC); font-variant-numeric: tabular-nums; }
 
 /* بند مشكلة */
@@ -350,7 +351,7 @@
   content: ""; position: absolute; inset-inline-start: 18px; top: -1px;
   width: 34px; height: 3px; border-radius: 0 0 3px 3px; background: #7A5C22; opacity: .5;
 }
-.sch-memo__k { font-size: 11px; letter-spacing: .1em; color: #A9884A; font-weight: 700; }
+.sch-memo__k { font-size: var(--sch-text-xs); color: #A9884A; font-weight: 600; }
 .sch-memo dl { margin: 12px 0 0; display: grid; gap: 11px; }
 .sch-memo dt { font-size: 11px; color: #A9884A; margin-bottom: 2px; }
 .sch-memo dd { margin: 0; font-size: 15px; color: #4A3A18; line-height: 1.65; }

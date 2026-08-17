@@ -95,12 +95,17 @@ body.sch-body {
   text-align: start;
   padding: var(--sch-3) var(--sch-4);
   font-size: var(--sch-text-xs);
-  font-weight: 700;
+  /* الخلفية تفصل الرأس فلا يحتاج ثقلًا — قاعدة «رأس بخلفية لا بخط ثقيل» */
+  font-weight: 600;
   color: var(--sch-ink-soft);
   letter-spacing: .02em;
   white-space: nowrap;
   background: var(--sch-surface-alt);
   border: 0;
+  /* يبقى مرئيًا في الجداول الطويلة — جدول بمئة صف كان يفقد أسماء أعمدته */
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 .sch-table thead tr:first-child th:first-child { border-start-start-radius: var(--sch-radius-lg); }
 .sch-table thead tr:first-child th:last-child  { border-start-end-radius: var(--sch-radius-lg); }
@@ -178,6 +183,28 @@ body.sch-body {
 .sch-btn:active { transform: translateY(1px); }
 .sch-btn:hover { background: var(--sch-accent-hover); }
 .sch-btn:focus-visible { outline: 2px solid var(--sch-ink); outline-offset: 2px; }
+
+/* الحالتان المفقودتان: حماية الضغط المزدوج كانت تعمل منطقيًا ولا تُرى —
+   الزرّ يقول «جارٍ الحفظ…» بمظهر زرّ جاهز، فيُضغط ثانيةً. */
+.sch-btn:disabled,
+.sch-btn[aria-disabled="true"] {
+  opacity: .55; cursor: not-allowed; transform: none; background: var(--sch-accent);
+}
+.sch-btn.is-sending {
+  opacity: .8; cursor: progress; transform: none;
+  padding-inline-start: calc(var(--sch-4) + 22px);
+  position: relative;
+}
+.sch-btn.is-sending::before {
+  content: ""; position: absolute; inset-inline-start: var(--sch-4); inset-block-start: 50%;
+  width: 14px; height: 14px; margin-block-start: -7px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: sch-spin .6s linear infinite;
+}
+@keyframes sch-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sch-btn.is-sending::before { animation: none; border-top-color: currentColor; opacity: .5; }
+}
 .sch-btn--block { width: 100%; padding: var(--sch-3); }
 
 .sch-btn--quiet:hover { background: var(--sch-accent-soft); }
@@ -3047,7 +3074,8 @@ body.sch-locked { overflow: hidden; }
 /* الجدول يعيش في بطاقة بلا حدّ */
 .sch-table-wrap {
   border-radius: var(--sch-radius-lg);
-  overflow: hidden;
+  /* auto لا hidden: يسمح بالرأس اللاصق وبتمرير الجداول العريضة أفقيًا */
+  overflow: auto;
   background: var(--sch-surface);
   box-shadow: var(--sch-e1);
   margin-bottom: var(--sch-4);
@@ -3146,6 +3174,9 @@ body.sch-locked { overflow: hidden; }
 }
 .sch-blank strong { display: block; font-size: var(--sch-text-lg); margin-bottom: 4px; }
 .sch-blank p { margin: 0; font-size: var(--sch-text-sm); color: var(--sch-muted); }
+/* الحالة الفارغة تحمل فعلها — نصّ يقول «افعل» بلا زرّ طريق مسدود */
+.sch-blank > .sch-btn,
+.sch-body a.sch-blank__act { margin-block-start: var(--sch-4); }
 
 @media (max-width: 900px) {
   .sch-content { padding: var(--sch-4) var(--sch-4) var(--sch-6); }
@@ -3569,7 +3600,9 @@ body.sch-body {
 /* 3) الشريط الجانبي: قشرة داكنة ثابتة في الوضعين (v8.3) بتدرّج رأسي هامس
       يمنحها عمقًا، والعنصر النشط حبّة ممتلئة بلون الهوية ووزن أثقل */
 .sch-app > .sch-side { background: linear-gradient(180deg, var(--sch-chrome), var(--sch-chrome-2)); }
-.sch-body a.sch-side__link.is-on { font-weight: 700; box-shadow: 0 6px 16px -8px var(--sch-accent-glow); }
+/* الحبّة الممتلئة تحمل الإبراز — والوزن 600 يكفي فوقها. كان 700 هنا يهدم
+   التدرّج المقصود في الشريط (رؤوس 500 · روابط 400) من على بُعد ٢٢٧ سطرًا. */
+.sch-body a.sch-side__link.is-on { font-weight: 600; box-shadow: 0 6px 16px -8px var(--sch-accent-glow); }
 
 /* 4) الشريط العلوي زجاجي يطفو فوق المحتوى */
 .sch-topbar {
@@ -3848,6 +3881,8 @@ body.sch-body {
 /* اللوحة — مُلحقة بـ body وثابتة الإحداثيات فلا يقصّها جدول أو بطاقة */
 .sch-sel__panel {
   position: fixed; z-index: 100000; box-sizing: border-box;
+  /* تتّسع لأطول خيار ثم تتوقّف — عرض الزرّ أرضية تضعها JS لا سقف */
+  width: max-content; max-width: min(92vw, 420px);
   max-height: 300px; overflow-y: auto; padding: 6px;
   background: var(--sch-surface); border: 1px solid var(--sch-line);
   border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e3);
@@ -3859,13 +3894,14 @@ body.sch-body {
 .sch-sel__opt {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: var(--sch-r-sm, 8px); cursor: pointer;
-  font-size: var(--sch-text-base); font-weight: 600; color: var(--sch-ink); line-height: 1.4;
+  /* قائمة تُقرأ لا عنوان يُصرَخ: الوزن عادي والمختار وحده يثقُل */
+  font-size: var(--sch-text-base); font-weight: 400; color: var(--sch-ink); line-height: 1.55;
 }
 .sch-sel__optt { flex: 1; min-width: 0; }
 .sch-sel__ck { flex: none; display: inline-flex; color: var(--sch-accent); opacity: 0; }
 .sch-sel__opt.is-active { background: var(--sch-surface-alt); }
 .sch-sel__opt.is-selected {
-  background: var(--sch-accent-soft); color: var(--sch-accent-ink, var(--sch-accent)); font-weight: 700;
+  background: var(--sch-accent-soft); color: var(--sch-accent-ink, var(--sch-accent)); font-weight: 600;
 }
 .sch-sel__opt.is-selected .sch-sel__ck { opacity: 1; }
 .sch-sel__opt.is-disabled { opacity: .5; cursor: default; }
