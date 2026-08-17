@@ -328,9 +328,12 @@ img { max-width: 100%; }
 }
 .p-who__pic img, .p-who__pic svg { display: block; width: 100%; height: 100%; object-fit: cover; }
 .p-who__t { min-width: 0; }
+/* التحية كانت 17px في شريط تأكل منه ثلاث أيقونات ٤٤px عرضَه، فتُقصّ
+   «مساء الخير اح…» — والاسم الأول وحده كان مطبَّقًا أصلًا، فالعلّة في
+   المقاس لا في الاسم. */
 .p-who__t b {
   display: block;
-  font-size: var(--p-t3);
+  font-size: var(--p-t4);
   font-weight: 700;
   letter-spacing: -.01em;
   white-space: nowrap;
@@ -338,6 +341,10 @@ img { max-width: 100%; }
   text-overflow: ellipsis;
 }
 .p-who__t span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
+/* وعلى الشاشات الضيّقة حقًّا تنزل درجةً أخرى بدل أن تُقصّ */
+@media (max-width: 360px) {
+  .p-who__t b { font-size: var(--p-t5); }
+}
 
 .p-icons { display: flex; gap: var(--p-2); flex: 0 0 auto; }
 .p-body a.p-ico {
@@ -1057,6 +1064,14 @@ textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui);
    تُقرأ ولا يُلعب بها. والعمق من الطبقات والظل لا من الحركة.
    ========================================================= */
 
+/* ═══════════ بطاقة الطالب ═══════════
+
+   وثيقة تُقرأ عند بوابة، لا بطاقة في تطبيق. وما يميّز الوثيقة عن الشاشة
+   ثلاثة: **رأسٌ داكن موقَّع**، و**خيط نحاسيّ** يحدّه من طرفيه، و**نقشٌ
+   دقيق** لا يُرى إلا عن قرب — وهو تقليد الطباعة الأمنية لا زخرفة.
+   والحقول صفوفٌ يفصلها خيط شعرة لا حبّات رمادية: الحبّات لغة لوحة قيادة،
+   والصفوف لغة وثيقة. */
+
 .p-id {
   position: relative;
   border-radius: var(--p-r4);
@@ -1065,6 +1080,14 @@ textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui);
   box-shadow: var(--p-e3);
   margin-bottom: var(--p-3);
 }
+/* الخيط النحاسيّ السفلي — يقابل علويّه فتبدو البطاقة مُجلَّدة لا مقطوعة */
+.p-id::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0; inset-inline: 0;
+  height: 3px;
+  background: var(--p-gold);
+}
 
 .p-id__top {
   position: relative;
@@ -1072,76 +1095,129 @@ textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui);
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 12px var(--p-4);
+  padding: 13px var(--p-4);
   background: var(--p-deep-2);
   color: #FFFFFF;
+  border-block-end: 3px solid var(--p-gold);
 }
+/* نقش الطباعة الأمنية: خطوط مائلة دقيقة بخمسة بالمئة — تُرى عن قرب وحدها */
+.p-id__top::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M-2 6 L6 -2 M2 14 L14 2 M10 18 L18 10' stroke='rgba(255,255,255,0.5)' stroke-width='0.7' fill='none'/%3E%3C/svg%3E");
+  opacity: .11;
+}
+.p-id__top > * { position: relative; }
 .p-id__top span { font-size: var(--p-t5); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-id__top em {
   flex: 0 0 auto;
   font-style: normal;
-  padding: 3px 11px;
+  padding: 4px 12px;
   border-radius: 99px;
-  background: rgba(255, 255, 255, .20);
-  color: var(--p-shine);
+  background: rgba(255, 255, 255, .16);
+  border: 1px solid rgba(255, 255, 255, .22);
+  color: #FFFFFF;
   font-size: var(--p-t6);
   font-weight: 700;
 }
 
-.p-id__who { display: flex; align-items: center; gap: var(--p-3); padding: var(--p-4); }
+.p-id__who { display: flex; align-items: center; gap: var(--p-4); padding: var(--p-5) var(--p-4) var(--p-4); }
 .p-id__pic {
-  width: 62px; height: 76px; flex: 0 0 auto;
+  width: 64px; height: 78px; flex: 0 0 auto;
   border-radius: var(--p-r1);
   overflow: hidden;
   background: var(--p-brand-s);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--p-e2);
+  /* حلقة نحاسية رفيعة بدل الظلّ — علامة الوثيقة لا علامة البطاقة */
+  box-shadow: 0 0 0 1.5px var(--p-gold), var(--p-e1);
 }
 .p-id__pic img { width: 100%; height: 100%; object-fit: cover; }
 
 .p-id__name { flex: 1; min-width: 0; }
 .p-id__name b { display: block; font-size: var(--p-t3); line-height: var(--p-lh-snug); overflow-wrap: anywhere; }
+/* الاسم اللاتيني تحت العربي وعلى حافّته نفسها.
+   كان يحمل `dir="ltr"` فصار `text-align: start` عنده = اليسار، فانفصل عن
+   الاسم فوقه بعرض السطر. العزل وحده يكفي: الحروف اللاتينية تُرتَّب صحيحةً
+   بخوارزمية الاتجاهين، والكتلة تبقى محاذيةً لليمين كأمّها. */
 .p-id__name em {
   display: block;
+  unicode-bidi: isolate;
   font-style: normal;
   font-size: var(--p-t6);
   color: var(--p-faint);
-  letter-spacing: .05em;
-  margin: 1px 0 6px;
+  letter-spacing: .06em;
+  margin: 2px 0 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* الرقم الأكاديمي — بيانُ البطاقة الأول، فله سطرٌ مؤطَّر بلون الهوية */
 .p-id__no {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--p-3);
   margin: 0 var(--p-4);
-  padding: 10px var(--p-3);
+  padding: 11px var(--p-3);
   border-radius: var(--p-r1);
-  background: var(--p-alt);
+  background: var(--p-brand-s);
+  border: 1px solid color-mix(in srgb, var(--p-brand) 24%, transparent);
 }
 .p-id__no span { font-size: var(--p-t6); color: var(--p-mute); }
-.p-id__no b { font-size: var(--p-t3); font-weight: 700; letter-spacing: .14em; }
-
-.p-id__facts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 0;
-  padding: var(--p-3) var(--p-4);
+.p-id__no b {
+  font-size: var(--p-t3); font-weight: 700; letter-spacing: .16em;
+  color: var(--p-brand-ink);
+  font-variant-numeric: tabular-nums;
 }
-.p-id__facts > div { min-width: 0; padding: 8px 10px; border-radius: var(--p-r1); background: var(--p-alt); }
-.p-id__facts dt { font-size: var(--p-t6); color: var(--p-mute); margin-bottom: 1px; }
-.p-id__facts dd { margin: 0; font-size: var(--p-t5); font-weight: 700; overflow-wrap: anywhere; }
 
-.p-id__qr { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 0 var(--p-4) var(--p-4); }
+/* الحقول صفوفٌ بخيط شعرة — لغة وثيقة لا لغة لوحة قيادة */
+.p-id__facts {
+  margin: var(--p-4) var(--p-4) 0;
+  padding: 0;
+  border-radius: var(--p-r1);
+  border: 1px solid var(--p-line);
+  overflow: hidden;
+}
+.p-id__facts > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--p-3);
+  min-width: 0;
+  padding: 11px var(--p-3);
+}
+.p-id__facts > div + div { border-block-start: 1px solid var(--p-line-2); }
+.p-id__facts dt { font-size: var(--p-t5); color: var(--p-mute); flex: 0 0 auto; }
+.p-id__facts dd {
+  margin: 0; font-size: var(--p-t5); font-weight: 700;
+  overflow-wrap: anywhere; text-align: end;
+}
+
+/* الرمز مؤطَّر كختم: أربع علامات ركن نحاسية حوله */
+.p-id__qr { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: var(--p-4); }
+.p-id__stamp {
+  position: relative;
+  padding: 12px;
+  border-radius: var(--p-r2);
+}
+.p-id__stamp::before,
+.p-id__stamp::after {
+  content: "";
+  position: absolute;
+  width: 16px; height: 16px;
+  border: 2px solid var(--p-gold);
+  pointer-events: none;   /* علامات الأركان زينة لا تعترض اللمس */
+}
+.p-id__stamp::before { inset-block-start: 0; inset-inline-start: 0; border-inline-end: 0; border-block-end: 0; border-start-start-radius: 5px; }
+.p-id__stamp::after  { inset-block-end: 0; inset-inline-end: 0; border-inline-start: 0; border-block-start: 0; border-end-end-radius: 5px; }
 .p-id__hint { font-size: var(--p-t6); color: var(--p-mute); }
 
-.p-id__open { position: absolute; inset: 0; border: 0; background: none; cursor: pointer; }
-.p-id__open:focus-visible { outline: 3px solid var(--p-brand); outline-offset: -3px; }
+/* زرّ الفتح: على الرمز وحده لا على البطاقة كلها.
+   كان `inset: 0` يغطّي الوثيقة كاملةً، فأيّ لمسة على أيّ حقل تفتح ملء الشاشة. */
+.p-id__open {
+  position: absolute; inset: 0;
+  border: 0; background: none; cursor: pointer;
+  border-radius: var(--p-r2);
+}
+.p-id__open:focus-visible { outline: 3px solid var(--p-brand); outline-offset: 2px; }
 
 /* ---------- الرمز وصورة الطفل في وسطه ---------- */
 
@@ -1174,13 +1250,15 @@ textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui);
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: #fff;
+  background: var(--p-bg);
+  color: var(--p-ink);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--p-5);
 }
 .p-full[hidden] { display: none; }
+.p-full { animation: none !important; }
 .p-full__box { text-align: center; }
 .p-full__n { display: block; font-size: var(--p-t3); font-weight: 700; margin-bottom: var(--p-4); }
 .p-full__no { display: block; margin-top: var(--p-4); font-size: var(--p-t2); font-weight: 700; letter-spacing: .18em; }

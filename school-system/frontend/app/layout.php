@@ -77,9 +77,9 @@ $p_hour  = (int) current_time('G');
                         $p_first
                     )); ?></b>
                     <span><?php echo esc_html(sprintf(
-                        /* translators: %d: عدد الأبناء */
-                        _n('%d ابن', '%d أبناء', count($p_kids), 'school-system'),
-                        count($p_kids)
+                        /* translators: %s: عدد الأبناء */
+                        _n('%s ابن', '%s أبناء', count($p_kids), 'school-system'),
+                        number_format_i18n(count($p_kids))
                     )); ?></span>
                 </span>
             </a>
