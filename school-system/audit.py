@@ -363,7 +363,14 @@ def c_action_no_handler():
 def c_action_method_missing():
     """فعل مسجَّل ومعالجه غير معرَّف — خطأ فادح عند أول إرسال."""
     dash = os.path.join(ROOT, 'frontend/class-dashboard.php')
+    # المعالجات موزّعة على سمات في frontend/controllers/ تُدمَج في الصنف —
+    # فالبحث عنها في ملف الصنف وحده يجعل الفحص يُبلّغ عن 106 معالج «مفقود».
     src = read(dash)
+    ctl = os.path.join(ROOT, 'frontend/controllers')
+    if os.path.isdir(ctl):
+        for f in sorted(os.listdir(ctl)):
+            if f.endswith('.php'):
+                src += read(os.path.join(ctl, f))
     defined = set(re.findall(r'function\s+([a-z_0-9]+)\s*\(', src))
     for act, (_cap, meth) in _dashboard_registry().items():
         if meth not in defined:

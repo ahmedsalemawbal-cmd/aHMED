@@ -72,7 +72,7 @@ FAULTS: dict[str, callable] = {
         'value="register_student"', 'value="regsiter_student"'),
 
     'ACTION_METHOD_MISSING': sub(
-        'frontend/class-dashboard.php',
+        'frontend/controllers/trait-students.php',
         'private static function do_add_student(', 'private static function do_add_studnt('),
 
     'FORM_NO_NONCE': write(

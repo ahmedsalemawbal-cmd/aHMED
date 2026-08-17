@@ -103,7 +103,8 @@ includes/
   icons.php                أيقونات SVG خطية
 modules/<مجال>/class-*.php طبقة البيانات — **كل SQL هنا ولا شيء خارجها**
 frontend/
-  class-dashboard.php      الموجّه + سجل الأفعال الـ104 (نونس + صلاحية لكلٍّ)
+  class-dashboard.php      الموجّه + سجل الأفعال الـ106 (نونس + صلاحية لكلٍّ)
+  controllers/trait-*.php  المعالجات موزّعة على 7 سمات حسب المجال
   views/                   شاشات الداشبورد — عرض فقط
   class-app|teacher|driver|gate|student|portal.php   الواجهات الست
 api/
@@ -124,7 +125,8 @@ audit.py · dev.sh · build.sh · tools/   أدوات التطوير (لا تد�
 - **لا SQL خارج `modules/`.** الشاشات والـAPI تنادي طبقة البيانات فقط.
 - **كل استعلام عبر `$wpdb->prepare()`.** بلا استثناء.
 - **كل فعل في الداشبورد** يمرّ بـ`handle_post()`: نونس ثم صلاحية ثم المعالج.
-  إضافة فعل = سطر في `actions()` + دالة `do_*`. لا مسار ثانٍ.
+  إضافة فعل = سطر في `actions()` **المركزي** + دالة `do_*` في سمة مجالها
+  (`frontend/controllers/trait-<مجال>.php`). لا مسار ثانٍ.
 - **كل قسم** = سطر في `SECTIONS` + ملف في `frontend/views/`.
 - **رموز التصميم `--sch-*` بيتها `assets/shared-ui.css`** وحده
   (و`parent.css`/`admin.css`/طبقة الداشبورد استثناءات موثّقة).

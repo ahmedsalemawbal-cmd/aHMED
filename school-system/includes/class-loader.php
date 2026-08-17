@@ -52,6 +52,14 @@ final class SCH_Loader
         // الـAPI والداشبورد
         require_once SCH_PATH . 'api/class-auth.php';
         require_once SCH_PATH . 'api/class-rest.php';
+        // السمات تُحمَّل قبل الصنف الذي يستعملها
+        require_once SCH_PATH . 'frontend/controllers/trait-students.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-academic.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-attendance.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-finance.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-transport.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-services.php';
+        require_once SCH_PATH . 'frontend/controllers/trait-system.php';
         require_once SCH_PATH . 'frontend/class-dashboard.php';
         require_once SCH_PATH . 'frontend/class-app.php';
         require_once SCH_PATH . 'frontend/class-portal.php';
