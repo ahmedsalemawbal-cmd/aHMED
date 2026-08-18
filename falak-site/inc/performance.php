@@ -53,6 +53,7 @@ function falak_enqueue_assets() {
 		array(
 			'rest'     => esc_url_raw( rest_url( 'falak/v1/enroll' ) ),
 			'review'   => esc_url_raw( rest_url( 'falak/v1/review' ) ),
+			'job'      => esc_url_raw( rest_url( 'falak/v1/job' ) ),
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
 			'whatsapp' => falak_wa_number(),
 			'grades'   => array(

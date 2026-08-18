@@ -19,6 +19,7 @@
     initDynamicGrades();
     initRate();
     initReviewForm();
+    initJobForm();
     initDashboard();
   });
 
@@ -368,6 +369,52 @@
         if (btn) { btn.disabled = false; btn.innerHTML = t; }
         if (r.ok) { show('ok', 'شكرًا لك! تم استلام تقييمك وسيظهر بعد اعتماده. 🌟'); form.reset(); initRate(); }
         else { show('err', 'تعذّر إرسال التقييم، حاول لاحقًا.'); }
+      }).catch(function () {
+        if (btn) { btn.disabled = false; btn.innerHTML = t; }
+        show('err', 'تعذّر الاتصال، حاول لاحقًا.');
+      });
+    });
+
+    function show(type, text) {
+      if (!msg) { alert(text); return; }
+      msg.className = 'fk-form-msg ' + type;
+      msg.textContent = text;
+      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  /* إرسال نموذج التوظيف */
+  function initJobForm() {
+    var form = document.getElementById('falak-job-form');
+    if (!form) return;
+    var msg = form.querySelector('.fk-form-msg');
+    var btn = form.querySelector('.fk-form-submit');
+    var data = window.falakData || {};
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (msg) { msg.className = 'fk-form-msg'; msg.textContent = ''; }
+      var hp = form.querySelector('[name="fk_website"]');
+      if (hp && hp.value) return;
+
+      var fd = new FormData(form), payload = {};
+      fd.forEach(function (v, k) { payload[k] = v; });
+      if (!payload.name || !payload.phone || !payload.position) {
+        show('err', 'الرجاء تعبئة الاسم والجوال والوظيفة المطلوبة.');
+        return;
+      }
+      if (!data.job) { show('err', 'تعذّر الإرسال حاليًا.'); return; }
+
+      var t = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = 'جارٍ الإرسال…'; }
+      fetch(data.job, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': data.nonce || '' },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        if (btn) { btn.disabled = false; btn.innerHTML = t; }
+        if (r.ok) { show('ok', 'تم استلام طلب التوظيف بنجاح ✅ سنتواصل معك عند توفّر شاغرٍ مناسب.'); form.reset(); }
+        else { show('err', 'تعذّر إرسال الطلب، حاول لاحقًا.'); }
       }).catch(function () {
         if (btn) { btn.disabled = false; btn.innerHTML = t; }
         show('err', 'تعذّر الاتصال، حاول لاحقًا.');

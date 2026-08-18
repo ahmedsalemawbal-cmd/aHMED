@@ -8,43 +8,6 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /* ─────────────────────────────────────────
-   المعلمون
-───────────────────────────────────────────*/
-function falak_tpl_teachers() {
-	falak_page_head( 'المعلمون والمعلمات', 'كادرٌ تعليميٌّ مؤهّل ومتخصّص في مختلف المواد' );
-
-	$teachers = falak_get_teachers();
-	?>
-	<section class="fk-teachers" style="background:#fff">
-		<div class="fk-sec-head fk-reveal">
-			<span class="fk-eyebrow center">كادرنا</span>
-			<h2 class="fk-h2">نُخبةٌ من <span>المعلمين والمعلمات</span></h2>
-			<p class="fk-lead">يجمع كادرنا بين الكفاءة العلمية والخبرة التربوية والعناية بكل طالب.</p>
-		</div>
-		<div class="fk-teach-grid">
-			<?php foreach ( $teachers as $t ) : ?>
-				<article class="fk-teach-card fk-reveal">
-					<div class="fk-teach-photo">
-						<?php if ( ! empty( $t['img'] ) ) : ?>
-							<img src="<?php echo esc_url( $t['img'] ); ?>" alt="<?php echo esc_attr( $t['name'] ); ?>" loading="lazy">
-						<?php else : ?>
-							<span class="ph"><?php falak_icon( 'user', 42 ); ?></span>
-						<?php endif; ?>
-					</div>
-					<div class="fk-teach-body">
-						<h3><?php echo esc_html( $t['name'] ); ?></h3>
-						<?php if ( ! empty( $t['role'] ) ) : ?><div class="role"><?php echo esc_html( $t['role'] ); ?></div><?php endif; ?>
-						<?php if ( ! empty( $t['note'] ) ) : ?><span class="ijaza"><?php falak_icon( 'award', 13 ); ?> <?php echo esc_html( $t['note'] ); ?></span><?php endif; ?>
-					</div>
-				</article>
-			<?php endforeach; ?>
-		</div>
-	</section>
-	<?php
-	falak_cta_band( 'تعليمٌ نوعيٌّ <span>على أيدي نخبة</span>', 'سجّل الآن ليبدأ ابنك أو ابنتك رحلته التعليمية على يد نخبةٍ من المعلمين والمعلمات.' );
-}
-
-/* ─────────────────────────────────────────
    معرض الصور
 ───────────────────────────────────────────*/
 function falak_tpl_gallery() {

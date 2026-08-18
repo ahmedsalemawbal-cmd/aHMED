@@ -3,7 +3,7 @@
  * Plugin Name:       مدرسة الفلك المنير — Al-Falak Al-Munir Quran School
  * Plugin URI:        https://alfalak-almunir.com
  * Description:        موقع «مدرسة الفلك المنير» (مدرسة عامة) — واجهة عربية RTL كاملة + داش بورد مستقلة ببوابة دخول لإدارة التسجيلات والمعرض والمعلمين والتقييمات، ونظام تسجيل طلاب احترافي بمراحل ديناميكية حسب النوع، وسلايدرات معرض وتقييمات. مبنية على نمط إضافة «أصول البناء».
- * Version:           2.2.0
+ * Version:           2.3.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            مدرسة الفلك المنير
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // حماية من التحميل المزدوج.
 if ( defined( 'FALAK_VERSION' ) ) { return; }
 
-define( 'FALAK_VERSION', '2.2.0' );
+define( 'FALAK_VERSION', '2.3.0' );
 define( 'FALAK_FILE', __FILE__ );
 define( 'FALAK_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FALAK_URL', plugin_dir_url( __FILE__ ) );
@@ -36,6 +36,7 @@ $falak_modules = array(
 	'inc/content.php',       // أنواع المحتوى: المعرض + المعلمون + التقييمات
 	'inc/enroll.php',        // نظام التسجيل: REST + حفظ + بريد
 	'inc/reviews.php',       // التقييمات: صفحة عامة + REST + عرض الشهادات
+	'inc/careers.php',       // التوظيف: صفحة + REST + CPT (بديل المعلمون)
 	'inc/dashboard.php',     // الداش بورد المستقلة + بوابة الدخول
 	'inc/pages.php',         // إنشاء صفحات ووردبريس المطلوبة
 	'inc/performance.php',   // تحميل الأصول + تلميحات الموارد + تنظيف
@@ -63,6 +64,7 @@ function falak_activate() {
 	if ( function_exists( 'falak_register_program_cpt' ) ) { falak_register_program_cpt(); }
 	if ( function_exists( 'falak_register_enroll_cpt' ) ) { falak_register_enroll_cpt(); }
 	if ( function_exists( 'falak_register_content_cpts' ) ) { falak_register_content_cpts(); }
+	if ( function_exists( 'falak_register_job_cpt' ) ) { falak_register_job_cpt(); }
 	if ( function_exists( 'falak_seed_programs' ) ) { falak_seed_programs(); }
 	if ( function_exists( 'falak_create_roles' ) ) { falak_create_roles(); }
 	if ( function_exists( 'falak_create_missing_pages' ) ) { falak_create_missing_pages( true ); }
@@ -83,6 +85,14 @@ function falak_maybe_upgrade() {
 		return;
 	}
 	if ( function_exists( 'falak_create_roles' ) ) { falak_create_roles(); }
+	// إزالة صفحة «المعلمون» القديمة (استُبدلت بصفحة «التوظيف»).
+	$falak_old = get_page_by_path( 'teachers' );
+	if ( $falak_old instanceof WP_Post ) {
+		wp_delete_post( $falak_old->ID, true );
+		$falak_ids = get_option( 'falak_page_ids', array() );
+		unset( $falak_ids['teachers'] );
+		update_option( 'falak_page_ids', $falak_ids );
+	}
 	if ( function_exists( 'falak_create_missing_pages' ) ) { falak_create_missing_pages( true ); }
 	if ( function_exists( 'falak_seed_programs' ) ) { falak_seed_programs(); }
 	update_option( 'falak_ver', FALAK_VERSION );

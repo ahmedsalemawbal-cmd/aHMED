@@ -34,8 +34,8 @@ function falak_render_page() {
 		case 'programs':
 			falak_tpl_programs();
 			break;
-		case 'teachers':
-			falak_tpl_teachers();
+		case 'careers':
+			falak_tpl_careers();
 			break;
 		case 'gallery':
 			falak_tpl_gallery();

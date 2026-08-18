@@ -80,6 +80,7 @@ require FALAK_DIR . 'inc/settings.php';
 require FALAK_DIR . 'inc/programs.php';
 require FALAK_DIR . 'inc/content.php';
 require FALAK_DIR . 'inc/reviews.php';
+require FALAK_DIR . 'inc/careers.php';
 require FALAK_DIR . 'inc/dashboard.php';
 require FALAK_DIR . 'inc/header.php';
 require FALAK_DIR . 'inc/footer.php';
@@ -122,6 +123,7 @@ switch ( $PAGE ) {
 	case 'teachers':  falak_tpl_teachers(); break;
 	case 'programs':  falak_tpl_programs(); break;
 	case 'contact':   falak_tpl_contact(); break;
+	case 'careers':   falak_tpl_careers(); break;
 	case 'about':     falak_tpl_about(); break;
 	case 'faq':       falak_tpl_faq(); break;
 	case 'dashboard': falak_tpl_dashboard(); break;

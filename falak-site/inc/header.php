@@ -16,7 +16,7 @@ function falak_nav_items() {
 		array( 'label' => 'الرئيسية', 'url' => $home, 'icon' => 'compass' ),
 		array( 'label' => 'من نحن', 'url' => $home . 'about/', 'icon' => 'book' ),
 		array( 'label' => 'المراحل والبرامج', 'url' => $home . 'programs/', 'icon' => 'book' ),
-		array( 'label' => 'المعلمون', 'url' => $home . 'teachers/', 'icon' => 'users' ),
+		array( 'label' => 'التوظيف', 'url' => $home . 'careers/', 'icon' => 'user' ),
 		array( 'label' => 'المعرض', 'url' => $home . 'gallery/', 'icon' => 'image' ),
 		array( 'label' => 'الأسئلة الشائعة', 'url' => $home . 'faq/', 'icon' => 'sparkle' ),
 		array( 'label' => 'تواصل معنا', 'url' => $home . 'contact/', 'icon' => 'phone' ),

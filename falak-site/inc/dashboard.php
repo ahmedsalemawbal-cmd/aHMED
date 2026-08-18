@@ -211,6 +211,19 @@ function falak_dash_do_action( $dash ) {
 			if ( $id && falak_post_is( $id, 'falak_enroll' ) ) { wp_delete_post( $id, true ); $msg = 'deleted'; } else { $msg = 'err'; }
 			break;
 
+		case 'set_job_status':
+			$id = (int) ( $P['id'] ?? 0 );
+			$st = sanitize_key( $P['status'] ?? '' );
+			if ( $id && falak_post_is( $id, 'falak_job' ) && in_array( $st, array( 'new', 'contacted', 'hired', 'closed' ), true ) ) {
+				update_post_meta( $id, '_falak_status', $st );
+			} else { $msg = 'err'; }
+			break;
+
+		case 'del_job':
+			$id = (int) ( $P['id'] ?? 0 );
+			if ( $id && falak_post_is( $id, 'falak_job' ) ) { wp_delete_post( $id, true ); $msg = 'deleted'; } else { $msg = 'err'; }
+			break;
+
 		case 'add_photo':
 			$cap = sanitize_text_field( $P['caption'] ?? '' );
 			$img = falak_dash_upload( 'photo' );
@@ -362,8 +375,8 @@ function falak_dash_app_view() {
 
 	$tabs = array(
 		'students' => array( 'التسجيلات', 'users' ),
+		'careers'  => array( 'التوظيف', 'user' ),
 		'gallery'  => array( 'المعرض', 'image' ),
-		'teachers' => array( 'المعلمون', 'user' ),
 		'reviews'  => array( 'التقييمات', 'star' ),
 	);
 	if ( $is_admin ) {
@@ -409,7 +422,7 @@ function falak_dash_app_view() {
 			<?php
 			switch ( $tab ) {
 				case 'gallery':  falak_dash_tab_gallery(); break;
-				case 'teachers': falak_dash_tab_teachers(); break;
+				case 'careers':  falak_dash_tab_careers(); break;
 				case 'reviews':  falak_dash_tab_reviews(); break;
 				case 'staff':    if ( $is_admin ) { falak_dash_tab_staff(); } break;
 				default:         falak_dash_tab_students();
@@ -551,40 +564,61 @@ function falak_dash_tab_gallery() {
 	<?php endif;
 }
 
-/* ---- تبويب: المعلمون ---- */
-function falak_dash_tab_teachers() {
-	$teachers = get_posts( array( 'post_type' => 'falak_teacher', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC' ) );
+/* ---- تبويب: التوظيف (طلبات المتقدّمين) ---- */
+function falak_dash_tab_careers() {
+	$posts  = get_posts( array( 'post_type' => 'falak_job', 'post_status' => 'any', 'numberposts' => 300, 'orderby' => 'date', 'order' => 'DESC' ) );
+	$labels = array( 'new' => 'جديد', 'contacted' => 'تم التواصل', 'hired' => 'تم التوظيف', 'closed' => 'مغلق' );
 	?>
-	<div class="fk-dash-head"><h2>المعلمون <span class="fk-dash-count"><?php echo count( $teachers ); ?></span></h2></div>
-	<form method="post" action="<?php echo esc_url( falak_dash_url() ); ?>" class="fk-dash-form open" enctype="multipart/form-data">
-		<?php falak_dash_form_fields( 'add_teacher', 'teachers' ); ?>
-		<div class="fk-form-row">
-			<div class="fk-field"><label>الاسم *</label><input type="text" name="name" required></div>
-			<div class="fk-field"><label>المسمّى / المادة</label><input type="text" name="role" placeholder="مثال: معلم رياضيات"></div>
-		</div>
-		<div class="fk-form-row">
-			<div class="fk-field"><label>المؤهل (اختياري)</label><input type="text" name="note" placeholder="مثال: بكالوريوس"></div>
-			<div class="fk-field"><label>الصورة</label><input type="file" name="photo" accept="image/*"></div>
-		</div>
-		<button type="submit" class="fk-btn fk-btn-p"><?php falak_icon( 'user', 16 ); ?> إضافة معلم</button>
-	</form>
+	<div class="fk-dash-head"><h2>طلبات التوظيف <span class="fk-dash-count"><?php echo count( $posts ); ?></span></h2></div>
 
-	<?php if ( empty( $teachers ) ) : ?>
-		<div class="fk-dash-empty"><?php falak_icon( 'user', 40 ); ?><p>لم تُضِف معلمين بعد — تظهر حاليًا قائمة افتراضية في الموقع.</p></div>
+	<?php if ( empty( $posts ) ) : ?>
+		<div class="fk-dash-empty"><?php falak_icon( 'user', 40 ); ?><p>لا توجد طلبات توظيف بعد. تصل الطلبات هنا من صفحة «التوظيف».</p></div>
 	<?php else : ?>
-	<div class="fk-dash-grid">
-		<?php foreach ( $teachers as $p ) : $img = get_post_meta( $p->ID, '_falak_img', true ); $role = get_post_meta( $p->ID, '_falak_role', true ); ?>
-			<div class="fk-dash-card">
-				<div class="thumb round"><?php if ( $img ) : ?><img src="<?php echo esc_url( $img ); ?>" alt=""><?php else : ?><?php falak_icon( 'user', 30 ); ?><?php endif; ?></div>
-				<div class="meta"><span><b><?php echo esc_html( $p->post_title ); ?></b><br><small><?php echo esc_html( $role ); ?></small></span>
-					<form method="post" action="<?php echo esc_url( falak_dash_url() ); ?>" onsubmit="return confirm('حذف المعلم؟')">
-						<?php falak_dash_form_fields( 'del_teacher', 'teachers' ); ?>
-						<input type="hidden" name="id" value="<?php echo (int) $p->ID; ?>">
-						<button class="ic del" type="submit" title="حذف"><?php falak_icon( 'close', 15 ); ?></button>
-					</form>
-				</div>
-			</div>
-		<?php endforeach; ?>
+	<div class="fk-dash-tablewrap">
+		<table class="fk-dash-table">
+			<thead><tr><th>الاسم</th><th>الوظيفة</th><th>الخبرة</th><th>المؤهل</th><th>الجوال</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+			<tbody>
+			<?php foreach ( $posts as $p ) :
+				$name  = get_post_meta( $p->ID, '_falak_name', true ) ?: $p->post_title;
+				$pos   = get_post_meta( $p->ID, '_falak_position', true );
+				$exp   = get_post_meta( $p->ID, '_falak_experience', true );
+				$qual  = get_post_meta( $p->ID, '_falak_qualification', true );
+				$phone = get_post_meta( $p->ID, '_falak_phone', true );
+				$st    = get_post_meta( $p->ID, '_falak_status', true ) ?: 'new';
+				$wa    = preg_replace( '/\D+/', '', (string) $phone );
+				?>
+				<tr>
+					<td data-l="الاسم"><b><?php echo esc_html( $name ); ?></b></td>
+					<td data-l="الوظيفة"><?php echo esc_html( $pos ); ?></td>
+					<td data-l="الخبرة"><?php echo esc_html( $exp ); ?></td>
+					<td data-l="المؤهل"><?php echo esc_html( $qual ); ?></td>
+					<td data-l="الجوال" dir="ltr"><?php echo esc_html( $phone ); ?></td>
+					<td data-l="الحالة">
+						<form method="post" action="<?php echo esc_url( falak_dash_url() ); ?>" class="fk-inline">
+							<?php falak_dash_form_fields( 'set_job_status', 'careers' ); ?>
+							<input type="hidden" name="id" value="<?php echo (int) $p->ID; ?>">
+							<select name="status" onchange="this.form.submit()">
+								<?php foreach ( $labels as $k => $lab ) : ?>
+									<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $st, $k ); ?>><?php echo esc_html( $lab ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</form>
+					</td>
+					<td data-l="إجراءات" class="fk-dash-actions">
+						<?php if ( $wa ) : ?>
+							<a class="ic wa" href="https://wa.me/<?php echo esc_attr( $wa ); ?>" target="_blank" rel="noopener" title="واتساب"><?php falak_icon( 'whatsapp', 16 ); ?></a>
+							<a class="ic" href="tel:<?php echo esc_attr( $phone ); ?>" title="اتصال"><?php falak_icon( 'phone', 16 ); ?></a>
+						<?php endif; ?>
+						<form method="post" action="<?php echo esc_url( falak_dash_url() ); ?>" class="fk-inline" onsubmit="return confirm('حذف الطلب؟')">
+							<?php falak_dash_form_fields( 'del_job', 'careers' ); ?>
+							<input type="hidden" name="id" value="<?php echo (int) $p->ID; ?>">
+							<button class="ic del" type="submit" title="حذف"><?php falak_icon( 'close', 16 ); ?></button>
+						</form>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 	<?php endif;
 }

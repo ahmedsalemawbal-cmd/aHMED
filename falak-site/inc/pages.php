@@ -15,7 +15,7 @@ function falak_required_pages() {
 		'home'     => 'الرئيسية',
 		'about'    => 'من نحن',
 		'programs' => 'البرامج',
-		'teachers' => 'المعلمون',
+		'careers'  => 'التوظيف',
 		'gallery'  => 'معرض الصور',
 		'faq'      => 'الأسئلة الشائعة',
 		'contact'  => 'تواصل معنا',
