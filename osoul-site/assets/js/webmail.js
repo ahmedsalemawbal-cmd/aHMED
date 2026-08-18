@@ -708,7 +708,8 @@
 			dock.classList.remove('min'); var full = dock.classList.toggle('full');
 			q('.om-cd-expand', dock).innerHTML = full ? I.compress : I.expand;
 		});
-		on(q('.om-cd-head', dock), 'click', function (e) { if (e.target.closest('.om-ic')) return; dock.classList.toggle('min'); });
+		// Clicking the header no longer collapses the window (only the "–" button
+		// does), so a stray click on the blue bar never hides the message.
 		on(q('.show-cc', dock), 'click', function () { q('.cc-row', dock).classList.toggle('om-hide'); });
 		on(q('.show-bcc', dock), 'click', function () { q('.bcc-row', dock).classList.toggle('om-hide'); });
 

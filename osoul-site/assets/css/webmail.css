@@ -279,7 +279,7 @@ textarea.om-input{height:auto;padding:13px 16px;min-height:96px;resize:vertical;
 }
 @keyframes om-rise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 .om-compose-dock.min{max-height:56px}
-.om-cd-head{display:flex;align-items:center;gap:8px;background:var(--grad);color:#fff;padding:13px 18px;border-radius:19px 19px 0 0;cursor:pointer}
+.om-cd-head{display:flex;align-items:center;gap:8px;background:var(--grad);color:#fff;padding:13px 18px;border-radius:19px 19px 0 0;cursor:default}
 .om-cd-head .t{flex:1;font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .om-cd-head .om-ic{width:30px;height:30px;border-radius:9px}
 .om-cd-head .om-ic:hover{background:rgba(255,255,255,.2)}
