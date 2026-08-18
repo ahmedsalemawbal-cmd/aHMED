@@ -646,8 +646,17 @@ img { max-width: 100%; }
 .p-btn--brand { background: var(--p-brand); }
 .p-body button.p-btn--quiet,
 .p-body a.p-btn--quiet { background: var(--p-card); color: var(--p-ink); border: 1px solid var(--p-line-2); }
-.p-btn[disabled] { background: var(--p-alt); color: var(--p-mute); cursor: not-allowed; box-shadow: none; }
-.p-btn[disabled]:active { transform: none; }
+/* المعطَّل يحتاج أولوية القاعدة الأساسية نفسها: `.p-btn[disabled]` وحدها
+   (صنف+سمة) تخسر أمام `.p-body button.p-btn` (صنفان+عنصر)، فيبقى الزرّ
+   المعطَّل أسودَ كأنه الفعل الأساسي في الشاشة. */
+.p-body button.p-btn[disabled],
+.p-body a.p-btn[disabled] {
+  background: var(--p-alt);
+  color: var(--p-mute);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.p-body button.p-btn[disabled]:active { transform: none; }
 
 .p-field { margin-bottom: var(--p-3); }
 .p-field label { display: block; margin-bottom: 5px; font-size: var(--p-t5); color: var(--p-mute); }
