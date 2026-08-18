@@ -283,7 +283,7 @@ textarea.om-input{height:auto;padding:13px 16px;min-height:96px;resize:vertical;
 .om-cd-head .t{flex:1;font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .om-cd-head .om-ic{width:30px;height:30px;border-radius:9px}
 .om-cd-head .om-ic:hover{background:rgba(255,255,255,.2)}
-.om-cd-body{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.om-cd-body{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .om-compose-dock.min .om-cd-body{display:none}
 .om-cd-fields{padding:8px 18px}
 .om-cd-fld{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line2);padding:9px 0}
