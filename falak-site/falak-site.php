@@ -3,7 +3,7 @@
  * Plugin Name:       مدرسة الفلك المنير — Al-Falak Al-Munir Quran School
  * Plugin URI:        https://alfalak-almunir.com
  * Description:        موقع «مدرسة الفلك المنير» (مدرسة عامة) — واجهة عربية RTL كاملة + داش بورد مستقلة ببوابة دخول لإدارة التسجيلات والمعرض والمعلمين والتقييمات، ونظام تسجيل طلاب احترافي بمراحل ديناميكية حسب النوع، وسلايدرات معرض وتقييمات. مبنية على نمط إضافة «أصول البناء».
- * Version:           2.3.0
+ * Version:           2.4.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            مدرسة الفلك المنير
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // حماية من التحميل المزدوج.
 if ( defined( 'FALAK_VERSION' ) ) { return; }
 
-define( 'FALAK_VERSION', '2.3.0' );
+define( 'FALAK_VERSION', '2.4.0' );
 define( 'FALAK_FILE', __FILE__ );
 define( 'FALAK_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FALAK_URL', plugin_dir_url( __FILE__ ) );
@@ -81,10 +81,19 @@ register_deactivation_hook( __FILE__, function () {
  */
 add_action( 'init', 'falak_maybe_upgrade', 99 );
 function falak_maybe_upgrade() {
-	if ( get_option( 'falak_ver' ) === FALAK_VERSION ) {
+	$need = ( get_option( 'falak_ver' ) !== FALAK_VERSION );
+
+	// شبكة أمان: لو صفحة «لوحة التحكم» مفقودة (حُذفت أو لم تُنشأ) — سبب شائع لتحويل /dashboard/
+	// إلى الرئيسية — فعّل الترقية لإعادة إنشائها وتحديث روابط ووردبريس.
+	if ( ! $need && function_exists( 'falak_page_id' ) && ! falak_page_id( 'dashboard' ) ) {
+		$need = true;
+	}
+	if ( ! $need ) {
 		return;
 	}
+
 	if ( function_exists( 'falak_create_roles' ) ) { falak_create_roles(); }
+
 	// إزالة صفحة «المعلمون» القديمة (استُبدلت بصفحة «التوظيف»).
 	$falak_old = get_page_by_path( 'teachers' );
 	if ( $falak_old instanceof WP_Post ) {
@@ -93,8 +102,19 @@ function falak_maybe_upgrade() {
 		unset( $falak_ids['teachers'] );
 		update_option( 'falak_page_ids', $falak_ids );
 	}
+
 	if ( function_exists( 'falak_create_missing_pages' ) ) { falak_create_missing_pages( true ); }
 	if ( function_exists( 'falak_seed_programs' ) ) { falak_seed_programs(); }
+
+	// ترحيل الشعار إلى الشعار الرسمي للمدرسة إن كان لا يزال على الافتراضي القديم
+	// (لا يُلمَس إن كان المستخدم قد عيّن شعارًا خاصًا به).
+	$falak_opts     = get_option( 'falak_opts', array() );
+	$falak_old_logo = 'https://ahmedawbal.com/wp-content/uploads/2026/07/%D8%AA%D8%B5%D9%85%D9%8A%D9%85-%D8%A8%D8%AF%D9%88%D9%86-%D8%B9%D9%86%D9%88%D8%A7%D9%86-89.png';
+	if ( is_array( $falak_opts ) && isset( $falak_opts['logo'] ) && $falak_opts['logo'] === $falak_old_logo ) {
+		$falak_opts['logo'] = falak_default_opts()['logo'];
+		update_option( 'falak_opts', $falak_opts );
+	}
+
 	update_option( 'falak_ver', FALAK_VERSION );
 	flush_rewrite_rules();
 }
