@@ -52,7 +52,7 @@ $today    = current_time('Y-m-d');
             <span class="p-bill__k"><?php esc_html_e('المتبقي عليك', 'school-system'); ?></span>
             <b class="p-bill__v">
                 <span class="p-amt">
-                    <span class="p-nm"><?php echo esc_html(number_format($left, 2)); ?></span>
+                    <span class="p-nm"><?php echo esc_html(number_format_i18n($left, 0)); ?></span>
                     <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
                 </span>
             </b>
@@ -68,9 +68,9 @@ $today    = current_time('Y-m-d');
                 <span class="p-bill__pct"><?php echo esc_html(number_format_i18n($pct)); ?>٪</span>
                 <span>
                     <?php esc_html_e('دفعت', 'school-system'); ?>
-                    <b class="p-nm"><?php echo esc_html(number_format($paid, 0)); ?></b>
+                    <b class="p-nm"><?php echo esc_html(number_format_i18n($paid, 0)); ?></b>
                     <?php esc_html_e('من', 'school-system'); ?>
-                    <b class="p-nm"><?php echo esc_html(number_format($total, 0)); ?></b>
+                    <b class="p-nm"><?php echo esc_html(number_format_i18n($total, 0)); ?></b>
                 </span>
             </span>
 
@@ -81,7 +81,7 @@ $today    = current_time('Y-m-d');
                         /* translators: 1: النسبة 2: المبلغ */
                         __('خصم %1$s٪ · وفّرت %2$s', 'school-system'),
                         number_format_i18n((float) $inv->discount_pct, 1),
-                        number_format((float) $inv->discount, 0)
+                        number_format_i18n((float) $inv->discount, 0)
                     )); ?>
                 </span>
             <?php endif; ?>
@@ -105,7 +105,7 @@ $today    = current_time('Y-m-d');
                                 <b><?php echo esc_html(number_format_i18n($i + 1)); ?></b>
                             <?php endif; ?>
                         </span>
-                        <b class="p-pay__a p-nm"><?php echo esc_html(number_format((float) $r->amount, 0)); ?></b>
+                        <b class="p-pay__a p-nm"><?php echo esc_html(number_format_i18n((float) $r->amount, 0)); ?></b>
                         <span class="p-pay__d"><?php echo esc_html(wp_date('j M', strtotime((string) $r->due_date))); ?></span>
                     </div>
                 <?php endforeach; ?>
@@ -146,7 +146,7 @@ $today    = current_time('Y-m-d');
                 <?php if ($next) : ?>
                     <b class="p-due__v">
                         <span class="p-amt">
-                            <span class="p-nm"><?php echo esc_html(number_format((float) $next->amount - (float) $next->paid, 2)); ?></span>
+                            <span class="p-nm"><?php echo esc_html(number_format_i18n((float) $next->amount - (float) $next->paid, 0)); ?></span>
                             <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
                         </span>
                     </b>

@@ -1,2048 +1,2065 @@
-/* =========================================================
-   تطبيق ولي الأمر — نظام تصميم جديد من الصفر.
+/* ═══════════════════════════════════════════════════════════════════
+   تطبيق وليّ الأمر — الأساس
 
-   المستخدم أب يفتحه صباحًا وهو مستعجل، أحيانًا قلق، وبيد واحدة.
-   السؤال الذي يفتحه لأجله: **أين ابني الآن وهل هو بخير**.
+   الهوية منقولة حرفيًّا من مخرَج كلود ديزاين المحفوظ في
+   `osool-cloud/تصميم/تطبيق-وليّ-الأمر/`. القيم نُسخت ولم تُجتهد، فما
+   يعمل مطابقٌ لما صُمِّم. وحين يتغيّر التصميم تُنسخ مرّة أخرى — فلا
+   تُحرَّر قيمة هنا يدويًّا.
+   ═══════════════════════════════════════════════════════════════════ */
 
-   ثلاثة مبادئ:
-   1. **الهرمية بالحجم والمسافة قبل اللون** — لو حُذف اللون بقيت مفهومة.
-   2. **حركة واحدة بمنحنى واحد** — هذا ما يجعلها تبدو كالماء لا كقطع.
-   3. **ما يُخفى خلف قائمة لا يُستخدم** — كل شيء بضغطة واحدة.
+.p-body {
+  --canvas:#e7e9f6; --bg:#f3f4fb; --card:#ffffff; --card2:#f7f8fd;
+  --ink:#191b2e; --ink2:#585c78; --muted:#6e7290; --line:rgba(25,27,46,.10);
+  --pri:#4453cc; --pri-ink:#3b49b8; --pri-tint:#e7eaff; --on-pri:#ffffff;
+  --ok:#0d7a55; --ok-tint:#dcf2e7;
+  --warn:#8c5b06; --warn-tint:#fbeed2;
+  --bad:#b3332c; --bad-tint:#fbe3e1;
+  --gold:#7e5a0c; --gold-tint:#f7edd3;
+  --slate:#4a5170; --slate-tint:#e8eaf2;
+  --shadow:0 6px 22px rgba(38,42,88,.09); --shadow-sm:0 2px 8px rgba(38,42,88,.06);
+  --skel:rgba(25,27,46,.09);
+  --map-bg:#e3e8f1; --map-block:#d4dae7; --map-road:#f5f7fb;
 
-   البادئة `p-` لكل شيء هنا — لا تتصادم مع أي طبقة أخرى في النظام.
-   ========================================================= */
+  /* سُلَّم الخطّ كما استُعمل في التصميم */
+  --t0:10.5px; --t1:11.5px; --t2:12.5px; --t3:14px;
+  --t4:17px;   --t5:25px;   --t6:34px;
 
-:root {
-  color-scheme: light;
-
-  /* ---------- الأسطح: ورق حجريّ معتم — لا زجاج ولا توهّج ----------
-     الزجاج (backdrop-filter) يُعيد رسم ما خلف كل بطاقة في كل إطار،
-     وجوّال أكثر أولياء الأمور لا يحتمله. العمق من خيط شعرة وظلّ ناعم
-     وفرق سطحين — وهو أوضح في شمس الظهيرة أيضًا. */
-  --p-bg:       #F1F4F3;   /* ورق: محايد بانحياز أخضر رمادي، لا رمادي جاهز */
-  --p-card:     #FFFFFF;
-  --p-alt:      #E8EDEB;   /* جيب داخلي غائر */
-  --p-glass-brd:#DCE4E1;   /* بقي الاسم وتغيّر المعنى: خيط شعرة لا حافة زجاج */
-  --p-line:     #DCE4E1;
-  --p-line-2:   #C9D5D0;
-  --p-chrome:   #FFFFFF;
-  --p-tabbar:   #FFFFFF;
-  --sch-av-bg:  #E4F0F4;
-  --sch-av-ink: #0F6E8C;
-
-  /* ---------- النص ---------- */
-  --p-ink:      #0D1A17;   /* أسود بانحياز أخضر — مختار لا موروث */
-  --p-ink-2:    #3C4C47;
-  --p-mute:     #4E605B;
-  --p-faint:    #6B7975;
-
-  /* ---------- الهوية: «مرفأ» ----------
-     أزرق بحريّ يقول هدوءًا وحركة — وهو ما يفتح الأب التطبيق لأجله. */
-  --p-brand:    #0F6E8C;
-  --p-brand-ink:#0B5266;   /* أغمق للنص الدقيق على أبيض */
-  --p-brand-d:  #0C5C76;
-  --p-brand-s:  rgba(15, 110, 140, .10);
-
-  /* ---------- على اللون ----------
-     البارز ينقلب فاتحًا في الوضع الداكن، فـ`#fff` فوقه ينهار إلى ٢٫٢:١.
-     هذا الرمز موجود لهذا السبب بالضبط — لا تكتب أبيض صريحًا فوق رمز. */
-  --p-on-color: #FFFFFF;
-
-  /* ---------- العمق: أسطح داكنة تبقى داكنة في الوضعين ---------- */
-  --p-deep-1:   #072935;
-  --p-deep-2:   #0B3F52;
-  --p-deep-3:   #0F6E8C;
-  --p-shine:    #A9CFDC;
-
-  /* ---------- أربع بوابات ----------
-     مرفأ · ليل · قرمزي · كهرماني — والصحّة وحدها حمراء لأنها وحدها قد تكون عاجلة. */
-  --p-n1:       #0F6E8C;   /* الجدول */
-  --p-n2:       #1B3A57;   /* أين ابني الآن */
-  --p-n3:       #AC3830;   /* الصحة المدرسية */
-  --p-n4:       #A8722A;   /* الإجازات */
-
-  /* ---------- الحالات: للحالة وحدها لا للزينة ---------- */
-  --p-ok:       #157A52;
-  --p-ok-s:     rgba(21, 122, 82, .12);
-  --p-warn:     #9E6B27;
-  --p-warn-s:   rgba(158, 107, 39, .14);
-  --p-late:     #0D1A17;
-  --p-late-s:   #E8EDEB;
-
-  /* ---------- الغياب بعذر ----------
-     كان يُرسم بلون الخطوط، فيُقرأ «لا بيانات» لا «إجازة معتمدة». وهو ثالث
-     حالة قائمة بذاتها: المدرسة تعرف وأذِنت — فله لونه من عائلة الهوية،
-     مغبَّشًا ليقول «محسوب، لكنه ليس حضورًا». */
-  --p-excused:   #6E8FA0;
-  --p-excused-s: #DFE8EC;
-  --p-gold:     #936F33;   /* النحاس: توقيع نادر — النقطة الحيّة والشهادة وحدهما */
-  --p-gold-s:   rgba(147, 111, 51, .16);
-
-  /* ---------- لون ثابت لكل ابن ----------
-     يُشتق من معرّفه (`% 6`) فيبقى نفسه دائمًا، ويتعرّف عليه الأب بالعين قبل
-     قراءة الاسم. **رموز لا قيم مكتوبة**: ثلاث منها كانت مكتوبة مباشرةً فلم
-     تنقلب في الوضع الداكن. */
-  --p-k1: #0F6E8C;
-  --p-k2: #1B3A57;
-  --p-k3: #157A52;
-  --p-k4: #936F33;
-  --p-k5: #8A4B3C;
-  --p-k6: #4A5C7A;
-
-  /* ---------- الخط: القاهرة وحدها ---------- */
-  --p-font:  'Cairo', system-ui, -apple-system, sans-serif;
-  --p-t0:    38px;   /* الرقم البطل — المبلغ وحده */
-  --p-t1:    28px;   /* رقم بارز */
-  --p-t2:    22px;   /* عنوان الشاشة */
-  --p-t3:    17px;   /* عنوان قسم */
-  --p-t4:    14.5px; /* النص */
-  --p-t5:    13px;   /* ثانوي */
-  --p-t6:    11.5px; /* وسم */
-
-  /* ---------- ارتفاع السطر مربوط بالدرجة ----------
-     نصف الإحساس بـ«الكِبَر» كان هنا لا في حجم الحرف: 1.7 مفروضة على كل شيء
-     تجعل رقمًا بـ28px يجلس في صندوق 48px. */
-  --p-lh-tight: 1.15;
-  --p-lh-snug:  1.35;
-  --p-lh-ui:    1.55;
-  --p-lh-read:  1.8;   /* للنثر العربي وحده — التشكيل والنزلات تحتاج رصاصًا */
-
-  /* ---------- المسافات ---------- */
-  --p-1: 4px;  --p-2: 8px;   --p-3: 12px;
-  --p-4: 16px; --p-5: 22px;  --p-6: 30px;
-
-  /* ---------- الزوايا ---------- */
-  --p-r1: 10px; --p-r2: 16px; --p-r3: 20px; --p-r4: 26px;
-
-  /* ---------- الظل: حبريّ لا بنفسجي ---------- */
-  --p-e1: 0 1px 2px rgba(13, 26, 23, .05), 0 6px 16px -10px rgba(13, 26, 23, .18);
-  --p-e2: 0 2px 4px rgba(13, 26, 23, .06), 0 16px 32px -18px rgba(13, 26, 23, .24);
-  --p-e3: 0 2px 6px rgba(13, 26, 23, .08), 0 28px 52px -24px rgba(13, 26, 23, .32);
-  --p-hi: 0 0 0 0 transparent;   /* اللمعان الداخلي كان لغة الزجاج — والورق لا يلمع.
-                                    و`none` داخل قائمة ظلال يُبطل التصريح كلّه، فالمحايد ظلّ صفريّ. */
-
-  /* ---------- الحركة: منحنى واحد لكل شيء ---------- */
-  --p-ease: cubic-bezier(.22, 1, .36, 1);
-  --p-fast: .16s;
-  --p-slow: .4s;
+  /* المسافات وأنصاف الأقطار */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:26px;
+  --r1:12px; --r2:16px; --r3:19px; --r4:22px; --r5:26px;
 }
 
-/* ═════════ الوضع الداكن — «where is my child» ليلًا بلا وهج ═════════
-   ورقية دافئة تصير ليلًا دافئًا، والعمق يبقى نيليًا. الأب يفتحه في
-   السرير أو في سيارة مظلمة — والأبيض الكامل يؤذي. */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-
-  --p-bg:       #080F0D;
-  --p-card:     #101A18;
-  --p-alt:      #16211E;
-  --p-glass-brd:#1F2E2A;
-  --p-line:     #1F2E2A;
-  --p-line-2:   #2A3C37;
-  --p-chrome:   #101A18;
-  --p-tabbar:   #101A18;
-  --sch-av-bg:  #10303A;
-  --sch-av-ink: #4FAEC9;
-
-  --p-ink:      #E9F0ED;
-  --p-ink-2:    #B3C3BE;
-  --p-mute:     #9BACA7;
-  --p-faint:    #738580;
-
-  --p-brand:    #4FAEC9;
-  --p-brand-ink:#7FC9DE;
-  --p-brand-d:  #3E9CB8;
-  --p-brand-s:  rgba(79, 174, 201, .16);
-
-  --p-on-color: #061417;
-
-  --p-deep-1:   #061C24;
-  --p-deep-2:   #0B3242;
-  --p-deep-3:   #14586F;
-  --p-shine:    #7FC9DE;
-
-  --p-n1:       #4FAEC9;
-  --p-n2:       #6C9DCB;
-  --p-n3:       #DE6459;
-  --p-n4:       #CE9A4A;
-
-  --p-ok:       #2FA97A;
-  --p-ok-s:     rgba(47, 169, 122, .15);
-  --p-warn:     #CE9A4A;
-  --p-warn-s:   rgba(206, 154, 74, .14);
-  --p-late:     #E9F0ED;
-  --p-late-s:   rgba(255, 255, 255, .08);
-  --p-excused:   #7FA3B5;
-  --p-excused-s: #17303A;
-  --p-gold:     #D2A75E;
-  --p-gold-s:   rgba(210, 167, 94, .18);
-  --p-k1: #4FAEC9;
-  --p-k2: #6C9DCB;
-  --p-k3: #2FA97A;
-  --p-k4: #D2A75E;
-  --p-k5: #D18C78;
-  --p-k6: #93A8C6;
-
-  --p-e1: 0 1px 2px rgba(0, 0, 0, .45), 0 6px 16px -10px rgba(0, 0, 0, .60);
-  --p-e2: 0 2px 4px rgba(0, 0, 0, .50), 0 16px 32px -18px rgba(0, 0, 0, .70);
-  --p-e3: 0 2px 6px rgba(0, 0, 0, .55), 0 28px 52px -24px rgba(0, 0, 0, .80);
-  --p-hi: 0 0 0 0 transparent;
+.p-body[data-theme="dark"] {
+  --canvas:#0b0c14; --bg:#12131c; --card:#1b1d29; --card2:#20222f;
+  --ink:#eceffa; --ink2:#a7abc4; --muted:#8a8fad; --line:rgba(255,255,255,.11);
+  --pri:#8d99ff; --pri-ink:#a3adff; --pri-tint:rgba(141,153,255,.16); --on-pri:#11131f;
+  --ok:#4fd9a4; --ok-tint:rgba(79,217,164,.15);
+  --warn:#f0b65a; --warn-tint:rgba(240,182,90,.15);
+  --bad:#ff8a80; --bad-tint:rgba(255,138,128,.15);
+  --gold:#e8c264; --gold-tint:rgba(232,194,100,.15);
+  --slate:#a8aecb; --slate-tint:rgba(168,174,203,.14);
+  --shadow:0 6px 22px rgba(0,0,0,.5); --shadow-sm:0 2px 10px rgba(0,0,0,.4);
+  --skel:rgba(255,255,255,.08);
+  --map-bg:#141826; --map-block:#1d2231; --map-road:#0d0f18;
 }
 
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    color-scheme: dark;
-  
-    --p-bg:       #080F0D;
-    --p-card:     #101A18;
-    --p-alt:      #16211E;
-    --p-glass-brd:#1F2E2A;
-    --p-line:     #1F2E2A;
-    --p-line-2:   #2A3C37;
-    --p-chrome:   #101A18;
-    --p-tabbar:   #101A18;
-    --sch-av-bg:  #10303A;
-    --sch-av-ink: #4FAEC9;
-  
-    --p-ink:      #E9F0ED;
-    --p-ink-2:    #B3C3BE;
-    --p-mute:     #9BACA7;
-    --p-faint:    #738580;
-  
-    --p-brand:    #4FAEC9;
-    --p-brand-ink:#7FC9DE;
-    --p-brand-d:  #3E9CB8;
-    --p-brand-s:  rgba(79, 174, 201, .16);
-  
-    --p-on-color: #061417;
-  
-    --p-deep-1:   #061C24;
-    --p-deep-2:   #0B3242;
-    --p-deep-3:   #14586F;
-    --p-shine:    #7FC9DE;
-  
-    --p-n1:       #4FAEC9;
-    --p-n2:       #6C9DCB;
-    --p-n3:       #DE6459;
-    --p-n4:       #CE9A4A;
-  
-    --p-ok:       #2FA97A;
-    --p-ok-s:     rgba(47, 169, 122, .15);
-    --p-warn:     #CE9A4A;
-    --p-warn-s:   rgba(206, 154, 74, .14);
-    --p-late:     #E9F0ED;
-    --p-late-s:   rgba(255, 255, 255, .08);
-    --p-excused:   #7FA3B5;
-    --p-excused-s: #17303A;
-    --p-gold:     #D2A75E;
-    --p-gold-s:   rgba(210, 167, 94, .18);
-    --p-k1: #4FAEC9;
-    --p-k2: #6C9DCB;
-    --p-k3: #2FA97A;
-    --p-k4: #D2A75E;
-    --p-k5: #D18C78;
-    --p-k6: #93A8C6;
-
-    --p-e1: 0 1px 2px rgba(0, 0, 0, .45), 0 6px 16px -10px rgba(0, 0, 0, .60);
-    --p-e2: 0 2px 4px rgba(0, 0, 0, .50), 0 16px 32px -18px rgba(0, 0, 0, .70);
-    --p-e3: 0 2px 6px rgba(0, 0, 0, .55), 0 28px 52px -24px rgba(0, 0, 0, .80);
-    --p-hi: 0 0 0 0 transparent;
-  }
-}
+/* ── الجذر ───────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; }
 
-body.p-body {
+.p-body {
   margin: 0;
-  background: var(--p-bg);
-  color: var(--p-ink);
-  font-family: var(--p-font);
-  font-size: var(--p-t4);
-  line-height: var(--p-lh-ui);
-  -webkit-tap-highlight-color: transparent;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Cairo, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: var(--t3);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: contain;
-}
-body.p-body a { color: inherit; text-decoration: none; }
-img { max-width: 100%; }
-
-/* =========================================================
-   الحركة.
-   ========================================================= */
-
-@keyframes p-rise {
-  from { opacity: 0; transform: translate3d(0, 12px, 0); }
-  to   { opacity: 1; transform: none; }
+  -webkit-tap-highlight-color: transparent;
 }
 
-.p-main > * { animation: p-rise var(--p-slow) var(--p-ease) both; }
-.p-main > *:nth-child(1) { animation-delay: 0ms; }
-.p-main > *:nth-child(2) { animation-delay: 45ms; }
-.p-main > *:nth-child(3) { animation-delay: 90ms; }
-.p-main > *:nth-child(4) { animation-delay: 130ms; }
-.p-main > *:nth-child(n+5) { animation-delay: 165ms; }
+/**
+ * الرابط يرث لونه في كل التطبيق.
+ *
+ * **وهذا مصدر فخّ التخصّصية**: `.p-body a` تخصّصيتها (0,1,1)، فأي صنف
+ * مفرد يلوّن رابطًا تغلبه هذه القاعدة. ولذلك كل صنف يلوّن `<a>` يُكتب
+ * مؤهَّلًا بعنصره — `.p-body a.p-btn` لا `.p-btn` وحدها — وإلا خرج
+ * الزرّ بلون النصّ العادي بلا أن يُنبّه أحد.
+ */
+.p-body a { color: inherit; text-decoration: none; }
 
-/* ردّ اللمس: هبوط فوري ونهوض ناعم — يشعر الإصبع أنه جسم لا صورة */
-.p-tap { transition: transform var(--p-fast) var(--p-ease); will-change: transform; }
-.p-tap:active { transform: scale(.968); }
+.p-main { padding: var(--s4) var(--s4) 0; }
+
+/* الشريط السفلي ثابت، فيُترك له مكانٌ لا يغطّي آخر بطاقة */
+.p-app { min-height: 100dvh; padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+
+.p-body button { font-family: inherit; cursor: pointer; }
+
+/* حلقة التركيز للوحة المفاتيح وحدها */
+.p-body :focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; border-radius: 10px; }
+
+.p-body a.p-skip {
+  position: absolute; inset-inline-start: -9999px; top: 0; z-index: 99;
+  padding: 10px 16px; background: var(--pri); color: var(--on-pri);
+  border-radius: 0 0 var(--r1) 0; font-weight: 700;
+}
+.p-body a.p-skip:focus { inset-inline-start: 0; }
+
+/* ── الأرقام ─────────────────────────────────────────────────────── */
+
+/* بلا أرقام مُجدوَلة يتغيّر عرض الرقم بين صفّ وصفّ فيرقص العمود */
+.p-nm, .p-num { font-variant-numeric: tabular-nums; }
+.p-nm { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+/**
+ * الرقم مع وحدته كتلة واحدة لا تنكسر.
+ * «٣٬١٠٠ ر.س» مفصولةً بسطر تبدو رقمين لا مبلغًا واحدًا.
+ */
+.p-amt {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  white-space: nowrap; direction: rtl;
+}
+.p-cur { font-size: .62em; font-weight: 600; color: var(--muted); }
+
+/* ── العناوين ────────────────────────────────────────────────────── */
+
+.p-h1 {
+  margin: 0 0 var(--s3);
+  font-size: var(--t4); font-weight: 700; line-height: 1.25; color: var(--ink);
+}
+
+.p-h2 {
+  display: block; margin: var(--s5) 0 var(--s2);
+  font-size: var(--t2); font-weight: 700; color: var(--ink);
+}
+
+.p-sub { margin: -6px 0 var(--s4); font-size: var(--t1); color: var(--muted); }
+
+.p-sect { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); margin: var(--s5) 0 var(--s2); }
+.p-sect:first-child { margin-top: 0; }
+.p-sect__h { font-size: var(--t2); font-weight: 700; color: var(--ink); }
+.p-sect__a { font-size: var(--t1); font-weight: 600; color: var(--muted); }
+.p-body a.p-sect__a { color: var(--pri-ink); }
+
+/* ── البطاقة ─────────────────────────────────────────────────────── */
+
+.p-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r4);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s4);
+  margin: 0 0 var(--s3);
+}
+
+/* ── الأزرار ─────────────────────────────────────────────────────── */
+
+/**
+ * مؤهَّلة بعنصرها عمدًا.
+ *
+ * الزرّ يظهر على `<button>` و`<a>` معًا في التطبيق. و`.p-btn` وحدها
+ * تخصّصيتها (0,1,0) فتخسر أمام `.p-body a` — فيخرج الزرّ الذي على
+ * رابط بلون النصّ العادي. التأهيل يرفعها إلى (0,2,1) فتغلب.
+ */
+.p-body button.p-btn,
+.p-body a.p-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  padding: 14px var(--s5);
+  border: 0; border-radius: var(--r2);
+  background: var(--pri); color: var(--on-pri);
+  font-size: var(--t3); font-weight: 700; line-height: 1;
+  box-shadow: 0 6px 18px rgba(68,83,204,.24);
+  transition: filter .15s, transform .08s;
+}
+
+.p-body button.p-btn:hover,
+.p-body a.p-btn:hover { filter: brightness(.95); }
+
+.p-body button.p-btn--quiet,
+.p-body a.p-btn--quiet {
+  background: var(--card); color: var(--pri-ink);
+  border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+}
+
+.p-body button.p-btn--brand,
+.p-body a.p-btn--brand { background: var(--pri); color: var(--on-pri); }
+
+/**
+ * المعطَّل.
+ *
+ * `[disabled]` وحدها تخصّصيتها (0,2,0) فتخسر أمام `.p-body a.p-btn`
+ * التي هي (0,2,1) — فيبقى الزرّ المعطَّل ملوّنًا كأنه يعمل. فيُؤهَّل
+ * هو الآخر بعنصره.
+ */
+.p-body button.p-btn[disabled],
+.p-body a.p-btn[disabled],
+.p-body button.p-btn[aria-disabled="true"] {
+  background: var(--card2); color: var(--muted);
+  box-shadow: none; cursor: not-allowed; filter: none;
+}
+
+/* الهبوط عند اللمس — تغذية راجعة تُحسّ ولا تُشرح */
+.p-tap { transition: transform .08s ease; }
+.p-tap:active { transform: scale(.975); }
+
+/* ── الوسوم ──────────────────────────────────────────────────────── */
+
+.p-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--slate-tint); color: var(--slate);
+  font-size: var(--t0); font-weight: 700; white-space: nowrap;
+}
+.p-tag--ok    { background: var(--ok-tint);    color: var(--ok); }
+.p-tag--warn  { background: var(--warn-tint);  color: var(--warn); }
+.p-tag--late  { background: var(--warn-tint);  color: var(--warn); }
+.p-tag--mute  { background: var(--slate-tint); color: var(--slate); }
+
+/* ── الحالة الفارغة ──────────────────────────────────────────────── */
+
+/**
+ * تقول **ما العمل** لا «لا توجد بيانات» وحدها.
+ * الشاشة الفارغة الصامتة تبدو معطّلة، فيظنّ الأب أن التطبيق لا يعمل.
+ */
+.p-empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: var(--s2); padding: var(--s6) var(--s5);
+  color: var(--muted);
+}
+.p-empty__i {
+  display: grid; place-items: center;
+  width: 72px; height: 72px; margin-bottom: var(--s2);
+  border-radius: 24px; background: var(--gold-tint); color: var(--gold);
+}
+.p-empty b { font-size: var(--t4); font-weight: 700; color: var(--ink); }
+.p-empty p { margin: 0; font-size: var(--t2); line-height: 1.6; max-width: 30ch; }
+
+/* ── تنبيه هادئ ──────────────────────────────────────────────────── */
+
+.p-note {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: var(--s3) var(--s4); margin: 0 0 var(--s3);
+  border-radius: var(--r2);
+  background: var(--warn-tint); color: var(--warn);
+}
+.p-note b { font-size: var(--t2); font-weight: 700; }
+.p-note span { font-size: var(--t1); color: var(--ink2); }
+
+/* ── الرجوع ──────────────────────────────────────────────────────── */
+
+.p-body a.p-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: var(--s3);
+  font-size: var(--t2); font-weight: 600; color: var(--muted);
+}
+.p-body a.p-back svg { flex: none; }
+
+/* ── الحقول ──────────────────────────────────────────────────────── */
+
+.p-field { display: block; margin-bottom: var(--s4); }
+.p-field > span,
+.p-field > label { display: block; margin-bottom: 6px; font-size: var(--t2); font-weight: 600; color: var(--ink2); }
+.p-field--half { width: calc(50% - var(--s2) / 2); }
+
+.p-in {
+  width: 100%; padding: 13px var(--s4);
+  border: 1px solid var(--line); border-radius: var(--r2);
+  background: var(--card); color: var(--ink);
+  font-family: inherit; font-size: var(--t3);
+}
+.p-in:focus { border-color: var(--pri); }
+select.p-in { appearance: none; background-image: none; }
+textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
+
+.p-form { margin: 0; }
+.p-form__row { display: flex; gap: var(--s2); }
+
+/* ── تخطيطات صغيرة ───────────────────────────────────────────────── */
+
+.p-list { display: flex; flex-direction: column; gap: var(--s2); margin: 0; padding: 0; list-style: none; }
+.p-duo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.p-split { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+
+/* ── الحركات ─────────────────────────────────────────────────────── */
+
+@keyframes p-halo {
+  0%   { box-shadow: 0 0 0 0 var(--hc, rgba(68,83,204,.5)); }
+  70%  { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes p-shim { 0% { opacity: .5; } 50% { opacity: 1; } 100% { opacity: .5; } }
+@keyframes p-bob  { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .p-main > * { animation: none; }
-  .p-tap:active { transform: none; }
-  * { scroll-behavior: auto !important; }
+  .p-body *, .p-body *::before, .p-body *::after {
+    animation-duration: .01ms !important; transition-duration: .01ms !important;
+  }
 }
+/* ═══════════════════════════════════════════════════════════════════
+   القشرة (الشريط العلوي · شريط الأبناء · الشريط السفلي) وشاشة اليوم
+   ═══════════════════════════════════════════════════════════════════ */
 
-/* =========================================================
-   الهيكل.
-   ========================================================= */
-
-.p-app { min-height: 100dvh; display: flex; flex-direction: column; }
-
-.p-main {
-  flex: 1;
-  padding: 0 var(--p-4) calc(94px + env(safe-area-inset-bottom, 0px));
-}
-
-/* ---------- الشريط العلوي ---------- */
+/* ── الشريط العلوي ───────────────────────────────────────────────── */
 
 .p-top {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: var(--p-3);
-  padding: var(--p-3) var(--p-4);
-  background: var(--p-chrome);
-  border-bottom: 1px solid var(--p-line);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+  padding: 14px 18px 10px;
 }
 
-.p-who { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.p-who { display: flex; align-items: center; gap: 11px; min-width: 0; }
+
 .p-who__pic {
-  width: 40px; height: 40px; flex: 0 0 auto;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--p-brand-s);
-  box-shadow: 0 0 0 2px var(--p-card), 0 2px 6px -2px rgba(13, 26, 23, .34);
+  flex: none; display: grid; place-items: center;
+  width: 42px; height: 42px;
+  border-radius: 50%; overflow: hidden;
+  background: var(--pri-tint); color: var(--pri-ink);
+  font-size: var(--t4); font-weight: 700;
+
+  /* `sch_avatar_svg` يرسم حرفه بـ`--sch-av-bg/--sch-av-ink` وقيمهما
+     الافتراضية محايدة لا تعرف هويّتنا — فتُحقَن هنا لتتبع السمة. */
+  --sch-av-bg: var(--pri-tint);
+  --sch-av-ink: var(--pri-ink);
 }
-.p-who__pic img, .p-who__pic svg { display: block; width: 100%; height: 100%; object-fit: cover; }
-.p-who__t { min-width: 0; }
-/* التحية كانت 17px في شريط تأكل منه ثلاث أيقونات ٤٤px عرضَه، فتُقصّ
-   «مساء الخير اح…» — والاسم الأول وحده كان مطبَّقًا أصلًا، فالعلّة في
-   المقاس لا في الاسم. */
+.p-who__pic img,
+.p-who__pic svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+.p-who__t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+/* الاسم الرباعي يمدّ الشريط فيدفع الأيقونات خارج الشاشة */
 .p-who__t b {
-  display: block;
-  font-size: var(--p-t4);
-  font-weight: 700;
-  letter-spacing: -.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--t3); font-weight: 700; color: var(--ink);
 }
-.p-who__t span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-/* وعلى الشاشات الضيّقة حقًّا تنزل درجةً أخرى بدل أن تُقصّ */
-@media (max-width: 360px) {
-  .p-who__t b { font-size: var(--p-t5); }
-}
+.p-who__t span { font-size: var(--t0); color: var(--muted); white-space: nowrap; }
 
-.p-icons { display: flex; gap: var(--p-2); flex: 0 0 auto; }
+.p-icons { display: flex; align-items: center; gap: var(--s2); flex: none; }
+
+/**
+ * مؤهَّلة بعنصريها: الصنف نفسه على `<button>` (الوضع الليلي) وعلى `<a>`
+ * (الرسائل والإشعارات) — و`.p-body a` تغلب الصنف المفرد فيخرج الرابطان
+ * بلون الحبر لا بلون `--ink2`.
+ */
+.p-body button.p-ico,
 .p-body a.p-ico {
-  position: relative;
-  width: 44px; height: 44px;   /* رُفِع من 40 — الحد الأدنى للمس الموثوق */
-  border-radius: 50%;
-  border: 1px solid var(--p-line);
-  background: var(--p-card);
-  color: var(--p-ink-2);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform var(--p-fast) var(--p-ease), background var(--p-fast) var(--p-ease);
+  position: relative; flex: none;
+  display: grid; place-items: center;
+  width: 38px; height: 38px; padding: 0;
+  border: 1px solid var(--line); border-radius: var(--r1);
+  background: var(--card); color: var(--ink2);
+  box-shadow: var(--shadow-sm);
 }
-.p-ico:active { transform: scale(.9); background: var(--p-alt); }
+.p-body button.p-ico svg,
+.p-body a.p-ico svg { flex: none; }
 
-/* زر تبديل السمة (button لا anchor) — يطابق أيقونات الشريط ويعرض شمسًا/قمرًا */
-.p-body button.p-ico {
-  position: relative;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--p-line);
-  background: var(--p-card);
-  color: var(--p-ink-2);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--p-fast) var(--p-ease), background var(--p-fast) var(--p-ease), color var(--p-fast) var(--p-ease), border-color var(--p-fast) var(--p-ease);
-}
-.p-body button.p-ico:hover { color: var(--p-brand); border-color: var(--p-brand); }
-.p-theme__sun { display: none; }
-[data-theme="dark"] .p-theme__sun  { display: block; }
-[data-theme="dark"] .p-theme__moon { display: none; }
+/**
+ * الزاوية العليا اليسرى بصريًّا.
+ * `inset-inline-end` في RTL هي اليسار — فتبقى النقطة بعيدة عن سطح الجرس
+ * وتنقلب وحدها لو صار المستند LTR.
+ */
 .p-ico__dot {
-  position: absolute;
-  top: 8px; inset-inline-start: 8px;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--p-n3);
-  box-shadow: 0 0 0 2px var(--p-card);
+  position: absolute; top: 7px; inset-inline-end: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bad); border: 1.5px solid var(--card);
 }
 
-/* ---------- الشريط السفلي: عائم ---------- */
+/**
+ * `.p-theme` بلا تخطيط عمدًا.
+ *
+ * الصنف نفسه يقع في «حسابي» على صفّ إعدادات بعرض الشاشة (`.p-setrow`)
+ * لا على زرّ ٣٨px — فأي مقاس يُكتب هنا يكسر أحد الموضعين. الزرّ العلوي
+ * يأخذ شكله من `.p-ico` وحده، ولا يبقى مشتركًا إلا تبديل الأيقونتين.
+ *
+ * والوسم `data-theme` يضعه السكربت على `<html>` لا على `<body>`،
+ * فالمحدِّد مربوط بـ`:root`.
+ */
+.p-theme__sun { display: none; }
+:root[data-theme="dark"] .p-theme__moon { display: none; }
+:root[data-theme="dark"] .p-theme__sun  { display: block; }
 
-/* حبّة طافية من ورق: كانت أميثيست عميقة بنصّ أبيض، فصارت السطح نفسه
-   الذي عليه كل شيء — والنشط وحده ملوّن. */
-.p-tabs {
-  position: fixed;
-  inset-inline: var(--p-4);
-  bottom: calc(var(--p-3) + env(safe-area-inset-bottom, 0px));
-  z-index: 30;
-  display: flex;
-  gap: var(--p-1);
-  padding: 6px;
-  border-radius: 99px;
-  background: var(--p-tabbar);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e3);
-}
-.p-body a.p-tab {
-  flex: 1;
-  min-height: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border-radius: 99px;
-  color: var(--p-faint);
-  font-size: var(--p-t6);
-  font-weight: 600;
-  transition: color var(--p-fast) var(--p-ease), background var(--p-slow) var(--p-ease);
-}
-.p-tab svg { transition: transform var(--p-fast) var(--p-ease); }
-.p-tab:active svg { transform: scale(.85); }
+/* ── شريط الأبناء ────────────────────────────────────────────────── */
 
-/* =========================================================
-   دوّار الأبناء.
-   ========================================================= */
-
+/**
+ * التمرير الأفقي شرط تشغيلي لا زينة: السكربت يقرأ `getBoundingClientRect`
+ * لكل بطاقة ويبدّل `is-on` بأقربها للوسط، ثم ينتقل إليها. فلا يُحوَّل
+ * الشريط إلى شبكة ولا يُلغى الالتقاط.
+ */
 .p-kids {
-  display: flex;
-  gap: var(--p-3);
-  padding: var(--p-2) var(--p-4) var(--p-4);
-  overflow-x: auto;
-  scrollbar-width: none;
+  display: flex; align-items: flex-start; gap: var(--s4);
+  padding: 4px 18px 12px;
+  overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  scroll-snap-stop: always;
-  scroll-padding-inline: var(--p-4);
   scroll-behavior: smooth;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
 }
 .p-kids::-webkit-scrollbar { display: none; }
 
 .p-kid {
-  flex: 0 0 136px;
+  --k: var(--pri); --k-tint: var(--pri-tint);
+
+  /* عرض ثابت يسع أطول حالة («خارج المدرسة») بنقطتها، ويمنع رقص الشريط
+     حين تكبر دائرة النشط من ٤٦ إلى ٥٨ */
+  flex: none; width: 76px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding-top: 6px;
+  opacity: .5;
   scroll-snap-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: var(--p-3) 10px;
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-  transition: transform var(--p-slow) var(--p-ease),
-              opacity var(--p-slow) var(--p-ease),
-              box-shadow var(--p-slow) var(--p-ease),
-              background var(--p-slow) var(--p-ease),
-              border-color var(--p-slow) var(--p-ease);
+  scroll-snap-stop: always;
+  transition: opacity .2s ease, padding-top .2s ease;
 }
+.p-kid.is-on { opacity: 1; padding-top: 0; }
+
 .p-kid__pic {
-  width: 54px; height: 54px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--p-brand-s);
-  box-shadow: 0 0 0 2.5px var(--p-card), 0 3px 8px -3px rgba(13, 26, 23, .42);
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  border-radius: 50%; overflow: hidden;
+  background: var(--k-tint); color: var(--k);
+  font-size: var(--t4); font-weight: 700;
+  transition: width .2s ease, height .2s ease, box-shadow .2s ease;
+
+  --sch-av-bg: var(--k-tint);
+  --sch-av-ink: var(--k);
 }
-.p-kid__pic img, .p-kid__pic svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.p-kid__pic img,
+.p-kid__pic svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* الحلقة طبقتان: الأولى بلون الخلفية تفصل الدائرة عن الثانية فتبدو معلّقة */
+.p-kid.is-on .p-kid__pic {
+  width: 58px; height: 58px;
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5.5px var(--k);
+}
+
+/* عنصر مرن (`.p-kid` عمود مرن) فيُكتَّل تلقائيًا — والقصّ يعمل عليه */
 .p-kid__n {
-  font-size: var(--p-t3);
-  font-weight: 700;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: var(--t1); font-weight: 600; color: var(--ink);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.p-kid__c { font-size: var(--p-t6); color: var(--p-mute); }
+
+/**
+ * الصفّ مخفيّ في الشريط.
+ * «الرابع/أ» سطرٌ ثالث يرفع الشريط ٢٠px فيدفع بطاقة البطل خارج الشاشة،
+ * وهو مكتوب أصلًا في البطاقة نفسها للابن النشط. والشريط أداة تبديل
+ * لا بطاقة تعريف.
+ */
+.p-kid__c { display: none; }
+
+/**
+ * كتلة لا صفّ مرن.
+ *
+ * `text-overflow` لا يعمل على نصٍّ صار عنصرًا مرنًا مجهولًا داخل حاضنة
+ * `flex` — فيُقصّ الاسم في منتصف حرفه بلا نقاط. فالنقطة `inline-block`
+ * في تدفّق السطر نفسه، والثلاث نقاط تعمل.
+ */
 .p-kid__s {
-  margin-top: 2px;
-  padding: 3px 11px;
-  border-radius: 99px;
-  background: var(--p-alt);
-  color: var(--p-mute);
-  font-size: var(--p-t6);
-  font-weight: 700;
-  white-space: nowrap;
+  display: block; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--t0); color: var(--muted);
 }
 
-.p-kid:not(.is-on) { transform: scale(.9); opacity: .5; }
-.p-kid.is-on { box-shadow: var(--p-e2); }
+/* حالة الابن لا تصل CSS كصنف، فالنقطة تحمل لون هويّته لا لون حالته */
+.p-kid__s::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: 7px; height: 7px; margin-inline-end: 5px;
+  border-radius: 50%; background: var(--k);
+}
 
-/* ست نغمات — لكل ابن لونه الثابت فيُعرَف بالعين قبل الاسم.
-   والبطاقة ورقٌ في الحالتين؛ اللون في الحرف وحده فلا تصرخ ستّ بطاقات معًا. */
-.p-kid--0.is-on .p-kid__s { background: var(--p-k1); color: var(--p-on-color); }
-.p-kid--1.is-on .p-kid__s { background: var(--p-k2); color: var(--p-on-color); }
-.p-kid--2.is-on .p-kid__s { background: var(--p-k3); color: var(--p-on-color); }
-.p-kid--3.is-on .p-kid__s { background: var(--p-k4); color: var(--p-on-color); }
-.p-kid--4.is-on .p-kid__s { background: var(--p-k5); color: var(--p-on-color); }
-.p-kid--5.is-on .p-kid__s { background: var(--p-k6); color: var(--p-on-color); }
+/**
+ * لون ثابت لكل ابن يُشتق من معرّفه (`% 6`) — يُعرَف بالعين قبل قراءة
+ * الاسم. النغمات الستّ كلها مستعملة، و`--bad` منها لأنها السادسة الوحيدة
+ * التي لها صبغة؛ وهي هنا هوية لا إنذار.
+ *
+ * وتخصّصيتها تساوي تخصّصية `.p-kid` وتأتي بعدها — فتغلبها بالترتيب.
+ * (لو كُتب الافتراض داخل محدِّد مؤهَّل بعنصره لغلب المُعدِّلات كلَّها.)
+ */
+.p-kid--0 { --k: var(--pri);   --k-tint: var(--pri-tint); }
+.p-kid--1 { --k: var(--ok);    --k-tint: var(--ok-tint); }
+.p-kid--2 { --k: var(--gold);  --k-tint: var(--gold-tint); }
+.p-kid--3 { --k: var(--slate); --k-tint: var(--slate-tint); }
+.p-kid--4 { --k: var(--warn);  --k-tint: var(--warn-tint); }
+.p-kid--5 { --k: var(--bad);   --k-tint: var(--bad-tint); }
 
-/* =========================================================
-   البوابات الأربع.
-   ========================================================= */
+/* ── الشريط السفلي ───────────────────────────────────────────────── */
 
+/* ثابت أسفل الشاشة، و`.p-app` يحجز له ٧٨px في الأساس فلا يغطّي آخر بطاقة */
+.p-tabs {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 40;
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+  background: var(--card); border-top: 1px solid var(--line);
+}
+
+.p-body a.p-tab {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s1);
+  min-width: 64px; padding: var(--s1) var(--s3);
+  font-size: var(--t0); font-weight: 600; color: var(--muted);
+  transition: color .2s ease;
+}
+.p-body a.p-tab.is-on { font-weight: 700; color: var(--pri); }
+.p-body a.p-tab svg { flex: none; }
+
+/* المؤشّر لا عنصر له في القالب، فيُرسم بـ`::after` ويتلوّن بالانتقال وحده */
+.p-body a.p-tab::after {
+  content: ""; width: 20px; height: 3px; border-radius: 2px;
+  background: transparent; transition: background .2s ease;
+}
+.p-body a.p-tab.is-on::after { background: var(--pri); }
+
+/**
+ * النقاط الثلاث من عنصر واحد.
+ * القالب لا يعطينا إلا `<i>` فارغًا، فيصير أوسطها ويحمل الأخريين في
+ * عنصريه الزائفين. و`margin-inline-end` يحجز عرضهما لئلّا تركبا النصّ.
+ */
+.p-hero__call-s i {
+  position: relative; flex: none;
+  width: 7px; height: 7px; margin-inline-end: 22px;
+  border-radius: 50%; background: var(--warn);
+  animation: p-bob 1.2s infinite;
+}
+.p-hero__call-s i::before,
+.p-hero__call-s i::after {
+  content: ""; position: absolute; top: 0;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--warn);
+  animation: p-bob 1.2s infinite;
+}
+.p-hero__call-s i::before { inset-inline-end: -11px; animation-delay: .2s; }
+.p-hero__call-s i::after  { inset-inline-end: -22px; animation-delay: .4s; }
+
+.p-hero__call p { margin: 0; font-size: var(--t1); color: var(--ink2); }
+
+/* النموذج كتلة، فبلا `flex` يجلس زرّ الإلغاء بعرض نصّه في وسط البطاقة */
+.p-hero__call form { display: flex; margin: var(--s2) 0 0; }
+
+/* ── البوابات الأربع ─────────────────────────────────────────────── */
+
+/**
+ * شبكة ٢×٢ لا صفّ مُمرَّر: أربعة أبواب تُرى كلها في لحظة، ولا يُخفى
+ * بابٌ خلف حافة الشاشة. وهي خارج كل فرع شرطي في القالب عمدًا — أُدرجت
+ * مرّة داخل `if` الإجازة فاختفت عن كل طالب حاضر.
+ */
 .p-gates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--p-3);
-  margin-bottom: var(--p-4);
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2);
+  margin: 0 0 var(--s3);
 }
+
+/* الافتراض غير مؤهَّل عمدًا: المُعدِّلات تخصّصيتها (0,1,0)، فلو كُتب
+   `--g` داخل `.p-body a.p-gate` لغلبها كلَّها ولخرجت البوابات بلون واحد */
+.p-gate { --g: var(--pri); --g-tint: var(--pri-tint); }
+
+/**
+ * مؤهَّلة بعنصرها: البوابات الأربع كلّها `<a>` — و`.p-body a{color:inherit}`
+ * تغلب الصنف المفرد فيخرج اسم البوابة بلون الحبر الموروث لا بلون النصّ.
+ * والارتفاع ٥٦px: أصغر منه لا يصيبه إصبع في سيارة متحرّكة.
+ */
 .p-body a.p-gate {
-  flex: 1 1 calc(50% - var(--p-3));
-  min-width: 130px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: var(--p-4);
-  border-radius: var(--p-r3);
-  color: #fff;
-  overflow: hidden;
-  box-shadow: var(--p-e2);
+  display: flex; align-items: center; gap: 10px;
+  min-height: 56px; padding: 11px var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r3);
+  background: var(--card); color: var(--ink);
+  box-shadow: var(--shadow-sm);
 }
-.p-gate::after {
-  content: "";
-  position: absolute;
-  width: 118px; height: 118px;
-  top: -62px; inset-inline-start: -24px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .12);
-}
+
 .p-gate__i {
+  display: grid; place-items: center;
+  flex: none; width: 34px; height: 34px; border-radius: var(--r1);
+  background: var(--g-tint); color: var(--g);
+}
+
+.p-gate__t {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--t3); font-weight: 700;
+}
+
+/**
+ * لون لكل باب يقول موضوعه قبل قراءة اسمه: الجدول أساسيّ، و«أين ابني»
+ * أخضر كالمدرسة، والإجازات كهرمانية كالباص.
+ * والصحة وحدها حمراء — فهي الوحيدة التي قد تكون عاجلة، والأحمر مرّة
+ * واحدة في الشاشة.
+ */
+.p-gate--1 { --g: var(--pri);  --g-tint: var(--pri-tint); }
+.p-gate--2 { --g: var(--ok);   --g-tint: var(--ok-tint); }
+.p-gate--3 { --g: var(--bad);  --g-tint: var(--bad-tint); }
+.p-gate--4 { --g: var(--warn); --g-tint: var(--warn-tint); }
+
+/* ── خيط اليوم ───────────────────────────────────────────────────── */
+
+/**
+ * ستّ بطاقات متساوية الوزن كانت تُقرأ سطرًا سطرًا، فصارت خطًّا بنقاط:
+ * `is-done` ما مضى · `is-now` أين هو الآن · `is-next` ما بقي.
+ *
+ * ونوع الحدث (`kind`) لا يصل CSS صنفًا — تصل الحالة وحدها. فالنغمة
+ * تتبع الحالة، ولا يُكتب محدِّد لنوعٍ لا يظهر في القالب.
+ */
+.p-thr { margin: 0 0 var(--s3); padding: 0; list-style: none; }
+
+.p-thr__i {
+  --tn: var(--slate);
   position: relative;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .18);
-  display: flex; align-items: center; justify-content: center;
+  display: grid; grid-template-columns: 20px 1fr; align-items: start; gap: 10px;
+  padding-bottom: 14px;
 }
-.p-gate__t { position: relative; font-size: var(--p-t5); font-weight: 700; line-height: var(--p-lh-ui); }
+.p-thr__i:last-child { padding-bottom: 0; }
 
-.p-gate--1 { background: var(--p-n1); }
-.p-gate--2 { background: var(--p-n2); }
-.p-gate--3 { background: var(--p-n3); }
-.p-gate--4 { background: var(--p-n4); }
-
-/* =========================================================
-   الحالة والرقمان.
-   ========================================================= */
-
-.p-state {
-  padding: var(--p-4) var(--p-5);
-  margin-bottom: var(--p-3);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
+/**
+ * الخيط الواصل بالزائف: القالب لا يعطي عنصرًا له.
+ * يبدأ تحت النقطة وينتهي عند حافة الصفّ السفلية — أي عند بداية الصفّ
+ * التالي تمامًا. و`inset-inline-start` تضعه في منتصف عمود النقاط
+ * وتنقلب وحدها لو صار المستند LTR.
+ */
+.p-thr__i::before {
+  content: ""; position: absolute;
+  top: 16px; bottom: 0; inset-inline-start: 9px;
+  width: 2px; background: var(--line);
 }
-.p-state__k { display: block; font-size: var(--p-t6); color: var(--p-mute); letter-spacing: .06em; }
-.p-state__v { display: block; font-size: var(--p-t2); font-weight: 700; letter-spacing: -.02em; line-height: var(--p-lh-snug); }
-.p-state__s { display: block; font-size: var(--p-t5); color: var(--p-mute); }
-.p-state.is-live { background: var(--p-brand-s); border-color: var(--p-line-2); }
+.p-thr__i:last-child::before { display: none; }
 
-.p-duo { display: flex; gap: var(--p-3); margin-bottom: var(--p-4); }
-.p-num {
-  flex: 1 1 0;
+/* عنصر شبكة فيُكتَّل تلقائيًا وإن كان `<span>` — فالمقاس يسري عليه */
+.p-thr__d {
+  justify-self: center; margin-top: 5px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--tn);
+}
+
+/* «الآن» وحدها تكبر وتتنفّس: نقطة واحدة تتحرّك تُعرَف بلا بحث.
+   ومركزها يبقى على ١٠٫٥px كالباقي فلا ينكسر الخيط */
+.p-thr__i.is-now { --tn: var(--pri); }
+.p-thr__i.is-now .p-thr__d {
+  width: 15px; height: 15px; margin-top: 3px;
+  --hc: color-mix(in srgb, var(--tn) 55%, transparent);
+  animation: p-halo 1.9s ease-out infinite;
+}
+
+/* ما بقي مفرَّغ: حلقة بلا حشو تقول «لم يقع بعد» */
+.p-thr__i.is-next .p-thr__d { background: transparent; border: 2px solid var(--line); }
+
+.p-thr__b { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.p-thr__b b { font-size: var(--t2); font-weight: 600; color: var(--ink); }
+.p-thr__b span { font-size: var(--t1); color: var(--muted); }
+.p-thr__i.is-now  .p-thr__b b { font-weight: 700; }
+.p-thr__i.is-next .p-thr__b b { color: var(--muted); }
+
+/* ── صورة الملفّ في «حسابي» ──────────────────────────────────────── */
+
+/**
+ * `overflow: hidden` على الصورة لا على الحاضنة:
+ * وضعه هنا يقصّ شارة الكاميرا لأنها تخرج عن الحافة.
+ */
+.p-av { position: relative; display: block; width: 72px; height: 72px; cursor: pointer; }
+.p-av img,
+.p-av > svg {
+  width: 100%; height: 100%; display: block; object-fit: cover;
+  border-radius: 50%; overflow: hidden;
+  background: var(--pri-tint);
+  --sch-av-bg: var(--pri-tint);
+  --sch-av-ink: var(--pri-ink);
+}
+.p-av.is-saving { opacity: .55; }
+
+/* أسفل اليسار بصريًّا — و`inset-inline-end` تنقلب وحدها لو صار LTR */
+.p-av__cam {
+  position: absolute; bottom: 0; inset-inline-end: 0;
+  display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--pri); color: var(--on-pri);
+  border: 2.5px solid var(--bg);
+}
+
+/* ── صفّ الأدوار في بوابة الدخول ─────────────────────────────────── */
+
+/* من يدخل يُعرَف تلقائيًا: الصفّ يطمئن ولا يطلب اختيارًا، فيبقى هادئًا */
+.p-who4 {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+  margin-top: var(--s3);
+}
+.p-who4 span {
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--muted); font-size: var(--t0); font-weight: 600; white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   بطاقة البطل
+
+   بنية واحدة لكل الحالات ونغمتها وحدها تتبدّل، فلا يتغيّر ارتفاع
+   البطاقة بين حالة وأخرى ولا تقفز الشاشة تحتها كلّما تبدّلت الحالة.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.p-hero {
+  position: relative;
+  margin: 0 0 var(--s3);
+  padding: var(--s4) var(--s4) 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r5);
+  box-shadow: var(--shadow);
+  background: linear-gradient(205deg, var(--slate-tint) 0%, var(--card) 58%);
+}
+
+/* النغمة تتبع العهدة — والمعاني نفسها في كل شاشة في النظام */
+.p-hero--school { background: linear-gradient(205deg, var(--ok-tint) 0%, var(--card) 58%); }
+.p-hero--bus    { background: linear-gradient(205deg, var(--warn-tint) 0%, var(--card) 58%); }
+.p-hero--home   { background: linear-gradient(205deg, var(--slate-tint) 0%, var(--card) 58%); }
+
+.p-hero__who { display: flex; align-items: center; gap: var(--s3); }
+
+.p-hero__pic {
+  flex: none; width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: var(--r3); overflow: hidden;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--ink2);
+}
+.p-hero__pic img { width: 100%; height: 100%; object-fit: cover; }
+
+.p-hero__id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.p-hero__id b  { font-size: var(--t4); font-weight: 700; color: var(--ink); }
+.p-hero__id em { font-size: var(--t1); font-style: normal; color: var(--muted); }
+
+.p-hero__state { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+
+/* النبض يقول «هذه اللحظة» — والحالة الساكنة تبدو تاريخًا لا خبرًا */
+.p-hero__dot {
+  flex: none; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--slate);
+  --hc: color-mix(in srgb, var(--slate) 55%, transparent);
+  animation: p-halo 2s ease-out infinite;
+}
+.p-hero--school .p-hero__dot { background: var(--ok);   --hc: color-mix(in srgb, var(--ok) 55%, transparent); }
+.p-hero--bus    .p-hero__dot { background: var(--warn); --hc: color-mix(in srgb, var(--warn) 55%, transparent); }
+
+.p-hero__h { font-size: var(--t5); font-weight: 700; line-height: 1.2; color: var(--slate); }
+.p-hero--school .p-hero__h { color: var(--ok); }
+.p-hero--bus    .p-hero__h { color: var(--warn); }
+
+.p-body a.p-hero__go {
+  margin-inline-start: auto; flex: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 15px; border-radius: 14px;
+  background: var(--warn); color: var(--card);
+  font-size: var(--t2); font-weight: 700;
+}
+
+.p-hero__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line);
+}
+.p-hero__foot span { font-size: var(--t1); font-weight: 600; color: var(--ink2); }
+.p-hero__foot em   { font-size: var(--t0); font-style: normal; color: var(--muted); }
+
+/* ── نداء الانصراف ───────────────────────────────────────────────── */
+
+.p-hero__cta { margin: 0 0 var(--s3); }
+.p-hero__cta .p-btn { width: 100%; }
+
+.p-hero__call {
+  display: flex; align-items: center; gap: var(--s3);
+  margin: 0 0 var(--s3); padding: 13px var(--s4);
+  border-radius: var(--r4);
+  background: var(--warn-tint); color: var(--warn);
+}
+.p-hero__call.is-onway { background: var(--ok-tint); color: var(--ok); }
+
+.p-hero__call-i {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background: currentColor; opacity: .22;
+}
+.p-hero__call-b { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.p-hero__call-b b    { font-size: var(--t2); font-weight: 700; }
+.p-hero__call-b span { font-size: var(--t0); color: var(--ink2); }
+
+.p-body button.p-hero__x {
+  flex: none; padding: 7px 13px; border: 0; border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  color: inherit; font-size: var(--t0); font-weight: 700;
+}
+/* ═══════════════════════════════════════════════════════════════════
+   السجل والرسوم
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── الرقمان في شاشة الطفل — بطاقتا الإحصاء ─────────────────────── */
+
+/**
+ * الشكل على النوعين لا على `.p-num`.
+ *
+ * `.p-num` معرَّفة في الأساس (مع `.p-nm` لأرقامٍ مجدولة)، ولا يُعاد
+ * تعريف لبنةٍ فيه. والبطاقتان لا تظهران قطّ بلا نوع — إحداهما
+ * `--pay` والأخرى `--att` — فالنوعان يكفيان حاملًا للشكل.
+ *
+ * و`min-width:0` لأنهما عنصرا شبكة في `.p-duo` (‏1fr 1fr)، وحدّهما
+ * الأدنى التلقائي هو مقاس المحتوى الأدنى — والمبلغ داخلهما `nowrap`،
+ * فمبلغٌ طويل يوسّع العمود ويدفع الصفحة إلى تمرير أفقيّ.
+ */
+.p-num--att,
+.p-num--pay {
+  display: flex; flex-direction: column; justify-content: center; gap: var(--s1);
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  min-height: 96px;
-  padding: var(--p-4);
-  border-radius: var(--p-r3);
-  box-shadow: var(--p-e1);
+  padding: 13px 14px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r3); box-shadow: var(--shadow-sm);
 }
-.p-num__k { font-size: var(--p-t6); letter-spacing: .06em; }
+
+/**
+ * بطاقة المستحق رابط، والحضور <div>.
+ *
+ * التدرّج هو ما يفرّق القابل للنقر عن العارض — لا يمكن إضافة سهم ولا
+ * أيّ عنصر، فالسطح نفسه هو الإشارة الوحيدة المتاحة. والتأهيل بـ`a`
+ * ضروريّ لأن `.p-body a{color:inherit}` تغلب الصنف المفرد.
+ */
+.p-body a.p-num--pay {
+  background: linear-gradient(205deg, var(--pri-tint) 0%, var(--card) 58%);
+  color: var(--ink);
+}
+
+.p-num__k { font-size: var(--t1); font-weight: 400; color: var(--muted); }
+
+/* القصّ هنا شبكة أمان لا تخطيطًا: مع `min-width:0` أعلاه يبقى المبلغ
+   داخل البطاقة بدل أن يسيل خارج حدّها */
 .p-num__v {
   display: block;
-  font-size: clamp(22px, 6.4vw, 28px);
-  font-weight: 700;
-  letter-spacing: -.03em;
-  line-height: var(--p-lh-tight);
-  white-space: nowrap;
+  font-size: var(--t5); font-weight: 700; line-height: 1.15;
   overflow: hidden;
-  font-variant-numeric: tabular-nums;
 }
-.p-num__v i { font-style: normal; font-size: var(--p-t6); font-weight: 400; opacity: .66; margin-inline-start: 4px; }
-.p-num__s { font-size: var(--p-t6); opacity: .7; }
+.p-num--att .p-num__v { color: var(--ok); }
+.p-num--pay .p-num__v { color: var(--ink); }
 
-.p-body a.p-num--pay {
-  color: #fff;
-  background: var(--p-deep-2);
-  box-shadow: var(--p-e2);
+.p-num__s { font-size: var(--t0); color: var(--muted); }
+
+/* ── شريحتا السجل ────────────────────────────────────────────────── */
+
+/**
+ * الرابطان بلا صنفٍ أساسيّ — `is-on` وحده على النشط.
+ *
+ * فالمحدِّد `.p-seg a`، ومؤهَّل بـ`.p-body` عمدًا: `.p-seg a` تخصّصيتها
+ * (٠,١,١) وهي تخصّصية `.p-body a{color:inherit}` نفسها، فتُحسم بترتيب
+ * المصدر وحده — وهذا رهانٌ لا يُكتب. التأهيل يرفعها إلى (٠,٢,١) فتغلب
+ * يقينًا.
+ */
+.p-seg {
+  display: flex; gap: var(--s1);
+  padding: var(--s1); margin: 0 0 var(--s4);
+  background: var(--card2); border: 1px solid var(--line);
+  border-radius: var(--r2);
 }
-.p-num--pay .p-num__k { color: var(--p-shine); }
-.p-num--att { background: var(--p-card); border: 1px solid var(--p-line); }
-.p-num--att .p-num__k { color: var(--p-mute); }
-.p-num--att .p-num__v { color: var(--p-brand); }
-
-/* =========================================================
-   عناصر عامة.
-   ========================================================= */
-
-.p-h1 { font-size: var(--p-t2); font-weight: 700; letter-spacing: -.02em; margin: var(--p-4) 0 var(--p-1); }
-.p-h2 { font-size: var(--p-t3); font-weight: 700; margin: var(--p-5) 0 var(--p-2); }
-.p-sub { font-size: var(--p-t5); color: var(--p-mute); margin: 0 0 var(--p-3); }
-
-.p-body a.p-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin: var(--p-3) 0 var(--p-2);
-  font-size: var(--p-t5);
-  color: var(--p-mute);
+.p-body .p-seg a {
+  flex: 1 1 0; padding: 9px 0;
+  border-radius: var(--r1);
+  text-align: center; font-size: var(--t2); font-weight: 700; color: var(--muted);
+}
+.p-body .p-seg a.is-on {
+  background: var(--card); color: var(--pri-ink);
+  box-shadow: var(--shadow-sm);
 }
 
-/* **`a` وحدها كانت تُنسي كل `button`.** كُتب المحدِّد `a.p-btn` ليغلب
-   `.p-body a { color }`، فخرج من التنسيق **كل زرّ إرسال في التطبيق** —
-   سبعة أزرار في سبع شاشات منها الدخول والبوابة — فظهرت أزرارًا خامًا من
-   المتصفح بحدّها الافتراضي. العنصران يُذكران معًا، والتخصيص يبقى كما هو. */
-.p-body button.p-btn,
-.p-body a.p-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+/* ── نسبة الحضور — البطاقة الحاكمة ───────────────────────────────── */
+
+.p-score {
+  padding: 14px var(--s4); margin: 0 0 var(--s3);
+  background: linear-gradient(210deg, var(--pri-tint) 0%, var(--card) 60%);
+  border: 1px solid var(--line);
+  border-radius: var(--r4); box-shadow: var(--shadow-sm);
+}
+
+/**
+ * معكوس الاتجاه عمدًا.
+ *
+ * الـPHP يضع الرقم أوّلًا فيقع في حافة البدء (اليمين)، والتصميم يضع
+ * الجملة يمينًا والرقم في الطرف المقابل. لا يمكن تبديل ترتيب الـDOM،
+ * فيُبدَّل اتجاه الصفّ.
+ */
+.p-score__top {
+  display: flex; flex-direction: row-reverse;
+  align-items: center; justify-content: space-between; gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.p-score__n {
+  flex: none;
+  font-size: var(--t6); font-weight: 700; line-height: 1.05;
+  color: var(--pri-ink);
+}
+/* علامة النسبة جزءٌ من الرقم لا حاشية عليه — فترث لونه لا لون الحاشية */
+.p-score__n .p-cur { color: inherit; font-weight: 700; opacity: .5; }
+
+.p-score__t { flex: 1; min-width: 0; }
+.p-score__t b    { display: block; font-size: var(--t2); font-weight: 700; color: var(--ink); }
+.p-score__t span { display: block; font-size: var(--t1); color: var(--muted); }
+
+/**
+ * الشريط المكدّس — تركيب الأيام لا نسبتها.
+ *
+ * `--w` يُكتب في PHP على كل شريحة نسبةً مئويّة جاهزة، وهو عقد تخطيط
+ * كـ`--n` و`width`: بلا استهلاكه تبقى الشرائح `<i>` فارغةً بعرض صفر
+ * فيختفي الشريط كلّه بلا خطأ يظهر.
+ *
+ * و`.p-split` لبنة في الأساس (صفّ مفرّق للطرفين) — فلا تُعاد كتابتها،
+ * بل تُقيَّد داخل هذه البطاقة وحدها. و`gap:0` كي تُجمِّع الشرائح ١٠٠٪
+ * بلا فائض يُقصّ من آخرها.
+ */
+.p-score .p-split {
+  align-items: stretch; justify-content: flex-start; gap: 0;
+  height: 8px;
+  border-radius: 5px; overflow: hidden;
+}
+.p-score .p-split i { flex: 0 0 var(--w, 0%); }
+
+/* ألوان التركيب هي ألوان الشبكة والدليل نفسها — وإلا ناقض الملخّصُ التفصيل */
+.p-score .p-split .is-ok      { background: var(--ok-tint); }
+.p-score .p-split .is-warn    { background: var(--warn); }
+.p-score .p-split .is-bad     { background: var(--bad); }
+.p-score .p-split .is-excused { background: var(--pri); }
+
+.p-tally {
+  display: flex; flex-wrap: wrap; gap: var(--s3);
+  margin-top: var(--s3);
+  font-size: var(--t0); color: var(--ink2);
+}
+.p-tally__i   { display: inline-flex; align-items: center; gap: 5px; }
+.p-tally__i i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.p-tally__i b { font-weight: 700; color: var(--ink); }
+
+.p-tally__i.is-ok i      { background: var(--ok-tint); }
+.p-tally__i.is-warn i    { background: var(--warn); }
+.p-tally__i.is-bad i     { background: var(--bad); }
+.p-tally__i.is-excused i { background: var(--pri); }
+
+/* ── الشبكة الحرارية والدليل ─────────────────────────────────────── */
+
+/**
+ * الشبكة ودليلها بطاقة واحدة مقسومة بخيط.
+ *
+ * في التصميم هما داخل بطاقة واحدة، وفي الـPHP هما شقيقان منفصلان
+ * (`.p-days` ثم `.p-legend`) لا حاضنة لهما. فتحمل الشبكة نصفَي القطر
+ * العلويّين بلا حدّ سفليّ، ويحمل الدليل السفليّين — فيلتحمان بصريًّا.
+ * والظلّ على السفلي وحده كي لا يظهر خيط ظلٍّ في وسط البطاقة.
+ */
+.p-days {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 15), minmax(0, 1fr));
+  gap: 7px;
+  padding: 15px;
+  background: var(--card);
+  border: 1px solid var(--line); border-bottom: 0;
+  border-radius: var(--r4) var(--r4) 0 0;
+}
+
+/**
+ * `--n` يهبط إلى ١ حين يكون في السجلّ يومٌ واحد — وبلا سقفٍ للعرض
+ * يصير المربّع الواحد بحجم البطاقة كلّها. ونصف القطر نسبةٌ لا مقاسًا
+ * ثابتًا كي يبقى ١٥٪ من الضلع سواء أكانت الأعمدة خمسة أم خمسة عشر.
+ */
+.p-cell {
+  aspect-ratio: 1; max-width: 60px; justify-self: center;
   width: 100%;
-  min-height: 50px;
-  margin-top: var(--p-4);
-  padding: 13px var(--p-4);
-  border: 0;
-  border-radius: var(--p-r2);
-  background: var(--p-ink);
-  /* `--p-ink` ينقلب فاتحًا في الوضع الداكن، فـ`#fff` فوقه يختفي */
-  color: var(--p-on-color);
-  font-family: inherit;
-  font-size: var(--p-t4);
-  font-weight: 700;
-  line-height: var(--p-lh-snug);
-  cursor: pointer;
-  transition: background var(--p-fast) var(--p-ease), transform var(--p-fast) var(--p-ease);
+  border-radius: 15%;
+  background: var(--card2); border: 1px dashed var(--line);
+  cursor: default;
 }
-.p-body button.p-btn:active,
-.p-body a.p-btn:active { transform: scale(.985); }
-.p-body button.p-btn:focus-visible,
-.p-body a.p-btn:focus-visible { outline: 2px solid var(--p-brand); outline-offset: 3px; }
+/* الحدّ يبقى شفّافًا لا معدومًا فلا يختلّ مقاس الخلايا الملوّنة عن العطلة */
+.p-cell--ok,
+.p-cell--warn,
+.p-cell--late,
+.p-cell--excused { border-color: transparent; border-style: solid; }
 
-.p-btn--brand { background: var(--p-brand); }
-.p-body button.p-btn--quiet,
-.p-body a.p-btn--quiet { background: var(--p-card); color: var(--p-ink); border: 1px solid var(--p-line-2); }
-/* المعطَّل يحتاج أولوية القاعدة الأساسية نفسها: `.p-btn[disabled]` وحدها
-   (صنف+سمة) تخسر أمام `.p-body button.p-btn` (صنفان+عنصر)، فيبقى الزرّ
-   المعطَّل أسودَ كأنه الفعل الأساسي في الشاشة. */
-.p-body button.p-btn[disabled],
-.p-body a.p-btn[disabled] {
-  background: var(--p-alt);
-  color: var(--p-mute);
-  cursor: not-allowed;
-  box-shadow: none;
+.p-cell--ok   { background: var(--ok-tint); }   /* حاضر */
+.p-cell--warn { background: var(--warn); }      /* متأخر */
+.p-cell--late { background: var(--bad); }       /* غائب — الصنف مسمّى late والحالة absent */
+
+/* الإجازة المعتمدة ليست غيابًا: لونٌ أساسيّ مستقلّ لا درجةٌ من الأحمر */
+.p-cell--excused { background: var(--pri); }
+
+/**
+ * `--p-ok` و`--p-warn` و`--p-n3` و`--p-excused` تُكتب داخل PHP في
+ * `style` كلِّ مربّع دليل، فهي جزءٌ من عقد القالب لا أسماء داخلية.
+ * تُعرَّف هنا على الدليل وحده — لا على `.p-body` — كي لا تتسرّب
+ * تسميةٌ قديمة إلى بقيّة التطبيق. وقيمها هي ألوان الخلايا نفسها،
+ * وإلا كذب الدليل على الشبكة.
+ */
+.p-legend {
+  --p-ok: var(--ok-tint);
+  --p-warn: var(--warn);
+  --p-n3: var(--bad);
+  --p-excused: var(--pri);
+
+  display: flex; flex-wrap: wrap; gap: var(--s3);
+  padding: 12px 15px 13px; margin: 0 0 var(--s4);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 0 0 var(--r4) var(--r4);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--t0); color: var(--ink2);
 }
-.p-body button.p-btn[disabled]:active { transform: none; }
+.p-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.p-legend i    { width: 10px; height: 10px; border-radius: 3px; flex: none; }
 
-.p-field { margin-bottom: var(--p-3); }
-.p-field label { display: block; margin-bottom: 5px; font-size: var(--p-t5); color: var(--p-mute); }
-.p-field--half { min-width: 0; }
-.p-form { display: grid; gap: var(--p-3); }
-.p-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--p-3); }
+/* ── المعدّل العام — الحلقة ──────────────────────────────────────── */
 
-.p-in {
-  width: 100%;
-  min-height: 48px;
-  padding: 12px var(--p-3);
-  font-family: inherit;
-  font-size: var(--p-t3);              /* أقل من 16 يجعل iOS يقرّب الشاشة تلقائيًا */
-  color: var(--p-ink);
-  /* غائر لا طافٍ: يهدأ حتى يُلمس، فيقود التركيزُ العينَ لا الحدود */
-  background: var(--p-alt);
-  border: 1px solid transparent;
-  border-radius: var(--p-r1);
-  box-shadow: none;
-  transition: background var(--p-fast) var(--p-ease),
-              border-color var(--p-fast) var(--p-ease),
-              box-shadow var(--p-fast) var(--p-ease);
-}
-.p-in::placeholder { color: var(--p-faint); }
-.p-in:hover { border-color: var(--p-line-2); }
-.p-in:focus {
-  outline: 0;
-  background: var(--p-card);
-  border-color: var(--p-brand);
-  box-shadow: 0 0 0 3px var(--p-brand-s);
+/**
+ * `--p-alt` و`--p-brand` رمزان يُقرآن من PHP كـ`--p-ok` أخواتها:
+ * دائرتا الـSVG تكتبان `stroke="var(--p-alt)"` و`stroke="var(--p-brand)"`.
+ * وبلا تعريفهما تسقط الخاصّية عند الحساب فتعود `stroke` إلى قيمتها
+ * الابتدائية `none` — فتختفي الحلقة كاملةً بلا أثرٍ في الصفحة ولا خطأ.
+ * تُعرَّفان على المكوّن وحده لا على `.p-body` كي لا تتسرّبا.
+ */
+.p-stat {
+  --p-alt: var(--card2);
+  --p-brand: var(--pri);
+
+  display: flex; align-items: center; gap: var(--s4);
+  padding: 14px var(--s4); margin: 0 0 var(--s3);
+  background: linear-gradient(210deg, var(--pri-tint) 0%, var(--card) 60%);
+  border: 1px solid var(--line);
+  border-radius: var(--r4); box-shadow: var(--shadow-sm);
 }
 
-/* القائمة: سهم واحد من عندنا بدل سهم المتصفح الخام، في الحافة الأمامية */
-select.p-in {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-inline-end: 38px;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7975' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: left 14px center;
-  background-size: 14px;
+/* الرقم فوق الحلقة بلا تموضع مطلق: خليّة شبكة واحدة يشتركان فيها */
+.p-stat__ring {
+  display: grid; place-items: center; flex: none;
+  width: 88px; height: 88px;
 }
-:root[data-theme="dark"] select.p-in {
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23738580' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+.p-stat__ring svg { grid-area: 1 / 1; display: block; }
+.p-stat__ring b {
+  grid-area: 1 / 1;
+  font-size: var(--t5); font-weight: 700; line-height: 1; color: var(--pri-ink);
 }
+.p-stat__ring b i { font-style: normal; font-size: .5em; font-weight: 700; opacity: .5; }
 
-/* التاريخ: أيقونة المتصفح تُبقى لكن تُهدَّأ لتشبه بقية الواجهة */
-.p-in[type="date"]::-webkit-calendar-picker-indicator { opacity: .45; cursor: pointer; }
-.p-in[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: .8; }
-textarea.p-in { min-height: 92px; resize: vertical; line-height: var(--p-lh-ui); }
+.p-stat__lead { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.p-stat__lead b    { font-size: var(--t2); font-weight: 700; color: var(--ink); }
+.p-stat__lead span { font-size: var(--t1); color: var(--muted); }
 
-.p-card {
-  padding: var(--p-4);
-  margin-bottom: var(--p-3);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-}
+/* ── أشرطة الدرجات ───────────────────────────────────────────────── */
 
-.p-row {
-  display: flex;
-  align-items: center;
-  gap: var(--p-3);
-  padding: var(--p-3) var(--p-4);
-  border-bottom: 1px solid var(--p-line);
-}
-.p-row:last-child { border-bottom: 0; }
-.p-row__i {
-  width: 38px; height: 38px; flex: 0 0 auto;
-  border-radius: var(--p-r1);
-  background: var(--p-alt);
-  color: var(--p-ink-2);
-  display: flex; align-items: center; justify-content: center;
-}
-.p-row__t { flex: 1; min-width: 0; }
-.p-row__t b { display: block; font-size: var(--p-t4); }
-.p-row__t span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-.p-row__e { flex: 0 0 auto; font-size: var(--p-t5); color: var(--p-mute); font-variant-numeric: tabular-nums; }
-
-.p-list { border-radius: var(--p-r3); background: var(--p-card); border: 1px solid var(--p-line); overflow: hidden; box-shadow: var(--p-e1); }
-
-.p-tag {
-  display: inline-block;
-  padding: 2px 11px;
-  border-radius: 99px;
-  font-size: var(--p-t6);
-  font-weight: 700;
-  white-space: nowrap;
-}
-.p-tag--ok   { background: var(--p-ok-s);   color: var(--p-ok); }
-.p-tag--warn { background: var(--p-warn-s); color: var(--p-warn); }
-.p-tag--late { background: var(--p-late-s); color: var(--p-late); }
-.p-tag--mute { background: var(--p-alt);    color: var(--p-mute); }
-
-.p-empty {
-  text-align: center;
-  padding: var(--p-6) var(--p-4);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-}
-.p-empty__i {
-  width: 52px; height: 52px;
-  margin: 0 auto var(--p-3);
-  border-radius: var(--p-r2);
-  background: var(--p-brand-s);
-  color: var(--p-brand);
-  display: flex; align-items: center; justify-content: center;
-}
-.p-empty b { display: block; font-size: var(--p-t3); margin-bottom: 3px; }
-.p-empty p { margin: 0; font-size: var(--p-t5); color: var(--p-mute); }
-
-.p-note {
-  padding: var(--p-3) var(--p-4);
-  margin-bottom: var(--p-3);
-  border-radius: var(--p-r2);
-  background: var(--p-warn-s);
-  border: 1px solid var(--p-warn);
-  border-color: color-mix(in srgb, var(--p-warn) 32%, transparent);
-}
-.p-note b { display: block; font-size: var(--p-t4); color: var(--p-warn); }
-.p-note span { display: block; font-size: var(--p-t5); color: var(--p-ink-2); }
-
-/* الرقم اللاتيني داخل نص عربي يقفز جزؤه — العزل يمنع ذلك */
-.p-nm { unicode-bidi: isolate; direction: ltr; display: inline-block; font-variant-numeric: tabular-nums; }
-.p-cur { font-size: .58em; font-weight: 400; opacity: .7; }
-
-/* ═══════════ المبلغ: رقمٌ وعملته لا ينفصلان ═══════════
-
-   العطل الذي تكرّر في ثلاث شاشات: `.p-nm` تعزل الرقم بـ`direction: ltr`،
-   فإن جلست داخل كتلة عربية صار الرقم يُحاذي اليسار والعملة تبقى يمينًا —
-   فينفتح بينهما عرض السطر كله. ومع ضيق الشاشة ينكسران سطرين.
-
-   والعلاج **بنيويّ لا تجميليّ**: `inline-flex` يجعلهما عنصرًا واحدًا لا
-   يقبل الفصل ولا الكسر مهما كان اتجاه ما حولهما. وكل مبلغ في التطبيق
-   يمرّ من هنا. */
-.p-amt {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  white-space: nowrap;
-  direction: rtl;
-}
-.p-amt .p-nm { display: inline; }
-.p-amt .p-cur {
-  font-size: .55em;
-  font-weight: 600;
-  opacity: 1;
-  color: var(--p-faint);
+/* المواد كلّها في بطاقة واحدة: بطاقةٌ لكلّ مادّة تجعل سبع مواد سبع
+   لوحات متجاورة فيضيع الترتيب من الأعلى للأدنى */
+.p-bars {
+  display: flex; flex-direction: column; gap: 11px;
+  padding: 15px var(--s4); margin-bottom: var(--s4);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r4); box-shadow: var(--shadow-sm);
 }
 
-/* =========================================================
-   شاشة الدخول.
-   ========================================================= */
-
-.p-body--auth { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: var(--p-5); }
-.p-auth { width: 100%; max-width: 380px; }
-.p-auth__mark {
-  width: 58px; height: 58px;
-  margin: 0 auto var(--p-4);
-  border-radius: var(--p-r2);
-  background: var(--p-brand);
-  color: var(--p-on-color);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--p-t3); font-weight: 700;
-  box-shadow: var(--p-e2);
+/**
+ * نغمة العتبة تُحقن مرّةً على الشريط ثم تُستهلك في ثلاثة مواضع
+ * (الرقم والتعبئة والتقدير) — بدلها اثنتا عشرة قاعدة تكرّر الشيء نفسه.
+ * و`-ink` منفصلة لأن الأزرق يحتاج درجةً أدكن ليُقرأ نصًّا.
+ */
+.p-bar {
+  --bar-tone: var(--pri);
+  --bar-ink: var(--pri-ink);
+  display: flex; flex-direction: column; gap: 3px;
 }
-.p-auth h1 { text-align: center; font-size: var(--p-t2); margin: 0 0 var(--p-1); }
-.p-auth__s { text-align: center; font-size: var(--p-t5); color: var(--p-mute); margin: 0 0 var(--p-5); }
-.p-auth__box { padding: var(--p-5); border-radius: var(--p-r4); background: var(--p-card); border: 1px solid var(--p-line); box-shadow: var(--p-e2); }
-.p-auth__err {
-  margin-bottom: var(--p-3);
-  padding: var(--p-3);
-  border-radius: var(--p-r1);
-  background: var(--p-late-s);
-  color: var(--p-late);
-  font-size: var(--p-t5);
-  font-weight: 700;
-  text-align: center;
-}
-.p-auth__hint { margin: var(--p-4) 0 0; text-align: center; font-size: var(--p-t6); color: var(--p-faint); line-height: var(--p-lh-read); }
+.p-bar--ex { --bar-tone: var(--ok);   --bar-ink: var(--ok); }
+.p-bar--gd { --bar-tone: var(--pri);  --bar-ink: var(--pri-ink); }
+.p-bar--ps { --bar-tone: var(--warn); --bar-ink: var(--warn); }
+.p-bar--fl { --bar-tone: var(--bad);  --bar-ink: var(--bad); }
 
-/* تخطي التنقّل — مخفي تمامًا حتى يُركَّز عليه بلوحة المفاتيح */
-.p-body a.p-skip {
-  position: fixed;
-  inset-inline-start: 12px; top: 0;
-  z-index: 100;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  opacity: 0;
-  pointer-events: none;
-  padding: 10px 18px;
-  border-radius: 0 0 12px 12px;
-  background: var(--p-ink);
-  color: #fff;
-  font-size: var(--p-t4);
-}
-.p-skip:focus, .p-skip:focus-visible {
-  width: auto; height: auto;
-  overflow: visible;
-  clip-path: none;
-  opacity: 1;
-  pointer-events: auto;
-}
+.p-bar__top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+.p-bar__top b { font-size: var(--t2); font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.p-bar__top .p-nm { font-size: var(--t2); font-weight: 700; color: var(--bar-ink); }
 
-/* =========================================================
-   الرسوم.
+.p-bar__track { display: block; height: 8px; border-radius: 5px; background: var(--card2); }
+/* العرض مكتوب في `style` داخل PHP — لا تُسنَد هنا عرضٌ يُلغيه أو يُلغيها */
+.p-bar__track i { display: block; height: 8px; border-radius: 5px; background: var(--bar-tone); }
 
-   الأب لا يقرأ جدولًا محاسبيًا: يريد رقمًا واحدًا كبيرًا، ثم متى
-   الدفعة القادمة. والدوائر المتدرجة تُقرأ من الامتلاء قبل النص.
-   ========================================================= */
+.p-bar__sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); font-size: var(--t0); color: var(--muted); }
+.p-bar__sub em { font-style: normal; font-weight: 700; color: var(--bar-ink); }
 
-.p-bill { margin-bottom: var(--p-6); }
+/* ── الرسوم — الرقم الكبير ───────────────────────────────────────── */
+
+.p-bill { display: block; margin: 0 0 var(--s6); }
 
 .p-bill__hero {
-  position: relative;
-  overflow: hidden;
-  padding: var(--p-5) var(--p-4) var(--p-4);
-  border-radius: var(--p-r4);
-  color: #fff;
-  background: var(--p-deep-2);
-  box-shadow: var(--p-e3);
+  display: flex; flex-direction: column; gap: 6px;
+  padding: var(--s5) 18px; margin-bottom: var(--s3);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r5); box-shadow: var(--shadow);
 }
-.p-bill__hero::before {
-  content: "";
-  position: absolute;
-  width: 240px; height: 240px;
-  top: -130px; inset-inline-start: -60px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .07);
-}
-.p-bill__hero > * { position: relative; }
 
 .p-bill__chip {
-  float: inline-end;
-  padding: 6px 13px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .15);
-  border: 1px solid rgba(255, 255, 255, .22);
-  font-size: var(--p-t6);
-  font-weight: 700;
-  white-space: nowrap;
+  align-self: flex-start;
+  padding: 4px 9px; border-radius: 9px;
+  background: var(--slate-tint); color: var(--slate);
+  font-size: var(--t0); font-weight: 700;
 }
-.p-bill__k {
-  display: block;
-  font-size: var(--p-t6);
-  color: var(--p-shine);
-  letter-spacing: .09em;
-  margin-inline-end: 96px;
-}
+
+.p-bill__k { font-size: var(--t2); color: var(--muted); }
+
+/**
+ * ٤٦px هو مقاس التصميم وهو خارج سُلَّم الخطّ عمدًا — هذا الرقم وحده
+ * جواب الشاشة كلّها. و`clamp` لأن المبلغ يُطبع بمنزلتين عشريّتين
+ * (`٣٬١٠٠٫٠٠ ر.س`) و`p-amt` يمنع كسره، فالشاشة الضيّقة تفيض به.
+ */
 .p-bill__v {
-  display: block;
-  clear: both;
-  padding-top: 2px;
-  font-size: clamp(28px, 9vw, 38px);
-  font-weight: 700;
-  letter-spacing: -.03em;
-  line-height: var(--p-lh-tight);
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: clamp(34px, 11.5vw, 46px);
+  font-weight: 700; line-height: 1.1; color: var(--ink);
 }
-.p-bill__v .p-cur { color: var(--p-shine); }
+.p-bill__v .p-cur { font-size: .43em; font-weight: 700; color: var(--ink2); }
 
-.p-bill__bar { display: flex; gap: 5px; margin: var(--p-4) 0 9px; }
-.p-bill__bar i {
-  flex: 1;
-  height: 6px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .2);
-  transition: background var(--p-slow) var(--p-ease);
+/* الدفعات مقاطع في مسارٍ واحد — الحالة تُقرأ من الامتلاء قبل النسبة */
+.p-bill__bar { display: flex; gap: 5px; margin-top: var(--s3); }
+.p-bill__bar i { flex: 1 1 0; height: 10px; border-radius: 6px; background: var(--card2); }
+.p-bill__bar i.is-on { background: var(--ok); }
+
+/* النسبة أوّل الـDOM والتصميم يضعها في الطرف المقابل للجملة */
+.p-bill__of {
+  display: flex; flex-direction: row-reverse;
+  align-items: baseline; justify-content: space-between; gap: var(--s2);
+  font-size: var(--t1); color: var(--muted);
 }
-.p-bill__bar i.is-on { background: var(--p-shine); box-shadow: 0 0 12px rgba(169, 128, 59, .55); }
-
-.p-bill__of { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: var(--p-t6); color: var(--p-shine); }
-.p-bill__of b { color: #fff; font-weight: 700; }
-.p-bill__pct { font-size: var(--p-t5); font-weight: 700; color: #fff; }
+.p-bill__of b { font-weight: 700; color: var(--ink); }
+.p-bill__pct { flex: none; font-size: var(--t1); font-weight: 700; color: var(--ok); }
 
 .p-bill__won {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: var(--p-3);
-  padding: 6px 13px;
-  border-radius: 99px;
-  background: var(--p-gold-s);
-  border: 1px solid color-mix(in srgb, var(--p-gold) 46%, transparent);
-  color: var(--p-gold);
-  font-size: var(--p-t6);
-  font-weight: 700;
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 6px; padding: 6px 10px; border-radius: var(--r1);
+  background: var(--ok-tint); color: var(--ok);
+  font-size: var(--t1); font-weight: 700;
+}
+.p-bill__won svg { flex: none; }
+
+/* ── خطّ الأقساط ─────────────────────────────────────────────────── */
+
+.p-pays {
+  position: relative;
+  display: flex; gap: var(--s1);
+  padding: var(--s4) 14px 14px; margin: 0 0 var(--s3);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r4); box-shadow: var(--shadow-sm);
 }
 
-/* ---------- دوائر الدفعات ---------- */
-
-.p-pays { display: flex; gap: var(--p-2); }
+/**
+ * الخيط الواصل بين الدوائر لا عنصر له في الـPHP، فيُرسم بطبقةٍ زائفة.
+ * موضعه = حشوة البطاقة العليا + ٩px (وهو موضع الخيط في التصميم داخل
+ * شبكة الأقساط)، فيمرّ بمركز الدائرة.
+ * وهو أوّل ما يُرسم فتغطّيه الدوائر المصمتة — لذلك `.p-pay` نسبيّة.
+ */
+.p-pays::before {
+  content: ""; position: absolute;
+  top: calc(var(--s4) + 9px); inset-inline: 12%;
+  height: 2px; background: var(--line);
+}
 
 .p-pay {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: var(--p-3) 4px;
-  border-radius: var(--p-r2);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  text-align: center;
+  position: relative; flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
 }
+
+/**
+ * `--f` يُحقن من PHP بموضع القسط في الخطّة، ويُستهلك هنا مروحةً
+ * مخروطية — وهي من التدرّجات المسموح بها في نظام التصميم.
+ */
 .p-pay__ring {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px; height: 34px;
-  margin: 0 auto 8px;
-  border-radius: 50%;
-  /* القوس يمتلئ بمقدار موضع الدفعة — تُقرأ بالعين قبل الرقم */
-  background: conic-gradient(var(--p-line-2) var(--f, 0%), var(--p-alt) 0);
-  color: var(--p-mute);
-  font-size: var(--p-t5);
-  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; flex: none;
+  border-radius: 50%; border: 2px solid var(--line);
+  background: conic-gradient(var(--pri-tint) var(--f, 0%), var(--bg) 0);
+  color: var(--muted);
+  font-size: var(--t2); font-weight: 700; line-height: 1;
 }
-.p-pay__ring::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  background: var(--p-card);
+.p-pay__ring svg { display: block; }
+
+.p-pay.is-done .p-pay__ring { background: var(--ok);  border-color: transparent; color: var(--card); }
+.p-pay.is-late .p-pay__ring { background: var(--bad); border-color: transparent; color: var(--card); }
+
+/* الدفعة القادمة هي المطلوب فعله الآن — الهالة تنبيهٌ لا زينة */
+.p-pay.is-next .p-pay__ring {
+  background: var(--pri); border-color: transparent; color: var(--on-pri);
+  --hc: color-mix(in srgb, var(--pri) 55%, transparent);
+  animation: p-halo 1.9s ease-out infinite;
 }
-.p-pay__ring b, .p-pay__ring svg { position: relative; z-index: 1; }
 
-.p-pay__a { display: block; font-size: var(--p-t5); font-weight: 700; letter-spacing: -.01em; }
-.p-pay__d { display: block; font-size: var(--p-t6); color: var(--p-faint); }
+/* التصميم يضع التاريخ فوق المبلغ والـDOM يعكسهما — والترتيب لا يُبدَّل في PHP */
+.p-pay__d { order: 1; font-size: var(--t0); font-weight: 600; color: var(--muted); }
+.p-pay__a { order: 2; font-size: var(--t1); font-weight: 700; white-space: nowrap; color: var(--muted); }
 
-.p-pay.is-done { background: var(--p-ok-s); border-color: color-mix(in srgb, var(--p-ok) 32%, transparent); }
-.p-pay.is-done .p-pay__ring { background: var(--p-ok); color: var(--p-on-color); }
-.p-pay.is-done .p-pay__ring::after { inset: 0; background: transparent; }
-.p-pay.is-done .p-pay__a { color: var(--p-ok); }
+.p-pay.is-done .p-pay__d,
+.p-pay.is-late .p-pay__d,
+.p-pay.is-next .p-pay__d { color: var(--ink); }
 
-.p-pay.is-next { border: 2px solid var(--p-brand); box-shadow: 0 10px 20px -12px rgba(13, 26, 23, .28); }
-.p-pay.is-next .p-pay__ring { background: var(--p-brand); color: var(--p-on-color); }
-.p-pay.is-next .p-pay__ring::after { inset: 0; background: transparent; }
+.p-pay.is-done .p-pay__a { color: var(--ok); }
+.p-pay.is-late .p-pay__a { color: var(--bad); }
+.p-pay.is-next .p-pay__a { color: var(--pri-ink); }
 
-.p-pay.is-late { border: 2px solid var(--p-late); }
-.p-pay.is-late .p-pay__ring { background: var(--p-late); color: #fff; }
-.p-pay.is-late .p-pay__ring::after { inset: 0; background: transparent; }
-
-/* ---------- الدفعة القادمة ---------- */
+/* ── الدفعة القادمة وزرّها ───────────────────────────────────────── */
 
 .p-due {
-  margin-top: var(--p-3);
-  border-radius: var(--p-r3);
-  overflow: hidden;
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e2);
+  display: flex; flex-direction: column; gap: var(--s3);
+  padding: var(--s4); margin: 0 0 var(--s3);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r4); box-shadow: var(--shadow-sm);
 }
-/* كانت أربعة أشياء في صفٍّ واحد على شاشة جوّال: أيقونة 44px + الحالة +
-   المبلغ بـ22px + «٨ / يومًا تأخرت» في عمود ثالث. فاض الصفّ فانكسر المبلغ
-   عن عملته سطرين، وخرج الزرّ من البطاقة.
 
-   الآن **سطران رأسيّان**: الحالة فوق، والمبلغ سطرًا كاملًا لنفسه، والتأخير
-   جملةً لا رقمًا معزولًا في عمود. */
-.p-due__b { padding: var(--p-4); }
+.p-due__b   { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.p-due__row { display: flex; align-items: center; gap: var(--s3); flex: 1; min-width: 0; }
 
-.p-due__row { display: flex; align-items: center; gap: var(--p-3); }
 .p-due__i {
-  width: 40px; height: 40px; flex: 0 0 auto;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--p-brand) 14%, transparent);
-  color: var(--p-brand);
-  display: flex; align-items: center; justify-content: center;
-}
-.p-due__t { flex: 1; min-width: 0; }
-.p-due__t span {
-  display: block; font-size: var(--p-t5); font-weight: 700;
-  color: var(--p-brand);
-}
-.p-due__t em {
-  display: block; font-style: normal;
-  font-size: var(--p-t6); color: var(--p-faint);
+  display: grid; place-items: center; flex: none;
+  width: 40px; height: 40px; border-radius: var(--r1);
+  background: var(--pri-tint); color: var(--pri-ink);
 }
 
-/* المبلغ: سطرٌ له وحده، ورقمه وعملته ملتصقان بـ`.p-amt` */
-.p-due__v {
-  display: block;
-  margin-top: var(--p-4);
-  font-size: var(--p-t1);
-  font-weight: 700;
-  line-height: var(--p-lh-tight);
-  letter-spacing: -.02em;
+.p-due__t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.p-due__t span { font-size: var(--t2); font-weight: 700; color: var(--ink); }
+.p-due__t em   { font-style: normal; font-size: var(--t0); color: var(--muted); }
+
+.p-due__v { flex: none; font-size: var(--t3); font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+.p-due.is-late  .p-due__i { background: var(--bad-tint); color: var(--bad); }
+.p-due.is-late  .p-due__t span,
+.p-due.is-late  .p-due__v { color: var(--bad); }
+.p-due.is-clear .p-due__i { background: var(--ok-tint); color: var(--ok); }
+.p-due.is-clear .p-due__t span { color: var(--ok); }
+
+/**
+ * مؤهَّل بثلاثة أصناف عمدًا.
+ *
+ * الزرّ يحمل `.p-btn` أيضًا، و`.p-body button.p-btn` تخصّصيتها (٠,٢,١)
+ * فتغلب `.p-due__go` المفردة وتُعيد نصف القطر إلى `--r2`. والتأهيل
+ * يرفعها إلى (٠,٣,١) — وهي لا تمسّ الخلفية ولا اللون فتبقى قاعدة
+ * `[disabled]` (وهي (٠,٣,١) كذلك) هي التي تحكم مظهر المعطَّل.
+ */
+.p-body button.p-btn.p-due__go {
+  width: 100%; height: 54px;
+  border-radius: var(--r3);
+  font-size: var(--t3);
 }
 
-.p-due__go { margin: 0; border-radius: 0; min-height: 54px; }
-
-.p-due.is-late .p-due__i { background: color-mix(in srgb, var(--p-n3) 14%, transparent); color: var(--p-n3); }
-.p-due.is-late .p-due__t span { color: var(--p-n3); }
-.p-due.is-late .p-due__v { color: var(--p-n3); }
-.p-due.is-clear .p-due__i { background: color-mix(in srgb, var(--p-ok) 14%, transparent); color: var(--p-ok); }
-.p-due.is-clear .p-due__t span { color: var(--p-ok); }
-
-.p-ways { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: var(--p-3); }
+/* وسائل الدفع: أسماء نصّية بلا صنف داخل `.p-ways` — رقاقات هادئة
+   تُطمئن ولا تنافس الزرّ المعطَّل فوقها */
+.p-ways {
+  display: flex; flex-wrap: wrap; gap: var(--s2);
+  margin: 0 0 var(--s3);
+  font-size: var(--t0); color: var(--muted);
+}
 .p-ways span {
-  padding: 5px 12px;
-  border-radius: 8px;
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  font-size: var(--p-t6);
-  font-weight: 700;
-  color: var(--p-ink-2);
+  padding: 5px 10px; border-radius: 9px;
+  background: var(--card2); border: 1px solid var(--line);
+  font-weight: 600; white-space: nowrap;
 }
 
-/* =========================================================
-   بطاقة الطالب — ثابتة.
+/* ── أيام الجدول الدراسي ─────────────────────────────────────────── */
 
-   تُقرأ ولا يُلعب بها. والعمق من الطبقات والظل لا من الحركة.
-   ========================================================= */
+.p-day {
+  display: block; overflow: hidden; margin: 0 0 var(--s3);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r3); box-shadow: var(--shadow-sm);
+}
 
-/* ═══════════ بطاقة الطالب ═══════════
+.p-day__h {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 11px 14px;
+  background: var(--card2); border-bottom: 1px solid var(--line);
+}
+.p-day__h b { font-size: var(--t2); font-weight: 700; color: var(--ink); }
+/* «اليوم» تُدفَع إلى الطرف المقابل بلا حاضنة إضافية */
+.p-day__h em {
+  margin-inline-start: auto;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--pri-tint); color: var(--pri-ink);
+  font-style: normal; font-size: var(--t0); font-weight: 700;
+}
 
-   وثيقة تُقرأ عند بوابة، لا بطاقة في تطبيق. وما يميّز الوثيقة عن الشاشة
-   ثلاثة: **رأسٌ داكن موقَّع**، و**خيط نحاسيّ** يحدّه من طرفيه، و**نقشٌ
-   دقيق** لا يُرى إلا عن قرب — وهو تقليد الطباعة الأمنية لا زخرفة.
-   والحقول صفوفٌ يفصلها خيط شعرة لا حبّات رمادية: الحبّات لغة لوحة قيادة،
-   والصفوف لغة وثيقة. */
+.p-day.is-now { box-shadow: var(--shadow-sm), 0 0 0 1.5px var(--pri); }
+.p-day.is-now .p-day__h { background: var(--pri-tint); border-bottom-color: transparent; }
 
+/* ── رأس اليوم في الإشعارات والرسائل ─────────────────────────────── */
+
+/* بلا تباعد حروف: العربية متّصلة، والتباعد يفكّ وصلها */
+.p-day-h {
+  display: block; margin: 0 var(--s1) var(--s2);
+  font-size: var(--t0); font-weight: 700; color: var(--muted);
+}
+
+/* ── شبكة التقرير اليومي (الروضة) ────────────────────────────────── */
+
+/* القيم نصٌّ حرّ تكتبه المعلّمة، فلا تُلوَّن بنغمات — اللون هنا يوهم
+   بحالةٍ لا وجود لها */
+.p-kgrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.p-kgrid > div {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 12px; border-radius: var(--r2);
+  background: var(--card2);
+}
+.p-kgrid span { font-size: var(--t0); color: var(--muted); }
+.p-kgrid b    { font-size: var(--t2); font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+/* ═══════════════════════════════════════════════════════════════════
+   البطاقة · الإشعارات والرسائل · الصفوف المسطّحة
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── البطاقة ─────────────────────────────────────────────────────── */
+
+/**
+ * الترويسة الملوّنة تمتدّ من حافة إلى حافة، وليس في PHP عنصرٌ يلفّ
+ * الجسم. فالحشو يُوضع على البطاقة نفسها ثم تُنفى الترويسة منه بهامش
+ * سالب — البديل هو تكرار `padding-inline` على كل طفل من الأربعة.
+ */
 .p-id {
-  position: relative;
-  border-radius: var(--p-r4);
+  display: block;
+  padding: 0 var(--s4) var(--s4);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r5);
+  box-shadow: var(--shadow);
   overflow: hidden;
-  background: var(--p-card);
-  box-shadow: var(--p-e3);
-  margin-bottom: var(--p-3);
-}
-/* الخيط النحاسيّ السفلي — يقابل علويّه فتبدو البطاقة مُجلَّدة لا مقطوعة */
-.p-id::after {
-  content: "";
-  position: absolute;
-  inset-block-end: 0; inset-inline: 0;
-  height: 3px;
-  background: var(--p-gold);
+  margin: 0 0 var(--s3);
 }
 
 .p-id__top {
-  position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 13px var(--p-4);
-  background: var(--p-deep-2);
-  color: #FFFFFF;
-  border-block-end: 3px solid var(--p-gold);
+  column-gap: 11px;
+  row-gap: 2px;
+  margin: 0 calc(-1 * var(--s4)) var(--s4);
+  padding: 14px var(--s4);
+  background: var(--pri);
+  color: var(--on-pri);
 }
-/* نقش الطباعة الأمنية: خطوط مائلة دقيقة بخمسة بالمئة — تُرى عن قرب وحدها */
+
+/**
+ * ختم المدرسة: رقاقة ورمز مبنى — وليس في DOM عنصرٌ لهما، والـPHP لا
+ * يُمسّ. فالرقاقة `::before` والرمز `::after` مركونان في الخليّة نفسها
+ * (grid-area واحدة) ليتراكبا، والأخير يُرسم فوق الأوّل بترتيب المصدر.
+ * والرمز `mask` لا `background-image` كي يأخذ `currentColor`: في الوضع
+ * الليلي يفتحّ `--pri` ويُظلم `--on-pri`، فالرمز الأبيض المكتوب داخل
+ * الـSVG كان يختفي على الترويسة الفاتحة.
+ */
 .p-id__top::before {
-  content: "";
-  position: absolute; inset: 0; pointer-events: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M-2 6 L6 -2 M2 14 L14 2 M10 18 L18 10' stroke='rgba(255,255,255,0.5)' stroke-width='0.7' fill='none'/%3E%3C/svg%3E");
-  opacity: .11;
-}
-.p-id__top > * { position: relative; }
-.p-id__top span { font-size: var(--p-t5); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-id__top em {
-  flex: 0 0 auto;
-  font-style: normal;
-  padding: 4px 12px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .16);
-  border: 1px solid rgba(255, 255, 255, .22);
-  color: #FFFFFF;
-  font-size: var(--p-t6);
-  font-weight: 700;
+  content: '';
+  grid-area: 1 / 1 / 3 / 2;
+  width: 34px; height: 34px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--on-pri) 18%, transparent);
 }
 
-.p-id__who { display: flex; align-items: center; gap: var(--p-4); padding: var(--p-5) var(--p-4) var(--p-4); }
+.p-id__top::after {
+  content: '';
+  grid-area: 1 / 1 / 3 / 2;
+  place-self: center;
+  width: 19px; height: 19px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.p-id__top > span { grid-column: 2; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.p-id__top > em   { grid-column: 2; font-size: var(--t0); font-style: normal; line-height: 1.3; opacity: .85; }
+
+/* ── البطاقة: الصورة والاسم ──────────────────────────────────────── */
+
+.p-id__who { display: flex; align-items: center; gap: 13px; }
+
+/**
+ * القصّ هنا وحده. `.p-id__who` أو `.p-id__name` لو حملت `overflow:hidden`
+ * قُصَّت شارة الشعبة معها.
+ */
 .p-id__pic {
-  width: 64px; height: 78px; flex: 0 0 auto;
-  border-radius: var(--p-r1);
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 66px; height: 66px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--card2);
   overflow: hidden;
-  background: var(--p-brand-s);
-  display: flex; align-items: center; justify-content: center;
-  /* حلقة نحاسية رفيعة بدل الظلّ — علامة الوثيقة لا علامة البطاقة */
-  box-shadow: 0 0 0 1.5px var(--p-gold), var(--p-e1);
 }
-.p-id__pic img { width: 100%; height: 100%; object-fit: cover; }
+.p-id__pic > img,
+.p-id__pic > svg { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.p-id__name { flex: 1; min-width: 0; }
-.p-id__name b { display: block; font-size: var(--p-t3); line-height: var(--p-lh-snug); overflow-wrap: anywhere; }
-/* الاسم اللاتيني تحت العربي وعلى حافّته نفسها.
-   كان يحمل `dir="ltr"` فصار `text-align: start` عنده = اليسار، فانفصل عن
-   الاسم فوقه بعرض السطر. العزل وحده يكفي: الحروف اللاتينية تُرتَّب صحيحةً
-   بخوارزمية الاتجاهين، والكتلة تبقى محاذيةً لليمين كأمّها. */
-.p-id__name em {
-  display: block;
-  unicode-bidi: isolate;
-  font-style: normal;
-  font-size: var(--p-t6);
-  color: var(--p-faint);
-  letter-spacing: .06em;
-  margin: 2px 0 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* الرقم الأكاديمي — بيانُ البطاقة الأول، فله سطرٌ مؤطَّر بلون الهوية */
-.p-id__no {
+/* `align-items` بدل `align-self` على الشارة: الشارة ليست من أصنافي */
+.p-id__name {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--p-3);
-  margin: 0 var(--p-4);
-  padding: 11px var(--p-3);
-  border-radius: var(--p-r1);
-  background: var(--p-brand-s);
-  border: 1px solid color-mix(in srgb, var(--p-brand) 24%, transparent);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s1);
+  min-width: 0;
 }
-.p-id__no span { font-size: var(--p-t6); color: var(--p-mute); }
-.p-id__no b {
-  font-size: var(--p-t3); font-weight: 700; letter-spacing: .16em;
-  color: var(--p-brand-ink);
-  font-variant-numeric: tabular-nums;
+.p-id__name > b  { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--ink); }
+
+/* الاسم اللاتيني تحت العربي لا بجانبه، وبـ`ltr` كي لا تُقلب مبادئه */
+.p-id__name > em {
+  font-size: var(--t1); font-style: normal; color: var(--muted);
+  direction: ltr; text-align: right;
 }
 
-/* الحقول صفوفٌ بخيط شعرة — لغة وثيقة لا لغة لوحة قيادة */
+/* ── البطاقة: الرقم الأكاديمي والحقائق ───────────────────────────── */
+
+.p-id__no {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+  margin-top: 15px;
+  padding: 12px 14px;
+  border-radius: var(--r2);
+  background: var(--card2);
+}
+.p-id__no > span { font-size: 11px; color: var(--muted); }
+.p-id__no > b    { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: 1px; }
+
 .p-id__facts {
-  margin: var(--p-4) var(--p-4) 0;
-  padding: 0;
-  border-radius: var(--p-r1);
-  border: 1px solid var(--p-line);
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: var(--s3) 0 0;
 }
 .p-id__facts > div {
-  display: flex; align-items: baseline; justify-content: space-between; gap: var(--p-3);
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
   min-width: 0;
-  padding: 11px var(--p-3);
 }
-.p-id__facts > div + div { border-block-start: 1px solid var(--p-line-2); }
-.p-id__facts dt { font-size: var(--p-t5); color: var(--p-mute); flex: 0 0 auto; }
-.p-id__facts dd {
-  margin: 0; font-size: var(--p-t5); font-weight: 700;
-  overflow-wrap: anywhere; text-align: end;
+.p-id__facts dt { font-size: 10px; color: var(--muted); }
+.p-id__facts dd { margin: 0; font-size: 12px; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+
+/**
+ * «الحالة الآن» — الخانة الرابعة الأخيرة دائمًا.
+ *
+ * التصميم يضع نقطتها بلون `--ok`، لكن قيمتها تتقلّب (بالمدرسة · في
+ * الباص · في المنزل) والـCSS لا يقرأها. فنقطة خضراء تكذب نصف الوقت.
+ * تُركت بلون `--pri` كعلامة «قيمة حيّة» لا كحكم على الحالة.
+ */
+.p-id__facts > div:last-child dd { display: flex; align-items: center; gap: 5px; }
+.p-id__facts > div:last-child dd::before {
+  content: '';
+  flex: none;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--pri);
 }
 
-/* الرمز مؤطَّر كختم: أربع علامات ركن نحاسية حوله */
-.p-id__qr { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: var(--p-4); }
+/* ── رمز QR ──────────────────────────────────────────────────────── */
+
+.p-id__qr {
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  margin-top: var(--s4);
+}
+
+/**
+ * اللوحة بيضاء في الوضعين، والرمز أسود عليها.
+ *
+ * هذا **قيد ماسح لا قرار تصميم**: قارئ البوابة يحتاج تباينًا ثابتًا،
+ * ورمزٌ يتبع الوضع الليلي يُصبح رمزًا معكوسًا لا يُقرأ. فهو الموضع
+ * الوحيد في هذه المجموعة الذي يُكتب فيه اللون بقيمته.
+ */
 .p-id__stamp {
   position: relative;
-  padding: 12px;
-  border-radius: var(--p-r2);
+  display: grid;
+  place-items: center;
+  width: 216px; max-width: 100%;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
 }
-.p-id__stamp::before,
-.p-id__stamp::after {
-  content: "";
-  position: absolute;
-  width: 16px; height: 16px;
-  border: 2px solid var(--p-gold);
-  pointer-events: none;   /* علامات الأركان زينة لا تعترض اللمس */
-}
-.p-id__stamp::before { inset-block-start: 0; inset-inline-start: 0; border-inline-end: 0; border-block-end: 0; border-start-start-radius: 5px; }
-.p-id__stamp::after  { inset-block-end: 0; inset-inline-end: 0; border-inline-start: 0; border-block-start: 0; border-end-end-radius: 5px; }
-.p-id__hint { font-size: var(--p-t6); color: var(--p-mute); }
-
-/* زرّ الفتح: على الرمز وحده لا على البطاقة كلها.
-   كان `inset: 0` يغطّي الوثيقة كاملةً، فأيّ لمسة على أيّ حقل تفتح ملء الشاشة. */
-.p-id__open {
-  position: absolute; inset: 0;
-  border: 0; background: none; cursor: pointer;
-  border-radius: var(--p-r2);
-}
-.p-id__open:focus-visible { outline: 3px solid var(--p-brand); outline-offset: 2px; }
-
-/* ---------- الرمز وصورة الطفل في وسطه ---------- */
 
 .p-qr {
-  position: relative;
-  display: inline-flex;
-  padding: 10px;
-  border-radius: var(--p-r2);
-  background: #fff;
-  box-shadow: var(--p-e1);
+  display: grid;
+  width: 200px; max-width: 100%;
+  aspect-ratio: 1;
 }
-.p-qr svg { display: block; width: 112px; height: 112px; }
-.p-qr--big { padding: 16px; }
-.p-qr--big svg { width: 236px; height: 236px; }
+/* الرمز والوجه في خليّة واحدة ليتراكبا بلا `position` ولا `z-index` */
+.p-qr > svg { grid-area: 1 / 1; width: 100%; height: 100%; display: block; }
 
-/* ٢٠٪ من القطر ≈ ٣٪ من المساحة — داخل هامش تصحيح الخطأ بفارق واسع.
-   لا تكبّرها دون اختبار مسح فعلي. */
+/* حجب أقلّ من ٥٪ من مساحة المصفوفة — التكبير يُبطل تصحيح الخطأ */
 .p-qr__face {
-  position: absolute;
-  top: 50%; inset-inline-start: 50%;
-  transform: translate(50%, -50%);
-  width: 20%; height: 20%;
+  grid-area: 1 / 1;
+  place-self: center;
+  width: 46px; height: 46px;
   border-radius: 50%;
-  object-fit: cover;
   border: 3px solid #fff;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
 }
-[dir="ltr"] .p-qr__face { transform: translate(-50%, -50%); }
 
+/**
+ * الزرّ يغطّي اللوحة وحدها.
+ *
+ * كان `inset:0` على البطاقة كلّها فتُفتح الطبقة من أي حقل، ولأنه في
+ * DOM **بعد** الرمز يفوز بالنقرة بلا `z-index`.
+ */
+.p-id__open {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+}
+
+.p-id__hint { font-size: var(--t1); font-weight: 600; color: var(--pri-ink); }
+
+/* ── البطاقة بملء الشاشة ─────────────────────────────────────────── */
+
+/**
+ * خلفية داكنة ثابتة لا تتبع الوضع.
+ *
+ * القاعدة القديمة «خلفية `.p-full` رمزٌ لا لون مكتوب» وُضعت حين كانت
+ * `#fff` تصطدم بنصٍّ يتبع الوضع فيختفي أحدهما في الآخر. هنا **الطرفان
+ * ثابتان معًا** — أرضية داكنة ونصّ أبيض — فالاصطدام مستحيل أصلًا،
+ * وهذا وضع «اعرِض للماسح» لا سطح تطبيق.
+ *
+ * الإخفاء يبقى لـ`[hidden]` وحده: لا نكتب `display` إلا مشروطًا بغيابه.
+ */
 .p-full {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: var(--p-bg);
-  color: var(--p-ink);
+  background: #0a0b12;
+  overscroll-behavior: contain;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+.p-full:not([hidden]) { display: flex; align-items: center; justify-content: center; }
+
+.p-full__box {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: var(--s6);
+  padding:
+    calc(env(safe-area-inset-top) + var(--s5))
+    28px
+    calc(env(safe-area-inset-bottom) + var(--s5));
+}
+
+.p-full__n { font-size: var(--t5); font-weight: 700; line-height: 1.3; color: #fff; }
+
+.p-qr--big {
+  width: min(302px, 74vw);
+  padding: 19px;
+  border-radius: 28px;
+  background: #fff;
+  /* هالة بيضاء واسعة: تفصل اللوحة عن الأرضية بلا حدٍّ يربك الماسح */
+  box-shadow: 0 0 90px rgba(255, 255, 255, .14);
+}
+.p-qr--big .p-qr__face { width: 62px; height: 62px; border-width: 4px; }
+
+.p-full__no { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 3px; }
+
+.p-full__x {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s4);
+  font-size: var(--t2); font-weight: 600;
+  color: rgba(255, 255, 255, .5);
+}
+/* مقبض الإغلاق — إيماءة «اسحب/انقر» المألوفة أسفل الشاشة */
+.p-full__x::after {
+  content: '';
+  width: 130px; height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .35);
+}
+
+/* ── الإشعارات والرسائل ──────────────────────────────────────────── */
+
+/* الفجوة بين أقسام الأيام؛ رأس اليوم يملك هوامشه بنفسه */
+.p-msgs   { display: flex; flex-direction: column; gap: var(--s5); }
+.p-msgs__g { display: flex; flex-direction: column; gap: var(--s2); }
+
+/**
+ * النغمة تُحقن كمتغيّرات على الصفّ، فالأيقونة والخلفية والنقطة تقرأ
+ * مصدرًا واحدًا ولا تتكرّر الكتلة تسعة عشر مرّة.
+ *
+ * `--msg-d` (لون النقطة) منفصل عن `--msg` (لون الأيقونة) لأن نغمة
+ * `pri` وحدها تختلف فيهما: النقطة `--pri` صريحة، والأيقونة `--pri-ink`
+ * الأقتم لتُقرأ فوق الصبغة.
+ *
+ * الحدّ يبقى موجودًا في الحالتين ويُشفَّف عند الجديد — إزالته تُنقص
+ * بكسلين من ارتفاع الصفّ فيرتجف الصفّ عند وسمه مقروءًا.
+ */
+.p-msg {
+  --msg: var(--pri-ink);
+  --msg-t: var(--pri-tint);
+  --msg-d: var(--msg);
+
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--p-5);
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
 }
-.p-full[hidden] { display: none; }
-.p-full { animation: none !important; }
-.p-full__box { text-align: center; }
-.p-full__n { display: block; font-size: var(--p-t3); font-weight: 700; margin-bottom: var(--p-4); }
-.p-full__no { display: block; margin-top: var(--p-4); font-size: var(--p-t2); font-weight: 700; letter-spacing: .18em; }
-.p-full__x { display: block; margin-top: 8px; font-size: var(--p-t5); color: var(--p-mute); }
 
-@media (max-width: 320px) { .p-id__facts { grid-template-columns: 1fr; } }
+/* الافتراضي الآمن: كل نوع مجهول يسقط على `message` */
+.p-msg--message,
+.p-msg--note,
+.p-msg--custody,
+.p-msg--transport,
+.p-msg--kg          { --msg: var(--pri-ink); --msg-t: var(--pri-tint); --msg-d: var(--pri); }
 
-/* =========================================================
-   شاشات فرعية.
-   ========================================================= */
+.p-msg--attendance,
+.p-msg--leave,
+.p-msg--payment     { --msg: var(--ok);    --msg-t: var(--ok-tint); }
 
-/* السجل: تبديل بين الحضور والدرجات */
-.p-seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: var(--p-3);
-  border-radius: 99px;
-  background: var(--p-alt);
-  border: 1px solid var(--p-line);
+.p-msg--alert,
+.p-msg--med,
+.p-msg--clinic,
+.p-msg--referral    { --msg: var(--bad);   --msg-t: var(--bad-tint); }
+
+.p-msg--invoice,
+.p-msg--finance,
+.p-msg--payroll     { --msg: var(--slate); --msg-t: var(--slate-tint); }
+
+.p-msg--timetable,
+.p-msg--substitution,
+.p-msg--reversal    { --msg: var(--warn);  --msg-t: var(--warn-tint); }
+
+.p-msg--certificate { --msg: var(--gold);  --msg-t: var(--gold-tint); }
+
+.p-msg__i {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px; height: 36px;
+  border-radius: var(--r1);
+  background: var(--msg-t);
+  color: var(--msg);
 }
-.p-seg a {
-  flex: 1;
-  min-height: 44px;   /* رُفِع من 40 — حد اللمس الموثوق */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 99px;
-  font-size: var(--p-t5);
-  color: var(--p-mute);
-  transition: background var(--p-fast) var(--p-ease), color var(--p-fast) var(--p-ease);
-}
-.p-seg a.is-on { background: var(--p-card); color: var(--p-ink); font-weight: 700; box-shadow: var(--p-e1); }
 
-.p-mark { flex: 0 0 auto; text-align: center; }
-.p-mark b { display: block; font-size: var(--p-t3); font-weight: 700; }
-.p-mark em { display: block; font-style: normal; font-size: var(--p-t6); color: var(--p-mute); }
+/* غير المقروء: الصفّ يأخذ الصبغة، فتُقلب الأيقونة إلى سطح البطاقة لتبرز */
+.p-msg.is-new           { background: var(--msg-t); border-color: transparent; }
+.p-msg.is-new .p-msg__i { background: var(--card); }
 
-/* الجدول */
-.p-date {
-  flex: 0 0 auto;
-  width: 46px;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: var(--p-r1);
-  background: var(--p-brand-s);
-  color: var(--p-brand-d);
-}
-.p-date b { display: block; font-size: var(--p-t3); font-weight: 700; line-height: var(--p-lh-tight); }
-.p-date em { display: block; font-style: normal; font-size: var(--p-t6); }
+.p-msg__b { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 
-.p-day {
-  margin-bottom: var(--p-2);
-  border-radius: var(--p-r2);
-  overflow: hidden;
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-}
-.p-day.is-now { border-color: var(--p-line-2); box-shadow: 0 0 0 1px var(--p-brand); }
-.p-day__h {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 10px var(--p-4);
-  background: var(--p-alt);
-  border-bottom: 1px solid var(--p-line);
-}
-.p-day__h b { flex: 1; font-size: var(--p-t4); }
-.p-day__h em {
-  font-style: normal;
-  padding: 2px 10px;
-  border-radius: 99px;
-  background: var(--p-brand);
-  color: var(--p-on-color);
-  font-size: var(--p-t6);
-  font-weight: 700;
-}
-.p-day.is-now .p-day__h { background: var(--p-brand-s); }
+.p-msg__h { display: flex; align-items: center; gap: 7px; }
+.p-msg__h b    { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; color: var(--ink); }
+.p-msg__h time { flex: none; font-size: var(--t0); color: var(--muted); }
 
-.p-slot {
+/**
+ * النقطة على `b::after` لا على الصفّ: بينهما `time` في DOM، فنقطةٌ على
+ * الحاضنة تقع خلف الوقت لا بجانب العنوان.
+ */
+.p-msg.is-new .p-msg__h b { font-weight: 700; }
+.p-msg.is-new .p-msg__h b::after {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-inline-start: 7px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--msg-d);
+}
+
+.p-msg__x { margin: 0; font-size: var(--t1); line-height: 1.6; color: var(--ink2); }
+
+/* ── الصفوف المسطّحة ─────────────────────────────────────────────── */
+
+/**
+ * خمسة أشكال بعدد أبناء مختلف (أيقونة/نصّ/وسم/تاريخ/قيمة). فلا شبكة
+ * ولا عدد أعمدة مفترض: النصّ يتمدّد والبقيّة بحجمها.
+ */
+.p-row {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 9px var(--p-4);
-  border-bottom: 1px solid var(--p-line);
-}
-.p-slot:last-child { border-bottom: 0; }
-.p-slot__n {
-  flex: 0 0 auto;
-  width: 24px; height: 24px;
-  border-radius: 8px;
-  background: var(--p-alt);
-  color: var(--p-mute);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--p-t6);
-  font-weight: 700;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
 }
 
-/* العيادة: الحساسية وفصيلة الدم أولًا */
-.p-vital { display: flex; gap: var(--p-3); margin-bottom: var(--p-3); }
-.p-vital__x {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: var(--p-4);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  border-top: 3px solid var(--p-n3);
-  box-shadow: var(--p-e1);
-}
-.p-vital__x span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-.p-vital__x b { display: block; font-size: var(--p-t3); font-weight: 700; overflow-wrap: anywhere; }
-
-/* الروضة */
-.p-kgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.p-kgrid > div { padding: 8px 10px; border-radius: var(--p-r1); background: var(--p-alt); }
-.p-kgrid span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-.p-kgrid b { display: block; font-size: var(--p-t5); font-weight: 700; }
-
-/* الإشعارات غير المقروءة */
-.p-row.is-new { background: var(--p-brand-s); }
-.p-row.is-new .p-row__t b::before {
-  content: "";
-  display: inline-block;
-  width: 7px; height: 7px;
-  margin-inline-end: 6px;
-  border-radius: 50%;
-  background: var(--p-brand);
-  vertical-align: middle;
+.p-row__i {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px; height: 34px;
+  border-radius: 11px;
+  background: var(--slate-tint);
+  color: var(--slate);
 }
 
-/* التثبيت */
-.p-steps { display: grid; gap: var(--p-3); margin-bottom: var(--p-4); }
-.p-steps > div { display: flex; align-items: center; gap: var(--p-3); }
-.p-steps b {
-  flex: 0 0 auto;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--p-brand);
-  color: var(--p-on-color);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--p-t5);
-  font-weight: 700;
-}
-.p-steps span { font-size: var(--p-t5); color: var(--p-ink-2); line-height: var(--p-lh-read); }
+/* مستقلّ عن `.p-row` عمدًا: يظهر في الجدول داخل `.p-slot` بلا صفّ حوله */
+.p-row__t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.p-row__t > b    { font-size: var(--t2); font-weight: 600; color: var(--ink); }
+.p-row__t > span { font-size: var(--t0); color: var(--muted); }
 
-/* صورة ولي الأمر */
-/* الصورة الشخصية.
-   **القصّ كان على الحاضنة**، فالشارة الجالسة على حافة الدائرة تُقصّ نصفها.
-   القصّ الآن على الصورة نفسها، والحاضنة تترك الشارة كاملة خارج الحافة. */
-.p-av {
-  position: relative;
-  display: inline-block;
-  width: 78px; height: 78px;
-  cursor: pointer;
-}
-.p-av img, .p-av svg {
-  display: block; width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  background: var(--p-brand-s);
-  box-shadow: var(--p-e2);
-}
-.p-av__cam {
-  position: absolute;
-  inset-inline-end: -2px; bottom: -2px;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--p-brand);
-  color: var(--p-on-color);
-  display: flex; align-items: center; justify-content: center;
-  border: 3px solid var(--p-card);
-  box-shadow: var(--p-e1);
-  transition: transform var(--p-fast) var(--p-ease);
-}
-.p-av:active .p-av__cam { transform: scale(.9); }
+/* في «حسابي» لا `b` في الصفّ — التسمية وحدها، فترقّى لتصير هي العنوان */
+.p-row__t > span:only-child { font-size: 13px; font-weight: 600; color: var(--ink); }
 
-/* أثناء الرفع: الصورة الجديدة معروضة أصلًا، والشارة وحدها تقول «جارٍ» */
-.p-av.is-saving img { opacity: .72; }
-@media (prefers-reduced-motion: no-preference) {
-  .p-av.is-saving .p-av__cam { animation: p-pulse-s 1s ease-in-out infinite; }
-}
-@keyframes p-pulse-s { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+/**
+ * القيمة الجانبية: التصميم يجعلها باهتة، لكنها هنا محتوى يُقرأ (جوّال،
+ * هوية، تاريخ زيارة) لا تعليقًا على عنوان. فرُفعت درجةً إلى `--ink2`.
+ */
+.p-row__e { flex: none; font-size: var(--t1); font-weight: 600; color: var(--ink2); }
 
-/* التتبع */
-.p-trk { border-radius: var(--p-r3); overflow: hidden; background: var(--p-card); border: 1px solid var(--p-line); box-shadow: var(--p-e2); }
-.p-trk__head { display: flex; align-items: baseline; gap: 8px; padding: var(--p-3) var(--p-4); }
-.p-trk__head b { font-size: var(--p-t4); }
-.p-trk__head span { font-size: var(--p-t6); color: var(--p-mute); }
-.p-trk__off { margin-inline-start: auto; color: var(--p-warn) !important; font-weight: 700; }
-.p-trk__map { height: 300px; background: var(--p-alt); }
+/**
+ * نغمتا الرقاقة الأيقونية.
+ *
+ * مؤهَّلتان بـ`.p-body` عمدًا: هما مُعدِّلتان تُلصقان على رقاقة يملكها
+ * مكوّن آخر (`.p-linkcard__i`) بالتخصّصية نفسها (0,1,0) — فلولا التأهيل
+ * لحسم ترتيبُ المصدر لا المعنى، وسقطت النغمة إن كُتب المكوّن بعدها.
+ */
+.p-body .p-i--gold { background: var(--gold-tint); color: var(--gold); }
+
+/* «n2» اسمٌ موروث من لوحة قديمة؛ موضعها الوحيد اليوم تقرير الروضة
+   اليومي — ونغمته في التصميم `ok` لا الكحليّ الذي سُمّيت به. */
+.p-body .p-i--n2   { background: var(--ok-tint);   color: var(--ok); }
+/* ═══════════════════════════════════════════════════════════════════
+   بقيّة الشاشات: التتبّع · شريط المسار · الجدول · الشهادات ·
+   حسابي · بطاقات الروابط · الشاشات العارية (الدخول والتثبيت والمنع)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── التتبّع الحي ─────────────────────────────────────────────────── */
+
+.p-trk {
+  overflow: hidden;
+  margin-bottom: var(--s4);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r5);
+  box-shadow: var(--shadow);
+}
+
+.p-trk__head {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 14px var(--s4);
+}
+
+/* النقطة النابضة في التصميم لا عنصر لها في الـDOM، وهي زخرفة لا خبر —
+   فتُرسَم بالزائف بدل تعديل PHP. */
+.p-trk__head::before {
+  content: ""; flex: none;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--warn);
+  --hc: color-mix(in srgb, var(--warn) 55%, transparent);
+  animation: p-halo 2s ease-out infinite;
+}
+
+.p-trk__head b { font-size: var(--t3); font-weight: 700; }
+.p-trk__head > span { font-size: var(--t1); color: var(--muted); }
+
+/**
+ * فخّ تخصّصية داخليّ: القاعدة أعلاه `.p-trk__head > span` تخصّصيتها (0,2,1)،
+ * و`.p-trk__off` وحدها (0,1,0) — بل حتى `.p-trk__head > .p-trk__off` (0,2,0)
+ * تخسر أمامها. فيُذكر العنصر ليتساويا، ويحسم الترتيب لصالح المتأخّر.
+ * وبلا هذا يخرج «انقطع البث» رماديًّا كأنه سطر ثانوي لا إنذار.
+ */
+.p-trk__head > span.p-trk__off {
+  margin-inline-start: auto;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--bad-tint); color: var(--bad);
+  font-size: var(--t0); font-weight: 700;
+}
+
+/* ارتفاع صريح لا نسبيّ: Leaflet لا يرسم شيئًا في صندوق ارتفاعه صفر، وليس
+   للخريطة محتوًى يمدّها. والسقف يُبقي اللوح السفلي في الشاشة بلا تمرير —
+   وهو أهمّ من الخريطة عند الأب. */
+.p-trk__map { height: clamp(240px, 44vh, 400px); background: var(--map-bg); }
 .p-trk__map.is-off { opacity: .5; }
-.p-trk__foot { display: flex; align-items: center; gap: var(--p-3); padding: var(--p-4); border-top: 1px solid var(--p-line); }
-.p-trk__ring { position: relative; width: 58px; height: 58px; flex: 0 0 auto; }
+
+.p-trk__foot {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s4);
+  border-top: 1px solid var(--line);
+}
+
+.p-trk__ring { position: relative; flex: none; width: 58px; height: 58px; }
+
+/**
+ * لونا الحلقة مكتوبان في PHP سمتَي عرض (`stroke="#E5E1DA"` و`"#5170FF"`)
+ * من الهوية الزرقاء القديمة. وسمة العرض أضعف من أي قاعدة CSS، فتُغطّى
+ * هنا بلا لمس سطر PHP واحد.
+ */
+.p-trk__ring circle { stroke: var(--line); }
+.p-trk__ring circle + circle { stroke: var(--warn); }
+
 .p-trk__ring b {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--p-t5); font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--warn);
+  font-size: var(--t4); font-weight: 700; line-height: 1;
 }
+/* «دقيقة/دقائق» يحقنها track.js داخل نفس الـ<b> */
+.p-trk__ring b span { font-size: var(--t0); font-weight: 600; }
+
 .p-trk__t { flex: 1; min-width: 0; }
-.p-trk__t b { display: block; font-size: var(--p-t4); }
-.p-trk__t span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-.p-trk__stops { padding: 0 var(--p-4) var(--p-4); }
+.p-trk__t b { display: block; font-size: var(--t3); font-weight: 700; }
+.p-trk__t span { display: block; font-size: var(--t1); color: var(--muted); }
 
-/* من يدخل يُعرَف تلقائيًا — الشارات تطمئنه أنه في المكان الصحيح */
-.p-who4 {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: var(--p-4);
-  padding-top: var(--p-4);
-  border-top: 1px solid var(--p-line);
+/**
+ * محتوى شريط النقاط يبنيه `assets/track.js`: لكل نقطة `<span>` فيه `<i>`
+ * ثم `<span>`، وحالتاه `is-past` و`is-mine`. فالمحدِّدات هنا على البنية،
+ * وكلّها محصورة داخل `.p-trk__stops` لأن أسماءها ليست ملكي.
+ */
+.p-trk__stops {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding: 0 var(--s4) var(--s4);
+  scrollbar-width: none;
 }
-.p-who4 span {
-  padding: 4px 12px;
-  border-radius: 99px;
-  background: var(--p-alt);
-  color: var(--p-mute);
-  font-size: var(--p-t6);
-  font-weight: 700;
+.p-trk__stops::-webkit-scrollbar { display: none; }
+
+.p-trk__stops > span {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  padding: 6px 11px; border-radius: 999px;
+  background: var(--card2); color: var(--muted);
+  font-size: var(--t0); font-weight: 700; white-space: nowrap;
+}
+.p-trk__stops > span > i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+
+.p-trk__stops > span.is-past { background: var(--ok-tint); color: var(--ok); }
+.p-trk__stops > span.is-past > i { background: var(--ok); }
+
+/* نقطة الأب: تُميَّز بالحلقة لا بالحجم — الصفّ يُمرَّر أفقيًّا فلا يُوثق
+   بالموضع وحده. */
+.p-trk__stops > span.is-mine {
+  background: var(--warn-tint); color: var(--warn);
+  box-shadow: 0 0 0 1.5px var(--warn);
+}
+.p-trk__stops > span.is-mine > i { background: var(--warn); }
+
+/* ── شريط المسار في بطل «في الباص» ───────────────────────────────── */
+
+/* لا يُصيَّر إلا داخل بطل الباص، فنغمته الصفراء ثابتة لا متغيّرة بالحالة. */
+.p-route { position: relative; margin-top: var(--s4); }
+
+/* الخيط مُطلَق بنفسه: لو أُطلق الجزء المقطوع على `.p-route` امتدّ ارتفاعه
+   إلى أسفل أسماء المحطّات بدل أن يبقى في الخيط. */
+.p-route__line { position: relative; height: 5px; border-radius: 999px; background: var(--line); }
+.p-route__line i {
+  position: absolute; inset-block: 0; inset-inline-start: 0;
+  width: 62%; border-radius: 999px; background: var(--warn);
 }
 
-/* =========================================================
-   الشهادات — يراها الأب ويحفظها ويرسلها لأهله.
-   ========================================================= */
+/* الباص يقف عند رأس المقطوع (٦٢٪)، والهامش السالب يُوسّطه على النقطة.
+   `margin-inline-start` لا `transform` لأن الإزاحة تنقلب مع الاتجاه. */
+.p-route__bus {
+  position: absolute; top: -13px;
+  inset-inline-start: 62%; margin-inline-start: -15px;
+  display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 11px;
+  background: var(--warn); color: var(--card);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--warn) 40%, transparent);
+}
 
+.p-route__stops {
+  display: flex; justify-content: space-between;
+  margin-top: var(--s3);
+  font-size: var(--t0); font-weight: 700; color: var(--ink2);
+}
+/* الوسط هو «الآن» — تلوينه يجعل موضع الباص يُقرأ بلا تفكير. */
+.p-route__stops span:nth-child(2) { color: var(--warn); }
+
+/* ── الجدول الدراسي ──────────────────────────────────────────────── */
+
+/* بطاقة تاريخ الاختبار: عمود ضيّق ثابت العرض حتى لا يرقص عمود العناوين
+   بين صفّ ذي يوم من رقمين وآخر من رقم. */
+.p-date {
+  flex: none; width: 46px; padding: 6px 0; text-align: center;
+  border-radius: var(--r1);
+  background: var(--pri-tint); color: var(--pri-ink);
+}
+.p-date b { display: block; font-size: var(--t3); font-weight: 700; line-height: 1.15; }
+.p-date em { display: block; font-style: normal; font-size: var(--t0); font-weight: 600; }
+
+/* صفّ الحصّة داخل قسم اليوم. الفاصل سفليّ لا علويّ لأن الصفّ الأخير هو
+   آخر أبناء القسم، فيُنزع عنه وحده. */
+.p-slot {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: 10px var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+.p-slot:last-child { border-bottom: 0; }
+
+.p-slot__n {
+  display: grid; place-items: center;
+  flex: none; width: 26px; height: 26px;
+  border-radius: 9px;
+  background: var(--card2); color: var(--muted);
+  font-size: var(--t1); font-weight: 700;
+}
+
+/* ── الشهادات ────────────────────────────────────────────────────── */
+
+/* الشهادة الواحدة: SVG بنسبة عرض ثابتة — السقف يمنعها من الانتفاخ على
+   الشاشات العريضة، و`height:auto` يبقيها متجاوبة تحته. */
 .p-cert {
-  max-width: 620px;
-  margin-inline: auto;
-  border-radius: var(--p-r3);
+  max-width: 620px; margin: 0 auto var(--s4);
   overflow: hidden;
-  box-shadow: var(--p-e3);
-  margin-bottom: var(--p-3);
+  border: 1px solid var(--line); border-radius: var(--r4);
+  box-shadow: var(--shadow);
 }
 .p-cert svg { display: block; width: 100%; height: auto; }
 
-.p-certs { display: grid; gap: var(--p-2); }
-
-.p-certcard {
-  display: flex;
-  align-items: center;
-  gap: var(--p-3);
-  padding: var(--p-3) var(--p-4);
-  border-radius: var(--p-r2);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-}
-.p-certcard__i {
-  width: 40px; height: 40px; flex: 0 0 auto;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
-}
-.p-certcard__t { flex: 1; min-width: 0; }
-.p-certcard__t b { display: block; font-size: var(--p-t4); }
-.p-certcard__t span { display: block; font-size: var(--p-t6); color: var(--p-mute); }
-.p-certcard__d { flex: 0 0 auto; font-size: var(--p-t6); color: var(--p-faint); }
-
-/* لون البطاقة يتبع قالب الشهادة — فيعرفها الأب قبل فتحها */
-.p-certcard--royal .p-certcard__i { background: linear-gradient(140deg, #111A44, #14574E); }
-.p-certcard--classic .p-certcard__i { background: linear-gradient(140deg, #9A7B33, #C0A055); }
-.p-certcard--modern .p-certcard__i { background: linear-gradient(140deg, #1B287A, #7B92FF); }
-/* الياقوتية — القالب الرابع كان يُصدَر ويُعرض ببطاقة بلا لون */
-.p-certcard--sapphire .p-certcard__i { background: linear-gradient(140deg, #16255C, #5C6E96); }
-
 @media print {
-  .p-top, .p-tabs, .p-back, .p-h1, .p-sub, .p-btn { display: none !important; }
+  .p-cert { max-width: none; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
   @page { size: A4 landscape; margin: 0; }
-  .p-main { padding: 0 !important; }
-  .p-cert { box-shadow: none; border-radius: 0; }
 }
 
-/* ═══════════════════ طبقة الزجاج «أميثيست» (v1) ═══════════════════
-   خلفية بيضاء · بطاقات زجاجية بنفسجية شفّافة (frosted) · عمق ثابت
-   بين 2D و3D (لمعان علوي داخلي + ظلال بنفسجية)، بلا حركة زائدة.
-   تُطبّق على أصناف البطاقات القائمة فلا ينكسر أي قالب. */
-.p-card, .p-list, .p-num, .p-num--att, .p-auth__box, .p-trk, .p-pay,
-/* الحقل خرج من هذه المجموعة: **البطاقة تطفو والحقل يغور**. إعطاؤه ظلّ
-   بطاقة جعل النموذج أربع بطاقات فارغة فوق بعضها — وهو ما جعله يبدو ثقيلًا
-   بلا سبب ظاهر. */
-.p-id, .p-day, .p-certcard, .p-state, .p-empty, .p-due {
-  background: var(--p-card);
-  border: 1px solid var(--p-glass-brd);
-  box-shadow: var(--p-e1), var(--p-hi);
+.p-certs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+
+/* على `<a>` — فيؤهَّل بعنصره وإلا ورث لون النصّ من `.p-body a`. */
+.p-body a.p-certcard {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 10px;
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r3);
+  box-shadow: var(--shadow-sm);
 }
 
-/* بطاقة الابن النشط: زجاج لافندر شفّاف بدل الباستيل القديم */
-.p-kid--0.is-on, .p-kid--1.is-on, .p-kid--2.is-on,
-.p-kid--3.is-on, .p-kid--4.is-on, .p-kid--5.is-on {
-  background: var(--p-card);
-  border-color: var(--p-line-2);
-}
-
-/* عمق ثابت (2.5D) على البلاطات الملوّنة والصور: لمعان علوي + ظل بنفسجي */
-.p-gate, .p-kid__pic {
-  box-shadow: var(--p-e1);
-}
-:root[data-theme="dark"] .p-gate,
-:root[data-theme="dark"] .p-kid__pic {
-  box-shadow: var(--p-e1);
-}
-
-/* الورق لا يلمع — العمق من فرق السطحين والظلّ وحدهما */
-.p-sc, .p-hero, .p-trk { position: relative; }
-
-/* ═══════════════ شاشة اليوم الجديدة: البطل + الخط الزمني ═══════════════ */
-
-/* ---------- البطل: أين ابني الآن (يتشكّل حسب الحالة) ---------- */
-.p-hero {
-  position: relative; overflow: hidden;
-  margin: 0 0 var(--p-4);
-  padding: var(--p-5);
-  border-radius: var(--p-r4);
-  color: #fff;
-  box-shadow: var(--p-e2);
-}
-/* ثلاث حالات، ثلاثة أعماق من العائلة نفسها: كلما اقترب الطفل من البيت هدأ السطح */
-.p-hero--bus    { background: var(--p-deep-3); }
-.p-hero--school { background: var(--p-deep-2); }
-.p-hero--home   { background: var(--p-deep-1); }
-.p-hero__sheen { display: none; }
-.p-hero > * { position: relative; }
-.p-hero__top { display: flex; align-items: center; gap: var(--p-2); margin-bottom: var(--p-4); }
-.p-hero__badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: var(--p-r4);
-  background: rgba(255,255,255,.18); font-size: var(--p-t5); font-weight: 700;
-}
-.p-hero__badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--p-gold);
-  box-shadow: 0 0 0 0 rgba(169,128,59,.75); animation: p-pulse 2s infinite; }
-@keyframes p-pulse { 0%{box-shadow:0 0 0 0 rgba(169,128,59,.75)} 70%{box-shadow:0 0 0 9px rgba(169,128,59,0)} 100%{box-shadow:0 0 0 0 rgba(169,128,59,0)} }
-.p-hero__time { margin-inline-start: auto; font-size: var(--p-t5); opacity: .82; font-weight: 600; }
-.p-hero__h { font-size: var(--p-t2); font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px; }
-.p-hero__sub { font-size: var(--p-t4); opacity: .84; margin: 0; }
-/* شريط مسار الباص */
-.p-route { margin-top: var(--p-5); }
-.p-route__line { height: 4px; border-radius: var(--p-r4); background: rgba(255,255,255,.22); position: relative; overflow: hidden; }
-.p-route__line i { position: absolute; inset-block: 0; inset-inline-start: 0; width: 62%; border-radius: var(--p-r4);
-  background: var(--p-shine); }
-.p-route__bus { position: absolute; margin-top: -22px; inset-inline-start: 62%; width: 28px; height: 28px; border-radius: 9px;
-  background: #fff; color: var(--p-deep-2); display: grid; place-items: center; transform: translateX(50%); box-shadow: var(--p-e1); }
-.p-route__stops { display: flex; justify-content: space-between; margin-top: var(--p-3); font-size: var(--p-t6); opacity: .78; font-weight: 600; }
-.p-hero__cta { margin-top: var(--p-4); display: flex; gap: var(--p-2); }
-.p-body a.p-hero__btn { flex: 1; text-align: center; padding: 12px; border-radius: var(--p-r2); font-size: var(--p-t4); font-weight: 700;
-  background: rgba(255,255,255,.18); color: #FFFFFF; }
-.p-body a.p-hero__btn.is-solid { background: #fff; color: var(--p-deep-1); }
-/* لوحة المدرسة */
-.p-hero__facts { margin-top: var(--p-5); display: flex; align-items: center; gap: var(--p-4); }
-
-/* ---------- نداء الانصراف: الفعل الوحيد الذي يعني شيئًا وابنك في المدرسة ---------- */
-.p-hero__call {
-  margin-top: var(--p-4);
-  padding: var(--p-3) var(--p-4);
-  border-radius: var(--p-r2);
-  background: rgba(255, 255, 255, .12);
-}
-.p-hero__call-s {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: var(--p-t5); font-weight: 700;
-}
-.p-hero__call-s i {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--p-gold);
-  box-shadow: 0 0 0 0 rgba(169, 128, 59, .7);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .p-hero__call-s i { animation: p-pulse 2s infinite; }
-}
-.p-hero__call p { margin: 4px 0 var(--p-3); font-size: var(--p-t5); opacity: .82; }
-.p-hero__call .p-hero__btn { width: 100%; }
-/* الزرّ داخل نموذج: `button` لا `a` — والقاعدة تشمل الاثنين */
-.p-body button.p-hero__btn {
-  border: 0; font-family: inherit; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; min-height: 50px;
-  padding: 13px; border-radius: var(--p-r2);
-  font-size: var(--p-t4); font-weight: 700;
-  background: rgba(255, 255, 255, .18); color: #FFFFFF;
-}
-.p-body button.p-hero__btn.is-solid { background: #FFFFFF; color: var(--p-deep-1); }
-.p-body button.p-hero__btn:active { transform: scale(.985); }
-.p-hero__ring { position: relative; width: 56px; height: 56px; flex: 0 0 auto; }
-.p-hero__ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: var(--p-t5); font-weight: 700; }
-.p-hero__list { flex: 1; }
-.p-hero__list div { display: flex; justify-content: space-between; padding: 3px 0; font-size: var(--p-t5); opacity: .92; }
-.p-hero__list b { font-weight: 700; }
-
-/* ---------- عنوان قسم ---------- */
-.p-sect { display: flex; align-items: baseline; justify-content: space-between; margin: var(--p-5) 2px var(--p-3); }
-.p-sect__h { font-size: var(--p-t3); font-weight: 700; }
-/* الطرف الثاني من رأس القسم: تعليقٌ هادئ أيًّا كان عنصره — و`a` وحدها
-   تحتاج المحدِّد المؤهَّل لتغلب `body.p-body a { color: inherit }`. */
-.p-sect__a { font-size: var(--p-t5); color: var(--p-faint); font-weight: 600; }
-.p-body a.p-sect__a { color: var(--p-brand-ink); }
-
-/* ═════ «خيط اليوم» — قلب الشاشة ═════
-
-   كان الخط الزمني بطاقةً لكل حدث: ستّ بطاقات متساوية الوزن تُقرأ سطرًا سطرًا،
-   والأب يريد جوابًا في نصف ثانية. الخيط يحذف الصناديق ويُبقي الخطّ والنقاط،
-   فيُقرأ **موضع** الطفل من موضع النقطة قبل أن تُقرأ كلمة:
-
-   - `is-done` ما مضى — نقطة مصمتة بلون الهوية وخيط ملوّن بعدها.
-   - `is-now`  أين هو الآن — النقطة الوحيدة النحاسية، وهالتها تتنفّس.
-   - `is-next` ما بقي — نقطة مفرَّغة ونصّ خفيف: وعد لا خبر.
-
-   والنحاس هنا **مرّة واحدة في الشاشة كلها** — لو ظهر مرّتين لتوقّف عن كونه
-   إشارة وصار زينة. */
-
-.p-thr { margin: 0 0 var(--p-4); padding: 0; list-style: none; }
-
-.p-thr__i {
-  display: flex;
-  gap: var(--p-3);
-  padding-bottom: 18px;
-}
-.p-thr__i:last-child { padding-bottom: 0; }
-
-.p-thr__d {
-  position: relative;
-  flex: 0 0 auto;
-  width: 15px; height: 15px;
-  margin-block-start: 4px;
-  border-radius: 50%;
-  border: 2px solid var(--p-line-2);
-  background: var(--p-bg);
-}
-/* الخيط الواصل: من النقطة إلى ما بعدها — ومركزه محايد الاتجاه */
-.p-thr__d::after {
-  content: "";
-  position: absolute;
-  inset-block-start: 17px;
-  height: 26px;
-  width: 2px;
-  inset-inline-start: 50%;
-  margin-inline-start: -1px;
-  background: var(--p-line-2);
-}
-.p-thr__i:last-child .p-thr__d::after { display: none; }
-
-.p-thr__b { min-width: 0; padding-block-start: 1px; }
-.p-thr__b b {
-  display: block;
-  font-size: var(--p-t4);
-  font-weight: 600;
-  line-height: var(--p-lh-snug);
-}
-.p-thr__b span {
-  display: block;
-  font-size: var(--p-t5);
-  color: var(--p-faint);
-  line-height: var(--p-lh-ui);
-}
-.p-thr__b time { font-variant-numeric: tabular-nums; }
-
-.p-thr__i.is-done .p-thr__d { border-color: var(--p-brand); background: var(--p-brand); }
-.p-thr__i.is-done .p-thr__d::after { background: var(--p-brand); opacity: .38; }
-
-.p-thr__i.is-now .p-thr__d {
-  border-color: var(--p-gold);
-  background: var(--p-gold);
-  box-shadow: 0 0 0 5px var(--p-gold-s);
-}
-.p-thr__i.is-now .p-thr__b b { color: var(--p-gold); font-weight: 700; }
-
-.p-thr__i.is-next .p-thr__b b { color: var(--p-faint); font-weight: 400; }
-
-/* الهالة تتنفّس — إشارة واحدة حيّة في الشاشة، وتتوقّف لمن طلب سكون الحركة */
-@media (prefers-reduced-motion: no-preference) {
-  .p-thr__i.is-now .p-thr__d { animation: p-breathe 2.6s ease-in-out infinite; }
-}
-@keyframes p-breathe {
-  0%, 100% { box-shadow: 0 0 0 5px var(--p-gold-s); }
-  50%      { box-shadow: 0 0 0 9px var(--p-gold-s); }
-}
-
-/* ---------- بطاقة رابط ثانوية ---------- */
-.p-body a.p-linkcard { display: flex; align-items: center; gap: var(--p-3); margin-bottom: var(--p-3);
-  padding: 14px 15px; border-radius: var(--p-r2); background: var(--p-card); border: 1px solid var(--p-glass-brd);
-  box-shadow: var(--p-e1), var(--p-hi);color: inherit; }
-.p-linkcard__i { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 12px; display: grid; place-items: center;
-  box-shadow: var(--p-e1); }
-.p-i--gold { background: var(--p-gold); color: var(--p-on-color); }
-.p-i--n2 { background: var(--p-n2); color: var(--p-on-color); }
-.p-linkcard__t { flex: 1; min-width: 0; }
-.p-linkcard__t b { display: block; font-size: var(--p-t4); font-weight: 700; }
-.p-linkcard__t span { display: block; font-size: var(--p-t5); color: var(--p-mute); }
-.p-linkcard__e { color: var(--p-faint); }
-
-/* ═══════════════ السجل: ملخص حيّ + شبكة الحضور + أشرطة الدرجات ═══════════════
-   الأب لا يقرأ جدولًا: رقم واحد كبير في حلقة، ثم لمحة بصرية لكل يوم/مادة. */
-
-/* ═══════════ لوحة السجل ═══════════
-
-   كانت حلقةً بقطر 88px إلى جوار أربع بلاطات رمادية، الرقم في طرفها
-   والوسم في الطرف الآخر — فانفتح بينهما عرض البلاطة كلّه. والحلقة تقول
-   رقمًا واحدًا وتأخذ ثلث الشاشة، ولا تقول **ممّ تركّب**.
-
-   البديل: رقمٌ بطلٌ وحكمٌ بجانبه، ثم **شريط مكدّس** يُظهر التركيب الذي
-   تعجز الحلقة عنه، ثم أربعة مفاتيح مضغوطة الرقم فيها ملاصق لاسمه. */
-
-.p-score {
-  padding: var(--p-5) var(--p-4) var(--p-4);
-  margin-bottom: var(--p-4);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-}
-.p-score__top { display: flex; align-items: baseline; gap: var(--p-3); }
-.p-score__n {
-  flex: 0 0 auto;
-  font-size: var(--p-t0);
-  font-weight: 700;
-  line-height: var(--p-lh-tight);
-  letter-spacing: -.02em;
-  color: var(--p-brand);
-}
-.p-score__n .p-cur { color: inherit; opacity: .55; }
-.p-score__t { min-width: 0; }
-.p-score__t b {
-  display: block; font-size: var(--p-t4); font-weight: 700;
-  line-height: var(--p-lh-snug);
-}
-.p-score__t span {
-  display: block; font-size: var(--p-t5); color: var(--p-mute);
-  line-height: var(--p-lh-ui); margin-top: 2px;
-}
-
-/* الشريط المكدّس: التركيب يُقرأ من الأطوال قبل الأرقام */
-.p-split {
-  display: flex; gap: 2px; margin-top: var(--p-4);
-  height: 10px; border-radius: 99px; overflow: hidden;
-  background: var(--p-alt);
-}
-.p-split i { display: block; flex: 0 0 auto; width: var(--w, 0%); }
-.p-split .is-ok      { background: var(--p-ok); }
-.p-split .is-warn    { background: var(--p-warn); }
-.p-split .is-bad     { background: var(--p-n3); }
-.p-split .is-excused { background: var(--p-excused); }
-
-/* المفاتيح: النقطة فالاسم فالرقم — ثلاثتها ملتصقة في مجموعة واحدة */
-.p-tally {
-  display: flex; flex-wrap: wrap; gap: var(--p-2) var(--p-4);
-  margin-top: var(--p-3);
-}
-.p-tally__i {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: var(--p-t5); color: var(--p-mute);
-}
-.p-tally__i i { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
-.p-tally__i b {
-  font-weight: 700; color: var(--p-ink);
-  font-variant-numeric: tabular-nums;
-}
-.p-tally__i.is-ok      i { background: var(--p-ok); }
-.p-tally__i.is-warn    i { background: var(--p-warn); }
-.p-tally__i.is-bad     i { background: var(--p-n3); }
-.p-tally__i.is-excused i { background: var(--p-excused); }
-
-/* شريط الأيام — الأعمدة بعدد الأيام لا خمسة عشر دائمًا: أحد عشر يومًا
-   في شبكة خمسة عشر تترك ربع البطاقة فارغًا فتبدو مكسورة. */
-.p-days {
-  display: grid;
-  grid-template-columns: repeat(var(--n, 15), 1fr);
-  gap: 5px;
-  padding: var(--p-4);
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-}
-.p-cell { aspect-ratio: 1; border-radius: 4px; background: var(--p-alt); }
-.p-cell--ok      { background: var(--p-ok); }
-.p-cell--warn    { background: var(--p-warn); }
-.p-cell--late    { background: var(--p-n3); }
-.p-cell--excused { background: var(--p-excused-s); box-shadow: inset 0 0 0 1.5px var(--p-excused); }
-
-/* الدليل يعرض ما ظهر فعلًا — لونٌ في الدليل لا يقابله مربّع تشويشٌ لا إرشاد */
-.p-legend {
-  display: flex; flex-wrap: wrap; gap: var(--p-2) var(--p-4);
-  margin: var(--p-3) 2px 0;
-  font-size: var(--p-t6); color: var(--p-mute);
-}
-.p-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.p-legend i { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
-
-/* أشرطة الدرجات — طول الشريط ولونه يحملان التقدير قبل الرقم */
-.p-bars { display: grid; gap: var(--p-2); }
-.p-bar {
-  padding: var(--p-3) var(--p-4); border-radius: var(--p-r2);
-  background: var(--p-card); border: 1px solid var(--p-glass-brd);
-  box-shadow: var(--p-e1), var(--p-hi);
-}
-.p-bar__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-.p-bar__top b { font-size: var(--p-t4); font-weight: 700; overflow-wrap: anywhere; }
-.p-bar__top .p-nm { font-size: var(--p-t3); font-weight: 700; color: var(--p-brand-ink); }
-.p-bar__track { height: 9px; border-radius: 99px; background: var(--p-alt); overflow: hidden; box-shadow: inset 0 1px 2px rgba(13, 26, 23, .10); }
-.p-bar__track i { display: block; height: 100%; border-radius: 99px; background: var(--p-brand); }
-.p-bar__sub { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 7px; font-size: var(--p-t6); color: var(--p-mute); }
-.p-bar__sub em { font-style: normal; font-weight: 700; color: var(--p-brand-ink); }
-.p-bar--ex .p-bar__track i { background: var(--p-ok); }
-.p-bar--ex .p-bar__top .p-nm, .p-bar--ex .p-bar__sub em { color: var(--p-ok); }
-.p-bar--gd .p-bar__track i { background: var(--p-brand); }
-.p-bar--ps .p-bar__track i { background: var(--p-warn); }
-.p-bar--ps .p-bar__top .p-nm, .p-bar--ps .p-bar__sub em { color: var(--p-warn); }
-.p-bar--fl .p-bar__track i { background: var(--p-n3); }
-.p-bar--fl .p-bar__top .p-nm, .p-bar--fl .p-bar__sub em { color: var(--p-n3); }
-
-/* ═══════════════ الرسائل — بطاقات محادثة بأيقونة مصدر ملوّنة ═══════════════ */
-/* ═══════════ الإشعارات والرسائل: قائمة واحدة بمجموعات يومية ═══════════
-
-   كانت ثماني بطاقات طافية متطابقة، لكلٍّ ظلّها ومربّعها الأخضر المصمت —
-   فصار **المربّع** أبرز ما في الشاشة، وهو أقلّ ما فيها معنى. والأسوأ أن
-   خريطة الأيقونات كانت تعرف سبعة أنواع من ستة عشر، فسقط الباقي على
-   «ساعة» واحدة: ثماني ساعات متطابقة لا تفرّق شهادةً عن دواء.
-
-   الآن: **سطح واحد لكل يوم** وصفوف يفصلها خيط شعرة. الأيقونة دائرة
-   مصبوغة بلون نوعها لا مربّع مصمت — تُميّز بلا أن تصرخ. وغير المقروء
-   نقطة نحاسية في الحافة الخلفية ووزنٌ أثقل، لا شريطٌ يخرج من البطاقة. */
-
-.p-msgs { display: grid; gap: var(--p-5); }
-
-.p-day-h {
-  display: block;
-  margin: 0 var(--p-2) var(--p-2);
-  font-size: var(--p-t6);
-  font-weight: 700;
-  color: var(--p-faint);
-  letter-spacing: .06em;
-}
-
-.p-msgs__g {
-  border-radius: var(--p-r3);
-  background: var(--p-card);
-  border: 1px solid var(--p-line);
-  box-shadow: var(--p-e1);
-  overflow: hidden;
-}
-
-.p-msg {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--p-3);
-  padding: var(--p-3) var(--p-4);
-}
-/* الخيط الفاصل يبدأ من بعد الأيقونة — فيُقرأ الصفّان مجموعةً لا صندوقين */
-.p-msg + .p-msg::before {
-  content: "";
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: calc(var(--p-4) + 38px + var(--p-3)) var(--p-4);
-  height: 1px;
-  background: var(--p-line-2);
-  opacity: .6;
-}
-
-.p-msg__i {
-  width: 38px; height: 38px; flex: 0 0 auto;
-  border-radius: 50%;
+/* المعاينة تحاكي ورق الشهادة نفسه — وهي أحد الموضعين المسموح فيهما
+   بالتدرّج لأنها تمثّل تصميمًا حقيقيًّا لا زينة. */
+.p-certcard__i {
   display: grid; place-items: center;
-  background: var(--p-alt);
-  background: color-mix(in srgb, var(--p-msg-c, var(--p-brand)) 14%, transparent);
-  color: var(--p-msg-c, var(--p-brand));
-  box-shadow: none;
+  height: 112px; border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(150deg, var(--gold-tint), var(--card));
+  color: var(--gold);
 }
+/* الختم خلف الأيقونة: كلاهما في خلية الشبكة نفسها فيتراكبان بلا إطلاق
+   ولا عنصر إضافي، والأيقونة أحدث في الترتيب فتعلو. */
+.p-certcard__i::before {
+  content: ""; grid-area: 1 / 1;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: currentColor; opacity: .22;
+}
+.p-certcard__i svg { grid-area: 1 / 1; }
 
-/* لون النوع — رمز واحد يقود الدائرة كلها */
-.p-msg--message, .p-msg--note, .p-msg--custody,
-.p-msg--transport, .p-msg--kg          { --p-msg-c: var(--p-brand); }
-.p-msg--certificate                     { --p-msg-c: var(--p-gold); }
-.p-msg--attendance, .p-msg--leave,
-.p-msg--payment                         { --p-msg-c: var(--p-ok); }
-.p-msg--alert, .p-msg--med,
-.p-msg--clinic, .p-msg--referral        { --p-msg-c: var(--p-n3); }
-.p-msg--invoice, .p-msg--finance,
-.p-msg--payroll                         { --p-msg-c: var(--p-n2); }
-.p-msg--timetable, .p-msg--substitution,
-.p-msg--reversal                        { --p-msg-c: var(--p-warn); }
+/* لون المعاينة يتبع قالب الشهادة، فيعرفها الأب قبل فتحها. */
+.p-certcard--royal    .p-certcard__i { background: linear-gradient(150deg, var(--ok-tint),    var(--card)); color: var(--ok); }
+.p-certcard--classic  .p-certcard__i { background: linear-gradient(150deg, var(--gold-tint),  var(--card)); color: var(--gold); }
+.p-certcard--modern   .p-certcard__i { background: linear-gradient(150deg, var(--pri-tint),   var(--card)); color: var(--pri); }
+.p-certcard--sapphire .p-certcard__i { background: linear-gradient(150deg, var(--slate-tint), var(--card)); color: var(--slate); }
 
-.p-msg__b { flex: 1; min-width: 0; }
-.p-msg__h { display: flex; align-items: baseline; gap: var(--p-2); }
-.p-msg__h b {
-  font-size: var(--p-t4); font-weight: 600; line-height: var(--p-lh-snug);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.p-msg__h time {
-  margin-inline-start: auto; flex: 0 0 auto;
-  font-size: var(--p-t6); color: var(--p-faint);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.p-msg__x {
-  margin: 3px 0 0; font-size: var(--p-t5); color: var(--p-mute);
-  line-height: var(--p-lh-ui);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
+.p-certcard__t { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 0 3px; }
+.p-certcard__t b { font-size: var(--t2); font-weight: 700; }
+.p-certcard__t span { font-size: var(--t0); color: var(--muted); }
+.p-certcard__d { padding: 0 3px 3px; font-size: var(--t0); color: var(--muted); }
 
-/* غير المقروء: نقطة نحاسية واحدة ووزن أثقل — بلا شريط ولا حدّ */
-.p-msg.is-new .p-msg__h b { font-weight: 700; color: var(--p-ink); }
-.p-msg.is-new .p-msg__h time::after {
-  content: ""; display: inline-block; vertical-align: middle;
-  width: 7px; height: 7px; margin-inline-start: 7px;
-  border-radius: 50%; background: var(--p-gold);
-}
+/* ── حسابي: ترويسة الملفّ ────────────────────────────────────────── */
 
-/* ═══════════════ حسابي — ترويسة ملف + صفوف إعدادات بأيقونات ═══════════════ */
+/**
+ * الترويسة عرضية في التصميم، والـDOM مسطّح: النموذج (الصورة) والاسم
+ * والشارات إخوة ثلاثة بلا حاضنة نملك إضافتها. فالشبكة تُنزل الصورة في
+ * عمود ممتدّ على صفّين، والاسم فوق الشارات في العمود الثاني — وهو ما
+ * يعجز عنه flex هنا.
+ */
 .p-prof {
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px;
-  padding: var(--p-5) var(--p-4); margin: var(--p-3) 0 var(--p-4);
-  border-radius: var(--p-r4);
-  background: var(--p-card); border: 1px solid var(--p-glass-brd);
-  box-shadow: var(--p-e2), var(--p-hi);
+  display: grid; grid-template-columns: auto 1fr;
+  column-gap: var(--s4); row-gap: var(--s1);
+  align-items: center;
+  padding: 6px var(--s1) var(--s4);
 }
-.p-prof::before {
-  content: ""; position: absolute; inset: 0 0 auto; height: 104px; pointer-events: none;
-  background: var(--p-brand-s);
-}
-.p-prof > * { position: relative; }
-/* الاسم العربي الرباعي لا يتّسع في 22px على شاشة جوّال — فينكسر سطرين
-   ويصير أكبر ما في الشاشة. 17px يسعه في سطر، والتوازن يقسمه بلا يُتم. */
+.p-prof > form { grid-row: 1 / span 2; }
+
 .p-prof__name {
-  font-size: var(--p-t3); font-weight: 700;
-  line-height: var(--p-lh-snug);
-  margin-top: 10px;
+  grid-column: 2; align-self: end;
+  font-size: var(--t4); font-weight: 700; line-height: 1.3;
+  /* الاسم العربي الرباعي ينكسر سطرين على الجوّال — والموازنة تقسمه بلا يُتم */
   text-wrap: balance;
-  max-width: 22ch;
 }
-.p-prof__meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 6px; }
-.p-prof__chip { padding: 4px 13px; border-radius: 99px; background: var(--p-brand-s); color: var(--p-brand-ink); font-size: var(--p-t6); font-weight: 700; }
-
-.p-body a.p-setrow, .p-body button.p-setrow {
-  display: flex; align-items: center; gap: var(--p-3); width: 100%;
-  padding: var(--p-3) var(--p-4);
-  background: transparent; border: 0; border-bottom: 1px solid var(--p-line);
-  color: var(--p-ink); font-family: inherit; font-size: var(--p-t4); text-align: start; cursor: pointer;
+.p-prof__meta { grid-column: 2; align-self: start; display: flex; flex-wrap: wrap; gap: 6px; }
+.p-prof__chip {
+  padding: 4px 11px; border-radius: 999px;
+  background: var(--pri-tint); color: var(--pri-ink);
+  font-size: var(--t0); font-weight: 700;
 }
-.p-setrow:last-child { border-bottom: 0; }
-.p-setrow__i { width: 38px; height: 38px; flex: 0 0 auto; border-radius: 11px; display: grid; place-items: center; color: var(--p-on-color); box-shadow: var(--p-e1); }
-.p-setrow--theme .p-setrow__i { background: var(--p-brand); }
-.p-setrow--lock  .p-setrow__i { background: var(--p-n4); }
-.p-setrow--out   .p-setrow__i { background: var(--p-n3); }
-.p-setrow__t { flex: 1; min-width: 0; font-weight: 600; }
-.p-setrow--out .p-setrow__t { color: var(--p-n3); }
-.p-setrow__e { flex: 0 0 auto; color: var(--p-faint); display: flex; align-items: center; gap: 6px; font-size: var(--p-t5); }
 
-/* الإشعارات: الأيقونة تقول الحالة — رمادية قبل، خضراء بعد، باهتة إن حجبها المتصفح */
-[data-sch-push] .p-setrow__i { background: var(--p-n2); }
-[data-sch-push][data-sch-push-state="on"] .p-setrow__i { background: var(--p-ok); }
-[data-sch-push][data-sch-push-state="blocked"] { opacity: .6; }
-[data-sch-push][data-sch-push-state="blocked"] .p-setrow__i { background: var(--p-faint); }
+/* ── حسابي: صفوف الإعدادات ───────────────────────────────────────── */
 
-/* ═══════════════ البطاقة الفاخرة — ترويسة أميثيست + خيط معدني ═══════════════ */
-.p-id::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: transparent;
+/**
+ * الصنف نفسه على `<button>` (المظهر والإشعارات) وعلى `<a>` (الخروج) —
+ * فيُكتب المحدِّدان معًا: `.p-setrow` وحدها تخسر أمام `.p-body a`
+ * فيخرج صفّ الخروج بلون النصّ العادي.
+ * وكل صفّ سطحٌ قائم بذاته لا شريحة في بطاقة، لأن حاضنته `.p-list`
+ * تفصل أبناءها بفجوة في الأساس ولا تجمعهم في إطار.
+ */
+.p-body a.p-setrow,
+.p-body button.p-setrow {
+  display: flex; align-items: center; gap: var(--s3);
+  width: 100%; padding: 14px 15px;
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r4);
+  box-shadow: var(--shadow-sm);
+  font-family: inherit; font-size: var(--t3); text-align: start;
 }
-.p-id > * { position: relative; z-index: 1; }
-.p-id__top::after {
-  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px;
-  background: var(--p-gold);
+
+.p-setrow__i {
+  display: grid; place-items: center;
+  flex: none; width: 34px; height: 34px; border-radius: 11px;
+  background: var(--pri-tint); color: var(--pri);
 }
-.p-id__qr .p-qr { box-shadow: var(--p-e2); }
+.p-setrow--theme .p-setrow__i { background: var(--slate-tint); color: var(--slate); }
+.p-setrow--out   .p-setrow__i { background: var(--bad-tint);   color: var(--bad); }
 
-/* ═══════════════ الشريط السفلي — الزر النشط حبّة أميثيست مضيئة ═══════════════ */
-/* النشط: حبّة بلون الهوية الخفيف ونصّ بلونها — لا سطح صارخ تحت الإبهام */
-.p-body a.p-tab.is-on {
-  background: var(--p-brand-s);
-  color: var(--p-brand);
-  font-weight: 700;
+.p-setrow__t { flex: 1; min-width: 0; font-size: var(--t2); font-weight: 600; }
+.p-setrow--out .p-setrow__t { color: var(--bad); }
+
+.p-setrow__e {
+  display: flex; align-items: center; gap: 6px; flex: none;
+  color: var(--muted); font-size: var(--t1);
 }
-/* الفاصل المقسّم (السجل) — الاختيار حبّة بنفسجية واضحة في الوضعين */
-.p-seg a.is-on { background: var(--p-brand-s); color: var(--p-brand-ink); font-weight: 700; box-shadow: inset 0 0 0 1px var(--p-line-2); }
 
-/* العيادة: بطاقتا الحساسية/فصيلة الدم تأخذان الزجاج مع بقاء الخيط الأحمر */
-.p-vital__x {box-shadow: var(--p-e1), var(--p-hi); }
+/* أيقونة الجرس تقول الحالة: صفراء قبل التفعيل، خضراء بعده، والصفّ كلّه
+   باهت إن حجب المتصفح الإذن. `data-sch-push` عقد مع SCH_Push لا يُمسّ. */
+.p-setrow[data-sch-push] .p-setrow__i { background: var(--warn-tint); color: var(--warn); }
+.p-setrow[data-sch-push][data-sch-push-state="on"] .p-setrow__i { background: var(--ok-tint); color: var(--ok); }
+.p-setrow[data-sch-push][data-sch-push-state="blocked"] { opacity: .6; }
 
-@media (prefers-reduced-motion: reduce) { .p-hero__badge i { animation: none; } }
+/* ── بطاقة رابط ثانوية (الشهادات · التقرير اليومي) ───────────────── */
+
+.p-body a.p-linkcard {
+  display: flex; align-items: center; gap: var(--s3);
+  margin-bottom: var(--s3); padding: 14px 15px;
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r4);
+  box-shadow: var(--shadow-sm);
+}
+
+.p-linkcard__i {
+  display: grid; place-items: center;
+  flex: none; width: 40px; height: 40px; border-radius: 14px;
+  background: var(--gold-tint); color: var(--gold);
+}
+/* النغمة الثانية (التقرير اليومي) لا تُميَّز إلا بصنف مصاحب في child.php
+   لا يظهر خارج هذه البطاقة — فيُؤهَّل بها ولا يُكتب مستقلًّا. */
+.p-linkcard__i.p-i--n2 { background: var(--warn-tint); color: var(--warn); }
+
+.p-linkcard__t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.p-linkcard__t b { font-size: var(--t3); font-weight: 700; }
+.p-linkcard__t span { font-size: var(--t1); color: var(--muted); }
+.p-linkcard__e { display: flex; flex: none; color: var(--muted); }
+
+/* ── الشاشات العارية: الدخول والتثبيت والمنع (وportal.php) ───────── */
+
+/* قشرة عارية: لا `p-app` ولا شريط سفليّ ولا ترويسة — فالتوسيط هنا
+   مسؤولية الجسم نفسه. */
+.p-body--auth {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100dvh;
+  padding: var(--s6);
+}
+
+/**
+ * دائرتا الزخرفة من التصميم.
+ * `fixed` لا `absolute`: الجسم هو الحاضنة فلا مرجع إطلاق تحته، والتثبيت
+ * يمنعهما من مدّ الصفحة أفقيًّا. وهما خارج التدفّق فلا تصيران عنصري
+ * flex في جسم موسَّط.
+ */
+.p-body--auth::before,
+.p-body--auth::after {
+  content: ""; position: fixed; z-index: 0;
+  border-radius: 50%; pointer-events: none;
+}
+.p-body--auth::before { top: -120px; inset-inline-end: -90px; width: 320px; height: 320px; background: var(--pri-tint); }
+.p-body--auth::after  { top: 60px; inset-inline-start: -110px; width: 220px; height: 220px; background: var(--ok-tint); opacity: .7; }
+
+.p-auth { position: relative; z-index: 1; width: 100%; max-width: 380px; }
+
+/* يحمل حرفين في الدخول والتثبيت و`<svg>` في شاشة المنع — فالتوسيط
+   بالشبكة لا بارتفاع سطر يفترض نصًّا. */
+.p-auth__mark {
+  display: grid; place-items: center;
+  width: 76px; height: 76px; margin: 0 auto var(--s4);
+  border-radius: var(--r5);
+  background: var(--pri); color: var(--on-pri);
+  font-size: var(--t5); font-weight: 700; line-height: 1;
+  /* الظلّ ملوّن بالرمز عبر color-mix ليتبع الوضع الليلي بلا كتلة ثانية */
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--pri) 32%, transparent);
+}
+
+/* العنوان في هذه الشاشات `<h1>` بلا صنف — فمِرساته الحاضنة وحدها. */
+.p-auth h1 { margin: 0 0 5px; text-align: center; font-size: var(--t5); font-weight: 700; line-height: 1.25; }
+.p-auth__s { margin: 0 0 var(--s6); text-align: center; font-size: var(--t2); color: var(--muted); }
+
+/**
+ * الصندوق ليس بطاقة: الحقول نفسها أسطح في التصميم الجديد، فبطاقة تحتها
+ * تُصيّر سطحًا فوق سطح. وكونه عمودًا ذا فجوة هو ما يمنح زرَّي `install.php`
+ * المتتاليين فراغهما بلا هامش مضمّن، ولا يمسّ `[hidden]` على زرّ التثبيت
+ * لأن الفجوة لا تُصيّر عنصرًا محذوفًا.
+ */
+.p-auth__box { display: flex; flex-direction: column; gap: var(--s3); }
+
+/* النموذج عمود ليمتدّ زرّ الدخول على العرض كاملًا — `.p-btn` في الأساس
+   inline-flex فلا يملأ سطره من تلقائه. */
+.p-auth__box form { display: flex; flex-direction: column; }
+
+.p-auth__err {
+  padding: var(--s3) var(--s4); border-radius: var(--r2);
+  background: var(--bad-tint); color: var(--bad);
+  font-size: var(--t2); font-weight: 700; text-align: center;
+}
+
+.p-auth__hint { margin: 0; text-align: center; font-size: var(--t1); color: var(--muted); line-height: 1.7; }

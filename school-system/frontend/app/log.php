@@ -36,7 +36,8 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
     $sch_due     = max(0, $sch_total - $tally['excused']);
     $sch_came    = $tally['present'] + $tally['late'];
     $sch_pct     = $sch_due > 0 ? (int) round($sch_came / $sch_due * 100) : 100;
-    $sch_cols    = max(1, min(15, $sch_total));
+    // خمسة أعمدة: صفٌّ لكل أسبوع دراسي — فتُقرأ الشبكة أسابيع لا شريطًا
+    $sch_cols    = max(1, min(5, $sch_total));
 
     // نِسَب الشريط المكدّس — على كل الأيام لأنه يعرض التركيب لا النسبة.
     $sch_w = static fn (int $n): string => $sch_total > 0
@@ -168,7 +169,7 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
                             stroke-dashoffset="<?php echo esc_attr((string) round($circ * (1 - $avg / 100), 1)); ?>"
                             transform="rotate(-90 44 44)"/>
                 </svg>
-                <b><?php echo esc_html(number_format($avg, 0)); ?><i>٪</i></b>
+                <b><?php echo esc_html(number_format_i18n($avg, 0)); ?><i>٪</i></b>
             </span>
             <div class="p-stat__lead">
                 <b><?php esc_html_e('المعدل العام', 'school-system'); ?></b>
@@ -195,7 +196,7 @@ $tab = isset($_GET['t']) && $_GET['t'] === 'grades' ? 'grades' : 'att';
                 <div class="p-bar p-bar--<?php echo esc_attr($tier); ?>">
                     <div class="p-bar__top">
                         <b><?php echo esc_html((string) $subject); ?></b>
-                        <b class="p-nm"><?php echo esc_html(number_format($percent, 1)); ?>٪</b>
+                        <b class="p-nm"><?php echo esc_html(number_format_i18n($percent, 1)); ?>٪</b>
                     </div>
                     <div class="p-bar__track"><i style="width:<?php echo esc_attr((string) min(100, max(0, $percent))); ?>%"></i></div>
                     <div class="p-bar__sub">
