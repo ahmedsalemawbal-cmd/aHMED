@@ -485,31 +485,6 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 .p-body a.p-tab.is-on::after { background: var(--pri); }
 
-/**
- * النقاط الثلاث من عنصر واحد.
- * القالب لا يعطينا إلا `<i>` فارغًا، فيصير أوسطها ويحمل الأخريين في
- * عنصريه الزائفين. و`margin-inline-end` يحجز عرضهما لئلّا تركبا النصّ.
- */
-.p-hero__call-s i {
-  position: relative; flex: none;
-  width: 7px; height: 7px; margin-inline-end: 22px;
-  border-radius: 50%; background: var(--warn);
-  animation: p-bob 1.2s infinite;
-}
-.p-hero__call-s i::before,
-.p-hero__call-s i::after {
-  content: ""; position: absolute; top: 0;
-  width: 7px; height: 7px; border-radius: 50%; background: var(--warn);
-  animation: p-bob 1.2s infinite;
-}
-.p-hero__call-s i::before { inset-inline-end: -11px; animation-delay: .2s; }
-.p-hero__call-s i::after  { inset-inline-end: -22px; animation-delay: .4s; }
-
-.p-hero__call p { margin: 0; font-size: var(--t1); color: var(--ink2); }
-
-/* النموذج كتلة، فبلا `flex` يجلس زرّ الإلغاء بعرض نصّه في وسط البطاقة */
-.p-hero__call form { display: flex; margin: var(--s2) 0 0; }
-
 /* ── البوابات الأربع ─────────────────────────────────────────────── */
 
 /**
@@ -1440,11 +1415,18 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 /* الرمز والوجه في خليّة واحدة ليتراكبا بلا `position` ولا `z-index` */
 .p-qr > svg { grid-area: 1 / 1; width: 100%; height: 100%; display: block; }
 
-/* حجب أقلّ من ٥٪ من مساحة المصفوفة — التكبير يُبطل تصحيح الخطأ */
+/**
+ * قياس التصميم ٥٢×٥٢ **بحدّه**: في المخرَج المحفوظ دائرة 52px بحدّ 3px
+ * وداخلها قرص 46px. وهنا العنصر واحد (img) و`box-sizing:border-box`
+ * مفروض من الأساس — فالمكتوب في `width` هو المقاس الخارجي. كتابة 46
+ * تُصغّر الشعار عن التصميم ستّ بكسلات.
+ *
+ * والحجب عند ٥٢ ≈ ٧٪ من مساحة المصفوفة، والسقف المسموح للمسح ٢٠٪.
+ */
 .p-qr__face {
   grid-area: 1 / 1;
   place-self: center;
-  width: 46px; height: 46px;
+  width: 52px; height: 52px;
   border-radius: 50%;
   border: 3px solid #fff;
   background: #fff;
@@ -1478,7 +1460,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * القاعدة القديمة «خلفية `.p-full` رمزٌ لا لون مكتوب» وُضعت حين كانت
  * `#fff` تصطدم بنصٍّ يتبع الوضع فيختفي أحدهما في الآخر. هنا **الطرفان
  * ثابتان معًا** — أرضية داكنة ونصّ أبيض — فالاصطدام مستحيل أصلًا،
- * وهذا وضع «اعرِض للماسح» لا سطح تطبيق.
+ * وهذا وضع «اعرِض للماسح» لا سطح تطبيق. والقيمة نفسها في spec.
  *
  * الإخفاء يبقى لـ`[hidden]` وحده: لا نكتب `display` إلا مشروطًا بغيابه.
  */
@@ -1513,7 +1495,8 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   /* هالة بيضاء واسعة: تفصل اللوحة عن الأرضية بلا حدٍّ يربك الماسح */
   box-shadow: 0 0 90px rgba(255, 255, 255, .14);
 }
-.p-qr--big .p-qr__face { width: 62px; height: 62px; border-width: 4px; }
+/* ٧٠ مقاسًا خارجيًّا بحدّ ٤ — كما في المخرَج (70 بحدّ 4 وقرص 62 داخله) */
+.p-qr--big .p-qr__face { width: 70px; height: 70px; border-width: 4px; }
 
 .p-full__no { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 3px; }
 
@@ -1671,6 +1654,12 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * مؤهَّلتان بـ`.p-body` عمدًا: هما مُعدِّلتان تُلصقان على رقاقة يملكها
  * مكوّن آخر (`.p-linkcard__i`) بالتخصّصية نفسها (0,1,0) — فلولا التأهيل
  * لحسم ترتيبُ المصدر لا المعنى، وسقطت النغمة إن كُتب المكوّن بعدها.
+ *
+ * ⚠ تعارُض قائم خارج هذا الملف: `70-rest.css` يكتب أيضًا
+ * `.p-linkcard__i.p-i--n2 { background: var(--warn-tint); color: var(--warn) }`
+ * بالتخصّصية نفسها (0,2,0) وبعد هذا الملف في ترتيب التحميل، فيغلبها.
+ * والتصميم يجعل نغمة «التقرير اليومي» `ok` لا `warn` — فالإصلاح حذف
+ * سطر `p-i--n2` من `70-rest.css` لا رفع تخصّصية هذا السطر.
  */
 .p-body .p-i--gold { background: var(--gold-tint); color: var(--gold); }
 
@@ -1716,6 +1705,10 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * و`.p-trk__off` وحدها (0,1,0) — بل حتى `.p-trk__head > .p-trk__off` (0,2,0)
  * تخسر أمامها. فيُذكر العنصر ليتساويا، ويحسم الترتيب لصالح المتأخّر.
  * وبلا هذا يخرج «انقطع البث» رماديًّا كأنه سطر ثانوي لا إنذار.
+ *
+ * ولا يُكتب هنا `display`: العنصر يبدأ بـ`hidden` ويكشفه `track.js`
+ * (`el('trk-off').hidden = d.live`)، فأي `display` مؤلِّف يغلب
+ * `[hidden]{display:none}` في ورقة المتصفح ويُخرج الإنذار دائمًا.
  */
 .p-trk__head > span.p-trk__off {
   margin-inline-start: auto;
@@ -1728,6 +1721,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
    للخريطة محتوًى يمدّها. والسقف يُبقي اللوح السفلي في الشاشة بلا تمرير —
    وهو أهمّ من الخريطة عند الأب. */
 .p-trk__map { height: clamp(240px, 44vh, 400px); background: var(--map-bg); }
+/* `is-off` يضعها `track.js` على `#trk-live` نفسه عند فشل النداء. */
 .p-trk__map.is-off { opacity: .5; }
 
 .p-trk__foot {
@@ -1853,8 +1847,9 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 /* ── الشهادات ────────────────────────────────────────────────────── */
 
-/* الشهادة الواحدة: SVG بنسبة عرض ثابتة — السقف يمنعها من الانتفاخ على
-   الشاشات العريضة، و`height:auto` يبقيها متجاوبة تحته. */
+/* الشهادة الواحدة: SVG بنسبة عرض ثابتة (viewBox 1123×794 بلا سمتَي
+   عرض وارتفاع) — السقف يمنعها من الانتفاخ على الشاشات العريضة،
+   و`height:auto` يبقيها متجاوبة تحته. */
 .p-cert {
   max-width: 620px; margin: 0 auto var(--s4);
   overflow: hidden;
@@ -1863,7 +1858,18 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 .p-cert svg { display: block; width: 100%; height: auto; }
 
+/**
+ * الطباعة: الشهادة وحدها على الورقة.
+ * الزرّ الذي فتح نافذة الطباعة و«رجوع» فوقه يُطبعان معها إن تُركا —
+ * وزرٌّ مطبوع على وثيقة رسمية عيبٌ يراه كل من تصله. والتأهيل بالعنصر
+ * لازم: `.p-body button.p-btn` في الأساس تخصّصيتها (0,2,1)، فـ`.p-btn`
+ * وحدها لا تخفيه.
+ */
 @media print {
+  .p-body a.p-back,
+  .p-body a.p-btn,
+  .p-body button.p-btn { display: none; }
+
   .p-cert { max-width: none; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
   @page { size: A4 landscape; margin: 0; }
 }
@@ -1897,11 +1903,16 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 .p-certcard__i svg { grid-area: 1 / 1; }
 
-/* لون المعاينة يتبع قالب الشهادة، فيعرفها الأب قبل فتحها. */
-.p-certcard--royal    .p-certcard__i { background: linear-gradient(150deg, var(--ok-tint),    var(--card)); color: var(--ok); }
-.p-certcard--classic  .p-certcard__i { background: linear-gradient(150deg, var(--gold-tint),  var(--card)); color: var(--gold); }
-.p-certcard--modern   .p-certcard__i { background: linear-gradient(150deg, var(--pri-tint),   var(--card)); color: var(--pri); }
-.p-certcard--sapphire .p-certcard__i { background: linear-gradient(150deg, var(--slate-tint), var(--card)); color: var(--slate); }
+/**
+ * لون المعاينة يتبع قالب الشهادة، فيعرفها الأب قبل فتحها.
+ * والأنغام الأربعة هي التي في spec.json حرفًا بحرف: gold · pri · ok · warn
+ * — أربعة قوالب لأربع نغمات، بلا خامسة ولا `slate` (وهو في هذا التطبيق
+ * نغمة «في المنزل» و`p-tag--mute`، فلا يُستعار لشهادة).
+ */
+.p-certcard--royal    .p-certcard__i { background: linear-gradient(150deg, var(--ok-tint),   var(--card)); color: var(--ok); }
+.p-certcard--classic  .p-certcard__i { background: linear-gradient(150deg, var(--gold-tint), var(--card)); color: var(--gold); }
+.p-certcard--modern   .p-certcard__i { background: linear-gradient(150deg, var(--pri-tint),  var(--card)); color: var(--pri); }
+.p-certcard--sapphire .p-certcard__i { background: linear-gradient(150deg, var(--warn-tint), var(--card)); color: var(--warn); }
 
 .p-certcard__t { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 0 3px; }
 .p-certcard__t b { font-size: var(--t2); font-weight: 700; }
@@ -1915,12 +1926,16 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * والشارات إخوة ثلاثة بلا حاضنة نملك إضافتها. فالشبكة تُنزل الصورة في
  * عمود ممتدّ على صفّين، والاسم فوق الشارات في العمود الثاني — وهو ما
  * يعجز عنه flex هنا.
+ *
+ * والحشو السفلي `--s1` كما في التصميم (6px 4px 4px) لا `--s4`: يليها
+ * `h2.p-h2` وهامشها العلوي `--s5` أصلًا، فحشوٌ سفليّ كبير يضاعف الفجوة
+ * ويفصل الترويسة عن شاشتها.
  */
 .p-prof {
   display: grid; grid-template-columns: auto 1fr;
   column-gap: var(--s4); row-gap: var(--s1);
   align-items: center;
-  padding: 6px var(--s1) var(--s4);
+  padding: 6px var(--s1) var(--s1);
 }
 .p-prof > form { grid-row: 1 / span 2; }
 
@@ -1945,6 +1960,8 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * فيخرج صفّ الخروج بلون النصّ العادي.
  * وكل صفّ سطحٌ قائم بذاته لا شريحة في بطاقة، لأن حاضنته `.p-list`
  * تفصل أبناءها بفجوة في الأساس ولا تجمعهم في إطار.
+ * (`font-family` لا يُعاد هنا: `.p-body button` في الأساس تورّثه أصلًا،
+ * و`<a>` يرثه بلا قاعدة.)
  */
 .p-body a.p-setrow,
 .p-body button.p-setrow {
@@ -1953,7 +1970,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   background: var(--card); color: var(--ink);
   border: 1px solid var(--line); border-radius: var(--r4);
   box-shadow: var(--shadow-sm);
-  font-family: inherit; font-size: var(--t3); text-align: start;
+  font-size: var(--t3); text-align: start;
 }
 
 .p-setrow__i {
@@ -1988,6 +2005,8 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   box-shadow: var(--shadow-sm);
 }
 
+/* النغمة الأولى (`p-i--gold` على بطاقة الشهادات) هي الافتراضية نفسها،
+   فلا تُكتب مرّتين. */
 .p-linkcard__i {
   display: grid; place-items: center;
   flex: none; width: 40px; height: 40px; border-radius: 14px;
@@ -2047,10 +2066,21 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 /**
  * الصندوق ليس بطاقة: الحقول نفسها أسطح في التصميم الجديد، فبطاقة تحتها
  * تُصيّر سطحًا فوق سطح. وكونه عمودًا ذا فجوة هو ما يمنح زرَّي `install.php`
- * المتتاليين فراغهما بلا هامش مضمّن، ولا يمسّ `[hidden]` على زرّ التثبيت
- * لأن الفجوة لا تُصيّر عنصرًا محذوفًا.
+ * المتتاليين فراغهما بلا هامش مضمّن.
  */
 .p-auth__box { display: flex; flex-direction: column; gap: var(--s3); }
+
+/**
+ * إعادة إخفاء ما وسمه PHP بـ`hidden` داخل هذا الصندوق.
+ *
+ * `#p-install` يبدأ `hidden` ويكشفه `beforeinstallprompt` وحده. لكن
+ * `.p-body button.p-btn` في الأساس تكتب `display:inline-flex`، وقاعدة
+ * المؤلّف تغلب `[hidden]{display:none}` في ورقة المتصفح — فيظهر زرّ
+ * «تثبيت الآن» لكل من لا يستطيع التثبيت أصلًا، ولا يفعل شيئًا عند ضغطه.
+ * التخصّصية هنا (0,2,0) تغلب (0,2,1)? لا — فيُذكر العنصر ليُحسم:
+ */
+.p-auth__box button[hidden],
+.p-auth__box [hidden] { display: none; }
 
 /* النموذج عمود ليمتدّ زرّ الدخول على العرض كاملًا — `.p-btn` في الأساس
    inline-flex فلا يملأ سطره من تلقائه. */
@@ -2063,3 +2093,81 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 
 .p-auth__hint { margin: 0; text-align: center; font-size: var(--t1); color: var(--muted); line-height: 1.7; }
+
+
+/* ── مؤشّرات الحالة والمراحل ─────────────────────────────────────── */
+
+.p-vital {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: var(--s3);
+}
+
+.p-vital__x {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s4);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r3);
+  box-shadow: var(--shadow-sm);
+}
+
+.p-vital__x > span { font-size: var(--t1); color: var(--muted); }
+
+.p-vital__x > b {
+  font-size: var(--t4);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.p-vital__x:nth-child(2) > b {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: end;
+}
+
+.p-state {
+  padding: var(--s5);
+  margin-bottom: var(--s3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r3);
+  box-shadow: var(--shadow-sm);
+}
+
+.p-state__k { display: block; font-size: var(--t1); color: var(--muted); }
+
+.p-state__v {
+  display: block;
+  margin: 2px 0 var(--s1);
+  font-size: var(--t5);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.p-state__s { display: block; font-size: var(--t1); line-height: 1.6; color: var(--muted); }
+
+.p-steps { display: grid; gap: var(--s3); margin-bottom: var(--s4); }
+
+.p-steps > div { display: flex; align-items: center; gap: var(--s3); }
+
+.p-steps b {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: var(--pri-tint);
+  color: var(--pri-ink);
+  font-size: var(--t2);
+  font-weight: 700;
+}
+
+.p-steps span { font-size: var(--t2); line-height: 1.6; color: var(--ink2); }

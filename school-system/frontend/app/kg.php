@@ -26,9 +26,9 @@ $days = SCH_KG::history($id, 14);
         <div class="p-card">
             <b class="p-h2" style="margin:0 0 8px"><?php echo esc_html(wp_date('l · j M', strtotime((string) $day->log_date))); ?></b>
             <div class="p-kgrid">
-                <div><span><?php esc_html_e('الوجبة', 'school-system'); ?></span><b><?php echo esc_html((string) ($day->meal ?: '—')); ?></b></div>
+                <div><span><?php esc_html_e('الوجبة', 'school-system'); ?></span><b><?php echo esc_html(SCH_KG::MEALS[(string) $day->meal] ?? '—'); ?></b></div>
                 <div><span><?php esc_html_e('النوم', 'school-system'); ?></span><b><?php echo esc_html($day->nap_minutes ? number_format_i18n((int) $day->nap_minutes) . ' ' . __('دقيقة', 'school-system') : '—'); ?></b></div>
-                <div><span><?php esc_html_e('المزاج', 'school-system'); ?></span><b><?php echo esc_html((string) ($day->mood ?: '—')); ?></b></div>
+                <div><span><?php esc_html_e('المزاج', 'school-system'); ?></span><b><?php echo esc_html(SCH_KG::MOODS[(string) $day->mood] ?? '—'); ?></b></div>
                 <div><span><?php esc_html_e('النشاط', 'school-system'); ?></span><b><?php echo esc_html((string) ($day->activities ?: '—')); ?></b></div>
             </div>
             <?php if ($day->note) : ?>

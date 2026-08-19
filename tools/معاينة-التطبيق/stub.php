@@ -18,11 +18,15 @@ define('SCH_PATH', '/home/user/aHMED/school-system/');
 define('SCH_URL', '/wp-content/plugins/school-system/');
 define('SCH_VERSION', '9.7.1');
 define('MINUTE_IN_SECONDS', 60);
+define('SCH_API_NS', 'school/v1');
 
 // ── دوال ووردبريس ───────────────────────────────────────────────────
 
 function __($t, $d = '') { return $t; }
 function _e($t, $d = '') { echo $t; }
+function _n($one, $many, $n, $d = '') { return $n == 1 ? $one : str_replace('%s', (string) $n, $many); }
+function _x($t, $c, $d = '') { return $t; }
+function esc_html__($t, $d = '') { return esc_html($t); }
 function esc_html($t) { return htmlspecialchars((string) $t, ENT_QUOTES, 'UTF-8'); }
 function esc_html_e($t, $d = '') { echo esc_html($t); }
 function esc_attr($t) { return htmlspecialchars((string) $t, ENT_QUOTES, 'UTF-8'); }
@@ -30,8 +34,20 @@ function esc_attr_e($t, $d = '') { echo esc_attr($t); }
 function esc_url($u) { return htmlspecialchars((string) $u, ENT_QUOTES, 'UTF-8'); }
 function esc_textarea($t) { return esc_html($t); }
 function absint($n) { return abs((int) $n); }
-function number_format_i18n($n, $d = 0) { return number_format((float) $n, $d); }
-function wp_date($f, $ts = null) { return date($f, $ts ?? time()); }
+/** ووردبريس بلغة عربية يحوّل الأرقام إلى هندية — فتُحاكى كما هي لا كما تسهل */
+function sch_ar_digits(string $t): string {
+    return strtr($t, ['0'=>'٠','1'=>'١','2'=>'٢','3'=>'٣','4'=>'٤','5'=>'٥','6'=>'٦','7'=>'٧','8'=>'٨','9'=>'٩', ','=>'٬', '.'=>'٫']);
+}
+function number_format_i18n($n, $d = 0) { return sch_ar_digits(number_format((float) $n, $d)); }
+function wp_date($f, $ts = null) {
+    $ar_m = [1=>'يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    $ar_d = ['Sunday'=>'الأحد','Monday'=>'الاثنين','Tuesday'=>'الثلاثاء','Wednesday'=>'الأربعاء','Thursday'=>'الخميس','Friday'=>'الجمعة','Saturday'=>'السبت'];
+    $ts = $ts ?? time();
+    $out = date($f, $ts);
+    $out = strtr($out, $ar_d);
+    $out = strtr($out, [date('M', $ts) => $ar_m[(int) date('n', $ts)], date('F', $ts) => $ar_m[(int) date('n', $ts)]]);
+    return sch_ar_digits($out);
+}
 function current_time($f, $gmt = 0) { return $f === 'timestamp' ? time() : date($f); }
 function get_bloginfo($k = '') { return 'مدرسة الملك المنير الأهلية'; }
 function get_current_user_id() { return 7; }
@@ -50,6 +66,9 @@ function sanitize_text_field($t) { return trim(strip_tags((string) $t)); }
 function home_url($p = '') { return 'https://school.test' . $p; }
 function admin_url($p = '') { return 'https://school.test/wp-admin/' . $p; }
 function is_rtl() { return true; }
+function rest_url($p = '') { return 'https://school.test/wp-json/' . $p; }
+function wp_localize_script(...$a) {}
+function plugins_url($p = '', $f = '') { return SCH_URL . $p; }
 function apply_filters($t, $v) { return $v; }
 function do_action($t, ...$a) {}
 function wp_kses_post($t) { return $t; }
