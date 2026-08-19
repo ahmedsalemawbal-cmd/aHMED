@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أُصول — لوحة التصميم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- الرموز نفسها التي يستعملها التطبيق — لا نسخة ثانية تتباعد عنها -->
+<link rel="stylesheet" href="../app/src/styles/tokens.css">
+
+<style>
+  body { padding: 0; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: var(--sch-s6); }
+
+  .bar {
+    position: sticky; top: 0; z-index: 9;
+    background: var(--sch-chrome); color: var(--sch-chrome-ink);
+    padding: var(--sch-s4) var(--sch-s6);
+    display: flex; align-items: center; gap: var(--sch-s4);
+  }
+  .bar b { font-size: var(--sch-t3); }
+  .bar span { color: var(--sch-chrome-mut); font-size: var(--sch-t1); }
+  .bar button {
+    font: inherit; font-size: var(--sch-t1); margin-inline-start: auto;
+    padding: 7px 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--sch-nav-line);
+    background: var(--sch-nav-hover); color: var(--sch-chrome-ink);
+  }
+
+  h2 {
+    font-size: var(--sch-t4); margin: var(--sch-s7) 0 var(--sch-s2);
+    padding-bottom: var(--sch-s2); border-bottom: 1px solid var(--sch-line-strong);
+  }
+  h2:first-of-type { margin-top: var(--sch-s5); }
+  .note { color: var(--sch-muted); font-size: var(--sch-t1); margin: 0 0 var(--sch-s5); }
+
+  .card {
+    background: var(--sch-surface); border: 1px solid var(--sch-line);
+    border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+    padding: var(--sch-s5);
+  }
+  .grid { display: grid; gap: var(--sch-s4); grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .row  { display: flex; flex-wrap: wrap; gap: var(--sch-s3); align-items: center; }
+
+  /* ── إحصاءة ── */
+  .stat { padding: var(--sch-s4) var(--sch-s5); }
+  .stat__l { font-size: var(--sch-t0); color: var(--sch-muted); font-weight: 600; }
+  .stat__v {
+    display: inline-flex; align-items: baseline; gap: 5px; white-space: nowrap;
+    margin-top: var(--sch-s1); font-size: var(--sch-t5); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat__v i { font-size: var(--sch-t1); font-weight: 600; font-style: normal; }
+  .stat__h { font-size: var(--sch-t0); color: var(--sch-muted); margin-top: 2px; }
+
+  /* ── شارة ── */
+  .tag {
+    display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+    font-size: var(--sch-t0); font-weight: 600; white-space: nowrap;
+  }
+  .t-accent  { background: var(--sch-accent-soft);  color: var(--sch-accent-ink); }
+  .t-success { background: var(--sch-success-soft); color: var(--sch-success); }
+  .t-warn    { background: var(--sch-warn-soft);    color: var(--sch-warn); }
+  .t-danger  { background: var(--sch-danger-soft);  color: var(--sch-danger); }
+  .t-gold    { background: var(--sch-gold-soft);    color: var(--sch-gold-ink); }
+  .t-mute    { background: var(--sch-surface-alt);  color: var(--sch-muted); }
+
+  /* ── زرّ ── */
+  .btn {
+    font: inherit; font-size: var(--sch-t2); font-weight: 600;
+    padding: 10px 20px; border-radius: var(--sch-radius); cursor: pointer;
+    border: none; background: var(--sch-accent); color: var(--sch-on-accent);
+  }
+  .btn--ghost { background: var(--sch-surface); color: var(--sch-accent-ink); border: 1px solid var(--sch-line-strong); }
+  .btn--danger { background: var(--sch-surface); color: var(--sch-danger); border: 1px solid var(--sch-line-strong); }
+  .btn[disabled] { background: var(--sch-surface-alt); color: var(--sch-muted); cursor: not-allowed; }
+
+  /* ── حقل ── */
+  .field { display: block; max-width: 340px; }
+  .field > span { display: block; font-size: var(--sch-t1); font-weight: 600; color: var(--sch-ink-soft); margin-bottom: 6px; }
+  .field input, .field select {
+    font: inherit; font-size: var(--sch-t2); width: 100%; padding: 11px 14px;
+    border-radius: var(--sch-radius); border: 1px solid var(--sch-line-strong);
+    background: var(--sch-surface); color: var(--sch-ink);
+  }
+
+  /* ── جدول ── */
+  .tw { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--sch-t2); }
+  th {
+    text-align: right; padding: 10px 14px; white-space: nowrap;
+    font-size: var(--sch-t1); font-weight: 600; color: var(--sch-muted);
+    border-bottom: 1px solid var(--sch-line-strong);
+  }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--sch-line); vertical-align: middle; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ── حالة فارغة ── */
+  .empty { padding: var(--sch-s7) var(--sch-s5); text-align: center; color: var(--sch-muted); }
+  .empty b { display: block; color: var(--sch-ink); font-size: var(--sch-t3); margin-bottom: 6px; }
+
+  /* ── عيّنات اللون ── */
+  .sw { display: flex; flex-direction: column; gap: 6px; }
+  .sw i {
+    display: grid; place-items: center; height: 66px; border-radius: var(--sch-radius);
+    font-style: normal; font-weight: 700; font-size: var(--sch-t1);
+  }
+  .sw code { font-size: var(--sch-t0); color: var(--sch-muted); direction: ltr; text-align: right; }
+
+  /* ── سُلَّم الخطّ ── */
+  .type div { border-bottom: 1px dashed var(--sch-line); padding: 9px 0; display: flex; align-items: baseline; gap: var(--sch-s4); }
+  .type code { font-size: var(--sch-t0); color: var(--sch-muted); direction: ltr; min-width: 120px; }
+
+  .bad { color: var(--sch-danger); font-weight: 600; }
+  .good { color: var(--sch-success); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <b>أُصول — لوحة التصميم</b>
+  <span>كل ما تُبنى منه الشاشات. المرجع: <code>تصميم/نظام-التصميم.md</code></span>
+  <button onclick="
+    var r = document.documentElement;
+    r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+    this.textContent = r.dataset.theme === 'dark' ? '☀︎ فاتح' : '☾ ليلي';
+  ">☾ ليلي</button>
+</header>
+
+<div class="wrap">
+
+  <h2>الألوان ومعانيها</h2>
+  <p class="note">لكل لون معنى واحد لا يتغيّر بين شاشة وأخرى — بدّل الوضع الليلي وراقب كيف ينقلب كلٌّ منها مع نصّه.</p>
+  <div class="grid">
+    <div class="sw"><i style="background:var(--sch-accent);color:var(--sch-on-accent)">الفعل الأساسي</i><code>--sch-accent / --sch-on-accent</code></div>
+    <div class="sw"><i style="background:var(--sch-success);color:var(--sch-on-success)">تمّ · حاضر · مسدَّد</i><code>--sch-success / --sch-on-success</code></div>
+    <div class="sw"><i style="background:var(--sch-warn);color:var(--sch-on-warn)">انتباه لا خطر</i><code>--sch-warn / --sch-on-warn</code></div>
+    <div class="sw"><i style="background:var(--sch-danger);color:var(--sch-on-danger)">خطر أو خسارة</i><code>--sch-danger / --sch-on-danger</code></div>
+    <div class="sw"><i style="background:var(--sch-gold);color:#fff">تميّز وتقدير</i><code>--sch-gold</code></div>
+    <div class="sw"><i style="background:var(--sch-chrome);color:var(--sch-chrome-ink)">القشرة — ثابتة</i><code>--sch-chrome</code></div>
+  </div>
+
+  <h2>سُلَّم الخطّ</h2>
+  <p class="note">Cairo وحده، بثلاثة أوزان: 400 · 600 · 700. سبع درجات حجم لا أكثر.</p>
+  <div class="card type">
+    <div><code>--sch-t6 · 38</code><span style="font-size:var(--sch-t6);font-weight:700">رقمٌ كبير وحده</span></div>
+    <div><code>--sch-t5 · 28</code><span style="font-size:var(--sch-t5);font-weight:700">عنوان الشاشة</span></div>
+    <div><code>--sch-t4 · 22</code><span style="font-size:var(--sch-t4);font-weight:700">عنوان قسم</span></div>
+    <div><code>--sch-t3 · 17</code><span style="font-size:var(--sch-t3);font-weight:600">عنوان بطاقة</span></div>
+    <div><code>--sch-t2 · 14.5</code><span style="font-size:var(--sch-t2)">النصّ الأساسي — أغلب الشاشة</span></div>
+    <div><code>--sch-t1 · 13</code><span style="font-size:var(--sch-t1)">نصّ ثانوي ورأس جدول</span></div>
+    <div><code>--sch-t0 · 11.5</code><span style="font-size:var(--sch-t0)">شارة وتلميح</span></div>
+  </div>
+
+  <h2>الإحصاءات</h2>
+  <p class="note">الرقم مع وحدته كتلة واحدة لا تنكسر — «١٬٢٥٠ ر.س» مفصولةً بسطر تبدو رقمين لا مبلغًا.</p>
+  <div class="grid">
+    <div class="card stat">
+      <div class="stat__l">في المدرسة</div>
+      <div class="stat__v" style="color:var(--sch-success)">٣٧١<i>طالبًا</i></div>
+      <div class="stat__h">من ٤١٢ مسجَّلًا</div>
+    </div>
+    <div class="card stat">
+      <div class="stat__l">في الباص</div>
+      <div class="stat__v" style="color:var(--sch-warn)">٢٤<i>طالبًا</i></div>
+      <div class="stat__h">رحلتان جاريتان</div>
+    </div>
+    <div class="card stat">
+      <div class="stat__l">المستحق هذا الشهر</div>
+      <div class="stat__v" style="color:var(--sch-accent-ink)">١٨٤٬٢٠٠<i>ر.س</i></div>
+      <div class="stat__h">٣١ فاتورة</div>
+    </div>
+    <div class="card stat">
+      <div class="stat__l">متأخرون عن الرسوم</div>
+      <div class="stat__v" style="color:var(--sch-danger)">١٢<i>أسرة</i></div>
+      <div class="stat__h">٣٧٬٢٠٠ ر.س</div>
+    </div>
+  </div>
+
+  <h2>الشارات</h2>
+  <p class="note">الحالة تُقرأ بلمحة. والأحمر لا يُستعمل للتزيين: شاشة فيها ستّة عناصر حمراء لا يميّز الموظّف فيها ما هو عاجل.</p>
+  <div class="card row">
+    <span class="tag t-success">حاضر</span>
+    <span class="tag t-warn">متأخر ١٢ د</span>
+    <span class="tag t-danger">غائب</span>
+    <span class="tag t-accent">في الباص</span>
+    <span class="tag t-gold">متفوّق</span>
+    <span class="tag t-mute">بلا شعبة</span>
+    <span class="tag t-success">مسدَّدة</span>
+    <span class="tag t-danger">متأخرة</span>
+    <span class="tag t-warn">مقسَّطة</span>
+  </div>
+
+  <h2>الأزرار والحقول</h2>
+  <div class="card">
+    <div class="row" style="margin-bottom:var(--sch-s5)">
+      <button class="btn">حفظ</button>
+      <button class="btn btn--ghost">إلغاء</button>
+      <button class="btn btn--danger">حذف</button>
+      <button class="btn" disabled>لا صلاحية</button>
+    </div>
+    <div class="row" style="align-items:flex-start;gap:var(--sch-s5)">
+      <label class="field"><span>اسم الطالب</span><input value="سامي أحمد العتيبي"></label>
+      <label class="field"><span>الصف</span>
+        <select><option>الرابع / أ</option><option>الخامس / ب</option></select>
+      </label>
+    </div>
+    <p class="note" style="margin:var(--sch-s4) 0 0">
+      كل حقل له <code>&lt;label&gt;</code> مربوط بـ<code>htmlFor</code> — لا نصٌّ فوقه.
+      قارئ الشاشة يقرؤه، والنقر عليه يضع المؤشّر في الحقل.
+    </p>
+  </div>
+
+  <h2>الجدول</h2>
+  <p class="note">الأرقام مُجدوَلة (<code>.num</code>) — بدونها يتغيّر عرض الرقم بين صفّ وصفّ فيرقص العمود.</p>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tw">
+      <table>
+        <thead><tr><th>الطالب</th><th>الرقم الأكاديمي</th><th>الصف</th><th>الحالة الآن</th><th>الحضور</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600">سامي أحمد العتيبي</td><td class="num">١٠٢٤١</td><td style="color:var(--sch-muted)">الرابع / أ</td><td><span class="tag t-success">في المدرسة</span></td><td class="num">٩٦٪</td></tr>
+          <tr><td style="font-weight:600">نورة سعد القحطاني</td><td class="num">١٠٢٤٢</td><td style="color:var(--sch-muted)">الرابع / أ</td><td><span class="tag t-success">في المدرسة</span></td><td class="num">٩٨٪</td></tr>
+          <tr><td style="font-weight:600">راكان بدر الحربي</td><td class="num">١٠٢٤٣</td><td style="color:var(--sch-muted)">الخامس / ب</td><td><span class="tag t-warn">في الباص</span></td><td class="num">٩١٪</td></tr>
+          <tr><td style="font-weight:600">لمى خالد الشمري</td><td class="num">١٠٢٤٤</td><td style="color:var(--sch-muted)">الخامس / ب</td><td><span class="tag t-mute">في المنزل</span></td><td class="num">٨٧٪</td></tr>
+          <tr><td style="font-weight:600">عبدالله ماجد الدوسري</td><td class="num">١٠٢٤٥</td><td style="color:var(--sch-muted)">السادس / أ</td><td><span class="tag t-danger">خرج مبكرًا</span></td><td class="num">٧٩٪</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>الحالات الأربع</h2>
+  <p class="note">كل شاشة تعرض بيانات لها أربع حالات، وثلاث منها تُنسى عادةً.</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+    <div class="card"><div class="empty" style="padding:var(--sch-s6)">جارٍ التحميل…</div></div>
+    <div class="card"><div class="empty" style="padding:var(--sch-s6)">
+      <b>لا يوجد طلاب بعد</b>
+      ابدأ بالاستيراد من ملفّ Excel، أو أضف طالبًا.
+    </div></div>
+    <div class="card" style="border-color:var(--sch-danger);background:var(--sch-danger-soft)">
+      <div style="color:var(--sch-danger);font-weight:600">تعذّر الاتصال بالخادم. حاول بعد قليل.</div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:var(--sch-s3)">
+    الشاشة الفارغة تقول <span class="good">ما العمل</span> لا <span class="bad">«لا توجد بيانات»</span> وحدها —
+    الفارغة الصامتة تبدو معطّلة.
+  </p>
+
+  <h2>تخطيط الشاشة</h2>
+  <div class="card">
+    <div style="border:2px dashed var(--sch-line-strong);border-radius:var(--sch-radius);padding:var(--sch-s4)">
+      <div style="font-size:var(--sch-t5);font-weight:700">عنوان الشاشة</div>
+      <div style="color:var(--sch-muted);font-size:var(--sch-t2);margin-bottom:var(--sch-s5)">سطرٌ يقول ما تفعله هذه الشاشة ولمن.</div>
+      <div class="grid" style="margin-bottom:var(--sch-s4)">
+        <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s4);text-align:center;color:var(--sch-muted);font-size:var(--sch-t1)">إحصاءة</div>
+        <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s4);text-align:center;color:var(--sch-muted);font-size:var(--sch-t1)">إحصاءة</div>
+        <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s4);text-align:center;color:var(--sch-muted);font-size:var(--sch-t1)">إحصاءة</div>
+        <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s4);text-align:center;color:var(--sch-muted);font-size:var(--sch-t1)">إحصاءة</div>
+      </div>
+      <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s3);margin-bottom:var(--sch-s4);color:var(--sch-muted);font-size:var(--sch-t1)">أدوات: بحث · تصفية · فعل جماعي (اختياري)</div>
+      <div style="background:var(--sch-surface-alt);border-radius:var(--sch-radius);padding:var(--sch-s7);text-align:center;color:var(--sch-muted);font-size:var(--sch-t1)">الجدول أو البطاقات</div>
+    </div>
+    <p class="note" style="margin:var(--sch-s4) 0 0">
+      الترتيب: ما يحتاج قرارًا أولًا، وما يُقرأ للاطّلاع بعده.
+      لا تبدأ بجدول طويل ثم تضع في الآخر الرقم الذي يهمّ.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
