@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--canvas:#e7e9f6;--bg:#f3f4fb;--card:#ffffff;--card2:#f7f8fd;
+--ink:#191b2e;--ink2:#585c78;--muted:#6e7290;--line:rgba(25,27,46,.10);
+--pri:#4453cc;--pri-ink:#3b49b8;--pri-tint:#e7eaff;--on-pri:#ffffff;
+--ok:#0d7a55;--ok-tint:#dcf2e7;
+--warn:#8c5b06;--warn-tint:#fbeed2;
+--bad:#b3332c;--bad-tint:#fbe3e1;
+--gold:#7e5a0c;--gold-tint:#f7edd3;
+--slate:#4a5170;--slate-tint:#e8eaf2;
+--shadow:0 6px 22px rgba(38,42,88,.09);--shadow-sm:0 2px 8px rgba(38,42,88,.06);
+--skel:rgba(25,27,46,.09);--bezel:#14151d;
+--map-bg:#e3e8f1;--map-block:#d4dae7;--map-road:#f5f7fb;
+}
+[data-theme="dark"]{
+--canvas:#0b0c14;--bg:#12131c;--card:#1b1d29;--card2:#20222f;
+--ink:#eceffa;--ink2:#a7abc4;--muted:#8a8fad;--line:rgba(255,255,255,.11);
+--pri:#8d99ff;--pri-ink:#a3adff;--pri-tint:rgba(141,153,255,.16);--on-pri:#11131f;
+--ok:#4fd9a4;--ok-tint:rgba(79,217,164,.15);
+--warn:#f0b65a;--warn-tint:rgba(240,182,90,.15);
+--bad:#ff8a80;--bad-tint:rgba(255,138,128,.15);
+--gold:#e8c264;--gold-tint:rgba(232,194,100,.15);
+--slate:#a8aecb;--slate-tint:rgba(168,174,203,.14);
+--shadow:0 6px 22px rgba(0,0,0,.5);--shadow-sm:0 2px 10px rgba(0,0,0,.4);
+--skel:rgba(255,255,255,.08);--bezel:#000000;
+--map-bg:#141826;--map-block:#1d2231;--map-road:#0d0f18;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);font-family:Cairo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--pri-ink);text-decoration:none}
+a:hover{color:var(--pri)}
+button{font-family:Cairo,system-ui,sans-serif}
+@keyframes halo{0%{box-shadow:0 0 0 0 var(--hc,rgba(68,83,204,.5))}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes bob{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes shim{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}
+</style>
+</helmet>
+<div dir="rtl" data-theme="{{ theme }}" style="min-height:100vh;background:var(--canvas);font-family:Cairo,system-ui,sans-serif;color:var(--ink)">
+
+<div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 40px;background:var(--canvas);border-bottom:1px solid var(--line)">
+<div style="display:flex;flex-direction:column;gap:3px">
+<div style="font:700 17px Cairo,sans-serif;color:var(--ink)">أُصول · تطبيق وليّ الأمر</div>
+<div style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">مدرسة الملك المنير الأهلية — iPhone 15 · ٣٩٣×٨٥٢ · عربي RTL · خطّ Cairo</div>
+</div>
+<div style="display:flex;align-items:center;gap:14px">
+<div style="display:flex;align-items:center;gap:14px;padding:7px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm)">
+<span style="display:flex;align-items:center;gap:6px;font:600 11px Cairo,sans-serif;color:var(--ink2);white-space:nowrap"><span style="width:9px;height:9px;border-radius:3px;background:var(--pri)"></span>أساسي</span>
+<span style="display:flex;align-items:center;gap:6px;font:600 11px Cairo,sans-serif;color:var(--ink2);white-space:nowrap"><span style="width:9px;height:9px;border-radius:3px;background:var(--ok)"></span>في المدرسة</span>
+<span style="display:flex;align-items:center;gap:6px;font:600 11px Cairo,sans-serif;color:var(--ink2);white-space:nowrap"><span style="width:9px;height:9px;border-radius:3px;background:var(--warn)"></span>في الباص</span>
+<span style="display:flex;align-items:center;gap:6px;font:600 11px Cairo,sans-serif;color:var(--ink2);white-space:nowrap"><span style="width:9px;height:9px;border-radius:3px;background:var(--bad)"></span>تنبيه</span>
+<span style="display:flex;align-items:center;gap:6px;font:600 11px Cairo,sans-serif;color:var(--ink2);white-space:nowrap"><span style="width:9px;height:9px;border-radius:3px;background:var(--gold)"></span>تفوّق</span>
+</div>
+<button onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:8px 14px;cursor:pointer;font:600 12.5px Cairo,sans-serif;color:var(--ink);box-shadow:var(--shadow-sm)">
+<span>الوضع الليلي</span>
+<span style="position:relative;width:44px;height:25px;border-radius:13px;background:var(--pri-tint);display:inline-block">
+<span style="position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:var(--pri);transition:transform .22s ease;transform:translateX({{ knobX }})"></span>
+</span>
+</button>
+</div>
+</div>
+
+<div style="padding:32px 40px 90px;display:flex;flex-direction:column;gap:44px">
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">① اليوم — قلب التطبيق</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">السؤال الوحيد الذي يُفتح التطبيق لأجله — «هل ابني بخير الآن؟» — يُجاب عنه في أول ثانية: بطاقة البطل تقول الحالة بخطّ كبير وبلون لا يتكرّر معناه في أي شاشة أخرى. الإطار الأول تفاعليّ: اضغط صور الأبناء لتبديل الحالة والخيط الزمني، واضغط الزرّ لترى نداء الانصراف.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="اليوم" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">01</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">اليوم</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">٣٩٣ × ٨٥٢ · تفاعلية</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px 10px">
+<div style="display:flex;align-items:center;gap:11px;min-width:0">
+<div style="width:42px;height:42px;flex:none;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 16px Cairo,sans-serif">أ</div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<div style="font:700 15px Cairo,sans-serif;color:var(--ink);white-space:nowrap">مساء الخير، أحمد</div>
+<div style="font:400 10.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap">الأحد ٢٤ صفر · ١٩ أغسطس</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:9px;flex:none">
+<div style="width:38px;height:38px;border-radius:13px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V6a1 1 0 0 1 1-1z"/></svg></div>
+<div style="position:relative;width:38px;height:38px;border-radius:13px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5 1.5 5h-15S6 14 6 10zM10 19a2 2 0 0 0 4 0"/></svg><span style="position:absolute;top:7px;left:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:1.5px solid var(--card)"></span></div>
+</div>
+</div>
+
+<div style="flex:none;display:flex;gap:16px;padding:4px 18px 12px;overflow:hidden">
+<sc-for list="{{ kids }}" as="c" hint-placeholder-count="3">
+<div onClick="{{ c.pick }}" style="--sz:{{ c.sz }};--op:{{ c.op }};--rg:{{ c.rg }};display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;flex:none;padding-top:{{ c.pad }}">
+<div style="width:var(--sz,58px);height:var(--sz,58px);border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 20px Cairo,sans-serif;opacity:var(--op,1);box-shadow:var(--rg,none);transition:all .2s ease">{{ c.ini }}</div>
+<div style="display:flex;align-items:center;gap:5px;opacity:var(--op,1)"><span style="width:7px;height:7px;border-radius:50%;background:{{ c.tc }}"></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink)">{{ c.n }}</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:14px">
+
+<div style="flex:none;margin:0 16px;border-radius:26px;padding:16px 16px 14px;border:1px solid var(--line);box-shadow:var(--shadow);background:linear-gradient(205deg,{{ kid.tt }} 0%,var(--card) 58%)">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:52px;height:52px;flex:none;border-radius:19px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font:700 20px Cairo,sans-serif;color:var(--ink2)">{{ kid.ini }}</div>
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+<div style="font:700 17px Cairo,sans-serif;color:var(--ink)">{{ kid.full }}</div>
+<div style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">{{ kid.cls }} · مدرسة الملك المنير الأهلية</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+<span style="width:12px;height:12px;border-radius:50%;background:{{ kid.tc }};--hc:{{ kid.hc }};animation:halo 2s ease-out infinite"></span>
+<span style="font:700 25px Cairo,sans-serif;color:{{ kid.tc }};line-height:1.2">{{ kid.st }}</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)">
+<span style="font:600 11.5px Cairo,sans-serif;color:var(--ink2)">{{ kid.sub }}</span>
+<span style="font:400 11px Cairo,sans-serif;color:var(--muted)">{{ kid.upd }}</span>
+</div>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">خيط اليوم</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">٦ أحداث</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px 14px 8px;box-shadow:var(--shadow-sm)">
+<sc-for list="{{ events }}" as="e" hint-placeholder-count="6">
+<div style="--dt:{{ e.dot }};--bd:{{ e.bd }};--sz:{{ e.sz }};--tx:{{ e.tx }};--hc:{{ e.hc }};--an:{{ e.an }};--ch:{{ e.chip }};--ic:{{ e.icc }};display:grid;grid-template-columns:20px 46px 1fr;align-items:start;gap:10px;position:relative;padding-bottom:14px">
+<div style="display:flex;justify-content:center;position:relative;padding-top:5px"><span style="position:absolute;top:14px;bottom:-14px;width:2px;background:var(--line)"></span><span style="position:relative;width:var(--sz,11px);height:var(--sz,11px);border-radius:50%;background:var(--dt,var(--ok));border:var(--bd,0);animation:var(--an,none)"></span></div>
+<div style="font:600 12px Cairo,sans-serif;color:var(--tx,var(--ink));direction:ltr;text-align:right;padding-top:2px">{{ e.t }}</div>
+<div style="display:flex;align-items:center;gap:9px;min-width:0">
+<span style="width:26px;height:26px;flex:none;border-radius:9px;background:var(--ch,var(--ok-tint));color:var(--ic,var(--ok));display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ e.d }}"/></svg></span>
+<span style="font:400 12.5px Cairo,sans-serif;color:var(--tx,var(--ink));min-width:0">{{ e.d1 }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:12px;padding:14px 2px 4px;overflow:hidden">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 9h16M8 3v3M16 3v3"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الجدول</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">النقل</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--bad);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8M8 12h8M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الصحة</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--gold);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM8.5 14 7 22l5-2.5L17 22l-1.5-8"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الشهادات</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v6h6M9 13h6M9 17h4"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">التقرير</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:50px;height:50px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V6a1 1 0 0 1 1-1z"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الرسائل</span></div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;padding:6px 16px 10px;background:linear-gradient(to top,var(--bg) 74%,transparent)">
+<sc-if value="{{ callIdle }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ onCall }}" style="width:100%;height:54px;border:0;border-radius:19px;background:var(--pri);color:var(--on-pri);font:700 15px Cairo,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(68,83,204,.3);display:flex;align-items:center;justify-content:center;gap:9px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7M17 8l4 4-4 4M21 12H9"/></svg>استدعِ ابني للانصراف</button>
+</sc-if>
+<sc-if value="{{ callWait }}">
+<div onClick="{{ onCall }}" style="cursor:pointer;border-radius:19px;padding:14px 16px;background:var(--warn-tint);display:flex;align-items:center;gap:13px">
+<span style="display:flex;gap:4px;flex:none"><span style="width:7px;height:7px;border-radius:50%;background:var(--warn);animation:bob 1.2s infinite"></span><span style="width:7px;height:7px;border-radius:50%;background:var(--warn);animation:bob 1.2s .2s infinite"></span><span style="width:7px;height:7px;border-radius:50%;background:var(--warn);animation:bob 1.2s .4s infinite"></span></span>
+<span style="display:flex;flex-direction:column;gap:3px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--warn)">وصل نداؤك — بانتظار المشرفة</span><span style="font:400 11px Cairo,sans-serif;color:var(--ink2)">منذ دقيقتين · سيصلك إشعار عند خروجه</span></span>
+</div>
+</sc-if>
+<sc-if value="{{ callWay }}">
+<div onClick="{{ onCall }}" style="cursor:pointer;border-radius:19px;padding:14px 16px;background:var(--ok-tint);display:flex;align-items:center;gap:13px">
+<span style="width:30px;height:30px;flex:none;border-radius:50%;background:var(--ok);color:var(--card);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
+<span style="display:flex;flex-direction:column;gap:3px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ok)">المشرفة في الطريق</span><span style="font:400 11px Cairo,sans-serif;color:var(--ink2)">خرجت من الإدارة · قبل لحظات</span></span>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 10px 26px;background:var(--card);border-top:1px solid var(--line)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--pri)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg><span style="font:700 10.5px Cairo,sans-serif">اليوم</span><span style="width:20px;height:3px;border-radius:2px;background:var(--pri)"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span style="font:600 10.5px Cairo,sans-serif">السجل</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg><span style="font:600 10.5px Cairo,sans-serif">الرسوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16c.6-1.6 2-2.4 4-2.4M14 10h4M14 14h3"/></svg><span style="font:600 10.5px Cairo,sans-serif">البطاقة</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">① اليوم — عرض عريض ٤٣٠ · وحالة نداء الانصراف</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">العرض العريض يمدّ البطاقات ولا يكبّر الخطّ: الاختصارات الستّ تظهر كاملة بلا قصّ، وبطاقة البطل تكسب زرّ «تتبّع الباص» إلى يسار الحالة. ولمى «في الباص» — كهرمانيّ في كل موضع تُذكر فيه.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="اليوم ٤٣٠" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">02</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">اليوم — عريض + نداء الانصراف</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">٤٣٠ × ٩٣٢</span></figcaption>
+<div style="width:430px;height:932px;flex:none;position:relative;background:var(--bg);border-radius:48px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:34px;border-radius:19px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:18px 32px 2px;font:700 14.5px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 10px">
+<div style="display:flex;align-items:center;gap:11px;min-width:0">
+<div style="width:44px;height:44px;flex:none;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 17px Cairo,sans-serif">أ</div>
+<div style="display:flex;flex-direction:column;gap:2px"><div style="font:700 15.5px Cairo,sans-serif;color:var(--ink);white-space:nowrap">مساء الخير، أحمد</div><div style="font:400 10.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap">الأحد ٢٤ صفر · ١٩ أغسطس</div></div>
+</div>
+<div style="display:flex;align-items:center;gap:9px;flex:none">
+<div style="width:39px;height:39px;border-radius:13px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V6a1 1 0 0 1 1-1z"/></svg></div>
+<div style="position:relative;width:39px;height:39px;border-radius:13px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5 1.5 5h-15S6 14 6 10zM10 19a2 2 0 0 0 4 0"/></svg><span style="position:absolute;top:7px;left:8px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:1.5px solid var(--card)"></span></div>
+</div>
+</div>
+
+<div style="flex:none;display:flex;gap:18px;padding:4px 20px 14px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:6px"><div style="width:48px;height:48px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 18px Cairo,sans-serif;opacity:.5">س</div><div style="display:flex;align-items:center;gap:5px;opacity:.5"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink)">سامي</span></div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:60px;height:60px;border-radius:50%;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center;font:700 22px Cairo,sans-serif;box-shadow:0 0 0 3px var(--bg),0 0 0 5.5px var(--warn)">ل</div><div style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:var(--warn)"></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink)">لمى</span></div></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:6px"><div style="width:48px;height:48px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 18px Cairo,sans-serif;opacity:.5">ج</div><div style="display:flex;align-items:center;gap:5px;opacity:.5"><span style="width:7px;height:7px;border-radius:50%;background:var(--slate)"></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink)">جود</span></div></div>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:16px">
+<div style="flex:none;margin:0 20px;border-radius:28px;padding:18px;border:1px solid var(--line);box-shadow:var(--shadow);background:linear-gradient(205deg,var(--warn-tint) 0%,var(--card) 58%)">
+<div style="display:flex;align-items:center;gap:13px">
+<div style="width:56px;height:56px;flex:none;border-radius:20px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font:700 22px Cairo,sans-serif;color:var(--ink2)">ل</div>
+<div style="display:flex;flex-direction:column;gap:3px;flex:1"><div style="font:700 18px Cairo,sans-serif;color:var(--ink)">لمى أحمد العتيبي</div><div style="font:400 12px Cairo,sans-serif;color:var(--muted)">الثاني/ب · مدرسة الملك المنير الأهلية</div></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:12px;height:12px;border-radius:50%;background:var(--warn);--hc:color-mix(in srgb,var(--warn) 55%,transparent);animation:halo 2s ease-out infinite"></span><span style="font:700 27px Cairo,sans-serif;color:var(--warn);line-height:1.2">في الباص</span></div>
+<button style="flex:none;border:0;cursor:pointer;display:flex;align-items:center;gap:7px;background:var(--warn);color:var(--card);border-radius:14px;padding:11px 15px;font:700 12.5px Cairo,sans-serif"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>تتبّع الباص</button>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><span style="font:600 12px Cairo,sans-serif;color:var(--ink2)">تبعد عنكم نقطتان · ٦ دقائق</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">آخر تحديث ١٢:٢٥</span></div>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 20px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px"><span style="font:700 14px Cairo,sans-serif;color:var(--ink)">خيط اليوم</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">٦ أحداث</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:24px;padding:15px 16px 9px;box-shadow:var(--shadow-sm)">
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:15px"><div style="display:flex;justify-content:center;position:relative;padding-top:5px"><span style="position:absolute;top:14px;bottom:-15px;width:2px;background:var(--line)"></span><span style="position:relative;width:11px;height:11px;border-radius:50%;background:var(--slate)"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right;padding-top:1px">٦:٤٥</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg></span><span style="font:400 13px Cairo,sans-serif;color:var(--ink)">خرجت من البيت</span></div></div>
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:15px"><div style="display:flex;justify-content:center;position:relative;padding-top:5px"><span style="position:absolute;top:14px;bottom:-15px;width:2px;background:var(--line)"></span><span style="position:relative;width:11px;height:11px;border-radius:50%;background:var(--warn)"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right;padding-top:1px">٦:٥٨</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="font:400 13px Cairo,sans-serif;color:var(--ink)">صعدت الباص — مسار «الياسمين»</span></div></div>
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:15px"><div style="display:flex;justify-content:center;position:relative;padding-top:5px"><span style="position:absolute;top:14px;bottom:-15px;width:2px;background:var(--line)"></span><span style="position:relative;width:11px;height:11px;border-radius:50%;background:var(--pri)"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right;padding-top:1px">٧:٢٠</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5"/></svg></span><span style="font:400 13px Cairo,sans-serif;color:var(--ink)">دخلت بوابة المدرسة</span></div></div>
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:15px"><div style="display:flex;justify-content:center;position:relative;padding-top:5px"><span style="position:absolute;top:14px;bottom:-15px;width:2px;background:var(--line)"></span><span style="position:relative;width:11px;height:11px;border-radius:50%;background:var(--ok)"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right;padding-top:1px">٧:٣٠</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--ok-tint);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span><span style="font:400 13px Cairo,sans-serif;color:var(--ink)">حاضرة في الفصل</span></div></div>
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:15px"><div style="display:flex;justify-content:center;position:relative;padding-top:3px"><span style="position:absolute;top:16px;bottom:-15px;width:2px;background:var(--line)"></span><span style="position:relative;width:15px;height:15px;border-radius:50%;background:var(--warn);--hc:color-mix(in srgb,var(--warn) 55%,transparent);animation:halo 1.9s ease-out infinite"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right;padding-top:1px">١٢:٢٥</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">صعدت باص العودة</span></div></div>
+<div style="display:grid;grid-template-columns:20px 48px 1fr;gap:10px;position:relative;padding-bottom:12px"><div style="display:flex;justify-content:center;padding-top:5px"><span style="width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--line)"></span></div><div style="font:600 12.5px Cairo,sans-serif;color:var(--muted);direction:ltr;text-align:right;padding-top:1px">١٢:٥٥</div><div style="display:flex;align-items:center;gap:9px"><span style="width:27px;height:27px;flex:none;border-radius:9px;background:var(--card2);color:var(--muted);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg></span><span style="font:400 13px Cairo,sans-serif;color:var(--muted)">تصل نقطة الالتقاء — حيّ الياسمين</span></div></div>
+</div>
+<div style="display:flex;gap:13px;padding:16px 0 4px;justify-content:space-between">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 9h16M8 3v3M16 3v3"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الجدول</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">النقل</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--bad);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8M8 12h8M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الصحة</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--gold);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM8.5 14 7 22l5-2.5L17 22l-1.5-8"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الشهادات</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v6h6M9 13h6M9 17h4"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">التقرير</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:56px"><span style="width:52px;height:52px;border-radius:19px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V6a1 1 0 0 1 1-1z"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink2)">الرسائل</span></div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;padding:6px 20px 12px;background:linear-gradient(to top,var(--bg) 74%,transparent)">
+<div style="border-radius:20px;padding:15px 17px;background:var(--ok-tint);display:flex;align-items:center;gap:13px">
+<span style="width:32px;height:32px;flex:none;border-radius:50%;background:var(--ok);color:var(--card);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
+<span style="display:flex;flex-direction:column;gap:3px"><span style="font:700 14px Cairo,sans-serif;color:var(--ok)">المشرفة في الطريق</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">خرجت من الإدارة · قبل لحظات</span></span>
+</div>
+</div>
+
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:11px 12px 28px;background:var(--card);border-top:1px solid var(--line)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 14px;color:var(--pri)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg><span style="font:700 11px Cairo,sans-serif">اليوم</span><span style="width:22px;height:3px;border-radius:2px;background:var(--pri)"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 14px;color:var(--muted)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span style="font:600 11px Cairo,sans-serif">السجل</span><span style="width:22px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 14px;color:var(--muted)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg><span style="font:600 11px Cairo,sans-serif">الرسوم</span><span style="width:22px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 14px;color:var(--muted)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16c.6-1.6 2-2.4 4-2.4M14 10h4M14 14h3"/></svg><span style="font:600 11px Cairo,sans-serif">البطاقة</span><span style="width:22px;height:3px;border-radius:2px;background:transparent"></span></div>
+<span style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:138px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">② السجل · ③ الرسوم</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">السجل يقرأ بالعين لا بالعدّ: شبكة حرارية شهريّة تُظهر نمط الغياب في لمحة، ثم الدرجات كأشرطة تمتلئ من اليمين مرتّبة من الأعلى للأدنى. والرسوم تبدأ برقم واحد كبير — المتبقّي — لأنه السؤال الوحيد.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="السجل" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">03</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">السجل</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">حضور + درجات</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px"><span style="font:700 20px Cairo,sans-serif;color:var(--ink)">السجل</span><span style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 12px 6px 8px;box-shadow:var(--shadow-sm)"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">سامي</span><span style="width:24px;height:24px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 11px Cairo,sans-serif">س</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:14px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الحضور</span><span style="font:700 24px Cairo,sans-serif;color:var(--ok);direction:ltr;text-align:right">٩٦٪</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">هذا الفصل الدراسي</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الغياب</span><span style="font:700 24px Cairo,sans-serif;color:var(--bad)">٣ أيام</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">آخرها ١٧ صفر</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">التأخير</span><span style="font:700 24px Cairo,sans-serif;color:var(--warn)">مرّتان</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">١١ و٢٠ صفر</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الإجازات</span><span style="font:700 24px Cairo,sans-serif;color:var(--pri-ink)">يوم واحد</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">معتمَدة من الإدارة</span></div>
+</div>
+
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:var(--shadow-sm)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">شهر صفر</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">٢٤ يومًا دراسيًّا</span></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:7px"><span style="font:600 10px Cairo,sans-serif;color:var(--muted);text-align:center">الأحد</span><span style="font:600 10px Cairo,sans-serif;color:var(--muted);text-align:center">الاثنين</span><span style="font:600 10px Cairo,sans-serif;color:var(--muted);text-align:center">الثلاثاء</span><span style="font:600 10px Cairo,sans-serif;color:var(--muted);text-align:center">الأربعاء</span><span style="font:600 10px Cairo,sans-serif;color:var(--muted);text-align:center">الخميس</span></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px">
+<span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--warn)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span>
+<span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--bad)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span>
+<span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--warn)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span>
+<span style="aspect-ratio:1;border-radius:9px;background:var(--bad)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--pri)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span>
+<span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--bad)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--ok-tint)"></span><span style="aspect-ratio:1;border-radius:9px;background:var(--card2);border:1px dashed var(--line)"></span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line)">
+<span style="display:flex;align-items:center;gap:5px;font:400 10px Cairo,sans-serif;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:3px;background:var(--ok-tint)"></span>حاضر</span>
+<span style="display:flex;align-items:center;gap:5px;font:400 10px Cairo,sans-serif;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:3px;background:var(--warn)"></span>متأخر</span>
+<span style="display:flex;align-items:center;gap:5px;font:400 10px Cairo,sans-serif;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:3px;background:var(--bad)"></span>غائب</span>
+<span style="display:flex;align-items:center;gap:5px;font:400 10px Cairo,sans-serif;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:3px;background:var(--pri)"></span>إجازة معتمَدة</span>
+<span style="display:flex;align-items:center;gap:5px;font:400 10px Cairo,sans-serif;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:3px;background:var(--card2);border:1px dashed var(--line)"></span>عطلة</span>
+</div>
+</div>
+
+<div style="background:linear-gradient(210deg,var(--pri-tint) 0%,var(--card) 60%);border:1px solid var(--line);border-radius:22px;padding:14px 16px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">المتوسّط العام</span><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">الفصل الأول · ٧ مواد</span></div>
+<span style="font:700 34px Cairo,sans-serif;color:var(--pri-ink);direction:ltr">٩١</span>
+</div>
+
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:11px">
+<span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الدرجات</span>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">رياضة</span><span style="font:700 12px Cairo,sans-serif;color:var(--ok);direction:ltr">٩٨</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:98%;border-radius:5px;background:var(--ok)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:700 12px Cairo,sans-serif;color:var(--ok);direction:ltr">٩٦</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:96%;border-radius:5px;background:var(--ok)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">لغة عربية</span><span style="font:700 12px Cairo,sans-serif;color:var(--ok);direction:ltr">٩٤</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:94%;border-radius:5px;background:var(--ok)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">دراسات إسلامية</span><span style="font:700 12px Cairo,sans-serif;color:var(--ok);direction:ltr">٩٢</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:92%;border-radius:5px;background:var(--ok)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:700 12px Cairo,sans-serif;color:var(--pri-ink);direction:ltr">٨٩</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:89%;border-radius:5px;background:var(--pri)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">اجتماعيات</span><span style="font:700 12px Cairo,sans-serif;color:var(--pri-ink);direction:ltr">٨٦</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:86%;border-radius:5px;background:var(--pri)"></span></span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">لغة إنجليزية</span><span style="font:700 12px Cairo,sans-serif;color:var(--warn);direction:ltr">٨٢</span></div><span style="height:8px;border-radius:5px;background:var(--card2);display:block"><span style="display:block;height:8px;width:82%;border-radius:5px;background:var(--warn)"></span></span></div>
+</div>
+</div>
+
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 10px 26px;background:var(--card);border-top:1px solid var(--line);margin-top:12px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg><span style="font:600 10.5px Cairo,sans-serif">اليوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--pri)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span style="font:700 10.5px Cairo,sans-serif">السجل</span><span style="width:20px;height:3px;border-radius:2px;background:var(--pri)"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg><span style="font:600 10.5px Cairo,sans-serif">الرسوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16c.6-1.6 2-2.4 4-2.4M14 10h4M14 14h3"/></svg><span style="font:600 10.5px Cairo,sans-serif">البطاقة</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+</div>
+</figure>
+
+<figure data-screen-label="الرسوم" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">04</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الرسوم</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">قسط متأخر ظاهر</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px"><span style="font:700 20px Cairo,sans-serif;color:var(--ink)">الرسوم</span><span style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 12px 6px 8px;box-shadow:var(--shadow-sm)"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">سامي</span><span style="width:24px;height:24px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 11px Cairo,sans-serif">س</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:14px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:26px;padding:20px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px">
+<span style="font:400 12px Cairo,sans-serif;color:var(--muted)">المتبقّي على العام الدراسي</span>
+<span style="font:700 46px Cairo,sans-serif;color:var(--ink);line-height:1.1;white-space:nowrap">٣٬١٠٠ <span style="font:700 20px Cairo,sans-serif;color:var(--ink2)">ر.س</span></span>
+<span style="display:inline-flex;align-items:center;gap:7px;font:600 12.5px Cairo,sans-serif;color:var(--warn);margin-top:2px"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn)"></span>القسط القادم بعد ١٢ يومًا</span>
+<div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">
+<div style="display:flex;justify-content:space-between"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">سُدِّد ٦٬٩٠٠ ر.س من ١٠٬٠٠٠ ر.س</span><span style="font:700 11px Cairo,sans-serif;color:var(--ok);direction:ltr">٦٩٪</span></div>
+<span style="height:10px;border-radius:6px;background:var(--card2);display:block"><span style="display:block;height:10px;width:69%;border-radius:6px;background:var(--ok)"></span></span>
+</div>
+</div>
+
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px 14px 14px;box-shadow:var(--shadow-sm)">
+<div style="font:700 13.5px Cairo,sans-serif;color:var(--ink);margin-bottom:16px">الأقساط</div>
+<div style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+<span style="position:absolute;top:9px;right:12%;left:12%;height:2px;background:var(--line)"></span>
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;position:relative"><span style="width:20px;height:20px;border-radius:50%;background:var(--ok);color:var(--card);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink)">١ سبتمبر</span><span style="font:700 11.5px Cairo,sans-serif;color:var(--ok);white-space:nowrap">٣٬٤٠٠</span><span style="font:400 9.5px Cairo,sans-serif;color:var(--muted)">مدفوع</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;position:relative"><span style="width:20px;height:20px;border-radius:50%;background:var(--ok);color:var(--card);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink)">١ نوفمبر</span><span style="font:700 11.5px Cairo,sans-serif;color:var(--ok);white-space:nowrap">٣٬٥٠٠</span><span style="font:400 9.5px Cairo,sans-serif;color:var(--muted)">مدفوع</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;position:relative"><span style="width:20px;height:20px;border-radius:50%;background:var(--bad);color:var(--card);display:flex;align-items:center;justify-content:center;font:700 12px Cairo,sans-serif">!</span><span style="font:600 10.5px Cairo,sans-serif;color:var(--ink)">١٥ يناير</span><span style="font:700 11.5px Cairo,sans-serif;color:var(--bad);white-space:nowrap">١٬٦٠٠</span><span style="font:400 9.5px Cairo,sans-serif;color:var(--bad)">متأخر</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;position:relative"><span style="width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line)"></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--muted)">١ مارس</span><span style="font:700 11.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap">١٬٥٠٠</span><span style="font:400 9.5px Cairo,sans-serif;color:var(--muted)">قادم</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:0 2px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الفواتير</span><span style="font:600 11px Cairo,sans-serif;color:var(--pri-ink)">عرض الكل</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="display:flex;flex-direction:column;gap:3px"><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink)">القسط الثالث</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">١٥ يناير ٢٠٢٥</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font:700 13px Cairo,sans-serif;color:var(--ink);white-space:nowrap">١٬٦٠٠ ر.س</span><span style="font:700 10px Cairo,sans-serif;color:var(--bad);background:var(--bad-tint);padding:4px 9px;border-radius:8px">متأخر</span></div></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="display:flex;flex-direction:column;gap:3px"><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink)">رسوم النقل — الفصل الأول</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">٣ نوفمبر ٢٠٢٤</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font:700 13px Cairo,sans-serif;color:var(--ink);white-space:nowrap">٩٠٠ ر.س</span><span style="font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--ok-tint);padding:4px 9px;border-radius:8px">مسدَّد</span></div></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="display:flex;flex-direction:column;gap:3px"><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink)">الزيّ المدرسي</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">١٢ سبتمبر ٢٠٢٤</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font:700 13px Cairo,sans-serif;color:var(--ink);white-space:nowrap">٤٢٠ ر.س</span><span style="font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--ok-tint);padding:4px 9px;border-radius:8px">مسدَّد</span></div></div>
+</div>
+</div>
+
+<div style="flex:none;padding:8px 16px 10px;background:linear-gradient(to top,var(--bg) 74%,transparent)"><button style="width:100%;height:54px;border:0;border-radius:19px;background:var(--pri);color:var(--on-pri);font:700 15px Cairo,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(68,83,204,.3);display:flex;align-items:center;justify-content:center;gap:8px">سدّد ٣٬١٠٠ ر.س</button></div>
+
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 10px 26px;background:var(--card);border-top:1px solid var(--line)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg><span style="font:600 10.5px Cairo,sans-serif">اليوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span style="font:600 10.5px Cairo,sans-serif">السجل</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--pri)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg><span style="font:700 10.5px Cairo,sans-serif">الرسوم</span><span style="width:20px;height:3px;border-radius:2px;background:var(--pri)"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16c.6-1.6 2-2.4 4-2.4M14 10h4M14 14h3"/></svg><span style="font:600 10.5px Cairo,sans-serif">البطاقة</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">④ البطاقة · وحالة ملء الشاشة</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">وثيقة رسميّة لا بطاقة تطبيق: ترويسة المدرسة، والاسم بالعربية وتحته بالإنجليزية بخطّ أصغر، والرقم الأكاديمي بارز. لوحة الرمز بيضاء دائمًا في الوضعين — الماسح يحتاج تباينًا لا هويّة. وحالة ملء الشاشة تُفتح عند البوابة: خلفية داكنة والرمز يُمسح من مسافة.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="البطاقة" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">05</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">البطاقة</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px"><span style="font:700 20px Cairo,sans-serif;color:var(--ink)">البطاقة</span><span style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 12px 6px 8px;box-shadow:var(--shadow-sm)"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">سامي</span><span style="width:24px;height:24px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 11px Cairo,sans-serif">س</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden">
+<div style="display:flex;align-items:center;gap:11px;padding:14px 16px;background:var(--pri);color:var(--on-pri)">
+<span style="width:34px;height:34px;flex:none;border-radius:11px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5"/></svg></span>
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font:700 13px Cairo,sans-serif">مدرسة الملك المنير الأهلية</span><span style="font:400 10.5px Cairo,sans-serif;opacity:.85">بطاقة طالب · العام ١٤٤٦هـ</span></span>
+</div>
+<div style="padding:16px">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:66px;height:66px;flex:none;border-radius:20px;background:repeating-linear-gradient(135deg,var(--card2),var(--card2) 5px,var(--bg) 5px,var(--bg) 10px);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font:400 7px ui-monospace,monospace;color:var(--muted)">صورة</span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<span style="font:700 18px Cairo,sans-serif;color:var(--ink)">سامي أحمد العتيبي</span>
+<span style="font:400 11.5px Cairo,sans-serif;color:var(--muted);direction:ltr;text-align:right">Sami Ahmed Alotaibi</span>
+<span style="align-self:flex-start;font:700 10.5px Cairo,sans-serif;color:var(--pri-ink);background:var(--pri-tint);padding:4px 10px;border-radius:8px">الرابع/أ</span>
+</span>
+</div>
+<div style="margin-top:15px;padding:12px 14px;border-radius:16px;background:var(--card2);display:flex;align-items:center;justify-content:space-between"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الرقم الأكاديمي</span><span style="font:700 22px Cairo,sans-serif;color:var(--ink);direction:ltr;letter-spacing:1px">٤٠٢٧١٥</span></div>
+<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:9px">
+<span style="display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">رقم الهوية</span><span style="font:600 12px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">١٠٩٨٧٦٥٤٣٢</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">تاريخ الميلاد</span><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">١٢ رجب ١٤٣٦هـ</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">النقل</span><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">مسار «الياسمين»</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">الحالة الآن</span><span style="display:flex;align-items:center;gap:5px;font:600 12px Cairo,sans-serif;color:var(--ok)"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>في المدرسة</span></span>
+</div>
+<div style="margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:9px">
+<div style="position:relative;width:216px;height:216px;border-radius:20px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)">
+<div style="position:relative;width:200px;height:200px;direction:ltr;color:#111"><span style="position:absolute;top:0;left:0;width:8px;height:8px;box-shadow:{{ qr }}"></span></div>
+<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(0,0,0,.08)"><span style="width:46px;height:46px;border-radius:50%;background:repeating-linear-gradient(135deg,#eef0f7,#eef0f7 4px,#e2e5ef 4px,#e2e5ef 8px);display:flex;align-items:center;justify-content:center;font:700 16px Cairo,sans-serif;color:#7b8098">س</span></span>
+</div>
+<span style="font:600 11.5px Cairo,sans-serif;color:var(--pri-ink)">اضغط لعرضه كاملًا</span>
+</div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 10px 26px;background:var(--card);border-top:1px solid var(--line)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5"/></svg><span style="font:600 10.5px Cairo,sans-serif">اليوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span style="font:600 10.5px Cairo,sans-serif">السجل</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg><span style="font:600 10.5px Cairo,sans-serif">الرسوم</span><span style="width:20px;height:3px;border-radius:2px;background:transparent"></span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 12px;color:var(--pri)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16c.6-1.6 2-2.4 4-2.4M14 10h4M14 14h3"/></svg><span style="font:700 10.5px Cairo,sans-serif">البطاقة</span><span style="width:20px;height:3px;border-radius:2px;background:var(--pri)"></span></div>
+<span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+</div>
+</figure>
+
+<figure data-screen-label="البطاقة ملء الشاشة" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">06</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">البطاقة — ملء الشاشة</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">عند البوابة</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:#0a0b12;border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#000;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:#fff"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:#fff;opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid #fff;border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:0 28px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px">
+<span style="font:700 25px Cairo,sans-serif;color:#fff">سامي أحمد العتيبي</span>
+<span style="font:400 12.5px Cairo,sans-serif;color:rgba(255,255,255,.6)">الرابع/أ · مدرسة الملك المنير الأهلية</span>
+</div>
+<div style="position:relative;width:302px;height:302px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 90px rgba(255,255,255,.14)">
+<div style="position:relative;width:200px;height:200px;direction:ltr;color:#111;transform:scale(1.32)"><span style="position:absolute;top:0;left:0;width:8px;height:8px;box-shadow:{{ qr }}"></span></div>
+<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:#fff;border:4px solid #fff;display:flex;align-items:center;justify-content:center"><span style="width:62px;height:62px;border-radius:50%;background:repeating-linear-gradient(135deg,#eef0f7,#eef0f7 4px,#e2e5ef 4px,#e2e5ef 8px);display:flex;align-items:center;justify-content:center;font:700 22px Cairo,sans-serif;color:#7b8098">س</span></span>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+<span style="font:400 11.5px Cairo,sans-serif;color:rgba(255,255,255,.55)">الرقم الأكاديمي</span>
+<span style="font:700 32px Cairo,sans-serif;color:#fff;direction:ltr;letter-spacing:3px">٤٠٢٧١٥</span>
+</div>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:16px;padding-bottom:34px">
+<span style="font:600 12.5px Cairo,sans-serif;color:rgba(255,255,255,.5)">اضغط للإغلاق</span>
+<span style="width:130px;height:5px;border-radius:3px;background:rgba(255,255,255,.35)"></span>
+</div>
+</div>
+</figure>
+
+<figure data-screen-label="الإشعارات" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">07</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الإشعارات</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">⑤ مجموعة بيومها</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px">
+<span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+<span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الإشعارات</span>
+<span style="font:600 11.5px Cairo,sans-serif;color:var(--pri-ink)">تحديد الكل كمقروء</span>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:8px">
+<span style="font:700 12px Cairo,sans-serif;color:var(--muted);padding:6px 4px 2px">اليوم</span>
+<div style="background:var(--pri-tint);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--card);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;gap:7px"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">دخل بوابة المدرسة</span><span style="width:7px;height:7px;border-radius:50%;background:var(--pri);flex:none"></span></span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">تمّ تسجيل دخول العهدة عند البوابة الرئيسية</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>سامي</span><span>·</span><span>٧:١٤</span></span></span></div>
+<div style="background:var(--bad-tint);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--card);color:var(--bad);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8M8 12h8M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;gap:7px"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">زيارة العيادة</span><span style="width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none"></span></span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">صداع خفيف — أُعطي ماءً وراحة، ولم يُرسل للمنزل</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>سامي</span><span>·</span><span>١٢:٠٥</span></span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">صعدت باص العودة</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">مسار «الياسمين» — الوصول المتوقّع ١٢:٥٥</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>لمى</span><span>·</span><span>١٢:٢٥</span></span></span></div>
+<span style="font:700 12px Cairo,sans-serif;color:var(--muted);padding:8px 4px 2px">أمس</span>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--gold-tint);color:var(--gold);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM8.5 14 7 22l5-2.5L17 22l-1.5-8"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">شهادة جديدة</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">المركز الأول في مسابقة القراءة</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>سامي</span><span>·</span><span>٤:٢٠ م</span></span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--ok-tint);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">رُصدت درجة رياضيات</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">٩٦ من ١٠٠ — أ. خالد المطيري</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>سامي</span><span>·</span><span>١:٤٠ م</span></span></span></div>
+<span style="font:700 12px Cairo,sans-serif;color:var(--muted);padding:8px 4px 2px">الأحد ٢٤ صفر</span>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7V6a2 2 0 0 1 2-2h9M16 13h2"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">تذكير بالقسط الثالث</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">١٬٦٠٠ ر.س — تجاوز موعد الاستحقاق</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>سامي</span><span>·</span><span>٩:٠٠</span></span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;gap:11px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V6a1 1 0 0 1 1-1z"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:600 13px Cairo,sans-serif;color:var(--ink)">تعميم إداري</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">انصراف مبكّر يوم الخميس الساعة ١١:٠٠</span><span style="display:flex;gap:8px;font:400 10.5px Cairo,sans-serif;color:var(--muted)"><span>الثلاثة</span><span>·</span><span>٨:١٥</span></span></span></div>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">⑥ أين ابني الآن · ⑦ النقل · ⑧ الجدول الدراسي</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">شاشة التتبّع تجيب بجملة واحدة قبل الخريطة: «تبعد عنكم نقطتان · ٦ دقائق». ورقم السائق زرّ اتصال لا نصّ يُنسخ. الجدول يميّز الحصة الجارية بإطار ملوّن حتى لا يعدّ الأب الصفوف.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="التتبع" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">08</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">أين ابني الآن</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--map-bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;inset:0;background:var(--map-bg)">
+<span style="position:absolute;top:70px;right:-20px;width:150px;height:120px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:70px;left:20px;width:130px;height:80px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:210px;right:30px;width:110px;height:140px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:200px;left:-10px;width:120px;height:100px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:330px;left:40px;width:100px;height:110px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:400px;right:-30px;width:160px;height:130px;border-radius:14px;background:var(--map-block)"></span>
+<span style="position:absolute;top:0;bottom:0;right:170px;width:26px;background:var(--map-road)"></span>
+<span style="position:absolute;left:0;right:0;top:170px;height:24px;background:var(--map-road)"></span>
+<span style="position:absolute;left:0;right:0;top:370px;height:22px;background:var(--map-road)"></span>
+<span style="position:absolute;top:120px;bottom:0;left:150px;width:20px;background:var(--map-road)"></span>
+<svg width="393" height="620" viewBox="0 0 393 620" fill="none" style="position:absolute;top:0;left:0"><path d="M60 560 L60 380 L183 380 L183 182 L300 182 L300 90" stroke="var(--pri)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>
+<span style="position:absolute;top:86px;left:86px;width:15px;height:15px;border-radius:50%;background:var(--card);border:4px solid var(--pri)"></span>
+<span style="position:absolute;top:174px;right:178px;width:13px;height:13px;border-radius:50%;background:var(--card);border:3.5px solid var(--pri);opacity:.75"></span>
+<span style="position:absolute;top:372px;right:196px;width:13px;height:13px;border-radius:50%;background:var(--card);border:3.5px solid var(--pri);opacity:.75"></span>
+<span style="position:absolute;top:552px;right:326px;width:15px;height:15px;border-radius:50%;background:var(--card);border:4px solid var(--ok)"></span>
+<span style="position:absolute;top:520px;right:290px;font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--card);padding:4px 8px;border-radius:8px;box-shadow:var(--shadow-sm);white-space:nowrap">نقطة لمى</span>
+<span style="position:absolute;top:340px;right:172px;width:44px;height:44px;border-radius:50%;background:var(--warn);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.28);--hc:color-mix(in srgb,var(--warn) 50%,transparent);animation:halo 2s ease-out infinite"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span>
+</div>
+<div style="position:relative;z-index:3;flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="position:relative;z-index:3;flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px">
+<span style="width:38px;height:38px;border-radius:13px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+<span style="display:flex;align-items:center;gap:8px;background:var(--card);border-radius:13px;padding:9px 14px;box-shadow:var(--shadow)"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn)"></span><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">لمى · في الباص</span></span>
+</div>
+<div style="flex:1"></div>
+<div style="position:relative;z-index:3;flex:none;background:var(--card);border-radius:30px 30px 0 0;padding:10px 18px 30px;box-shadow:0 -10px 34px rgba(20,22,50,.16)">
+<span style="display:block;width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></span>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 21px Cairo,sans-serif;color:var(--ink)">تبعد عنكم نقطتان</span><span style="font:400 12px Cairo,sans-serif;color:var(--muted)">الوصول المتوقّع ١٢:٥٥ · مسار «الياسمين»</span></div>
+<span style="flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:70px;height:62px;border-radius:20px;background:var(--warn-tint)"><span style="font:700 22px Cairo,sans-serif;color:var(--warn);line-height:1">٦</span><span style="font:600 10px Cairo,sans-serif;color:var(--warn)">دقائق</span></span>
+</div>
+<div style="margin-top:16px;padding:13px 14px;border-radius:20px;background:var(--card2);display:flex;align-items:center;gap:12px">
+<span style="width:46px;height:46px;flex:none;border-radius:16px;background:repeating-linear-gradient(135deg,var(--bg),var(--bg) 5px,var(--card) 5px,var(--card) 10px);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font:400 7px ui-monospace,monospace;color:var(--muted)">صورة</span>
+<span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">عبدالله الشمري</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted);direction:ltr;text-align:right">٠٥٥ ١٢٣ ٤٤٨٧</span></span>
+<span style="width:46px;height:46px;flex:none;border-radius:16px;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(13,122,85,.3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg></span>
+</div>
+<div style="margin-top:10px;display:flex;gap:10px">
+<span style="flex:1;display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:16px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">الباص</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink)">باص ٧ — «الياسمين»</span></span>
+<span style="flex:1;display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:16px;border:1px solid var(--line)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">اللوحة</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">ر ح د ٤٢٩٨</span></span>
+</div>
+<span style="display:block;width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24;margin:18px auto 0"></span>
+</div>
+</div>
+</figure>
+
+<figure data-screen-label="النقل" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">09</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">النقل</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink)">النقل</span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:13px">
+<div style="background:linear-gradient(205deg,var(--warn-tint) 0%,var(--card) 60%);border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px">
+<span style="width:50px;height:50px;flex:none;border-radius:18px;background:var(--card);display:flex;align-items:center;justify-content:center;font:700 20px Cairo,sans-serif;color:var(--ink2);border:1px solid var(--line)">ل</span>
+<span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:700 16px Cairo,sans-serif;color:var(--ink)">لمى أحمد العتيبي</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">الثاني/ب · مشتركة في النقل المدرسي</span></span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--warn);background:var(--card);padding:5px 10px;border-radius:9px">في الباص</span>
+</div>
+
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:54px;height:54px;flex:none;border-radius:18px;background:repeating-linear-gradient(135deg,var(--card2),var(--card2) 5px,var(--bg) 5px,var(--bg) 10px);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font:400 7px ui-monospace,monospace;color:var(--muted)">صورة</span>
+<span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">السائق</span><span style="font:700 14.5px Cairo,sans-serif;color:var(--ink)">عبدالله الشمري</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted);direction:ltr;text-align:right">٠٥٥ ١٢٣ ٤٤٨٧</span></span>
+<span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg></span>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+<span style="display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:15px;background:var(--card2)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">المسار</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink)">«الياسمين»</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:15px;background:var(--card2)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">لوحة الباص</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">ر ح د ٤٢٩٨</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:15px;background:var(--card2)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">التقاط الصباح</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">٦:٥٥</span></span>
+<span style="display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:15px;background:var(--card2)"><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">التوصيل المساء</span><span style="font:600 12.5px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">١٢:٥٥</span></span>
+</div>
+</div>
+
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px 16px 16px;box-shadow:var(--shadow-sm)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">نقطة الالتقاء</span><span style="font:600 11px Cairo,sans-serif;color:var(--pri-ink)">تعديل</span></div>
+<div style="position:relative;height:168px;border-radius:18px;overflow:hidden;background:var(--map-bg)">
+<span style="position:absolute;top:16px;right:-10px;width:110px;height:60px;border-radius:10px;background:var(--map-block)"></span>
+<span style="position:absolute;top:100px;left:10px;width:120px;height:70px;border-radius:10px;background:var(--map-block)"></span>
+<span style="position:absolute;top:0;bottom:0;right:130px;width:20px;background:var(--map-road)"></span>
+<span style="position:absolute;left:0;right:0;top:84px;height:18px;background:var(--map-road)"></span>
+<span style="position:absolute;top:74px;right:122px;width:36px;height:36px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg></span>
+<span style="position:absolute;bottom:12px;right:12px;left:12px;background:var(--card);border-radius:13px;padding:9px 12px;box-shadow:var(--shadow-sm);font:600 12px Cairo,sans-serif;color:var(--ink)">حيّ الياسمين — أمام مسجد الفرقان</span>
+</div>
+</div>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="الجدول" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">10</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الجدول الدراسي</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 10px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الجدول الدراسي</span><span style="font:600 11px Cairo,sans-serif;color:var(--muted)">سامي · الرابع/أ</span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 14px">
+<div style="background:var(--pri-tint);border-radius:16px;padding:11px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pri);--hc:color-mix(in srgb,var(--pri) 55%,transparent);animation:halo 2s ease-out infinite"></span><span style="font:700 12.5px Cairo,sans-serif;color:var(--pri-ink)">الآن: علوم — أ. منى القحطاني · حتى ١٢:٤٠</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 10px;box-shadow:var(--shadow-sm)">
+<div style="display:grid;grid-template-columns:38px repeat(5,1fr);gap:5px;margin-bottom:7px">
+<span></span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--pri-ink);text-align:center">الأحد</span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--muted);text-align:center">الاثنين</span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--muted);text-align:center">الثلاثاء</span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--muted);text-align:center">الأربعاء</span>
+<span style="font:700 10.5px Cairo,sans-serif;color:var(--muted);text-align:center">الخميس</span>
+</div>
+<div style="display:grid;grid-template-columns:38px repeat(5,1fr);gap:5px">
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">٧:٣٠</span>
+<span style="border-radius:10px;background:var(--pri-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">عربي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--pri-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--warn-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إسلامية</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">٨:٢٠</span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">عربي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--pri-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إنجليزي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">عربي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">٩:١٠</span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إنجليزي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--warn-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إسلامية</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضة</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">اجتماعيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--pri-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="grid-column:1/-1;height:26px;display:flex;align-items:center;justify-content:center;font:600 10px Cairo,sans-serif;color:var(--muted);background:var(--card2);border-radius:9px;margin:1px 0">الفسحة · ١٠:٠٠</span>
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">١٠:٣٠</span>
+<span style="border-radius:10px;background:var(--warn-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إسلامية</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--pri-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">عربي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إنجليزي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">١١:٥٠</span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 0 0 2.5px var(--pri)"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">اجتماعيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضة</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--warn-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إسلامية</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 9px Cairo,sans-serif;color:var(--muted);direction:ltr">١٢:٤٠</span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">اجتماعيات</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--gold-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">رياضة</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">خالد</span></span>
+<span style="border-radius:10px;background:var(--warn-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إسلامية</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">هند</span></span>
+<span style="border-radius:10px;background:var(--ok-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">علوم</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+<span style="border-radius:10px;background:var(--slate-tint);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">إنجليزي</span><span style="font:400 8.5px Cairo,sans-serif;color:var(--muted)">منى</span></span>
+</div>
+</div>
+<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow-sm)"><span style="font:600 12px Cairo,sans-serif;color:var(--ink)">الانصراف</span><span style="font:700 12.5px Cairo,sans-serif;color:var(--ink2);direction:ltr">١:٢٠</span></div>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">⑨ الصحة · ⑩ الشهادات · ⑪ التقرير اليومي</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">الصحة مرتّبة بالخطورة لا بالتاريخ: الحساسية أولًا وبالأحمر — وهو اللون الوحيد الأحمر في الشاشة. الشهادات مصمّمة لتُشارَك، فزرّ المشاركة بحجم زرّ الحفظ نفسه. والتقرير اليومي للروضة يُقرأ بالأيقونة قبل النصّ.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="الصحة" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">11</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الصحة المدرسية</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الصحة المدرسية</span><span style="font:600 11px Cairo,sans-serif;color:var(--muted)">سامي</span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:13px">
+<div style="background:var(--bad-tint);border-radius:22px;padding:16px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--shadow-sm)">
+<span style="width:42px;height:42px;flex:none;border-radius:14px;background:var(--bad);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3zM12 10v4M12 17h.01"/></svg></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span style="font:700 17px Cairo,sans-serif;color:var(--bad)">حساسية: الفول السوداني</span><span style="font:400 12px/1.6 Cairo,sans-serif;color:var(--ink2)">مسجّلة لدى عيادة المدرسة والمقصف. يحمل قلم إبينفرين في حقيبته.</span></span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">فصيلة الدم</span><span style="font:700 26px Cairo,sans-serif;color:var(--ink);direction:ltr;text-align:right">+O</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">زيارات العيادة</span><span style="font:700 26px Cairo,sans-serif;color:var(--ink)">٣</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">هذا الفصل</span></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<span style="font:700 13.5px Cairo,sans-serif;color:var(--ink);padding:2px 2px 0">زيارات العيادة</span>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">صداع خفيف</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">اليوم · ١٢:٠٥</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:9px;border-top:1px solid var(--line)">
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">ما فُعل</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink)">راحة ٢٠ دقيقة وشرب ماء</span></div>
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">أُرسل للمنزل</span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ok)">لا — عاد إلى الفصل</span></div>
+</div>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">كدمة في الركبة</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">١١ صفر</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:9px;border-top:1px solid var(--line)">
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">ما فُعل</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink)">تعقيم وضمادة بعد حصة الرياضة</span></div>
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">أُرسل للمنزل</span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ok)">لا</span></div>
+</div>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">حرارة ٣٨٫٢</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">٢ صفر</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:9px;border-top:1px solid var(--line)">
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">ما فُعل</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink)">اتُّصل بولي الأمر فورًا</span></div>
+<div style="display:flex;gap:8px"><span style="font:400 11px Cairo,sans-serif;color:var(--muted);width:64px;flex:none">أُرسل للمنزل</span><span style="font:600 11.5px Cairo,sans-serif;color:var(--warn)">نعم — ١٠:٤٠</span></div>
+</div>
+</div>
+</div>
+<p style="margin:2px 4px 0;font:400 11px/1.7 Cairo,sans-serif;color:var(--muted)">التشخيصات والأدوية الموصوفة لدى عيادة المدرسة.</p>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="الشهادات" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">12</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الشهادات + المشاركة</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الشهادات</span><span style="font:600 11px Cairo,sans-serif;color:var(--muted)">٤ شهادات</span></div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px"><span style="height:112px;border-radius:14px;background:linear-gradient(150deg,var(--gold-tint),var(--card));border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--gold);opacity:.22"></span></span><span style="display:flex;flex-direction:column;gap:3px;padding:0 3px 3px"><span style="font:700 12px Cairo,sans-serif;color:var(--ink)">المركز الأول في القراءة</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">٢٣ صفر ١٤٤٦</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px"><span style="height:112px;border-radius:14px;background:linear-gradient(150deg,var(--pri-tint),var(--card));border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--pri);opacity:.22"></span></span><span style="display:flex;flex-direction:column;gap:3px;padding:0 3px 3px"><span style="font:700 12px Cairo,sans-serif;color:var(--ink)">شهادة تفوّق — الفصل الأول</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">١٠ صفر ١٤٤٦</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px"><span style="height:112px;border-radius:14px;background:linear-gradient(150deg,var(--ok-tint),var(--card));border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--ok);opacity:.22"></span></span><span style="display:flex;flex-direction:column;gap:3px;padding:0 3px 3px"><span style="font:700 12px Cairo,sans-serif;color:var(--ink)">الحضور المثالي</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">٢٩ محرم ١٤٤٦</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px"><span style="height:112px;border-radius:14px;background:linear-gradient(150deg,var(--warn-tint),var(--card));border:1px solid var(--line);display:flex;align-items:center;justify-content:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--warn);opacity:.22"></span></span><span style="display:flex;flex-direction:column;gap:3px;padding:0 3px 3px"><span style="font:700 12px Cairo,sans-serif;color:var(--ink)">مشاركة معرض العلوم</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">١٥ محرم ١٤٤٦</span></span></div>
+</div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(10,11,18,.55);z-index:8"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--card);border-radius:30px 30px 0 0;padding:10px 18px 26px;box-shadow:0 -12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px">
+<span style="width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto"></span>
+<div style="height:290px;border-radius:20px;background:linear-gradient(150deg,var(--gold-tint),var(--card));border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px">
+<span style="width:52px;height:52px;border-radius:50%;border:3px solid var(--gold);opacity:.5"></span>
+<span style="font:400 11px Cairo,sans-serif;color:var(--muted)">مدرسة الملك المنير الأهلية</span>
+<span style="font:700 21px Cairo,sans-serif;color:var(--ink);text-align:center">المركز الأول في مسابقة القراءة</span>
+<span style="font:600 13px Cairo,sans-serif;color:var(--gold)">سامي أحمد العتيبي</span>
+<span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">٢٣ صفر ١٤٤٦ · الرابع/أ</span>
+</div>
+<div style="display:flex;gap:10px">
+<button style="flex:1;height:50px;border:0;border-radius:17px;background:var(--pri);color:var(--on-pri);font:700 14px Cairo,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M12 3v13M8 11l4 4 4-4"/></svg>حفظ</button>
+<button style="flex:1;height:50px;border:1px solid var(--pri);border-radius:17px;background:transparent;color:var(--pri-ink);font:700 14px Cairo,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M8 7l4-4 4 4M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>مشاركة</button>
+</div>
+<span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24;margin:2px auto 0"></span>
+</div>
+</div>
+</figure>
+
+<figure data-screen-label="الشهادات فارغة" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--slate);color:var(--card);padding:3px 7px;border-radius:6px;direction:ltr">13</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الشهادات — فارغة</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">جود</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الشهادات</span><span style="font:600 11px Cairo,sans-serif;color:var(--muted)">جود · روضة ٢</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 44px;margin-top:-60px">
+<div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center">
+<span style="position:absolute;inset:0;border-radius:36px;background:var(--gold-tint)"></span>
+<span style="position:relative;width:56px;height:56px;border-radius:50%;border:3px dashed var(--gold);opacity:.55"></span>
+</div>
+<span style="font:700 18px Cairo,sans-serif;color:var(--ink)">لا شهادات بعد</span>
+<p style="margin:0;font:400 12.5px/1.8 Cairo,sans-serif;color:var(--ink2);text-align:center;text-wrap:pretty">تظهر شهادات جود هنا فور اعتمادها من المعلّمة — عادةً في نهاية كل فصل دراسي، أو بعد المسابقات والأنشطة.</p>
+<span style="font:600 12px Cairo,sans-serif;color:var(--pri-ink);background:var(--pri-tint);padding:11px 18px;border-radius:14px">عرض شهادات سامي ولمى</span>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="التقرير اليومي" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">14</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">التقرير اليومي</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">للروضة فقط</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="display:flex;flex-direction:column;gap:1px;flex:1"><span style="font:700 19px Cairo,sans-serif;color:var(--ink)">التقرير اليومي</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">جود · روضة ٢ · الأحد ٢٤ صفر</span></span></div>
+
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;align-items:center;gap:9px"><span style="width:52px;height:52px;border-radius:19px;background:var(--ok-tint);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8a2 2 0 0 0 4 0V3M8 11v10M17 3c-1.4 2-2 4-2 6s.6 3 2 3 2-1 2-3-.6-4-2-6M17 12v9"/></svg></span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">الوجبة</span><span style="font:700 14px Cairo,sans-serif;color:var(--ok)">أكلت معظمها</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;align-items:center;gap:9px"><span style="width:52px;height:52px;border-radius:19px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8.2 8.2 0 1 0 10.5 10.5z"/></svg></span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">النوم</span><span style="font:700 14px Cairo,sans-serif;color:var(--ink)">٤٥ دقيقة</span></div>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px">
+<span style="font:700 13px Cairo,sans-serif;color:var(--ink)">المزاج</span>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:11px 4px;border-radius:16px;background:var(--gold-tint);box-shadow:0 0 0 2.5px var(--gold)"><span style="position:relative;width:34px;height:34px;border-radius:50%;background:var(--gold);opacity:.9"><span style="position:absolute;top:11px;right:8px;width:4px;height:4px;border-radius:50%;background:#fff"></span><span style="position:absolute;top:11px;left:8px;width:4px;height:4px;border-radius:50%;background:#fff"></span><span style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:14px;height:7px;border-radius:0 0 9px 9px;background:#fff"></span></span><span style="font:700 10.5px Cairo,sans-serif;color:var(--ink)">سعيدة</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:11px 4px;border-radius:16px;background:var(--card2)"><span style="position:relative;width:34px;height:34px;border-radius:50%;background:var(--line)"><span style="position:absolute;top:11px;right:8px;width:4px;height:4px;border-radius:50%;background:var(--muted)"></span><span style="position:absolute;top:11px;left:8px;width:4px;height:4px;border-radius:50%;background:var(--muted)"></span><span style="position:absolute;bottom:11px;left:50%;transform:translateX(-50%);width:14px;height:3px;border-radius:2px;background:var(--muted)"></span></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--muted)">هادئة</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:11px 4px;border-radius:16px;background:var(--card2)"><span style="position:relative;width:34px;height:34px;border-radius:50%;background:var(--line)"><span style="position:absolute;top:12px;right:8px;width:5px;height:2.5px;border-radius:2px;background:var(--muted)"></span><span style="position:absolute;top:12px;left:8px;width:5px;height:2.5px;border-radius:2px;background:var(--muted)"></span><span style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:12px;height:5px;border-radius:9px 9px 0 0;background:var(--muted);opacity:.6"></span></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--muted)">متعبة</span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:11px 4px;border-radius:16px;background:var(--card2)"><span style="position:relative;width:34px;height:34px;border-radius:50%;background:var(--line)"><span style="position:absolute;top:11px;right:8px;width:4px;height:4px;border-radius:50%;background:var(--muted)"></span><span style="position:absolute;top:11px;left:8px;width:4px;height:4px;border-radius:50%;background:var(--muted)"></span><span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:14px;height:7px;border-radius:9px 9px 0 0;background:var(--muted);opacity:.7"></span></span><span style="font:600 10.5px Cairo,sans-serif;color:var(--muted)">منزعجة</span></span>
+</div>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;padding:15px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:11px">
+<span style="font:700 13px Cairo,sans-serif;color:var(--ink)">نشاط اليوم</span>
+<span style="font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2)">رسمت شجرة بألوان الخريف وشاركت في ركن الموسيقى مع المجموعة.</span>
+<span style="height:150px;border-radius:16px;background:repeating-linear-gradient(135deg,var(--card2),var(--card2) 7px,var(--bg) 7px,var(--bg) 14px);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font:400 9px ui-monospace,monospace;color:var(--muted)">صورة من نشاط اليوم</span>
+</div>
+<div style="background:var(--warn-tint);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+<span style="width:36px;height:36px;flex:none;border-radius:12px;background:var(--card);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.2 12a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8zM9 7V5a3 3 0 0 1 6 0v2"/></svg></span>
+<span style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font:700 13px Cairo,sans-serif;color:var(--warn)">طلب من المعلّمة</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--ink2)">انتهت الحفّاضات — يُرجى إرسال عبوة</span></span>
+</div>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">⑫ الرسائل · ⑬ حسابي · من يحقّ له الاستلام</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">اسم الأب في حسابه بخطّ معتدل — الصفحة عن الإعدادات لا عن الاسم. و«من يحقّ له استلام أبنائي» بند مستقلّ بارز لأنه أخطر إعداد في التطبيق، والتفويض المؤقّت ينتهي وحده في نهاية اليوم.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="الرسائل" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">15</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الرسائل</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink);flex:1">الرسائل</span><span style="font:700 10px Cairo,sans-serif;color:var(--on-pri);background:var(--pri);padding:4px 9px;border-radius:9px">٢ جديدة</span></div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:9px">
+<div style="background:var(--pri-tint);border-radius:20px;padding:13px 14px;display:flex;gap:12px;align-items:center"><span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--card);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.4-3.6 4.4-5.4 8-5.4s6.6 1.8 8 5.4"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">أ. منى القحطاني</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">١١:٤٠</span></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">سامي أبدع في تجربة العلوم اليوم، وأرجو أن يُحضر…</span></span></div>
+<div style="background:var(--pri-tint);border-radius:20px;padding:13px 14px;display:flex;gap:12px;align-items:center"><span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--card);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">إدارة المدرسة</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">٨:١٥</span></span><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">تعميم: انصراف مبكّر يوم الخميس الساعة ١١:٠٠</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-sm)"><span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--ok-tint);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8M8 12h8M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:600 13.5px Cairo,sans-serif;color:var(--ink)">عيادة المدرسة</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">أمس</span></span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">تمّ تحديث سجلّ الحساسية لسامي</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-sm)"><span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:600 13.5px Cairo,sans-serif;color:var(--ink)">مشرف النقل</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">٢٢ صفر</span></span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">تغيير نقطة الالتقاء مؤقّتًا بسبب أعمال الطريق</span></span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-sm)"><span style="width:44px;height:44px;flex:none;border-radius:15px;background:var(--gold-tint);color:var(--gold);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.4-3.6 4.4-5.4 8-5.4s6.6 1.8 8 5.4"/></svg></span><span style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0"><span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:600 13.5px Cairo,sans-serif;color:var(--ink)">أ. هند الزهراني</span><span style="font:400 10px Cairo,sans-serif;color:var(--muted)">٢٠ صفر</span></span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">شكرًا لمتابعتكم — لمى تحسّنت في الإملاء</span></span></div>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="حسابي" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">16</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">حسابي</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 8px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 19px Cairo,sans-serif;color:var(--ink)">حسابي</span></div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:14px;padding:6px 4px 4px">
+<span style="position:relative;width:72px;height:72px;flex:none"><span style="width:72px;height:72px;border-radius:50%;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 26px Cairo,sans-serif">أ</span><span style="position:absolute;bottom:0;left:0;width:26px;height:26px;border-radius:50%;background:var(--pri);color:var(--on-pri);border:2.5px solid var(--bg);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16zM14 6l4 4"/></svg></span></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span style="font:700 18px Cairo,sans-serif;color:var(--ink)">أحمد سعد العتيبي</span><span style="font:400 11.5px Cairo,sans-serif;color:var(--muted)">وليّ أمر · ٣ أبناء</span></span>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-sm);overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line)"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.4-3.6 4.4-5.4 8-5.4s6.6 1.8 8 5.4"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink);flex:1">بياناتي</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line)"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--ok-tint);color:var(--ok);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c1.2-3.2 3.8-4.8 7-4.8s5.8 1.6 7 4.8M17 8.5a2.6 2.6 0 1 0 0-5M18 20h4c-.5-2-1.6-3.3-3.2-3.9"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink);flex:1">أبنائي</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">٣</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line);background:var(--card2)"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--bad-tint);color:var(--bad);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9.5 4.6-1.1 8-4.5 8-9.5V6zM9.5 12l1.8 1.8L15 10"/></svg></span><span style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font:700 13px Cairo,sans-serif;color:var(--ink)">من يحقّ له استلام أبنائي</span><span style="font:400 10.5px Cairo,sans-serif;color:var(--muted)">٤ مخوَّلين · تفويض مؤقّت واحد نشط</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line)"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--warn-tint);color:var(--warn);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5 1.5 5h-15S6 14 6 10zM10 19a2 2 0 0 0 4 0"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink);flex:1">الإشعارات</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line)"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.5 9h17M3.5 15h17M12 3c-4 5.5-4 12.5 0 18M12 3c4 5.5 4 12.5 0 18"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink);flex:1">اللغة</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">العربية</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 15px"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8.2 8.2 0 1 0 10.5 10.5z"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--ink);flex:1">الوضع الليلي</span><span style="position:relative;width:44px;height:25px;border-radius:13px;background:var(--line);display:inline-block"><span style="position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:var(--card);box-shadow:var(--shadow-sm)"></span></span></div>
+</div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px;padding:14px 15px"><span style="width:34px;height:34px;flex:none;border-radius:11px;background:var(--bad-tint);color:var(--bad);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7M17 8l4 4-4 4M21 12H9"/></svg></span><span style="font:600 13px Cairo,sans-serif;color:var(--bad);flex:1">تسجيل الخروج</span></div>
+<span style="font:400 10.5px Cairo,sans-serif;color:var(--muted);text-align:center">أُصول · الإصدار ٤٫٢٫١</span>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="المخولون" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--pri);color:var(--on-pri);padding:3px 7px;border-radius:6px;direction:ltr">17</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">من يحقّ له الاستلام</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px 12px"><span style="width:36px;height:36px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span><span style="font:700 17px Cairo,sans-serif;color:var(--ink);flex:1">من يحقّ له الاستلام</span></div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:10px">
+<p style="margin:0 2px 4px;font:400 11.5px/1.7 Cairo,sans-serif;color:var(--ink2)">لن تُسلَّم المدرسة أيًّا من أبنائك إلا لمن في هذه القائمة، بعد مطابقة الهوية.</p>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px"><span style="width:46px;height:46px;flex:none;border-radius:16px;background:var(--pri-tint);color:var(--pri-ink);display:flex;align-items:center;justify-content:center;font:700 17px Cairo,sans-serif">أ</span><span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">أحمد سعد العتيبي</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الأب · الثلاثة</span></span><span style="font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--ok-tint);padding:5px 10px;border-radius:9px">دائم</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px"><span style="width:46px;height:46px;flex:none;border-radius:16px;background:var(--gold-tint);color:var(--gold);display:flex;align-items:center;justify-content:center;font:700 17px Cairo,sans-serif">ن</span><span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">نورة المطيري</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الأم · الثلاثة</span></span><span style="font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--ok-tint);padding:5px 10px;border-radius:9px">دائم</span></div>
+<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:12px"><span style="width:46px;height:46px;flex:none;border-radius:16px;background:var(--slate-tint);color:var(--slate);display:flex;align-items:center;justify-content:center;font:700 17px Cairo,sans-serif">س</span><span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">سعد العتيبي</span><span style="font:400 11px Cairo,sans-serif;color:var(--muted)">الجدّ · سامي ولمى</span></span><span style="font:700 10px Cairo,sans-serif;color:var(--ok);background:var(--ok-tint);padding:5px 10px;border-radius:9px">دائم</span></div>
+<div style="background:var(--warn-tint);border-radius:20px;padding:13px 14px;display:flex;align-items:center;gap:12px"><span style="width:46px;height:46px;flex:none;border-radius:16px;background:var(--card);color:var(--warn);display:flex;align-items:center;justify-content:center;font:700 17px Cairo,sans-serif">ه</span><span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">هيا المطيري</span><span style="font:400 11px Cairo,sans-serif;color:var(--ink2)">الخالة · جود · اليوم فقط حتى ٣:٠٠</span></span><span style="font:700 10px Cairo,sans-serif;color:var(--warn);background:var(--card);padding:5px 10px;border-radius:9px">مؤقّت</span></div>
+<button style="margin-top:4px;width:100%;height:50px;border:1.5px dashed var(--pri);border-radius:18px;background:transparent;color:var(--pri-ink);font:700 13.5px Cairo,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>إضافة تفويض مؤقّت</button>
+</div>
+<div style="flex:none;height:34px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:5px;max-width:760px">
+<h2 style="margin:0;font:700 15px Cairo,sans-serif;color:var(--ink)">الدخول · التحميل</h2>
+<p style="margin:0;font:400 12.5px/1.7 Cairo,sans-serif;color:var(--ink2);text-wrap:pretty">شاشة التحميل هياكل بشكل المحتوى القادم لا دوّامة — الأب يعرف ما ينتظره قبل أن يصل.</p>
+</div>
+<div style="display:flex;gap:50px;flex-wrap:wrap;align-items:flex-start">
+
+<figure data-screen-label="الدخول" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--slate);color:var(--card);padding:3px 7px;border-radius:6px;direction:ltr">18</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">الدخول</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<span style="position:absolute;top:-120px;right:-90px;width:320px;height:320px;border-radius:50%;background:var(--pri-tint)"></span>
+<span style="position:absolute;top:60px;left:-110px;width:220px;height:220px;border-radius:50%;background:var(--ok-tint);opacity:.7"></span>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="position:relative;flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:0 26px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+<span style="width:76px;height:76px;border-radius:26px;background:var(--pri);color:var(--on-pri);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(68,83,204,.32)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5"/></svg></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font:700 24px Cairo,sans-serif;color:var(--ink)">أُصول</span><span style="font:400 12px Cairo,sans-serif;color:var(--muted)">مدرسة الملك المنير الأهلية</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<span style="display:flex;flex-direction:column;gap:6px"><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink2);padding-right:4px">البريد الإلكتروني</span><span style="height:54px;border-radius:17px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 15px;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM3.5 7l8.5 6 8.5-6"/></svg><span style="font:400 13px Cairo,sans-serif;color:var(--ink);direction:ltr">ahmad.otaibi@gmail.com</span></span></span>
+<span style="display:flex;flex-direction:column;gap:6px"><span style="font:600 11.5px Cairo,sans-serif;color:var(--ink2);padding-right:4px">كلمة المرور</span><span style="height:54px;border-radius:17px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 15px;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM8 10V7a4 4 0 0 1 8 0v3"/></svg><span style="flex:1;font:700 15px Cairo,sans-serif;color:var(--ink);letter-spacing:3px;direction:ltr">••••••••</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg></span></span>
+<span style="align-self:flex-start;font:600 11.5px Cairo,sans-serif;color:var(--pri-ink);padding:2px 4px">نسيت كلمة المرور؟</span>
+</div>
+<button style="width:100%;height:56px;border:0;border-radius:19px;background:var(--pri);color:var(--on-pri);font:700 15.5px Cairo,sans-serif;cursor:pointer;box-shadow:0 10px 26px rgba(68,83,204,.32)">تسجيل الدخول</button>
+<span style="text-align:center;font:400 11.5px Cairo,sans-serif;color:var(--muted)">للدعم الفني تواصل مع إدارة المدرسة</span>
+</div>
+<div style="position:relative;flex:none;height:40px;display:flex;align-items:center;justify-content:center"><span style="width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span></div>
+</div>
+</figure>
+
+<figure data-screen-label="التحميل" style="margin:0;display:flex;flex-direction:column;gap:11px;flex:none">
+<figcaption style="display:flex;align-items:center;gap:9px"><span style="font:700 10px ui-monospace,monospace;background:var(--slate);color:var(--card);padding:3px 7px;border-radius:6px;direction:ltr">19</span><span style="font:700 13.5px Cairo,sans-serif;color:var(--ink)">التحميل — هياكل</span></figcaption>
+<div style="width:393px;height:852px;flex:none;position:relative;background:var(--bg);border-radius:44px;box-shadow:0 0 0 9px var(--bezel),0 22px 50px rgba(20,22,50,.22);overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:32px;border-radius:18px;background:#0d0e16;z-index:9"></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;padding:17px 30px 2px;font:700 14px Cairo,sans-serif;color:var(--ink)"><span style="direction:ltr">٩:٤١</span><span style="display:flex;align-items:center;gap:6px"><span style="width:17px;height:10px;border-radius:2px;background:var(--ink);opacity:.85"></span><span style="width:16px;height:11px;border:1.6px solid var(--ink);border-radius:3px;opacity:.85"></span></span></div>
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;animation:shim 1.6s ease-in-out infinite">
+<span style="display:flex;align-items:center;gap:11px"><span style="width:42px;height:42px;border-radius:50%;background:var(--skel)"></span><span style="display:flex;flex-direction:column;gap:6px"><span style="width:128px;height:13px;border-radius:5px;background:var(--skel)"></span><span style="width:86px;height:9px;border-radius:5px;background:var(--skel)"></span></span></span>
+<span style="display:flex;gap:9px"><span style="width:38px;height:38px;border-radius:13px;background:var(--skel)"></span><span style="width:38px;height:38px;border-radius:13px;background:var(--skel)"></span></span>
+</div>
+<div style="flex:none;display:flex;gap:16px;padding:4px 18px 14px;animation:shim 1.6s .1s ease-in-out infinite">
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px"><span style="width:58px;height:58px;border-radius:50%;background:var(--skel)"></span><span style="width:38px;height:9px;border-radius:5px;background:var(--skel)"></span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:6px"><span style="width:46px;height:46px;border-radius:50%;background:var(--skel)"></span><span style="width:34px;height:9px;border-radius:5px;background:var(--skel)"></span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:6px"><span style="width:46px;height:46px;border-radius:50%;background:var(--skel)"></span><span style="width:34px;height:9px;border-radius:5px;background:var(--skel)"></span></span>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:14px;animation:shim 1.6s .2s ease-in-out infinite">
+<div style="border-radius:26px;background:var(--card);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:14px">
+<span style="display:flex;align-items:center;gap:12px"><span style="width:52px;height:52px;border-radius:19px;background:var(--skel)"></span><span style="display:flex;flex-direction:column;gap:7px;flex:1"><span style="width:60%;height:14px;border-radius:5px;background:var(--skel)"></span><span style="width:80%;height:10px;border-radius:5px;background:var(--skel)"></span></span></span>
+<span style="width:52%;height:26px;border-radius:8px;background:var(--skel)"></span>
+<span style="width:100%;height:1px;background:var(--line)"></span>
+<span style="display:flex;justify-content:space-between"><span style="width:110px;height:10px;border-radius:5px;background:var(--skel)"></span><span style="width:74px;height:10px;border-radius:5px;background:var(--skel)"></span></span>
+</div>
+<span style="width:76px;height:13px;border-radius:5px;background:var(--skel);margin-right:2px"></span>
+<div style="border-radius:22px;background:var(--card);border:1px solid var(--line);padding:15px;display:flex;flex-direction:column;gap:17px">
+<span style="display:grid;grid-template-columns:20px 46px 1fr;gap:10px;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:var(--skel);justify-self:center"></span><span style="height:11px;border-radius:5px;background:var(--skel)"></span><span style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:9px;background:var(--skel)"></span><span style="width:62%;height:11px;border-radius:5px;background:var(--skel)"></span></span></span>
+<span style="display:grid;grid-template-columns:20px 46px 1fr;gap:10px;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:var(--skel);justify-self:center"></span><span style="height:11px;border-radius:5px;background:var(--skel)"></span><span style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:9px;background:var(--skel)"></span><span style="width:78%;height:11px;border-radius:5px;background:var(--skel)"></span></span></span>
+<span style="display:grid;grid-template-columns:20px 46px 1fr;gap:10px;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:var(--skel);justify-self:center"></span><span style="height:11px;border-radius:5px;background:var(--skel)"></span><span style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:9px;background:var(--skel)"></span><span style="width:54%;height:11px;border-radius:5px;background:var(--skel)"></span></span></span>
+<span style="display:grid;grid-template-columns:20px 46px 1fr;gap:10px;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:var(--skel);justify-self:center"></span><span style="height:11px;border-radius:5px;background:var(--skel)"></span><span style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:9px;background:var(--skel)"></span><span style="width:70%;height:11px;border-radius:5px;background:var(--skel)"></span></span></span>
+</div>
+<div style="display:flex;gap:12px">
+<span style="width:50px;height:50px;border-radius:18px;background:var(--skel)"></span><span style="width:50px;height:50px;border-radius:18px;background:var(--skel)"></span><span style="width:50px;height:50px;border-radius:18px;background:var(--skel)"></span><span style="width:50px;height:50px;border-radius:18px;background:var(--skel)"></span><span style="width:50px;height:50px;border-radius:18px;background:var(--skel)"></span>
+</div>
+</div>
+<div style="flex:none;padding:6px 16px 10px"><span style="display:block;width:100%;height:54px;border-radius:19px;background:var(--skel)"></span></div>
+<div style="flex:none;position:relative;display:flex;justify-content:space-around;align-items:flex-start;padding:10px 10px 26px;background:var(--card);border-top:1px solid var(--line)">
+<span style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 12px"><span style="width:20px;height:20px;border-radius:6px;background:var(--skel)"></span><span style="width:26px;height:8px;border-radius:4px;background:var(--skel)"></span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 12px"><span style="width:20px;height:20px;border-radius:6px;background:var(--skel)"></span><span style="width:26px;height:8px;border-radius:4px;background:var(--skel)"></span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 12px"><span style="width:20px;height:20px;border-radius:6px;background:var(--skel)"></span><span style="width:26px;height:8px;border-radius:4px;background:var(--skel)"></span></span>
+<span style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 12px"><span style="width:20px;height:20px;border-radius:6px;background:var(--skel)"></span><span style="width:26px;height:8px;border-radius:4px;background:var(--skel)"></span></span>
+<span style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:var(--ink);opacity:.24"></span>
+</div>
+</div>
+</figure>
+
+</div>
+</section>
+
+<div data-end="frames"></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;العرض&quot;},&quot;defaultKid&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;سامي&quot;,&quot;لمى&quot;,&quot;جود&quot;],&quot;default&quot;:&quot;سامي&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;شاشة اليوم&quot;},&quot;pickupState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;الزرّ&quot;,&quot;بانتظار المشرفة&quot;,&quot;المشرفة في الطريق&quot;],&quot;default&quot;:&quot;الزرّ&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;شاشة اليوم&quot;}}">
+const IC = {
+  home:'M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5',
+  bus:'M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M7 16v3M17 16v3',
+  gate:'M3 20h18M5 20V9l7-4 7 4v11M10 20v-5h4v5',
+  check:'m5 12.5 4.5 4.5L19 7',
+  clinic:'M12 8v8M8 12h8M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z',
+  exit:'M13 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7M17 8l4 4-4 4M21 12H9',
+  meal:'M6 3v8a2 2 0 0 0 4 0V3M8 11v10M17 3c-1.4 2-2 4-2 6s.6 3 2 3 2-1 2-3-.6-4-2-6M17 12v9',
+  art:'M12 4a8 8 0 1 0 0 16c1 0 1.6-.7 1.6-1.5 0-1.4 1-2 2.2-2H18a4 4 0 0 0 4-4c0-4.6-4.5-8.5-10-8.5zM7.5 11.5h.01M11 8.5h.01M15 9.5h.01',
+  pin:'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z'
+};
+
+const RAW = [
+  { n:'سامي', full:'سامي أحمد العتيبي', cls:'الرابع/أ', ini:'س', st:'في المدرسة', tone:'ok',
+    sub:'الحصة الخامسة · علوم', upd:'آخر تحديث ١٢:٠٥',
+    events:[
+      { t:'٦:٤٠', d1:'خرج من البيت', ic:'home', tone:'slate', s:'past' },
+      { t:'٦:٥٢', d1:'صعد الباص — مسار «الياسمين»', ic:'bus', tone:'warn', s:'past' },
+      { t:'٧:١٤', d1:'دخل بوابة المدرسة', ic:'gate', tone:'pri', s:'past' },
+      { t:'٧:٣٠', d1:'حاضر في الفصل', ic:'check', tone:'ok', s:'past' },
+      { t:'١٢:٠٥', d1:'زيارة العيادة — صداع خفيف', ic:'clinic', tone:'bad', s:'now' },
+      { t:'١:١٠', d1:'خروج من البوابة — يستلمه: والده', ic:'exit', tone:'slate', s:'next' }
+    ] },
+  { n:'لمى', full:'لمى أحمد العتيبي', cls:'الثاني/ب', ini:'ل', st:'في الباص', tone:'warn',
+    sub:'باص العودة · مسار «الياسمين»', upd:'آخر تحديث ١٢:٢٥',
+    events:[
+      { t:'٦:٤٥', d1:'خرجت من البيت', ic:'home', tone:'slate', s:'past' },
+      { t:'٦:٥٨', d1:'صعدت الباص — مسار «الياسمين»', ic:'bus', tone:'warn', s:'past' },
+      { t:'٧:٢٠', d1:'دخلت بوابة المدرسة', ic:'gate', tone:'pri', s:'past' },
+      { t:'٧:٣٠', d1:'حاضرة في الفصل', ic:'check', tone:'ok', s:'past' },
+      { t:'١٢:٢٥', d1:'صعدت باص العودة', ic:'bus', tone:'warn', s:'now' },
+      { t:'١٢:٥٥', d1:'تصل نقطة الالتقاء — حيّ الياسمين', ic:'pin', tone:'slate', s:'next' }
+    ] },
+  { n:'جود', full:'جود أحمد العتيبي', cls:'روضة ٢', ini:'ج', st:'في المنزل', tone:'slate',
+    sub:'انصرفت مبكرًا · التقرير اليومي جاهز', upd:'آخر تحديث ١١:٤٥',
+    events:[
+      { t:'٦:٥٠', d1:'خرجت من البيت', ic:'home', tone:'slate', s:'past' },
+      { t:'٧:٠٥', d1:'دخلت بوابة الروضة', ic:'gate', tone:'pri', s:'past' },
+      { t:'٩:٣٠', d1:'وجبة الإفطار — أكلت معظمها', ic:'meal', tone:'ok', s:'past' },
+      { t:'١١:٠٠', d1:'نشاط الرسم — ألوان الخريف', ic:'art', tone:'gold', s:'past' },
+      { t:'١١:٤٥', d1:'خرجت من البوابة — استلمتها: والدتها', ic:'exit', tone:'slate', s:'now' },
+      { t:'١:٠٠', d1:'التقرير اليومي يُرسل إليك', ic:'check', tone:'slate', s:'next' }
+    ] }
+];
+
+function makeQR(seed) {
+  const N = 25, S = 8;
+  let s = seed;
+  const rnd = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  const g = [];
+  for (let y = 0; y < N; y++) { g.push([]); for (let x = 0; x < N; x++) g[y].push(rnd() > 0.52 ? 1 : 0); }
+  const finder = (ox, oy) => {
+    for (let y = -1; y < 8; y++) for (let x = -1; x < 8; x++) {
+      const yy = oy + y, xx = ox + x;
+      if (yy < 0 || yy >= N || xx < 0 || xx >= N) continue;
+      if (y < 0 || y > 6 || x < 0 || x > 6) { g[yy][xx] = 0; continue; }
+      const edge = (x === 0 || x === 6 || y === 0 || y === 6);
+      const core = (x >= 2 && x <= 4 && y >= 2 && y <= 4);
+      g[yy][xx] = (edge || core) ? 1 : 0;
+    }
+  };
+  finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+  for (let y = 9; y < 16; y++) for (let x = 9; x < 16; x++) g[y][x] = 0;
+  const out = [];
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (g[y][x]) out.push((x * S) + 'px ' + (y * S) + 'px 0 0 currentColor');
+  return out.join(',');
+}
+const QR = makeQR(402715);
+
+class Component extends DCLogic {
+  state = {
+    dark: !!this.props.startDark,
+    kid: Math.max(0, ['سامي', 'لمى', 'جود'].indexOf(this.props.defaultKid ?? 'سامي')),
+    call: Math.max(0, ['الزرّ', 'بانتظار المشرفة', 'المشرفة في الطريق'].indexOf(this.props.pickupState ?? 'الزرّ'))
+  };
+
+  renderVals() {
+    const dark = this.state.dark;
+    const ki = this.state.kid;
+
+    const kids = RAW.map((k, i) => ({
+      n: k.n, ini: k.ini,
+      tc: 'var(--' + k.tone + ')',
+      sz: i === ki ? '58px' : '46px',
+      op: i === ki ? '1' : '.5',
+      pad: i === ki ? '0px' : '6px',
+      rg: i === ki ? '0 0 0 3px var(--bg),0 0 0 5.5px var(--pri)' : 'none',
+      pick: () => this.setState({ kid: i })
+    }));
+
+    const k = RAW[ki];
+    const events = k.events.map(e => ({
+      t: e.t, d1: e.d1, d: IC[e.ic],
+      dot: e.s === 'next' ? 'transparent' : 'var(--' + e.tone + ')',
+      bd: e.s === 'next' ? '2px solid var(--line)' : '0',
+      sz: e.s === 'now' ? '15px' : '11px',
+      tx: e.s === 'next' ? 'var(--muted)' : 'var(--ink)',
+      hc: e.s === 'now' ? 'color-mix(in srgb, var(--' + e.tone + ') 55%, transparent)' : 'transparent',
+      an: e.s === 'now' ? 'halo 1.9s ease-out infinite' : 'none',
+      chip: e.s === 'next' ? 'var(--card2)' : 'var(--' + e.tone + '-tint)',
+      icc: e.s === 'next' ? 'var(--muted)' : 'var(--' + e.tone + ')'
+    }));
+
+    const call = this.state.call;
+    return {
+      theme: dark ? 'dark' : 'light',
+      knobX: dark ? '-19px' : '0px',
+      toggleTheme: () => this.setState(s => ({ dark: !s.dark })),
+      kids, events,
+      kid: {
+        full: k.full, cls: k.cls, ini: k.ini, st: k.st, sub: k.sub, upd: k.upd,
+        tc: 'var(--' + k.tone + ')',
+        tt: 'var(--' + k.tone + '-tint)',
+        hc: 'color-mix(in srgb, var(--' + k.tone + ') 55%, transparent)'
+      },
+      qr: QR,
+      callIdle: call === 0, callWait: call === 1, callWay: call === 2,
+      onCall: () => this.setState(s => ({ call: (s.call + 1) % 3 }))
+    };
+  }
+}
+</script>
+</body>
+</html>
