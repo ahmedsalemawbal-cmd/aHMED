@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════
+   رموز التصميم — منقولة كما هي من هوية أُصول القائمة.
+
+   الواجهة تتغيّر، والهوية لا. فتُكتب الألوان والمسافات هنا مرّة،
+   ويقرأها كل مكوّن — بما فيها ما يأتي لاحقًا من كلود ديزاين:
+   يُلصق التصميم الجديد، ويرث اللون والخطّ والزوايا بلا لمسة.
+
+   وكل لون له نظيره في الوضع الليلي في المكان نفسه — فلا يبقى
+   لونٌ معرَّفٌ في وضع واحد ثم يختفي نصُّه في الآخر.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* الخطّ */
+  --sch-font: 'Cairo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* سُلَّم الحجم — سبع درجات لا أكثر */
+  --sch-t0: 11.5px; --sch-t1: 13px; --sch-t2: 14.5px; --sch-t3: 17px;
+  --sch-t4: 22px;   --sch-t5: 28px; --sch-t6: 38px;
+
+  /* ارتفاع السطر */
+  --sch-lh-tight: 1.15; --sch-lh-snug: 1.35; --sch-lh-base: 1.55; --sch-lh-loose: 1.8;
+
+  /* المسافات */
+  --sch-s1: 4px; --sch-s2: 8px; --sch-s3: 12px; --sch-s4: 16px;
+  --sch-s5: 24px; --sch-s6: 32px; --sch-s7: 48px;
+
+  /* الزوايا */
+  --sch-radius: 11px; --sch-radius-lg: 16px; --sch-radius-xl: 22px;
+
+  /* الأسطح */
+  --sch-paper: #F4F5F8;  --sch-surface: #FFFFFF;
+  --sch-surface-alt: #F0F1F5; --sch-surface-2: #EDEEF3;
+
+  /* القشرة الداكنة (الشريط الجانبي والترويسة) */
+  --sch-chrome: #14161F; --sch-chrome-2: #1E2130;
+  --sch-chrome-ink: #EEF0F5; --sch-chrome-mut: #A2A6B4;
+  --sch-nav-line: rgba(255,255,255,.09);
+  --sch-nav-hover: rgba(255,255,255,.07);
+  --sch-nav-danger: #FF7B7B;
+
+  /* الحبر */
+  --sch-ink: #0E0E16; --sch-ink-soft: #3E3E4A; --sch-muted: #7A7B87;
+  --sch-line: #ECECF2; --sch-line-strong: #E0E1E9;
+
+  /* الأكسنت */
+  --sch-accent: #5B6B8C; --sch-accent-ink: #3D4A64; --sch-accent-hover: #4C5A78;
+  --sch-accent-soft: #EDF0F6; --sch-accent-glow: rgba(91,107,140,.20);
+
+  /* الحالات — ومعها لون النصّ فوقها.
+     كتابة #fff فوق لون يفتحُّ في الوضع الليلي تعطي تباينًا ٢٫٢:١،
+     فيبقى لون النصّ رمزًا يتبدّل معه لا قيمة ثابتة. */
+  --sch-success: #1E8E5A; --sch-success-soft: #E4F3EB; --sch-on-success: #fff;
+  --sch-warn: #C77A15;    --sch-warn-soft: #FBEFDC;    --sch-on-warn: #fff;
+  --sch-danger: #D64545;  --sch-danger-soft: #FBE9E9;  --sch-on-danger: #fff;
+  --sch-gold: #B08512;    --sch-gold-soft: #F7EFD9;    --sch-gold-ink: #7C6216;
+  --sch-on-accent: #fff;
+
+  /* الظلال */
+  --sch-e1: 0 1px 3px rgba(16,18,30,.04), 0 10px 28px -12px rgba(16,18,30,.12);
+  --sch-e2: 0 2px 8px -2px rgba(16,18,30,.06), 0 18px 44px -14px rgba(16,18,30,.16);
+  --sch-e3: 0 10px 26px -8px rgba(16,18,30,.14), 0 30px 60px -18px rgba(16,18,30,.22);
+
+  --sch-sbw: 260px;
+}
+
+:root[data-theme="dark"] {
+  --sch-paper: #0C0D12;  --sch-surface: #16171E;
+  --sch-surface-alt: #1E1F28; --sch-surface-2: #1E1F28;
+
+  --sch-chrome: #0E0F16; --sch-chrome-2: #191B24;
+
+  --sch-ink: #F5F6FA; --sch-ink-soft: #C4C5CF; --sch-muted: #888995;
+  --sch-line: rgba(255,255,255,.07); --sch-line-strong: rgba(255,255,255,.12);
+
+  --sch-accent: #8A99B8; --sch-accent-ink: #B2BED6; --sch-accent-hover: #9AA8C4;
+  --sch-accent-soft: rgba(138,153,184,.18); --sch-accent-glow: rgba(138,153,184,.40);
+
+  --sch-success: #35C489; --sch-success-soft: rgba(53,196,137,.15); --sch-on-success: #08120E;
+  --sch-warn: #E9B44C;    --sch-warn-soft: rgba(233,180,76,.15);    --sch-on-warn: #1A1205;
+  --sch-danger: #FF6B6B;  --sch-danger-soft: rgba(255,107,107,.15); --sch-on-danger: #2A0A0A;
+  --sch-gold: #E6C56A;    --sch-gold-soft: rgba(230,197,106,.14);   --sch-gold-ink: #F2D98C;
+  --sch-on-accent: #0C0D12;
+
+  --sch-e1: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px -14px rgba(0,0,0,.6);
+  --sch-e2: 0 4px 14px -2px rgba(0,0,0,.5), 0 20px 46px -16px rgba(0,0,0,.6);
+  --sch-e3: 0 14px 32px -10px rgba(0,0,0,.6), 0 34px 64px -20px rgba(0,0,0,.7);
+}
+
+/* ── أساس ─────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sch-font);
+  font-size: var(--sch-t2);
+  line-height: var(--sch-lh-base);
+  color: var(--sch-ink);
+  background: var(--sch-paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* الأرقام العربية تُقرأ أسرع بأرقام مُجدوَلة: لا يرقص العمود بين صفّ وصفّ */
+.num { font-variant-numeric: tabular-nums; }
+
+a { color: var(--sch-accent-ink); }
+
+/* حلقة التركيز تظهر للوحة المفاتيح ولا تظهر للفأرة */
+:focus-visible {
+  outline: 2px solid var(--sch-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

@@ -1,2 +1,8 @@
 # حزم التثبيت المبنية — تُسلَّم للمالك ولا تُخزَّن في المستودع
 *.zip
+
+# النسخة السحابية
+osool-cloud/app/node_modules/
+osool-cloud/app/dist/
+osool-cloud/app/.env.local
+osool-cloud/app/tsconfig.tsbuildinfo
