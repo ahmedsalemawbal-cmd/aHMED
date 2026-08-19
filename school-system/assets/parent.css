@@ -43,6 +43,16 @@
   --map-bg:#141826; --map-block:#1d2231; --map-road:#0d0f18;
 }
 
+/**
+ * قيمتان افتراضيتان لكل صورة رمزية في التطبيق.
+ *
+ * `sch_avatar_svg` يكتب `var(--sch-av-bg,#E8E8F0)` — واحتياطيّه فاتحٌ
+ * ثابت، فأي صورة رمزية في مكوّن لا يعرّف الرمزين تخرج **دائرةً بيضاء
+ * ساطعة في الوضع الداكن**. تُعرَّف هنا مرّة على الجذر فتتبع السمة،
+ * ومن أراد نغمته الخاصة عرّفهما على مكوّنه فوقها.
+ */
+.p-body { --sch-av-bg: var(--slate-tint); --sch-av-ink: var(--slate); }
+
 /* ── الجذر ───────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -313,23 +323,21 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 .p-who__t span { font-size: var(--t0); color: var(--muted); white-space: nowrap; }
 
-.p-icons { display: flex; align-items: center; gap: var(--s2); flex: none; }
+.p-icons { display: flex; align-items: center; gap: 9px; flex: none; }
 
 /**
- * مؤهَّلة بعنصريها: الصنف نفسه على `<button>` (الوضع الليلي) وعلى `<a>`
- * (الرسائل والإشعارات) — و`.p-body a` تغلب الصنف المفرد فيخرج الرابطان
- * بلون الحبر لا بلون `--ink2`.
+ * مؤهَّلة بـ`a` لأنها لا تقع إلا على رابط (الرسائل والإشعارات)،
+ * و`.p-body a` تغلب الصنف المفرد فيخرج الرابطان بلون الحبر لا `--ink2`.
+ * ولو وقعت يومًا على `<button>` فاذكر العنصرين معًا.
  */
-.p-body button.p-ico,
 .p-body a.p-ico {
   position: relative; flex: none;
   display: grid; place-items: center;
   width: 38px; height: 38px; padding: 0;
-  border: 1px solid var(--line); border-radius: var(--r1);
+  border: 1px solid var(--line); border-radius: 13px;
   background: var(--card); color: var(--ink2);
   box-shadow: var(--shadow-sm);
 }
-.p-body button.p-ico svg,
 .p-body a.p-ico svg { flex: none; }
 
 /**
@@ -2171,3 +2179,150 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 
 .p-steps span { font-size: var(--t2); line-height: 1.6; color: var(--ink2); }
+
+/* ── من يحقّ له الاستلام ─────────────────────────────────────────── */
+
+/**
+ * بطاقة لكل ابن، وفيها قائمة من يحقّ له استلامه.
+ *
+ * والتمييز بين الدائم والمؤقّت **بحافّة ملوّنة لا بلون خلفية**: صفّان
+ * ملوّنان بالكامل يجعلان القائمة تُقرأ تحذيرًا، وهي ليست تحذيرًا.
+ */
+
+.p-flash {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0 0 var(--s3);
+  padding: 11px var(--s3);
+  border-radius: var(--r2);
+  font-size: var(--t2);
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.p-flash--bad { background: var(--bad-tint); color: var(--bad); }
+
+.p-pk {
+  margin: 0 0 var(--s3);
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r4);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.p-pk__h {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.p-pk__h > b  { font-size: var(--t3); font-weight: 700; color: var(--ink); }
+.p-pk__h > em { font-style: normal; font-size: var(--t1); color: var(--muted); }
+
+/* القصّ على الصورة لا على الحاضنة، وإلا قُصّ ما يخرج عنها عمدًا */
+.p-pk__pic {
+  flex: none;
+  display: block;
+  width: 38px;
+  height: 38px;
+}
+
+.p-pk__pic img,
+.p-pk__pic svg {
+  display: block;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  overflow: hidden;
+  object-fit: cover;
+}
+
+.p-pk__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.p-pk__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 12px;
+  border-radius: var(--r3);
+  background: var(--card2);
+  border-inline-start: 3px solid var(--slate);
+}
+
+.p-pk__row--guardian { border-inline-start-color: var(--ok); }
+.p-pk__row--delegate { border-inline-start-color: var(--warn); }
+
+.p-pk__av { flex: none; display: block; width: 34px; height: 34px; }
+
+.p-pk__av svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.p-pk__t { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+
+/* الاسم الثلاثيّ لا يُترك ينكسر ثلاثة أسطر فيقفز ارتفاع الصفّ */
+.p-pk__t > b,
+.p-pk__t > em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.p-pk__t > b  { font-size: var(--t2); font-weight: 600; color: var(--ink); }
+.p-pk__t > em { font-style: normal; font-size: var(--t0); color: var(--muted); }
+
+.p-pk__x { margin: 0; }
+
+/* ٤٤px هو الحدّ الأدنى للمس في كل التطبيق — والحقل الصغير هنا سحبُ حقّ */
+.p-pk__xb {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  transition: background .12s ease, color .12s ease;
+}
+
+.p-pk__xb:hover { background: var(--bad-tint); color: var(--bad); }
+
+.p-pk__add { margin-top: var(--s3); }
+
+.p-pk__add > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r2);
+  color: var(--pri-ink);
+  font-size: var(--t2);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.p-pk__add > summary::-webkit-details-marker { display: none; }
+.p-pk__add[open] > summary { margin-bottom: var(--s3); }
+
+.p-pk__note {
+  margin: var(--s3) 0 0;
+  font-size: var(--t1);
+  line-height: 1.65;
+  color: var(--muted);
+}

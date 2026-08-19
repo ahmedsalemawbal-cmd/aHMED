@@ -36,6 +36,9 @@ function demo_student(int $id): ?object {
 
 final class SCH_Students {
     public static function get(int $id): ?object { return demo_student($id); }
+    public static function children_of(int $uid): array {
+        return array_values(array_filter(array_map('demo_student', array_keys(KIDS))));
+    }
     public static function current_class(int $id): ?object {
         $k = KIDS[$id] ?? null;
         return $k ? (object) ['id' => $id, 'grade_level' => $k['grade_level'], 'section' => $k['section'], 'stage' => $k['stage']] : null;
@@ -59,6 +62,22 @@ final class SCH_Custody {
     public static function state_label(?string $s): string {
         return ['at_school' => 'في المدرسة', 'on_bus' => 'في الباص', 'home' => 'في المنزل', 'left_early' => 'خرج مبكرًا'][$s] ?? 'غير معروف';
     }
+
+    /* أحمد وأمّ الأبناء دائمان، وخالتهم مفوَّضة اليوم وحده — وجود لا مفوَّض له،
+       فتُرى الحالتان: قائمة فيها تفويض وقائمة بلا تفويض. */
+    public static function pickers(int $id): array {
+        $out = [
+            ['key' => 'g:7', 'name' => 'أحمد سعد العتيبي', 'relation' => 'الأب', 'source' => 'guardian', 'until' => null],
+            ['key' => 'g:2', 'name' => 'منى عبدالله القحطاني', 'relation' => 'الأم', 'source' => 'guardian', 'until' => null],
+        ];
+        if ($id === 1) {
+            $out[] = ['key' => 'd:7', 'name' => 'نورة سعد المطيري', 'relation' => 'الخالة',
+                      'source' => 'delegate', 'until' => date('Y-m-d H:i:s', strtotime('+6 hours'))];
+        }
+        return $out;
+    }
+
+    public static function may_pick_up(int $id, string $key): bool { return $key === 'g:7'; }
 }
 
 final class SCH_Attendance {

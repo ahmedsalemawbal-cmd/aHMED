@@ -31,6 +31,7 @@ $SCREENS = [
     ['certificates', 'الشهادات',             1, []],
     ['kg',           'التقرير اليومي',       3, []],
     ['account',      'حسابي',                1, []],
+    ['pickers',      'من يحقّ له الاستلام',   1, []],
 ];
 
 function render_screen(string $file, int $kid, array $env): string

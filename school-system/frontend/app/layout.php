@@ -85,17 +85,16 @@ $p_hour  = (int) current_time('G');
             </a>
 
             <div class="p-icons">
-                <button type="button" class="p-ico p-theme" aria-label="<?php esc_attr_e('تبديل الوضع الفاتح/الداكن', 'school-system'); ?>">
-                    <svg class="p-theme__moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <svg class="p-theme__sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-                </button>
+                <?php /* أيقونتان لا ثلاث كما في التصميم: تبديل المظهر صفٌّ في
+                         «حسابي» — وهو إعداد يُضبط مرّة، لا زرّ يزاحم الرسائل
+                         والإشعارات في رأس كل شاشة. */ ?>
                 <a class="p-ico" href="<?php echo esc_url(SCH_App::url('messages')); ?>"
                    aria-label="<?php esc_attr_e('الرسائل', 'school-system'); ?>">
-                    <?php echo sch_icon('mail', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <?php echo sch_icon('chat', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                 </a>
                 <a class="p-ico" href="<?php echo esc_url(SCH_App::url('alerts')); ?>"
                    aria-label="<?php esc_attr_e('الإشعارات', 'school-system'); ?>">
-                    <?php echo sch_icon('clock', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <?php echo sch_icon('bell', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                     <?php if ($p_unread > 0) : ?>
                         <span class="p-ico__dot"></span>
                     <?php endif; ?>

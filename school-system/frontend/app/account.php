@@ -57,6 +57,16 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
 </div>
 
 <!-- الإعدادات -->
+<!-- الاستلام -->
+<h2 class="p-h2"><?php esc_html_e('أبنائي', 'school-system'); ?></h2>
+<div class="p-list">
+    <a class="p-setrow p-tap" href="<?php echo esc_url(SCH_App::url('pickers')); ?>">
+        <span class="p-setrow__i"><?php echo sch_icon('user-check', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <span class="p-setrow__t"><?php esc_html_e('من يحقّ له الاستلام', 'school-system'); ?></span>
+        <span class="p-setrow__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+    </a>
+</div>
+
 <h2 class="p-h2"><?php esc_html_e('الإعدادات', 'school-system'); ?></h2>
 <div class="p-list">
     <button type="button" class="p-setrow p-setrow--theme p-theme p-tap">

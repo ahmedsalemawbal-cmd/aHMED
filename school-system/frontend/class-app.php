@@ -13,7 +13,7 @@ final class SCH_App
     public const BASE = 'app';
 
     private const SECTIONS = ['', 'child', 'log', 'invoices', 'alerts', 'messages',
-                              'schedule', 'kg', 'clinic', 'leave', 'certificates', 'card', 'transport', 'track', 'account', 'install'];
+                              'schedule', 'kg', 'clinic', 'leave', 'certificates', 'card', 'transport', 'track', 'account', 'pickers', 'install'];
 
     public static function init(): void
     {
@@ -162,6 +162,53 @@ final class SCH_App
             }
 
             wp_safe_redirect(self::url('child', $sid));
+            exit;
+        }
+
+        /* التفويض المؤقّت — «خالته اليوم فقط».
+           والفحوص كلّها في SCH_Custody: الشاشة تجمع الحقول ولا تقرّر. */
+        if ($action === 'delegate_add' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_app_delegate')) {
+            $sid = absint($_POST['student_id'] ?? 0);
+
+            // لا يفوّض إلا من يحقّ له هو الاستلام — وإلا صار التفويض بابًا
+            // خلفيًّا يفوّض به من لا يملك أصلًا.
+            if (!SCH_Custody::may_pick_up($sid, 'g:' . get_current_user_id())) {
+                wp_safe_redirect(add_query_arg('err', 'not_yours', self::url('pickers')));
+                exit;
+            }
+
+            // حقل datetime-local يرسل «2026-08-19T14:30» بلا ثوانٍ
+            $until = trim((string) ($_POST['valid_until'] ?? ''));
+            if ($until !== '') {
+                $until = str_replace('T', ' ', $until);
+                $until .= substr_count($until, ':') === 1 ? ':00' : '';
+            }
+
+            $done = SCH_Custody::delegate([
+                'student_id'  => $sid,
+                'person_name' => (string) ($_POST['person_name'] ?? ''),
+                'relation'    => (string) ($_POST['relation'] ?? ''),
+                'id_number'   => (string) ($_POST['id_number'] ?? ''),
+                'phone'       => (string) ($_POST['phone'] ?? ''),
+                'valid_until' => $until,
+            ]);
+
+            wp_safe_redirect(is_wp_error($done)
+                ? add_query_arg('err', $done->get_error_code(), self::url('pickers'))
+                : self::url('pickers'));
+            exit;
+        }
+
+        if ($action === 'delegate_revoke' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_app_delegate')) {
+            $del = absint($_POST['delegation_id'] ?? 0);
+            $row = SCH_Custody::get_delegation($del);
+
+            // لا يُلغى إلا تفويض أنشأتَه أنت — لا يُلغى تفويض غيرك بتخمين رقمه
+            if ($row && (int) $row->granted_by === get_current_user_id()) {
+                SCH_Custody::revoke_delegation($del);
+            }
+
+            wp_safe_redirect(self::url('pickers'));
             exit;
         }
 

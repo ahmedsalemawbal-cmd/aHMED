@@ -193,6 +193,23 @@ final class SCH_Custody
         return true;
     }
 
+    /**
+     * تفويض واحد بمعرّفه.
+     *
+     * يحتاجه من يريد الإلغاء أن يعرف **من أذن به** قبل أن يلغيه: الحارس
+     * في `revoke_delegation` يمنع الإلغاء المستحيل لا الإلغاء الخطأ، وولي
+     * الأمر يجب ألّا يلغي تفويضًا كتبه غيره برقمٍ مُخمَّن.
+     */
+    public static function get_delegation(int $id): ?object
+    {
+        global $wpdb;
+
+        return $wpdb->get_row($wpdb->prepare(
+            'SELECT * FROM ' . sch_table('pickup_delegations') . ' WHERE id = %d',
+            $id
+        )) ?: null;
+    }
+
     /** تفويضات الطالب — السارية أولًا. */
     public static function delegations(int $student_id, int $limit = 20): array
     {
