@@ -753,22 +753,22 @@ class Osoul_MIME {
 
 		foreach ( $parts as $p ) {
 			$ctype = strtolower( $p['type'] );
-			$isAtt = ( 'attachment' === $p['disposition'] ) || ( '' !== $p['filename'] && 'text/html' !== $ctype && 'text/plain' !== $ctype );
-			if ( ! $isAtt && 'text/html' === $ctype ) {
-				$result['html'] .= $p['content'];
-			} elseif ( ! $isAtt && 'text/plain' === $ctype ) {
-				$result['text'] .= $p['content'];
-			} elseif ( 'inline' === $p['disposition'] && '' !== $p['cid'] && 0 === strpos( $ctype, 'image/' ) && strlen( $p['content'] ) < 1600000 ) {
+			if ( self::is_embedded_inline( $p ) ) {
 				$result['inline'][ trim( $p['cid'], '<>' ) ] = 'data:' . $ctype . ';base64,' . base64_encode( $p['content'] );
-			} else {
+			} elseif ( self::is_attachment_part( $p ) ) {
+				$n = count( $result['attachments'] );
 				$result['attachments'][] = array(
-					'index'    => count( $result['attachments'] ),
-					'name'     => '' !== $p['filename'] ? $p['filename'] : ( 'ملف-' . ( count( $result['attachments'] ) + 1 ) ),
-					'mime'     => $ctype,
+					'index'    => $n,
+					'name'     => self::ensure_name( $p['filename'], $ctype, 'مرفق-' . ( $n + 1 ) ),
+					'mime'     => '' !== $ctype ? $ctype : 'application/octet-stream',
 					'size'     => strlen( $p['content'] ),
 					'cid'      => trim( $p['cid'], '<>' ),
 					'inline'   => ( 'inline' === $p['disposition'] ),
 				);
+			} elseif ( 'text/html' === $ctype ) {
+				$result['html'] .= $p['content'];
+			} elseif ( 'text/plain' === $ctype ) {
+				$result['text'] .= $p['content'];
 			}
 		}
 
@@ -793,13 +793,12 @@ class Osoul_MIME {
 		self::walk( self::parse_headers( $head ), $body, $parts );
 		$n = 0;
 		foreach ( $parts as $p ) {
-			$ctype = strtolower( $p['type'] );
-			$isAtt = ( 'attachment' === $p['disposition'] ) || ( '' !== $p['filename'] && 'text/html' !== $ctype && 'text/plain' !== $ctype );
-			$isInlineNotEmbedded = ( 'inline' === $p['disposition'] && ! ( '' !== $p['cid'] && 0 === strpos( $ctype, 'image/' ) ) );
-			if ( $isAtt || $isInlineNotEmbedded ) {
+			// Same detection as get_message() so the download index always aligns.
+			if ( self::is_attachment_part( $p ) ) {
 				if ( $n === (int) $index ) {
+					$ctype = strtolower( $p['type'] );
 					return array(
-						'name'    => '' !== $p['filename'] ? $p['filename'] : ( 'file-' . ( $n + 1 ) ),
+						'name'    => self::ensure_name( $p['filename'], $ctype, 'مرفق-' . ( $n + 1 ) ),
 						'mime'    => '' !== $ctype ? $ctype : 'application/octet-stream',
 						'content' => $p['content'],
 					);
@@ -808,6 +807,70 @@ class Osoul_MIME {
 			}
 		}
 		return null;
+	}
+
+	/** An inline image that we embed into the HTML preview (not shown as a file). */
+	private static function is_embedded_inline( $p ) {
+		$ctype = strtolower( $p['type'] );
+		return ( 'inline' === $p['disposition'] && '' !== $p['cid']
+			&& 0 === strpos( $ctype, 'image/' ) && strlen( $p['content'] ) < 1600000 );
+	}
+
+	/** Whether a leaf part should be listed/downloadable as an attachment. */
+	private static function is_attachment_part( $p ) {
+		if ( self::is_embedded_inline( $p ) ) { return false; }
+		if ( 'attachment' === $p['disposition'] ) { return true; }
+		if ( '' !== (string) $p['filename'] ) { return true; }
+		$ctype = strtolower( $p['type'] );
+		// The message body itself isn't an attachment; anything else that reached
+		// this leaf (application/*, image/* w/o cid, message/rfc822, …) is.
+		if ( 'text/html' === $ctype || 'text/plain' === $ctype || '' === $ctype ) { return false; }
+		if ( 0 === strpos( $ctype, 'multipart/' ) ) { return false; }
+		return true;
+	}
+
+	/** Map a MIME type to a file extension (best effort). */
+	private static function ext_for_mime( $mime ) {
+		$mime = strtolower( trim( (string) $mime ) );
+		$map  = array(
+			'application/pdf' => 'pdf',
+			'application/msword' => 'doc',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+			'application/vnd.ms-excel' => 'xls',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+			'application/vnd.ms-powerpoint' => 'ppt',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+			'application/zip' => 'zip', 'application/x-zip-compressed' => 'zip',
+			'application/x-rar-compressed' => 'rar', 'application/vnd.rar' => 'rar',
+			'application/x-7z-compressed' => '7z', 'application/gzip' => 'gz',
+			'application/json' => 'json', 'application/xml' => 'xml', 'text/xml' => 'xml',
+			'application/rtf' => 'rtf', 'text/plain' => 'txt', 'text/csv' => 'csv',
+			'text/html' => 'html', 'message/rfc822' => 'eml',
+			'image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png',
+			'image/gif' => 'gif', 'image/webp' => 'webp', 'image/bmp' => 'bmp',
+			'image/svg+xml' => 'svg', 'image/tiff' => 'tif', 'image/heic' => 'heic',
+			'application/octet-stream' => '',
+		);
+		if ( isset( $map[ $mime ] ) ) { return $map[ $mime ]; }
+		if ( preg_match( '#^[a-z]+/(?:x-)?([a-z0-9.+-]{1,8})$#', $mime, $m ) ) {
+			return preg_replace( '/[^a-z0-9]/', '', $m[1] );
+		}
+		return '';
+	}
+
+	/** Ensure an attachment has a real name and a sensible extension. */
+	private static function ensure_name( $filename, $mime, $fallback ) {
+		$filename = trim( (string) $filename );
+		// Some clients wrap the name in stray quotes/backslashes.
+		$filename = trim( str_replace( array( "\\", '"' ), '', $filename ) );
+		$filename = preg_replace( '#[\\/\x00-\x1f]+#', ' ', $filename );
+		$filename = trim( (string) $filename );
+		if ( '' === $filename ) { $filename = (string) $fallback; }
+		if ( ! preg_match( '/\.[A-Za-z0-9]{1,8}$/', $filename ) ) {
+			$ext = self::ext_for_mime( $mime );
+			if ( '' !== $ext ) { $filename .= '.' . $ext; }
+		}
+		return $filename;
 	}
 
 	/* ---- internals ---- */
@@ -849,7 +912,12 @@ class Osoul_MIME {
 		elseif ( 0 === strpos( $disp_raw, 'inline' ) ) { $disposition = 'inline'; }
 		$filename = self::param( $headers['content-disposition'] ?? '', 'filename' );
 		if ( '' === $filename ) { $filename = self::param( $ctype_raw, 'name' ); }
-		$filename = self::decode_header( $filename );
+		// RFC 2231 (filename*=) values are already charset-decoded by param(); only
+		// RFC 2047 encoded-words (=?utf-8?..?=) need decode_header — running it on
+		// raw UTF-8 would strip the non-ASCII bytes.
+		if ( false !== strpos( $filename, '=?' ) ) {
+			$filename = self::decode_header( $filename );
+		}
 		$cid      = trim( $headers['content-id'] ?? '' );
 
 		$parts[] = array(
@@ -881,14 +949,26 @@ class Osoul_MIME {
 
 	private static function param( $header, $name ) {
 		$header = (string) $header;
-		// RFC 2231 extended (name*=charset''value or name*0*=...) — best effort.
-		if ( preg_match( '/;\s*' . preg_quote( $name, '/' ) . '\*\s*=\s*([^\';]+)\'[^\';]*\'([^;\r\n]+)/i', $header, $m ) ) {
+		$q      = preg_quote( $name, '/' );
+		// RFC 2231 continuation: name*0*=...; name*1*=...  reassemble in order.
+		if ( preg_match_all( '/;\s*' . $q . '\*(\d+)\*?\s*=\s*([^;\r\n]+)/i', $header, $mm, PREG_SET_ORDER ) ) {
+			$segs = array();
+			foreach ( $mm as $m ) { $segs[ (int) $m[1] ] = trim( $m[2], " \t\"" ); }
+			ksort( $segs );
+			$val = implode( '', $segs );
+			// The first segment may carry the "charset'lang'" prefix.
+			if ( preg_match( "/^[A-Za-z0-9!#$%&+.^_`{}~-]*'[^']*'(.*)$/s", $val, $mc ) ) { $val = $mc[1]; }
+			$dec = rawurldecode( $val );
+			return ( '' !== $dec ) ? $dec : $val;
+		}
+		// RFC 2231 single extended: name*=charset''value
+		if ( preg_match( '/;\s*' . $q . '\*\s*=\s*([^\';]*)\'[^\';]*\'([^;\r\n]+)/i', $header, $m ) ) {
 			return rawurldecode( trim( $m[2] ) );
 		}
-		if ( preg_match( '/;\s*' . preg_quote( $name, '/' ) . '\s*=\s*"([^"]*)"/i', $header, $m ) ) {
+		if ( preg_match( '/;\s*' . $q . '\s*=\s*"([^"]*)"/i', $header, $m ) ) {
 			return $m[1];
 		}
-		if ( preg_match( '/;\s*' . preg_quote( $name, '/' ) . '\s*=\s*([^;\r\n]+)/i', $header, $m ) ) {
+		if ( preg_match( '/;\s*' . $q . '\s*=\s*([^;\r\n]+)/i', $header, $m ) ) {
 			return trim( $m[1] );
 		}
 		return '';
