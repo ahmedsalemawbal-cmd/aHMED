@@ -798,9 +798,19 @@
 		[q('.cto', dock), q('.ccc', dock), q('.cbcc', dock)].forEach(setupAutocomplete);
 	}
 
+	// Drop inline data:/cid: images (and url(data:) backgrounds) from quoted text.
+	// Large embedded images balloon the reply and can blow past the server's POST
+	// size limit — which arrives as an empty body ("Message body empty").
+	function stripHeavy(html) {
+		return String(html || '')
+			.replace(/<img\b[^>]*\ssrc\s*=\s*(["'])\s*(?:data:|cid:)[^"']*\1[^>]*>/gi, '')
+			.replace(/\ssrc\s*=\s*(["'])\s*(?:data:|cid:)[^"']*\1/gi, ' ')
+			.replace(/url\(\s*['"]?\s*data:[^)]*\)/gi, 'none');
+	}
 	function quoteBlock(m) {
 		var head = (m.from.name || m.from.email) + ' ' + t('on_wrote');
-		var inner = m.html ? m.html : ('<pre style="white-space:pre-wrap;font-family:inherit">' + esc(m.text || '') + '</pre>');
+		var inner = m.html ? stripHeavy(m.html) : ('<pre style="white-space:pre-wrap;font-family:inherit">' + esc(m.text || '') + '</pre>');
+		if (inner.length > 200000) { inner = inner.slice(0, 200000) + '…'; }   // safety cap
 		return '<br><br><div style="border-inline-start:3px solid #d0d7e2;padding-inline-start:12px;color:#555">' +
 			'<div style="color:#888;font-size:12px;margin-bottom:6px">— ' + esc(head) + '</div>' + inner + '</div>';
 	}

@@ -389,8 +389,20 @@ function osoul_rest_mail_send( WP_REST_Request $req ) {
 	$cc   = osoul_mail_split_addrs( $req->get_param( 'cc' ) );
 	$bcc  = osoul_mail_split_addrs( $req->get_param( 'bcc' ) );
 	$subj = sanitize_text_field( (string) $req->get_param( 'subject' ) );
-	$body = (string) $req->get_param( 'body_html' );
-	$body = wp_kses_post( $body );
+	$raw  = (string) $req->get_param( 'body_html' );
+	// Very large bodies (usually inline base64 images) can break wp_kses_post via
+	// PCRE limits and come back empty — which surfaces as "Message body empty".
+	// Strip embedded data:/cid: media first so kses only ever sees light HTML.
+	if ( strlen( $raw ) > 100000 ) {
+		$raw = osoul_mail_strip_heavy( $raw );
+	}
+	$body = (string) wp_kses_post( $raw );
+	// If kses still collapsed it to nothing but the user did send text, keep the
+	// text so the message isn't rejected as empty.
+	if ( '' === trim( wp_strip_all_tags( $body ) ) ) {
+		$plain = trim( wp_strip_all_tags( $raw ) );
+		if ( '' !== $plain ) { $body = '<div dir="auto">' . nl2br( esc_html( $plain ) ) . '</div>'; }
+	}
 	$draft = filter_var( $req->get_param( 'draft' ), FILTER_VALIDATE_BOOLEAN );
 
 	if ( ! $draft && ! $to && ! $cc && ! $bcc ) {
@@ -630,6 +642,22 @@ function osoul_rest_mail_password( WP_REST_Request $req ) {
  *  Small helpers
  * ---------------------------------------------------------------------- */
 
+/**
+ * Remove inline data:/cid: images (and url(data:) backgrounds) from an HTML body.
+ * Uses linear regexes only, so it stays safe on multi-megabyte input where
+ * wp_kses_post would otherwise choke. Embedded images belong as attachments.
+ */
+function osoul_mail_strip_heavy( $html ) {
+	$html = (string) $html;
+	$out  = preg_replace( '#<img\b[^>]*\ssrc\s*=\s*("|\')\s*(?:data:|cid:)[^"\']*\1[^>]*>#i', '', $html );
+	if ( null !== $out ) { $html = $out; }
+	$out = preg_replace( '#\ssrc\s*=\s*("|\')\s*(?:data:|cid:)[^"\']*\1#i', ' ', $html );
+	if ( null !== $out ) { $html = $out; }
+	$out = preg_replace( '#url\(\s*[\'"]?\s*data:[^)]*\)#i', 'none', $html );
+	if ( null !== $out ) { $html = $out; }
+	return $html;
+}
+
 /** Normalise a comma/newline-separated recipient string (or array) → emails[]. */
 function osoul_mail_split_addrs( $raw ) {
 	if ( is_array( $raw ) ) {
@@ -750,9 +778,11 @@ function osoul_mail_save_draft( $user_id, $args ) {
 		foreach ( (array) $args['cc'] as $a )  { if ( is_email( $a ) ) { $mail->addCC( $a ); } }
 		foreach ( (array) $args['bcc'] as $a ) { if ( is_email( $a ) ) { $mail->addBCC( $a ); } }
 		$mail->Subject = (string) $args['subject'];
+		$dhtml         = (string) $args['body_html'];
+		$dtext         = trim( wp_strip_all_tags( $dhtml ) );
 		$mail->isHTML( true );
-		$mail->Body    = (string) $args['body_html'];
-		$mail->AltBody = trim( wp_strip_all_tags( (string) $args['body_html'] ) );
+		$mail->Body    = ( '' !== trim( $dhtml ) ) ? $dhtml : '&nbsp;';   // drafts may be blank
+		$mail->AltBody = ( '' !== $dtext ) ? $dtext : ' ';
 		foreach ( (array) $args['attachments'] as $att ) {
 			if ( ! empty( $att['path'] ) && file_exists( $att['path'] ) ) {
 				$mail->addAttachment( $att['path'], (string) ( $att['name'] ?? '' ) );

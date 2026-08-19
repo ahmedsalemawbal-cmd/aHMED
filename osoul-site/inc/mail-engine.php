@@ -1065,9 +1065,11 @@ function osoul_mail_send( $user_id, $args ) {
 
 		$mail->Subject = (string) ( $args['subject'] ?? '' );
 		$html          = (string) ( $args['body_html'] ?? '' );
+		$text          = trim( wp_strip_all_tags( $html ) );
 		$mail->isHTML( true );
-		$mail->Body    = $html;
-		$mail->AltBody = trim( wp_strip_all_tags( $html ) );
+		// Never hand PHPMailer an empty body (it aborts with "Message body empty").
+		$mail->Body    = ( '' !== trim( $html ) ) ? $html : '&nbsp;';
+		$mail->AltBody = ( '' !== $text ) ? $text : ' ';
 
 		if ( ! empty( $args['in_reply_to'] ) ) {
 			$mail->addCustomHeader( 'In-Reply-To', (string) $args['in_reply_to'] );
