@@ -72,12 +72,24 @@ final class SCH_Custody {
         ];
         if ($id === 1) {
             $out[] = ['key' => 'd:7', 'name' => 'نورة سعد المطيري', 'relation' => 'الخالة',
-                      'source' => 'delegate', 'until' => date('Y-m-d H:i:s', strtotime('+6 hours'))];
+                      'source' => 'delegate', 'until' => date('Y-m-d') . ' 15:00:00'];
         }
         return $out;
     }
 
     public static function may_pick_up(int $id, string $key): bool { return $key === 'g:7'; }
+
+    public static function pickers_summary(int $uid): array {
+        $keys = []; $temp = 0;
+        foreach (array_keys(KIDS) as $kid) {
+            foreach (self::pickers($kid) as $p) {
+                if (isset($keys[$p['key']])) { continue; }
+                $keys[$p['key']] = true;
+                $temp += $p['source'] === 'delegate' ? 1 : 0;
+            }
+        }
+        return ['people' => count($keys), 'temp' => $temp];
+    }
 }
 
 final class SCH_Attendance {

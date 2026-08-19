@@ -1990,6 +1990,16 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .p-setrow--out   .p-setrow__i { background: var(--bad-tint);   color: var(--bad); }
 
 .p-setrow__t { flex: 1; min-width: 0; font-size: var(--t2); font-weight: 600; }
+
+/* سطرٌ ثانٍ اختياري في الصفّ: الرقم يغني عن فتح الشاشة للاطمئنان */
+.p-setrow__t > em {
+  display: block;
+  margin-top: 1px;
+  font-style: normal;
+  font-size: var(--t0);
+  font-weight: 400;
+  color: var(--muted);
+}
 .p-setrow--out .p-setrow__t { color: var(--bad); }
 
 .p-setrow__e {
@@ -2183,10 +2193,10 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 /* ── من يحقّ له الاستلام ─────────────────────────────────────────── */
 
 /**
- * بطاقة لكل ابن، وفيها قائمة من يحقّ له استلامه.
+ * صفٌّ لكل شخص، ونطاقه مكتوب تحته.
  *
- * والتمييز بين الدائم والمؤقّت **بحافّة ملوّنة لا بلون خلفية**: صفّان
- * ملوّنان بالكامل يجعلان القائمة تُقرأ تحذيرًا، وهي ليست تحذيرًا.
+ * والتمييز بين الدائم والمؤقّت **بلون البطاقة كلّها** لا بشارة وحدها:
+ * المؤقّت هو ما يُراجَع، فيجب أن يُلتقط بنظرة على القائمة لا بقراءتها.
  */
 
 .p-flash {
@@ -2203,84 +2213,89 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 .p-flash--bad { background: var(--bad-tint); color: var(--bad); }
 
+/* رأس الشاشة الفرعية: عودة على حافة، وعنوان يملأ ما بقي */
+.p-sub__h {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s2);
+}
+
+.p-sub__h .p-h1 { flex: 1; min-width: 0; margin: 0; }
+
+.p-body a.p-chip {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--card);
+  color: var(--ink2);
+  box-shadow: var(--shadow-sm);
+}
+
+/* الشيفرون يشير إلى الوراء، وفي RTL «الوراء» هو اليمين */
+.p-body a.p-chip svg { transform: scaleX(-1); }
+
 .p-pk {
-  margin: 0 0 var(--s3);
-  padding: var(--s4);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 68px;
+  margin: 0 0 var(--s2);
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: var(--r4);
   background: var(--card);
   box-shadow: var(--shadow-sm);
 }
 
-.p-pk__h {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  margin-bottom: var(--s3);
+.p-pk--temp {
+  background: var(--warn-tint);
+  border-color: transparent;
 }
 
-.p-pk__h > b  { font-size: var(--t3); font-weight: 700; color: var(--ink); }
-.p-pk__h > em { font-style: normal; font-size: var(--t1); color: var(--muted); }
+/* نغمة ثابتة لكل شخص تُشتق من ترتيبه، فيتعرّف عليه الأب بالعين */
+.p-pk--t0 { --sch-av-bg: var(--pri-tint);   --sch-av-ink: var(--pri-ink); }
+.p-pk--t1 { --sch-av-bg: var(--gold-tint);  --sch-av-ink: var(--gold); }
+.p-pk--t2 { --sch-av-bg: var(--slate-tint); --sch-av-ink: var(--slate); }
+.p-pk--t3 { --sch-av-bg: var(--ok-tint);    --sch-av-ink: var(--ok); }
+.p-pk--t4 { --sch-av-bg: var(--warn-tint);  --sch-av-ink: var(--warn); }
+.p-pk--t5 { --sch-av-bg: var(--bad-tint);   --sch-av-ink: var(--bad); }
+
+/* المؤقّت على خلفية كهرمانية، فصورته الكهرمانية تذوب فيها */
+.p-pk--temp { --sch-av-bg: var(--card); --sch-av-ink: var(--warn); }
+
+/* والشارة كذلك: كهرمانيّ على كهرمانيّ لا يُقرأ شارةً */
+.p-pk--temp .p-tag--warn { background: var(--card); }
 
 /* القصّ على الصورة لا على الحاضنة، وإلا قُصّ ما يخرج عنها عمدًا */
-.p-pk__pic {
-  flex: none;
-  display: block;
-  width: 38px;
-  height: 38px;
-}
-
-.p-pk__pic img,
-.p-pk__pic svg {
-  display: block;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  overflow: hidden;
-  object-fit: cover;
-}
-
-.p-pk__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.p-pk__row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 52px;
-  padding: 9px 12px;
-  border-radius: var(--r3);
-  background: var(--card2);
-  border-inline-start: 3px solid var(--slate);
-}
-
-.p-pk__row--guardian { border-inline-start-color: var(--ok); }
-.p-pk__row--delegate { border-inline-start-color: var(--warn); }
-
-.p-pk__av { flex: none; display: block; width: 34px; height: 34px; }
+.p-pk__av { flex: none; display: block; width: 44px; height: 44px; }
 
 .p-pk__av svg {
   display: block;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
   overflow: hidden;
 }
 
-.p-pk__t { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.p-pk__t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 
-/* الاسم الثلاثيّ لا يُترك ينكسر ثلاثة أسطر فيقفز ارتفاع الصفّ */
-.p-pk__t > b,
-.p-pk__t > em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* الاسم الثلاثيّ لا يُترك ينكسر سطرين فيقفز ارتفاع الصفّ */
+.p-pk__t > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.p-pk__t > b  { font-size: var(--t2); font-weight: 600; color: var(--ink); }
-.p-pk__t > em { font-style: normal; font-size: var(--t0); color: var(--muted); }
+/**
+ * وسطر النطاق **يُترك ينكسر**.
+ * «الخالة · سامي · حتى ٢٠ أغسطس ٤:٤٧ ص» لا يسع سطرًا في ٣٩٣px، وقصُّه
+ * بثلاث نقاط يحجب **متى ينتهي التفويض** — وهي المعلومة التي جاء لها.
+ */
+.p-pk__t > em { overflow-wrap: anywhere; }
+
+.p-pk__t > b  { font-size: var(--t3); font-weight: 700; color: var(--ink); }
+.p-pk__t > em { font-style: normal; font-size: var(--t1); color: var(--muted); }
 
 .p-pk__x { margin: 0; }
 
@@ -2300,16 +2315,16 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 .p-pk__xb:hover { background: var(--bad-tint); color: var(--bad); }
 
-.p-pk__add { margin-top: var(--s3); }
+.p-pk__add { margin: var(--s3) 0 0; }
 
 .p-pk__add > summary {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 44px;
-  border: 1px dashed var(--line);
-  border-radius: var(--r2);
+  gap: 7px;
+  min-height: 48px;
+  border: 1.5px dashed var(--pri);
+  border-radius: var(--r3);
   color: var(--pri-ink);
   font-size: var(--t2);
   font-weight: 700;
@@ -2321,7 +2336,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .p-pk__add[open] > summary { margin-bottom: var(--s3); }
 
 .p-pk__note {
-  margin: var(--s3) 0 0;
+  margin: var(--s3) 0;
   font-size: var(--t1);
   line-height: 1.65;
   color: var(--muted);

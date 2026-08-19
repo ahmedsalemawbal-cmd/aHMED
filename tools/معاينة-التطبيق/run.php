@@ -89,7 +89,8 @@ function shell(string $body, int $kid, string $view): string
         . '<a class="p-ico" href="#">' . sch_icon('chat', 18) . '</a>'
         . '<a class="p-ico" href="#">' . sch_icon('bell', 18) . '<i class="p-ico__dot"></i></a>'
         . '</span></header>'
-        . '<nav class="p-kids">' . $kids . '</nav>'
+        /* الدوّار لا يظهر إلا في شاشة تخصّ ابنًا — كما في layout.php */
+        . (in_array($view, ['account', 'pickers', 'alerts', 'messages'], true) ? '' : '<nav class="p-kids">' . $kids . '</nav>')
         . '<main class="p-main">' . $body . '</main>'
         . '<nav class="p-tabs">' . $tabs . '</nav>'
         . '</div>';

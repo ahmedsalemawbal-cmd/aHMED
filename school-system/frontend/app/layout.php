@@ -102,7 +102,11 @@ $p_hour  = (int) current_time('G');
             </div>
         </header>
 
-        <?php if ($p_kids !== []) : ?>
+        <?php /* الدوّار لا يظهر إلا في شاشةٍ تخصّ ابنًا بعينه.
+                 «حسابي» و«الرسائل» و«الإشعارات» و«الاستلام» عن الأسرة كلها،
+                 ودوّارٌ فيها يعرض اختيارًا لا يغيّر شيئًا — والاختيار الذي
+                 لا يفعل شيئًا يُعلِّم أن الدوّار لا يفعل شيئًا. */ ?>
+        <?php if ($p_kids !== [] && !in_array($p_view, ['account', 'pickers', 'alerts', 'messages', 'install'], true)) : ?>
             <!-- السحب بالإصبع يبدّل الابن ويستقر عند بطاقة تمامًا -->
             <nav class="p-kids" id="p-kids" aria-label="<?php esc_attr_e('الأبناء', 'school-system'); ?>">
                 <?php foreach ($p_kids as $p_kid) :

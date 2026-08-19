@@ -56,16 +56,41 @@ $guardian = SCH_Guardians::by_user(get_current_user_id());
     </div>
 </div>
 
-<!-- الإعدادات -->
 <!-- الاستلام -->
+<?php $sch_pk = SCH_Custody::pickers_summary(get_current_user_id()); ?>
 <h2 class="p-h2"><?php esc_html_e('أبنائي', 'school-system'); ?></h2>
 <div class="p-list">
     <a class="p-setrow p-tap" href="<?php echo esc_url(SCH_App::url('pickers')); ?>">
         <span class="p-setrow__i"><?php echo sch_icon('user-check', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <span class="p-setrow__t"><?php esc_html_e('من يحقّ له الاستلام', 'school-system'); ?></span>
+        <span class="p-setrow__t">
+            <?php esc_html_e('من يحقّ له استلام أبنائي', 'school-system'); ?>
+            <?php /* الرقم في الصفّ يغني عن فتح الشاشة للاطمئنان — ومن رأى
+                     تفويضًا ساريًا لا يتذكّره فتحها لسبب. */ ?>
+            <em>
+                <?php
+                $sch_pk_txt = sprintf(
+                    /* translators: %s: عدد المخوَّلين */
+                    _n('%s مخوَّل', '%s مخوَّلين', $sch_pk['people'], 'school-system'),
+                    number_format_i18n($sch_pk['people'])
+                );
+
+                if ($sch_pk['temp'] > 0) {
+                    $sch_pk_txt .= ' · ' . sprintf(
+                        /* translators: %s: عدد التفويضات المؤقّتة */
+                        _n('تفويض مؤقّت واحد نشط', '%s تفويضات مؤقّتة نشطة', $sch_pk['temp'], 'school-system'),
+                        number_format_i18n($sch_pk['temp'])
+                    );
+                }
+
+                echo esc_html($sch_pk_txt);
+                ?>
+            </em>
+        </span>
         <span class="p-setrow__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
     </a>
 </div>
+
+<!-- الإعدادات -->
 
 <h2 class="p-h2"><?php esc_html_e('الإعدادات', 'school-system'); ?></h2>
 <div class="p-list">

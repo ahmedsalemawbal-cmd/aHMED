@@ -223,6 +223,34 @@ final class SCH_Custody
         )) ?: [];
     }
 
+    /**
+     * ملخّص مخوَّلي أبناء وليّ أمر: كم شخصًا، وكم تفويضًا مؤقّتًا ساريًا.
+     *
+     * تخدم صفَّ «حسابي» وشاشة الاستلام معًا. والعدّ **بالأشخاص لا بالصفوف**:
+     * أبٌ يستلم ثلاثة أبناء شخصٌ واحد، وعدّه ثلاثة يجعل الرقم يكبر بعدد
+     * الأبناء لا بعدد من يملك المفتاح.
+     *
+     * @return array{people:int,temp:int}
+     */
+    public static function pickers_summary(int $guardian_user_id): array
+    {
+        $keys = [];
+        $temp = 0;
+
+        foreach (SCH_Students::children_of($guardian_user_id) as $child) {
+            foreach (self::pickers((int) $child->id) as $p) {
+                if (isset($keys[$p['key']])) {
+                    continue;
+                }
+
+                $keys[$p['key']] = true;
+                $temp           += $p['source'] === 'delegate' ? 1 : 0;
+            }
+        }
+
+        return ['people' => count($keys), 'temp' => $temp];
+    }
+
     /** هل هذا المفتاح مخوَّل باستلام هذا الطفل الآن؟ */
     public static function may_pick_up(int $student_id, string $picker_key): bool
     {
