@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "أُصول — وليّ الأمر",
+    "slug": "osool-parent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "osool",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#f3f4fb",
+    "splash": {
+      "backgroundColor": "#4453cc",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.osool.parent",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "android": {
+      "package": "com.osool.parent",
+      "adaptiveIcon": {
+        "backgroundColor": "#4453cc"
+      }
+    },
+    "extra": {
+      "defaultSite": ""
+    }
+  }
+}
