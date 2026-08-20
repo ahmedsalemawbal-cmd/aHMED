@@ -62,7 +62,7 @@ foreach ($msgs as $sch_m) {
                     <div class="p-inb__h">
                         <b class="p-inb__t"><?php echo esc_html((string) $m->title); ?></b>
                         <time class="p-inb__w" datetime="<?php echo esc_attr((string) $m->created_at); ?>">
-                            <?php echo esc_html(SCH_App::when_label((string) $m->created_at)); ?>
+                            <?php echo esc_html(SCH_App::stamp_label((string) $m->created_at)); ?>
                         </time>
                     </div>
 

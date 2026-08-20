@@ -26,7 +26,9 @@ function demo_student(int $id): ?object {
     return (object) (KIDS[$id] + [
         'id' => $id, 'photo_file' => '', 'qr_token' => str_repeat((string) $id, 32),
         'badge_token' => str_repeat((string) $id, 32), 'status' => 'active',
-        'custody_at' => date('Y-m-d H:i:s'), 'user_id' => 100 + $id, 'notes' => '',
+        /* ساعةٌ مثبَّتة: لقطتان لنفس الشاشة يجب أن تتطابقا بايتًا ببايت،
+           وإلا لم تُميَّز الفروق الحقيقية عن مرور الدقيقة. */
+        'custody_at' => date('Y-m-d') . ' 07:14:00', 'user_id' => 100 + $id, 'notes' => '',
         'father_name' => 'أحمد', 'family_name' => 'العتيبي', 'grand_name' => 'سعد',
         'id_type' => 'national', 'nationality' => 'سعودي', 'gender' => $id === 1 ? 'male' : 'female',
         'enrolled_at' => '2023-08-20', 'student_no' => (string) (1024 + $id),
@@ -259,10 +261,18 @@ final class SCH_StudentLeave {
 }
 
 final class SCH_Certificates {
-    const TYPES = ['excellence' => 'تفوّق', 'reading' => 'قراءة', 'attendance' => 'حضور', 'thanks' => 'شكر'];
+    /* الشكل الحقيقي: قائمةٌ لكل نوع [الاسم، عنوان الشهادة، القالب، يُقترح؟].
+       وخريطةٌ من نصوص تجعل `TYPES[$t][0]` يعيد **أوّل بايت** من كلمة عربية،
+       فيخرج نصٌّ غير صالح، و`esc_html` تُرجع فراغًا بصمت — فيختفي السطر. */
+    const TYPES = [
+        'excellence' => ['التفوّق الدراسي', 'شهادة تفوّق', 'royal', true],
+        'attendance' => ['الحضور المثالي', 'لم يغب يومًا', 'modern', true],
+        'activity'   => ['المشاركة والأنشطة', 'شهادة مشاركة', 'classic', false],
+        'thanks'     => ['شكر وتقدير', 'شهادة شكر وتقدير', 'classic', false],
+    ];
     public static function of_student(int $id): array {
         return [
-            (object) ['id' => 1, 'type' => 'reading', 'template' => 'royal', 'title' => 'المركز الأول في مسابقة القراءة', 'issued_at' => date('Y-m-d', strtotime('-1 day')), 'serial' => 'C-1041', 'status' => 'valid'],
+            (object) ['id' => 1, 'type' => 'activity', 'template' => 'royal', 'title' => 'المركز الأول في مسابقة القراءة', 'issued_at' => date('Y-m-d', strtotime('-1 day')), 'serial' => 'C-1041', 'status' => 'valid'],
             (object) ['id' => 2, 'type' => 'excellence', 'template' => 'classic', 'title' => 'شهادة تفوّق — الفصل الأول', 'issued_at' => date('Y-m-d', strtotime('-40 days')), 'serial' => 'C-0987', 'status' => 'valid'],
         ];
     }
@@ -300,7 +310,7 @@ final class SCH_Pickup {
     const STATUSES = ['open' => 'بانتظار المشرفة', 'onway' => 'المشرفة في الطريق', 'done' => 'سُلّم', 'cancelled' => 'أُلغي'];
     public static function open_for(int $id): ?object {
         return getenv('DEMO_CALL') ? (object) ['id' => 1, 'student_id' => $id, 'status' => getenv('DEMO_CALL'),
-            'created_at' => date('Y-m-d H:i:s', strtotime('-2 minutes')), 'caller_name' => 'أحمد سعد العتيبي'] : null;
+            'created_at' => date('Y-m-d') . ' 12:40:00', 'caller_name' => 'أحمد سعد العتيبي'] : null;
     }
 }
 
@@ -315,6 +325,8 @@ final class SCH_Comms {
             ['attendance', 'رُصدت درجة رياضيات', '٩٦ من ١٠٠ — أ. خالد المطيري', '-1 day', 0, 'سامي'],
             ['invoice', 'تذكير بالقسط الثالث', '١٦٠٠ ر.س — تجاوز موعد الاستحقاق', '-2 days', 0, 'سامي'],
             ['message', 'تعميم إداري', 'انصراف مبكر يوم الخميس الساعة ١١:٠٠', '-3 days', 0, ''],
+            ['note', 'الأخصائية الاجتماعية', 'سامي شارك في حلّ خلاف بين زميلين — سلوكٌ يستحق الشكر', '-1 day', 1, 'سامي'],
+            ['referral', 'عيادة المدرسة', 'تمّ تحديث سجلّ الحساسية لسامي — يُرجى مراجعة الملف', '-2 days', 0, 'سامي'],
         ];
         $out = [];
         foreach ($m as $i => [$t, $ti, $b, $ago, $unread, $kid]) {

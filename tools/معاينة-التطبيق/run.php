@@ -108,7 +108,11 @@ $out = [];
 
 foreach ($SCREENS as $i => [$file, $title, $kid, $env]) {
     $body  = render_screen($file, $kid, $env);
-    $inner = in_array($file, ['login', 'install', 'denied'], true) ? $body : shell($body, $kid, $file);
+    // الشاشات بلا قشرة يضع القالبُ لها `p-body--auth` على <body> —
+    // وداخل الإطار تُحاكى بحاضنةٍ تحمل الصنف نفسه
+    $inner = in_array($file, ['login', 'install', 'denied'], true)
+        ? '<div class="p-body--auth p-frame-auth">' . $body . '</div>'
+        : shell($body, $kid, $file);
 
     $out[] = '<figure class="fr"><figcaption>' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT)
         . ' · ' . esc_html($title) . '</figcaption>'
@@ -151,5 +155,9 @@ echo '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'
       .scr .p-app{display:flex;flex-direction:column;min-height:100%}
       .scr .p-main{flex:1}
       .scr .p-tabs{position:sticky;bottom:0}
+      /* `p-body--auth` مبنيّ على نافذة المتصفّح (100dvh وزخرفة fixed) —
+         وداخل الإطار يُربَط بالإطار نفسه فتُرى الشاشة كما تُرى فعلًا. */
+      .p-frame-auth{min-height:100%;position:relative;overflow:hidden}
+      .p-frame-auth::before,.p-frame-auth::after{position:absolute}
       .scr::-webkit-scrollbar{width:0}
       </style></head><body' . $theme . '>' . implode('', $out) . '</body></html>';
