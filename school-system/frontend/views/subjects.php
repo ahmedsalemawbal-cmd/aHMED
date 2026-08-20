@@ -102,6 +102,29 @@ SCH_Modal::head(
                             <?php if ($slot) : ?>
                                 <strong><?php echo esc_html($slot->subject_name); ?></strong>
                                 <span class="sch-sub sch-block"><?php echo esc_html($slot->teacher_name ?: '—'); ?></span>
+                                <?php
+                                /*
+                                 * زرّ التفريغ: الشاشة كانت تضع الحصة ولا تستطيع
+                                 * رفعها أبدًا — والخطأ الوحيد يبقى في الجدول للأبد،
+                                 * أو يُكتب فوقه بمادةٍ أخرى ولا يُترك فارغًا. والفعل
+                                 * `clear_slot` ومعالجه و`SCH_Timetable::clear_slot()`
+                                 * كلّها موجودة بلا نموذجٍ يرسلها.
+                                 */
+                                ?>
+                                <form method="post" class="sch-block">
+                                    <?php wp_nonce_field('sch_clear_slot', '_sch_nonce'); ?>
+                                    <input type="hidden" name="sch_action" value="clear_slot">
+                                    <input type="hidden" name="class_id" value="<?php echo esc_attr((string) $class_id); ?>">
+                                    <input type="hidden" name="day_of_week" value="<?php echo esc_attr((string) $day); ?>">
+                                    <input type="hidden" name="period_no" value="<?php echo esc_attr((string) $p); ?>">
+                                    <button class="sch-btn sch-btn--quiet sch-btn--sm"
+                                            aria-label="<?php echo esc_attr(sprintf(
+                                                /* translators: 1: اليوم 2: رقم الحصة */
+                                                __('تفريغ %1$s — الحصة %2$d', 'school-system'),
+                                                SCH_Timetable::DAYS[$day] ?? '',
+                                                $p
+                                            )); ?>"><?php esc_html_e('تفريغ', 'school-system'); ?></button>
+                                </form>
                             <?php else : ?>
                                 <span class="sch-sub">—</span>
                             <?php endif; ?>

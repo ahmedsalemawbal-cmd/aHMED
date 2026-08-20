@@ -77,6 +77,24 @@ SCH_Modal::head(
                         </td>
                         <td>
                             <div class="sch-inline">
+                                <?php
+                                /*
+                                 * «جدّده» كان وعدًا بلا زرّ: الشاشة تقول «مضت سنة على
+                                 * نشره — جدّده أو أرشفه»، والأرشفة موجودة والتجديد لا.
+                                 * والفعل `content_renew` ومعالجه و`SCH_Content::renew()`
+                                 * كلّها مكتوبة منذ البداية بلا نموذجٍ يرسلها.
+                                 */
+                                $sch_stale = $c->review_at !== null && $c->review_at <= current_time('Y-m-d');
+                                ?>
+                                <?php if ($sch_stale && $c->status === 'published') : ?>
+                                    <form method="post">
+                                        <?php wp_nonce_field('sch_content_renew', '_sch_nonce'); ?>
+                                        <input type="hidden" name="sch_action" value="content_renew">
+                                        <input type="hidden" name="content_id" value="<?php echo esc_attr((string) $c->id); ?>">
+                                        <button class="sch-btn sch-btn--quiet"><?php esc_html_e('تجديد', 'school-system'); ?></button>
+                                    </form>
+                                <?php endif; ?>
+
                                 <?php foreach (['published' => __('نشر', 'school-system'), 'archived' => __('أرشفة', 'school-system')] as $slug => $label) : ?>
                                     <?php if ($c->status !== $slug) : ?>
                                         <form method="post">

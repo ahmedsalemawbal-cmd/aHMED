@@ -163,10 +163,17 @@ $late_books = array_values(array_filter(
     static fn (object $l): bool => $l->returned_at === null && $l->due_date < current_time('Y-m-d')
 ));
 
+/*
+ * «إجازة» بلاطةٌ لا زينة: شاشة `leave` مبنيّة كاملةً — نموذجٌ وفعلٌ ونونس
+ * وقائمة طلبات — ولم يكن في التطبيق كلّه رابطٌ واحد إليها. فوليّ الأمر لا
+ * يستطيع طلب إجازة لابنه إلا بكتابة العنوان بيده. وموضعها بعد «الصحة»
+ * لأن أكثر الإجازات مرضٌ يُطلَب في صباحه.
+ */
 $sch_tiles = [
     ['schedule',  __('الجدول', 'school-system'), 'calendar', 'pri',  $id],
     ['transport', __('النقل', 'school-system'),  'bus',      'warn', $id],
     ['clinic',    __('الصحة', 'school-system'),  'heart',    'bad',  $id],
+    ['leave',     __('إجازة', 'school-system'),  'leaf',     'ok',   $id],
 ];
 
 if ($sch_certs !== []) {
