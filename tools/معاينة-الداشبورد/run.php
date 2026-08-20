@@ -10,9 +10,11 @@
 
 declare(strict_types=1);
 
+$GLOBALS['SCREEN'] = $argv[1] ?? 'attendance';
 require __DIR__ . '/stub.php';
 
 $SCREEN = $argv[1] ?? 'attendance';
+$GLOBALS['SCREEN'] = $SCREEN;
 $VIEW   = SCH_PATH . 'frontend/views/' . $SCREEN . '.php';
 
 if (!is_file($VIEW)) {
@@ -26,6 +28,11 @@ $sch_view = $SCREEN;
 
 /* التبويبة تُقرأ من `?tab=` — تُمرَّر ثالثًا لتُلتقط كل صفحة على حدة */
 $_GET['tab'] = (string) ($argv[3] ?? '');
+
+/* شاشة الجداول: الخطوة والعدسة يُمرَّران كذلك — run.php timetable 0 4 school */
+$_GET['step'] = (string) ($argv[3] ?? '1');
+$_GET['lens'] = (string) ($argv[4] ?? 'section');
+$_GET['cls']  = (string) ($argv[2] ?? '1');
 
 ob_start();
 try {

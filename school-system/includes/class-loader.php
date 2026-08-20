@@ -24,6 +24,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/attendance/class-attendance.php';
         require_once SCH_PATH . 'modules/attendance/class-staff-attendance.php';
         require_once SCH_PATH . 'modules/academic/class-assessment.php';
+        require_once SCH_PATH . 'modules/academic/class-tt.php';
         require_once SCH_PATH . 'modules/transport/class-transport.php';
         require_once SCH_PATH . 'modules/finance/class-finance.php';
         require_once SCH_PATH . 'modules/accounting/class-accounting.php';

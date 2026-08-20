@@ -561,7 +561,9 @@ final class SCH_Deputy
 
         foreach ($rows as $row) {
             $row->period_no  = (int) $row->period_no;
-            $row->time       = SCH_Timetable::period_hhmm($row->period_no);
+            // وقت الحصة يتبع مرحلة الشعبة: حصةُ الروضة الثالثة ليست في وقت
+            // حصة الثانوي الثالثة، والوكيل يقرأ الاثنتين في كشفٍ واحد.
+            $row->time       = SCH_Timetable::period_hhmm($row->period_no, (string) ($row->stage ?? ''));
             $row->assigned   = (int) ($row->substitute_teacher_id ?? 0) > 0;
             $row->candidates = $row->assigned
                 ? []

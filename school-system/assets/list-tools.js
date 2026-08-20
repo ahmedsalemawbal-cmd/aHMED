@@ -392,3 +392,109 @@
 
   paint(boot, false);
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   بناء الجداول — تحسينات فوق شاشة تعمل بلا جافاسكربت
+
+   الشبكة تُملأ أصلًا بـ«اختر مادة ثم اضغط خانة» (روابط ونماذج حقيقية)،
+   وهذه الطبقة تضيف: المِزواد (+/−) · شرائح أيام الدوام · إرسال القائمة عند
+   الاختيار · والسحب والإفلات. من يُطفئ الجافاسكربت يبني جدوله كاملًا.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var root = document.querySelector('[data-sch-tt]');
+  if (!root) { return; }
+
+  /* ── المِزواد: +/− على حقل رقميّ ── */
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tt-step][data-tt-for]');
+    if (!b) { return; }
+
+    var f = document.getElementById(b.dataset.ttFor);
+    if (!f) { return; }
+
+    var step = parseInt(b.dataset.ttStep, 10) || 1;
+    var min  = f.min !== '' ? parseInt(f.min, 10) : -Infinity;
+    var max  = f.max !== '' ? parseInt(f.max, 10) : Infinity;
+    var next = (parseInt(f.value, 10) || 0) + step;
+
+    f.value = Math.max(min, Math.min(max, next));
+    f.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  /* ── أيام الدوام: الشرائح تكتب القناع ── */
+  var mask = document.getElementById('tt-mask');
+  root.addEventListener('click', function (e) {
+    var d = e.target.closest('[data-tt-day]');
+    if (!d || !mask) { return; }
+
+    var bit = 1 << (parseInt(d.dataset.ttDay, 10) - 1);
+    var now = parseInt(mask.value, 10) || 0;
+    var on  = !(now & bit);
+
+    /* يومٌ واحد على الأقل — أسبوعٌ بلا دوام لا يقبله المولّد ولا معنى له */
+    if (!on && (now & ~bit) === 0) { return; }
+
+    mask.value = on ? (now | bit) : (now & ~bit);
+    d.classList.toggle('is-on', on);
+    d.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  /* ── القائمة تُرسل نموذجها عند الاختيار ── */
+  root.addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-tt-submit]');
+    if (!sel) { return; }
+    var form = sel.form || sel.closest('form');
+    if (form) { form.requestSubmit ? form.requestSubmit() : form.submit(); }
+  });
+
+  /* ── السحب والإفلات ──
+     المصدر إمّا مادة من السلّة (`subj:`) أو خانة مملوءة (`cell:`).
+     والإفلات يُرسل نموذج الخانة الهدف بعد ضبط فعله — فلا مسار كتابةٍ
+     ثانٍ يتباعد عن مسار الضغط، ولا نداء يتخطّى النونس. */
+  var drag = null;
+
+  root.addEventListener('dragstart', function (e) {
+    var pickEl = e.target.closest('[data-tt-pick]');
+    var cellEl = e.target.closest('[data-tt-cell]');
+
+    if (pickEl) { drag = { kind: 'subj', id: pickEl.dataset.ttPick }; }
+    else if (cellEl && cellEl.querySelector('b')) { drag = { kind: 'cell', from: cellEl }; }
+    else { return; }
+
+    if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'sch'); }
+  });
+
+  root.addEventListener('dragend', function () { drag = null; });
+
+  root.addEventListener('dragover', function (e) {
+    if (drag && e.target.closest('[data-tt-cell]')) { e.preventDefault(); }
+  });
+
+  root.addEventListener('drop', function (e) {
+    var cell = e.target.closest('[data-tt-cell]');
+    if (!drag || !cell) { return; }
+    e.preventDefault();
+
+    var form = cell.form || cell.closest('form');
+    if (!form) { drag = null; return; }
+
+    var sid = drag.kind === 'subj'
+      ? drag.id
+      : (drag.from.dataset.ttSubject || '');
+
+    drag = null;
+    if (!sid) { return; }
+
+    /* نموذج الخانة فعلُه واحد (`tt_place`) ونونسُه واحد: المادة وحدها تتغيّر —
+       صفرٌ يعني تفريغًا. فلا تبديلَ فعلٍ في المتصفّح ولا نونس لا يطابق. */
+    var sub = form.querySelector('[name="subject_id"]');
+    if (!sub) { return; }
+    sub.value = sid;
+
+    /* السحب من خانة إلى أخرى يُفرّغ الأصل بعد وصول الهدف — والخادم يُعيد
+       التحميل، فيُترك التفريغ للضغطة التالية بدل نداءَين متسابقَين. */
+    form.requestSubmit ? form.requestSubmit() : form.submit();
+  });
+})();

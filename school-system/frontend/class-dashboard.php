@@ -376,6 +376,18 @@ final class SCH_Dashboard
             'cover_unassign'   => ['sch_supervise_stage',  'do_cover_unassign'],
             'cover_auto'       => ['sch_supervise_stage',  'do_cover_auto'],
             'cover_notify'     => ['sch_supervise_stage',  'do_cover_notify'],
+            // ── محرّك الجداول (v10.7) ──
+            'tt_bell'          => ['sch_build_timetable',  'do_tt_bell'],
+            'tt_quota'         => ['sch_build_timetable',  'do_tt_quota'],
+            'tt_seed'          => ['sch_build_timetable',  'do_tt_seed'],
+            'tt_teacher'       => ['sch_build_timetable',  'do_tt_teacher'],
+            'tt_auto_assign'   => ['sch_build_timetable',  'do_tt_auto_assign'],
+            'tt_rules'         => ['sch_build_timetable',  'do_tt_rules'],
+            'tt_generate'      => ['sch_build_timetable',  'do_tt_generate'],
+            'tt_place'         => ['sch_build_timetable',  'do_tt_place'],
+            'tt_wipe'          => ['sch_build_timetable',  'do_tt_wipe'],
+            'tt_copy'          => ['sch_build_timetable',  'do_tt_copy'],
+            'tt_publish'       => ['sch_approve_timetable','do_tt_publish'],
             'submit_timetable' => ['sch_build_timetable',  'do_submit_timetable'],
             'publish_timetable'=> ['sch_approve_timetable','do_publish_timetable'],
             'reopen_timetable' => ['sch_build_timetable',  'do_reopen_timetable'],
@@ -1441,6 +1453,217 @@ final class SCH_Dashboard
             'client_uuid' => wp_generate_uuid4(),
             'reason'      => (string) ($d['reason'] ?? __('إدخال إداري', 'school-system')),
         ]);
+    }
+
+    // ═══════════════════════ محرّك الجداول (v10.7) ═══════════════════════
+    //
+    // كل معالج يُعيد `keep` بموضع الشاشة (الشهر · الخطوة · الشعبة · العدسة):
+    // من يضبط نصاب عشر مواد لا يُعاد عشر مرات إلى الخطوة الأولى بلا شعبة.
+
+    /** @return array<string,string> */
+    private static function tt_keep(array $d): array
+    {
+        $out = [];
+        foreach (['m' => 7, 'step' => 2, 'cls' => 12, 'lens' => 10, 'day' => 2, 'p' => 3] as $k => $len) {
+            $v = sanitize_text_field((string) ($d[$k] ?? ''));
+            if ($v !== '') {
+                $out[$k] = mb_substr($v, 0, $len);
+            }
+        }
+
+        return $out;
+    }
+
+    private static function do_tt_bell(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_TT::save_bell($d);
+        if (is_wp_error($done)) {
+            return $done;
+        }
+
+        return ['msg' => __('حُفظ إيقاع اليوم للمرحلة.', 'school-system'), 'keep' => self::tt_keep($d)];
+    }
+
+    private static function do_tt_quota(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_TT::set_quota(
+            absint($d['plan_id'] ?? 0),
+            absint($d['class_id'] ?? 0),
+            absint($d['subject_id'] ?? 0),
+            (int) ($d['weekly'] ?? 0)
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::tt_keep($d)];
+    }
+
+    private static function do_tt_seed(array $d, int $id): array|WP_Error
+    {
+        $n = SCH_TT::seed_quota(absint($d['plan_id'] ?? 0), absint($d['class_id'] ?? 0));
+
+        return [
+            'msg'  => sprintf(
+                /* translators: %d: عدد الحصص */
+                __('عُبّئ القالب — %d حصة موزّعة على المواد.', 'school-system'),
+                $n
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    private static function do_tt_teacher(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_TT::set_teacher(
+            absint($d['plan_id'] ?? 0),
+            absint($d['class_id'] ?? 0),
+            absint($d['subject_id'] ?? 0),
+            absint($d['teacher_user_id'] ?? 0) ?: null
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::tt_keep($d)];
+    }
+
+    private static function do_tt_auto_assign(array $d, int $id): array|WP_Error
+    {
+        $n = SCH_TT::auto_assign(absint($d['plan_id'] ?? 0), absint($d['class_id'] ?? 0));
+
+        return [
+            'msg'  => sprintf(
+                /* translators: %d: عدد المواد */
+                __('أُسند معلم لـ%d مادة — الأقلّ حِملًا أولًا.', 'school-system'),
+                $n
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    private static function do_tt_rules(array $d, int $id): array|WP_Error
+    {
+        SCH_TT::set_rules(
+            absint($d['plan_id'] ?? 0),
+            array_map('sanitize_key', (array) ($d['rules'] ?? [])),
+            (int) ($d['max_daily'] ?? 6)
+        );
+
+        return ['keep' => self::tt_keep($d)];
+    }
+
+    private static function do_tt_generate(array $d, int $id): array|WP_Error
+    {
+        $plan  = absint($d['plan_id'] ?? 0);
+        $scope = (string) ($d['scope'] ?? 'class');
+
+        // نطاق «المدرسة» هو الصحيح رياضيًّا: المعلم واحد وشُعبه كثيرة، ومن
+        // يولّد شعبةً شعبة يجد الأخيرة وكل معلميها محجوزون.
+        $classes = $scope === 'school'
+            ? array_map(static fn (object $c): int => (int) $c->id, SCH_Classes::list())
+            : [absint($d['class_id'] ?? 0)];
+
+        $res = SCH_TT::generate($plan, $classes);
+        if (is_wp_error($res)) {
+            return $res;
+        }
+
+        $msg = sprintf(
+            /* translators: 1: عدد الحصص 2: عدد الشعب */
+            __('وُلّد الجدول: %1$d حصة في %2$d شعبة.', 'school-system'),
+            $res['placed'],
+            $res['classes']
+        );
+
+        if ($res['missing'] > 0) {
+            $first = (string) reset($res['blocked']);
+            $msg  .= ' ' . sprintf(
+                /* translators: 1: عدد الحصص 2: السبب */
+                __('وبقيت %1$d حصة بلا مكان — %2$s', 'school-system'),
+                $res['missing'],
+                $first
+            );
+        }
+
+        return ['msg' => $msg, 'keep' => self::tt_keep($d) + ['step' => '4']];
+    }
+
+    /**
+     * الخانة: مادةٌ تُوضع، وصفرٌ يُفرّغ.
+     *
+     * فعلٌ واحد لا اثنان — لأن السحب والإفلات يُرسل نموذج الخانة الهدف، ونموذجٌ
+     * مهيّأ للتفريغ يحمل نونس التفريغ. تبديلُ الفعل في المتصفّح كان يعني إمّا
+     * نونسًا لا يطابق، أو نونسَين باسمٍ واحد يطمس أحدهما الآخر.
+     */
+    private static function do_tt_place(array $d, int $id): array|WP_Error
+    {
+        $plan   = absint($d['plan_id'] ?? 0);
+        $class  = absint($d['class_id'] ?? 0);
+        $day    = (int) ($d['day'] ?? 0);
+        $period = (int) ($d['period'] ?? 0);
+        $sid    = absint($d['subject_id'] ?? 0);
+
+        if ($sid <= 0) {
+            SCH_TT::clear($plan, $class, $day, $period);
+            return ['keep' => self::tt_keep($d)];
+        }
+
+        $done = SCH_TT::place($plan, $class, $day, $period, $sid);
+
+        return is_wp_error($done) ? $done : ['keep' => self::tt_keep($d)];
+    }
+
+    private static function do_tt_wipe(array $d, int $id): array|WP_Error
+    {
+        $n = SCH_TT::wipe(absint($d['plan_id'] ?? 0), absint($d['class_id'] ?? 0), false);
+
+        return [
+            'msg'  => sprintf(
+                /* translators: %d: عدد الحصص */
+                __('فُرّغت %d حصة.', 'school-system'),
+                $n
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    private static function do_tt_copy(array $d, int $id): array|WP_Error
+    {
+        $plan = absint($d['plan_id'] ?? 0);
+        $from = absint($d['class_id'] ?? 0);
+        $src  = SCH_Classes::get($from);
+
+        if (!$src) {
+            return sch_api_error('not_found', __('الشعبة غير موجودة.', 'school-system'), 404);
+        }
+
+        // شُعب الصف نفسه — نسخ جدول «الأول / أ» إلى «الأول / ب» له معنى،
+        // ونسخُه إلى «الثالث / أ» ليس له.
+        $to = [];
+        foreach (SCH_Classes::list() as $c) {
+            if ((int) $c->id !== $from
+                && (string) $c->stage === (string) $src->stage
+                && (string) $c->grade_level === (string) $src->grade_level) {
+                $to[] = (int) $c->id;
+            }
+        }
+
+        if ($to === []) {
+            return sch_api_error('no_peer', __('لا شعب أخرى في هذا الصف.', 'school-system'), 422);
+        }
+
+        $n = SCH_TT::copy_to($plan, $from, $to);
+
+        return [
+            'msg'  => sprintf(
+                /* translators: %d: عدد الشعب */
+                __('نُسخ الجدول إلى %d شعبة — المواد فقط، والإسناد يتبع معلم كل شعبة.', 'school-system'),
+                $n
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    private static function do_tt_publish(array $d, int $id): array|WP_Error
+    {
+        $res = SCH_TT::publish(absint($d['plan_id'] ?? 0));
+
+        return is_wp_error($res) ? $res : ['msg' => $res['msg'], 'keep' => self::tt_keep($d)];
     }
 
     private static function do_update_student(array $d, int $id): bool|WP_Error

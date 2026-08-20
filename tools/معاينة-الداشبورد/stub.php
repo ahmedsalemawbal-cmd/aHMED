@@ -102,6 +102,12 @@ function apply_filters($t, $v, ...$a) {
 function do_action($t, ...$a) {}
 function wp_kses_post($t) { return $t; }
 function get_userdata($id) { return (object) ['display_name' => 'أحمد سعد العتيبي']; }
+function get_users($a = []) {
+    $names = ['محمد عوبل', 'اميره الشامي', 'خالد القحطاني', 'نورة الحربي', 'سعود العتيبي'];
+    $out = [];
+    foreach ($names as $i => $n) { $out[] = (object) ['ID' => 101 + $i, 'display_name' => $n]; }
+    return $out;
+}
 
 // ── دوال الإضافة ────────────────────────────────────────────────────
 
@@ -169,6 +175,7 @@ function wp_unslash($v) { return is_array($v) ? array_map('wp_unslash', $v) : st
 /** إيقاع اليوم — نسخةٌ من `SCH_Timetable` بالقيم نفسها. */
 final class SCH_Timetable
 {
+    public const DAYS        = [1 => 'الأحد', 2 => 'الاثنين', 3 => 'الثلاثاء', 4 => 'الأربعاء', 5 => 'الخميس'];
     public const PERIODS     = 8;
     public const OPEN        = 450;
     public const LEN         = 50;
@@ -180,6 +187,15 @@ final class SCH_Timetable
         $m = self::OPEN + (max(1, $p) - 1) * self::LEN;
         return $p > self::BREAK_AFTER ? $m + self::BREAK_LEN : $m;
     }
+
+    /** عدد حصص المرحلة — الشاشات صارت تسأله بدل الثابت. */
+    public static function periods(string $stage = ''): int
+    {
+        return class_exists('SCH_TT') ? SCH_TT::bell($stage ?: 'primary')->periods : self::PERIODS;
+    }
+
+    /** شبكة الشعبة المنشورة — تقرؤها شاشة المواد وتطبيق ولي الأمر. */
+    public static function grid(int $class_id): array { return []; }
 
     public static function period_hhmm(int $p): string
     {

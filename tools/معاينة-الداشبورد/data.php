@@ -151,20 +151,31 @@ final class SCH_Custody
 
 final class SCH_Classes
 {
-    public const STAGES = ['kg' => 'روضة', 'primary' => 'ابتدائي', 'middle' => 'متوسط', 'high' => 'ثانوي'];
+    public const STAGES = ['nursery' => 'حضانة', 'kg' => 'روضة', 'prep' => 'تمهيدي', 'primary' => 'ابتدائي', 'intermediate' => 'متوسط', 'secondary' => 'ثانوي'];
 
     public static function list(): array
     {
-        return [
-            (object) ['id' => 1, 'grade_level' => 'الرابع', 'section' => 'أ', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 9],
-            (object) ['id' => 2, 'grade_level' => 'الرابع', 'section' => 'ب', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 14],
-            (object) ['id' => 3, 'grade_level' => 'الخامس', 'section' => 'أ', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 11],
-        ];
+        static $out = null;
+        if ($out !== null) { return $out; }
+        $out = [];
+        $id  = 0;
+        foreach (['الأول' => ['A', 'B', 'C', 'D'], 'الثاني' => ['A', 'B', 'C'], 'الثالث' => ['A', 'B', 'C']] as $g => $secs) {
+            foreach ($secs as $i => $sec) {
+                $id++;
+                $out[] = (object) ['id' => $id, 'grade_level' => $g, 'section' => $sec, 'stage' => 'primary',
+                                   'capacity' => 15, 'enrolled' => 12 + $i * 3, 'year_id' => 1];
+            }
+        }
+        return $out;
     }
-    public static function get(int $id): ?object { return self::list()[0] ?? null; }
+    public static function get(int $id): ?object
+    {
+        foreach (self::list() as $c) { if ((int) $c->id === $id) { return $c; } }
+        return null;
+    }
     public static function label($c): string
     {
-        return trim(($c->grade_level ?? '') . ($c->section ? ' / ' . $c->section : ''));
+        return trim((self::STAGES[$c->stage] ?? '') . ' — ' . ($c->grade_level ?? '') . ($c->section ? ' / ' . $c->section : ''));
     }
 }
 
@@ -382,7 +393,7 @@ final class SCH_Deputy
  * الشهادات: **الصنف الحقيقي** لا نسخة — القوالب والـSVG هي ما يُصيَّر في
  * الإنتاج بالضبط. ولا يُستبدَل منه إلا ما يقرأ القاعدة.
  */
-final class SCH_FakeWpdb
+class SCH_FakeWpdb
 {
     public $users = 'wp_users';
     public $prefix = 'wp_';
@@ -409,7 +420,47 @@ function sch_api_error($c, $m, $s = 400) { return null; }
 function sch_audit(...$a) {}
 function is_wp_error($x) { return false; }
 
-final class SCH_Years { public static function current_id(): int { return 1; } }
+final class SCH_Years
+{
+    public static function current_id(): int { return 1; }
+    public static function current(): ?object
+    {
+        return (object) ['id' => 1, 'name' => '1448', 'start_date' => '2026-08-01', 'end_date' => '2027-06-30'];
+    }
+}
+
+/** المواد — كما في الإنتاج، بمرحلةٍ أو بلا. */
+final class SCH_Subjects
+{
+    public static function all(?string $stage = null): array { return array_values(self::rows()); }
+
+    /** مواد الشعبة ومعلموها — تستعملها شاشة «المواد والجداول». */
+    public static function of_class(int $class_id): array
+    {
+        $out = [];
+        foreach (array_slice(self::rows(), 0, 4, true) as $s) {
+            $out[] = (object) ['id' => $s->id, 'subject_id' => $s->id, 'name' => $s->name,
+                               'subject_name' => $s->name, 'teacher_user_id' => 101,
+                               'teacher_name' => 'محمد عوبل', 'display_name' => 'محمد عوبل',
+                               'class_id' => $class_id];
+        }
+        return $out;
+    }
+    public static function get(int $id): ?object { return self::rows()[$id] ?? null; }
+
+    public static function rows(): array
+    {
+        static $r = null;
+        if ($r !== null) { return $r; }
+        $names = ['القرآن الكريم', 'اللغة العربية', 'الرياضيات', 'العلوم', 'الدراسات الإسلامية',
+                  'اللغة الإنجليزية', 'الاجتماعيات', 'التربية البدنية', 'التربية الفنية', 'المهارات الرقمية'];
+        $r = [];
+        foreach ($names as $i => $n) {
+            $r[$i + 1] = (object) ['id' => $i + 1, 'name' => $n, 'code' => null, 'stage' => 'primary'];
+        }
+        return $r;
+    }
+}
 final class SCH_Guardians
 {
     public const RELATIONS = ['father' => 'الأب', 'mother' => 'الأم', 'brother' => 'أخ',
@@ -696,3 +747,199 @@ function sch_money($n) { return number_format_i18n((float) $n, 2) . ' ر.س'; }
 function current_user_can($c) { return true; }
 function remove_query_arg($k, $u = null) { return '/dashboard/students/'; }
 function esc_js($t) { return esc_attr($t); }
+
+/* ═══ محرّك الجداول في المعاينة ═══
+   `SCH_TT` الحقيقيّة تُحمَّل، ويُزوَّد `$wpdb` بما تطلبه: إيقاع اليوم من
+   الإعداد الجاهز، ونصابٌ مملوء، وشبكةٌ مولَّدة — فتُقارَن الشاشة بتصميمها. */
+
+final class SCH_TTFake extends SCH_FakeWpdb
+{
+    public array $slots = [];   // "class|day|period" => [subject, teacher]
+    public array $quota = [];   // "class|subject" => [weekly, teacher]
+
+    public function get_row($q, $o = null)
+    {
+        if (str_contains($q, 'tt_plans')) {
+            return (object) [
+                'id' => 1, 'year_id' => 1, 'name' => 'أغسطس', 'status' => 'draft',
+                'effective_from' => '2026-08-01', 'effective_to' => '2026-08-31',
+                'rules' => 'no_pair,core_early,pe_last,cap', 'max_daily' => 6,
+            ];
+        }
+        if (str_contains($q, 'sch_bell')) { return null; }
+        return null;
+    }
+
+    public function get_results($q, $o = null)
+    {
+        // نصاب شعبة (خطوة ٢): كل المواد ومعها نصابها ومعلمها
+        if (str_contains($q, 'COALESCE(q.weekly, 0) AS weekly')) {
+            preg_match('/q.class_id = (\d+)/', $q, $m);
+            $cid = (int) ($m[1] ?? 1);
+            $out = [];
+            foreach (SCH_Subjects::rows() as $s) {
+                [$w, $t] = $this->quota[$cid . '|' . $s->id] ?? [0, 0];
+                $out[] = (object) [
+                    'subject_id' => $s->id, 'subject_name' => $s->name, 'code' => null,
+                    'weekly' => $w, 'teacher_user_id' => $t ?: null,
+                    'teacher_name' => $t ? 'معلّم ' . $t : null,
+                ];
+            }
+            usort($out, static fn ($a, $b) => $b->weekly <=> $a->weekly);
+            return $out;
+        }
+
+        // المطلوب توزيعه (weekly > 0)
+        if (str_contains($q, 'q.weekly > 0')) {
+            preg_match('/q.class_id = (\d+)/', $q, $m);
+            $cid = (int) ($m[1] ?? 1);
+            $out = [];
+            foreach (SCH_Subjects::rows() as $s) {
+                [$w, $t] = $this->quota[$cid . '|' . $s->id] ?? [0, 0];
+                if ($w > 0) {
+                    $out[] = (object) ['subject_id' => $s->id, 'subject_name' => $s->name,
+                                       'weekly' => $w, 'teacher_user_id' => $t, 'class_id' => $cid];
+                }
+            }
+            return $out;
+        }
+
+        // شبكة الشعبة
+        if (str_contains($q, 'AS clash')) {
+            preg_match('/s.class_id = (\d+)/', $q, $m);
+            $cid = (int) ($m[1] ?? 1);
+            $out = [];
+            foreach ($this->slots as $k => $v) {
+                [$c, $d, $p] = array_map('intval', explode('|', $k));
+                if ($c !== $cid) { continue; }
+                $out[] = (object) [
+                    'id' => 0, 'plan_id' => 1, 'class_id' => $c, 'day_of_week' => $d, 'period_no' => $p,
+                    'subject_id' => $v[0], 'teacher_user_id' => $v[1], 'locked' => 0,
+                    'subject_name' => SCH_Subjects::get($v[0])->name ?? '',
+                    'teacher_name' => $v[1] ? 'معلّم ' . $v[1] : null,
+                    'clash' => 0,
+                ];
+            }
+            return $out;
+        }
+
+        // أشهر فيها خانات
+        if (str_contains($q, 'effective_from, COUNT')) {
+            return [(object) ['effective_from' => '2026-08-01', 'n' => count($this->slots)]];
+        }
+
+        // حِمل المعلمين
+        if (str_contains($q, 'SUM(weekly) AS n')) {
+            $out = [];
+            foreach ($this->quota as $k => $v) {
+                if (!$v[1]) { continue; }
+                $out[$v[1]] = ($out[$v[1]] ?? 0) + $v[0];
+            }
+            return array_map(static fn ($t, $n) => (object) ['t' => $t, 'n' => $n], array_keys($out), $out);
+        }
+
+        // المعلمون
+        if (str_contains($q, 'FROM wp_users u') && str_contains($q, 'employees')) {
+            // ٢٤ معلمًا: ١٠ شعب × ٥٠ حصة ÷ (٦ يوميًّا × ٥ أيام) = ١٧ حدًّا أدنى.
+            // بعشرة معلمين تظهر كل الأحمال حمراء — وهو صحيح لكنه ليس حال مدرسة.
+            $names = ['محمد عوبل', 'اميره الشامي', 'خالد القحطاني', 'نورة الحربي', 'سعود العتيبي',
+                      'هند الزهراني', 'ماجد الدوسري', 'أمل الغامدي', 'فهد السبيعي', 'ريم المطيري',
+                      'بدر الشهري', 'لمياء العنزي', 'تركي الحارثي', 'شهد الرشيد', 'ياسر البقمي',
+                      'منال السلمي', 'عبدالله الخالدي', 'رنا الجهني', 'مشعل العمري', 'دانة الشمري',
+                      'راكان الزيد', 'جواهر الفهد', 'سلطان النصر', 'عهود المالكي'];
+            $out = [];
+            foreach ($names as $i => $n) { $out[] = (object) ['ID' => 101 + $i, 'display_name' => $n]; }
+            return $out;
+        }
+
+        // خريطة المدرسة
+        if (str_contains($q, 'c.id AS class_id')) {
+            preg_match('/s.day_of_week = (\d+) AND s.period_no = (\d+)/', $q, $m);
+            $d = (int) ($m[1] ?? 1); $p = (int) ($m[2] ?? 1);
+            $out = [];
+            foreach (SCH_Classes::list() as $c) {
+                $v = $this->slots[$c->id . '|' . $d . '|' . $p] ?? null;
+                $out[] = (object) [
+                    'class_id' => $c->id, 'stage' => $c->stage, 'grade_level' => $c->grade_level, 'section' => $c->section,
+                    'subject_id' => $v[0] ?? null, 'teacher_user_id' => $v[1] ?? null,
+                    'subject_name' => $v ? (SCH_Subjects::get($v[0])->name ?? '') : null,
+                    'teacher_name' => $v && $v[1] ? 'معلّم ' . $v[1] : null,
+                ];
+            }
+            return $out;
+        }
+
+        // صحّة الشعبة
+        if (str_contains($q, 's.teacher_user_id,') && str_contains($q, 'tt_slots')) {
+            preg_match('/s.class_id = (\d+)/', $q, $m);
+            $cid = (int) ($m[1] ?? 1);
+            $out = [];
+            foreach ($this->slots as $k => $v) {
+                [$c, $d, $p] = array_map('intval', explode('|', $k));
+                if ($c === $cid) {
+                    $out[] = (object) ['day_of_week' => $d, 'period_no' => $p, 'teacher_user_id' => $v[1], 'clash' => 0];
+                }
+            }
+            return $out;
+        }
+
+        // جدول المعلم
+        if (str_contains($q, 's.teacher_user_id = ')) {
+            preg_match('/s.teacher_user_id = (\d+)/', $q, $m);
+            $t = (int) ($m[1] ?? 0);
+            $out = [];
+            foreach ($this->slots as $k => $v) {
+                if ((int) $v[1] !== $t) { continue; }
+                [$c, $d, $p] = array_map('intval', explode('|', $k));
+                $cl = SCH_Classes::get($c);
+                $out[] = (object) ['day_of_week' => $d, 'period_no' => $p, 'class_id' => $c,
+                                   'subject_name' => SCH_Subjects::get($v[0])->name ?? '',
+                                   'grade_level' => $cl->grade_level ?? '', 'section' => $cl->section ?? '', 'stage' => 'primary'];
+            }
+            return $out;
+        }
+
+        return [];
+    }
+
+    public function get_var($q)
+    {
+        if (str_contains($q, 'COALESCE(SUM(weekly), 0)')) {
+            preg_match('/class_id = (\d+)/', $q, $m);
+            $cid = (int) ($m[1] ?? 1);
+            $n = 0;
+            foreach ($this->quota as $k => $v) { if (str_starts_with($k, $cid . '|')) { $n += $v[0]; } }
+            return $n;
+        }
+        return 0;
+    }
+}
+
+/* بذرة العرض: كل شعبة بنصاب ٥٠ حصة ومعلّم لكل مادة، وشبكة الشعبة الأولى مولَّدة */
+if (($GLOBALS['SCREEN'] ?? '') === 'timetable') {
+    $tt = new SCH_TTFake();
+    $QUOTA = [1 => 8, 2 => 10, 3 => 8, 4 => 5, 5 => 5, 6 => 4, 7 => 3, 8 => 3, 9 => 2, 10 => 2];
+    foreach (SCH_Classes::list() as $c) {
+        foreach ($QUOTA as $sid => $w) {
+            $tt->quota[$c->id . '|' . $sid] = [$w, 101 + ((($sid - 1) * 10 + ($c->id - 1)) % 24)];
+        }
+    }
+    if ((getenv('EMPTY') ?: '') !== '1') {
+        $days = [1, 2, 3, 4, 5];
+        foreach (SCH_Classes::list() as $c) {
+            $left = $QUOTA;
+            foreach ($days as $d) {
+                for ($p = 1; $p <= 10; $p++) {
+                    arsort($left);
+                    $sid = (int) array_key_first($left);
+                    if (($left[$sid] ?? 0) <= 0) { continue; }
+                    $left[$sid]--;
+                    $tt->slots[$c->id . '|' . $d . '|' . $p] = [$sid, 101 + ((($sid - 1) * 10 + ($c->id - 1)) % 24)];
+                }
+            }
+        }
+    }
+    $GLOBALS['wpdb'] = $tt;
+}
+
+require SCH_PATH . 'modules/academic/class-tt.php';

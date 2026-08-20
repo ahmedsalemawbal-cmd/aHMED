@@ -7,6 +7,12 @@ $classes  = SCH_Classes::list();
 $class_id = isset($_GET['class_id']) ? absint($_GET['class_id']) : (int) ($classes[0]->id ?? 0);
 $assigned = $class_id > 0 ? SCH_Subjects::of_class($class_id) : [];
 $grid     = $class_id > 0 ? SCH_Timetable::grid($class_id) : [];
+
+// عدد الحصص يتبع مرحلة الشعبة لا رقمًا ثابتًا: الروضة ستّ والابتدائي عشر،
+// والجدول الذي يعرض ثمانيًا لكليهما يكذب على إحداهما.
+$sch_cls_row = $class_id > 0 ? SCH_Classes::get($class_id) : null;
+$sch_stage   = $sch_cls_row ? (string) $sch_cls_row->stage : '';
+$sch_periods = SCH_Timetable::periods($sch_stage);
 $teachers = get_users(['role' => 'sch_teacher', 'fields' => ['ID', 'display_name']]);
 ?>
 <?php
@@ -87,7 +93,7 @@ SCH_Modal::head(
                 <?php endforeach; ?>
             </tr></thead>
             <tbody>
-            <?php for ($p = 1; $p <= SCH_Timetable::PERIODS; $p++) : ?>
+            <?php for ($p = 1; $p <= $sch_periods; $p++) : ?>
                 <tr>
                     <td class="sch-name"><?php echo esc_html((string) $p); ?></td>
                     <?php foreach (array_keys(SCH_Timetable::DAYS) as $day) :
@@ -118,7 +124,7 @@ SCH_Modal::head(
             <?php endforeach; ?>
         </select>
         <select name="period_no" required aria-label="الحصة">
-            <?php for ($p = 1; $p <= SCH_Timetable::PERIODS; $p++) : ?>
+            <?php for ($p = 1; $p <= $sch_periods; $p++) : ?>
                 <option value="<?php echo esc_attr((string) $p); ?>"><?php echo esc_html(sprintf(__('الحصة %d', 'school-system'), $p)); ?></option>
             <?php endfor; ?>
         </select>

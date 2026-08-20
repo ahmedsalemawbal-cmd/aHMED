@@ -34,10 +34,21 @@ $sch_meta = implode(' · ', array_filter([$sch_kid, $class ? SCH_Classes::label(
  * صارت شاشة تغطية الحصص تعرض الوقت نفسه.
  * ويوم تُخزَّن المواقيت يُستبدل ذلك الإيقاع وحده.
  */
-$sch_len    = SCH_Timetable::LEN;
+// النداء يمرّ بـ`SCH_Timetable` لا بـ`SCH_TT` مباشرةً: الواجهة الأمامية
+// تعرف الواجهة القديمة وحدها، وهي تسأل الإيقاع الجديد وترجع للقيم الافتراضية
+// إن غاب — فلا تنكسر شاشةٌ لأن وحدةً لم تُحمَّل بعد.
+$sch_stage  = $class ? (string) $class->stage : 'primary';
+$sch_per    = SCH_Timetable::periods($sch_stage);
 $sch_brk_at = SCH_Timetable::BREAK_AFTER;
+$sch_len    = SCH_Timetable::LEN;
 
-$sch_at = static fn (int $period): int => SCH_Timetable::period_start($period);
+if (class_exists('SCH_TT')) {
+    $sch_bell   = SCH_TT::bell($sch_stage);
+    $sch_len    = $sch_bell->period_len;
+    $sch_brk_at = $sch_bell->break_after;
+}
+
+$sch_at = static fn (int $period): int => SCH_Timetable::period_start($period, $sch_stage);
 
 // الساعة بأرقام اللغة، ودقيقتان دائمًا: «٩:٥» تُقرأ رقمًا لا وقتًا.
 $sch_clock = static function (int $m): string {
@@ -64,7 +75,7 @@ $sch_first = static function (string $name): string {
 // الحصة الجارية الآن — لحلقة الخانة ولشريط «الآن» معًا.
 $sch_min    = (int) current_time('G') * 60 + (int) current_time('i');
 $sch_now_no = 0;
-for ($sch_n = 1; $sch_n <= SCH_Timetable::PERIODS; $sch_n++) {
+for ($sch_n = 1; $sch_n <= $sch_per; $sch_n++) {
     $sch_s = $sch_at($sch_n);
     if ($sch_min >= $sch_s && $sch_min < $sch_s + $sch_len) {
         $sch_now_no = $sch_n;
@@ -75,7 +86,7 @@ $sch_live = ($sch_now_no > 0 && !empty($grid[$day_now][$sch_now_no])) ? $grid[$d
 
 // لا صفَّ لحصّةٍ فارغة في الأسبوع كلّه: الشبكة تعرض ما هو مجدوَل فعلًا.
 $sch_rows = [];
-for ($sch_n = 1; $sch_n <= SCH_Timetable::PERIODS; $sch_n++) {
+for ($sch_n = 1; $sch_n <= $sch_per; $sch_n++) {
     foreach (array_keys(SCH_Timetable::DAYS) as $sch_d) {
         if (!empty($grid[$sch_d][$sch_n])) {
             $sch_rows[] = $sch_n;

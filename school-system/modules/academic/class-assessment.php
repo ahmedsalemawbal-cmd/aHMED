@@ -120,19 +120,34 @@ final class SCH_Timetable
      * الحصص تحتاجه أيضًا — ونسختان تعنيان يومًا يبدأ ٧:٣٠ في شاشة و٨:٠٠
      * في أخرى بعد أول تعديل. فصار رقمًا واحدًا هنا.
      */
-    public static function period_start(int $period): int
+    public static function period_start(int $period, string $stage = ''): int
     {
+        // الإيقاع صار لكل مرحلة (`SCH_TT::bell`): الروضة تخرج ١٠:١٢ والابتدائي
+        // ١:١٥، ورقمٌ واحد يكذب عليهما. والثوابت أعلاه تبقى **قيمًا احتياطية**
+        // لا مصدرًا — فلا ينكسر نداءٌ قديم بحجّة واحدة.
+        if (class_exists('SCH_TT')) {
+            return SCH_TT::period_start($period, $stage !== '' ? $stage : 'primary');
+        }
+
         $m = self::OPEN + (max(1, $period) - 1) * self::LEN;
 
         return $period > self::BREAK_AFTER ? $m + self::BREAK_LEN : $m;
     }
 
     /** بداية الحصة بصيغة «07:30» — للأرقام الجدولية اللاتينية في الداشبورد. */
-    public static function period_hhmm(int $period): string
+    public static function period_hhmm(int $period, string $stage = ''): string
     {
-        $m = self::period_start($period);
+        $m = self::period_start($period, $stage);
 
         return sprintf('%02d:%02d', intdiv($m, 60) % 24, $m % 60);
+    }
+
+    /** عدد حصص المرحلة — كان ثابتًا بثمانية، والمرحلة تقول خمسًا أو عشرًا. */
+    public static function periods(string $stage = ''): int
+    {
+        return class_exists('SCH_TT')
+            ? SCH_TT::bell($stage !== '' ? $stage : 'primary')->periods
+            : self::PERIODS;
     }
 
     /** وضع حصة في خانة — مع منع تعارض المعلم. */

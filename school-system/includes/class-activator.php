@@ -1404,6 +1404,88 @@ final class SCH_Activator
             KEY idx_status (status)
         ) {$charset};";
 
+        /* ═══════════════ محرّك الجداول الأسبوعية (v10.7) ═══════════════
+           `timetable` يبقى **الجدول المنشور** كما هو — يقرؤه تطبيق ولي الأمر
+           والمعلم والطالب وشاشة التغطية، فلا يُمسّ شكله. والبناء يجري فوقه في
+           خطة مستقلّة، والنشر نسخةٌ ذرّية منها إليه. وبهذا لا ينكسر قارئٌ واحد
+           مما بُني على مدى عشرة إصدارات. */
+
+        // إيقاع اليوم لكل مرحلة: بدايته وعدد حصصه وطولها وفسحته وأيام الدراسة.
+        // كان أربعة ثوابت في الكود، والمدرسة الواحدة فيها ستّ مراحل بإيقاعات
+        // مختلفة — والروضة تخرج 10:12 والابتدائي 1:15، فرقمٌ واحد يكذب عليهما.
+        $sql[] = "CREATE TABLE {$p}bell (
+            id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            year_id     BIGINT UNSIGNED NOT NULL,
+            stage       VARCHAR(30)     NOT NULL,
+            periods     TINYINT UNSIGNED NOT NULL DEFAULT 8,
+            start_min   SMALLINT UNSIGNED NOT NULL DEFAULT 450,
+            period_len  TINYINT UNSIGNED NOT NULL DEFAULT 50,
+            break_after TINYINT UNSIGNED NOT NULL DEFAULT 3,
+            break_len   TINYINT UNSIGNED NOT NULL DEFAULT 30,
+            days_mask   TINYINT UNSIGNED NOT NULL DEFAULT 31,
+            created_at  DATETIME        NOT NULL,
+            updated_at  DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_stage (year_id, stage)
+        ) {$charset};";
+
+        // خطة جدول: مسودّة تُبنى وتُعتمد وتُنشر. لها مدى سريان بالتواريخ —
+        // و«الشهر» في الواجهة اختصارٌ يملأ هذا المدى، لأن المدرسة قد تغيّر
+        // الجدول في منتصف الشهر ولا يعرف تقويمُها شيئًا اسمه «أغسطس كاملًا».
+        $sql[] = "CREATE TABLE {$p}tt_plans (
+            id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            year_id        BIGINT UNSIGNED NOT NULL,
+            name           VARCHAR(120)    NOT NULL,
+            effective_from DATE            NOT NULL,
+            effective_to   DATE            DEFAULT NULL,
+            status         ENUM('draft','pending','published','archived') NOT NULL DEFAULT 'draft',
+            rules          VARCHAR(255)    DEFAULT NULL,
+            max_daily      TINYINT UNSIGNED NOT NULL DEFAULT 6,
+            created_by     BIGINT UNSIGNED DEFAULT NULL,
+            published_by   BIGINT UNSIGNED DEFAULT NULL,
+            published_at   DATETIME        DEFAULT NULL,
+            created_at     DATETIME        NOT NULL,
+            updated_at     DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_year (year_id, status),
+            KEY idx_window (year_id, effective_from, effective_to)
+        ) {$charset};";
+
+        // نصاب المادة الأسبوعي في شعبة، ومعلمها. مصدر الحقيقة لخطوتَي «النصاب»
+        // و«الإسناد»، ومنه يقرأ المولّد ما يجب توزيعه.
+        $sql[] = "CREATE TABLE {$p}tt_quota (
+            id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            plan_id         BIGINT UNSIGNED NOT NULL,
+            class_id        BIGINT UNSIGNED NOT NULL,
+            subject_id      BIGINT UNSIGNED NOT NULL,
+            weekly          TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            teacher_user_id BIGINT UNSIGNED DEFAULT NULL,
+            created_at      DATETIME        NOT NULL,
+            updated_at      DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_cell (plan_id, class_id, subject_id),
+            KEY idx_class (plan_id, class_id),
+            KEY idx_teacher (plan_id, teacher_user_id)
+        ) {$charset};";
+
+        // خانات الخطة. `locked` تحمي ما ثبّته الوكيل بيده من إعادة التوليد —
+        // بدونها يفقد عمله كلّما ضغط «توليد من جديد» فيتوقّف عن الضغط.
+        $sql[] = "CREATE TABLE {$p}tt_slots (
+            id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            plan_id         BIGINT UNSIGNED NOT NULL,
+            class_id        BIGINT UNSIGNED NOT NULL,
+            day_of_week     TINYINT UNSIGNED NOT NULL,
+            period_no       TINYINT UNSIGNED NOT NULL,
+            subject_id      BIGINT UNSIGNED NOT NULL,
+            teacher_user_id BIGINT UNSIGNED DEFAULT NULL,
+            locked          TINYINT(1)      NOT NULL DEFAULT 0,
+            created_at      DATETIME        NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_slot (plan_id, class_id, day_of_week, period_no),
+            KEY idx_plan_class (plan_id, class_id),
+            KEY idx_clash (plan_id, teacher_user_id, day_of_week, period_no)
+        ) {$charset};";
+
         foreach ($sql as $statement) {
             dbDelta($statement);
         }
@@ -1491,6 +1573,13 @@ final class SCH_Activator
             ['payments',        'fk_pay_invoice',     'invoice_id',  'invoices'],
             ['payslips',        'fk_slip_run',        'run_id',      'payroll_runs'],
             ['book_loans',      'fk_loan_book',       'book_id',     'books'],
+            // محرّك الجداول: الخطة أصلٌ لخاناتها ونصابها، والشعبة أصلٌ لكليهما.
+            // المادة والمعلم **لا يُربطان**: حذف مادة يجب أن يُبلَّغ عنه لا أن
+            // يمحو حصصها بصمت من كل جدول في المدرسة.
+            ['tt_quota',        'fk_quota_plan',      'plan_id',     'tt_plans'],
+            ['tt_quota',        'fk_quota_class',     'class_id',    'classes'],
+            ['tt_slots',        'fk_slot_plan',       'plan_id',     'tt_plans'],
+            ['tt_slots',        'fk_slot_class',      'class_id',    'classes'],
         ];
 
         foreach ($constraints as [$table, $name, $column, $parent]) {
