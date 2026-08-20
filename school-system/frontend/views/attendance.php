@@ -65,8 +65,12 @@ for ($sch_i = 0; $sch_i < 10; $sch_i++) {
 
 // ساعة اللوح: `sch_clock` تُعطي HH:MM وحدهما، والثواني تُوطَّن بخريطة الأرقام
 // نفسها — فلا تختلف أرقام الساعة عن أرقام الشاشة عند أول رسم.
-$sch_map = array_combine(str_split('0123456789'), mb_str_split($sch_digits));
-$sch_now = strtr(current_time('H:i:s'), is_array($sch_map) ? $sch_map : []);
+// و`array_combine` ترمي ValueError في PHP 8 حين تختلف الأطوال — لا تُرجع false
+// كما كانت في السابع، فحارس `is_array` لا يمسك شيئًا. والساعة زينة على اللوح،
+// فلا يجوز أن تُسقط شاشة البوابة كلها لو شذّ توطين الأرقام.
+$sch_pair = mb_strlen($sch_digits) === 10 ? mb_str_split($sch_digits) : [];
+$sch_map  = $sch_pair === [] ? [] : array_combine(str_split('0123456789'), $sch_pair);
+$sch_now  = strtr(current_time('H:i:s'), $sch_map);
 
 // وقت آخر بطاقة مقروءة — «--:--» حين لم يُمسح شيء بعد.
 $sch_last_at = $sch_last
@@ -305,12 +309,18 @@ $sch_last_at = $sch_last
 
 <style>
 /* ═══ شاشة البوابة — كل لون رمز، وكل مقاس درجة من السلّم ═══ */
+/* الترويسة أخت العمودين لا ابنتهما، فرمز الخط يُعلَن على الاثنين معًا:
+   رمز غير معرَّف عند الاستعمال يُسقط التصريح كلّه، فكانت ساعة «جرس الحصة»
+   تخرج بخط الواجهة بينما كل رقم آخر في الشاشة أحاديّ العرض. */
+.sch-gate,
+.sch-gate__head {
+    --gate-mono: ui-monospace, SFMono-Regular, 'IBM Plex Mono', Menlo, monospace;
+}
 .sch-gate {
     display: flex;
     align-items: stretch;
     gap: var(--sch-3);
     flex-wrap: wrap;
-    --gate-mono: ui-monospace, SFMono-Regular, 'IBM Plex Mono', Menlo, monospace;
 }
 .sch-gate__main { flex: 1 1 0; min-width: 430px; display: flex; flex-direction: column; gap: var(--sch-3); }
 
@@ -368,17 +378,21 @@ $sch_last_at = $sch_last
 .sch-gate__seg--excused { background: var(--sch-accent); }
 .sch-gate__seg--absent  { background: var(--sch-danger); }
 
-/* نغمة كل حالة — تُورَّث فتلوّن المربّع والنقطة والحافة والنص معًا */
+/* نغمة كل حالة — تُورَّث فتلوّن المربّع والنقطة والحافة والنص معًا.
+   وثلاثة رموز لا اثنان: `--gate-tone` للمساحات الصمّاء (نقطة · مربّع · حافة)،
+   و`--gate-ink` للنص فوق `--gate-soft`. البارز #5170FF على أبيض تباينه 3.9
+   وهو يكفي سطحًا ولا يكفي كتابة — والقاعدة مكتوبة في CLAUDE.md — فوسم «بعذر»
+   يأخذ الدرجة الأغمق كما يأخذها زرّه في هذه الشاشة نفسها. */
 .sch-gate__key--present, .sch-gate__chip--present, .sch-gate__row[data-status="present"], .sch-gate__ev--in
-    { --gate-tone: var(--sch-success); --gate-soft: var(--sch-success-soft); }
+    { --gate-tone: var(--sch-success); --gate-ink: var(--sch-success); --gate-soft: var(--sch-success-soft); }
 .sch-gate__key--late, .sch-gate__chip--late, .sch-gate__row[data-status="late"], .sch-gate__ev--out
-    { --gate-tone: var(--sch-warn); --gate-soft: var(--sch-warn-soft); }
+    { --gate-tone: var(--sch-warn); --gate-ink: var(--sch-warn); --gate-soft: var(--sch-warn-soft); }
 .sch-gate__key--excused, .sch-gate__row[data-status="excused"], .sch-gate__ev--note
-    { --gate-tone: var(--sch-accent); --gate-soft: var(--sch-accent-soft); }
+    { --gate-tone: var(--sch-accent); --gate-ink: var(--sch-accent-ink); --gate-soft: var(--sch-accent-soft); }
 .sch-gate__key--absent, .sch-gate__row[data-status="absent"]
-    { --gate-tone: var(--sch-danger); --gate-soft: var(--sch-danger-soft); }
+    { --gate-tone: var(--sch-danger); --gate-ink: var(--sch-danger); --gate-soft: var(--sch-danger-soft); }
 .sch-gate__key--none, .sch-gate__chip--none, .sch-gate__chip--all, .sch-gate__row[data-status="none"]
-    { --gate-tone: var(--sch-muted); --gate-soft: var(--sch-surface-alt); }
+    { --gate-tone: var(--sch-muted); --gate-ink: var(--sch-ink-soft); --gate-soft: var(--sch-surface-alt); }
 
 /* ── صفّ المرشّحات ── */
 .sch-gate__filters {
@@ -386,11 +400,17 @@ $sch_last_at = $sch_last
     padding: var(--sch-3); display: flex; align-items: center; gap: var(--sch-2); flex-wrap: wrap;
 }
 .sch-gate__searchw { position: relative; flex: 1 1 200px; min-width: 200px; display: flex; }
-.sch-body input.sch-gate__search {
-    width: 100%; min-height: 40px;
-    padding-block: var(--sch-2); padding-inline: var(--sch-6) var(--sch-3);
+.sch-gate__search { width: 100%; }
+/* المحدِّق يطابق شكل قاعدة الحقول العامّة في dashboard.css ويزيد عليها صنفًا:
+   تلك القاعدة تخصّصيتها (0,4,1) بفضل ثلاثة `:not`، و`.sch-body input.اسم`
+   (0,2,1) تخسر أمامها مهما تأخّرت في المصدر — فتُطمس الإزاحة ويجلس رمز
+   البحث فوق ما يكتبه الموظف. والسطح `--sch-paper` غائر عن البطاقة كما في
+   التصميم، وينقلب مع الوضع الداكن وحده. */
+.sch-body :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="submit"]).sch-gate__search {
+    min-height: 40px;
+    padding-block: 9px; padding-inline: 34px var(--sch-3);
     border: 1px solid var(--sch-line-strong); border-radius: var(--sch-radius);
-    background: var(--sch-surface-alt); color: var(--sch-ink);
+    background: var(--sch-paper); color: var(--sch-ink);
     font-family: inherit; font-size: var(--sch-text-sm);
 }
 .sch-gate__ic {
@@ -444,7 +464,7 @@ $sch_last_at = $sch_last
 .sch-gate__st {
     display: flex; align-items: center; gap: var(--sch-2);
     padding: var(--sch-1) var(--sch-2); border-radius: var(--sch-r-sm);
-    background: var(--gate-soft); color: var(--gate-tone);
+    background: var(--gate-soft); color: var(--gate-ink, var(--gate-tone));
     font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); white-space: nowrap;
 }
 .sch-gate__time { font-size: var(--sch-text-base); color: var(--sch-muted); }
