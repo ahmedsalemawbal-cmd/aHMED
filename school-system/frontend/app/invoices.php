@@ -66,17 +66,30 @@ foreach ($invoices as $inv) {
 $sum_left = max(0, round($sum_total - $sum_paid, 2));
 $pct      = $sum_total > 0 ? min(100, (int) round($sum_paid / $sum_total * 100)) : 0;
 
-// أقساط الفواتير كلها على سكّة واحدة مرتّبة بالاستحقاق: الأب يقرأ زمنًا لا فواتير
-usort($steps, static fn (array $a, array $b): int => strcmp($a['due'], $b['due']));
+/**
+ * أقساط الفواتير كلها على سكّة واحدة مرتّبة بالاستحقاق: الأب يقرأ زمنًا لا فواتير.
+ *
+ * **والقسط بلا تاريخ يذهب آخرًا لا أوّلًا.** `strcmp` وحدها تُصدِّر السلسلة
+ * الفارغة، فيصير قسطٌ لم يُجدوَل بعد هو «القادم» ويقرأ الأب «بعد ٠ يومًا»
+ * بينما القسط الحقيقي بعد شهر.
+ */
+usort($steps, static function (array $a, array $b): int {
+    if (($a['due'] === '') !== ($b['due'] === '')) {
+        return $a['due'] === '' ? 1 : -1;
+    }
+
+    return strcmp($a['due'], $b['due']);
+});
 
 $due_i = null;
 foreach ($steps as $i => $s) {
     if (!$s['done']) { $due_i = $i; break; }
 }
 
-$due  = $due_i !== null ? $steps[$due_i] : null;
-$late = $due !== null && $due['late'];
-$days = $due !== null && $due['due'] !== ''
+$due     = $due_i !== null ? $steps[$due_i] : null;
+$late    = $due !== null && $due['late'];
+$no_date = $due !== null && $due['due'] === '';
+$days    = $due !== null && !$no_date
     ? (int) floor((strtotime($due['due']) - strtotime($today)) / 86400)
     : 0;
 ?>
@@ -96,33 +109,48 @@ $days = $due !== null && $due['due'] !== ''
         <i class="p-fee__dot" aria-hidden="true"></i>
         <?php if ($due === null) : ?>
             <?php esc_html_e('اكتمل السداد — شكرًا لك', 'school-system'); ?>
+        <?php elseif ($no_date) : ?>
+            <?php esc_html_e('القسط القادم بلا تاريخ محدَّد', 'school-system'); ?>
+        <?php elseif ($late) : ?>
+            <?php echo esc_html(sprintf(
+                /* translators: %s: عدد الأيام */
+                _n('تأخّر القسط يومًا واحدًا', 'تأخّر القسط %s أيام', abs($days), 'school-system'),
+                number_format_i18n(abs($days))
+            )); ?>
+        <?php elseif ($days === 0) : ?>
+            <?php /* «بعد ٠ يومًا» جملةٌ لا تُقال — واليوم هو أهمّ حالات هذا السطر */ ?>
+            <?php esc_html_e('القسط القادم اليوم', 'school-system'); ?>
         <?php else : ?>
-            <?php echo esc_html($late
-                ? sprintf(
-                    /* translators: %s: عدد الأيام */
-                    _n('تأخّر القسط يومًا واحدًا', 'تأخّر القسط %s أيام', abs($days), 'school-system'),
-                    number_format_i18n(abs($days))
-                )
-                : sprintf(
-                    /* translators: %s: عدد الأيام */
-                    _n('القسط القادم غدًا', 'القسط القادم بعد %s يومًا', abs($days), 'school-system'),
-                    number_format_i18n(abs($days))
-                )); ?>
+            <?php echo esc_html(sprintf(
+                /* translators: %s: عدد الأيام */
+                _n('القسط القادم غدًا', 'القسط القادم بعد %s يومًا', $days, 'school-system'),
+                number_format_i18n($days)
+            )); ?>
         <?php endif; ?>
     </span>
 
     <div class="p-fee__bar">
         <div class="p-fee__of">
+            <?php /* «ر.س» بعد الرقمين كليهما كما في التصميم، وكلٌّ في `p-amt` فلا ينفصل عن عملته */ ?>
             <span>
                 <?php esc_html_e('سُدِّد', 'school-system'); ?>
-                <b class="p-nm"><?php echo esc_html(number_format_i18n($sum_paid, 0)); ?></b>
+                <span class="p-amt">
+                    <b class="p-nm"><?php echo esc_html(number_format_i18n($sum_paid, 0)); ?></b>
+                    <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
+                </span>
                 <?php esc_html_e('من', 'school-system'); ?>
-                <b class="p-nm"><?php echo esc_html(number_format_i18n($sum_total, 0)); ?></b>
-                <?php esc_html_e('ر.س', 'school-system'); ?>
+                <span class="p-amt">
+                    <b class="p-nm"><?php echo esc_html(number_format_i18n($sum_total, 0)); ?></b>
+                    <span class="p-cur"><?php esc_html_e('ر.س', 'school-system'); ?></span>
+                </span>
             </span>
-            <span class="p-fee__pct">
-                <span class="p-nm"><?php echo esc_html(number_format_i18n($pct)); ?></span>٪
-            </span>
+
+            <?php /* الرقم وعلامته في عنصر واحد `p-nm` (ltr) — فتبقى «٦٩٪» بترتيب التصميم */ ?>
+            <span class="p-fee__pct p-nm"><?php echo esc_html(sprintf(
+                /* translators: %s: نسبة ما سُدِّد */
+                __('%s٪', 'school-system'),
+                number_format_i18n($pct)
+            )); ?></span>
         </div>
 
         <span class="p-fee__track">
@@ -167,8 +195,9 @@ $days = $due !== null && $due['due'] !== ''
 
 <div class="p-sect">
     <h2 class="p-sect__h"><?php esc_html_e('الفواتير', 'school-system'); ?></h2>
-    <?php /* عدد لا رابط: «عرض الكل» تحتاج شاشة ثانية، والقائمة كلها هنا أصلًا */ ?>
-    <span class="p-sect__a"><?php echo esc_html(sprintf(
+    <?php /* عدد لا رابط: «عرض الكل» تحتاج شاشة ثانية، والقائمة كلها هنا أصلًا.
+             و`p-sect__n` لا `p-sect__a`: الثانية بلون بارز تدعو للنقر. */ ?>
+    <span class="p-sect__n"><?php echo esc_html(sprintf(
         /* translators: %s: عدد الفواتير */
         _n('%s فاتورة', '%s فواتير', count($bills), 'school-system'),
         number_format_i18n(count($bills))
@@ -202,9 +231,9 @@ $days = $due !== null && $due['due'] !== ''
                     (string) $inv->id
                 )); ?></b>
 
-                <span class="p-inv__d"><?php echo esc_html($when !== ''
-                    ? wp_date('j F Y', strtotime($when))
-                    : ''); ?></span>
+                <?php if ($when !== '') : ?>
+                    <span class="p-inv__d"><?php echo esc_html(wp_date('j F Y', strtotime($when))); ?></span>
+                <?php endif; ?>
 
                 <?php if ((float) $inv->discount > 0) : ?>
                     <!-- الخصم يُذكر صراحةً: الأب يرى في تطبيقه أنه استفاد -->

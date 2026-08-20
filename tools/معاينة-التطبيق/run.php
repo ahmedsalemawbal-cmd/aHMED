@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/stub.php';
 
+// التوطين يُفعَّل كما تفعّله SCH_App::render — بمرشِّحات الإضافة نفسها
+sch_localize_output();
+
 $APP  = SCH_PATH . 'frontend/app/';
 $CSS  = SCH_PATH . 'assets/parent.css';
 
@@ -32,6 +35,7 @@ $SCREENS = [
     ['kg',           'التقرير اليومي',       3, []],
     ['account',      'حسابي',                1, []],
     ['pickers',      'من يحقّ له الاستلام',   1, []],
+    ['login',        'الدخول',               1, []],
 ];
 
 function render_screen(string $file, int $kid, array $env): string
@@ -40,7 +44,8 @@ function render_screen(string $file, int $kid, array $env): string
 
     foreach ($env as $k => $v) { putenv("$k=$v"); }
 
-    $sch_data = ['id' => $kid];
+    // الموجّه يمرّر الأبناء لكل شاشة — و«حسابي» تعدّهم منه بلا استعلام
+    $sch_data = ['id' => $kid, 'children' => SCH_Students::children_of(7), 'section' => $file];
     $sch_view = $file;
     $p_kid    = demo_student($kid);
     $p_kid_id = $kid;

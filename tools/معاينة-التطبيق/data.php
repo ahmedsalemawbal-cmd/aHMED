@@ -45,6 +45,14 @@ final class SCH_Students {
     }
 }
 
+final class SCH_Apps {
+    public static function packs(): array {
+        return ['family' => ['name' => 'مدرستي — الأسرة', 'short' => 'مدرستي',
+                             'color' => '#0F6E8C', 'icon' => 'icon']];
+    }
+    public static function url(string $k, string $f = ''): string { return '/' . $k . '/' . $f; }
+}
+
 final class SCH_Years {
     public static function current(): ?object {
         return (object) ['id' => 1, 'name' => '١٤٤٦هـ', 'start_date' => '2024-08-18',

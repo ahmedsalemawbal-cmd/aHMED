@@ -709,6 +709,9 @@ JS;
             $file = SCH_PATH . 'frontend/app/home.php';
         }
 
+        // الأرقام الهندية في التطبيق وحده — تُفعَّل عند التصيير لا عند الإقلاع
+        sch_localize_output();
+
         $sch_view = $view;
         $sch_data = $data;
 

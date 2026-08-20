@@ -81,6 +81,47 @@ $marks = SCH_Assessment::report_card($id);
         }
     }
     $sch_off = count(array_filter($sch_grid, static fn (string $st): bool => $st === ''));
+
+    // «غياب بعذر» لفظ السجل الإداري، والتصميم يخاطب الأب بـ«إجازة معتمَدة» —
+    // والبطاقة فوق تقول «الإجازات»، فتتفق الشاشة كلها على لفظ واحد.
+    // وبقية الحالات تبقى من `STATUSES` لأنها تطابق التصميم حرفًا بحرف.
+    $sch_labels            = SCH_Attendance::STATUSES;
+    $sch_labels['excused'] = __('إجازة معتمَدة', 'school-system');
+
+    /**
+     * العدّ بالعربية لا بصيغتين.
+     *
+     * `_n()` تعرف مفردًا وجمعًا وحدهما، والعربية تعدّ بأربع:
+     * «يوم واحد» · «يومان» · «٣ أيام» · «١١ يومًا». فكانت البطاقة تكتب
+     * «٢ أيام» و«٢ مرّات»، والتصميم يكتب «يوم واحد» و«مرّتان».
+     *
+     * ويعود الرقم منفصلًا عن كلمته ليبقى في `p-nm` بأرقامه المجدوَلة،
+     * ويعود فارغًا حين تحمل الكلمة العدد في صيغتها فلا يُكتب مرّتين.
+     *
+     * @param array{0:string,1:string,2:string,3:string} $words واحد · اثنان · ٣–١٠ · ١١ فأكثر
+     * @return array{0:string,1:string}
+     */
+    $sch_qty = static function (int $n, array $words): array {
+        return match (true) {
+            $n === 1 => ['', $words[0]],
+            $n === 2 => ['', $words[1]],
+            $n <= 10 => [number_format_i18n($n), $words[2]],
+            default  => [number_format_i18n($n), $words[3]],
+        };
+    };
+
+    $sch_w_day = [
+        __('يوم واحد', 'school-system'),
+        __('يومان', 'school-system'),
+        __('أيام', 'school-system'),
+        __('يومًا', 'school-system'),
+    ];
+    $sch_w_time = [
+        __('مرّة واحدة', 'school-system'),
+        __('مرّتان', 'school-system'),
+        __('مرّات', 'school-system'),
+        __('مرّة', 'school-system'),
+    ];
     ?>
 
     <!-- أربع حقائق قبل التفصيل: الرقم أوّلًا، ولونه يقول نوعه -->
@@ -99,10 +140,12 @@ $marks = SCH_Assessment::report_card($id);
             )); ?></span>
         </div>
 
+        <?php [$sch_n, $sch_u] = $sch_qty($tally['absent'], $sch_w_day); ?>
         <div class="p-fact p-fact--bad">
-            <span class="p-fact__k"><?php echo esc_html(SCH_Attendance::STATUSES['absent']); ?></span>
+            <span class="p-fact__k"><?php esc_html_e('الغياب', 'school-system'); ?></span>
             <span class="p-amt p-fact__v">
-                <span class="p-nm"><?php echo esc_html(number_format_i18n($tally['absent'])); ?></span><i class="p-fact__u"><?php echo esc_html(_n('يوم', 'أيام', $tally['absent'], 'school-system')); ?></i>
+                <?php if ($sch_n !== '') : ?><span class="p-nm"><?php echo esc_html($sch_n); ?></span><?php endif; ?>
+                <i class="p-fact__u p-fact__u--w"><?php echo esc_html($sch_u); ?></i>
             </span>
             <span class="p-fact__s"><?php echo esc_html($sch_last_absent !== ''
                 ? sprintf(
@@ -113,20 +156,24 @@ $marks = SCH_Assessment::report_card($id);
                 : __('لا غياب في السجل', 'school-system')); ?></span>
         </div>
 
+        <?php [$sch_n, $sch_u] = $sch_qty($tally['late'], $sch_w_time); ?>
         <div class="p-fact p-fact--warn">
-            <span class="p-fact__k"><?php echo esc_html(SCH_Attendance::STATUSES['late']); ?></span>
+            <span class="p-fact__k"><?php esc_html_e('التأخير', 'school-system'); ?></span>
             <span class="p-amt p-fact__v">
-                <span class="p-nm"><?php echo esc_html(number_format_i18n($tally['late'])); ?></span><i class="p-fact__u"><?php echo esc_html(_n('مرّة', 'مرّات', $tally['late'], 'school-system')); ?></i>
+                <?php if ($sch_n !== '') : ?><span class="p-nm"><?php echo esc_html($sch_n); ?></span><?php endif; ?>
+                <i class="p-fact__u p-fact__u--w"><?php echo esc_html($sch_u); ?></i>
             </span>
             <span class="p-fact__s"><?php echo esc_html($sch_late_days !== []
                 ? implode(' · ', $sch_late_days)
                 : __('بلا تأخير', 'school-system')); ?></span>
         </div>
 
+        <?php [$sch_n, $sch_u] = $sch_qty($tally['excused'], $sch_w_day); ?>
         <div class="p-fact p-fact--pri">
-            <span class="p-fact__k"><?php echo esc_html(SCH_Attendance::STATUSES['excused']); ?></span>
+            <span class="p-fact__k"><?php esc_html_e('الإجازات', 'school-system'); ?></span>
             <span class="p-amt p-fact__v">
-                <span class="p-nm"><?php echo esc_html(number_format_i18n($tally['excused'])); ?></span><i class="p-fact__u"><?php echo esc_html(_n('يوم', 'أيام', $tally['excused'], 'school-system')); ?></i>
+                <?php if ($sch_n !== '') : ?><span class="p-nm"><?php echo esc_html($sch_n); ?></span><?php endif; ?>
+                <i class="p-fact__u p-fact__u--w"><?php echo esc_html($sch_u); ?></i>
             </span>
             <span class="p-fact__s"><?php esc_html_e('معتمَدة من الإدارة', 'school-system'); ?></span>
         </div>
@@ -178,7 +225,7 @@ $marks = SCH_Assessment::report_card($id);
                     default   => 'off',
                 }; ?>
                 <i class="p-cal__d p-cal__d--<?php echo esc_attr($tone); ?>"
-                   title="<?php echo esc_attr(wp_date('j M', strtotime((string) $sch_ymd)) . ' · ' . (SCH_Attendance::STATUSES[$sch_st] ?? __('عطلة', 'school-system'))); ?>"></i>
+                   title="<?php echo esc_attr(wp_date('j M', strtotime((string) $sch_ymd)) . ' · ' . ($sch_labels[$sch_st] ?? __('عطلة', 'school-system'))); ?>"></i>
             <?php endforeach; ?>
         </div>
 
@@ -191,7 +238,7 @@ $marks = SCH_Assessment::report_card($id);
                 ['excused', 'exc'],
             ] as [$sch_k, $sch_cls]) : ?>
                 <?php if ($tally[$sch_k] > 0) : ?>
-                    <span><i class="p-cal__sw p-cal__sw--<?php echo esc_attr($sch_cls); ?>"></i><?php echo esc_html(SCH_Attendance::STATUSES[$sch_k]); ?></span>
+                    <span><i class="p-cal__sw p-cal__sw--<?php echo esc_attr($sch_cls); ?>"></i><?php echo esc_html($sch_labels[$sch_k]); ?></span>
                 <?php endif; ?>
             <?php endforeach; ?>
             <?php if ($sch_off > 0) : ?>

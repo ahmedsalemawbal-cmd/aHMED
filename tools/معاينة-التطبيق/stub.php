@@ -41,23 +41,36 @@ function esc_textarea($t) { return esc_html($t); }
 function absint($n) { return abs((int) $n); }
 function sanitize_key($k) { return preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $k)); }
 function wp_timezone() { return new DateTimeZone('Asia/Riyadh'); }
-/** ووردبريس بلغة عربية يحوّل الأرقام إلى هندية — فتُحاكى كما هي لا كما تسهل */
-function sch_ar_digits(string $t): string {
-    return strtr($t, ['0'=>'٠','1'=>'١','2'=>'٢','3'=>'٣','4'=>'٤','5'=>'٥','6'=>'٦','7'=>'٧','8'=>'٨','9'=>'٩', ','=>'٬', '.'=>'٫']);
+/* الفاصلة والعلامة العشرية من ترجمة ووردبريس العربية — والأرقام تبقى
+   لاتينية حتى تمرّ بمرشِّح الإضافة، تمامًا كما في الإنتاج. */
+function number_format_i18n($n, $d = 0) {
+    return apply_filters('number_format_i18n', number_format((float) $n, $d, '٫', '٬'));
 }
-function number_format_i18n($n, $d = 0) { return sch_ar_digits(number_format((float) $n, $d)); }
-function wp_date($f, $ts = null) {
+function wp_date($f, $ts = null, $tz = null) {
     $ar_m = [1=>'يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     $ar_d = ['Sunday'=>'الأحد','Monday'=>'الاثنين','Tuesday'=>'الثلاثاء','Wednesday'=>'الأربعاء','Thursday'=>'الخميس','Friday'=>'الجمعة','Saturday'=>'السبت'];
-    $ts = $ts ?? time();
+    $ts  = $ts ?? time();
     $out = date($f, $ts);
     $out = strtr($out, $ar_d);
     $out = strtr($out, [date('M', $ts) => $ar_m[(int) date('n', $ts)], date('F', $ts) => $ar_m[(int) date('n', $ts)]]);
-    // ووردبريس العربي يترجم am/pm إلى ص/م عبر `get_meridiem` — فلا تظهر لاتينية
     $out = strtr($out, ['am' => 'ص', 'pm' => 'م', 'AM' => 'ص', 'PM' => 'م']);
-    return sch_ar_digits($out);
+    return apply_filters('wp_date', $out, $f, $ts, $tz);
+}
+
+/* نسخةٌ حرفية من `includes/functions.php` */
+function sch_ar_digits(string $text): string {
+    return strtr($text, ['0'=>'٠','1'=>'١','2'=>'٢','3'=>'٣','4'=>'٤','5'=>'٥','6'=>'٦','7'=>'٧','8'=>'٨','9'=>'٩']);
+}
+function sch_localize_output(): void {
+    add_filter('number_format_i18n', static function ($formatted): string { return sch_ar_digits((string) $formatted); });
+    add_filter('wp_date', static function ($date, $format = '') : string {
+        $date = (string) $date;
+        if (preg_match('/^\\d{4}-\\d{2}-\\d{2}/', $date) === 1) { return $date; }
+        return sch_ar_digits($date);
+    }, 10, 2);
 }
 function current_time($f, $gmt = 0) { return $f === 'timestamp' ? time() : date($f); }
+function get_locale() { return 'ar'; }
 function get_bloginfo($k = '') { return 'مدرسة الملك المنير الأهلية'; }
 function get_current_user_id() { return 7; }
 function get_user_by($f, $v) { return (object) ['ID' => (int) $v, 'display_name' => 'عبدالله الشمري', 'user_email' => 'driver@example.com']; }
@@ -79,7 +92,12 @@ function is_rtl() { return true; }
 function rest_url($p = '') { return 'https://school.test/wp-json/' . $p; }
 function wp_localize_script(...$a) {}
 function plugins_url($p = '', $f = '') { return SCH_URL . $p; }
-function apply_filters($t, $v) { return $v; }
+$GLOBALS['sch_filters'] = [];
+function add_filter($t, $cb, $p = 10, $n = 1) { $GLOBALS['sch_filters'][$t][] = $cb; }
+function apply_filters($t, $v, ...$a) {
+    foreach ($GLOBALS['sch_filters'][$t] ?? [] as $cb) { $v = $cb($v, ...$a); }
+    return $v;
+}
 function do_action($t, ...$a) {}
 function wp_kses_post($t) { return $t; }
 function get_userdata($id) { return (object) ['display_name' => 'أحمد سعد العتيبي']; }
