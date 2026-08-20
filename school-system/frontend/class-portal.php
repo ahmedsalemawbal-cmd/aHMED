@@ -29,6 +29,21 @@ final class SCH_Portal
         ['sch_view_own_children', [SCH_App::class,       'url']],
     ];
 
+    /**
+     * أدوارٌ لكلٍّ منها تطبيقُه — بيتها تطبيقُها لا الداشبورد.
+     *
+     * الصلاحية وحدها لا تكفي للتوجيه: المعلم يملك `sch_manage_attendance`،
+     * وتملكها كذلك مشرفةُ المرحلة ووكيلُ الشؤون التعليمية — وبيت هاتين
+     * الداشبورد. فالدور هو الفيصل، والترتيب هنا هو ترتيب الأولوية.
+     */
+    private const APP_ROLES = [
+        'sch_guard'    => [SCH_Gate::class,    'url'],
+        'sch_driver'   => [SCH_Driver::class,  'url'],
+        'sch_teacher'  => [SCH_Teacher::class, 'url'],
+        'sch_student'  => [SCH_Student::class, 'url'],
+        'sch_guardian' => [SCH_App::class,     'url'],
+    ];
+
     public static function init(): void
     {
         add_action('init', [self::class, 'rewrite']);
@@ -53,6 +68,27 @@ final class SCH_Portal
 
         if ($user_id === 0) {
             return self::url();
+        }
+
+        /*
+         * صاحب تطبيقٍ مخصّص يذهب إليه أوّلًا — قبل سؤال الداشبورد.
+         *
+         * كان السؤال معكوسًا: `allowed_areas()` تُسأل أوّلًا، والحارس يملك
+         * `sch_scan_gate` وهي صلاحية قسم «نداء الانصراف» في الداشبورد،
+         * والمعلم يملك `sch_manage_attendance` وهي صلاحية «الحضور» —
+         * فكان الاثنان يُرَدّان إلى الداشبورد ولا يبلغان `/gate` و`/teacher`
+         * أبدًا، مهما كان ترتيب `ROUTES` تحتها.
+         *
+         * ومن حمل مع دور تطبيقه دورًا إداريًّا (معلّمٌ هو مشرف مرحلة) يبقى
+         * على الداشبورد: الدور الأوسع يغلب، وهو ما يتوقّعه صاحبه.
+         */
+        $roles = (array) (get_userdata($user_id)->roles ?? []);
+        if ($roles !== [] && array_diff($roles, array_keys(self::APP_ROLES)) === []) {
+            foreach (self::APP_ROLES as $role => $dest) {
+                if (in_array($role, $roles, true) && is_callable($dest)) {
+                    return (string) call_user_func($dest);
+                }
+            }
         }
 
         // من له مجال في الداشبورد مكانه الداشبورد — المدير والوكيل والمحاسب.

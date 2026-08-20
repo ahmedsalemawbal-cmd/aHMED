@@ -26,6 +26,23 @@ $can_notes  = current_user_can('sch_handle_notes');
 $full      = SCH_Enrollment::full_name($student);
 $class     = SCH_Students::current_class($id);
 $classes   = SCH_Classes::list();
+
+/*
+ * شعبة الطالب تُؤخذ من القائمة لا من `SCH_Classes::get()`.
+ *
+ * الأخيرة `SELECT *` على جدول الشعب، وليس فيه عمود `enrolled` — إنما تحسبه
+ * `list()` باستعلامٍ فرعيّ. فكان لوح السعة يقرأ خاصّيةً غير موجودة: العدد
+ * يظهر فارغًا، و«ممتلئة» لا تظهر أبدًا لأن الطرح يصير `capacity - 0`.
+ * والقائمة محمّلة أصلًا في هذه الشاشة — فلا استعلام إضافيّ.
+ */
+if ($class) {
+    foreach ($classes as $sch_c) {
+        if ((int) $sch_c->id === (int) $class->id) {
+            $class = $sch_c;
+            break;
+        }
+    }
+}
 $guardians = SCH_Guardians::of_student($id);
 $all_g     = SCH_Guardians::list(['per_page' => 200]);
 $docs      = SCH_Enrollment::docs($id);

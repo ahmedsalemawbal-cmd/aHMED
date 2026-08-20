@@ -4,7 +4,16 @@ defined('ABSPATH') || exit;
 
 $target_id = isset($_GET['user_id']) ? absint($_GET['user_id']) : 0;
 $target    = $target_id > 0 ? get_userdata($target_id) : null;
-$staff     = SCH_Staff::list(['status' => 'active']);
+/*
+ * `SCH_Staff::list()` تُعيد غلافًا `['items' => …, 'total' => …]` لا قائمة.
+ * والتكرار على الغلاف نفسه كان يُخرج صفَّين مكسورَين — مصفوفةً وعددًا — بدل
+ * الموظفين، ولا يظهر «لا يوجد موظفون» أبدًا لأن الغلاف ليس فارغًا قطّ.
+ * وبقيّة الشاشات (`employees` و`hr` و`overview`) تقرؤه صحيحًا.
+ *
+ * ولا ترقيم هنا عمدًا: الشاشة تختار موظفًا لتعدّل صلاحياته، وسقفٌ افتراضيّ
+ * من خمسة وعشرين كان يُخفي بقيّة المدرسة بلا أن يقول.
+ */
+$staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 100])['items'];
 
 if (!$target) : ?>
 

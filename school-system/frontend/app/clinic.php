@@ -111,7 +111,8 @@ $sch_today = wp_date('Y-m-d');
         ?>
         <article class="p-vst">
             <div class="p-vst__h">
-                <b class="p-vst__t"><?php echo esc_html((string) $med->drug_name); ?></b>
+                <?php // أسماء الأعمدة كما في `medications`: `med_name` و`times_csv`. ?>
+                <b class="p-vst__t"><?php echo esc_html((string) $med->med_name); ?></b>
                 <span class="p-tag p-tag--<?php echo esc_attr($sch_med_tone[$sch_st] ?? 'mute'); ?>">
                     <?php echo esc_html(SCH_Medication::STATUSES[$sch_st] ?? ''); ?>
                 </span>
@@ -119,7 +120,7 @@ $sch_today = wp_date('Y-m-d');
             <div class="p-vst__b">
                 <div class="p-kv">
                     <span class="p-kv__k"><?php esc_html_e('الجرعة', 'school-system'); ?></span>
-                    <span class="p-kv__v"><?php echo esc_html(trim((string) $med->dose . ' · ' . (string) $med->times)); ?></span>
+                    <span class="p-kv__v"><?php echo esc_html(trim((string) $med->dose . ' · ' . str_replace(',', '، ', (string) $med->times_csv), ' ·')); ?></span>
                 </div>
             </div>
         </article>

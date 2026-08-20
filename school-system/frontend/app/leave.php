@@ -72,8 +72,9 @@ $sch_today = current_time('Y-m-d');
             }; ?>
             <div class="p-row">
                 <span class="p-row__t">
-                    <b><?php echo esc_html(SCH_StudentLeave::REASONS[$req->reason] ?? ''); ?></b>
-                    <span dir="ltr"><?php echo esc_html($req->from_date . ' → ' . $req->to_date); ?></span>
+                    <?php // أسماء الأعمدة كما في `student_leaves`: `reason_code` و`start_date` و`end_date`. ?>
+                    <b><?php echo esc_html(SCH_StudentLeave::REASONS[$req->reason_code] ?? ''); ?></b>
+                    <span dir="ltr"><?php echo esc_html($req->start_date . ' → ' . $req->end_date); ?></span>
                     <?php if ($req->status === 'rejected' && $req->decision_note) : ?>
                         <span><?php echo esc_html(__('السبب:', 'school-system') . ' ' . $req->decision_note); ?></span>
                     <?php endif; ?>
