@@ -539,7 +539,9 @@ for _css in ('assets/dashboard.css', 'assets/parent.css', 'assets/shared-ui.css'
         for _tpl in glob.glob(os.path.join(ROOT, 'frontend', '**', '*.php'), recursive=True):
             _t = open(_tpl, encoding='utf-8').read()
 
-            if not re.search(r'<a[^>]{0,200}class="[^"]*\b' + re.escape(_cls) + r'\b', _t):
+            # `<a` وحدها تلتقط `<aside>` و`<article>` و`<abbr>` — فحدُّ الكلمة
+            # شرط، وإلا بُلِّغ عن لوحٍ جانبي أنه رابط.
+            if not re.search(r'<a(?=[\s>])[^>]{0,200}class="[^"]*\b' + re.escape(_cls) + r'\b', _t):
                 continue
 
             # مُصلَح إن وُجدت قاعدة أقوى **بنفس اللواحق** — لا أي قاعدة للصنف،

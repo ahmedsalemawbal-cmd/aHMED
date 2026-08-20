@@ -4299,3 +4299,266 @@ body.sch-body {
 .sch-set2__side { display: grid; gap: var(--sch-5); }
 .sch-set__stat { display: grid; }
 @media (max-width: 1100px) { .sch-set2 { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════════════════════════════
+   حضور الطلاب — شاشة البوابة
+
+   كانت داخل القالب مؤقّتًا. ومكان الأنماط الورقةُ لا ملف العرض: نمطٌ
+   في القالب لا يمرّ بوسم `sch_asset()` فلا يُبطل كاش المتصفّح عند
+   التعديل، ولا يراه فحص التصادم فيمرّ اسمٌ مكرّر بلا تنبيه.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ شاشة البوابة — كل لون رمز، وكل مقاس درجة من السلّم ═══ */
+/* الترويسة أخت العمودين لا ابنتهما، فرمز الخط يُعلَن على الاثنين معًا:
+   رمز غير معرَّف عند الاستعمال يُسقط التصريح كلّه، فكانت ساعة «جرس الحصة»
+   تخرج بخط الواجهة بينما كل رقم آخر في الشاشة أحاديّ العرض. */
+.sch-gate,
+.sch-gate__head {
+    --gate-mono: ui-monospace, SFMono-Regular, 'IBM Plex Mono', Menlo, monospace;
+}
+.sch-gate {
+    display: flex;
+    align-items: stretch;
+    gap: var(--sch-3);
+    flex-wrap: wrap;
+}
+.sch-gate__main { flex: 1 1 0; min-width: 430px; display: flex; flex-direction: column; gap: var(--sch-3); }
+
+/* ── الترويسة ── */
+.sch-gate__head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: var(--sch-5); flex-wrap: wrap; margin-bottom: var(--sch-3);
+}
+.sch-gate__ttlw { display: flex; flex-direction: column; gap: var(--sch-1); }
+.sch-gate__ttl { font-size: var(--sch-text-2xl); line-height: var(--sch-lh-snug); }
+.sch-gate__sub { font-size: var(--sch-text-sm); color: var(--sch-muted); }
+.sch-gate__tags { display: flex; align-items: center; gap: var(--sch-2); flex-wrap: wrap; }
+.sch-gate__tag {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-1) var(--sch-3);
+    border: 1px solid var(--sch-line); border-radius: var(--sch-radius);
+    background: var(--sch-surface); min-height: 34px;
+}
+.sch-gate__tagt { font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); color: var(--sch-ink-soft); }
+.sch-gate__tagm { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-gate__sep { width: 1px; height: 12px; background: var(--sch-line-strong); }
+.sch-gate__mono, .sch-gate__no, .sch-gate__time, .sch-gate__big,
+.sch-gate__keyn, .sch-gate__chipn, .sch-gate__clock, .sch-gate__lt,
+.sch-gate__evt, .sch-gate__pend b {
+    font-family: var(--gate-mono); font-variant-numeric: tabular-nums; direction: ltr;
+}
+.sch-gate__mono { font-size: var(--sch-text-sm); font-weight: var(--sch-w-medium); color: var(--sch-ink); }
+.sch-gate__pulse {
+    width: 7px; height: 7px; border-radius: var(--sch-r-full);
+    background: var(--sch-success); flex: 0 0 auto;
+    animation: sch-gate-beat 1.6s ease infinite;
+}
+
+/* ── بطاقة الملخّص ── */
+.sch-gate__sum {
+    background: var(--sch-surface); border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+    padding: var(--sch-4); display: flex; flex-direction: column; gap: var(--sch-4);
+}
+.sch-gate__sumh { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sch-4); flex-wrap: wrap; }
+.sch-gate__lead { display: flex; align-items: baseline; gap: var(--sch-2); }
+.sch-gate__big { font-size: var(--sch-text-3xl); font-weight: var(--sch-w-medium); line-height: var(--sch-lh-tight); color: var(--sch-ink); }
+.sch-gate__of { font-size: var(--sch-text-base); color: var(--sch-muted); }
+.sch-gate__keys { display: flex; align-items: center; gap: var(--sch-4); flex-wrap: wrap; }
+.sch-gate__key { display: flex; align-items: center; gap: var(--sch-2); }
+.sch-gate__sq { width: 9px; height: 9px; border-radius: 3px; background: var(--gate-tone); flex: 0 0 auto; }
+.sch-gate__keyt { font-size: var(--sch-text-xs); color: var(--sch-ink-soft); }
+.sch-gate__keyn { font-size: var(--sch-text-base); font-weight: var(--sch-w-medium); color: var(--sch-ink); }
+.sch-gate__bar {
+    display: flex; height: 12px; border-radius: var(--sch-r-full);
+    overflow: hidden; background: var(--sch-surface-alt); gap: 2px;
+}
+.sch-gate__seg { display: block; transition: width var(--sch-slow) var(--sch-ease); }
+.sch-gate__seg--present { background: var(--sch-success); }
+.sch-gate__seg--late    { background: var(--sch-warn); }
+.sch-gate__seg--excused { background: var(--sch-accent); }
+.sch-gate__seg--absent  { background: var(--sch-danger); }
+
+/* نغمة كل حالة — تُورَّث فتلوّن المربّع والنقطة والحافة والنص معًا.
+   وثلاثة رموز لا اثنان: `--gate-tone` للمساحات الصمّاء (نقطة · مربّع · حافة)،
+   و`--gate-ink` للنص فوق `--gate-soft`. البارز #5170FF على أبيض تباينه 3.9
+   وهو يكفي سطحًا ولا يكفي كتابة — والقاعدة مكتوبة في CLAUDE.md — فوسم «بعذر»
+   يأخذ الدرجة الأغمق كما يأخذها زرّه في هذه الشاشة نفسها. */
+.sch-gate__key--present, .sch-gate__chip--present, .sch-gate__row[data-status="present"], .sch-gate__ev--in
+    { --gate-tone: var(--sch-success); --gate-ink: var(--sch-success); --gate-soft: var(--sch-success-soft); }
+.sch-gate__key--late, .sch-gate__chip--late, .sch-gate__row[data-status="late"], .sch-gate__ev--out
+    { --gate-tone: var(--sch-warn); --gate-ink: var(--sch-warn); --gate-soft: var(--sch-warn-soft); }
+.sch-gate__key--excused, .sch-gate__row[data-status="excused"], .sch-gate__ev--note
+    { --gate-tone: var(--sch-accent); --gate-ink: var(--sch-accent-ink); --gate-soft: var(--sch-accent-soft); }
+.sch-gate__key--absent, .sch-gate__row[data-status="absent"]
+    { --gate-tone: var(--sch-danger); --gate-ink: var(--sch-danger); --gate-soft: var(--sch-danger-soft); }
+.sch-gate__key--none, .sch-gate__chip--none, .sch-gate__chip--all, .sch-gate__row[data-status="none"]
+    { --gate-tone: var(--sch-muted); --gate-ink: var(--sch-ink-soft); --gate-soft: var(--sch-surface-alt); }
+
+/* ── صفّ المرشّحات ── */
+.sch-gate__filters {
+    background: var(--sch-surface); border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+    padding: var(--sch-3); display: flex; align-items: center; gap: var(--sch-2); flex-wrap: wrap;
+}
+.sch-gate__searchw { position: relative; flex: 1 1 200px; min-width: 200px; display: flex; }
+.sch-gate__search { width: 100%; }
+/* المحدِّق يطابق شكل قاعدة الحقول العامّة في dashboard.css ويزيد عليها صنفًا:
+   تلك القاعدة تخصّصيتها (0,4,1) بفضل ثلاثة `:not`، و`.sch-body input.اسم`
+   (0,2,1) تخسر أمامها مهما تأخّرت في المصدر — فتُطمس الإزاحة ويجلس رمز
+   البحث فوق ما يكتبه الموظف. والسطح `--sch-paper` غائر عن البطاقة كما في
+   التصميم، وينقلب مع الوضع الداكن وحده. */
+.sch-body :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="submit"]).sch-gate__search {
+    min-height: 40px;
+    padding-block: 9px; padding-inline: 34px var(--sch-3);
+    border: 1px solid var(--sch-line-strong); border-radius: var(--sch-radius);
+    background: var(--sch-paper); color: var(--sch-ink);
+    font-family: inherit; font-size: var(--sch-text-sm);
+}
+.sch-gate__ic {
+    position: absolute; inset-inline-start: var(--sch-3); inset-block: 0;
+    display: flex; align-items: center; color: var(--sch-muted); pointer-events: none;
+}
+.sch-body button.sch-gate__chip {
+    display: flex; align-items: center; gap: var(--sch-2); min-height: 36px;
+    padding: var(--sch-2) var(--sch-3);
+    border: 1px solid var(--sch-line); border-radius: var(--sch-radius);
+    background: var(--sch-surface); color: var(--sch-ink-soft);
+    font-family: inherit; cursor: pointer;
+}
+.sch-body button.sch-gate__chip.is-on { background: var(--sch-surface-alt); border-color: var(--sch-line-strong); }
+.sch-gate__chipt { font-size: var(--sch-text-xs); }
+.sch-gate__chip.is-on .sch-gate__chipt { font-weight: var(--sch-w-medium); }
+.sch-gate__chipn { font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); opacity: .7; }
+.sch-gate__dot { width: 7px; height: 7px; border-radius: var(--sch-r-full); background: var(--gate-tone); flex: 0 0 auto; }
+.sch-body button.sch-gate__toggle {
+    min-height: 38px; padding: var(--sch-2) var(--sch-4);
+    border: 1px solid var(--sch-line-strong); border-radius: var(--sch-radius);
+    background: var(--sch-surface-alt); color: var(--sch-ink-soft);
+    font-family: inherit; font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); cursor: pointer;
+}
+.sch-body button.sch-gate__toggle[aria-pressed="true"] { background: var(--sch-accent); color: var(--sch-on-accent); border-color: var(--sch-accent); }
+
+/* ── الكشف: قائمة أو بطاقات، والصفّ نفسه في الوضعين ── */
+.sch-gate__list {
+    background: var(--sch-surface); border-radius: var(--sch-radius-lg);
+    box-shadow: var(--sch-e1); overflow: hidden;
+}
+.sch-gate__row {
+    display: grid; align-items: center;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "av id meta";
+    gap: var(--sch-3); padding: var(--sch-3) var(--sch-4);
+    border-bottom: 1px solid var(--sch-line);
+}
+.sch-gate__row:last-child { border-bottom: 0; }
+.sch-gate__row[hidden] { display: none; }
+.sch-gate__av {
+    grid-area: av; width: 34px; height: 34px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sch-surface-alt); color: var(--sch-ink-soft);
+    font-weight: var(--sch-w-bold); font-size: var(--sch-text-base); flex: 0 0 auto;
+}
+.sch-gate__id { grid-area: id; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sch-gate__name { font-size: var(--sch-text-base); color: var(--sch-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sch-gate__no { font-size: var(--sch-text-xs); color: var(--sch-muted); text-align: end; }
+.sch-gate__meta { grid-area: meta; display: flex; flex-direction: row-reverse; align-items: center; gap: var(--sch-3); }
+.sch-gate__st {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-1) var(--sch-2); border-radius: var(--sch-r-sm);
+    background: var(--gate-soft); color: var(--gate-ink, var(--gate-tone));
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); white-space: nowrap;
+}
+.sch-gate__time { font-size: var(--sch-text-base); color: var(--sch-muted); }
+.sch-gate__acts { grid-area: acts; display: none; align-items: center; gap: var(--sch-1); }
+.sch-body button.sch-gate__act {
+    flex: 1 1 0; min-height: 34px; padding: var(--sch-2);
+    border: 1px solid transparent; border-radius: 9px;
+    font-family: inherit; font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); cursor: pointer;
+}
+.sch-body button.sch-gate__act--absent  { background: var(--sch-danger-soft); color: var(--sch-danger); }
+.sch-body button.sch-gate__act--excused { background: var(--sch-accent-soft); color: var(--sch-accent-ink); }
+.sch-body button.sch-gate__act--absent:hover  { border-color: var(--sch-danger); }
+.sch-body button.sch-gate__act--excused:hover { border-color: var(--sch-accent); }
+
+.sch-gate__list.is-cards {
+    background: none; box-shadow: none; overflow: visible;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(252px, 1fr)); gap: var(--sch-3);
+}
+.sch-gate__list.is-cards .sch-gate__row {
+    position: relative; overflow: hidden; align-content: start;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "av id" "meta meta" "acts acts";
+    background: var(--sch-surface); border: 0; border-radius: var(--sch-radius-lg);
+    box-shadow: var(--sch-e1); padding: var(--sch-3);
+}
+.sch-gate__list.is-cards .sch-gate__row::before {
+    content: ""; position: absolute; inset-block: 0; inset-inline-end: 0;
+    width: 3px; background: var(--gate-tone);
+}
+.sch-gate__list.is-cards .sch-gate__av { width: 38px; height: 38px; border-radius: 12px; }
+.sch-gate__list.is-cards .sch-gate__meta {
+    flex-direction: row; justify-content: space-between;
+    padding-top: var(--sch-3); border-top: 1px solid var(--sch-line);
+}
+.sch-gate__list.is-cards .sch-gate__acts { display: flex; }
+
+/* ── اللوح الحيّ — قشرة داكنة في الوضعين ── */
+.sch-gate__live {
+    width: 334px; flex: 0 0 auto; min-width: 300px; align-self: flex-start;
+    position: sticky; top: var(--sch-4);
+    background: var(--sch-chrome-2); color: var(--sch-chrome-ink);
+    border-radius: var(--sch-r-xl); box-shadow: var(--sch-e3);
+    padding: var(--sch-4); display: flex; flex-direction: column; gap: var(--sch-4);
+}
+.sch-gate__lh { display: flex; align-items: center; justify-content: space-between; gap: var(--sch-2); }
+.sch-gate__lht { display: flex; align-items: center; gap: var(--sch-2); }
+.sch-gate__lht b { font-size: var(--sch-text-base); font-weight: var(--sch-w-bold); }
+.sch-gate__clock { font-size: var(--sch-text-sm); font-weight: var(--sch-w-medium); color: var(--sch-chrome-mut); }
+.sch-gate__last {
+    position: relative; overflow: hidden;
+    border-radius: var(--sch-radius-lg); border: 1px solid var(--sch-nav-line);
+    background: var(--sch-chrome); padding: var(--sch-4);
+    display: flex; flex-direction: column; gap: var(--sch-2);
+}
+.sch-gate__sweep {
+    position: absolute; inset: 0; pointer-events: none; opacity: .16;
+    background: linear-gradient(transparent, var(--sch-success), transparent);
+    animation: sch-gate-sweep 2.6s linear infinite;
+}
+.sch-gate__cap { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); }
+.sch-gate__lname { font-size: var(--sch-text-lg); font-weight: var(--sch-w-bold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sch-gate__lrow { display: flex; align-items: center; gap: var(--sch-2); }
+.sch-gate__lt { font-size: var(--sch-text-xl); font-weight: var(--sch-w-medium); color: var(--sch-success); }
+.sch-gate__lmeta { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); }
+.sch-gate__feedw { display: flex; flex-direction: column; gap: var(--sch-2); flex: 1 1 auto; min-height: 180px; }
+.sch-gate__feed { display: flex; flex-direction: column; gap: var(--sch-1); }
+.sch-gate__ev {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-2) var(--sch-3); border-radius: 11px; background: var(--sch-nav-hover);
+}
+.sch-gate__evn { flex: 1 1 auto; min-width: 0; font-size: var(--sch-text-sm); font-weight: var(--sch-w-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sch-gate__evl { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); white-space: nowrap; }
+.sch-gate__evt { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); }
+.sch-gate__none { padding: var(--sch-4) 0; text-align: center; font-size: var(--sch-text-sm); color: var(--sch-chrome-mut); }
+.sch-gate__foot { border-top: 1px solid var(--sch-nav-line); padding-top: var(--sch-3); display: flex; flex-direction: column; gap: var(--sch-3); }
+.sch-gate__pend { display: flex; align-items: center; justify-content: space-between; font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); }
+.sch-gate__pend b { font-size: var(--sch-text-lg); font-weight: var(--sch-w-medium); color: var(--sch-chrome-ink); }
+.sch-body button.sch-gate__close {
+    width: 100%; min-height: 46px; padding: var(--sch-3);
+    border: 1px solid var(--sch-chrome-ink); border-radius: var(--sch-radius-lg);
+    background: var(--sch-chrome-ink); color: var(--sch-chrome);
+    font-family: inherit; font-size: var(--sch-text-sm); font-weight: var(--sch-w-bold); cursor: pointer;
+}
+.sch-body button.sch-gate__close[disabled] { opacity: .45; cursor: not-allowed; }
+.sch-gate__hint { font-size: var(--sch-text-xs); color: var(--sch-chrome-mut); line-height: var(--sch-lh-read); text-wrap: pretty; }
+
+@keyframes sch-gate-beat { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes sch-gate-sweep { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+
+@media (max-width: 900px) {
+    .sch-gate__main { min-width: 0; }
+    .sch-gate__live { width: 100%; position: static; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sch-gate__pulse, .sch-gate__sweep { animation: none; }
+    .sch-gate__seg { transition: none; }
+}
