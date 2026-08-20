@@ -159,32 +159,73 @@ final class SCH_Students
      * @return array{items:array<int,object>,total:int}
      */
     /**
-     * عدد الطلاب في كل حالة — استعلام واحد لا أربعة.
+     * شرائح رأس الشاشة — الإجمالي ومن هو داخل المدرسة ومتأخر وغائب وبلا وليّ أمر.
      *
-     * شرائح الرأس بلا أرقام تُقرأ تسميات لا حالة مدرسة: «موقوف ٣» تدفع
-     * للضغط، و«موقوف» وحدها تُتجاوَز. والصفر يبقى معروضًا لأن غيابه يجعل
-     * الشريحة تظهر وتختفي بين زيارتين فتتغيّر خريطة الشاشة تحت اليد.
+     * **استعلام واحد بخمسة عدّادات** لا خمسة استعلامات: `SUM(شرط)` تعدّ داخل
+     * المسح نفسه. والشرائح ليست زينة — «بلا وليّ أمر ٣» هي الشريحة التي تُصلَح
+     * فعلًا، لأن الطالب بلا وليّ أمر مرتبط لا يصل عنه إشعارٌ واحد.
      *
-     * @return array<string,int>
+     * وهي تقرأ مصدرين عمدًا: العهدة تقول أين هو **الآن**، وكشف الحضور يقول
+     * ماذا سُجّل له **اليوم**.
+     *
+     * @return array{total:int,in:int,late:int,absent:int,nog:int}
      */
-    public static function status_counts(): array
+    public static function today_counts(): array
     {
         global $wpdb;
 
-        $out = ['active' => 0, 'transferred' => 0, 'withdrawn' => 0, 'graduated' => 0];
+        $row = $wpdb->get_row($wpdb->prepare(
+            'SELECT COUNT(*) AS total,
+                    SUM(s.custody_state = %s) AS n_in,
+                    SUM(EXISTS (SELECT 1 FROM ' . sch_table('attendance') . ' a
+                                 WHERE a.student_id = s.id AND a.att_date = %s AND a.status = %s)) AS n_late,
+                    SUM(EXISTS (SELECT 1 FROM ' . sch_table('attendance') . ' a2
+                                 WHERE a2.student_id = s.id AND a2.att_date = %s AND a2.status = %s)) AS n_absent,
+                    SUM(NOT EXISTS (SELECT 1 FROM ' . sch_table('guardian_student') . ' g
+                                     WHERE g.student_id = s.id)) AS n_nog
+             FROM ' . sch_table('students') . ' s
+             WHERE s.status = %s',
+            'in_school',
+            current_time('Y-m-d'),
+            'late',
+            current_time('Y-m-d'),
+            'absent',
+            'active'
+        ));
 
-        $rows = $wpdb->get_results(
-            'SELECT status, COUNT(*) AS n FROM ' . sch_table('students') . ' GROUP BY status'
-        ) ?: [];
+        return [
+            'total'  => (int) ($row->total ?? 0),
+            'in'     => (int) ($row->n_in ?? 0),
+            'late'   => (int) ($row->n_late ?? 0),
+            'absent' => (int) ($row->n_absent ?? 0),
+            'nog'    => (int) ($row->n_nog ?? 0),
+        ];
+    }
 
-        foreach ($rows as $row) {
-            $key = (string) $row->status;
-            if (isset($out[$key])) {
-                $out[$key] = (int) $row->n;
-            }
+    /**
+     * الحالة الآن لصفٍّ واحد — تُشتقّ من مصدرين ولا تُخزَّن.
+     *
+     * الترتيب مقصود: الغياب والتأخّر **قرارٌ مسجّل لليوم** فيسبق موضعَ الطفل
+     * الآن؛ وطفلٌ غائب رجع بعد الظهر لا يُقال عنه «داخل المدرسة» وكأن غيابه
+     * لم يقع.
+     *
+     * @return array{key:string,label:string}
+     */
+    public static function now_state(object $row): array
+    {
+        $att = (string) ($row->att_status ?? '');
+
+        if ($att === 'absent') {
+            return ['key' => 'absent', 'label' => __('غائب', 'school-system')];
+        }
+        if ($att === 'late') {
+            return ['key' => 'late', 'label' => __('متأخر', 'school-system')];
+        }
+        if ((string) ($row->custody_state ?? '') === 'in_school') {
+            return ['key' => 'in', 'label' => __('داخل المدرسة', 'school-system')];
         }
 
-        return $out;
+        return ['key' => 'out', 'label' => __('خارج المدرسة', 'school-system')];
     }
 
     public static function list(array $args = []): array
@@ -205,6 +246,25 @@ final class SCH_Students
         if (!empty($args['status'])) {
             $where[]  = 's.status = %s';
             $params[] = (string) $args['status'];
+        }
+
+        // ═══ الحالة الآن ═══
+        // شريحتان في شريط الأدوات: «داخل المدرسة» تقرأ سلسلة العهدة،
+        // و«غياب وتأخر» تقرأ كشف اليوم. وهما مصدران مختلفان عمدًا: العهدة
+        // تقول أين هو **الآن**، والكشف يقول ماذا سُجّل له **اليوم**.
+        $state_now = (string) ($args['state'] ?? '');
+
+        if ($state_now === 'in') {
+            $where[]  = 's.custody_state = %s';
+            $params[] = 'in_school';
+        } elseif ($state_now === 'flag') {
+            $where[]  = 'EXISTS (SELECT 1 FROM ' . sch_table('attendance') . " a2
+                                  WHERE a2.student_id = s.id AND a2.att_date = %s
+                                    AND a2.status IN ('late','absent'))";
+            $params[] = current_time('Y-m-d');
+        } elseif ($state_now === 'nog') {
+            $where[] = 'NOT EXISTS (SELECT 1 FROM ' . sch_table('guardian_student') . ' g3
+                                     WHERE g3.student_id = s.id)';
         }
 
         // العروض المحفوظة: شريحة واحدة تُغني عن خمسة حقول تصفية.
@@ -312,6 +372,7 @@ final class SCH_Students
             $gs = sch_table('guardian_student');
             $tb = sch_table('transport_subs');
             $rt = sch_table('routes');
+            $at = sch_table('attendance');
 
             $list_sql = "SELECT s.*,
                                 c.grade_level AS cls_grade, c.section AS cls_section, c.stage AS cls_stage,
@@ -330,7 +391,11 @@ final class SCH_Students
                                    FROM {$tb} t
                                    INNER JOIN {$rt} r ON r.id = t.route_id
                                   WHERE t.student_id = s.id AND t.status = 'active'
-                                  LIMIT 1) AS route_name
+                                  LIMIT 1) AS route_name,
+                                (SELECT a.status
+                                   FROM {$at} a
+                                  WHERE a.student_id = s.id AND a.att_date = %s
+                                  LIMIT 1) AS att_status
                            FROM {$table} s
                            LEFT JOIN {$en} e ON e.student_id = s.id AND e.status = 'active'
                            LEFT JOIN {$cl} c ON c.id = e.class_id
@@ -338,7 +403,13 @@ final class SCH_Students
                           ORDER BY {$order} LIMIT %d OFFSET %d";
         }
 
-        $items = $wpdb->get_results($wpdb->prepare($list_sql, ...[...$params, $per_page, $offset]));
+        // `%s` حالةِ اليوم في جملة SELECT فتسبق وسائط WHERE — والترتيب هو
+        // كلّ ما يفصل استعلامًا صحيحًا عن آخر يقرأ التاريخ اسمًا للطالب.
+        $list_args = empty($args['with']) && ($args['with'] ?? null) !== null
+            ? [...$params, $per_page, $offset]
+            : [current_time('Y-m-d'), ...$params, $per_page, $offset];
+
+        $items = $wpdb->get_results($wpdb->prepare($list_sql, ...$list_args));
 
         return ['items' => $items ?: [], 'total' => $total];
     }

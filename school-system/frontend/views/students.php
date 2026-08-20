@@ -4,6 +4,10 @@
  *
  * التسجيل نافذة تُفتح فوق القائمة لا شاشة تنقلك عنها: الموظف الذي يسجّل
  * طالبًا متأخرًا يريد العودة لمكانه، لا أن يبحث عن طريقه إليه.
+ *
+ * والشاشة تجيب سؤال الصباح قبل سؤال الأرشيف: **من داخل المدرسة الآن، ومن
+ * تأخّر أو غاب، ومن ليس له وليّ أمر مرتبط.** الشرائح تقول العدد وتفتحه،
+ * والصفّ يفتح لوحًا يجيب أكثر ما يُسأل عنه بلا مغادرة القائمة.
  */
 
 declare(strict_types=1);
@@ -11,6 +15,8 @@ defined('ABSPATH') || exit;
 
 $classes = SCH_Classes::list();
 $routes  = SCH_Routes::all();
+// نموذج التسجيل المشترك يقرأ هذا المتغيّر — وحذفه يترك حقل السجل الصحي
+// يُبنى على متغيّرٍ غير معرَّف.
 $can_health = current_user_can('sch_view_health');
 
 $q        = isset($_GET['s']) ? sanitize_text_field(wp_unslash((string) $_GET['s'])) : '';
@@ -18,24 +24,30 @@ $stage    = isset($_GET['stage']) ? sanitize_key(wp_unslash((string) $_GET['stag
 $grade    = isset($_GET['g']) ? sanitize_text_field(wp_unslash((string) $_GET['g'])) : '';
 $class_id = isset($_GET['class_id']) ? absint($_GET['class_id']) : 0;
 $view     = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : '';
+$state    = isset($_GET['now']) ? sanitize_key(wp_unslash((string) $_GET['now'])) : '';
 
-$sch_pick_status = isset($_GET['st']) ? sanitize_key(wp_unslash((string) $_GET['st'])) : 'active';
-if (!in_array($sch_pick_status, ['active', 'transferred', 'withdrawn', 'graduated'], true)) {
-    $sch_pick_status = 'active';
+if (!in_array($state, ['in', 'flag', 'nog'], true)) {
+    $state = '';
 }
+
+$per_page = 25;
 
 $list = SCH_Students::list([
     'search'      => $q,
-    'status'      => $sch_pick_status,
+    'status'      => 'active',
     'stage'       => $stage,
     'grade_level' => $grade,
     'class_id'    => $class_id,
     'view'        => $view,
-    'per_page'    => 25,
+    'state'       => $state,
+    'per_page'    => $per_page,
     'page'        => SCH_Table::page(),
 ] + SCH_Table::order_args());
 
-$total = (int) ($list['total'] ?? count($list['items']));
+$total  = (int) ($list['total'] ?? count($list['items']));
+$counts = SCH_Students::today_counts();
+$base   = SCH_Dashboard::url('students');
+$dirty  = ($q !== '' || $stage !== '' || $grade !== '' || $class_id > 0 || $view !== '' || $state !== '');
 
 // الصفوف المتاحة داخل المرحلة المختارة — لا نعرض صفوفًا لا طلاب فيها.
 $grades = [];
@@ -45,20 +57,45 @@ foreach ($classes as $c) {
     }
 }
 ksort($grades);
+
+// شرائح الرأس: الإجمالي وثلاثة أسئلةٍ تُفتح بالضغط. و«بلا وليّ أمر» أهمّها —
+// طالبٌ بلا حساب مرتبط لا يصل عنه إشعارٌ واحد، وهي الشريحة التي تُصلَح فعلًا.
+$sch_chips = [
+    ['key' => '',     'label' => __('إجمالي', 'school-system'),       'n' => $counts['total'], 'tone' => 'all'],
+    ['key' => 'in',   'label' => __('داخل المدرسة', 'school-system'), 'n' => $counts['in'],    'tone' => 'in'],
+    ['key' => 'flag', 'label' => __('غياب وتأخّر', 'school-system'),  'n' => $counts['late'] + $counts['absent'], 'tone' => 'flag'],
+    ['key' => 'nog',  'label' => __('بلا وليّ أمر', 'school-system'), 'n' => $counts['nog'],   'tone' => 'nog'],
+];
+
+/** رابط الشاشة مع تغيير معامل واحد وإسقاط الترقيم واللوح. */
+$sch_link = static function (array $changes) use ($base): string {
+    $args = $_GET;
+    unset($args['sch_dash'], $args['sch_section'], $args['sch_id'], $args['paged'], $args['open']);
+
+    foreach ($changes as $k => $v) {
+        if ($v === '' || $v === 0) {
+            unset($args[$k]);
+        } else {
+            $args[$k] = (string) $v;
+        }
+    }
+
+    return add_query_arg(array_map('sanitize_text_field', array_map('strval', $args)), $base);
+};
+
+// سهم الفرز على الاسم — الرأس زرٌّ لا خليّة جدول، فيُبنى هنا.
+$sch_ob   = isset($_GET['orderby']) ? sanitize_key(wp_unslash((string) $_GET['orderby'])) : '';
+$sch_dir  = (isset($_GET['order']) && strtoupper((string) $_GET['order']) === 'DESC') ? 'DESC' : 'ASC';
+$sch_on   = ($sch_ob === 'name');
+$sch_next = ($sch_on && $sch_dir === 'ASC') ? 'DESC' : 'ASC';
 ?>
 
 <?php
-// صفّ واحد: العنوان · منسدلة العروض · التصدير · الاستيراد · الفعل الأساسي.
-// كانت ثلاثة أسطر تدفع الجدول تحت الطيّة.
 $sch_tools = SCH_Views::menu('students', $view)
     . '<a class="sch-btn sch-btn--quiet sch-noprint" href="' . esc_url(add_query_arg('sch_export', 'csv')) . '">'
-    . sch_icon('upload', 15)
-    . esc_html__('تصدير CSV', 'school-system')
-    . '</a>'
+    . sch_icon('upload', 15) . esc_html__('تصدير CSV', 'school-system') . '</a>'
     . '<a class="sch-btn sch-btn--quiet sch-noprint" href="' . esc_url(SCH_Dashboard::url('import')) . '">'
-    . sch_icon('download', 15)
-    . esc_html__('استيراد', 'school-system')
-    . '</a>';
+    . sch_icon('download', 15) . esc_html__('استيراد', 'school-system') . '</a>';
 
 SCH_Modal::head(
     __('الطلاب', 'school-system'),
@@ -68,233 +105,229 @@ SCH_Modal::head(
     'plus',
     $sch_tools
 );
-
-// ═══ شرائح الحالة ═══
-// «٥ طالبًا نشطًا» جملةٌ تُقرأ ولا يُضغط عليها. والشرائح تقول العدد وتصفّي
-// به معًا — والصفر يبقى معروضًا فلا تتغيّر خريطة الشاشة بين زيارتين.
-$sch_counts = SCH_Students::status_counts();
-$sch_status = isset($_GET['st']) ? sanitize_key(wp_unslash((string) $_GET['st'])) : 'active';
-
-if (!isset($sch_counts[$sch_status])) {
-    $sch_status = 'active';
-}
-
-$sch_slabels = [
-    'active'      => __('نشط', 'school-system'),
-    'transferred' => __('منقول', 'school-system'),
-    'withdrawn'   => __('منسحب', 'school-system'),
-    'graduated'   => __('متخرّج', 'school-system'),
-];
 ?>
 
-<div class="sch-stu__chips" role="group" aria-label="<?php esc_attr_e('تصفية بحالة القيد', 'school-system'); ?>">
-    <?php foreach ($sch_slabels as $sch_k => $sch_l) : ?>
-        <a class="sch-stu__chip sch-stu__chip--<?php echo esc_attr($sch_k); ?><?php echo $sch_status === $sch_k ? ' is-on' : ''; ?>"
-           href="<?php echo esc_url(add_query_arg('st', $sch_k, SCH_Dashboard::url('students'))); ?>"
-           aria-current="<?php echo $sch_status === $sch_k ? 'true' : 'false'; ?>">
+<div class="sch-stu__chips">
+    <?php foreach ($sch_chips as $sch_i => $sch_c) : ?>
+        <a class="sch-stu__chip sch-stu__chip--<?php echo esc_attr($sch_c['tone']); ?><?php echo $state === $sch_c['key'] ? ' is-on' : ''; ?>"
+           href="<?php echo esc_url($sch_link(['now' => $sch_c['key']])); ?>"
+           aria-current="<?php echo $state === $sch_c['key'] ? 'true' : 'false'; ?>">
             <span class="sch-stu__dot" aria-hidden="true"></span>
-            <span><?php echo esc_html($sch_l); ?></span>
-            <b><?php echo esc_html(number_format_i18n($sch_counts[$sch_k])); ?></b>
+            <span class="sch-stu__cl"><?php echo esc_html($sch_c['label']); ?></span>
+            <b><?php echo esc_html(number_format_i18n($sch_c['n'])); ?></b>
         </a>
+        <?php if ($sch_i < count($sch_chips) - 1) : ?>
+            <span class="sch-stu__csep" aria-hidden="true"></span>
+        <?php endif; ?>
     <?php endforeach; ?>
 </div>
 
-<!-- المرشّحات في بطاقة واحدة: يبحث الموظف بما يعرفه لا بما نرتّبه له -->
-<form method="get" class="sch-card sch-filters">
+<!-- شريط أدوات واحد: بحثٌ وثلاث قوائم — لا بطاقة تصفية بارتفاع نصف شاشة -->
+<form method="get" class="sch-stu__bar" id="sch-stu-filters">
     <input type="hidden" name="sch_section" value="students">
-    <?php /* الشريحة تُحمَل مع التصفية: من صفّى «المنسحبين» ثم بحث باسم لا
-             يُعاد إلى «النشطين» بلا أن يطلب. */ ?>
-    <input type="hidden" name="st" value="<?php echo esc_attr($sch_status); ?>">
+    <?php if ($state !== '') : ?>
+        <input type="hidden" name="now" value="<?php echo esc_attr($state); ?>">
+    <?php endif; ?>
 
-    <div class="sch-filters__row">
-        <div class="sch-field sch-field--grow">
-            <label for="f-s"><?php esc_html_e('بحث', 'school-system'); ?></label>
-            <input id="f-s" type="search" name="s" value="<?php echo esc_attr($q); ?>"
-                   placeholder="<?php esc_attr_e('الاسم أو الرقم الأكاديمي أو رقم الهوية', 'school-system'); ?>">
-        </div>
+    <div class="sch-stu__find">
+        <label class="sch-sr" for="f-s"><?php esc_html_e('بحث', 'school-system'); ?></label>
+        <input id="f-s" type="search" name="s" value="<?php echo esc_attr($q); ?>"
+               placeholder="<?php esc_attr_e('الاسم أو الرقم الأكاديمي أو رقم الهوية', 'school-system'); ?>">
+        <span class="sch-stu__findic" aria-hidden="true"><?php echo sch_icon('search', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+    </div>
 
-        <div class="sch-field">
-            <label for="f-stage"><?php esc_html_e('المرحلة', 'school-system'); ?></label>
-            <select id="f-stage" name="stage">
-                <option value=""><?php esc_html_e('كل المراحل', 'school-system'); ?></option>
-                <?php foreach (SCH_Classes::STAGES as $sch_slug => $sch_label) : ?>
-                    <option value="<?php echo esc_attr($sch_slug); ?>" <?php selected($stage, $sch_slug); ?>>
-                        <?php echo esc_html($sch_label); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+    <label class="sch-sr" for="f-stage"><?php esc_html_e('المرحلة', 'school-system'); ?></label>
+    <select id="f-stage" name="stage" data-go>
+        <option value=""><?php esc_html_e('كل المراحل', 'school-system'); ?></option>
+        <?php foreach (SCH_Classes::STAGES as $sch_slug => $sch_label) : ?>
+            <option value="<?php echo esc_attr($sch_slug); ?>" <?php selected($stage, $sch_slug); ?>>
+                <?php echo esc_html($sch_label); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
 
-        <div class="sch-field">
-            <label for="f-g"><?php esc_html_e('الصف', 'school-system'); ?></label>
-            <select id="f-g" name="g">
-                <option value=""><?php esc_html_e('كل الصفوف', 'school-system'); ?></option>
-                <?php foreach ($grades as $sch_g) : ?>
-                    <option value="<?php echo esc_attr($sch_g); ?>" <?php selected($grade, $sch_g); ?>>
-                        <?php echo esc_html($sch_g); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+    <label class="sch-sr" for="f-g"><?php esc_html_e('الصف', 'school-system'); ?></label>
+    <select id="f-g" name="g" data-go>
+        <option value=""><?php esc_html_e('كل الصفوف', 'school-system'); ?></option>
+        <?php foreach ($grades as $sch_g) : ?>
+            <option value="<?php echo esc_attr($sch_g); ?>" <?php selected($grade, $sch_g); ?>>
+                <?php echo esc_html($sch_g); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
 
-        <div class="sch-field">
-            <label for="f-c"><?php esc_html_e('الشعبة', 'school-system'); ?></label>
-            <select id="f-c" name="class_id">
-                <option value=""><?php esc_html_e('كل الشعب', 'school-system'); ?></option>
-                <?php foreach ($classes as $c) : ?>
-                    <?php if ($stage === '' || $c->stage === $stage) : ?>
-                        <option value="<?php echo esc_attr((string) $c->id); ?>" <?php selected($class_id, (int) $c->id); ?>>
-                            <?php echo esc_html(SCH_Classes::label($c)); ?>
-                        </option>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </select>
-        </div>
+    <label class="sch-sr" for="f-c"><?php esc_html_e('الشعبة', 'school-system'); ?></label>
+    <select id="f-c" name="class_id" data-go>
+        <option value=""><?php esc_html_e('كل الشعب', 'school-system'); ?></option>
+        <?php foreach ($classes as $c) : ?>
+            <?php if ($stage === '' || $c->stage === $stage) : ?>
+                <option value="<?php echo esc_attr((string) $c->id); ?>" <?php selected($class_id, (int) $c->id); ?>>
+                    <?php echo esc_html(SCH_Classes::label($c)); ?>
+                </option>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </select>
 
-        <div class="sch-filters__acts">
-            <button class="sch-btn"><?php esc_html_e('تصفية', 'school-system'); ?></button>
-            <?php if ($q !== '' || $stage !== '' || $grade !== '' || $class_id > 0 || $view !== '') : ?>
-                <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>">
-                    <?php esc_html_e('مسح', 'school-system'); ?>
+    <button class="sch-btn sch-btn--quiet sch-stu__go"><?php esc_html_e('تصفية', 'school-system'); ?></button>
+
+    <?php if ($dirty) : ?>
+        <a class="sch-stu__clear" href="<?php echo esc_url($base); ?>"><?php esc_html_e('إزالة التصفية', 'school-system'); ?></a>
+    <?php endif; ?>
+</form>
+
+<div class="sch-stu__wrap">
+    <?php /* شريط التحديد والأفعال — المحرّك الجماعي نفسه (`SCH_Bulk`) في
+             موضعه من التصميم: داخل رأس البطاقة لا شريطًا طافيًا فوق الشاشة. */ ?>
+    <div class="sch-stu__pick sch-noprint">
+        <label class="sch-stu__all">
+            <?php SCH_Bulk::pick_all(); ?>
+            <span><?php esc_html_e('تحديد الكل', 'school-system'); ?></span>
+        </label>
+        <span class="sch-stu__hint"><?php esc_html_e('اضغط صفًّا لعرض ملف الطالب · Shift للتحديد المتّصل', 'school-system'); ?></span>
+        <?php SCH_Bulk::bar('students'); ?>
+    </div>
+
+    <div class="sch-stu__scroll">
+        <div class="sch-stu__grid">
+            <div class="sch-stu__row sch-stu__row--head">
+                <span></span>
+                <a class="sch-stu__sort<?php echo $sch_on ? ' is-on' : ''; ?>"
+                   href="<?php echo esc_url($sch_link(['orderby' => 'name', 'order' => $sch_next])); ?>">
+                    <?php esc_html_e('الطالب', 'school-system'); ?>
+                    <span aria-hidden="true"><?php echo esc_html($sch_on ? ($sch_dir === 'ASC' ? '▲' : '▼') : '⇅'); ?></span>
                 </a>
+                <span class="sch-stu__th"><?php esc_html_e('الشعبة', 'school-system'); ?></span>
+                <span class="sch-stu__th"><?php esc_html_e('ولي الأمر', 'school-system'); ?></span>
+                <span class="sch-stu__th"><?php esc_html_e('النقل', 'school-system'); ?></span>
+                <span class="sch-stu__th"><?php esc_html_e('الحالة الآن', 'school-system'); ?></span>
+                <span class="sch-stu__th"><?php esc_html_e('إجراء', 'school-system'); ?></span>
+            </div>
+
+            <?php foreach ($list['items'] as $st) :
+                $sch_id   = (int) $st->id;
+                $sch_name = SCH_Enrollment::full_name($st);
+                $sch_now  = SCH_Students::now_state($st);
+                ?>
+                <div class="sch-stu__row<?php echo $sch_now['key'] === 'absent' ? ' is-absent' : ''; ?>" data-row>
+                    <span class="sch-stu__cb"><?php SCH_Bulk::pick($sch_id); ?></span>
+
+                    <span class="sch-stu__who">
+                        <span class="sch-stu__av" aria-hidden="true"><?php echo esc_html(mb_substr(trim($sch_name), 0, 1)); ?></span>
+                        <span class="sch-stu__whot">
+                            <a class="sch-stu__name" href="<?php echo esc_url(add_query_arg('open', $sch_id)); ?>">
+                                <?php echo esc_html($sch_name); ?>
+                            </a>
+                            <span class="sch-stu__no sch-mono" dir="ltr"><?php echo esc_html((string) $st->academic_no); ?></span>
+                        </span>
+                    </span>
+
+                    <span class="sch-stu__sec"><?php echo esc_html($st->cls_grade
+                        ? trim((string) $st->cls_grade . ' / ' . (string) $st->cls_section)
+                        : '—'); ?></span>
+
+                    <span class="sch-stu__g">
+                        <?php if ((string) ($st->guardian_name ?? '') !== '') : ?>
+                            <b><?php echo esc_html((string) $st->guardian_name); ?></b>
+                            <?php if ((string) ($st->guardian_phone ?? '') !== '') : ?>
+                                <em class="sch-mono" dir="ltr"><?php echo esc_html((string) $st->guardian_phone); ?></em>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            <?php /* «—» تقول «لا بيانات»، والحقيقة أخطر: بلا وليّ أمر
+                                     مرتبط لا يصل إشعارٌ واحد عن هذا الطالب. */ ?>
+                            <a class="sch-stu__link" href="<?php echo esc_url(SCH_Dashboard::url('guardians')); ?>">
+                                <?php esc_html_e('ربط وليّ أمر', 'school-system'); ?>
+                            </a>
+                        <?php endif; ?>
+                    </span>
+
+                    <span class="sch-stu__bus<?php echo (string) ($st->route_name ?? '') === '' ? ' is-off' : ''; ?>">
+                        <?php echo esc_html((string) ($st->route_name ?? '') ?: '—'); ?>
+                    </span>
+
+                    <span class="sch-stu__now sch-stu__now--<?php echo esc_attr($sch_now['key']); ?>">
+                        <span class="sch-stu__nowd" aria-hidden="true"></span>
+                        <span><?php echo esc_html($sch_now['label']); ?></span>
+                    </span>
+
+                    <span class="sch-stu__acts">
+                        <a href="<?php echo esc_url(SCH_Dashboard::url('badges')); ?>"
+                           title="<?php esc_attr_e('بطاقة الطالب', 'school-system'); ?>"
+                           aria-label="<?php esc_attr_e('بطاقة الطالب', 'school-system'); ?>">
+                            <?php echo sch_icon('badge', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                        </a>
+                        <a href="<?php echo esc_url(add_query_arg('student', $sch_id, SCH_Dashboard::url('certificates'))); ?>"
+                           title="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>"
+                           aria-label="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>">
+                            <?php echo sch_icon('award', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                        </a>
+                        <a href="<?php echo esc_url(SCH_Dashboard::url('students', $sch_id)); ?>"
+                           title="<?php esc_attr_e('ملف الطالب', 'school-system'); ?>"
+                           aria-label="<?php esc_attr_e('ملف الطالب', 'school-system'); ?>">
+                            <?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                        </a>
+                    </span>
+                </div>
+            <?php endforeach; ?>
+
+            <?php if ($list['items'] === []) : ?>
+                <div class="sch-stu__empty">
+                    <strong><?php echo esc_html($dirty
+                        ? __('لا طلاب مطابقين', 'school-system')
+                        : __('لا طلاب بعد', 'school-system')); ?></strong>
+                    <span><?php echo esc_html($dirty
+                        ? __('جرّب اسمًا آخر أو أزل التصفية.', 'school-system')
+                        : __('سجّل أول طالب لتبدأ.', 'school-system')); ?></span>
+                    <?php if ($dirty) : ?>
+                        <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url($base); ?>">
+                            <?php esc_html_e('إزالة التصفية', 'school-system'); ?>
+                        </a>
+                    <?php elseif ($classes !== []) : ?>
+                        <button type="button" class="sch-btn" data-modal-open="sch-enroll">
+                            <?php esc_html_e('سجّل أول طالب', 'school-system'); ?>
+                        </button>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
-</form>
 
-<?php if ($list['items'] === []) : ?>
-    <div class="sch-blank">
-        <span class="sch-blank__ic"><?php echo sch_icon('users', 26); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <strong><?php esc_html_e('لا طلاب هنا', 'school-system'); ?></strong>
-        <?php $sch_filtered = ($q !== '' || $stage !== '' || $grade !== '' || $class_id > 0); ?>
-        <p><?php echo esc_html($sch_filtered
-            ? __('لا نتائج تطابق التصفية. جرّب مسحها.', 'school-system')
-            : __('سجّل أول طالب لتبدأ.', 'school-system')); ?></p>
-        <?php /* حالة فارغة تقول «افعل» تحتاج ما يُضغط — والفاتح معرَّف في هذا الملف */ ?>
-        <?php if ($sch_filtered) : ?>
-            <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(SCH_Dashboard::url('students')); ?>">
-                <?php esc_html_e('مسح التصفية', 'school-system'); ?>
-            </a>
-        <?php elseif ($classes !== []) : ?>
-            <button type="button" class="sch-btn" data-modal-open="sch-enroll">
-                <?php esc_html_e('سجّل أول طالب', 'school-system'); ?>
-            </button>
+    <?php
+    $sch_pages = max(1, (int) ceil($total / $per_page));
+    $sch_page  = min(max(1, SCH_Table::page()), $sch_pages);
+    $sch_from  = $total === 0 ? 0 : (($sch_page - 1) * $per_page) + 1;
+    $sch_to    = min($total, $sch_page * $per_page);
+    ?>
+    <div class="sch-stu__foot">
+        <span class="sch-stu__range"><?php echo esc_html($total > 0 ? sprintf(
+            /* translators: 1: من 2: إلى 3: المجموع */
+            __('عرض %1$s–%2$s من %3$s طالبًا', 'school-system'),
+            number_format_i18n($sch_from),
+            number_format_i18n($sch_to),
+            number_format_i18n($total)
+        ) : __('لا صفوف', 'school-system')); ?></span>
+
+        <?php if ($sch_pages > 1) : ?>
+            <div class="sch-stu__pages">
+                <a class="sch-stu__page sch-stu__page--arrow<?php echo $sch_page <= 1 ? ' is-off' : ''; ?>"
+                   href="<?php echo esc_url($sch_link(['paged' => max(1, $sch_page - 1)])); ?>"
+                   aria-label="<?php esc_attr_e('الصفحة السابقة', 'school-system'); ?>">›</a>
+                <?php for ($sch_p = 1; $sch_p <= $sch_pages; $sch_p++) : ?>
+                    <a class="sch-stu__page<?php echo $sch_p === $sch_page ? ' is-on' : ''; ?>"
+                       href="<?php echo esc_url($sch_link(['paged' => $sch_p])); ?>"><?php echo esc_html(number_format_i18n($sch_p)); ?></a>
+                <?php endfor; ?>
+                <a class="sch-stu__page sch-stu__page--arrow<?php echo $sch_page >= $sch_pages ? ' is-off' : ''; ?>"
+                   href="<?php echo esc_url($sch_link(['paged' => min($sch_pages, $sch_page + 1)])); ?>"
+                   aria-label="<?php esc_attr_e('الصفحة التالية', 'school-system'); ?>">‹</a>
+            </div>
         <?php endif; ?>
     </div>
-<?php else : ?>
-    <?php /* كانت بطاقةً كاملة بارتفاع ١٣٠ بكسل لسطرٍ واحد — تدفع الجدول
-             تحت الطيّة مقابل جملةٍ تُقرأ مرة. صارت شريطًا فوق الجدول داخل
-             البطاقة نفسها. */ ?>
-    <div class="sch-stu__wrap">
-        <div class="sch-stu__pick sch-noprint">
-            <label class="sch-stu__all">
-                <?php SCH_Bulk::pick_all(); ?>
-                <span><?php esc_html_e('تحديد الكل', 'school-system'); ?></span>
-            </label>
-            <span class="sch-stu__hint"><?php esc_html_e('اضغط صفًّا لفتح ملف الطالب · Shift للتحديد المتّصل', 'school-system'); ?></span>
-        </div>
-
-    <div class="sch-table-wrap">
-        <table class="sch-table">
-            <thead><tr>
-                <th class="sch-th-pick"><?php SCH_Bulk::pick_all(); ?></th>
-                <?php echo SCH_Table::th(__('الطالب', 'school-system'), 'name'); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                <?php echo SCH_Table::th(__('الشعبة', 'school-system'), 'grade'); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                <th class="sch-col--lg"><?php esc_html_e('ولي الأمر', 'school-system'); ?></th>
-                <th class="sch-col--xl"><?php esc_html_e('النقل', 'school-system'); ?></th>
-                <th><?php esc_html_e('الحالة الآن', 'school-system'); ?></th>
-                <th></th>
-            </tr></thead>
-
-            <tbody>
-                <?php foreach ($list['items'] as $st) : ?>
-                    <tr data-row>
-                        <td class="sch-th-pick"><?php SCH_Bulk::pick((int) $st->id); ?></td>
-
-                        <td class="sch-name">
-                            <?php /* الحرف الأول يسبق الاسم: العين تمسك موضع الصفّ
-                                     بلونٍ وشكل قبل أن تقرأ أربع كلمات متشابهة. */ ?>
-                            <span class="sch-stu__who">
-                                <span class="sch-stu__av" aria-hidden="true"><?php
-                                    echo esc_html(mb_substr(trim(SCH_Enrollment::full_name($st)), 0, 1));
-                                ?></span>
-                                <span class="sch-stu__whot">
-                                    <?php /* الاسم يفتح اللوح لا الشاشة الكاملة: أكثر
-                                             ما يُسأل عنه (وليّ الأمر · الرسوم · الحضور)
-                                             يُجاب على مكانه، والملف الكامل بزرٍّ فيه. */ ?>
-                                    <a href="<?php echo esc_url(add_query_arg('open', (int) $st->id)); ?>">
-                                        <?php echo esc_html(SCH_Enrollment::full_name($st)); ?>
-                                    </a>
-                                    <span class="sch-sub sch-block sch-mono"><?php echo esc_html((string) $st->academic_no); ?></span>
-                                </span>
-                            </span>
-                        </td>
-
-                        <td>
-                            <?php echo esc_html($st->cls_grade
-                                ? trim((string) $st->cls_grade . ' / ' . (string) $st->cls_section)
-                                : '—'); ?>
-                        </td>
-
-                        <td class="sch-col--lg">
-                            <?php if ((string) ($st->guardian_name ?? '') !== '') : ?>
-                                <span class="sch-stu__g">
-                                    <b><?php echo esc_html((string) $st->guardian_name); ?></b>
-                                    <?php if ((string) ($st->guardian_phone ?? '') !== '') : ?>
-                                        <em class="sch-mono" dir="ltr"><?php echo esc_html((string) $st->guardian_phone); ?></em>
-                                    <?php endif; ?>
-                                </span>
-                            <?php else : ?>
-                                <?php /* «—» تقول «لا بيانات»، والحقيقة أخطر: بلا وليّ أمر
-                                         مرتبط لا يصل إشعارٌ واحد عن هذا الطالب. */ ?>
-                                <a class="sch-stu__link" href="<?php echo esc_url(SCH_Dashboard::url('guardians')); ?>">
-                                    <?php esc_html_e('اربط وليَّ أمر', 'school-system'); ?>
-                                </a>
-                            <?php endif; ?>
-                        </td>
-
-                        <td class="sch-col--xl"><?php echo esc_html((string) ($st->route_name ?: '—')); ?></td>
-
-                        <td>
-                            <span class="sch-badge sch-badge--muted">
-                                <?php echo esc_html(SCH_Custody::state_label((string) $st->custody_state)); ?>
-                            </span>
-                        </td>
-
-                        <td>
-                            <div class="sch-rowacts">
-                                <a href="<?php echo esc_url(SCH_Dashboard::url('students', (int) $st->id)); ?>"
-                                   title="<?php esc_attr_e('الملف', 'school-system'); ?>"
-                                   aria-label="<?php esc_attr_e('الملف', 'school-system'); ?>">
-                                    <?php echo sch_icon('badge', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                </a>
-                                <a href="<?php echo esc_url(SCH_Dashboard::url('badges')); ?>"
-                                   title="<?php esc_attr_e('البطاقة', 'school-system'); ?>"
-                                   aria-label="<?php esc_attr_e('البطاقة', 'school-system'); ?>">
-                                    <?php echo sch_icon('print', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                </a>
-                                <a href="<?php echo esc_url(add_query_arg('student', (int) $st->id, SCH_Dashboard::url('certificates'))); ?>"
-                                   title="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>"
-                                   aria-label="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>">
-                                    <?php echo sch_icon('award', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    </div>
-
-    <?php echo SCH_Table::pager($total, 25); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-<?php endif; ?>
+</div>
 
 <?php
 // ═══ لوح ملف الطالب ═══
-// الصفّ يفتح ملفًّا كاملًا في شاشةٍ أخرى، فالموظف الذي يريد رقم وليّ الأمر
-// وحده يخرج من قائمته ثم يعود إليها. واللوح يجيب أكثر الأسئلة على مكانه،
-// والملف الكامل يبقى بزرٍّ فيه.
+// الصفّ كان يفتح ملفًّا كاملًا في شاشةٍ أخرى، فالموظف الذي يريد رقم وليّ
+// الأمر وحده يخرج من قائمته ثم يعود إليها. واللوح يجيب أكثر الأسئلة على
+// مكانه، والملف الكامل يبقى بزرٍّ فيه.
 //
 // ومن الخادم لا من المتصفّح: نصاب الحضور والرسوم وآخر الأحداث استعلاماتٌ
 // لكل طالب، ولا يُدفع ثمنها إلا حين يُفتح اللوح على واحدٍ بعينه.
@@ -314,6 +347,7 @@ if ($sch_one) :
 
     $sch_events = SCH_Enrollment::timeline($sch_open, 5);
     $sch_klass  = SCH_Students::current_class($sch_open);
+    $sch_dnow   = SCH_Students::now_state($sch_one);
     ?>
 <div class="sch-stu__veil">
     <a class="sch-stu__veilx" href="<?php echo esc_url(remove_query_arg('open')); ?>"
@@ -327,7 +361,10 @@ if ($sch_one) :
                 <span>
                     <em class="sch-mono" dir="ltr"><?php echo esc_html((string) $sch_one->academic_no); ?></em>
                     <em><?php echo esc_html($sch_klass ? SCH_Classes::label($sch_klass) : __('بلا شعبة', 'school-system')); ?></em>
-                    <em><?php echo esc_html(SCH_Custody::state_label((string) ($sch_one->custody_state ?? ''))); ?></em>
+                    <span class="sch-stu__now sch-stu__now--<?php echo esc_attr($sch_dnow['key']); ?>">
+                        <span class="sch-stu__nowd" aria-hidden="true"></span>
+                        <span><?php echo esc_html($sch_dnow['label']); ?></span>
+                    </span>
                 </span>
             </span>
             <a class="sch-stu__px" href="<?php echo esc_url(remove_query_arg('open')); ?>"
@@ -350,7 +387,7 @@ if ($sch_one) :
                 </span>
             </div>
 
-            <section class="sch-stu__sec">
+            <section class="sch-stu__sec2">
                 <h3><?php esc_html_e('ولي الأمر', 'school-system'); ?></h3>
                 <?php if ($sch_g1) : ?>
                     <div class="sch-stu__grow">
@@ -373,7 +410,7 @@ if ($sch_one) :
                 <?php endif; ?>
             </section>
 
-            <section class="sch-stu__sec">
+            <section class="sch-stu__sec2">
                 <h3><?php esc_html_e('آخر الأحداث', 'school-system'); ?></h3>
                 <?php if ($sch_events === []) : ?>
                     <p class="sch-sub"><?php esc_html_e('لا أحداث مسجّلة بعد.', 'school-system'); ?></p>
@@ -390,14 +427,14 @@ if ($sch_one) :
                 <?php endif; ?>
             </section>
 
-            <section class="sch-stu__sec">
+            <section class="sch-stu__sec2">
                 <h3><?php esc_html_e('بيانات التسجيل', 'school-system'); ?></h3>
                 <dl class="sch-stu__fields">
                     <?php
                     $sch_rows = [
-                        __('رقم الطالب', 'school-system')  => (string) ($sch_one->student_no ?? ''),
-                        __('رقم الهوية', 'school-system')  => (string) ($sch_one->national_id ?? ''),
-                        __('الجنسية', 'school-system')     => (string) ($sch_one->nationality ?? ''),
+                        __('رقم الطالب', 'school-system')    => (string) ($sch_one->student_no ?? ''),
+                        __('رقم الهوية', 'school-system')    => (string) ($sch_one->national_id ?? ''),
+                        __('الجنسية', 'school-system')       => (string) ($sch_one->nationality ?? ''),
                         __('تاريخ الميلاد', 'school-system') => (string) ($sch_one->birth_date ?? ''),
                     ];
                     foreach ($sch_rows as $sch_k => $sch_v) :
@@ -422,10 +459,24 @@ if ($sch_one) :
 </div>
 <?php endif; ?>
 
-<?php SCH_Bulk::bar('students'); ?>
-
 <?php if ($classes !== []) : ?>
     <?php SCH_Modal::open('sch-enroll', __('تسجيل طالب جديد', 'school-system'), __('أربع خطوات — والملف يُكمَل لاحقًا', 'school-system')); ?>
         <?php require SCH_PATH . 'frontend/views/partials/enroll-form.php'; ?>
     <?php SCH_Modal::close(); ?>
 <?php endif; ?>
+
+<script>
+/* القوائم تُصفّي عند الاختيار — وزرّ «تصفية» يبقى في الصفحة لمن لا
+   جافاسكربت عنده، ويُخفى هنا فلا يبدو زرًّا لا لزوم له. */
+(function () {
+  var form = document.getElementById('sch-stu-filters');
+  if (!form) { return; }
+
+  form.querySelectorAll('[data-go]').forEach(function (s) {
+    s.addEventListener('change', function () { form.submit(); });
+  });
+
+  var go = form.querySelector('.sch-stu__go');
+  if (go) { go.hidden = true; }
+})();
+</script>

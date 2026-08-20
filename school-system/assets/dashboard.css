@@ -5021,59 +5021,197 @@ body.sch-body {
 /* ═══════════════════════════════════════════════════════════════════
    شاشة الطلاب (`.sch-stu__*`)
    ───────────────────────────────────────────────────────────────────
-   القائمة تجيب على مكانها: شرائح الحالة تصفّي وتعدّ معًا، وعمود وليّ
-   الأمر يقول الرقم أو يقول إنه غير مرتبط، واللوح يفتح أكثر ما يُسأل
-   عنه بلا مغادرة الصفحة.
+   الصفوف شبكة لا جدول: خليّة «وليّ الأمر» تحمل اسمًا وجوالًا أو زرَّ ربط،
+   وخليّة «الحالة الآن» تحمل نقطةً وشريحة — و`<td>` بمحتوى مركّب يقاوم
+   المحاذاة بينما `grid-template-columns` تُبقي السبعة على خطٍّ واحد.
    ═══════════════════════════════════════════════════════════════════ */
 
+
+/* ── شرائح الرأس ── */
 .sch-stu__chips {
     display: flex; align-items: center; gap: var(--sch-2);
-    flex-wrap: wrap; margin-block-end: var(--sch-3);
+    flex-wrap: wrap; margin-block: calc(var(--sch-3) * -1) var(--sch-3);
 }
 .sch-body a.sch-stu__chip {
     display: flex; align-items: center; gap: var(--sch-2);
-    padding: var(--sch-2) var(--sch-3); min-height: 38px;
-    border: 1px solid var(--sch-line); border-radius: var(--sch-radius);
-    background: var(--sch-surface); color: var(--sch-ink-soft); text-decoration: none;
-    font-size: var(--sch-text-xs);
+    padding: var(--sch-1) var(--sch-2); min-height: 30px;
+    border-radius: var(--sch-r-sm); text-decoration: none;
+    color: var(--sch-muted); font-size: var(--sch-text-xs);
 }
-.sch-body a.sch-stu__chip:hover { border-color: var(--sch-line-strong); color: var(--sch-ink); }
-.sch-body a.sch-stu__chip.is-on {
-    background: var(--sch-surface-alt); border-color: var(--sch-line-strong);
-    color: var(--sch-ink); font-weight: var(--sch-w-medium);
+.sch-body a.sch-stu__chip:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+.sch-body a.sch-stu__chip.is-on { background: var(--sch-surface); box-shadow: var(--sch-e1); color: var(--sch-ink); }
+.sch-stu__chip b {
+    font-variant-numeric: tabular-nums; font-weight: var(--sch-w-bold); color: var(--sch-ink);
 }
-.sch-stu__chip b { font-variant-numeric: tabular-nums; font-weight: var(--sch-w-bold); }
-.sch-stu__dot { width: 7px; height: 7px; border-radius: var(--sch-r-full); flex: 0 0 auto; }
-.sch-stu__chip--active .sch-stu__dot { background: var(--sch-success); }
-.sch-stu__chip--transferred .sch-stu__dot { background: var(--sch-accent); }
-.sch-stu__chip--withdrawn .sch-stu__dot { background: var(--sch-danger); }
-.sch-stu__chip--graduated .sch-stu__dot { background: var(--sch-gold); }
+.sch-stu__csep { width: 1px; height: 11px; background: var(--sch-line); }
+.sch-stu__dot { width: 7px; height: 7px; border-radius: 2px; flex: 0 0 auto; }
+.sch-stu__chip--all  .sch-stu__dot { background: var(--sch-muted); }
+.sch-stu__chip--in   .sch-stu__dot { background: var(--sch-success); }
+.sch-stu__chip--flag .sch-stu__dot { background: var(--sch-danger); }
+.sch-stu__chip--nog  .sch-stu__dot { background: var(--sch-accent); }
 
+/* ── شريط الأدوات ── */
+.sch-stu__bar {
+    background: var(--sch-surface); border: 1px solid var(--sch-line);
+    border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+    padding: var(--sch-2) var(--sch-3);
+    display: flex; align-items: center; gap: var(--sch-2); flex-wrap: wrap;
+    margin-block-end: var(--sch-3);
+}
+.sch-stu__find { position: relative; flex: 1 1 230px; min-width: 230px; }
+.sch-stu__find input { width: 100%; padding-inline-end: 34px; }
+.sch-stu__findic {
+    position: absolute; inset-inline-end: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--sch-muted); pointer-events: none; display: flex;
+}
+.sch-stu__bar select { min-width: 118px; }
+.sch-body a.sch-stu__clear {
+    padding: var(--sch-2) var(--sch-3); border-radius: var(--sch-radius);
+    color: var(--sch-muted); font-size: var(--sch-text-xs); text-decoration: none;
+}
+.sch-body a.sch-stu__clear:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+
+/* ── البطاقة ── */
 .sch-stu__wrap {
     background: var(--sch-surface); border: 1px solid var(--sch-line);
     border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1); overflow: hidden;
 }
 .sch-stu__pick {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: var(--sch-3); padding: var(--sch-2) var(--sch-4); flex-wrap: wrap;
+    position: relative; min-height: 48px;
+    display: flex; align-items: center; gap: var(--sch-3); flex-wrap: wrap;
+    padding: var(--sch-2) var(--sch-4);
     background: var(--sch-surface-alt); border-block-end: 1px solid var(--sch-line);
 }
-.sch-stu__all { display: flex; align-items: center; gap: var(--sch-2); font-size: var(--sch-text-xs); cursor: pointer; }
+.sch-stu__all { display: flex; align-items: center; gap: var(--sch-2); font-size: var(--sch-text-sm); cursor: pointer; }
 .sch-stu__hint { font-size: var(--sch-text-xs); color: var(--sch-muted); }
 
+/* الشريط الجماعي المشترك يجلس هنا لا يطفو فوق الشاشة — والتصميم يضعه في
+   رأس البطاقة حيث التحديد نفسه، فلا تنتقل العين إلى أسفل الشاشة وتعود. */
+.sch-stu__pick .sch-bulk {
+    position: static; inset: auto; transform: none;
+    margin-inline-start: auto; box-shadow: none;
+}
+
+.sch-stu__scroll { overflow-x: auto; }
+.sch-stu__grid { min-width: 880px; }
+.sch-stu__row {
+    display: grid;
+    grid-template-columns: 30px minmax(190px, 1.45fr) 96px minmax(150px, 1.1fr) 118px 118px 96px;
+    align-items: center; gap: var(--sch-3);
+    padding: var(--sch-2) var(--sch-4); min-height: 54px;
+    border-block-end: 1px solid var(--sch-hair);
+}
+.sch-stu__row:hover { background: var(--sch-surface-alt); }
+.sch-stu__row--head {
+    min-height: 42px; background: var(--sch-surface-alt);
+    border-block-end: 1px solid var(--sch-line);
+}
+.sch-stu__row--head:hover { background: var(--sch-surface-alt); }
+.sch-stu__th { font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium); color: var(--sch-muted); }
+.sch-body a.sch-stu__sort {
+    display: flex; align-items: center; gap: var(--sch-1);
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium);
+    color: var(--sch-ink-soft); text-decoration: none;
+}
+.sch-body a.sch-stu__sort.is-on { color: var(--sch-ink); font-weight: var(--sch-w-bold); }
+.sch-stu__sort span { font-size: 9px; opacity: .8; }
+
+/* الغائب صفٌّ بحافةٍ لا بخلفيةٍ صارخة — الشريحة تحمل الإشارة أصلًا. */
+.sch-stu__row.is-absent { box-shadow: inset 3px 0 0 0 var(--sch-danger); }
+.sch-stu__row.is-picked { background: var(--sch-accent-soft); }
+
+.sch-stu__cb { display: flex; align-items: center; }
 .sch-stu__who { display: flex; align-items: center; gap: var(--sch-2); min-width: 0; }
 .sch-stu__av {
-    width: 30px; height: 30px; border-radius: var(--sch-r-sm); flex: 0 0 auto;
+    width: 32px; height: 32px; border-radius: var(--sch-r-sm); flex: 0 0 auto;
     display: flex; align-items: center; justify-content: center;
     background: var(--sch-surface-2); color: var(--sch-accent-ink);
     font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold);
 }
 .sch-stu__whot { display: flex; flex-direction: column; min-width: 0; }
+.sch-body a.sch-stu__name {
+    font-size: var(--sch-text-sm); font-weight: var(--sch-w-medium); color: var(--sch-ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none;
+}
+.sch-body a.sch-stu__name:hover { text-decoration: underline; }
+.sch-stu__no { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-stu__sec { font-size: var(--sch-text-xs); color: var(--sch-ink-soft); }
 
 .sch-stu__g { display: flex; flex-direction: column; min-width: 0; }
-.sch-stu__g b { font-weight: var(--sch-w-normal); color: var(--sch-ink); }
+.sch-stu__g b {
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-normal); color: var(--sch-ink-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .sch-stu__g em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
-.sch-body a.sch-stu__link { font-size: var(--sch-text-xs); color: var(--sch-danger); text-decoration: underline; }
+/* الحاضنة عمود مرن، فـ`justify-self` لا تعمل فيها — والزرّ كان يمتدّ
+   بعرض العمود كلّه فيبدو حقلًا فارغًا لا زرًّا. */
+.sch-body a.sch-stu__link {
+    align-self: flex-start; padding: 5px var(--sch-2);
+    border: 1px dashed var(--sch-line-strong); border-radius: var(--sch-r-sm);
+    background: var(--sch-surface); color: var(--sch-muted);
+    font-size: var(--sch-text-xs); text-decoration: none;
+}
+.sch-body a.sch-stu__link:hover { border-color: var(--sch-accent); color: var(--sch-accent-ink); }
+
+.sch-stu__bus {
+    font-size: var(--sch-text-xs); color: var(--sch-ink-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sch-stu__bus.is-off { color: var(--sch-line-strong); }
+
+.sch-stu__now {
+    display: inline-flex; align-items: center; gap: var(--sch-1);
+    justify-self: start; padding: 4px var(--sch-2);
+    border-radius: var(--sch-r-sm); font-size: var(--sch-text-xs);
+    font-weight: var(--sch-w-medium); white-space: nowrap;
+}
+.sch-stu__nowd { width: 6px; height: 6px; border-radius: var(--sch-r-full); flex: 0 0 auto; }
+.sch-stu__now--in { background: var(--sch-success-soft); color: var(--sch-success); }
+.sch-stu__now--in .sch-stu__nowd { background: var(--sch-success); }
+.sch-stu__now--late { background: var(--sch-warn-soft); color: var(--sch-warn); }
+.sch-stu__now--late .sch-stu__nowd { background: var(--sch-warn); }
+.sch-stu__now--absent { background: var(--sch-danger-soft); color: var(--sch-danger); }
+.sch-stu__now--absent .sch-stu__nowd { background: var(--sch-danger); }
+.sch-stu__now--out { background: var(--sch-surface-2); color: var(--sch-ink-soft); }
+.sch-stu__now--out .sch-stu__nowd { background: var(--sch-line-strong); }
+
+.sch-stu__acts { display: flex; align-items: center; gap: var(--sch-1); }
+.sch-body a.sch-stu__acts > a,
+.sch-stu__acts > a {
+    width: 28px; height: 28px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--sch-line); border-radius: var(--sch-r-sm);
+    background: var(--sch-surface); color: var(--sch-ink-soft);
+}
+.sch-body .sch-stu__acts > a:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+
+.sch-stu__empty {
+    padding: var(--sch-7) var(--sch-4);
+    display: flex; flex-direction: column; align-items: center; gap: var(--sch-2);
+}
+.sch-stu__empty strong { font-size: var(--sch-text-lg); color: var(--sch-ink-soft); }
+.sch-stu__empty span { font-size: var(--sch-text-sm); color: var(--sch-muted); }
+
+.sch-stu__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sch-3); padding: var(--sch-2) var(--sch-4); flex-wrap: wrap;
+    background: var(--sch-surface-alt); border-block-start: 1px solid var(--sch-line);
+}
+.sch-stu__range { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-stu__pages { display: flex; align-items: center; gap: var(--sch-1); flex-wrap: wrap; }
+.sch-body a.sch-stu__page {
+    min-width: 31px; height: 31px; padding: 0 var(--sch-2);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--sch-line); border-radius: var(--sch-r-sm);
+    background: var(--sch-surface); color: var(--sch-ink-soft);
+    font-size: var(--sch-text-xs); font-variant-numeric: tabular-nums; text-decoration: none;
+}
+.sch-body a.sch-stu__page:hover { border-color: var(--sch-line-strong); }
+.sch-body a.sch-stu__page.is-on {
+    background: var(--sch-accent); border-color: var(--sch-accent);
+    color: var(--sch-on-accent); font-weight: var(--sch-w-bold);
+}
+.sch-body a.sch-stu__page.is-off { opacity: .45; pointer-events: none; }
 
 /* ── لوح ملف الطالب ── */
 .sch-stu__veil {
@@ -5113,7 +5251,7 @@ body.sch-body {
 .sch-body a.sch-stu__px:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
 
 .sch-stu__pbody { flex: 1; overflow: auto; padding: var(--sch-4); display: flex; flex-direction: column; gap: var(--sch-5); }
-.sch-stu__metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sch-2); }
+.sch-stu__metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sch-2); container-type: inline-size; }
 .sch-stu__m {
     display: flex; flex-direction: column; gap: var(--sch-1);
     padding: var(--sch-3); border-radius: var(--sch-radius);
@@ -5121,18 +5259,16 @@ body.sch-body {
 }
 .sch-stu__m em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
 /* المبلغ **يتقلّص ولا يُقصّ**: «28,800.00 ر.س» في ثلث لوحٍ عرضه ٤٤٠ بكسل
-   كان يخرج بثلاث نقاط، ورقمٌ مالي منقوص أسوأ من رقمٍ صغير. وهو الدرس نفسه
-   الذي تعلّمناه في شاشة رسوم وليّ الأمر. */
+   كان يخرج بثلاث نقاط، ورقمٌ مالي منقوص أسوأ من رقمٍ صغير. */
 .sch-stu__m b {
     font-size: clamp(var(--sch-text-sm), 2.6cqw, var(--sch-text-lg));
     font-weight: var(--sch-w-bold); color: var(--sch-ink);
     font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.sch-stu__metrics { container-type: inline-size; }
 .sch-stu__m b.is-due { color: var(--sch-danger); }
 
-.sch-stu__sec { display: flex; flex-direction: column; gap: var(--sch-2); }
-.sch-stu__sec h3 { margin: 0; font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold); color: var(--sch-muted); }
+.sch-stu__sec2 { display: flex; flex-direction: column; gap: var(--sch-2); }
+.sch-stu__sec2 h3 { margin: 0; font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold); color: var(--sch-muted); }
 .sch-stu__grow {
     display: flex; align-items: center; gap: var(--sch-2);
     padding: var(--sch-3); border-radius: var(--sch-radius);

@@ -157,7 +157,9 @@ final class SCH_Students
                 'status' => 'active', 'class_id' => 7,
                 'cls_grade' => 'الأول', 'cls_section' => 'أ', 'cls_stage' => 'ابتدائي', 'cls_id' => 7,
                 'guardian_name' => $g[$i] ?? null, 'guardian_phone' => $p[$i] ?? null,
-                'route_name' => $r[$i] ?? null, 'custody_state' => 'home',
+                'route_name' => $r[$i] ?? null,
+                'custody_state' => [0 => 'in_school', 1 => 'home', 2 => 'in_school', 3 => 'in_school', 4 => 'home'][$i] ?? 'home',
+                'att_status' => [0 => 'present', 1 => null, 2 => 'late', 3 => 'present', 4 => 'absent'][$i] ?? null,
                 'student_no' => 'S' . $row['academic_no'], 'national_id' => '215846649' . $i,
                 'nationality' => 'اليمن', 'birth_date' => '2016-04-0' . ($i + 1),
             ]);
@@ -165,9 +167,18 @@ final class SCH_Students
         return ['items' => $items, 'total' => count($items)];
     }
 
-    public static function status_counts(): array
+    public static function today_counts(): array
     {
-        return ['active' => 5, 'transferred' => 0, 'withdrawn' => 1, 'graduated' => 0];
+        return ['total' => 5, 'in' => 3, 'late' => 1, 'absent' => 1, 'nog' => 2];
+    }
+
+    public static function now_state(object $r): array
+    {
+        $att = (string) ($r->att_status ?? '');
+        if ($att === 'absent') { return ['key' => 'absent', 'label' => 'غائب']; }
+        if ($att === 'late')   { return ['key' => 'late',   'label' => 'متأخر']; }
+        if ((string) ($r->custody_state ?? '') === 'in_school') { return ['key' => 'in', 'label' => 'داخل المدرسة']; }
+        return ['key' => 'out', 'label' => 'خارج المدرسة'];
     }
 
     public static function current_class(int $id): ?object
