@@ -34,9 +34,22 @@ foreach ((array) ($sch_data['children'] ?? []) as $kid) {
 
 $first = $me ? (string) ($me->first_name ?: $me->full_name) : '';
 
-/* الشعبة تُطلب في الحالة الفارغة وحدها: الرأس يعرض العدد حين توجد
-   شهادات، فاستعلامُ الشعبة هناك يُدفع ثمنه ولا يُقرأ. */
-$class = $items === [] ? SCH_Students::current_class($id) : null;
+/* الشعبة تُطلب في الحالة الفارغة وحدها **ولابنٍ معروف**: الرأس يعرض
+   العدد حين توجد شهادات، ولا يعرض الهوية أصلًا حين لا نعرف الابن —
+   فاستعلامُ الشعبة في الحالتين يُدفع ثمنه ولا يُقرأ. */
+$class = ($items === [] && $me) ? SCH_Students::current_class($id) : null;
+
+/* الهوية تُبنى من الموجود لا بوصلٍ ثم قصّ: الابن الذي لا اسم له يخرج
+   سطره بـ«· الشعبة» مبتدئًا بفاصلة معلّقة. */
+$hd_bits = [];
+
+if ($first !== '') {
+    $hd_bits[] = $first;
+}
+
+if ($class) {
+    $hd_bits[] = SCH_Classes::label($class);
+}
 
 $cert = $one > 0 ? SCH_Certificates::get($one) : null;
 
@@ -63,10 +76,8 @@ if ($cert && (int) $cert->student_id !== $id) {
                 _n('%s شهادة', '%s شهادات', count($items), 'school-system'),
                 number_format_i18n(count($items))
             )); ?>
-        <?php elseif ($me) : ?>
-            <?php echo esc_html(trim(
-                $first . ($class ? ' · ' . SCH_Classes::label($class) : '')
-            )); ?>
+        <?php elseif ($hd_bits !== []) : ?>
+            <?php echo esc_html(implode(' · ', $hd_bits)); ?>
         <?php endif; ?>
     </span>
 </header>
@@ -124,10 +135,11 @@ if ($cert && (int) $cert->student_id !== $id) {
 
     <div class="p-certs">
         <?php foreach ($items as $c) :
-            /* التاريخ والنوع في سطرٍ واحد كما في التصميم: سطران متتاليان
-               بلون واحد يُقرآن سطرًا واحدًا مكسورًا. والوصل بالشرط لا
-               بـ`trim` على «·» — المحرف عربيُّ الجوار متعدّد البايتات،
-               و`trim` تقطع بالبايت فتُفسد آخر حرف. */
+            /* التصميم يضع تحت العنوان سطرًا خافتًا واحدًا فيه التاريخ.
+               وهنا يحمل معه نوع الشهادة — سطران متتاليان بلون واحد
+               يُقرآن سطرًا واحدًا مكسورًا، فالوصل في السطر نفسه.
+               والوصل بالشرط لا بـ`trim` على «·»: المحرف عربيُّ الجوار
+               متعدّد البايتات، و`trim` تقطع بالبايت فتُفسد آخر حرف. */
             $c_kind = (string) (SCH_Certificates::TYPES[$c->type][0] ?? '');
             $c_meta = wp_date('j M', strtotime((string) $c->issued_at));
 

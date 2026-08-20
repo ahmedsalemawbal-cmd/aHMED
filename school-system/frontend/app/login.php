@@ -30,7 +30,7 @@ $school = sch_settings('school_name', get_bloginfo('name'));
         <div class="p-auth__fields">
 
             <?php if ($err !== '') : ?>
-                <div class="p-auth__err"><?php echo esc_html($err); ?></div>
+                <div class="p-auth__err" role="alert"><?php echo esc_html($err); ?></div>
             <?php endif; ?>
 
             <div class="p-auth__f">

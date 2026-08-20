@@ -145,7 +145,9 @@ $sch_last = $sch_rows === [] ? 0 : (int) end($sch_rows);
         </div>
 
         <div class="p-tt__g">
-            <?php $sch_brk_done = false; ?>
+            <?php /* فسحةٌ فوق أوّل حصة ليست فسحة: يومٌ يبدأ بالحصة الرابعة
+                     لا فاصل فيه بعدُ، فتُعدّ مؤدّاةً قبل أن تُرسم. */ ?>
+            <?php $sch_brk_done = (int) reset($sch_rows) > $sch_brk_at; ?>
             <?php foreach ($sch_rows as $sch_n) : ?>
 
                 <?php /* الفسحة صفٌّ يعبر الشبكة كلّها: هي فاصل اليوم لا حصّة فيه */ ?>
@@ -166,15 +168,25 @@ $sch_last = $sch_rows === [] ? 0 : (int) end($sch_rows);
                         <?php /* الخانة الفارغة تبقى قائمةً: حذفها يزحزح ما بعدها يومًا كاملًا */ ?>
                         <span class="p-tt__c p-tt__c--off" aria-hidden="true"></span>
                     <?php else : ?>
+                        <?php
+                        /**
+                         * الخانة تعرض الاسم الأول وحده لضيقها، والاسم الكامل — وهو ما
+                         * كان يُعرض قبل الشبكة — يبقى في التلميح فلا يضيع من الشاشة.
+                         */
+                        $sch_tip = implode(' · ', array_filter([
+                            $sch_dl,
+                            sprintf(
+                                /* translators: %s: رقم الحصة */
+                                __('الحصة %s', 'school-system'),
+                                number_format_i18n($sch_n)
+                            ),
+                            $sch_clock($sch_at($sch_n)),
+                            (string) $sch_slot->teacher_name,
+                        ]));
+                        ?>
                         <?php // نغمة ثابتة لكل مادة تُشتق من معرّفها، فتُعرَف بالعين قبل قراءة اسمها ?>
                         <span class="p-tt__c p-tt__c--<?php echo esc_attr((string) ((int) $sch_slot->subject_id % 5)); ?><?php echo esc_attr($sch_d === $day_now && $sch_n === $sch_now_no ? ' is-now' : ''); ?>"
-                              title="<?php echo esc_attr(sprintf(
-                                  /* translators: 1: اليوم 2: رقم الحصة 3: وقت البداية */
-                                  __('%1$s · الحصة %2$s · %3$s', 'school-system'),
-                                  $sch_dl,
-                                  number_format_i18n($sch_n),
-                                  $sch_clock($sch_at($sch_n))
-                              )); ?>">
+                              title="<?php echo esc_attr($sch_tip); ?>">
                             <b><?php echo esc_html((string) $sch_slot->subject_name); ?></b>
                             <?php if ($sch_slot->teacher_name) : ?>
                                 <span><?php echo esc_html($sch_first((string) $sch_slot->teacher_name)); ?></span>

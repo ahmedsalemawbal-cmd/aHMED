@@ -1298,7 +1298,6 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .p-certcard--sapphire .p-certcard__i { background: linear-gradient(150deg, var(--warn-tint), var(--card)); color: var(--warn); }
 .p-certcard__t b { font-size: var(--t2); font-weight: 700; }
 .p-certcard__t span { font-size: var(--t0); color: var(--muted); }
-.p-certcard__d { padding: 0 3px 3px; font-size: var(--t0); color: var(--muted); }
 
 /* ── حسابي: ترويسة الملفّ ────────────────────────────────────────── */
 
@@ -2438,18 +2437,17 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   margin: 0 0 var(--s3);
 }
 
-.p-body a.p-hd__back {
-  position: relative;
-  display: grid; place-items: center; flex: none;
-  width: 36px; height: 36px;
-  border-radius: var(--r1);
-  background: var(--card); border: 1px solid var(--line);
-  color: var(--ink); box-shadow: var(--shadow-sm);
-}
-
-/* المربّع 36px كما في التصميم، ومساحة اللمس 44px حوله: إصبعٌ في سيارة
-   واقفة أمام البوابة لا تصيب أصغر من ذلك. */
-.p-body a.p-hd__back::after { content: ''; position: absolute; inset: -4px; }
+/**
+ * **ولا يُعاد تعريف `.p-hd__back` هنا.**
+ *
+ * المربّع 36px ومساحة لمسه 44px وقلبُ الشيفرون معرَّفة أعلاه مرّة واحدة
+ * لرأس الشاشات الخمسة. وكانت مكرَّرةً هنا بالقيم نفسها إلا `::after`:
+ * الأولى `top:50%; height:44px; transform:translateY(-50%)` والثانية
+ * `inset:-4px` — فيغلب `inset` الأعلى ويبقى `height` و`transform` من
+ * الأولى، فتُفرَط المساحة (`bottom` يسقط لتقييد زائد) **وتزيح 22px
+ * لأعلى** في الشاشات الخمسة جميعًا. صنفٌ واحد بتعريفين لا يُصلَح
+ * بمواءمة القيم، بل بحذف الثاني.
+ */
 
 .p-hd__t { flex: 1 1 auto; min-width: 0; margin: 0; }
 
@@ -2583,12 +2581,14 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 
 
-/* ── الصحة المدرسية ────────────────────────────────────────────── */
 /* ── الصحة المدرسية ──────────────────────────────────────────────── */
 
 /* اسم الابن في رأس الشاشة: الأب يقفز بين ملفّات أبنائه، فيؤكّد له الرأس
-   أيّ ملفّ يقرأ قبل أن يقرأ رقمًا واحدًا. */
-.p-hl__who {
+   أيّ ملفّ يقرأ قبل أن يقرأ رقمًا واحدًا.
+
+   واسمه `p-sub__who` لا `p-hl__who`: لا كتلة `p-hl` في النظام، والعنصر
+   لا يعيش إلا داخل `.p-sub__h` — والاسم اليتيم يُنسى فيُعاد تعريفه. */
+.p-sub__who {
   flex: none;
   font-size: var(--t1);
   font-weight: 600;
@@ -2673,8 +2673,16 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 .p-vit__k { font-size: var(--t1); color: var(--muted); }
 
-/* رقم بطل: ارتفاع سطر ضيّق وإلا جلس الرقم في صندوقٍ نصفه فراغ */
+/**
+ * رقم بطل: ارتفاع سطر ضيّق وإلا جلس الرقم في صندوقٍ نصفه فراغ.
+ *
+ * و`align-self: start` ليست زينة: البطاقة عمود مرن، فالقيمة تُمدَّد
+ * بعرضها كاملًا، و`.p-nm` تحمل `direction: ltr` — فتقفز «+O» إلى الطرف
+ * المقابل وتترك تحتها مسمّاها وحده. الصندوق يُقلَّص إلى مقاس محتواه
+ * فيبقى الرقم فوق اسمه. (نفس درس `.p-drv__tel`.)
+ */
 .p-vit__v {
+  align-self: start;
   font-size: var(--t5);
   font-weight: 700;
   line-height: 1.15;
@@ -3445,11 +3453,22 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 /**
  * التاريخ نزل داخل كتلة النصّ — سطران لا ثلاثة كما في التصميم: العنوان،
- * وتحته التاريخ والنوع في سطرٍ واحد. فأخذت الكتلة الحشو السفلي الذي كان
- * على `.p-certcard__d`، **وذلك الصنف لم يعد له عنصر في القالب فيُحذف**
+ * وتحته التاريخ والنوع في سطرٍ واحد. فأخذت الكتلة الحشو الذي كان على
+ * `.p-certcard__d`، **وذلك الصنف لم يعد له عنصر في القالب فيُحذف**
  * من `parent.css` بدل أن يبقى قاعدةً ميتة.
+ *
+ * **والعمود صريح لا مفترَض:** الكتلة `<span>` وابناها `<b>` و`<span>`
+ * سطريّان، فبلا `flex` يجلس التاريخ **بجانب** العنوان في سطره لا تحته —
+ * والتصميم يريد سطرين. و`gap: 3px` و`padding: 0 3px 3px` هما رقما
+ * الإطار حرفًا بحرف.
  */
-.p-certcard__t { padding-bottom: 3px; }
+.p-certcard__t {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 3px 3px;
+}
 
 /* ── الشهادات: الحالة الفارغة ───────────────────────────────────── */
 
@@ -3460,7 +3479,9 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  */
 .p-empty--cert {
   justify-content: center;
-  min-height: 54vh;
+  /* `dvh` لا `vh` — شريط المتصفّح على الجوّال يأكل الفرق فتنزل الكتلة
+     تحت الطيّة في الشاشة التي هي كلّ ما فيها */
+  min-height: 54dvh;
   gap: var(--s4);
   padding-inline: var(--s6);
 }
@@ -3474,15 +3495,21 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   margin-bottom: 0;
 }
 
-/* `currentColor` لا رمزٌ ثانٍ: الحلقة تتبع لون حاضنتها فتبقى نغمةً واحدة */
+/**
+ * `currentColor` لا رمزٌ ثانٍ: الحلقة تتبع لون حاضنتها فتبقى نغمةً واحدة.
+ *
+ * **والخفوت على الحدّ لا على العنصر:** `opacity` تنزل على الأبناء كذلك،
+ * فحلقةٌ بـ`opacity:.55` تُخفت الوسام الذي بداخلها معها — وهو الذي
+ * وُضع ليقول أيَّ مكانٍ محجوز. فالخفوت في لون الحدّ وحده، والنسبة هي
+ * نسبة الإطار نفسها.
+ */
 .p-empty__ring {
   display: grid;
   place-items: center;
   width: 56px;
   height: 56px;
-  border: 3px dashed currentColor;
+  border: 3px dashed color-mix(in srgb, currentColor 55%, transparent);
   border-radius: 50%;
-  opacity: .55;
 }
 
 /* هنا فقرة تُقرأ لا سطرٌ يُلمح: حبرٌ أغمق ورصاصٌ أوسع للنثر العربي */
@@ -3571,8 +3598,13 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   background: var(--line);
 }
 
-/* الشهادة بلا هوامشها المستقلّة داخله — اللوح هو إطارها */
-.p-sheet .p-cert { margin: 0; }
+/**
+ * الشهادة بلا هامشها السفلي داخله — اللوح هو إطارها.
+ * **و`auto` تبقى في الجانبين:** `.p-cert` سقفها 620px وتوسّطها من
+ * `margin: 0 auto`، فـ`margin: 0` تلصقها بحافّة اللوح على أي شاشة
+ * أعرض من ذلك.
+ */
+.p-sheet .p-cert { margin: 0 auto; }
 
 .p-sheet__acts { display: flex; gap: var(--s2); }
 
@@ -3860,6 +3892,24 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .p-auth__inp::placeholder { color: var(--muted); }
 
 /**
+ * الملء التلقائي لا يكسر السطح الواحد.
+ *
+ * المتصفّح يرسم خلفيته هو داخل `<input>` — وهي هنا مستطيل مصمت بزوايا
+ * قائمة داخل غلافٍ نصف قطره 16px، فيظهر «حقلٌ داخل حقل» عند كل من حفظ
+ * كلمة مروره. وشاشة الدخول أكثر شاشة يقع فيها هذا.
+ * `box-shadow` داخليّ هو الطريق الوحيد لطمسها، ولون النصّ يُفرض بـ
+ * `-webkit-text-fill-color` لأن `color` وحده لا يُطبَّق في هذه الحالة.
+ * والرمز لا القيمة — فينقلب مع الوضع الداكن.
+ */
+.p-auth__inp:-webkit-autofill,
+.p-auth__inp:-webkit-autofill:hover,
+.p-auth__inp:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 40px var(--card) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+}
+
+/**
  * زرّ الكشف بهدف لمس 44px كاملًا داخل حقلٍ ارتفاعه 54.
  * الهامش السالب يُعيد الأيقونة إلى حافّة التصميم بلا تقليص مساحة الضغط
  * — والإصبع في سيارة لا تصيب 18px.
@@ -3881,7 +3931,15 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * تُطبَّق على الصندوق نفسه داخل العمود.
  */
 .p-auth__forgot { align-self: flex-start; font-size: var(--t1); }
+/**
+ * وهو في التصميم سطرٌ ساكن، وصار هنا مِفتاحًا يُضغط — فيلزمه ما يلزم
+ * كلّ مِفتاح: هدف لمسٍ 44px. سطرٌ بـ11.5px وحشوة 2px هدفه 22px، وإصبع
+ * في سيارة لا تصيبه. والهامش السالب يُعيد النصّ إلى موضعه من التصميم
+ * بلا تقليص مساحة الضغط — نفس حيلة زرّ الكشف فوقه.
+ */
 .p-auth__forgot > summary {
+  display: flex; align-items: center;
+  min-height: 44px; margin-block: -8px;
   padding: 2px var(--s1);
   list-style: none; cursor: pointer;
   font-weight: 600; color: var(--pri-ink);

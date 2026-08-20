@@ -114,7 +114,19 @@ $sch_bits = array_filter([
         <!-- المزاج: الأربعة كلها معروضة والمسجَّل وحده مضاء — الوجه يُقرأ قبل الكلمة -->
         <div class="p-card">
             <b class="p-kg__t"><?php esc_html_e('المزاج', 'school-system'); ?></b>
-            <div class="p-moods">
+            <?php
+            /**
+             * الوجوه الأربعة صورةٌ واحدة لا أربع كلمات.
+             *
+             * قارئ الشاشة كان ينطق «سعيد هادئ متعب منزعج» متتابعةً بلا ما يقول
+             * أيّها المسجَّل — فالإضاءة لونٌ وحلقة، وكلاهما لا يُنطق. و`role="img"`
+             * يجعل المجموعة عنصرًا واحدًا اسمُه المزاج المسجَّل وحده، والثلاثة
+             * الباقية سياقٌ بصريّ كأعمدة الرسم الفارغة.
+             */
+            $sch_mood_now = SCH_KG::MOODS[(string) $day->mood] ?? '';
+            ?>
+            <div class="p-moods" role="img"
+                 aria-label="<?php echo esc_attr($sch_mood_now !== '' ? $sch_mood_now : __('لم يُسجَّل المزاج', 'school-system')); ?>">
                 <?php foreach (SCH_KG::MOODS as $sch_mood => $sch_mood_label) : ?>
                     <span class="p-mood<?php echo esc_attr((string) $day->mood === $sch_mood ? ' is-on' : ''); ?>">
                         <span class="p-face p-face--<?php echo esc_attr($sch_mood); ?>"><i></i></span>
