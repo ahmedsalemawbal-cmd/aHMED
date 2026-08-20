@@ -29,6 +29,19 @@
   --r1:12px; --r2:16px; --r3:19px; --r4:22px; --r5:26px;
 }
 
+/**
+ * الوضع الداكن — ثلاث حالات لا حالتان.
+ *
+ * **والوسم يقع على `<html>` لا على `<body>`**: يضعه نصّ «منع الوميض»
+ * قبل أول رسم، ويقلبه زرّ المظهر. وكان المحدِّد `.p-body[data-theme]`
+ * وحده، فالوسم يُكتب على `<html>` ولا يطابق شيئًا — فيتبدّل رمز الشمس
+ * والقمر ولا يتبدّل لونٌ واحد. يقع الوسم على أيّهما، والقاعدة تقبله.
+ *
+ * والحالة الثالثة **«بلا اختيار»**: من لم يلمس الزرّ يتبع جهازه، ولا
+ * يُفرض عليه الفاتح لأن التخزين فارغ. والاختيار الصريح يغلب الجهاز في
+ * الاتجاهين — ولذلك `:not([data-theme="light"])` في استعلام الوسائط.
+ */
+:root[data-theme="dark"] .p-body,
 .p-body[data-theme="dark"] {
   --canvas:#0b0c14; --bg:#12131c; --card:#1b1d29; --card2:#20222f;
   --ink:#eceffa; --ink2:#a7abc4; --muted:#8a8fad; --line:rgba(255,255,255,.11);
@@ -41,6 +54,22 @@
   --shadow:0 6px 22px rgba(0,0,0,.5); --shadow-sm:0 2px 10px rgba(0,0,0,.4);
   --skel:rgba(255,255,255,.08);
   --map-bg:#141826; --map-block:#1d2231; --map-road:#0d0f18;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .p-body:not([data-theme="light"]) {
+    --canvas:#0b0c14; --bg:#12131c; --card:#1b1d29; --card2:#20222f;
+    --ink:#eceffa; --ink2:#a7abc4; --muted:#8a8fad; --line:rgba(255,255,255,.11);
+    --pri:#8d99ff; --pri-ink:#a3adff; --pri-tint:rgba(141,153,255,.16); --on-pri:#11131f;
+    --ok:#4fd9a4; --ok-tint:rgba(79,217,164,.15);
+    --warn:#f0b65a; --warn-tint:rgba(240,182,90,.15);
+    --bad:#ff8a80; --bad-tint:rgba(255,138,128,.15);
+    --gold:#e8c264; --gold-tint:rgba(232,194,100,.15);
+    --slate:#a8aecb; --slate-tint:rgba(168,174,203,.14);
+    --shadow:0 6px 22px rgba(0,0,0,.5); --shadow-sm:0 2px 10px rgba(0,0,0,.4);
+    --skel:rgba(255,255,255,.08);
+    --map-bg:#141826; --map-block:#1d2231; --map-road:#0d0f18;
+  }
 }
 
 /**
@@ -365,12 +394,19 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
  * لا على زرّ ٣٨px — فأي مقاس يُكتب هنا يكسر أحد الموضعين. الزرّ العلوي
  * يأخذ شكله من `.p-ico` وحده، ولا يبقى مشتركًا إلا تبديل الأيقونتين.
  *
- * والوسم `data-theme` يضعه السكربت على `<html>` لا على `<body>`،
- * فالمحدِّد مربوط بـ`:root`.
+ * والوسم `data-theme` يضعه السكربت على `<html>`، والقاعدة تقبله على
+ * `<html>` أو على `<body>` معًا.
  */
 .p-theme__sun { display: none; }
-:root[data-theme="dark"] .p-theme__moon { display: none; }
-:root[data-theme="dark"] .p-theme__sun  { display: block; }
+:root[data-theme="dark"] .p-theme__moon,
+.p-body[data-theme="dark"] .p-theme__moon { display: none; }
+:root[data-theme="dark"] .p-theme__sun,
+.p-body[data-theme="dark"] .p-theme__sun  { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .p-theme__moon { display: none; }
+  :root:not([data-theme="light"]) .p-theme__sun  { display: block; }
+}
 
 /* ── شريط الأبناء ────────────────────────────────────────────────── */
 
@@ -2369,7 +2405,9 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 
 /* الافتراض غير مؤهَّل عمدًا: المُعدِّلات تخصّصيتها (0,1,0)، فلو كُتب
    `--g` داخل `.p-body a.p-tile` لغلبها كلَّها ولخرجت الأبواب بلون واحد */
-.p-tile { --g: var(--pri-ink); }`
+.p-tile { --g: var(--pri-ink); }
+
+/* مؤهَّلة بعنصرها: الأبواب كلّها روابط — وقاعدة الرابط في الأساس
    تغلب الصنف المفرد فيخرج اسم الباب بلون الحبر الموروث */
 .p-body a.p-tile {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -3105,14 +3143,23 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   background: var(--tone, var(--card2)); text-align: center;
 }
 
+/**
+ * سطران للمادّة على الأكثر، والاسم كاملًا في `title` الخانة.
+ *
+ * العمود ٦٤px في شاشة ٣٩٣، و«الدراسات الاجتماعية» تكسر الكلمة أربعة
+ * أسطر فيطول الصفّ كلّه لأجل خانة واحدة — والشبكة تُقرأ بالمسح لا
+ * بالقراءة، فسطرٌ ثالث يضرّ أكثر ممّا يفيد.
+ */
 .p-tt__c > b {
   font-size: var(--t0); font-weight: 700; color: var(--ink);
-  overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; overflow-wrap: anywhere;
 }
 
 .p-tt__c > span {
   font-size: calc(var(--t0) - 2px); color: var(--muted);
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 /* خمس نغمات تدور على المواد بمعرّفاتها: اللون هنا تعريفٌ لا حالة،
@@ -3575,7 +3622,12 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   inset-block-start: var(--s3);
   inset-inline: var(--s4);
   display: flex; align-items: center; gap: var(--s3);
-}` تخصّصيتها (0,1,1).
+}
+
+/**
+ * 44px لا 38 كما في التصميم: الحدّ الأدنى للمس في التطبيق كلّه —
+ * إصبعٌ في سيارة متحرّكة لا تصيب أصغر.
+ * ومؤهَّل بـ`a` لأن قاعدة الرابط في الأساس تخصّصيتها (0,1,1).
  */
 .p-body a.p-live__back {
   flex: none;

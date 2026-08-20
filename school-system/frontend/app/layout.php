@@ -31,7 +31,12 @@ $p_hour  = (int) current_time('G');
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="robots" content="noindex, nofollow">
     <?php /* منع وميض السمة: تُضبط قبل أول رسم. تطبيق المستهلك يتبع الجهاز افتراضيًا. */ ?>
-    <script>(function(){try{var s=localStorage.getItem('sch-theme');var t=s==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m){m.content=t==='dark'?'#080F0D':'#F1F4F3';}}catch(e){}})();</script>
+    <?php /* منع الوميض: يُضبط قبل أول رسم. ومن لم يختر يتبع جهازه —
+             فالوسم لا يُكتب أصلًا، وCSS يقرّر باستعلام الوسائط. */ ?>
+    <script>(function(){try{var s=localStorage.getItem('sch-theme');var r=document.documentElement;
+if(s==='dark'||s==='light'){r.setAttribute('data-theme',s);}
+var d=s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+var m=document.querySelector('meta[name=theme-color]');if(m){m.content=d?'#12131c':'#f3f4fb';}}catch(e){}})();</script>
 
     <title><?php echo esc_html(sch_settings('school_name', get_bloginfo('name'))); ?></title>
     <?php $sch_fav = SCH_Brand::favicon(); ?>
@@ -201,16 +206,22 @@ $p_hour  = (int) current_time('G');
       }, { passive: true });
     })();
 
-    /* تبديل السمة بالتفويض — يحفظ الاختيار ويحدّث لون شريط المتصفح */
+    /* تبديل السمة بالتفويض — يحفظ الاختيار ويحدّث لون شريط المتصفح.
+       والقلب يُحسب من **الوضع الظاهر** لا من الوسم: من لم يختر بعدُ لا
+       وسم له، فقراءة الوسم وحدها كانت تعطيه «فاتح» ولو كان جهازه داكنًا،
+       فتحتاج ضغطتين ليصير فاتحًا. */
     document.addEventListener('click', function (e) {
       var b = e.target.closest('.p-theme');
       if (!b) { return; }
       var r = document.documentElement;
-      var n = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      var cur = r.getAttribute('data-theme');
+      var dark = cur === 'dark'
+        || (!cur && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var n = dark ? 'light' : 'dark';
       r.setAttribute('data-theme', n);
       try { localStorage.setItem('sch-theme', n); } catch (_) {}
       var m = document.querySelector('meta[name=theme-color]');
-      if (m) { m.content = n === 'dark' ? '#080F0D' : '#F1F4F3'; }
+      if (m) { m.content = n === 'dark' ? '#12131c' : '#f3f4fb'; }
     });
 
     if ('serviceWorker' in navigator) {

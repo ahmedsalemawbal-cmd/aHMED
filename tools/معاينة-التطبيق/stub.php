@@ -98,6 +98,14 @@ function sch_settings($k, $d = '') {
 function sch_asset($p) { return SCH_URL . $p; }
 
 function sch_w($n) { return $n; }
+function human_time_diff($from, $to = 0) {
+    $to = $to ?: time(); $d = abs($to - $from);
+    if ($d < 3600)  { return sch_ar_digits((string) max(1, (int) round($d / 60))) . ' دقيقة'; }
+    if ($d < 86400) { $h = (int) round($d / 3600);
+                      return $h === 1 ? 'ساعة' : ($h === 2 ? 'ساعتان' : sch_ar_digits((string) $h) . ' ساعات'); }
+    $dd = (int) round($d / 86400);
+    return $dd === 1 ? 'يوم' : ($dd === 2 ? 'يومان' : sch_ar_digits((string) $dd) . ' أيام');
+}
 function sch_now() { return date('Y-m-d H:i:s'); }
 /* نسخةٌ حرفية من `includes/functions.php` — الوقت النصّي يُوطَّن كالأرقام */
 function sch_clock($hm) {

@@ -449,6 +449,34 @@ final class SCH_App
     }
 
     /**
+     * وسم وقتٍ لصفٍّ في قائمة: الساعة لليوم، ثم «أمس»، ثم التاريخ.
+     *
+     * و«قبل ساعتين» تبقى للحالة الحيّة وحدها (`when_label`). في قائمةٍ
+     * تُفتح مرّةً في اليوم لا تقول المسافةُ من الآن شيئًا: الأب يسأل
+     * «متى دخل البوابة؟» فيريد الساعة، لا بُعدها عن لحظة الفتح.
+     */
+    public static function stamp_label(string $stamp): string
+    {
+        $t = strtotime($stamp);
+
+        if ($t === false) {
+            return '';
+        }
+
+        $day = wp_date('Y-m-d', $t);
+
+        if ($day === wp_date('Y-m-d')) {
+            return wp_date('g:i a', $t) ?: '';
+        }
+
+        if ($day === wp_date('Y-m-d', (int) current_time('timestamp') - DAY_IN_SECONDS)) {
+            return __('أمس', 'school-system');
+        }
+
+        return wp_date('j M', $t) ?: '';
+    }
+
+    /**
      * رابط صورة ولي الأمر — **فارغ لمن لا صورة له** فيظهر الحرف بديلًا.
      *
      * كانت تُرجع رابطًا دائمًا، فيمرّ شرط `if (avatar_url())` دومًا وتُطلب صورة

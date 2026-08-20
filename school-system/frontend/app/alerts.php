@@ -113,7 +113,7 @@ $sch_kind_names = [
                                     <span><?php echo esc_html($sch_kind_names[$sch_kind] ?? __('إشعار', 'school-system')); ?></span>
                                     <span class="p-msg__sep" aria-hidden="true">·</span>
                                     <time datetime="<?php echo esc_attr((string) $item->created_at); ?>">
-                                        <?php echo esc_html(SCH_App::when_label((string) $item->created_at)); ?>
+                                        <?php echo esc_html(SCH_App::stamp_label((string) $item->created_at)); ?>
                                     </time>
                                 </div>
                             </div>

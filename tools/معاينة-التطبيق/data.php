@@ -388,11 +388,22 @@ final class SCH_App {
         return $days[date('l', $d ? strtotime($d) : time())] ?? '';
     }
 
+    /* نسختان حرفيّتان من `SCH_App`: القائمة تأخذ الساعة، والحالة الحيّة
+       تأخذ «قبل …» — واختلاف أيّهما هنا يجعل المعاينة تكذب على الفاحص. */
     public static function when_label(string $ts): string {
-        $diff = time() - strtotime($ts);
-        if ($diff < 3600) { return 'قبل ' . max(1, (int) ($diff / 60)) . ' دقيقة'; }
-        if ($diff < 86400) { return 'قبل ' . (int) ($diff / 3600) . ' ساعات'; }
-        return date('j M', strtotime($ts));
+        $t = strtotime($ts); $now = time();
+        if ($t === false) { return ''; }
+        if ($now - $t < 12 * 3600 && $now >= $t) { return sprintf('قبل %s', human_time_diff($t, $now)); }
+        return wp_date('g:i a', $t);
+    }
+
+    public static function stamp_label(string $ts): string {
+        $t = strtotime($ts);
+        if ($t === false) { return ''; }
+        $day = wp_date('Y-m-d', $t);
+        if ($day === wp_date('Y-m-d')) { return wp_date('g:i a', $t); }
+        if ($day === wp_date('Y-m-d', time() - 86400)) { return 'أمس'; }
+        return wp_date('j M', $t);
     }
 
     public static function trip_state_label(string $s): string {

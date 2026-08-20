@@ -75,7 +75,7 @@ function shell(string $body, int $kid, string $view): string
     }
 
     $tabs = '';
-    foreach (['child' => ['اليوم', 'home'], 'log' => ['السجل', 'list'],
+    foreach (['child' => ['اليوم', 'home'], 'log' => ['السجل', 'chart'],
               'invoices' => ['الرسوم', 'wallet'], 'card' => ['البطاقة', 'badge']] as $slug => [$label, $icon]) {
         $tabs .= '<a class="p-tab' . ($view === $slug ? ' is-on' : '') . '" href="#">'
               . sch_icon($icon, 19) . '<span>' . esc_html($label) . '</span></a>';
@@ -140,5 +140,11 @@ echo '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'
       .sbi i:first-child{width:17px;height:10px;border-radius:2px;background:currentColor;opacity:.85}
       .sbi i:last-child{width:16px;height:11px;border:1.6px solid currentColor;border-radius:3px;opacity:.85}
       .scr{height:calc(852px - 40px);overflow:auto;position:relative}
+      /* الشريط السفلي `position: fixed` في التطبيق — فيُثبَّت بالنسبة لنافذة
+         المتصفّح لا لإطار الجوّال، فيظهر خارج الشاشة في أكثر الإطارات.
+         داخل المعاينة يُربَط بمنطقة التمرير حتى تُرى الشاشة كما تُرى فعلًا. */
+      .scr .p-app{display:flex;flex-direction:column;min-height:100%}
+      .scr .p-main{flex:1}
+      .scr .p-tabs{position:sticky;bottom:0}
       .scr::-webkit-scrollbar{width:0}
       </style></head><body' . $theme . '>' . implode('', $out) . '</body></html>';
