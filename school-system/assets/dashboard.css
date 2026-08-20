@@ -5017,3 +5017,167 @@ body.sch-body {
     border-radius: var(--sch-radius);
 }
 .sch-lib__item:not(:has(.sch-lib__thumb)) .sch-lib__meta { align-items: center; text-align: center; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   شاشة الطلاب (`.sch-stu__*`)
+   ───────────────────────────────────────────────────────────────────
+   القائمة تجيب على مكانها: شرائح الحالة تصفّي وتعدّ معًا، وعمود وليّ
+   الأمر يقول الرقم أو يقول إنه غير مرتبط، واللوح يفتح أكثر ما يُسأل
+   عنه بلا مغادرة الصفحة.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.sch-stu__chips {
+    display: flex; align-items: center; gap: var(--sch-2);
+    flex-wrap: wrap; margin-block-end: var(--sch-3);
+}
+.sch-body a.sch-stu__chip {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-2) var(--sch-3); min-height: 38px;
+    border: 1px solid var(--sch-line); border-radius: var(--sch-radius);
+    background: var(--sch-surface); color: var(--sch-ink-soft); text-decoration: none;
+    font-size: var(--sch-text-xs);
+}
+.sch-body a.sch-stu__chip:hover { border-color: var(--sch-line-strong); color: var(--sch-ink); }
+.sch-body a.sch-stu__chip.is-on {
+    background: var(--sch-surface-alt); border-color: var(--sch-line-strong);
+    color: var(--sch-ink); font-weight: var(--sch-w-medium);
+}
+.sch-stu__chip b { font-variant-numeric: tabular-nums; font-weight: var(--sch-w-bold); }
+.sch-stu__dot { width: 7px; height: 7px; border-radius: var(--sch-r-full); flex: 0 0 auto; }
+.sch-stu__chip--active .sch-stu__dot { background: var(--sch-success); }
+.sch-stu__chip--transferred .sch-stu__dot { background: var(--sch-accent); }
+.sch-stu__chip--withdrawn .sch-stu__dot { background: var(--sch-danger); }
+.sch-stu__chip--graduated .sch-stu__dot { background: var(--sch-gold); }
+
+.sch-stu__wrap {
+    background: var(--sch-surface); border: 1px solid var(--sch-line);
+    border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1); overflow: hidden;
+}
+.sch-stu__pick {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sch-3); padding: var(--sch-2) var(--sch-4); flex-wrap: wrap;
+    background: var(--sch-surface-alt); border-block-end: 1px solid var(--sch-line);
+}
+.sch-stu__all { display: flex; align-items: center; gap: var(--sch-2); font-size: var(--sch-text-xs); cursor: pointer; }
+.sch-stu__hint { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+
+.sch-stu__who { display: flex; align-items: center; gap: var(--sch-2); min-width: 0; }
+.sch-stu__av {
+    width: 30px; height: 30px; border-radius: var(--sch-r-sm); flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sch-surface-2); color: var(--sch-accent-ink);
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold);
+}
+.sch-stu__whot { display: flex; flex-direction: column; min-width: 0; }
+
+.sch-stu__g { display: flex; flex-direction: column; min-width: 0; }
+.sch-stu__g b { font-weight: var(--sch-w-normal); color: var(--sch-ink); }
+.sch-stu__g em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-body a.sch-stu__link { font-size: var(--sch-text-xs); color: var(--sch-danger); text-decoration: underline; }
+
+/* ── لوح ملف الطالب ── */
+.sch-stu__veil {
+    position: fixed; inset: 0; z-index: 60;
+    background: color-mix(in srgb, var(--sch-chrome) 42%, transparent);
+    display: flex; justify-content: flex-start;
+}
+.sch-stu__veilx { position: absolute; inset: 0; }
+.sch-stu__panel {
+    position: relative; width: 440px; max-width: 92vw; height: 100%;
+    background: var(--sch-surface); box-shadow: var(--sch-e4);
+    display: flex; flex-direction: column;
+    animation: sch-stu-in 0.22s var(--sch-ease) both;
+}
+@keyframes sch-stu-in { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+
+.sch-stu__phd {
+    display: flex; align-items: flex-start; gap: var(--sch-3);
+    padding: var(--sch-4); border-block-end: 1px solid var(--sch-line);
+}
+.sch-stu__pav {
+    width: 44px; height: 44px; border-radius: var(--sch-radius); flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sch-surface-2); color: var(--sch-accent-ink);
+    font-size: var(--sch-text-lg); font-weight: var(--sch-w-bold);
+}
+.sch-stu__pt { display: flex; flex-direction: column; gap: var(--sch-1); min-width: 0; flex: 1 1 auto; }
+.sch-stu__pt strong { font-size: var(--sch-text-lg); color: var(--sch-ink); }
+.sch-stu__pt > span { display: flex; align-items: center; gap: var(--sch-2); flex-wrap: wrap; }
+.sch-stu__pt em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-stu__px {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--sch-line); border-radius: var(--sch-r-sm); background: var(--sch-surface);
+}
+.sch-body a.sch-stu__px { color: var(--sch-muted); }
+.sch-body a.sch-stu__px:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+
+.sch-stu__pbody { flex: 1; overflow: auto; padding: var(--sch-4); display: flex; flex-direction: column; gap: var(--sch-5); }
+.sch-stu__metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sch-2); }
+.sch-stu__m {
+    display: flex; flex-direction: column; gap: var(--sch-1);
+    padding: var(--sch-3); border-radius: var(--sch-radius);
+    background: var(--sch-surface-alt); min-width: 0;
+}
+.sch-stu__m em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+/* المبلغ **يتقلّص ولا يُقصّ**: «28,800.00 ر.س» في ثلث لوحٍ عرضه ٤٤٠ بكسل
+   كان يخرج بثلاث نقاط، ورقمٌ مالي منقوص أسوأ من رقمٍ صغير. وهو الدرس نفسه
+   الذي تعلّمناه في شاشة رسوم وليّ الأمر. */
+.sch-stu__m b {
+    font-size: clamp(var(--sch-text-sm), 2.6cqw, var(--sch-text-lg));
+    font-weight: var(--sch-w-bold); color: var(--sch-ink);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.sch-stu__metrics { container-type: inline-size; }
+.sch-stu__m b.is-due { color: var(--sch-danger); }
+
+.sch-stu__sec { display: flex; flex-direction: column; gap: var(--sch-2); }
+.sch-stu__sec h3 { margin: 0; font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold); color: var(--sch-muted); }
+.sch-stu__grow {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-3); border-radius: var(--sch-radius);
+    border: 1px solid var(--sch-line); background: var(--sch-surface);
+}
+.sch-stu__gav {
+    width: 32px; height: 32px; border-radius: var(--sch-r-full); flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sch-surface-2); color: var(--sch-accent-ink);
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-bold);
+}
+.sch-stu__gt { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+.sch-stu__gt b { font-size: var(--sch-text-sm); color: var(--sch-ink); }
+.sch-stu__gt em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-stu__warn {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sch-2);
+    padding: var(--sch-3); border-radius: var(--sch-radius);
+    background: var(--sch-danger-soft); border: 1px solid var(--sch-danger-soft);
+}
+.sch-stu__warn span { font-size: var(--sch-text-xs); color: var(--sch-danger); }
+
+.sch-stu__ev { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sch-2); }
+.sch-stu__ev li { display: flex; align-items: center; gap: var(--sch-2); font-size: var(--sch-text-xs); }
+.sch-stu__ev li > span:not(.sch-stu__evd) { flex: 1 1 auto; color: var(--sch-ink-soft); }
+.sch-stu__ev em { font-style: normal; color: var(--sch-muted); }
+.sch-stu__evd { width: 6px; height: 6px; border-radius: var(--sch-r-full); background: var(--sch-accent); flex: 0 0 auto; }
+
+.sch-stu__fields { margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sch-2); }
+.sch-stu__fields > div {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: var(--sch-2) var(--sch-3); border-radius: var(--sch-r-sm); background: var(--sch-surface-alt);
+}
+.sch-stu__fields dt { font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-stu__fields dd { margin: 0; font-size: var(--sch-text-xs); color: var(--sch-ink); }
+
+.sch-stu__pft {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-3) var(--sch-4); border-block-start: 1px solid var(--sch-line);
+}
+.sch-stu__pft > a:first-child { flex: 1 1 auto; }
+
+@media (max-width: 700px) {
+    .sch-stu__metrics, .sch-stu__fields { grid-template-columns: 1fr; }
+    .sch-stu__panel { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sch-stu__panel { animation: none; }
+}

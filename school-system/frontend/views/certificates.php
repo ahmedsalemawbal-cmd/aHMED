@@ -174,6 +174,10 @@ if (!isset(SCH_Certificates::CATEGORIES[$sch_cat])) {
 
 $sch_use = SCH_Certificates::template_usage();
 
+// طالبٌ قادم من شاشة الطلاب (`?student=`): تُفتح النافذة عليه مباشرةً —
+// وإلا كان زرّ «إصدار شهادة» في صفّه يوصلك لقائمةٍ تبحث فيها عنه من جديد.
+$sch_for = isset($_GET['student']) ? absint($_GET['student']) : 0;
+
 // عدّاد كل تصنيف — الشريحة بلا رقم لا تقول كم وراءها
 $sch_ccount = [];
 foreach (SCH_Certificates::TEMPLATES as $sch_k => $sch_t) {
@@ -541,7 +545,7 @@ $sch_on = array_filter($sch_f);
                 <label for="c-student"><?php esc_html_e('الطالب', 'school-system'); ?></label>
                 <select id="c-student" name="student_id" required>
                     <?php foreach ($sch_pick as $sch_st) : ?>
-                        <option value="<?php echo esc_attr((string) $sch_st->id); ?>">
+                        <option value="<?php echo esc_attr((string) $sch_st->id); ?>" <?php selected($sch_for, (int) $sch_st->id); ?>>
                             <?php echo esc_html(SCH_Enrollment::full_name($sch_st)); ?>
                         </option>
                     <?php endforeach; ?>
@@ -701,6 +705,15 @@ $sch_on = array_filter($sch_f);
 
 <script>
 (function () {
+  /* طالبٌ جاء من قائمة الطلاب: النافذة تُفتح عليه فورًا — الرابط وحده
+     بلا فتحٍ يترك المستخدم أمام شاشةٍ لا تدلّه على ما طلبه. */
+  (function () {
+    var pick = document.getElementById('c-student');
+    if (!pick || !pick.value || !window.location.search.includes('student=')) { return; }
+    var opener = document.querySelector('[data-modal-open="sch-issue-cert"]');
+    if (opener) { opener.click(); }
+  })();
+
   /* ═══ مكتبة القوالب ═══
      البحث في المتصفّح: القوالب ثمانية وعشرون مُصيَّرة أصلًا، وطلبُ صفحةٍ
      جديدة لكل حرف يُكتب يجعل الاختيار أبطأ من التمرير. */

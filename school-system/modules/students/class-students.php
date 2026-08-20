@@ -158,6 +158,35 @@ final class SCH_Students
      * @param array{search?:string,status?:string,grade_level?:string,page?:int,per_page?:int} $args
      * @return array{items:array<int,object>,total:int}
      */
+    /**
+     * عدد الطلاب في كل حالة — استعلام واحد لا أربعة.
+     *
+     * شرائح الرأس بلا أرقام تُقرأ تسميات لا حالة مدرسة: «موقوف ٣» تدفع
+     * للضغط، و«موقوف» وحدها تُتجاوَز. والصفر يبقى معروضًا لأن غيابه يجعل
+     * الشريحة تظهر وتختفي بين زيارتين فتتغيّر خريطة الشاشة تحت اليد.
+     *
+     * @return array<string,int>
+     */
+    public static function status_counts(): array
+    {
+        global $wpdb;
+
+        $out = ['active' => 0, 'transferred' => 0, 'withdrawn' => 0, 'graduated' => 0];
+
+        $rows = $wpdb->get_results(
+            'SELECT status, COUNT(*) AS n FROM ' . sch_table('students') . ' GROUP BY status'
+        ) ?: [];
+
+        foreach ($rows as $row) {
+            $key = (string) $row->status;
+            if (isset($out[$key])) {
+                $out[$key] = (int) $row->n;
+            }
+        }
+
+        return $out;
+    }
+
     public static function list(array $args = []): array
     {
         global $wpdb;
@@ -292,6 +321,11 @@ final class SCH_Students
                                    INNER JOIN {$wpdb->users} u ON u.ID = g.guardian_user_id
                                   WHERE g.student_id = s.id
                                   ORDER BY g.is_primary DESC, g.id ASC LIMIT 1) AS guardian_name,
+                                (SELECT u2.user_login
+                                   FROM {$gs} g2
+                                   INNER JOIN {$wpdb->users} u2 ON u2.ID = g2.guardian_user_id
+                                  WHERE g2.student_id = s.id
+                                  ORDER BY g2.is_primary DESC, g2.id ASC LIMIT 1) AS guardian_phone,
                                 (SELECT r.name
                                    FROM {$tb} t
                                    INNER JOIN {$rt} r ON r.id = t.route_id
