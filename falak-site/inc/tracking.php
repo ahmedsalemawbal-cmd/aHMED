@@ -29,6 +29,8 @@ function falak_tiktok_pixel_head() {
 		return;
 	}
 	?>
+<link rel="dns-prefetch" href="//analytics.tiktok.com">
+<link rel="preconnect" href="https://analytics.tiktok.com" crossorigin>
 <!-- TikTok Pixel Code -->
 <script>
 !function (w, d, t) {

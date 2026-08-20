@@ -99,7 +99,7 @@ $jsdata = json_encode( array(
 	'whatsapp' => falak_wa_number(),
 ), JSON_UNESCAPED_UNICODE );
 
-$body_class = ( 'dashboard' === $PAGE ) ? 'falak-dashboard' : '';
+$body_class = ( 'dashboard' === $PAGE ) ? 'falak-dashboard' : ( 'home' === $PAGE ? '' : 'falak-page-' . $PAGE );
 ?><!doctype html>
 <html lang="ar" dir="rtl">
 <head>

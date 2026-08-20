@@ -222,10 +222,7 @@ function falak_tpl_enroll() {
 
 				<button type="submit" class="fk-btn fk-btn-p fk-form-submit"><?php falak_icon( 'sparkle', 18 ); ?> إرسال طلب التسجيل</button>
 
-				<div class="fk-form-alt">
-					أو سجّل مباشرةً عبر
-					<a href="<?php echo esc_url( falak_wa_url( 'السلام عليكم، أرغب في تسجيل طالب بمدرسة الفلك المنير' ) ); ?>" target="_blank" rel="noopener"><?php falak_icon( 'whatsapp', 17 ); ?> واتساب</a>
-				</div>
+				<p class="fk-form-note"><?php falak_icon( 'shield', 15 ); ?> بياناتك تصل مباشرةً لإدارة المدرسة، وسنتواصل معك في أقرب وقت.</p>
 			</form>
 		</div>
 	</section>

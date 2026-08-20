@@ -183,6 +183,8 @@ a{color:inherit}
 .fk-float .top.show{opacity:1;pointer-events:auto}
 .fk-float .top svg{width:22px;height:22px}
 @media(max-width:768px){.fk-float{bottom:18px;left:16px}.fk-float a{width:50px;height:50px}}
+/* صفحة التسجيل قمعٌ مركّز: نخفي زر واتساب العائم لتوجيه العميل للنموذج (تصل بياناته للوحة التحكم) */
+body.falak-page-enroll .fk-float .wa{display:none}
 
 /* ─────────────────────────────────────────
    5. الأزرار المشتركة
@@ -418,9 +420,8 @@ a{color:inherit}
 .fk-field textarea{resize:vertical;min-height:90px}
 .fk-hp{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important;opacity:0}
 .fk-form-submit{width:100%;justify-content:center;margin-top:6px}
-.fk-form-alt{text-align:center;margin-top:16px;font-size:14px;color:var(--c-muted)}
-.fk-form-alt a{color:#25a355;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.fk-form-alt a svg{width:17px;height:17px}
+.fk-form-note{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;margin-top:16px;font-size:13.5px;color:var(--c-muted)}
+.fk-form-note svg{width:15px;height:15px;color:var(--c-green);flex-shrink:0}
 .fk-form-msg{display:none;padding:14px 16px;border-radius:10px;font-size:14.5px;font-weight:600;margin-bottom:18px}
 .fk-form-msg.ok{display:block;background:#e6f7ee;color:#137a45;border:1px solid #b9e6cd}
 .fk-form-msg.err{display:block;background:#fdecec;color:#c0392b;border:1px solid #f3c4c4}

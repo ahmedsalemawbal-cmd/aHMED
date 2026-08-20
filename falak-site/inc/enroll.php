@@ -90,17 +90,24 @@ function falak_handle_enroll( WP_REST_Request $request ) {
 		return new WP_REST_Response( array( 'ok' => true ), 200 ); // نتظاهر بالنجاح.
 	}
 
-	// التحقق من nonce (CSRF).
-	$nonce = $request->get_header( 'X-WP-Nonce' );
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-		return new WP_REST_Response( array( 'ok' => false, 'error' => 'nonce' ), 403 );
+	// حماية CSRF متوافقة مع التخزين المؤقت (الكاش): لا نعتمد على nonce الصفحة
+	// لأنه يفسد عندما تُخزَّن صفحة الإعلان مؤقتًا (cache)، فيفشل الإرسال ويضيع العميل.
+	// بدلًا منه نتحقق فقط أن الطلب ليس قادمًا من موقعٍ خارجي (يعمل مع الكاش دائمًا).
+	$origin = $request->get_header( 'origin' );
+	if ( $origin ) {
+		$o_host = wp_parse_url( $origin, PHP_URL_HOST );
+		$s_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( $o_host && $s_host && strcasecmp( $o_host, $s_host ) !== 0 ) {
+			return new WP_REST_Response( array( 'ok' => false, 'error' => 'origin' ), 403 );
+		}
 	}
 
-	// rate-limit: 5 طلبات / 10 دقائق لكل IP.
+	// rate-limit: حدّ مرتفع يناسب زيارات الإعلان (عناوين IP مشتركة عبر شبكات الجوّال)
+	// مع كبح الإغراق الآلي — والهوني بوت يتكفّل بمعظم السبام.
 	$ip  = falak_client_ip();
 	$key = 'falak_rl_' . md5( $ip );
 	$hits = (int) get_transient( $key );
-	if ( $hits >= 5 ) {
+	if ( $hits >= 30 ) {
 		return new WP_REST_Response( array( 'ok' => false, 'error' => 'rate' ), 429 );
 	}
 	set_transient( $key, $hits + 1, 10 * MINUTE_IN_SECONDS );

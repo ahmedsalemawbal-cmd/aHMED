@@ -73,6 +73,21 @@ function falak_font_preconnect() {
 }
 
 /**
+ * جعل خطوط جوجل غير حاجبة للعرض (non-render-blocking): تُرسم الصفحة فورًا بخطٍّ بديل
+ * ثم تُرقّى عند تحميل الخطوط. أكبر مكسب سرعة لصفحة الإعلان — لا ننتظر ملف الخطوط قبل الظهور.
+ */
+add_filter( 'style_loader_tag', 'falak_async_font_tag', 10, 4 );
+function falak_async_font_tag( $tag, $handle, $href, $media ) {
+	if ( 'falak-fonts' !== $handle ) {
+		return $tag;
+	}
+	$h = esc_url( $href );
+	return '<link rel="preload" as="style" href="' . $h . '" fetchpriority="high">' . "\n"
+		. '<link rel="stylesheet" href="' . $h . '" media="print" onload="this.media=\'all\';this.onload=null;">' . "\n"
+		. '<noscript><link rel="stylesheet" href="' . $h . '"></noscript>' . "\n";
+}
+
+/**
  * إزالة الحشو غير الضروري (إيموجي، embeds، أنماط البلوكات غير المستخدمة) — أداء أنظف وأسرع.
  */
 add_action( 'init', function () {

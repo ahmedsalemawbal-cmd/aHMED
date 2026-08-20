@@ -199,7 +199,7 @@
     });
   }
 
-  /* إرسال نموذج التسجيل عبر REST مع رجوع لواتساب عند التعذّر */
+  /* إرسال نموذج التسجيل عبر REST — يُحفظ دائمًا في لوحة التحكم (بلا واتساب) */
   function initEnrollForm() {
     var form = document.getElementById('falak-enroll-form');
     if (!form) return;
@@ -221,41 +221,47 @@
 
       // تحقّق.
       if (!payload.section) {
-        showMsg('err', 'الرجاء تحديد نوع الطالب (ولد / بنت).');
+        showMsg('err', 'الرجاء تحديد نوع الطالب (طالب / طالبة).');
         return;
       }
       if (!payload.student_name || !payload.grade || !payload.guardian_name || !payload.guardian_phone) {
         showMsg('err', 'الرجاء تعبئة جميع الحقول المطلوبة (المميّزة بـ *).');
         return;
       }
+      if (!data.rest) { showMsg('err', 'حدث خطأ مؤقت، يرجى المحاولة مرة أخرى بعد لحظات.'); return; }
 
       var btnText = btn ? btn.innerHTML : '';
       if (btn) { btn.disabled = true; btn.innerHTML = 'جارٍ الإرسال…'; }
+      var reset = function () { if (btn) { btn.disabled = false; btn.innerHTML = btnText; } };
 
-      var done = function (ok) {
-        if (btn) { btn.disabled = false; btn.innerHTML = btnText; }
-        if (ok) {
-          showMsg('ok', 'تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.');
-          form.reset();
-          // حدث تحويل لبكسل تيك توك (تحسين الحملة الإعلانية)
-          if (window.ttq) { try { ttq.track('CompleteRegistration'); } catch (e) {} }
-        } else {
-          // رجوع لواتساب حتى لا يضيع الطلب.
-          var wa = data.whatsapp ? 'https://wa.me/' + data.whatsapp + '?text=' + encodeURIComponent(buildWaText(payload)) : null;
-          showMsg('err', 'تعذّر الإرسال عبر الموقع. ' + (wa ? 'يمكنك الإرسال عبر واتساب.' : 'حاول لاحقًا.'));
-          if (wa) window.open(wa, '_blank');
-        }
+      // الإرسال إلى لوحة التحكم مع إعادة محاولة واحدة عند تعثّر الشبكة — بلا أي تحويل لواتساب.
+      var send = function (attempt) {
+        var headers = { 'Content-Type': 'application/json' };
+        if (data.nonce) { headers['X-WP-Nonce'] = data.nonce; }
+        fetch(data.rest, {
+          method: 'POST',
+          headers: headers,
+          credentials: 'same-origin',
+          body: JSON.stringify(payload)
+        }).then(function (r) {
+          if (r.ok) {
+            reset();
+            showMsg('ok', 'تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.');
+            form.reset();
+            // حدث تحويل لبكسل تيك توك (تحسين الحملة الإعلانية).
+            if (window.ttq) { try { ttq.track('CompleteRegistration'); } catch (e) {} }
+          } else if (attempt < 2) {
+            send(attempt + 1);
+          } else {
+            reset();
+            showMsg('err', 'تعذّر إرسال الطلب حاليًا، يرجى المحاولة مرة أخرى بعد لحظات.');
+          }
+        }).catch(function () {
+          if (attempt < 2) { send(attempt + 1); }
+          else { reset(); showMsg('err', 'تعذّر الاتصال، تحقّق من الإنترنت وحاول مرة أخرى.'); }
+        });
       };
-
-      if (!data.rest) { done(false); return; }
-
-      fetch(data.rest, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': data.nonce || '' },
-        body: JSON.stringify(payload)
-      }).then(function (r) {
-        return r.ok ? r.json().then(function () { done(true); }) : done(false);
-      }).catch(function () { done(false); });
+      send(1);
     });
 
     function showMsg(type, text) {
@@ -263,14 +269,6 @@
       msg.className = 'fk-form-msg ' + type;
       msg.textContent = text;
       msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    function buildWaText(p) {
-      return 'طلب تسجيل جديد:\n' +
-        'الطالب: ' + (p.student_name || '') + '\n' +
-        'النوع: ' + (p.section || '') + '\n' +
-        'المرحلة: ' + (p.grade || '') + '\n' +
-        'ولي الأمر: ' + (p.guardian_name || '') + '\n' +
-        'الجوال: ' + (p.guardian_phone || '');
     }
   }
 
