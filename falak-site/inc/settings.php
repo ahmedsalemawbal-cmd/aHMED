@@ -33,6 +33,7 @@ function falak_default_opts() {
 		'favicon'       => '',
 		'about_image'   => 'https://alfalakalmuneer.com/wp-content/uploads/2026/08/doha24net-1755349731.jpg',
 		'tiktok_pixel'  => 'DA1D3LRC77UDGUKDUVIG', // معرّف بكسل تيك توك (قابل للتعديل من الإعدادات)
+		'snap_pixel'    => '',                    // معرّف بكسل سناب شات (Snap Pixel ID) — يُفعّل التتبّع عند إدخاله
 		// إحصائيات الواجهة الرئيسية.
 		'stat_students' => '850',
 		'stat_grads'    => '320',
@@ -167,6 +168,7 @@ function falak_settings_page() {
 		),
 		'التتبّع والإعلانات' => array(
 			'tiktok_pixel' => array( 'معرّف بكسل تيك توك (TikTok Pixel ID)', 'text' ),
+			'snap_pixel'   => array( 'معرّف بكسل سناب شات (Snap Pixel ID)', 'text' ),
 		),
 	);
 	?>

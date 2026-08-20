@@ -248,8 +248,9 @@
             reset();
             showMsg('ok', 'تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.');
             form.reset();
-            // حدث تحويل لبكسل تيك توك (تحسين الحملة الإعلانية).
+            // أحداث تحويل للحملات الإعلانية (تيك توك + سناب شات).
             if (window.ttq) { try { ttq.track('CompleteRegistration'); } catch (e) {} }
+            if (window.snaptr) { try { snaptr('track', 'SIGN_UP'); } catch (e) {} }
           } else if (attempt < 2) {
             send(attempt + 1);
           } else {

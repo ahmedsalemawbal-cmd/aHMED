@@ -42,3 +42,31 @@ function falak_tiktok_pixel_head() {
 <!-- End TikTok Pixel Code -->
 	<?php
 }
+
+/**
+ * معرّف بكسل سناب شات بعد التنظيف (أحرف/أرقام/شرطات فقط)، أو '' .
+ * معرّفات سناب عادةً بصيغة UUID (تحتوي شرطات) لذا لا نحذف الشرطات.
+ */
+function falak_snap_pixel_id() {
+	$pid = preg_replace( '/[^A-Za-z0-9-]/', '', (string) falak_opt( 'snap_pixel' ) );
+	return $pid ? $pid : '';
+}
+
+add_action( 'wp_head', 'falak_snap_pixel_head', 3 );
+function falak_snap_pixel_head() {
+	$pid = falak_snap_pixel_id();
+	if ( '' === $pid ) {
+		return;
+	}
+	?>
+<link rel="dns-prefetch" href="//sc-static.net">
+<link rel="preconnect" href="https://sc-static.net" crossorigin>
+<!-- Snap Pixel Code -->
+<script type="text/javascript">
+(function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function(){a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};a.queue=[];var s="script";var r=t.createElement(s);r.async=!0;r.src=n;var u=t.getElementsByTagName(s)[0];u.parentNode.insertBefore(r,u)})(window,document,"https://sc-static.net/scevent.min.js");
+snaptr('init','<?php echo esc_js( $pid ); ?>');
+snaptr('track','PAGE_VIEW');
+</script>
+<!-- End Snap Pixel Code -->
+	<?php
+}

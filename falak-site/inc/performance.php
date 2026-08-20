@@ -29,14 +29,7 @@ function falak_enqueue_assets() {
 	);
 
 	// متغيرات الأنماط الزخرفية (data-URIs مولّدة من PHP).
-	$vars = ':root{'
-		. '--fk-pattern:url("' . falak_pattern_data_uri( '1F9D5A', '0.5' ) . '");'
-		. '--fk-pattern-gold:url("' . falak_pattern_data_uri( 'C6A15B', '1' ) . '");'
-		. '--fk-pattern-light:url("' . falak_pattern_data_uri( 'FFFFFF', '1' ) . '");'
-		. '--fk-pattern-hero:url("' . falak_pattern_hero( 'C6A15B', '0.55' ) . '");'
-		. '--fk-pattern-hero-w:url("' . falak_pattern_hero( 'FFFFFF', '0.7' ) . '");'
-		. '}';
-	wp_add_inline_style( 'falak-main', $vars );
+	wp_add_inline_style( 'falak-main', falak_pattern_css_vars() );
 
 	wp_enqueue_script(
 		'falak-main',
@@ -85,6 +78,44 @@ function falak_async_font_tag( $tag, $handle, $href, $media ) {
 	return '<link rel="preload" as="style" href="' . $h . '" fetchpriority="high">' . "\n"
 		. '<link rel="stylesheet" href="' . $h . '" media="print" onload="this.media=\'all\';this.onload=null;">' . "\n"
 		. '<noscript><link rel="stylesheet" href="' . $h . '"></noscript>' . "\n";
+}
+
+/**
+ * متغيرات الأنماط الزخرفية (data-URIs مولّدة من PHP) — تُستعمل في التحميل العادي وفي الإدراج المباشر.
+ */
+function falak_pattern_css_vars() {
+	return ':root{'
+		. '--fk-pattern:url("' . falak_pattern_data_uri( '1F9D5A', '0.5' ) . '");'
+		. '--fk-pattern-gold:url("' . falak_pattern_data_uri( 'C6A15B', '1' ) . '");'
+		. '--fk-pattern-light:url("' . falak_pattern_data_uri( 'FFFFFF', '1' ) . '");'
+		. '--fk-pattern-hero:url("' . falak_pattern_hero( 'C6A15B', '0.55' ) . '");'
+		. '--fk-pattern-hero-w:url("' . falak_pattern_hero( 'FFFFFF', '0.7' ) . '");'
+		. '}';
+}
+
+/**
+ * صفحة التسجيل (هبوط حملة إعلانية): ندمج كامل الأنماط داخل الصفحة (inline) ونلغي طلب ملف
+ * CSS الخارجي — فلا يبقى أي مورد يحجب الرسم، وتظهر الصفحة فورًا لزائر الإعلان (سناب/تيك توك…).
+ */
+add_action( 'wp_enqueue_scripts', 'falak_enroll_inline_boot', 200 );
+function falak_enroll_inline_boot() {
+	if ( is_admin() || ! function_exists( 'falak_current_page_key' ) || 'enroll' !== falak_current_page_key() ) {
+		return;
+	}
+	wp_dequeue_style( 'falak-main' );          // نلغي الملف الخارجي.
+	add_action( 'wp_head', 'falak_enroll_inline_css', 7 );
+}
+
+/**
+ * طباعة كامل ملف CSS داخل <head> مباشرةً (بلا طلب شبكة) لصفحة التسجيل.
+ */
+function falak_enroll_inline_css() {
+	$css_path = FALAK_DIR . 'assets/css/falak.css';
+	if ( ! is_readable( $css_path ) ) {
+		return;
+	}
+	$css = (string) file_get_contents( $css_path );
+	echo "<style id=\"falak-critical\">" . falak_pattern_css_vars() . $css . "</style>\n"; // phpcs:ignore WordPress.Security.EscapeOutput -- CSS داخلي موثوق.
 }
 
 /**
