@@ -79,6 +79,16 @@
 
 /* ---------- قائمة الطلاب ---------- */
 
+/* الحاضنة وسطر الانتظار: كانا بلا تعريف، فيظهر «جارٍ التحميل…» نصًّا
+   عاريًا في منتصف شاشة السائق قبل وصول القائمة. */
+.schd-list { display: block; }
+.schd-loading {
+  padding: 18px 14px;
+  color: var(--d-muted);
+  text-align: center;
+  font-size: 14px;
+}
+
 .schd-row {
   display: flex;
   align-items: center;

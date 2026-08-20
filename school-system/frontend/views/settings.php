@@ -67,7 +67,8 @@ $sch_cur = SCH_Years::current();
                 <?php wp_nonce_field('sch_save_brand', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="save_brand">
 
-                <div class="sch-blogogrid">
+                <?php // `sch-brandgrid` لا `sch-blogogrid`: الثانية غير معرَّفة، فكان العمودان يسقطان إلى عمودٍ واحد بلا فجوة. ?>
+                <div class="sch-brandgrid">
                     <?php
                     $sch_logo = SCH_Brand::logo();
                     $sch_fav  = SCH_Brand::favicon();

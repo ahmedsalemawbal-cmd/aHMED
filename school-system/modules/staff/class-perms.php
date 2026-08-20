@@ -35,18 +35,37 @@ final class SCH_Perms
         'audit'   => 'سجل النظام للقراءة فقط — تعديله يُبطل قيمته كسجل',
     ];
 
-    /** أقسام لا تُمنح لأدوار بعينها. */
+    /**
+     * أقسام لا تُمنح لأدوار بعينها.
+     *
+     * القيم **أسماء أقسام حقيقية** من سجلّ أقسام الداشبورد. وكانت
+     * فيها `referrals` (شاشةٌ حلّ محلّها `inbox`) و`accounting` (اسمٌ لا
+     * قسم له؛ الأقسام أربعة: `accounts` و`journal` و`ledger` و`reports`) —
+     * واسمٌ لا يطابق قسمًا لا يمنع شيئًا: كان دفتر الأستاذ يُمنَح للحارس
+     * والسائق رغم أن القاعدة تقول غير ذلك.
+     */
     public const LOCKED_FOR = [
-        'sch_guard'  => ['clinic', 'meds', 'referrals', 'inbox', 'nerve', 'payroll', 'accounting'],
-        'sch_driver' => ['clinic', 'meds', 'referrals', 'inbox', 'nerve', 'payroll', 'accounting'],
+        'sch_guard'  => ['clinic', 'meds', 'inbox', 'nerve', 'payroll',
+                         'accounts', 'journal', 'ledger', 'reports', 'finance'],
+        'sch_driver' => ['clinic', 'meds', 'inbox', 'nerve', 'payroll',
+                         'accounts', 'journal', 'ledger', 'reports', 'finance'],
     ];
 
     /** سبب المنع حسب الدور. */
     public const LOCKED_FOR_REASON =
-        'بيانات صحية أو سلوكية لا يراها من يقف عند البوابة أو يقود الحافلة';
+        'بيانات صحية أو سلوكية أو مالية لا يراها من يقف عند البوابة أو يقود الحافلة';
 
-    /** أقسام تُمنح فورًا ويصل إشعار للمدير. */
-    public const SENSITIVE = ['payroll', 'accounting', 'employees', 'settings', 'org', 'invoices'];
+    /**
+     * أقسام تُمنح فورًا ويصل إشعار للمدير.
+     *
+     * كانت تحمل ثلاثة أسماء لا أقسام لها — `accounting` و`org` و`invoices` —
+     * فكان منح المحاسبة والفواتير يمرّ **بلا إشعار** ولا تمييزٍ في الشاشة،
+     * وهو عكس المقصود تمامًا. والفواتير قسمُها `finance`.
+     */
+    public const SENSITIVE = [
+        'payroll', 'employees', 'perms', 'settings', 'rollover',
+        'accounts', 'journal', 'ledger', 'reports', 'finance',
+    ];
 
     // ---------- القراءة ----------
 

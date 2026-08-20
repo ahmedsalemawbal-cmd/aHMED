@@ -119,42 +119,11 @@
     });
   }
 
-  /* ---------- التوسّع داخل الصف ---------- */
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-expand]');
-    if (!t) { return; }
-    e.preventDefault();
-
-    var row = t.closest('[data-row]') || t.closest('tr');
-    if (!row) { return; }
-
-    row.classList.toggle('is-open');
-
-    var det = row.nextElementSibling;
-    if (det && det.hasAttribute('data-detail')) { det.hidden = !row.classList.contains('is-open'); }
-  });
-
-  /* ---------- التصفية: زر مسح لكل حقل ---------- */
-  document.querySelectorAll('[data-filter]').forEach(function (f) {
-    var field = f.querySelector('select, input');
-    var clear = f.querySelector('[data-clear-field]');
-
-    function mark() {
-      f.classList.toggle('has', field && field.value !== '');
-    }
-
-    if (field) { field.addEventListener('change', mark); mark(); }
-
-    if (clear) {
-      clear.addEventListener('click', function () {
-        if (!field) { return; }
-        field.value = '';
-        mark();
-        var form = f.closest('form');
-        if (form) { form.submit(); }
-      });
-    }
-  });
+  /* حُذف من هنا مستمعان لم يكن لهما مُصدِر في المشروع كلّه:
+     `[data-expand]`/`[data-detail]` للتوسّع داخل الصفّ، و
+     `[data-filter]`/`[data-clear-field]` لزرّ مسح كل حقل تصفية.
+     لا قالب ولا وحدة تُخرج أيًّا من هذه السمات، فكانتا شفرةً تُحمَّل على
+     كل شاشة ولا تُنفَّذ. ومن أرادهما فليُخرج السمات أوّلًا. */
 
   sync();
 })();

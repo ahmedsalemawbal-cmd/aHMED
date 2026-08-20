@@ -1145,6 +1145,9 @@ textarea[dir="ltr"] {
   gap: var(--sch-5);
   align-items: start;
 }
+/* عمود القائمة: ابن شبكةٍ بلا `min-width: 0` يتمدّد بمحتواه ويدفع
+   العمود المجاور خارج الشاشة. */
+.sch-permgrid__main { min-width: 0; }
 /* داخل معالج الموظف لا ريل — عمودان فقط (القائمة + الملخّص) */
 .sch-permgrid--norail { grid-template-columns: 1fr 300px; }
 
@@ -1844,16 +1847,9 @@ tr.is-picked, .is-picked { background: var(--sch-accent-soft) !important; }
   font-weight: 700;
 }
 .sch-view.is-on b { background: var(--sch-accent); color: var(--sch-on-accent); }
-.sch-filter.has select,
-.sch-filter.has input { color: var(--sch-accent-dark); font-weight: 600; }
-.sch-filter.has button { color: var(--sch-danger); }
-.is-open .sch-expand,
-tr.is-open .sch-expand {
-  transform: rotate(180deg);
-  background: var(--sch-accent-soft);
-  color: var(--sch-accent);
-  border-color: var(--sch-accent);
-}
+/* حُذفت من هنا أنماط `.sch-filter.has` و`.sch-expand`: لا قالب في المشروع
+   يحمل أيًّا من الصنفين، وقد حُذف معهما مستمعاهما في `list-tools.js`.
+   `.sch-filters` (بالجمع) شيءٌ آخر حيّ في شاشة الشهادات. */
 .sch-watch button.is-on { color: var(--sch-gold-ink); }
 .sch-watch button.is-on svg { fill: currentColor; }
 .sch-watch button.is-on[data-bell] { color: var(--sch-accent); }
@@ -2141,6 +2137,15 @@ tr.is-open .sch-expand {
   color: #20233a;
 }
 .sch-badge2__qr svg { display: block; width: 84px; height: 84px; }
+/* موظّفٌ بلا رمز: تُترك مساحة الرمز لتبقى البطاقات متساوية عند القصّ،
+   ويُقال السبب بدل فراغٍ يُظنّ خطأ طباعة. */
+.sch-badge2__noqr {
+  margin-top: auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 102px; height: 102px;
+  border: 1px dashed rgba(255, 255, 255, .5); border-radius: var(--sch-radius);
+  color: rgba(255, 255, 255, .72); font-size: var(--sch-text-xs); text-align: center;
+}
 /* الصورة ٢٠٪ من القطر وحولها حلقة بيضاء — داخل هامش تصحيح الخطأ */
 .sch-badge2__face {
   position: absolute;
@@ -2739,6 +2744,8 @@ body.sch-locked { overflow: hidden; }
 .sch-idc { transform: none !important; }
 
 /* رأس بأكثر من زر */
+/* كتلة العنوان: بلا `min-width: 0` يخرج عنوانٌ طويل من حاضنته المرنة. */
+.sch-head__t { flex: 1 1 auto; min-width: 0; }
 .sch-head__acts { display: flex; gap: var(--sch-2); flex: 0 0 auto; flex-wrap: wrap; }
 .sch-head__acts .sch-btn { margin: 0; }
 
@@ -3233,6 +3240,20 @@ body.sch-locked { overflow: hidden; }
 .sch-chips { display: flex; flex-wrap: wrap; gap: var(--sch-2); }
 .sch-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--sch-r-full); background: var(--sch-surface-alt); color: var(--sch-muted); font-size: var(--sch-text-xs); }
 .sch-chip--warn { background: var(--sch-warn-soft); color: var(--sch-warn); font-weight: 700; }
+
+/* شريحةٌ تُضغط — تصفية «الجديد فقط» في البطاقات و«مسح» في السجل.
+   كانت تُستعمل في ثلاث شاشات بلا تعريف، فتظهر رابطًا نصّيًّا لا شريحة. */
+.sch-body a.sch-chipbtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding-inline: var(--sch-3);
+  border: 1px solid var(--sch-line-strong); border-radius: var(--sch-r-full);
+  background: var(--sch-surface); color: var(--sch-ink-soft);
+  font-size: var(--sch-text-sm); font-weight: 600; text-decoration: none;
+}
+.sch-body a.sch-chipbtn:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+.sch-body a.sch-chipbtn.is-on {
+  background: var(--sch-accent-soft); border-color: var(--sch-accent); color: var(--sch-accent-ink);
+}
 
 /* ═══════════ لوحة نداء الانصراف ═══════════
    تُقرأ من مسافة ذراع على جهاز عند الباب: الاسم كبير، وزمن الانتظار رقمٌ
