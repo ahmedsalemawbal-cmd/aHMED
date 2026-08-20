@@ -131,6 +131,100 @@ final class SCH_Certificates
             'pal' => ['bg' => '#FCFBF6', 'bg2' => '#EFEADC', 'ink' => '#22201A',
                       'soft' => '#6A6558', 'dim' => '#9E9787', 'gold' => '#9C7F3F'],
         ],
+
+        // ── المحراب: القوس المدبَّب يحتضن المتن ──
+        'mihrab' => [
+            'name' => 'المحرابية', 'cat' => 'quran', 'tags' => 'محراب قوس عاجي ذهب مخطوط',
+            'layout' => 'mihrab', 'orn' => ['seal', 'rule'],
+            'pal' => ['bg' => '#F9F5EA', 'bg2' => '#E9DCC0', 'ink' => '#221D14',
+                      'soft' => '#6D6047', 'dim' => '#9A8E76', 'gold' => '#8C6E24'],
+        ],
+        'nightarch' => [
+            'name' => 'الليلية', 'cat' => 'quran', 'tags' => 'كحلي ذهب محراب ليل فخم',
+            'layout' => 'mihrab', 'orn' => ['seal', 'rope'],
+            'pal' => ['bg' => '#0C1830', 'bg2' => '#0A1226', 'ink' => '#F7F2E4',
+                      'soft' => '#B7C1D6', 'dim' => '#7D89A4', 'gold' => '#C9A227'],
+        ],
+        'turquoise' => [
+            'name' => 'الفيروزية', 'cat' => 'young', 'tags' => 'فيروزي هادئ روضة محراب',
+            'layout' => 'mihrab', 'orn' => ['seal'],
+            'pal' => ['bg' => '#F1FBFA', 'bg2' => '#CFEAE6', 'ink' => '#0E2624',
+                      'soft' => '#42706B', 'dim' => '#87A8A4', 'gold' => '#0F766E'],
+        ],
+
+        // ── الوسام: ما يُعلَّق لا ما يُوقَّع ──
+        'medal' => [
+            'name' => 'الوسام', 'cat' => 'honor', 'tags' => 'وسام شريط تكريم عاجي',
+            'layout' => 'medal', 'orn' => ['medallion', 'rule'],
+            'pal' => ['bg' => '#FCF9F2', 'bg2' => '#8E1B29', 'ink' => '#231A1B',
+                      'soft' => '#6E5D5F', 'dim' => '#9C8C8E', 'gold' => '#A8842C'],
+        ],
+        'indigo' => [
+            'name' => 'النيلي', 'cat' => 'sport', 'tags' => 'نيلي رياضة بطولة وسام',
+            'layout' => 'medal', 'orn' => ['medallion', 'rule'],
+            'pal' => ['bg' => '#FFFFFF', 'bg2' => '#1E3A8A', 'ink' => '#111726',
+                      'soft' => '#4C5878', 'dim' => '#8A93AC', 'gold' => '#1E3A8A'],
+        ],
+        'garnet' => [
+            'name' => 'العنابية', 'cat' => 'honor', 'tags' => 'عنّابي ذهب ملكي داكن',
+            'layout' => 'medal', 'orn' => ['medallion', 'rope'],
+            'pal' => ['bg' => '#3E0F1B', 'bg2' => '#5E1A2A', 'ink' => '#F9F1E4',
+                      'soft' => '#DCB9BF', 'dim' => '#A5767F', 'gold' => '#D9B46A'],
+        ],
+
+        // ── الشمس: أول ما يرسمه طفل ──
+        'dawn' => [
+            'name' => 'الشروق', 'cat' => 'young', 'tags' => 'أشعة كهرماني صغار مرح',
+            'layout' => 'sun', 'orn' => ['seal', 'confetti'],
+            'pal' => ['bg' => '#FFF8E6', 'bg2' => '#F6E2B3', 'ink' => '#3A2C10',
+                      'soft' => '#7E6C3C', 'dim' => '#AD9A64', 'gold' => '#C98A12'],
+        ],
+        'fullmoon' => [
+            'name' => 'البدرية', 'cat' => 'formal', 'tags' => 'كحلي فضة أشعة ليل',
+            'layout' => 'sun', 'orn' => ['seal', 'rule'],
+            'pal' => ['bg' => '#0D1224', 'bg2' => '#1A2440', 'ink' => '#EEF1F8',
+                      'soft' => '#AEB8CE', 'dim' => '#79839B', 'gold' => '#B8C3DC'],
+        ],
+
+        // ── المخطوطة: الزخرفة في الحاشية لا في سُمك الخط ──
+        'manuscript' => [
+            'name' => 'المخطوطة', 'cat' => 'quran', 'tags' => 'مخطوط لازورد ذهب حاشية',
+            'layout' => 'manuscript', 'orn' => ['seal', 'rope'],
+            'pal' => ['bg' => '#F7EFDD', 'bg2' => '#1D3B8B', 'ink' => '#221B10',
+                      'soft' => '#6B5D42', 'dim' => '#998A6C', 'gold' => '#A8842C'],
+        ],
+        'andalus' => [
+            'name' => 'الأندلسية', 'cat' => 'grad', 'tags' => 'أندلس أخضر ذهب حاشية تخرّج',
+            'layout' => 'manuscript', 'orn' => ['seal', 'rule'],
+            'pal' => ['bg' => '#F4F0E4', 'bg2' => '#14532D', 'ink' => '#1E2418',
+                      'soft' => '#63705A', 'dim' => '#93A08A', 'gold' => '#9C7C2F'],
+        ],
+        'inkwell' => [
+            'name' => 'الحبرية', 'cat' => 'honor', 'tags' => 'حبر داكن ذهب مخطوط تكريم',
+            'layout' => 'manuscript', 'orn' => ['seal', 'rope'],
+            'pal' => ['bg' => '#101828', 'bg2' => '#C9A227', 'ink' => '#F5EEDC',
+                      'soft' => '#A9B3C8', 'dim' => '#77819A', 'gold' => '#C9A227'],
+        ],
+
+        // ── الكوفيّ: وحدته مربّعٌ وزاوية ──
+        'kufi' => [
+            'name' => 'الكوفية', 'cat' => 'quran', 'tags' => 'كوفي هندسي أخضر حفظ تلاوة',
+            'layout' => 'kufic', 'orn' => ['seal', 'rule'],
+            'pal' => ['bg' => '#F7F3E8', 'bg2' => '#14532D', 'ink' => '#1F2A22',
+                      'soft' => '#5E6B5C', 'dim' => '#8E9A8C', 'gold' => '#14532D'],
+        ],
+        'sand' => [
+            'name' => 'الرملية', 'cat' => 'grad', 'tags' => 'رملي بنّي كوفي هادئ',
+            'layout' => 'kufic', 'orn' => ['seal', 'corners'],
+            'pal' => ['bg' => '#F6EFE2', 'bg2' => '#7A5C2E', 'ink' => '#2B2318',
+                      'soft' => '#6F6047', 'dim' => '#9E9078', 'gold' => '#7A5C2E'],
+        ],
+        'onyxkufi' => [
+            'name' => 'السبج الكوفية', 'cat' => 'formal', 'tags' => 'أسود ذهب كوفي رصين',
+            'layout' => 'kufic', 'orn' => ['seal', 'rope'],
+            'pal' => ['bg' => '#101318', 'bg2' => '#1B1F27', 'ink' => '#F3EDE0',
+                      'soft' => '#A3ABBA', 'dim' => '#6E7686', 'gold' => '#C9A227'],
+        ],
     ];
 
     /**
@@ -610,11 +704,41 @@ final class SCH_Certificates
 
         [$l1, $l2] = self::two_lines($reason ?: 'تقديرًا لجهده والتزامه خلال العام الدراسي');
 
-        $dark = $lay !== 'band' && $lay !== 'minimal';
+        // الداكن يُقرأ من اللون لا من اسم التخطيط: قالبٌ متمركز بأرضية عاجية
+        // كان يأخذ قلب ختمٍ داكنًا لأن تخطيطه ليس `band`.
+        $dark = self::is_dark($p['bg']);
         $svg  = '';
 
         // ── الأرضية ──
-        if ($lay === 'band') {
+        if ($lay === 'mihrab') {
+            // محراب: أرضيةٌ هادئة وقوسٌ يحتضن المتن — والقوس هو الحاشية.
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 .  '<rect x="30" y="30" width="' . ($w - 60) . '" height="' . ($h - 60) . '" fill="none" stroke="' . $p['bg2'] . '" stroke-width="10"/>'
+                 .  self::guilloche($c, 380, 250, $p['gold'], $dark ? .14 : .1)
+                 .  self::arch($c, 78, 700, 620, $p['gold'], 2.4)
+                 .  self::arch($c, 96, 660, 596, $p['gold'], .8, .55);
+        } elseif ($lay === 'medal') {
+            // وسام: المتن يبدأ تحت الوسام، فأعلى الورقة له لا للنص.
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 .  '<rect x="26" y="26" width="' . ($w - 52) . '" height="' . ($h - 52) . '" fill="none" stroke="' . $p['gold'] . '" stroke-width="2"/>'
+                 .  '<rect x="38" y="38" width="' . ($w - 76) . '" height="' . ($h - 76) . '" fill="none" stroke="' . $p['gold'] . '" stroke-width=".7" opacity=".55"/>'
+                 .  self::guilloche($c, 420, 235, $p['gold'], $dark ? .13 : .09);
+        } elseif ($lay === 'sun') {
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 .  self::rays($c, 214, 118, 186, $p['gold'], 28, $dark ? .34 : .26)
+                 .  '<rect x="30" y="30" width="' . ($w - 60) . '" height="' . ($h - 60) . '" rx="26" fill="none" stroke="' . $p['gold'] . '" stroke-width="2.4"/>';
+        } elseif ($lay === 'manuscript') {
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 .  self::illum($w, $h, $p['gold'], $p['bg2'])
+                 .  self::guilloche($c, 400, 230, $p['gold'], $dark ? .12 : .085);
+        } elseif ($lay === 'kufic') {
+            $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
+                 .  '<rect x="0" y="0" width="' . $w . '" height="16" fill="' . $p['bg2'] . '"/>'
+                 .  '<rect x="0" y="' . ($h - 16) . '" width="' . $w . '" height="16" fill="' . $p['bg2'] . '"/>'
+                 .  self::kufic_band(70, $w - 70, 62, $p['gold'], .55)
+                 .  self::kufic_band(70, $w - 70, $h - 62, $p['gold'], .55)
+                 .  '<rect x="46" y="46" width="' . ($w - 92) . '" height="' . ($h - 92) . '" fill="none" stroke="' . $p['gold'] . '" stroke-width="1.6"/>';
+        } elseif ($lay === 'band') {
             // شريط جانبي ملوّن يترك المتن كاملًا للنص (يبدأ من اليمين — RTL)
             $bw   = 168;
             $svg .= '<rect width="' . $w . '" height="' . $h . '" fill="' . $p['bg'] . '"/>'
@@ -632,6 +756,14 @@ final class SCH_Certificates
         }
 
         // ── الزخارف ──
+        if ($has('guilloche')) {
+            $svg .= self::guilloche($c, 400, 260, $p['gold'], $dark ? .16 : .12);
+        }
+
+        if ($has('medallion')) {
+            $svg .= self::medal($c, 118, 42, $p['bg2'], $p['gold'], $dark ? $p['bg'] : $p['bg2']);
+        }
+
         if ($has('rosette')) {
             $svg .= self::rosette($c, 400, 250, 63, 145, $p['gold'], .3, .13)
                  .  self::rosette($c, 400, 170, 47, 96, $p['gold'], .26, .09);
@@ -664,40 +796,47 @@ final class SCH_Certificates
         $inkc  = $p['ink'];
         $softc = $p['soft'];
 
-        $svg .= '<text x="' . $tx . '" y="112" text-anchor="middle" fill="' . $softc . '" font-size="17">' . esc_html($school) . '</text>';
+        // الوسام يحتلّ أعلى الورقة، فالمتن ينزل تحته. وبلا هذه الإزاحة كان
+        // اسم المدرسة يُطبع فوق شريطَي الوسام — والشريطان ينزلان إلى ٢٠٦.
+        $dy = $has('medallion') ? 118 : 0;
+
+        $svg .= '<text x="' . $tx . '" y="' . (112 + $dy) . '" text-anchor="middle" fill="' . $softc . '" font-size="17">' . esc_html($school) . '</text>';
 
         if ($has('rope')) {
-            $svg .= self::rope($tx - 95, $tx + 95, 132, $p['gold']);
+            $svg .= self::rope($tx - 95, $tx + 95, 132 + $dy, $p['gold']);
         }
 
         if ($has('rule')) {
-            $svg .= '<line x1="' . ($tx - 120) . '" y1="132" x2="' . ($tx + 120) . '" y2="132" stroke="' . $p['gold'] . '" stroke-width="1.4"/>';
+            $svg .= '<line x1="' . ($tx - 120) . '" y1="' . (132 + $dy) . '" x2="' . ($tx + 120) . '" y2="' . (132 + $dy) . '" stroke="' . $p['gold'] . '" stroke-width="1.4"/>';
         }
 
-        $svg .= '<text x="' . $tx . '" y="206" text-anchor="middle" fill="' . $p['gold'] . '" font-size="52" font-weight="bold">' . esc_html($title) . '</text>'
-             .  '<text x="' . $tx . '" y="270" text-anchor="middle" fill="' . $softc . '" font-size="17">تشهد إدارة المدرسة بأن الطالب</text>'
-             .  '<text x="' . $tx . '" y="350" text-anchor="middle" fill="' . $inkc . '" font-size="50" font-weight="bold">' . esc_html($name) . '</text>';
+        $svg .= '<text x="' . $tx . '" y="' . (206 + $dy) . '" text-anchor="middle" fill="' . $p['gold'] . '" font-size="52" font-weight="bold">' . esc_html($title) . '</text>'
+             .  '<text x="' . $tx . '" y="' . (270 + $dy) . '" text-anchor="middle" fill="' . $softc . '" font-size="17">تشهد إدارة المدرسة بأن الطالب</text>'
+             .  '<text x="' . $tx . '" y="' . (350 + $dy) . '" text-anchor="middle" fill="' . $inkc . '" font-size="50" font-weight="bold">' . esc_html($name) . '</text>';
 
         if ($has('rope')) {
-            $svg .= self::rope($tx - 230, $tx + 230, 374, $p['gold']);
+            $svg .= self::rope($tx - 230, $tx + 230, 374 + $dy, $p['gold']);
         } else {
-            $svg .= '<line x1="' . ($tx - 200) . '" y1="374" x2="' . ($tx + 200) . '" y2="374" stroke="' . $p['dim'] . '" stroke-width="1"/>';
+            $svg .= '<line x1="' . ($tx - 200) . '" y1="' . (374 + $dy) . '" x2="' . ($tx + 200) . '" y2="' . (374 + $dy) . '" stroke="' . $p['dim'] . '" stroke-width="1"/>';
         }
 
-        $svg .= '<text x="' . $tx . '" y="420" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l1) . '</text>';
+        $svg .= '<text x="' . $tx . '" y="' . (420 + $dy) . '" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l1) . '</text>';
 
         if ($l2 !== '') {
-            $svg .= '<text x="' . $tx . '" y="452" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l2) . '</text>';
+            $svg .= '<text x="' . $tx . '" y="' . (452 + $dy) . '" text-anchor="middle" fill="' . $softc . '" font-size="18">' . esc_html($l2) . '</text>';
         }
 
-        $svg .= '<text x="' . $tx . '" y="' . ($l2 !== '' ? 494 : 462) . '" text-anchor="middle" fill="' . $p['dim'] . '" font-size="15">' . esc_html($klass) . '</text>';
+        $svg .= '<text x="' . $tx . '" y="' . (($l2 !== '' ? 494 : 462) + $dy) . '" text-anchor="middle" fill="' . $p['dim'] . '" font-size="15">' . esc_html($klass) . '</text>';
 
-        if ($has('seal')) {
+        // الوسام ختمٌ في ذاته — ختمان في ورقةٍ واحدة يُلغيان معنى الختم.
+        if ($has('seal') && !$has('medallion')) {
             $svg .= self::seal($tx, 596, 40, $p['gold'], $dark ? $p['bg'] : $p['bg2']);
         }
 
         // ── التوقيعات والرقم ──
-        $sy   = 700;
+        // الكوفيّ يحجز أسفل الورقة لشريطه، فالتوقيعات تصعد له. وبلا هذا كان
+        // الشريط يُطبع فوق «مدير المدرسة» وفوق الرقم التسلسلي.
+        $sy   = $lay === 'kufic' ? 630 : 700;
         $lft  = ($lay === 'band') ? 150 : 175;
         $rgt  = ($lay === 'band') ? ($w - 168 - 150) : ($w - 175);
 
@@ -705,8 +844,8 @@ final class SCH_Certificates
              .  '<text x="' . ($lft + 100) . '" y="' . ($sy + 22) . '" text-anchor="middle" fill="' . $softc . '" font-size="13">مدير المدرسة</text>'
              .  '<line x1="' . ($rgt - 200) . '" y1="' . $sy . '" x2="' . $rgt . '" y2="' . $sy . '" stroke="' . $p['dim'] . '" stroke-width="1"/>'
              .  '<text x="' . ($rgt - 100) . '" y="' . ($sy + 22) . '" text-anchor="middle" fill="' . $softc . '" font-size="13">المشرف التربوي</text>'
-             .  '<text x="' . $tx . '" y="752" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($serial) . '</text>'
-             .  '<text x="' . $tx . '" y="772" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($date) . '</text>';
+             .  '<text x="' . $tx . '" y="' . ($sy + 52) . '" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($serial) . '</text>'
+             .  '<text x="' . $tx . '" y="' . ($sy + 72) . '" text-anchor="middle" fill="' . $p['dim'] . '" font-size="11">' . esc_html($date) . '</text>';
 
         return $svg;
     }
@@ -742,7 +881,10 @@ final class SCH_Certificates
     {
         $g     = self::gcd((int) $R, (int) $r);
         $turns = max(1, (int) ($r / max(1, $g)));
-        $steps = 2600;
+        // ١٤٠٠ نقطة على مسارٍ بطول ~٥٠٠ بكسل = نقطة كل ثلث بكسل، وهو أدقّ
+        // ممّا تُظهره الطباعة. وكانت ٢٦٠٠ فتزن الوردة الواحدة ٣١ كيلوبايت،
+        // ومكتبة القوالب تعرض ثمانيًا وعشرين معًا.
+        $steps = 1400;
         $pts   = [];
 
         for ($i = 0; $i <= $steps; $i++) {
@@ -797,6 +939,154 @@ final class SCH_Certificates
             . self::star($cx, $cy, $r - 15, $ring, 1.3, .95)
             . self::star($cx, $cy, $r - 22, $ring, .8, .6)
             . '</g>';
+    }
+
+    /**
+     * قرص الجيوش — الخطوط الشعاعية الدقيقة على الأوراق المالية.
+     *
+     * `rosette` تنسج منحنًى واحدًا متشابكًا، وهذا يرسم شعاعًا بعد شعاع ثم
+     * يُخفت أطرافه بقناع دائريّ — أثره أقرب إلى ما تحت الحبر في الوثائق
+     * الرسمية: نسيجٌ يُحسّ ولا يُقرأ.
+     */
+    private static function guilloche(float $cx, float $cy, float $r, string $color, float $op = .12): string
+    {
+        $id    = 'g' . (int) $cx . (int) $cy . (int) $r;
+        $lines = '';
+
+        for ($a = 0; $a < 360; $a += 3) {
+            $x = $cx + $r * cos(deg2rad($a));
+            $y = $cy + $r * sin(deg2rad($a));
+            $lines .= '<line x1="' . $cx . '" y1="' . $cy . '" x2="' . round($x, 1)
+                . '" y2="' . round($y, 1) . '" stroke="' . $color . '" stroke-width=".6"/>';
+        }
+
+        return '<defs><radialGradient id="' . $id . '">'
+            . '<stop offset="34%" stop-color="#fff" stop-opacity="1"/>'
+            . '<stop offset="62%" stop-color="#fff" stop-opacity=".35"/>'
+            . '<stop offset="72%" stop-color="#fff" stop-opacity="0"/>'
+            . '</radialGradient>'
+            . '<mask id="m' . $id . '"><circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r
+            . '" fill="url(#' . $id . ')"/></mask></defs>'
+            . '<g mask="url(#m' . $id . ')" opacity="' . $op . '">' . $lines . '</g>';
+    }
+
+    /**
+     * قوس المحراب — الشكل الذي يجعل الوثيقة تُقرأ عربيةً قبل أن تُقرأ.
+     *
+     * القوس مدبَّب لا نصف دائرة: نصف الدائرة رومانيّ، والمدبَّب هو ما في
+     * محاريب المساجد ومخطوطاتها.
+     */
+    private static function arch(float $cx, float $top, float $w, float $h, string $color, float $sw = 2, float $op = 1): string
+    {
+        $half = $w / 2;
+        $rise = $h * .42;   // ارتفاع القوس فوق كتفيه
+        $d = 'M ' . ($cx - $half) . ' ' . ($top + $h)
+           . ' L ' . ($cx - $half) . ' ' . ($top + $rise)
+           . ' Q ' . ($cx - $half) . ' ' . ($top + $rise * .28) . ' ' . ($cx - $half * .42) . ' ' . ($top + $rise * .12)
+           . ' Q ' . $cx . ' ' . ($top - $rise * .06) . ' ' . $cx . ' ' . $top
+           . ' Q ' . $cx . ' ' . ($top - $rise * .06) . ' ' . ($cx + $half * .42) . ' ' . ($top + $rise * .12)
+           . ' Q ' . ($cx + $half) . ' ' . ($top + $rise * .28) . ' ' . ($cx + $half) . ' ' . ($top + $rise)
+           . ' L ' . ($cx + $half) . ' ' . ($top + $h);
+
+        return '<path d="' . $d . '" fill="none" stroke="' . $color . '" stroke-width="' . $sw . '" opacity="' . $op . '"/>';
+    }
+
+    /** وسام بشريطَيه — لِما يُعلَّق لا لِما يُوقَّع. */
+    private static function medal(float $cx, float $cy, float $r, string $ribbon, string $gold, string $core): string
+    {
+        $rw = $r * .52;
+
+        return '<g>'
+            . '<path d="M ' . ($cx - $rw) . ' ' . ($cy + $r * .2) . ' L ' . ($cx - $rw * 1.5) . ' ' . ($cy + $r * 2.1)
+            . ' L ' . ($cx - $rw * .3) . ' ' . ($cy + $r * 1.6) . ' Z" fill="' . $ribbon . '"/>'
+            . '<path d="M ' . ($cx + $rw) . ' ' . ($cy + $r * .2) . ' L ' . ($cx + $rw * 1.5) . ' ' . ($cy + $r * 2.1)
+            . ' L ' . ($cx + $rw * .3) . ' ' . ($cy + $r * 1.6) . ' Z" fill="' . $ribbon . '"/>'
+            . '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="' . $core . '" stroke="' . $gold . '" stroke-width="2.4"/>'
+            . '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . ($r - 7) . '" fill="none" stroke="' . $gold . '" stroke-width=".9" opacity=".7"/>'
+            . self::star($cx, $cy, $r - 14, $gold, 1.4, .95)
+            . '</g>';
+    }
+
+    /** أشعّة — خلف العنوان في قوالب الصغار، فالشمس أول ما يرسمه طفل. */
+    private static function rays(float $cx, float $cy, float $r1, float $r2, string $color, int $n = 24, float $op = .3): string
+    {
+        $out = '';
+        $step = 360 / max(1, $n);
+
+        for ($a = 0.0; $a < 360; $a += $step) {
+            $out .= '<line x1="' . round($cx + $r1 * cos(deg2rad($a)), 1) . '" y1="' . round($cy + $r1 * sin(deg2rad($a)), 1)
+                . '" x2="' . round($cx + $r2 * cos(deg2rad($a)), 1) . '" y2="' . round($cy + $r2 * sin(deg2rad($a)), 1)
+                . '" stroke="' . $color . '" stroke-width="2.2" stroke-linecap="round"/>';
+        }
+
+        return '<g opacity="' . $op . '">' . $out . '</g>';
+    }
+
+    /**
+     * حاشية مُذهَّبة — إطار المخطوط: شريطان بينهما سلسلة معيّنات.
+     *
+     * وهي ما يميّز «المخطوطة» عن «إطارٍ سميك»: الزخرفة في الحاشية لا في
+     * سُمك الخط.
+     */
+    private static function illum(int $w, int $h, string $gold, string $deep, float $inset = 26): string
+    {
+        $out = '<rect x="' . $inset . '" y="' . $inset . '" width="' . ($w - $inset * 2) . '" height="' . ($h - $inset * 2)
+            . '" fill="none" stroke="' . $deep . '" stroke-width="14" opacity=".9"/>'
+            . '<rect x="' . ($inset + 12) . '" y="' . ($inset + 12) . '" width="' . ($w - ($inset + 12) * 2) . '" height="' . ($h - ($inset + 12) * 2)
+            . '" fill="none" stroke="' . $gold . '" stroke-width="1.2"/>'
+            . '<rect x="' . ($inset - 6) . '" y="' . ($inset - 6) . '" width="' . ($w - ($inset - 6) * 2) . '" height="' . ($h - ($inset - 6) * 2)
+            . '" fill="none" stroke="' . $gold . '" stroke-width="1.2"/>';
+
+        // سلسلة المعيّنات داخل الشريط — تُرسم على الأضلاع الأربعة بخطوة ثابتة
+        $mid = $inset + 7;
+        for ($x = $mid + 20; $x < $w - $mid - 10; $x += 26) {
+            $out .= self::diamond($x, $mid, 4.4, $gold) . self::diamond($x, $h - $mid, 4.4, $gold);
+        }
+        for ($y = $mid + 20; $y < $h - $mid - 10; $y += 26) {
+            $out .= self::diamond($mid, $y, 4.4, $gold) . self::diamond($w - $mid, $y, 4.4, $gold);
+        }
+
+        return $out;
+    }
+
+    private static function diamond(float $cx, float $cy, float $r, string $color): string
+    {
+        return '<polygon points="' . $cx . ',' . ($cy - $r) . ' ' . ($cx + $r) . ',' . $cy
+            . ' ' . $cx . ',' . ($cy + $r) . ' ' . ($cx - $r) . ',' . $cy . '" fill="' . $color . '" opacity=".85"/>';
+    }
+
+    /**
+     * شريط كوفيّ هندسيّ — مربّعات متداخلة كخطّ البنّائين.
+     *
+     * الخطّ الكوفيّ المربّع زخرفةٌ عربية خالصة، ولا يحتاج خطًّا مثبَّتًا:
+     * وحدته مربّعٌ وزاوية، وكلاهما يُرسم.
+     */
+    private static function kufic_band(float $x1, float $x2, float $y, string $color, float $op = .8): string
+    {
+        $out  = '';
+        $unit = 15;
+
+        for ($x = $x1; $x < $x2 - $unit; $x += $unit * 2) {
+            $out .= '<path d="M ' . $x . ' ' . ($y + $unit) . ' L ' . $x . ' ' . $y . ' L ' . ($x + $unit) . ' ' . $y
+                 .  ' L ' . ($x + $unit) . ' ' . ($y - $unit * .55) . '" fill="none" stroke="' . $color . '" stroke-width="2"/>'
+                 .  '<path d="M ' . ($x + $unit) . ' ' . ($y + $unit) . ' L ' . ($x + $unit * 2) . ' ' . ($y + $unit)
+                 .  ' L ' . ($x + $unit * 2) . ' ' . $y . '" fill="none" stroke="' . $color . '" stroke-width="2"/>';
+        }
+
+        return '<g opacity="' . $op . '">' . $out . '</g>';
+    }
+
+    /** هل اللون داكن؟ — يقرّر لون قلب الختم ونصّ العنوان فوق الأرضية. */
+    private static function is_dark(string $hex): bool
+    {
+        $s = ltrim($hex, '#');
+        if (strlen($s) === 3) {
+            $s = $s[0] . $s[0] . $s[1] . $s[1] . $s[2] . $s[2];
+        }
+        $n = (int) hexdec($s);
+
+        // اللمعان المُدرَك: العين أشدّ حساسيةً للأخضر ثم الأحمر ثم الأزرق
+        return (0.299 * (($n >> 16) & 255) + 0.587 * (($n >> 8) & 255) + 0.114 * ($n & 255)) < 128;
     }
 
     /** خيط محبّب — يفصل بلا ثقل الخط المستقيم. */

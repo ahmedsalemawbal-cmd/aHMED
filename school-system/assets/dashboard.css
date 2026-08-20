@@ -4914,3 +4914,106 @@ body.sch-body {
     .sch-sd__panel { animation: none; }
     .sch-sd__tab, .sch-sd__mark { transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   مكتبة قوالب الشهادات (`.sch-gal__*`)
+   ───────────────────────────────────────────────────────────────────
+   البطاقة تعرض **الوثيقة الحقيقية** لا مربّع تدرّج: القالب يُختار بالنظر
+   إليه لا بقراءة اسمه، وأول رؤية للوثيقة كانت تأتي بعد الإصدار.
+   والورقة أفقية (١١٢٣×٧٩٤) فالشبكة تتبع نسبتها لا العكس.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* شريحتان تتبادلان — عرضٌ واحد ظاهر في المرة */
+.sch-vsw {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 3px; border-radius: var(--sch-radius);
+    background: var(--sch-surface-alt); border: 1px solid var(--sch-line);
+}
+.sch-body a.sch-vsw__b {
+    padding: var(--sch-2) var(--sch-4); min-height: 34px;
+    display: flex; align-items: center; border-radius: var(--sch-r-sm);
+    font-size: var(--sch-text-xs); font-weight: var(--sch-w-medium);
+    color: var(--sch-ink-soft); text-decoration: none;
+}
+.sch-body a.sch-vsw__b:hover { background: var(--sch-surface-2); color: var(--sch-ink); }
+.sch-body a.sch-vsw__b.is-on {
+    background: var(--sch-surface); color: var(--sch-ink);
+    font-weight: var(--sch-w-bold); box-shadow: var(--sch-e1);
+}
+
+.sch-gal__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sch-3); flex-wrap: wrap; margin-block-end: var(--sch-4);
+    padding: var(--sch-2) var(--sch-3);
+    background: var(--sch-surface); border: 1px solid var(--sch-line);
+    border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+}
+.sch-gal__cats { display: flex; align-items: center; gap: var(--sch-1); flex-wrap: wrap; }
+.sch-body a.sch-gal__cat {
+    display: flex; align-items: center; gap: var(--sch-2);
+    padding: var(--sch-2) var(--sch-3); min-height: 36px;
+    border: 1px solid transparent; border-radius: var(--sch-radius);
+    font-size: var(--sch-text-xs); color: var(--sch-ink-soft); text-decoration: none;
+}
+.sch-body a.sch-gal__cat:hover { background: var(--sch-surface-alt); color: var(--sch-ink); }
+.sch-body a.sch-gal__cat.is-on {
+    background: var(--sch-accent); border-color: var(--sch-accent);
+    color: var(--sch-on-accent); font-weight: var(--sch-w-bold);
+}
+.sch-gal__cat b { font-variant-numeric: tabular-nums; opacity: .72; font-weight: inherit; }
+.sch-gal__find { flex: 0 1 260px; min-width: 200px; }
+.sch-gal__find input { width: 100%; }
+
+.sch-gal__grid {
+    display: grid; gap: var(--sch-4);
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+}
+.sch-gal__card[hidden] { display: none; }
+.sch-gal__card {
+    position: relative;
+    background: var(--sch-surface); border: 1px solid var(--sch-line);
+    border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: box-shadow var(--sch-fast) var(--sch-ease), transform var(--sch-fast) var(--sch-ease);
+}
+.sch-gal__card:hover { box-shadow: var(--sch-e3); transform: translateY(-2px); }
+
+/* الورقة تُعرض كاملةً لا مقصوصة: قالبٌ يُختار من نصفه ليس مُختارًا. */
+.sch-gal__pv { display: block; background: var(--sch-surface-2); }
+.sch-gal__pv svg { display: block; width: 100%; height: auto; }
+
+.sch-gal__meta {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sch-2); padding: var(--sch-3) var(--sch-4);
+    border-block-start: 1px solid var(--sch-hair);
+}
+.sch-gal__t { display: flex; flex-direction: column; min-width: 0; }
+.sch-gal__t b { font-size: var(--sch-text-base); color: var(--sch-ink); }
+.sch-gal__t em { font-style: normal; font-size: var(--sch-text-xs); color: var(--sch-muted); }
+.sch-gal__cx {
+    flex: 0 0 auto; padding: var(--sch-1) var(--sch-2);
+    border-radius: var(--sch-r-sm); background: var(--sch-surface-alt);
+    font-size: var(--sch-text-xs); color: var(--sch-ink-soft);
+}
+
+/* الزرّ يغطّي البطاقة كلها: قالبٌ يُنقَر عليه في أي موضع، واسمه في الزرّ
+   لقارئ الشاشة فلا يسمع «زرّ» ثمانيًا وعشرين مرة بلا تمييز. */
+.sch-gal__use {
+    position: absolute; inset: 0; border: 0; background: transparent;
+    cursor: pointer; font-size: 0; color: transparent;
+}
+.sch-gal__use:focus-visible { outline: 3px solid var(--sch-accent); outline-offset: -3px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .sch-gal__card { transition: none; }
+    .sch-gal__card:hover { transform: none; }
+}
+
+/* القالب في «المكتبة» بلا مصغّرة — فيصير حبّة اسمٍ لا بطاقةً فارغة.
+   `:not(:has(.sch-lib__thumb))` تفصل الحالتين بلا صنفٍ ثانٍ يُضاف في القالب. */
+.sch-lib__item:not(:has(.sch-lib__thumb)) {
+    flex-direction: row; align-items: center; justify-content: center;
+    padding: var(--sch-2) var(--sch-3); min-height: 40px;
+    border-radius: var(--sch-radius);
+}
+.sch-lib__item:not(:has(.sch-lib__thumb)) .sch-lib__meta { align-items: center; text-align: center; }

@@ -161,18 +161,111 @@ if ($sch_scoped) {
 ?>
 
 <?php
+// ═══ شاشتان في واحدة ═══
+// **المكتبة** تعرض القوالب كما تُطبع فعلًا، و**الصادرة** تعرض ما صدر منها.
+// وأول رؤية للوثيقة كانت تأتي بعد الإصدار — والمكتبة تجعلها قبله.
+$sch_view = (isset($_GET['view']) && $_GET['view'] === 'issued') ? 'issued' : 'library';
+$sch_cat  = isset($_GET['cat']) ? sanitize_key(wp_unslash((string) $_GET['cat'])) : '';
+$sch_url  = SCH_Dashboard::url('certificates');
+
+if (!isset(SCH_Certificates::CATEGORIES[$sch_cat])) {
+    $sch_cat = '';
+}
+
+$sch_use = SCH_Certificates::template_usage();
+
+// عدّاد كل تصنيف — الشريحة بلا رقم لا تقول كم وراءها
+$sch_ccount = [];
+foreach (SCH_Certificates::TEMPLATES as $sch_k => $sch_t) {
+    $sch_ccount[$sch_t['cat']] = ($sch_ccount[$sch_t['cat']] ?? 0) + 1;
+}
+
+ob_start(); ?>
+<span class="sch-vsw" role="group" aria-label="<?php esc_attr_e('عرض الشهادات', 'school-system'); ?>">
+    <a class="sch-vsw__b<?php echo $sch_view === 'library' ? ' is-on' : ''; ?>" href="<?php echo esc_url($sch_url); ?>"><?php esc_html_e('المكتبة', 'school-system'); ?></a>
+    <a class="sch-vsw__b<?php echo $sch_view === 'issued' ? ' is-on' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'issued', $sch_url)); ?>"><?php esc_html_e('الصادرة', 'school-system'); ?></a>
+</span>
+<?php
+$sch_tools = (string) ob_get_clean();
+
 SCH_Modal::head(
     __('الشهادات', 'school-system'),
-    sprintf(
-        /* translators: %s: العدد */
-        __('%s شهادة صادرة', 'school-system'),
-        number_format_i18n(count($sch_recent))
-    ),
+    $sch_view === 'library'
+        ? sprintf(
+            /* translators: %s: عدد القوالب */
+            __('%s قالبًا جاهزًا للطباعة والإرسال · تصل تطبيق ولي الأمر فور إصدارها', 'school-system'),
+            number_format_i18n(count(SCH_Certificates::TEMPLATES))
+        )
+        : sprintf(
+            /* translators: %s: العدد */
+            __('%s شهادة صادرة', 'school-system'),
+            number_format_i18n(count($sch_recent))
+        ),
     'sch-issue-cert',
     __('إصدار شهادة', 'school-system'),
-    'award'
+    'award',
+    $sch_tools
 );
 ?>
+
+<?php if ($sch_view === 'library') : ?>
+    <!-- ═══ مكتبة القوالب — الوثيقة الحقيقية لا مربّع تدرّج ═══ -->
+    <div class="sch-gal__bar">
+        <div class="sch-gal__cats">
+            <a class="sch-gal__cat<?php echo $sch_cat === '' ? ' is-on' : ''; ?>" href="<?php echo esc_url($sch_url); ?>">
+                <span><?php esc_html_e('الكل', 'school-system'); ?></span>
+                <b><?php echo esc_html(number_format_i18n(count(SCH_Certificates::TEMPLATES))); ?></b>
+            </a>
+            <?php foreach (SCH_Certificates::CATEGORIES as $sch_ck => $sch_cl) : ?>
+                <a class="sch-gal__cat<?php echo $sch_cat === $sch_ck ? ' is-on' : ''; ?>" href="<?php echo esc_url(add_query_arg('cat', $sch_ck, $sch_url)); ?>">
+                    <span><?php echo esc_html($sch_cl); ?></span>
+                    <b><?php echo esc_html(number_format_i18n($sch_ccount[$sch_ck] ?? 0)); ?></b>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="sch-gal__find">
+            <label class="sch-sr" for="sch-gal-q"><?php esc_html_e('ابحث في القوالب', 'school-system'); ?></label>
+            <input type="search" id="sch-gal-q" placeholder="<?php esc_attr_e('ابحث في القوالب…', 'school-system'); ?>">
+        </div>
+    </div>
+
+    <div class="sch-gal__grid" id="sch-gal-grid">
+        <?php foreach (SCH_Certificates::TEMPLATES as $sch_key => $sch_t) :
+            if ($sch_cat !== '' && $sch_t['cat'] !== $sch_cat) { continue; }
+            $sch_n = (int) ($sch_use[$sch_key] ?? 0); ?>
+            <article class="sch-gal__card" data-tpl="<?php echo esc_attr($sch_key); ?>"
+                     data-find="<?php echo esc_attr(mb_strtolower($sch_t['name'] . ' ' . ($sch_t['tags'] ?? '') . ' ' . (SCH_Certificates::CATEGORIES[$sch_t['cat']] ?? ''))); ?>">
+                <div class="sch-gal__pv"><?php echo SCH_Certificates::preview_svg($sch_key); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+                <div class="sch-gal__meta">
+                    <span class="sch-gal__t">
+                        <b><?php echo esc_html($sch_t['name']); ?></b>
+                        <em><?php echo esc_html($sch_n > 0 ? sprintf(
+                            /* translators: %s: عدد مرات الاستخدام */
+                            __('استُخدم %s مرة', 'school-system'),
+                            number_format_i18n($sch_n)
+                        ) : __('لم يُستخدم بعد', 'school-system')); ?></em>
+                    </span>
+                    <span class="sch-gal__cx"><?php echo esc_html(SCH_Certificates::CATEGORIES[$sch_t['cat']] ?? ''); ?></span>
+                </div>
+                <button type="button" class="sch-gal__use" data-use="<?php echo esc_attr($sch_key); ?>">
+                    <?php echo esc_html(sprintf(
+                        /* translators: %s: اسم القالب */
+                        __('استخدام %s', 'school-system'),
+                        $sch_t['name']
+                    )); ?>
+                </button>
+            </article>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="sch-blank" id="sch-gal-empty" hidden>
+        <strong><?php esc_html_e('لا قوالب مطابقة', 'school-system'); ?></strong>
+        <span><?php esc_html_e('جرّب اسمًا آخر أو اختر تصنيفًا مختلفًا.', 'school-system'); ?></span>
+    </div>
+<?php endif; ?>
+
+<?php if ($sch_view === 'issued') : ?>
 
 <?php foreach ($sch_sugg as $sch_type => $sch_students) :
     if ($sch_students === []) { continue; }
@@ -420,6 +513,8 @@ $sch_on = array_filter($sch_f);
     <?php endforeach; ?>
 <?php endif; ?>
 
+<?php endif; // نهاية عرض «الصادرة» ?>
+
 <?php SCH_Modal::open('sch-issue-cert', __('إصدار شهادة', 'school-system'), __('تصل تطبيق ولي الأمر فور إصدارها', 'school-system')); ?>
     <?php /* مدخل واحد لا اثنان: قائمة تختار «طالب واحد» أو «مجموعة»،
              وتُفتح حقول ما اخترته وحدها. الباقي (النوع والعنوان والسبب
@@ -546,9 +641,15 @@ $sch_on = array_filter($sch_f);
                            data-find="<?php echo esc_attr((string) $sch_t['name'] . ' ' . (string) ($sch_t['tags'] ?? '')); ?>">
                         <input type="radio" name="template" value="<?php echo esc_attr($sch_slug); ?>"
                                <?php checked($sch_slug, 'royal'); ?>>
-                        <span class="sch-lib__thumb">
-                            <?php echo SCH_Certificates::preview_svg($sch_slug); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-                        </span>
+                        <?php /* المصغّرة تُرسَم في «الصادرة» وحدها: في «المكتبة»
+                                 القوالب معروضة بحجمها الكامل خلف النافذة، ورسمها
+                                 مرّتين يضاعف وزن الصفحة (٢٧٢ كيلوبايت مضغوطة)
+                                 مقابل صفر معلومة جديدة. */ ?>
+                        <?php if ($sch_view !== 'library') : ?>
+                            <span class="sch-lib__thumb">
+                                <?php echo SCH_Certificates::preview_svg($sch_slug); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                            </span>
+                        <?php endif; ?>
                         <span class="sch-lib__meta">
                             <b><?php echo esc_html((string) $sch_t['name']); ?></b>
                             <?php if ((int) ($sch_used[$sch_slug] ?? 0) > 0) : ?>
@@ -574,6 +675,52 @@ $sch_on = array_filter($sch_f);
 
 <script>
 (function () {
+  /* ═══ مكتبة القوالب ═══
+     البحث في المتصفّح: القوالب ثمانية وعشرون مُصيَّرة أصلًا، وطلبُ صفحةٍ
+     جديدة لكل حرف يُكتب يجعل الاختيار أبطأ من التمرير. */
+  (function () {
+    var grid = document.getElementById('sch-gal-grid');
+    var q    = document.getElementById('sch-gal-q');
+    var none = document.getElementById('sch-gal-empty');
+    if (!grid) { return; }
+
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.sch-gal__card'));
+
+    if (q) {
+      q.addEventListener('input', function () {
+        var v = q.value.trim().toLowerCase();
+        var n = 0;
+        cards.forEach(function (c) {
+          var hit = v === '' || c.dataset.find.indexOf(v) >= 0;
+          c.hidden = !hit;
+          if (hit) { n++; }
+        });
+        if (none) { none.hidden = n !== 0; }
+      });
+    }
+
+    /* «استخدام القالب» يفتح نافذة الإصدار وقد اختير فيها — لا شاشة ثانية
+       يُعاد فيها اختيار ما اختاره المستخدم للتوّ. */
+    grid.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-use]');
+      if (!b) { return; }
+
+      var radio = document.querySelector('[name="template"][value="' + b.dataset.use + '"]');
+      if (radio) { radio.checked = true; }
+
+      var opener = document.querySelector('[data-modal-open="sch-issue-cert"]');
+      if (opener) { opener.click(); }
+
+      /* الشريحة تتبع القالب المختار فيراه المستخدم في مكانه لا مخفيًّا
+         تحت تصنيفٍ آخر. */
+      var wrap = radio ? radio.closest('[data-cat]') : null;
+      var cat  = wrap ? wrap.dataset.cat : '';
+      var chip = document.querySelector('.sch-lib__cat[data-cat="' + cat + '"]');
+      if (chip) { chip.click(); }
+      if (wrap && wrap.scrollIntoView) { wrap.scrollIntoView({ block: 'center' }); }
+    });
+  })();
+
   /* نوع الشهادة يملأ العنوان ويختار قالبه — الوكيل يكتب أقل */
   var type = document.getElementById('c-type');
   var title = document.getElementById('c-title');

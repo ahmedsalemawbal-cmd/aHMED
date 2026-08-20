@@ -128,6 +128,8 @@ final class SCH_Custody
 
 final class SCH_Classes
 {
+    public const STAGES = ['kg' => 'روضة', 'primary' => 'ابتدائي', 'middle' => 'متوسط', 'high' => 'ثانوي'];
+
     public static function list(): array
     {
         return [(object) ['id' => 1, 'grade_level' => 'الرابع', 'section' => 'أ', 'stage' => 'ابتدائي']];
@@ -141,6 +143,19 @@ final class SCH_Classes
 
 final class SCH_Students
 {
+    /** قائمة الأسماء للقوائم المنسدلة — الطلاب الخمسة أنفسهم. */
+    public static function list(array $args = []): array
+    {
+        $items = [];
+        foreach (SCH_ROSTER as $r) {
+            $items[] = (object) ($r + [
+                'stage' => 'ابتدائي', 'grade_level' => 'الأول', 'section' => 'أ',
+                'academic_no' => $r['academic_no'], 'status' => 'active', 'class_id' => 7,
+            ]);
+        }
+        return ['items' => $items, 'total' => count($items)];
+    }
+
     public static function get(int $id): ?object
     {
         foreach (SCH_Attendance::day_sheet(date('Y-m-d')) as $s) {
@@ -286,4 +301,79 @@ final class SCH_Deputy
 
         return ['teacher' => $teacher, 'rows' => $rows, 'open' => $open, 'total' => count($rows)];
     }
+}
+
+/**
+ * الشهادات: **الصنف الحقيقي** لا نسخة — القوالب والـSVG هي ما يُصيَّر في
+ * الإنتاج بالضبط. ولا يُستبدَل منه إلا ما يقرأ القاعدة.
+ */
+final class SCH_FakeWpdb
+{
+    public $users = 'wp_users';
+    public $prefix = 'wp_';
+    public $last_error = '';
+    public $insert_id = 0;
+    public function prepare($q, ...$a) { return $q; }
+    public function get_results($q, $o = null) { return []; }
+    public function get_row($q, $o = null) { return null; }
+    public function get_var($q) { return 0; }
+    public function get_col($q) { return []; }
+    public function query($q) { return 0; }
+    public function insert($t, $d, $f = null) { return 1; }
+    public function update($t, $d, $w, $df = null, $wf = null) { return 1; }
+    public function esc_like($s) { return $s; }
+}
+
+$GLOBALS['wpdb'] = new SCH_FakeWpdb();
+
+function get_transient($k) { return false; }
+function set_transient($k, $v, $t = 0) { return true; }
+function delete_transient($k) { return true; }
+function sanitize_textarea_field($t) { return trim(strip_tags((string) $t)); }
+function sch_api_error($c, $m, $s = 400) { return null; }
+function sch_audit(...$a) {}
+function is_wp_error($x) { return false; }
+
+final class SCH_Years { public static function current_id(): int { return 1; } }
+final class SCH_Guardians { public static function of_student(int $id): array { return []; } }
+final class SCH_Comms { public static function notify(...$a) {} }
+final class SCH_Enrollment {
+    public static function full_name($o): string
+    {
+        return (string) ($o->name_snapshot ?? $o->full_name ?? 'محمد عبدالله الأحمد');
+    }
+}
+
+require SCH_PATH . 'modules/academic/class-certificates.php';
+
+/** نافذة مشتركة — نسخة من `SCH_Modal` بالوسوم نفسها. */
+final class SCH_Modal
+{
+    public static function button(string $id, string $label, string $icon = 'plus'): void
+    {
+        echo '<button type="button" class="sch-btn sch-add" data-modal-open="' . esc_attr($id) . '">'
+           . sch_icon($icon, 16) . esc_html($label) . '</button>';
+    }
+
+    public static function head(string $title, string $count = '', string $btn_id = '', string $btn_label = '', string $icon = 'plus', string $tools = ''): void
+    {
+        echo '<div class="sch-head"><div class="sch-head__t"><h1 class="sch-title">' . esc_html($title) . '</h1>'
+           . ($count !== '' ? '<p class="sch-sub">' . esc_html($count) . '</p>' : '') . '</div>';
+        if ($tools !== '' || $btn_id !== '') {
+            echo '<div class="sch-head__acts">' . $tools;
+            if ($btn_id !== '') { self::button($btn_id, $btn_label, $icon); }
+            echo '</div>';
+        }
+        echo '</div>';
+    }
+
+    public static function open(string $id, string $title, string $sub = ''): void
+    {
+        echo '<div class="sch-modal" id="' . esc_attr($id) . '" hidden><div class="sch-modal__veil"></div>'
+           . '<div class="sch-modal__box"><div class="sch-modal__head"><div><strong>' . esc_html($title) . '</strong>'
+           . ($sub !== '' ? '<span>' . esc_html($sub) . '</span>' : '') . '</div>'
+           . '<button type="button" class="sch-modal__x" data-modal-close>✕</button></div><div class="sch-modal__body">';
+    }
+
+    public static function close(): void { echo '</div></div></div>'; }
 }
