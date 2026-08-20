@@ -113,7 +113,16 @@ final class SCH_Perms
     /**
      * هل يملك المستخدم هذا القسم؟
      *
-     * المقفل يُرفض دائمًا ولو مُنح بالخطأ — الحماية في القراءة لا في الكتابة وحدها.
+     * القفلان نوعان ولا يُخلطان:
+     *
+     * **قفل الدور** (`LOCKED_FOR`) يمنع الرؤية والتعديل معًا — من يقف عند
+     * البوابة لا يرى ملفًّا صحّيًّا أصلًا، ومنعُ التعديل وحده لا يحميه.
+     *
+     * **قفل «للقراءة فقط»** (`LOCKED`) يمنع التعديل ويُبقي الرؤية. وكان
+     * يمنع الاثنين، فيردّ `/dashboard/custody` و`/dashboard/audit` بـ403
+     * **لكل مستخدم بمن فيهم المدير** — والسببان المكتوبان في `LOCKED`
+     * يقولان عكس ذلك حرفًا: «سجل العهدة لا يُعدَّل» و«سجل النظام للقراءة
+     * فقط». شاشتان كاملتان كانتا خارج الخدمة.
      */
     public static function may(string $section, string $mode = 'view', ?int $user_id = null): bool
     {
@@ -123,7 +132,11 @@ final class SCH_Perms
             return false;
         }
 
-        if (self::is_locked($section, $user_id)) {
+        if (self::locked_for_role($section, $user_id)) {
+            return false;
+        }
+
+        if ($mode === 'edit' && isset(self::LOCKED[$section])) {
             return false;
         }
 
@@ -145,19 +158,28 @@ final class SCH_Perms
         return $mode === 'edit' ? $map[$section]['edit'] : $map[$section]['view'];
     }
 
+    /**
+     * هل هذا القسم مقفل عن المنح؟
+     *
+     * تُستعمل في شاشة الصلاحيات وفي الحفظ: المقفل لا يُمنَح لأحد، سواء أكان
+     * قفلَ دورٍ أم قفل «للقراءة فقط» — فمنحُ «تعديل» في قسمٍ لا يُعدَّل بلا
+     * معنى. أما الرؤية فتُقرّرها `may()` وحدها.
+     */
     public static function is_locked(string $section, ?int $user_id = null): bool
     {
-        if (isset(self::LOCKED[$section])) {
-            return true;
-        }
+        return isset(self::LOCKED[$section]) || self::locked_for_role($section, $user_id);
+    }
 
+    /** قفلٌ سببه دور المستخدم — يمنع الرؤية والتعديل معًا. */
+    public static function locked_for_role(string $section, ?int $user_id = null): bool
+    {
         $user = get_userdata($user_id ?? get_current_user_id());
 
         if (!$user) {
             return false;
         }
 
-        foreach ($user->roles as $role) {
+        foreach ((array) $user->roles as $role) {
             if (in_array($section, self::LOCKED_FOR[$role] ?? [], true)) {
                 return true;
             }

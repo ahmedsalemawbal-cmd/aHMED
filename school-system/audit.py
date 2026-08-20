@@ -149,6 +149,31 @@ for path, src in sources.items():
         if m.group(1) not in registered:
             add('ACTION_UNREGISTERED', f'{rel}: {m.group(1)}')
 
+# ---------- 6ب) الأفعال الجماعية: السجلّ ↔ المنفّذ ----------
+# `SCH_Bulk::registry()` يُعلن أفعال كل شاشة، و`run()` ينفّذها بمفتاح
+# «الشاشة.الفعل». ومفتاحٌ لا يطابق يسقط إلى `default => 0` فيُبلَّغ المستخدم
+# بالنجاح ولم يحدث شيء — وهو ما وقع لفعلَي شاشة الرسوم: السجلّ يسمّيها
+# `finance` و`run()` كان يكتب `invoices`.
+_bulk_path = os.path.join(ROOT, 'modules/staff/class-bulk.php')
+if _bulk_path in sources:
+    _bulk = sources[_bulk_path]
+
+    _reg = re.search(r'public static function registry\(\): array\s*\{(.*?)\n    \}', _bulk, re.S)
+    _run = re.search(r'\$done = match \(\$screen \. \'\.\' \. \$op\) \{(.*?)\n        \};', _bulk, re.S)
+
+    if _reg and _run:
+        handled = set(re.findall(r"'([a-z_]+\.[a-z_]+)'\s*=>", _run.group(1)))
+
+        declared = set()
+        for _screen, _body in re.findall(r"'([a-z_]+)'\s*=>\s*\[(.*?)\n            \],", _reg.group(1), re.S):
+            for _op in re.findall(r"^\s{16}'([a-z_]+)'\s*=>\s*\[", _body, re.M):
+                declared.add(f'{_screen}.{_op}')
+
+        for key in sorted(declared - handled):
+            add('BULK_OP_UNHANDLED', f'{key} — معلَن في registry() ولا ذراع له في run()')
+        for key in sorted(handled - declared):
+            add('BULK_OP_ORPHAN', f'{key} — ذراعٌ في run() بلا إعلانٍ في registry()')
+
 # كل نموذج فيه sch_action لازم نونس بنفس الاسم
 for path, src in sources.items():
     rel = os.path.relpath(path, ROOT)

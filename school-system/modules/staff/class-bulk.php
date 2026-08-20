@@ -28,10 +28,15 @@ final class SCH_Bulk
     public static function registry(): array
     {
         return [
+            /*
+             * حُذف من هنا فعلان كانا يُبلّغان بالنجاح ولا يفعلان شيئًا:
+             * «طباعة البطاقات» في شاشة الطلاب و«طباعة الفواتير» في الرسوم.
+             * الطباعة تحدث في المتصفّح، والشريط الجماعي يُرسل ويُعيد التحميل —
+             * فلا شيء يُطبَع. وبطاقات الطلاب لها شاشتها (`badges`) بتصفيتها
+             * و«غير المطبوعة» وتعليمها مطبوعةً بعد الطباعة فعلًا. أمّا فواتير
+             * الرسوم فلا شاشة طباعة لها في النظام أصلًا — فمتى بُنيت عاد الزرّ.
+             */
             'students' => [
-                'print_badges' => [
-                    __('طباعة البطاقات', 'school-system'), 'print', 'sch_manage_students', '',
-                ],
                 'message_guardians' => [
                     __('مراسلة أولياء الأمور', 'school-system'), 'mail', 'sch_send_messages', '',
                     ['text', __('نص الرسالة', 'school-system')],
@@ -68,9 +73,6 @@ final class SCH_Bulk
             'finance' => [
                 'remind' => [
                     __('تذكير أولياء الأمور', 'school-system'), 'mail', 'sch_manage_finance', '',
-                ],
-                'print' => [
-                    __('طباعة الفواتير', 'school-system'), 'print', 'sch_manage_finance', '',
                 ],
             ],
 
@@ -155,16 +157,20 @@ final class SCH_Bulk
             return sch_api_error('too_many', __('حدّد ٣٠٠ سجل أو أقل في المرة الواحدة.', 'school-system'), 422);
         }
 
+        /*
+         * المفتاح هنا **اسم الشاشة كما في `registry()` وكما تُنادى `bar()`**.
+         * وكان فعلا شاشة الرسوم مكتوبَين `invoices.*` والشاشة اسمها `finance` —
+         * فلا يطابقان، فيسقطان إلى `default => 0`، ويُبلَّغ المستخدم بالنجاح
+         * ولم يُرسَل تذكيرٌ واحد. زرٌّ يكذب أسوأ من زرٍّ غائب.
+         */
         $done = match ($screen . '.' . $op) {
             'students.message_guardians' => self::message_guardians($ids, (string) ($args['text'] ?? '')),
             'students.assign_route'      => self::assign_route($ids, absint($args['select'] ?? 0)),
             'students.issue_cert'        => self::issue_certs($ids, (string) ($args['select'] ?? '')),
             'students.mark_present'      => self::mark_present($ids),
-            'students.print_badges'      => count($ids),
             'leaves.approve'             => self::decide_leaves($ids, 'approved'),
             'leaves.reject'              => self::decide_leaves($ids, 'rejected', (string) ($args['text'] ?? '')),
-            'invoices.remind'            => self::remind_invoices($ids),
-            'invoices.print'             => count($ids),
+            'finance.remind'             => self::remind_invoices($ids),
             'alerts.ack'                 => self::alerts($ids, 'ack'),
             'alerts.close'               => self::alerts($ids, 'close', (string) ($args['text'] ?? '')),
             'employees.suspend'          => self::staff_status($ids, 'suspend'),
