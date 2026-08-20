@@ -84,6 +84,7 @@ function add_query_arg($a, $b = null, $c = null) {
     return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query($args);
 }
 function selected($a, $b = true, $e = true) { $r = (string) $a === (string) $b ? ' selected' : ''; if ($e) { echo $r; } return $r; }
+function disabled($a, $b = true, $e = true) { $r = (string) $a === (string) $b ? ' disabled' : ''; if ($e) { echo $r; } return $r; }
 function checked($a, $b = true, $e = true) { $r = (string) $a === (string) $b ? ' checked' : ''; if ($e) { echo $r; } return $r; }
 function sanitize_text_field($t) { return trim(strip_tags((string) $t)); }
 function home_url($p = '') { return 'https://school.test' . $p; }

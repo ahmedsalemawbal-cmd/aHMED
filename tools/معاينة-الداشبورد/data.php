@@ -54,19 +54,20 @@ final class SCH_Attendance
         return $occurred === null ? ['absent', 0] : ['present', 0];
     }
 
-    public static function sheet(int $class_id, string $date): array { return self::gate_sheet($date); }
+    public static function sheet(int $class_id, string $date): array { return self::day_sheet($date); }
 
     public static function day_summary(string $date): array
     {
         $out = ['present' => 0, 'late' => 0, 'absent' => 0, 'excused' => 0];
-        foreach (self::gate_sheet($date) as $r) {
+        foreach (self::day_sheet($date) as $r) {
             if ($r->status !== null && isset($out[$r->status])) { $out[$r->status]++; }
         }
         return $out;
     }
 
-    /** الكشف على مستوى المدرسة — الدالّة التي تحتاجها الشاشة الجديدة. */
-    public static function gate_sheet(string $date, ?int $class_id = null): array
+    /* نسخة مطابقة لتوقيع الطبقة وشكل مخرجاتها حرفيًّا — بلا `class_label`
+       المخترَعة: القالب يبني اسم الشعبة من stage/grade_level/section. */
+    public static function day_sheet(string $date): array
     {
         $out = [];
         foreach (SCH_ROSTER as $s) {
@@ -77,7 +78,7 @@ final class SCH_Attendance
                 'grade_level' => 'الرابع',
                 'section'     => 'أ',
                 'class_id'    => 1,
-                'class_label' => 'الرابع / أ',
+                'stage'       => 'ابتدائي',
                 'note'        => null,
                 'photo_file'  => '',
             ]);
@@ -142,7 +143,7 @@ final class SCH_Students
 {
     public static function get(int $id): ?object
     {
-        foreach (SCH_Attendance::gate_sheet(date('Y-m-d')) as $s) {
+        foreach (SCH_Attendance::day_sheet(date('Y-m-d')) as $s) {
             if ((int) $s->id === $id) { return $s; }
         }
         return null;
