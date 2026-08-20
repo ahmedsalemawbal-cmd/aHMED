@@ -1154,6 +1154,9 @@ final class SCH_Dashboard
         $roster = SCH_Students::list([
             'status'      => 'active',
             'stage'       => sanitize_key((string) ($d['scope_stage'] ?? '')),
+            // «كل الصف الرابع» نطاقٌ قائم بذاته بين المرحلة والشعبة، والطبقة
+            // تدعمه منذ البداية — وكانت النافذة وحدها لا تعرضه.
+            'grade_level' => sanitize_text_field((string) ($d['scope_grade'] ?? '')),
             'class_id'    => absint($d['scope_class'] ?? 0),
             'per_page'    => 300,
             'with'        => false,

@@ -558,6 +558,32 @@ $sch_on = array_filter($sch_f);
                 </select>
             </div>
 
+            <?php /* الصفّ بين المرحلة والشعبة: «كل الصف الرابع» أكثر ما يُطلب
+                     فعلًا — الشعبة أضيق منه والمرحلة أوسع، وكان الوحيد الغائب
+                     من النافذة رغم أن الطبقة تدعمه. والصفوف تُجمَع من الشُّعب
+                     القائمة فلا تُكتب قائمةٌ ثانية تتباعد عنها. */ ?>
+            <?php
+            $sch_grades = [];
+            foreach (SCH_Classes::list() as $sch_cl) {
+                $sch_g = trim((string) ($sch_cl->grade_level ?? ''));
+                if ($sch_g !== '') {
+                    $sch_grades[$sch_g] = true;
+                }
+            }
+            $sch_grades = array_keys($sch_grades);
+            ?>
+            <?php if ($sch_grades !== []) : ?>
+                <div class="sch-field" data-when="many" hidden>
+                    <label for="c-grade"><?php esc_html_e('الصف', 'school-system'); ?></label>
+                    <select id="c-grade" name="scope_grade" disabled>
+                        <option value=""><?php esc_html_e('كل الصفوف', 'school-system'); ?></option>
+                        <?php foreach ($sch_grades as $sch_g) : ?>
+                            <option value="<?php echo esc_attr($sch_g); ?>"><?php echo esc_html($sch_g); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
+
             <div class="sch-field" data-when="many" hidden>
                 <label for="c-class"><?php esc_html_e('الشعبة', 'school-system'); ?></label>
                 <select id="c-class" name="scope_class" disabled>
