@@ -406,42 +406,11 @@
   var root = document.querySelector('[data-sch-tt]');
   if (!root) { return; }
 
-  /* ── المِزواد: +/− على حقل رقميّ ── */
-  root.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-tt-step][data-tt-for]');
-    if (!b) { return; }
+  /* المِزواد وشرائح الأيام لا سكربت لها: كل زرٍّ زرُّ إرسالٍ يحمل قيمته
+     التالية، فيعمل بلا جافاسكربت ويعمل بها سواء. ولا مسار كتابةٍ ثانٍ
+     يتباعد عن الأول. */
 
-    var f = document.getElementById(b.dataset.ttFor);
-    if (!f) { return; }
-
-    var step = parseInt(b.dataset.ttStep, 10) || 1;
-    var min  = f.min !== '' ? parseInt(f.min, 10) : -Infinity;
-    var max  = f.max !== '' ? parseInt(f.max, 10) : Infinity;
-    var next = (parseInt(f.value, 10) || 0) + step;
-
-    f.value = Math.max(min, Math.min(max, next));
-    f.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-
-  /* ── أيام الدوام: الشرائح تكتب القناع ── */
-  var mask = document.getElementById('tt-mask');
-  root.addEventListener('click', function (e) {
-    var d = e.target.closest('[data-tt-day]');
-    if (!d || !mask) { return; }
-
-    var bit = 1 << (parseInt(d.dataset.ttDay, 10) - 1);
-    var now = parseInt(mask.value, 10) || 0;
-    var on  = !(now & bit);
-
-    /* يومٌ واحد على الأقل — أسبوعٌ بلا دوام لا يقبله المولّد ولا معنى له */
-    if (!on && (now & ~bit) === 0) { return; }
-
-    mask.value = on ? (now | bit) : (now & ~bit);
-    d.classList.toggle('is-on', on);
-    d.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
-
-  /* ── القائمة تُرسل نموذجها عند الاختيار ── */
+  /* ── الحقل يُرسل نموذجه عند التغيير ── */
   root.addEventListener('change', function (e) {
     var sel = e.target.closest('[data-tt-submit]');
     if (!sel) { return; }

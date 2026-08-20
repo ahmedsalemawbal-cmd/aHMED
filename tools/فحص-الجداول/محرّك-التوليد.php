@@ -118,7 +118,14 @@ final class FakeWpdb
     public function query($q)
     {
         if (str_starts_with(ltrim($q), 'INSERT INTO wp_sch_tt_slots')) {
-            preg_match_all('/\(([^()]*)\)/', substr($q, strpos($q, 'VALUES')), $m);
+            // `NULLIF(103, 0)` أقواسٌ داخل الصفّ — يُطوى إلى قيمته قبل التقطيع،
+            // وإلا انكسر التحليل على قوسٍ ليس قوس صفّ. وMySQL يفعل المعنى نفسه.
+            $sql = preg_replace_callback(
+                '/NULLIF\(\s*(\d+)\s*,\s*0\s*\)/',
+                static fn (array $x): string => $x[1] === '0' ? 'NULL' : $x[1],
+                substr($q, strpos($q, 'VALUES'))
+            );
+            preg_match_all('/\(([^()]*)\)/', (string) $sql, $m);
             foreach ($m[1] as $tuple) {
                 $p = array_map('trim', explode(',', $tuple));
                 if (count($p) < 8) { continue; }

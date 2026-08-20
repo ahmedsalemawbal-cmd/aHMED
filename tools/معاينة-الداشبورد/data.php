@@ -798,7 +798,8 @@ final class SCH_TTFake extends SCH_FakeWpdb
                 [$w, $t] = $this->quota[$cid . '|' . $s->id] ?? [0, 0];
                 if ($w > 0) {
                     $out[] = (object) ['subject_id' => $s->id, 'subject_name' => $s->name,
-                                       'weekly' => $w, 'teacher_user_id' => $t, 'class_id' => $cid];
+                                       'weekly' => $w, 'teacher_user_id' => $t, 'class_id' => $cid,
+                                       'teacher_name' => $t ? 'معلّم ' . $t : null];
                 }
             }
             return $out;

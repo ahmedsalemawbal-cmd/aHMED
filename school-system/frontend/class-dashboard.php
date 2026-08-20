@@ -387,6 +387,8 @@ final class SCH_Dashboard
             'tt_place'         => ['sch_build_timetable',  'do_tt_place'],
             'tt_wipe'          => ['sch_build_timetable',  'do_tt_wipe'],
             'tt_copy'          => ['sch_build_timetable',  'do_tt_copy'],
+            'tt_spread'        => ['sch_build_timetable',  'do_tt_spread'],
+            'tt_subject'       => ['sch_manage_subjects',  'do_tt_subject'],
             'tt_publish'       => ['sch_approve_timetable','do_tt_publish'],
             'submit_timetable' => ['sch_build_timetable',  'do_submit_timetable'],
             'publish_timetable'=> ['sch_approve_timetable','do_publish_timetable'],
@@ -1654,6 +1656,59 @@ final class SCH_Dashboard
                 /* translators: %d: عدد الشعب */
                 __('نُسخ الجدول إلى %d شعبة — المواد فقط، والإسناد يتبع معلم كل شعبة.', 'school-system'),
                 $n
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    private static function do_tt_spread(array $d, int $id): array|WP_Error
+    {
+        $res = SCH_TT::spread(absint($d['plan_id'] ?? 0), absint($d['class_id'] ?? 0));
+
+        if ($res['months'] === 0) {
+            return sch_api_error('no_month', __('لا شهر قادم يُفرَش عليه — أو ما بعده منشور.', 'school-system'), 422);
+        }
+
+        return [
+            'msg'  => sprintf(
+                /* translators: 1: عدد الأشهر 2: عدد الحصص */
+                __('فُرِش الجدول على %1$d شهرًا — %2$d حصة منسوخة.', 'school-system'),
+                $res['months'],
+                $res['slots']
+            ),
+            'keep' => self::tt_keep($d),
+        ];
+    }
+
+    /**
+     * مادةٌ جديدة تُولَد بنصاب حصة واحدة في هذه الشعبة.
+     *
+     * الإضافة من شاشة المواد تترك النصاب صفرًا، فتُضاف المادة ولا تظهر —
+     * فيُعاد الوكيل ليضغط «+» في مكانٍ آخر. هنا تُولَد المادة ظاهرة.
+     */
+    private static function do_tt_subject(array $d, int $id): array|WP_Error
+    {
+        $created = SCH_Subjects::create([
+            'name'  => (string) ($d['name'] ?? ''),
+            'stage' => sanitize_key((string) ($d['stage'] ?? '')),
+        ]);
+
+        if (is_wp_error($created)) {
+            return $created;
+        }
+
+        SCH_TT::set_quota(
+            absint($d['plan_id'] ?? 0),
+            absint($d['class_id'] ?? 0),
+            (int) $created['id'],
+            1
+        );
+
+        return [
+            'msg'  => sprintf(
+                /* translators: %s: اسم المادة */
+                __('أُضيفت «%s» بحصة واحدة — عدّل نصابها من هنا.', 'school-system'),
+                sanitize_text_field((string) ($d['name'] ?? ''))
             ),
             'keep' => self::tt_keep($d),
         ];

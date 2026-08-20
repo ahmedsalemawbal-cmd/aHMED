@@ -417,9 +417,12 @@ final class SCH_TT
         global $wpdb;
 
         return $wpdb->get_results($wpdb->prepare(
-            'SELECT q.*, s.name AS subject_name, s.code
+            // اسم المعلم يُجلَب معها: سلّة الحصص تعرضه تحت اسم المادة، وجلبُه
+            // صفًّا صفًّا يعني عشرة استعلامات في شاشة واحدة.
+            'SELECT q.*, s.name AS subject_name, s.code, u.display_name AS teacher_name
              FROM ' . sch_table('tt_quota') . ' q
              INNER JOIN ' . sch_table('subjects') . ' s ON s.id = q.subject_id
+             LEFT JOIN ' . $wpdb->users . ' u ON u.ID = q.teacher_user_id
              WHERE q.plan_id = %d AND q.class_id = %d AND q.weekly > 0
              ORDER BY q.weekly DESC, s.name',
             $plan_id,
@@ -1026,14 +1029,18 @@ final class SCH_TT
 
                     $t = $quota[$pick]['teacher'];
 
+                    // `NULLIF(%d, 0)` لا `%s` مع `null`: تمرير العدم عبر
+                    // `%s` يكتب سلسلةً فارغة في عمودٍ عدديّ — تُقبَل صفرًا في
+                    // وضعٍ متساهل وتُرفَض في الوضع الصارم. والحصة بلا معلم
+                    // حالةٌ مشروعة لا خطأ إدراج.
                     $rows[] = $wpdb->prepare(
-                        '(%d, %d, %d, %d, %d, %s, 0, %s)',
+                        '(%d, %d, %d, %d, %d, NULLIF(%d, 0), 0, %s)',
                         $plan_id,
                         $class_id,
                         $day,
                         $p,
                         $pick,
-                        $t > 0 ? (string) $t : null,
+                        max(0, (int) $t),
                         $now
                     );
 
@@ -1096,7 +1103,7 @@ final class SCH_TT
      * والقائمة تُوسَّع بكلمة، والمادة غير المعروفة تُعامَل إثرائية — وهو
      * الافتراض الأأمن: قيدُ «الأساسية أولًا» لا يُفرَض على ما لا نعرفه.
      */
-    private static function is_core(string $name): bool
+    public static function is_core(string $name): bool
     {
         foreach (['قرآن', 'عربي', 'العربية', 'رياضيات', 'علوم', 'إسلام', 'اسلام', 'توحيد', 'فقه', 'إنجليز', 'انجليز', 'لغوية', 'عددية'] as $k) {
             if (mb_strpos($name, $k) !== false) {
@@ -1297,13 +1304,13 @@ final class SCH_TT
                 ));
 
                 $rows[] = $wpdb->prepare(
-                    '(%d, %d, %d, %d, %d, %s, 0, %s)',
+                    '(%d, %d, %d, %d, %d, NULLIF(%d, 0), 0, %s)',
                     $plan_id,
                     $cid,
                     (int) $r->day_of_week,
                     (int) $r->period_no,
                     (int) $r->subject_id,
-                    $teacher > 0 ? (string) $teacher : null,
+                    max(0, $teacher),
                     $now
                 );
             }
@@ -1322,6 +1329,139 @@ final class SCH_TT
         sch_audit('tt.copied', 'tt_plan', $plan_id, ['from' => $from_class, 'to' => $done]);
 
         return $done;
+    }
+
+    /**
+     * فرش جدول الشعبة على الأشهر القادمة من السنة نفسها.
+     *
+     * الأسبوع يتكرر داخل الشهر، والشهر التالي خطةٌ أخرى — ومن بنى شهرًا
+     * وأراده بقيّة العام كان يعيده تسع مرات. هنا يُنسخ النصاب والخانات معًا:
+     * نصابٌ بلا خانات يترك الشهر فارغًا، وخاناتٌ بلا نصاب تجعل «نصاب ناقص»
+     * يقرأ خطأً في كل شهر منسوخ.
+     *
+     * الخطط المنشورة لا تُمَسّ: الشهر الذي اعتُمد جدوله يراه المعلمون، ولا
+     * يُبدَّل تحت أقدامهم بنسخةٍ من شهرٍ آخر.
+     *
+     * @return array{months:int,slots:int}
+     */
+    public static function spread(int $plan_id, int $class_id): array
+    {
+        global $wpdb;
+
+        $plan = self::get_plan($plan_id);
+        if (!$plan || !SCH_Classes::get($class_id)) {
+            return ['months' => 0, 'slots' => 0];
+        }
+
+        $from = (string) $plan->effective_from;
+        $year = (int) $plan->year_id;
+
+        // الأشهر التي لم تُفتَح خطتها بعد لا تظهر في الاستعلام — تُفتَح هنا
+        // بترتيبها، وإلا فُرِش الجدول على ما فُتِح وحده وبدا النسخ ناقصًا.
+        foreach (array_keys(self::months()) as $ym) {
+            if ($ym > substr($from, 0, 7)) {
+                self::ensure_plan($ym);
+            }
+        }
+
+        $later = $wpdb->get_results($wpdb->prepare(
+            'SELECT id FROM ' . sch_table('tt_plans') . '
+             WHERE year_id = %d AND effective_from > %s AND status <> %s
+             ORDER BY effective_from',
+            $year,
+            $from,
+            'published'
+        )) ?: [];
+
+        if ($later === []) {
+            return ['months' => 0, 'slots' => 0];
+        }
+
+        $quota = $wpdb->get_results($wpdb->prepare(
+            'SELECT subject_id, weekly, teacher_user_id FROM ' . sch_table('tt_quota') . '
+             WHERE plan_id = %d AND class_id = %d',
+            $plan_id,
+            $class_id
+        )) ?: [];
+
+        $slots = $wpdb->get_results($wpdb->prepare(
+            'SELECT day_of_week, period_no, subject_id, teacher_user_id, locked
+             FROM ' . sch_table('tt_slots') . '
+             WHERE plan_id = %d AND class_id = %d',
+            $plan_id,
+            $class_id
+        )) ?: [];
+
+        if ($slots === [] && $quota === []) {
+            return ['months' => 0, 'slots' => 0];
+        }
+
+        $now    = sch_now();
+        $months = 0;
+        $copied = 0;
+
+        foreach ($later as $p) {
+            $pid = (int) $p->id;
+
+            $rows = [];
+            foreach ($quota as $q) {
+                $rows[] = $wpdb->prepare(
+                    '(%d, %d, %d, %d, NULLIF(%d, 0), %s, %s)',
+                    $pid,
+                    $class_id,
+                    (int) $q->subject_id,
+                    (int) $q->weekly,
+                    max(0, (int) $q->teacher_user_id),
+                    $now,
+                    $now
+                );
+            }
+
+            if ($rows !== []) {
+                $wpdb->query(
+                    'INSERT INTO ' . sch_table('tt_quota') . '
+                        (plan_id, class_id, subject_id, weekly, teacher_user_id, created_at, updated_at)
+                     VALUES ' . implode(',', $rows) . '
+                     ON DUPLICATE KEY UPDATE weekly = VALUES(weekly),
+                                             teacher_user_id = VALUES(teacher_user_id),
+                                             updated_at = VALUES(updated_at)'
+                );
+            }
+
+            self::wipe($pid, $class_id, false);
+
+            $rows = [];
+            foreach ($slots as $s) {
+                $rows[] = $wpdb->prepare(
+                    '(%d, %d, %d, %d, %d, NULLIF(%d, 0), %d, %s)',
+                    $pid,
+                    $class_id,
+                    (int) $s->day_of_week,
+                    (int) $s->period_no,
+                    (int) $s->subject_id,
+                    max(0, (int) $s->teacher_user_id),
+                    (int) $s->locked,
+                    $now
+                );
+            }
+
+            if ($rows !== []) {
+                $wpdb->query(
+                    'INSERT INTO ' . sch_table('tt_slots') . '
+                        (plan_id, class_id, day_of_week, period_no, subject_id, teacher_user_id, locked, created_at)
+                     VALUES ' . implode(',', $rows) . '
+                     ON DUPLICATE KEY UPDATE subject_id = VALUES(subject_id),
+                                             teacher_user_id = VALUES(teacher_user_id)'
+                );
+                $copied += count($rows);
+            }
+
+            $months++;
+        }
+
+        sch_audit('tt.spread', 'tt_plan', $plan_id, ['class' => $class_id, 'months' => $months]);
+
+        return ['months' => $months, 'slots' => $copied];
     }
 
     // ═══════════════════════════ العدسات ═══════════════════════════
