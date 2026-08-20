@@ -484,15 +484,34 @@ final class SCH_Enrollment
 
     /**
      * الخط الزمني للطالب — أحدث ما جرى له عبر كل الوحدات.
-     * يجمع من النقل والحضور والدرجات والمالية والتسجيل.
+     * يجمع من البوابة والنقل والحضور والدرجات والمالية والتسجيل.
      *
-     * @return array<int,array{title:string,when:string}>
+     * لكل حدث `kind` تقول معناه (سليم · تنبيه · خلل · معلومة · أصل) — فاللون
+     * في الشاشة يُشتقّ من المعنى لا يُكتب في القالب، و`tag` وسمٌ قصير يُعرَض
+     * إن كان للحدث أثرٌ لا يظهر في عنوانه.
+     *
+     * @return array<int,array{title:string,when:string,kind:string,tag:string}>
      */
     public static function timeline(int $student_id, int $limit = 6): array
     {
         global $wpdb;
 
         $out = [];
+
+        $gate = $wpdb->get_row($wpdb->prepare(
+            'SELECT checkpoint, occurred_at FROM ' . sch_table('custody_events') . '
+             WHERE student_id = %d ORDER BY id DESC LIMIT 1',
+            $student_id
+        ));
+
+        if ($gate) {
+            $out[] = [
+                'title' => (string) (SCH_Custody::CHECKPOINTS[$gate->checkpoint] ?? __('حركة عند البوابة', 'school-system')),
+                'when'  => (string) $gate->occurred_at,
+                'kind'  => in_array((string) $gate->checkpoint, ['gate_in', 'bus_board'], true) ? 'ok' : 'info',
+                'tag'   => (string) $gate->checkpoint === 'early_out' ? __('خروج مبكر', 'school-system') : '',
+            ];
+        }
 
         $trip = $wpdb->get_row($wpdb->prepare(
             'SELECT type, occurred_at FROM ' . sch_table('trip_events') . '
@@ -509,16 +528,19 @@ final class SCH_Enrollment
                     default    => __('لم يحضر للباص', 'school-system'),
                 },
                 'when'  => (string) $trip->occurred_at,
+                'kind'  => $trip->type === 'absent' ? 'bad' : 'ok',
+                'tag'   => '',
             ];
         }
 
         $att = $wpdb->get_row($wpdb->prepare(
-            'SELECT status, att_date, recorded_at FROM ' . sch_table('attendance') . '
+            'SELECT status, att_date, recorded_at, minutes_late FROM ' . sch_table('attendance') . '
              WHERE student_id = %d ORDER BY att_date DESC LIMIT 1',
             $student_id
         ));
 
         if ($att) {
+            $late = (int) ($att->minutes_late ?? 0);
             $out[] = [
                 'title' => sprintf(
                     /* translators: %s: حالة الحضور */
@@ -526,6 +548,17 @@ final class SCH_Enrollment
                     SCH_Attendance::STATUSES[$att->status] ?? $att->status
                 ),
                 'when'  => (string) ($att->recorded_at ?: $att->att_date),
+                'kind'  => match ((string) $att->status) {
+                    'present' => 'ok',
+                    'late'    => 'warn',
+                    'absent'  => 'bad',
+                    default   => 'info',
+                },
+                'tag'   => $late > 0 ? sprintf(
+                    /* translators: %d: عدد الدقائق */
+                    __('تأخّر %d دقيقة', 'school-system'),
+                    $late
+                ) : '',
             ];
         }
 
@@ -539,14 +572,18 @@ final class SCH_Enrollment
         ));
 
         if ($exam) {
+            $max = (float) $exam->max_score;
+            $pct = $max > 0 ? (float) $exam->score / $max * 100 : 0.0;
             $out[] = [
                 'title' => sprintf(
                     '%s — %s / %s',
                     $exam->title,
                     number_format((float) $exam->score, 1),
-                    number_format((float) $exam->max_score, 0)
+                    number_format($max, 0)
                 ),
                 'when'  => (string) $exam->recorded_at,
+                'kind'  => $pct >= 50 ? 'ok' : 'warn',
+                'tag'   => '',
             ];
         }
 
@@ -565,6 +602,8 @@ final class SCH_Enrollment
                     sch_money($pay->amount)
                 ),
                 'when'  => (string) $pay->paid_at,
+                'kind'  => 'ok',
+                'tag'   => '',
             ];
         }
 
@@ -573,6 +612,8 @@ final class SCH_Enrollment
             $out[] = [
                 'title' => __('تسجيل في المدرسة', 'school-system'),
                 'when'  => (string) $student->enrolled_at,
+                'kind'  => 'base',
+                'tag'   => '',
             ];
         }
 

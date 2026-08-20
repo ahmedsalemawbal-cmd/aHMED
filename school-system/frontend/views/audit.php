@@ -67,7 +67,7 @@ $sch_base  = SCH_Dashboard::url('audit');
                     <tr>
                         <td dir="ltr"><?php echo esc_html($r->created_at); ?></td>
                         <td class="sch-name"><?php echo esc_html($r->display_name ?: '—'); ?></td>
-                        <td dir="ltr"><?php echo esc_html($r->action); ?></td>
+                        <td class="sch-name"><?php echo esc_html(SCH_Audit::label((string) $r->action)); ?></td>
                         <td dir="ltr"><?php echo esc_html($r->object_type ? $r->object_type . '#' . $r->object_id : '—'); ?></td>
                         <td dir="ltr"><?php echo esc_html($r->ip ?: '—'); ?></td>
                     </tr>

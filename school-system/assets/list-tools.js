@@ -252,7 +252,24 @@
     var opener = e.target.closest('[data-modal-open]');
     if (opener) {
       e.preventDefault();
-      show(document.getElementById(opener.dataset.modalOpen));
+
+      var box = document.getElementById(opener.dataset.modalOpen);
+
+      /* «استبدال هذا المستند» تفتح نافذة الرفع وقد اختير نوعه — لا نافذة
+         يُعاد فيها اختيار ما ضغط عليه المستخدم للتوّ. */
+      if (box && opener.dataset.pickName) {
+        var field = box.querySelector('[name="' + opener.dataset.pickName + '"]');
+        if (field) { field.value = opener.dataset.pickValue || ''; }
+      }
+
+      show(box);
+      return;
+    }
+
+    /* الطباعة: اطبع أولًا — إرسال نموذجٍ ينقل الصفحة فلا تصل window.print. */
+    if (e.target.closest('[data-sch-print]')) {
+      e.preventDefault();
+      window.print();
       return;
     }
 
@@ -280,4 +297,98 @@
   if (params.has('err') && params.has('from')) {
     show(document.getElementById(params.get('from')));
   }
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   تبويبات ملفّ الطالب — تحسينٌ فوق روابط حقيقية
+
+   كل تبويبة رابط `?tab=N` يعمل بلا جافاسكربت. وهذا يمنع إعادة التحميل
+   ويكتب الحالة في تاريخ المتصفّح، فزرّ الرجوع يعيد التبويبة السابقة لا
+   الصفحة السابقة. والصفحات كلّها في المستند أصلًا — البيانات تُقرأ مرة
+   واحدة في الخادم، فالتبديل إظهارٌ لا طلب.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var root = document.querySelector('[data-sch-tabs]');
+  if (!root) { return; }
+
+  /* الشريط هو الترتيب، والنقاط السفلية تحمل المفاتيح نفسها. خلطهما في قائمة
+     واحدة يجعل «التالي» بعد آخر تبويبة يقع على أوّل نقطة — فيظهر زرّ يعيدك
+     إلى البداية في موضع «النهاية». */
+  var links = Array.prototype.slice.call(root.querySelectorAll('.sch-sp__tabs [data-tab-go]'));
+  var marks = Array.prototype.slice.call(root.querySelectorAll('[data-tab-go]'));
+  var panes = Array.prototype.slice.call(root.querySelectorAll('[data-tab-pane]'));
+  var steps = Array.prototype.slice.call(root.querySelectorAll('[data-tab-step]'));
+  var edges = Array.prototype.slice.call(root.querySelectorAll('[data-tab-edge]'));
+  if (links.length < 2) { return; }
+
+  var order = links.map(function (a) { return a.dataset.tabGo; });
+  var at = 0;
+
+  function paint(n, push) {
+    var idx = order.indexOf(n);
+    if (idx < 0) { return false; }
+    at = idx;
+
+    panes.forEach(function (p) { p.classList.toggle('is-on', p.dataset.tabPane === n); });
+    marks.forEach(function (a) {
+      var hit = a.dataset.tabGo === n;
+      a.classList.toggle('is-on', hit);
+      a.setAttribute('aria-current', hit ? 'true' : 'false');
+    });
+    links[idx].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+
+    /* الترقيم السفلي يحمل اسمَي الجارتين — يُعاد بناؤه مع كل تبديل */
+    steps.forEach(function (s) {
+      var peer = links[at + parseInt(s.dataset.tabStep, 10)];
+      s.hidden = !peer;
+      if (!peer) { return; }
+      s.href = peer.href;
+      var label = s.querySelector('[data-tab-label]');
+      if (label) { label.textContent = peer.dataset.tabLabel || ''; }
+    });
+
+    /* و«البداية»/«النهاية» تحلّان محلّ الجارة الغائبة — وتُخفيان متى وُجدت.
+       بلا هذا تبقى «البداية» معروضة بعد التبديل لآخر صفحة. */
+    edges.forEach(function (e) {
+      e.hidden = !!links[at + (e.dataset.tabEdge === 'start' ? -1 : 1)];
+    });
+
+    if (push) {
+      var url = new URL(window.location.href);
+      url.searchParams.set('tab', n);
+      window.history.pushState({ schTab: n }, '', url);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    return true;
+  }
+
+  root.addEventListener('click', function (e) {
+    var hit = e.target.closest('[data-tab-go], [data-tab-step]');
+    if (!hit || hit.hidden) { return; }
+
+    var n = hit.dataset.tabGo;
+    if (!n) {
+      var peer = links[at + parseInt(hit.dataset.tabStep, 10)];
+      n = peer ? peer.dataset.tabGo : '';
+    }
+    if (n && paint(n, true)) { e.preventDefault(); }
+  });
+
+  /* ما رسمه الخادم هو الأصل — والرابط قد لا يحمل `tab` إطلاقًا (أوّل فتحة،
+     أو عودة بعد حفظ). قراءة الرابط وحدها كانت تُرجع الشاشة للتبويبة الأولى
+     فوق ما رسمه الخادم، فيضغط الموظف «المستندات» فيرى «الهوية». */
+  var booted = root.querySelector('[data-tab-pane].is-on');
+  var boot   = new URLSearchParams(window.location.search).get('tab')
+    || (booted ? booted.dataset.tabPane : order[0]);
+
+  /* الرجوع بالمتصفّح يعود لرابطٍ قد لا يحمل `tab` — فالمرجع هو ما فُتحت به
+     الصفحة أوّل مرة، لا التبويبة المعروضة الآن (وإلّا لم يفعل الرجوع شيئًا). */
+  window.addEventListener('popstate', function () {
+    paint(new URLSearchParams(window.location.search).get('tab') || boot, false);
+  });
+
+  paint(boot, false);
 })();

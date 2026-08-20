@@ -17,6 +17,9 @@ const SCH_ROSTER = [
 ];
 
 /** الحالة تُضبط بمتغيّر بيئة، فتُرى الشاشة فارغةً وممتلئة بلا تعديل ملف. */
+/** الوضع الفارغ: طالبٌ لا شيء له بعد — لاختبار كل فرعٍ فارغ في الشاشة. */
+function sch_empty_mode(): bool { return getenv('EMPTY') === '1'; }
+
 function sch_demo_state(int $i): array
 {
     $mode = getenv('DEMO') ?: 'fresh';
@@ -44,7 +47,19 @@ function sch_demo_state(int $i): array
 
 final class SCH_Attendance
 {
-    public const STATUSES = ['present' => 'حاضر', 'late' => 'متأخر', 'absent' => 'غائب', 'excused' => 'بعذر'];
+    public const STATUSES = ['present' => 'حاضر', 'absent' => 'غائب', 'late' => 'متأخر', 'excused' => 'غياب بعذر'];
+
+    public static function last_days(int $sid, int $days = 30): array
+    {
+        $out = []; $counts = ['present' => 0, 'late' => 0, 'absent' => 0, 'excused' => 0, 'off' => 0];
+        $labels = self::STATUSES + ['off' => 'لا دوام'];
+        for ($i = 0; $i < $days; $i++) {
+            $k = $i % 7 === 5 ? 'off' : ($i % 9 === 4 ? 'absent' : ($i % 11 === 7 ? 'late' : ($i % 13 === 3 ? 'excused' : 'present')));
+            $counts[$k]++;
+            $out[] = ['date' => date('Y-m-d', strtotime('-' . ($days - 1 - $i) . ' days')), 'key' => $k, 'label' => $labels[$k]];
+        }
+        return ['days' => $out, 'counts' => $counts];
+    }
 
     public static function expected_in(): string { return '07:30'; }
     public static function rate(int $student_id, int $days = 60): float { return 92.5; }
@@ -121,6 +136,13 @@ final class SCH_Custody
         return array_slice($out, 0, $limit);
     }
 
+    public static function delegations(int $sid, int $limit = 20): array
+    {
+        if (sch_empty_mode()) { return []; }
+        return [(object) ['id' => 3, 'person_name' => 'محمد أحمد', 'relation' => 'خاله',
+                          'status' => 'active', 'valid_until' => date('Y-m-d H:i:s', time() + 7200)]];
+    }
+
     public static function state_label(?string $s): string
     {
         return ['at_school' => 'في المدرسة', 'on_bus' => 'في الباص', 'home' => 'في المنزل'][$s] ?? 'غير معروف';
@@ -133,7 +155,11 @@ final class SCH_Classes
 
     public static function list(): array
     {
-        return [(object) ['id' => 1, 'grade_level' => 'الرابع', 'section' => 'أ', 'stage' => 'ابتدائي']];
+        return [
+            (object) ['id' => 1, 'grade_level' => 'الرابع', 'section' => 'أ', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 9],
+            (object) ['id' => 2, 'grade_level' => 'الرابع', 'section' => 'ب', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 14],
+            (object) ['id' => 3, 'grade_level' => 'الخامس', 'section' => 'أ', 'stage' => 'ابتدائي', 'capacity' => 15, 'enrolled' => 11],
+        ];
     }
     public static function get(int $id): ?object { return self::list()[0] ?? null; }
     public static function label($c): string
@@ -158,7 +184,7 @@ final class SCH_Students
                 'cls_grade' => 'الأول', 'cls_section' => 'أ', 'cls_stage' => 'ابتدائي', 'cls_id' => 7,
                 'guardian_name' => $g[$i] ?? null, 'guardian_phone' => $p[$i] ?? null,
                 'route_name' => $r[$i] ?? null,
-                'custody_state' => [0 => 'in_school', 1 => 'home', 2 => 'in_school', 3 => 'in_school', 4 => 'home'][$i] ?? 'home',
+                'custody_state' => [0 => 'at_school', 1 => 'home', 2 => 'at_school', 3 => 'at_school', 4 => 'home'][$i] ?? 'home',
                 'att_status' => [0 => 'present', 1 => null, 2 => 'late', 3 => 'present', 4 => 'absent'][$i] ?? null,
                 'student_no' => 'S' . $row['academic_no'], 'national_id' => '215846649' . $i,
                 'nationality' => 'اليمن', 'birth_date' => '2016-04-0' . ($i + 1),
@@ -177,21 +203,40 @@ final class SCH_Students
         $att = (string) ($r->att_status ?? '');
         if ($att === 'absent') { return ['key' => 'absent', 'label' => 'غائب']; }
         if ($att === 'late')   { return ['key' => 'late',   'label' => 'متأخر']; }
-        if ((string) ($r->custody_state ?? '') === 'in_school') { return ['key' => 'in', 'label' => 'داخل المدرسة']; }
+        if ((string) ($r->custody_state ?? '') === 'at_school') { return ['key' => 'in', 'label' => 'داخل المدرسة']; }
         return ['key' => 'out', 'label' => 'خارج المدرسة'];
     }
 
     public static function current_class(int $id): ?object
     {
-        return SCH_Classes::list()[0] ?? null;
+        return sch_empty_mode() ? null : (SCH_Classes::list()[0] ?? null);
     }
 
     public static function get(int $id): ?object
     {
         foreach (SCH_Attendance::day_sheet(date('Y-m-d')) as $s) {
-            if ((int) $s->id === $id) { return $s; }
+            if ((int) $s->id === $id) { break; }
+            $s = null;
         }
-        return null;
+
+        $name = $s->full_name ?? 'احمد سالم محمد عوبل';
+
+        return (object) [
+            'id' => $id, 'full_name' => $name, 'name_en' => 'AHMED SALEM MOHAMMED AWBAL',
+            'academic_no' => '1448000' . $id, 'student_no' => 'S1448000' . $id,
+            'national_id' => '215846649' . $id, 'nationality' => 'اليمن',
+            'birth_date' => '2016-04-09', 'gender' => $id % 2 ? 'male' : 'female',
+            'stage' => 'primary', 'grade_level' => 'الرابع', 'section' => 'أ',
+            'enrolled_at' => '2026-08-09', 'status' => 'active',
+            'qr_token' => 'demo-token', 'user_id' => sch_empty_mode() ? 0 : ($id % 3 ? 41 : 0),
+            'photo_file' => null, 'custody_state' => 'at_school',
+        ];
+    }
+
+    public static function state_now(object $student): array
+    {
+        $student->att_status = 'late';
+        return self::now_state($student);
     }
 }
 
@@ -367,30 +412,93 @@ function is_wp_error($x) { return false; }
 final class SCH_Years { public static function current_id(): int { return 1; } }
 final class SCH_Guardians
 {
+    public const RELATIONS = ['father' => 'الأب', 'mother' => 'الأم', 'brother' => 'أخ',
+                              'sister' => 'أخت', 'uncle' => 'عم/خال', 'guardian' => 'وصي'];
+
     /** أوّل طالب له وليّ أمر، والثاني بلا — فتُرى الحالتان في لقطة واحدة. */
     public static function of_student(int $id): array
     {
+        if (sch_empty_mode()) { return []; }
         return $id % 2 === 1
-            ? [(object) ['user_id' => 9, 'display_name' => 'أحمد سالم عوبل', 'user_login' => '0551234567']]
+            ? [
+                (object) ['id' => 4, 'user_id' => 9, 'display_name' => 'احمد سالم محمد عوبل سالم',
+                          'phone' => '0556847029', 'relation' => 'father', 'is_primary' => 1, 'can_pickup' => 1],
+                (object) ['id' => 5, 'user_id' => 10, 'display_name' => 'نورة عبدالله الحربي',
+                          'phone' => '0509876543', 'relation' => 'mother', 'is_primary' => 0, 'can_pickup' => 0],
+              ]
             : [];
     }
+
+    public static function list(array $args = []): array
+    {
+        return ['items' => [
+            (object) ['id' => 4, 'display_name' => 'احمد محمد سالم القحطاني', 'phone' => '0551234567'],
+            (object) ['id' => 5, 'display_name' => 'نورة عبدالله الحربي', 'phone' => '0509876543'],
+        ], 'total' => 2];
+    }
+
+    public static function relation_label(?string $r): string { return self::RELATIONS[$r] ?? '—'; }
+
+    public static function get(int $id): ?object
+    {
+        return (object) ['id' => $id, 'user_id' => 9, 'display_name' => 'احمد سالم محمد عوبل',
+                         'phone' => '0556847029', 'email' => '', 'national_id' => '2158466491',
+                         'job' => 'موظف', 'workplace' => 'شركة', 'address' => 'الرياض',
+                         'status' => 'active', 'created_at' => '2026-08-09 11:35:00'];
+    }
 }
-final class SCH_Comms { public static function notify(...$a) {} }
+final class SCH_Comms
+{
+    public const AUDIENCES = ['all_guardians' => 'كل أولياء الأمور', 'class' => 'أولياء أمور شعبة',
+                              'staff' => 'الموظفون', 'user' => 'شخص واحد'];
+
+    public static function notify(...$a) {}
+
+    public static function sent(int $limit = 50): array
+    {
+        return [
+            (object) ['title' => 'اجتماع أولياء الأمور', 'audience' => 'all_guardians',
+                      'display_name' => 'اميره الشامي', 'created_at' => '2026-08-18 12:04:00'],
+            (object) ['title' => 'تنبيه: تأخّر الحافلة', 'audience' => 'class',
+                      'display_name' => 'النظام', 'created_at' => '2026-08-17 07:22:00'],
+        ];
+    }
+}
 final class SCH_Enrollment {
     public const ID_TYPES = ['national' => 'هوية وطنية', 'iqama' => 'إقامة', 'passport' => 'جواز'];
     public const RELATIONS = ['father' => 'الأب', 'mother' => 'الأم', 'guardian' => 'وليّ أمر'];
-    public const DOC_TYPES = ['birth' => 'شهادة الميلاد', 'id' => 'الهوية', 'photo' => 'صورة', 'health' => 'تقرير صحي'];
+    public const DOC_TYPES = ['id' => 'الهوية أو الإقامة', 'birth' => 'شهادة الميلاد', 'transcript' => 'آخر شهادة دراسية', 'photo' => 'صورة شخصية'];
     public const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
     public const GENDERS = ['male' => 'ذكر', 'female' => 'أنثى'];
 
     public static function timeline(int $id, int $limit = 6): array
     {
+        if (sch_empty_mode()) { return []; }
+        return array_slice([
+            ['title' => 'دخول البوابة', 'when' => '2026-08-20 07:11:04', 'kind' => 'ok', 'tag' => ''],
+            ['title' => 'صعد إلى الباص', 'when' => '2026-08-20 06:31:04', 'kind' => 'ok', 'tag' => ''],
+            ['title' => 'الحضور: متأخر', 'when' => '2026-08-19 07:52:11', 'kind' => 'warn', 'tag' => 'تأخّر 22 دقيقة'],
+            ['title' => 'الحضور: غياب بعذر', 'when' => '2026-08-13 09:44:52', 'kind' => 'info', 'tag' => 'عذر طبي'],
+            ['title' => 'سداد دفعة — 8,100.00 ر.س', 'when' => '2026-08-12 08:02:10', 'kind' => 'ok', 'tag' => ''],
+            ['title' => 'تسجيل في المدرسة', 'when' => '2026-08-09 10:02:00', 'kind' => 'base', 'tag' => ''],
+        ], 0, $limit);
+    }
+
+    public static function docs(int $id): array
+    {
+        if (sch_empty_mode()) { return []; }
         return [
-            ['title' => 'الحضور: حاضر', 'when' => '2026-08-20 06:52:11'],
-            ['title' => 'صعد إلى الباص', 'when' => '2026-08-20 06:31:04'],
-            ['title' => 'الحضور: غياب بعذر', 'when' => '2026-08-13 09:44:52'],
-            ['title' => 'تسجيل في المدرسة', 'when' => '2026-08-09 10:02:00'],
+            (object) ['id' => 11, 'doc_type' => 'id', 'file_name' => 'id.jpg', 'file_size' => 1048576, 'created_at' => '2026-08-09 11:35:00'],
+            (object) ['id' => 12, 'doc_type' => 'birth', 'file_name' => 'birth.pdf', 'file_size' => 942080, 'created_at' => '2026-08-09 11:36:00'],
+            (object) ['id' => 13, 'doc_type' => 'photo', 'file_name' => 'photo.png', 'file_size' => 512000, 'created_at' => '2026-08-09 11:38:00'],
         ];
+    }
+
+    public static function health(int $id): ?object
+    {
+        if (sch_empty_mode()) { return null; }
+        return (object) ['blood_type' => 'O+', 'chronic' => '', 'allergies' => 'حساسية من الفول السوداني',
+                         'special_needs' => '', 'notes' => ''];
     }
 
     public static function full_name($o): string
@@ -434,7 +542,16 @@ final class SCH_Modal
 }
 
 /* ── ما تحتاجه شاشة الطلاب من بقيّة الوحدات ── */
-final class SCH_Routes { public static function all(): array { return []; } }
+final class SCH_Routes
+{
+    public static function all(): array { return []; }
+
+    public static function subscription_of(int $id): ?object
+    {
+        if (sch_empty_mode()) { return null; }
+        return (object) ['route_name' => 'حي النرجس', 'stop_name' => null, 'fee_amount' => 7000.0];
+    }
+}
 final class SCH_Views {
     public static function menu(string $screen, string $view = ''): string { return ''; }
 }
@@ -459,7 +576,122 @@ final class SCH_Bulk {
     }
     public static function bar(string $screen): void {}
 }
-final class SCH_Finance { public static function of_student(int $id): array { return [(object) ['balance' => 28800.0]]; } }
+final class SCH_Finance
+{
+    public static function of_student(int $id): array { return [(object) ['balance' => 28800.0]]; }
+
+    public static function invoices_of_student(int $id): array
+    {
+        if (sch_empty_mode()) { return []; }
+        return [
+            (object) ['id' => 21, 'plan_name' => 'الرسوم الدراسية', 'total' => 38000.0, 'paid' => 16200.0, 'due_date' => '2026-09-01'],
+        ];
+    }
+
+    public static function student_summary(int $id): array
+    {
+        if (sch_empty_mode()) {
+            return ['total' => 0.0, 'paid' => 0.0, 'remaining' => 0.0, 'pct' => 0, 'payments' => 0, 'next_due' => null];
+        }
+        return ['total' => 45000.0, 'paid' => 16200.0, 'remaining' => 28800.0,
+                'pct' => 36, 'payments' => 2, 'next_due' => '2026-09-01'];
+    }
+}
+
+final class SCH_Flow
+{
+    public static function progress(string $flow, int $id = 0): array
+    {
+        $defs = [
+            ['reg', 'تسجيل الطالب', 1], ['class', 'تحديد الصف والشعبة', 1],
+            ['guardian', 'ربط ولي الأمر', 1], ['fees', 'الرسوم الدراسية', 0],
+            ['bus', 'النقل المدرسي', 1], ['app', 'تفعيل التطبيق', 1],
+            ['card', 'طباعة البطاقة', 1],
+        ];
+        $steps = []; $done = 0; $next = null;
+        foreach ($defs as [$k, $label, $ok]) {
+            $state = $ok ? 'done' : ($next === null ? 'current' : 'todo');
+            if ($ok) { $done++; } elseif ($next === null) { $next = $k; }
+            $steps[$k] = ['label' => $label, 'icon' => 'user', 'why' => 'تُولَّد الفاتورة وأقساطها',
+                          'required' => true, 'state' => $state, 'manual' => false,
+                          'url' => SCH_Dashboard::url('finance')];
+        }
+        return ['steps' => $steps, 'done' => $done, 'total' => count($steps), 'next' => $next];
+    }
+}
+
+final class SCH_Audit
+{
+    public static function query(array $args = []): array
+    {
+        if (sch_empty_mode()) { return ['items' => [], 'total' => 0]; }
+        return ['items' => [
+            (object) ['action' => 'doc.uploaded', 'display_name' => 'اميره الشامي', 'created_at' => '2026-08-20 07:11:00', 'object_type' => 'student', 'object_id' => 1, 'ip' => '10.0.0.4'],
+            (object) ['action' => 'guardian.linked', 'display_name' => 'دواد احمد عوبل', 'created_at' => '2026-08-12 08:02:00', 'object_type' => 'student', 'object_id' => 1, 'ip' => '10.0.0.4'],
+            (object) ['action' => 'pickup.right_changed', 'display_name' => 'اميره الشامي', 'created_at' => '2026-08-11 09:20:00', 'object_type' => 'student', 'object_id' => 1, 'ip' => '10.0.0.4'],
+            (object) ['action' => 'student.registered', 'display_name' => 'اميره الشامي', 'created_at' => '2026-08-09 11:35:00', 'object_type' => 'student', 'object_id' => 1, 'ip' => '10.0.0.4'],
+        ], 'total' => 4];
+    }
+
+    public static function object_types(): array { return ['student', 'invoice', 'message']; }
+
+    public static function label(string $a): string
+    {
+        return ['doc.uploaded' => 'رفع مستند', 'guardian.linked' => 'ربط وليّ أمر',
+                'pickup.right_changed' => 'تغيير حقّ الاستلام',
+                'student.registered' => 'إنشاء ملف الطالب'][$a] ?? $a;
+    }
+}
+
+final class SCH_Nerve
+{
+    public static function summary(int $id): ?object
+    {
+        if (sch_empty_mode()) { return null; }
+        return (object) ['works' => 'يستجيب للمدح الفردي أمام مجموعة صغيرة', 'avoid' => '', 'notes' => ''];
+    }
+
+    public static function previous_summary(int $id): ?object
+    {
+        if (sch_empty_mode()) { return null; }
+        return (object) ['year_name' => '1447', 'works' => 'الجلوس في الصف الأول', 'avoid' => '', 'notes' => ''];
+    }
+}
+
+final class SCH_Assessment
+{
+    public static function report_card(int $id): array
+    {
+        if (sch_empty_mode()) { return []; }
+        return ['الرياضيات' => ['percent' => 88.0], 'العلوم' => ['percent' => 76.5], 'اللغة العربية' => ['percent' => 91.0]];
+    }
+}
+
+final class SCH_QR
+{
+    /** رمز تجريبي بالشكل نفسه — المولّد الحقيقي يحتاج قاعدة. */
+    public static function svg(string $data, int $scale = 4, int $quiet = 2): string
+    {
+        $cells = '';
+        for ($y = 0; $y < 21; $y++) {
+            for ($x = 0; $x < 21; $x++) {
+                if ((($x * 7 + $y * 13 + strlen($data)) % 3) === 0) {
+                    $cells .= '<rect x="' . $x . '" y="' . $y . '" width="1" height="1"/>';
+                }
+            }
+        }
+        return '<svg viewBox="0 0 21 21" width="100%" height="100%" shape-rendering="crispEdges"><g fill="#0E1420">' . $cells . '</g></svg>';
+    }
+}
+
+function size_format($bytes, $decimals = 0)
+{
+    $units = ['B', 'KB', 'MB', 'GB'];
+    $i = 0;
+    $bytes = (float) $bytes;
+    while ($bytes >= 1024 && $i < 3) { $bytes /= 1024; $i++; }
+    return number_format_i18n($bytes, $decimals) . ' ' . $units[$i];
+}
 function sch_money($n) { return number_format_i18n((float) $n, 2) . ' ر.س'; }
 function current_user_can($c) { return true; }
 function remove_query_arg($k, $u = null) { return '/dashboard/students/'; }

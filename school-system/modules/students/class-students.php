@@ -185,7 +185,7 @@ final class SCH_Students
                                      WHERE g.student_id = s.id)) AS n_nog
              FROM ' . sch_table('students') . ' s
              WHERE s.status = %s',
-            'in_school',
+            'at_school',
             current_time('Y-m-d'),
             'late',
             current_time('Y-m-d'),
@@ -221,11 +221,34 @@ final class SCH_Students
         if ($att === 'late') {
             return ['key' => 'late', 'label' => __('متأخر', 'school-system')];
         }
-        if ((string) ($row->custody_state ?? '') === 'in_school') {
+        if ((string) ($row->custody_state ?? '') === 'at_school') {
             return ['key' => 'in', 'label' => __('داخل المدرسة', 'school-system')];
         }
 
         return ['key' => 'out', 'label' => __('خارج المدرسة', 'school-system')];
+    }
+
+    /**
+     * الحالة الآن لطالبٍ واحد — لملفّه.
+     *
+     * القائمة تحمل `att_status` في الضمّ، والملف الفردي لا ضمّ فيه: تُقرأ
+     * حالة اليوم باستعلام واحد ثم يُحسَب الأمر بـ`now_state` نفسها — فلا
+     * تعريفان للحالة يتباعدان بين شاشتين.
+     *
+     * @return array{key:string,label:string}
+     */
+    public static function state_now(object $student): array
+    {
+        global $wpdb;
+
+        $student->att_status = (string) $wpdb->get_var($wpdb->prepare(
+            'SELECT status FROM ' . sch_table('attendance') . '
+             WHERE student_id = %d AND att_date = %s LIMIT 1',
+            (int) $student->id,
+            current_time('Y-m-d')
+        ));
+
+        return self::now_state($student);
     }
 
     public static function list(array $args = []): array
@@ -256,7 +279,7 @@ final class SCH_Students
 
         if ($state_now === 'in') {
             $where[]  = 's.custody_state = %s';
-            $params[] = 'in_school';
+            $params[] = 'at_school';
         } elseif ($state_now === 'flag') {
             $where[]  = 'EXISTS (SELECT 1 FROM ' . sch_table('attendance') . " a2
                                   WHERE a2.student_id = s.id AND a2.att_date = %s

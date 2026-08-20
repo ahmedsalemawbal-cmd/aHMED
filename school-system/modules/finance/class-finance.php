@@ -709,6 +709,58 @@ final class SCH_Finance
         return self::invoices(['student_id' => $student_id])['items'];
     }
 
+    /**
+     * ملخّص مالي لطالب في سنته الحالية — لبطاقة الرسوم في ملفّه.
+     *
+     * استعلامان لا حلقة: الفواتير غير الملغاة في واحد، والدفعات غير المرتجَعة
+     * وأقرب قسط مستحقّ في الثاني. والملغاة تخرج من الحساب كلّه — فاتورة أُبطلت
+     * ليست دَينًا على أحد.
+     *
+     * @return array{total:float,paid:float,remaining:float,pct:int,payments:int,next_due:?string}
+     */
+    public static function student_summary(int $student_id): array
+    {
+        global $wpdb;
+
+        $year = SCH_Years::current_id();
+
+        $sum = $wpdb->get_row($wpdb->prepare(
+            "SELECT COALESCE(SUM(total), 0) AS total, COALESCE(SUM(paid), 0) AS paid
+             FROM " . sch_table('invoices') . "
+             WHERE student_id = %d AND year_id = %d AND status <> 'void'",
+            $student_id,
+            $year
+        ));
+
+        $meta = $wpdb->get_row($wpdb->prepare(
+            "SELECT (SELECT COUNT(*) FROM " . sch_table('payments') . " p
+                     INNER JOIN " . sch_table('invoices') . " i2 ON i2.id = p.invoice_id
+                     WHERE i2.student_id = %d AND i2.year_id = %d AND i2.status <> 'void'
+                       AND p.refunded_at IS NULL) AS n_pay,
+                    (SELECT MIN(n.due_date) FROM " . sch_table('installments') . " n
+                     INNER JOIN " . sch_table('invoices') . " i3 ON i3.id = n.invoice_id
+                     WHERE i3.student_id = %d AND i3.year_id = %d AND i3.status <> 'void'
+                       AND n.status <> 'paid' AND n.due_date IS NOT NULL) AS next_due",
+            $student_id,
+            $year,
+            $student_id,
+            $year
+        ));
+
+        $total     = round((float) ($sum->total ?? 0), 2);
+        $paid      = round((float) ($sum->paid ?? 0), 2);
+        $remaining = round(max(0, $total - $paid), 2);
+
+        return [
+            'total'     => $total,
+            'paid'      => $paid,
+            'remaining' => $remaining,
+            'pct'       => $total > 0 ? (int) round($paid / $total * 100) : 0,
+            'payments'  => (int) ($meta->n_pay ?? 0),
+            'next_due'  => $meta && $meta->next_due ? (string) $meta->next_due : null,
+        ];
+    }
+
     private static function notify_payment(int $student_id, float $amount, float $remaining): void
     {
         foreach (SCH_Guardians::of_student($student_id) as $g) {

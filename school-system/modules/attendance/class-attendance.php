@@ -276,6 +276,51 @@ final class SCH_Attendance
         )) ?: [];
     }
 
+    /**
+     * شريط آخر N يومًا لطالب — خليّة لكل يوم تقويميّ بالترتيب (الأقدم أولًا).
+     *
+     * اليوم الذي لا سجلّ له ليس غيابًا: قد يكون عطلة أو يومًا لم يُرصد بعد.
+     * يُعطى مفتاح `off` وحده، ولا يدخل حساب الغياب — وإلّا بدت إجازة نهاية
+     * الأسبوع في ملفّ الطفل كأنها تغيّب.
+     *
+     * @return array{days:array<int,array{date:string,key:string,label:string}>,counts:array<string,int>}
+     */
+    public static function last_days(int $student_id, int $days = 30): array
+    {
+        global $wpdb;
+
+        $days  = max(1, min(120, $days));
+        $start = gmdate('Y-m-d', strtotime(current_time('Y-m-d') . ' -' . ($days - 1) . ' days'));
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT att_date, status FROM ' . sch_table('attendance') . '
+             WHERE student_id = %d AND att_date >= %s',
+            $student_id,
+            $start
+        )) ?: [];
+
+        $by_date = [];
+        foreach ($rows as $r) {
+            $by_date[(string) $r->att_date] = (string) $r->status;
+        }
+
+        $labels = self::STATUSES + ['off' => __('لا دوام', 'school-system')];
+        $out    = [];
+        $counts = ['present' => 0, 'late' => 0, 'absent' => 0, 'excused' => 0, 'off' => 0];
+
+        for ($i = 0; $i < $days; $i++) {
+            $date = gmdate('Y-m-d', strtotime($start . ' +' . $i . ' days'));
+            $key  = $by_date[$date] ?? 'off';
+            if (!isset($counts[$key])) {
+                $key = 'off';
+            }
+            $counts[$key]++;
+            $out[] = ['date' => $date, 'key' => $key, 'label' => (string) $labels[$key]];
+        }
+
+        return ['days' => $out, 'counts' => $counts];
+    }
+
     /** نسبة الحضور لطالب — تُستخدم في التقارير ومؤشرات الإنذار. */
     public static function rate(int $student_id, int $days = 60): float
     {
@@ -410,6 +455,7 @@ final class SCH_Comms
         'all_guardians' => 'كل أولياء الأمور',
         'class'         => 'أولياء أمور شعبة',
         'staff'         => 'الموظفون',
+        'user'          => 'شخص واحد',
     ];
 
     /** إشعار فردي — هذا ما يقرؤه التطبيق. */
@@ -597,6 +643,10 @@ final class SCH_Comms
             'staff' => array_map('intval', $wpdb->get_col(
                 'SELECT user_id FROM ' . sch_table('employees') . " WHERE status = 'active'"
             ) ?: []),
+
+            // شخص واحد — من زرّ «مراسلة» في ملفّ الطالب. المستخدم يُتحقَّق من
+            // وجوده هنا لا في القالب: الرقم يأتي من الرابط.
+            'user' => $audience_id && get_userdata($audience_id) ? [(int) $audience_id] : [],
 
             default => [],
         };

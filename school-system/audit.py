@@ -502,7 +502,13 @@ for path in glob.glob(os.path.join(ROOT, 'frontend', 'views', '*.php')):
         add('MODAL_UNBALANCED', f'{rel}: open {_o} / close {_c}')
 
     # زر بلا نافذة، أو نافذة بلا زر يفتحها
+    #
+    # العقد الحقيقي هو السمة `data-modal-open` — وهي ما يقرؤه list-tools.js.
+    # و`SCH_Modal::button()` أحد طريقين إليها لا الطريق الوحيد: الشاشة التي
+    # يفرض تصميمها زرًّا بشكل آخر تكتب السمة بيدها، وكان الفحص يعدّها نافذة
+    # بلا زر فيُبلّغ عن عطلٍ لا وجود له.
     _btns = set(_MODAL_ID.findall(' '.join(_MODAL_BTN.findall(src))))
+    _btns |= set(re.findall(r'data-modal-open="([\w-]+)"', src))
     _mods = set(re.findall(r"SCH_Modal::open\('([\w-]+)'", src))
 
     for _m in _mods - _btns:

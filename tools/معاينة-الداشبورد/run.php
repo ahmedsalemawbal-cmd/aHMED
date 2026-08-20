@@ -20,8 +20,12 @@ if (!is_file($VIEW)) {
     exit(1);
 }
 
-$sch_data = ['section' => $SCREEN];
+/* الشاشة المفردة تحتاج معرّف كيان — يُمرَّر ثانيًا: run.php students-single 1 */
+$sch_data = ['section' => $SCREEN, 'id' => (int) ($argv[2] ?? 0)];
 $sch_view = $SCREEN;
+
+/* التبويبة تُقرأ من `?tab=` — تُمرَّر ثالثًا لتُلتقط كل صفحة على حدة */
+$_GET['tab'] = (string) ($argv[3] ?? '');
 
 ob_start();
 try {

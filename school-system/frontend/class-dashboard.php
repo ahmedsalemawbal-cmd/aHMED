@@ -603,7 +603,9 @@ final class SCH_Dashboard
             self::back($section, $id, ['err' => $result->get_error_code(), 'msg' => $result->get_error_message()]);
         }
 
-        $args = ['ok' => $action];
+        // موضع المستخدم يعود معه دائمًا إن أرسله النموذج — لا يُنتظر من كل
+        // معالج أن يتذكّر إرجاعه. النموذج الذي لا يحمل `keep[...]` لا يتأثّر.
+        $args = array_merge(self::keep_state(wp_unslash($_POST)), ['ok' => $action]);
         if (is_array($result)) {
             // بيانات الدخول لا تمر أبدًا في الرابط — تُحفظ لعرض واحد ثم تُمحى.
             if (isset($result['password'])) {
@@ -743,7 +745,7 @@ final class SCH_Dashboard
         $raw  = (array) ($d['keep'] ?? []);
         $keep = [];
 
-        foreach (['f', 'dept', 'pg', 'cover'] as $key) {
+        foreach (['f', 'dept', 'pg', 'cover', 'tab'] as $key) {
             $value = sanitize_text_field((string) ($raw[$key] ?? ''));
             if ($value !== '') {
                 $keep[$key] = $value;

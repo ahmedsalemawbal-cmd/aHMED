@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
 final class SCH_Audit
 {
     /**
-     * @param array{search?:string,object_type?:string,from?:string,to?:string,page?:int,per_page?:int} $args
+     * @param array{search?:string,object_type?:string,object_id?:int,from?:string,to?:string,page?:int,per_page?:int} $args
      * @return array{items:array<int,object>,total:int}
      */
     public static function query(array $args = []): array
@@ -29,6 +29,11 @@ final class SCH_Audit
         if (!empty($args['object_type'])) {
             $where[]  = 'a.object_type = %s';
             $params[] = (string) $args['object_type'];
+        }
+        // سجل هدفٍ بعينه — «سجل التغييرات» في ملفّ الطالب: من غيّر ماذا ومتى.
+        if (!empty($args['object_id'])) {
+            $where[]  = 'a.object_id = %d';
+            $params[] = (int) $args['object_id'];
         }
         if (!empty($args['from'])) {
             $where[]  = 'a.created_at >= %s';
@@ -69,5 +74,43 @@ final class SCH_Audit
         );
 
         return array_map('strval', $rows ?: []);
+    }
+
+    /**
+     * اسم الفعل بالعربية — «سجل التغييرات» يُقرأ لا يُفكّ.
+     *
+     * السجل يُكتب بمفاتيح إنجليزية ثابتة عمدًا (تُبحث وتُفلتر ولا تتغيّر مع
+     * الترجمة)، والترجمة تحدث عند العرض وحده. وما لا اسم له يظهر بمفتاحه —
+     * فعلٌ جديد بلا تسمية يُقرأ ناقصًا ولا يختفي.
+     */
+    public static function label(string $action): string
+    {
+        $map = [
+            'student.registered'         => __('إنشاء ملف الطالب', 'school-system'),
+            'student.created'            => __('إضافة طالب', 'school-system'),
+            'student.updated'            => __('تعديل بيانات الطالب', 'school-system'),
+            'student.password_reset'     => __('توليد كلمة مرور جديدة للطالب', 'school-system'),
+            'guardian.linked'            => __('ربط وليّ أمر', 'school-system'),
+            'guardian.unlinked'          => __('فكّ ارتباط وليّ أمر', 'school-system'),
+            'pickup.right_changed'       => __('تغيير حقّ الاستلام', 'school-system'),
+            'pickup.delegated'           => __('تفويض استلام مؤقّت', 'school-system'),
+            'pickup.delegation_revoked'  => __('سحب تفويض الاستلام', 'school-system'),
+            'pickup.called'              => __('نداء انصراف', 'school-system'),
+            'pickup.delivered'           => __('تسليم الطالب', 'school-system'),
+            'custody.rejected'           => __('رُفض انتقال في سلسلة العهدة', 'school-system'),
+            'doc.uploaded'               => __('رفع مستند', 'school-system'),
+            'doc.deleted'                => __('حذف مستند', 'school-system'),
+            'health.updated'             => __('تعديل السجل الصحي', 'school-system'),
+            'health.viewed'              => __('اطّلاع على السجل الصحي', 'school-system'),
+            'clinic.visit'               => __('زيارة العيادة', 'school-system'),
+            'note.created'               => __('تسجيل ملاحظة', 'school-system'),
+            'alert.opened'               => __('فتح إنذار', 'school-system'),
+            'certificate.issued'         => __('إصدار شهادة', 'school-system'),
+            'certificate.revoked'        => __('إلغاء شهادة', 'school-system'),
+            'invoice.issued'             => __('إصدار فاتورة', 'school-system'),
+            'student.enrolled'           => __('نقل بين الشُّعب', 'school-system'),
+        ];
+
+        return $map[$action] ?? $action;
     }
 }
