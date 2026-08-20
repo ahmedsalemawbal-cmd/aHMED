@@ -1,5 +1,5 @@
 <?php
-/** شاشة اليوم — البطل الحيّ + الخط الزمني ليوم الطفل (القلب). */
+/** شاشة اليوم — البطل الحيّ + خيط اليوم (القلب). */
 
 declare(strict_types=1);
 defined('ABSPATH') || exit;
@@ -77,6 +77,8 @@ $sch_detail = match ($hero) {
         <span class="p-hero__dot" aria-hidden="true"></span>
         <b class="p-hero__h"><?php echo esc_html($sch_state); ?></b>
 
+        <?php /* زرّ التتبّع داخل بطاقة البطل لحالة الباص وحدها: هو الفعل
+                 الوحيد الذي يعني شيئًا وابنك على الطريق. */ ?>
         <?php if ($hero === 'bus') : ?>
             <a class="p-hero__go p-tap" href="<?php echo esc_url(SCH_App::url('track', $id)); ?>">
                 <?php echo sch_icon('pin', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -91,54 +93,101 @@ $sch_detail = match ($hero) {
     </div>
 </div>
 
-<?php
-/* نداء الانصراف — الفعل الوحيد الذي يعني شيئًا وابنك داخل المدرسة.
-   «طلب إجازة» هنا لا معنى له: هو حاضر بالفعل. */
-?>
-<?php if ($sch_call) : ?>
-    <div class="p-hero__call is-<?php echo esc_attr($sch_call->status); ?>">
-        <span class="p-hero__call-i" aria-hidden="true"></span>
-        <div class="p-hero__call-b">
-            <b><?php echo esc_html($sch_call->status === 'onway'
-                ? __('المشرفة في الطريق', 'school-system')
-                : __('وصل نداؤك — بانتظار المشرفة', 'school-system')); ?></b>
-            <span><?php echo esc_html($sch_call->status === 'onway'
-                ? __('خرجت من الإدارة · قبل لحظات', 'school-system')
-                : sprintf(/* translators: %s: مدّة */ __('%s · سيصلك إشعار عند خروجه', 'school-system'), SCH_App::when_label((string) $sch_call->created_at))); ?></span>
-        </div>
-        <form method="post">
-            <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
-            <input type="hidden" name="sch_app_action" value="pickup_cancel">
-            <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
-            <button type="submit" class="p-hero__x p-tap"><?php esc_html_e('إلغاء', 'school-system'); ?></button>
-        </form>
-    </div>
-<?php elseif ($hero === 'school') : ?>
-    <form method="post" class="p-hero__cta">
-        <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
-        <input type="hidden" name="sch_app_action" value="pickup_call">
-        <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
-        <button type="submit" class="p-btn p-tap">
-            <?php echo sch_icon('logout', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('استدعِ ابني للانصراف', 'school-system'); ?>
-        </button>
-    </form>
-<?php endif; ?>
+<!-- ═════ خيط اليوم — القلب: ما مضى، وأين هو الآن، وما بقي ═════ -->
+<?php /* بلا رابط «كل السجل»: تبويب «السجل» في الشريط السفلي يذهب إليه نفسه،
+         ومدخلان لمكان واحد في شاشة واحدة حشوٌ يزاحم العنوان. ومكان الرابط
+         يحمل عدد المحطّات — رقمٌ يقول حجم اليوم قبل قراءة سطر منه. */ ?>
+<div class="p-sect">
+    <h2 class="p-sect__h"><?php esc_html_e('خيط اليوم', 'school-system'); ?></h2>
+    <span class="p-sect__n"><?php echo esc_html(sprintf(
+        /* translators: %s: عدد الأحداث */
+        _n('حدث واحد', '%s أحداث', count($thread), 'school-system'),
+        number_format_i18n(count($thread))
+    )); ?></span>
+</div>
 
-<!-- ═════ بوابات الوصول السريع ═════ -->
-<div class="p-gates">
-    <?php foreach ([
-        ['schedule', __('الجدول', 'school-system'),       'calendar', 1],
-        ['track',    __('أين ابني', 'school-system'),      'bus',      2],
-        ['clinic',   __('الصحة', 'school-system'),         'heart',    3],
-        ['leave',    __('الإجازات', 'school-system'),      'check',    4],
-    ] as [$slug, $label, $icon, $tone]) : ?>
-        <a class="p-gate p-gate--<?php echo esc_attr((string) $tone); ?> p-tap" href="<?php echo esc_url(SCH_App::url($slug, $id)); ?>">
-            <span class="p-gate__i"><?php echo sch_icon($icon, 20); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-            <b class="p-gate__t"><?php echo esc_html($label); ?></b>
+<?php
+/* نوع الحدث يختار أيقونته ونغمته.
+ *
+ * الخريطة هنا لا في CSS: `kind` يأتي من `SCH_App::day_thread()` بسبعة
+ * أنواع معروفة، والاسم غير المعروف يسقط على «تحديث» محايد بدل أن يخرج
+ * الصفّ بلا أيقونة. والحالة (`done`/`now`/`next`) تبقى على العنصر
+ * منفصلةً — فالنغمة تقول **ماذا وقع**، والحالة تقول **متى**. */
+$sch_look = [
+    'home'   => ['home',   'home'],
+    'bus'    => ['bus',    'bus'],
+    'login'  => ['shield', 'login'],
+    'logout' => ['logout', 'logout'],
+    'check'  => ['check',  'check'],
+    'alert'  => ['bell',   'alert'],
+    'star'   => ['award',  'star'],
+];
+?>
+<div class="p-thrbox">
+    <ol class="p-thr">
+        <?php foreach ($thread as $ev) : ?>
+            <?php [$sch_ic, $sch_kn] = $sch_look[$ev['kind'] ?? ''] ?? ['clock', 'check']; ?>
+            <li class="p-thr__i p-thr__i--<?php echo esc_attr($sch_kn); ?> is-<?php echo esc_attr($ev['state']); ?>">
+                <span class="p-thr__d" aria-hidden="true"></span>
+
+                <?php if ($ev['time'] !== '') : ?>
+                    <time class="p-thr__t" dir="ltr"><?php echo esc_html($ev['time']); ?></time>
+                <?php else : ?>
+                    <span class="p-thr__t" aria-hidden="true"></span>
+                <?php endif; ?>
+
+                <span class="p-thr__b">
+                    <span class="p-thr__ic" aria-hidden="true"><?php echo sch_icon($sch_ic, 14); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+                    <span class="p-thr__x">
+                        <?php echo esc_html($ev['title']); ?>
+                        <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?>
+                            <em class="p-thr__m">— <?php echo esc_html($ev['detail']); ?></em>
+                        <?php endif; ?>
+                    </span>
+                </span>
+            </li>
+        <?php endforeach; ?>
+    </ol>
+</div>
+
+<?php
+/* بوابات الوصول السريع.
+ *
+ * وهي خارج كل فرع شرطي عمدًا — أُدرجت مرّة داخل `if` الإجازة فاختفت
+ * عن كل طالب حاضر. والشرطان أدناه على **بابين بعينهما** لا على الصفّ:
+ * الشهادات لمن نال واحدة، وتقرير الروضة لطفل الروضة — وبابٌ يفتح على
+ * فراغ أسوأ من غيابه. */
+$sch_certs  = SCH_Certificates::of_student($id);
+$late_books = array_values(array_filter(
+    SCH_Library::loans_of_student($id),
+    static fn (object $l): bool => $l->returned_at === null && $l->due_date < current_time('Y-m-d')
+));
+
+$sch_tiles = [
+    ['schedule',  __('الجدول', 'school-system'), 'calendar', 'pri',  $id],
+    ['transport', __('النقل', 'school-system'),  'bus',      'warn', $id],
+    ['clinic',    __('الصحة', 'school-system'),  'heart',    'bad',  $id],
+];
+
+if ($sch_certs !== []) {
+    $sch_tiles[] = ['certificates', __('الشهادات', 'school-system'), 'award', 'gold', $id];
+}
+
+if ($student->stage === 'kg') {
+    $sch_tiles[] = ['kg', __('التقرير', 'school-system'), 'book', 'ok', $id];
+}
+
+// الرسائل بلا معرّف طفل: صندوق ولي الأمر واحد لأبنائه كلّهم.
+$sch_tiles[] = ['messages', __('الرسائل', 'school-system'), 'chat', 'slate', 0];
+?>
+<nav class="p-tiles" aria-label="<?php esc_attr_e('وصول سريع', 'school-system'); ?>">
+    <?php foreach ($sch_tiles as [$sch_slug, $sch_label, $sch_icon, $sch_tint, $sch_arg]) : ?>
+        <a class="p-tile p-tile--<?php echo esc_attr($sch_tint); ?> p-tap" href="<?php echo esc_url(SCH_App::url($sch_slug, $sch_arg)); ?>">
+            <span class="p-tile__i"><?php echo sch_icon($sch_icon, 20); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <span class="p-tile__t"><?php echo esc_html($sch_label); ?></span>
         </a>
     <?php endforeach; ?>
-</div>
+</nav>
 
 <!-- ═════ الرقمان: المستحق والحضور ═════ -->
 <div class="p-duo">
@@ -153,59 +202,52 @@ $sch_detail = match ($hero) {
     </div>
 </div>
 
-<!-- ═════ خيط اليوم — القلب: ما مضى، وأين هو الآن، وما بقي ═════ -->
-<?php /* بلا رابط «كل السجل»: تبويب «السجل» في الشريط السفلي يذهب إليه نفسه،
-         ومدخلان لمكان واحد في شاشة واحدة حشوٌ يزاحم العنوان. */ ?>
-<div class="p-sect"><h2 class="p-sect__h"><?php esc_html_e('يومه', 'school-system'); ?></h2></div>
-
-<ol class="p-thr">
-    <?php foreach ($thread as $ev) : ?>
-        <li class="p-thr__i is-<?php echo esc_attr($ev['state']); ?>">
-            <span class="p-thr__d" aria-hidden="true"></span>
-            <span class="p-thr__b">
-                <b><?php echo esc_html($ev['title']); ?></b>
-                <span>
-                    <?php if ($ev['time'] !== '') : ?>
-                        <time dir="ltr"><?php echo esc_html($ev['time']); ?></time>
-                        <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?> · <?php endif; ?>
-                    <?php endif; ?>
-                    <?php if ($ev['detail'] !== '' && $ev['detail'] !== $ev['title']) : ?>
-                        <?php echo esc_html($ev['detail']); ?>
-                    <?php endif; ?>
-                </span>
-            </span>
-        </li>
-    <?php endforeach; ?>
-</ol>
+<?php if ($late_books !== []) : ?>
+    <div class="p-warnbar">
+        <span class="p-warnbar__i" aria-hidden="true"><?php echo sch_icon('book', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <span class="p-warnbar__b">
+            <b><?php echo esc_html(sprintf(_n('كتاب متأخر لم يُرجَع', '%d كتب متأخرة لم تُرجَع', count($late_books), 'school-system'), count($late_books))); ?></b>
+            <span><?php echo esc_html(implode(' · ', array_map(static fn (object $l): string => (string) $l->title, array_slice($late_books, 0, 3)))); ?></span>
+        </span>
+    </div>
+<?php endif; ?>
 
 <?php
-// بطاقات ثانوية: الشهادات · تقرير الروضة · الكتب المتأخرة.
-$sch_certs  = SCH_Certificates::of_student($id);
-$late_books = array_values(array_filter(
-    SCH_Library::loans_of_student($id),
-    static fn (object $l): bool => $l->returned_at === null && $l->due_date < current_time('Y-m-d')
-));
+/* نداء الانصراف — الفعل الوحيد الذي يعني شيئًا وابنك داخل المدرسة.
+   «طلب إجازة» هنا لا معنى له: هو حاضر بالفعل.
+   وموضعه شريطٌ ملتصق فوق الشريط السفلي: يبقى في متناول الإبهام مهما
+   طال خيط اليوم، ويتبدّل بحالة النداء في مكانه نفسه فلا تقفز الشاشة. */
 ?>
-
-<?php if ($sch_certs !== []) : ?>
-    <a class="p-linkcard p-tap" href="<?php echo esc_url(SCH_App::url('certificates', $id)); ?>">
-        <span class="p-linkcard__i p-i--gold"><?php echo sch_icon('award', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <span class="p-linkcard__t"><b><?php esc_html_e('الشهادات', 'school-system'); ?></b><span><?php echo esc_html(sprintf(_n('شهادة واحدة', '%s شهادات', count($sch_certs), 'school-system'), number_format_i18n(count($sch_certs)))); ?></span></span>
-        <span class="p-linkcard__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-    </a>
-<?php endif; ?>
-
-<?php if ($student->stage === 'kg') : ?>
-    <a class="p-linkcard p-tap" href="<?php echo esc_url(SCH_App::url('kg', $id)); ?>">
-        <span class="p-linkcard__i p-i--n2"><?php echo sch_icon('sun', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <span class="p-linkcard__t"><b><?php esc_html_e('التقرير اليومي', 'school-system'); ?></b><span><?php esc_html_e('الوجبة والنوم والنشاط', 'school-system'); ?></span></span>
-        <span class="p-linkcard__e"><?php echo sch_icon('chev', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-    </a>
-<?php endif; ?>
-
-<?php if ($late_books !== []) : ?>
-    <div class="p-note">
-        <b><?php echo esc_html(sprintf(_n('كتاب متأخر لم يُرجَع', '%d كتب متأخرة لم تُرجَع', count($late_books), 'school-system'), count($late_books))); ?></b>
-        <span><?php echo esc_html(implode(' · ', array_map(static fn (object $l): string => (string) $l->title, array_slice($late_books, 0, 3)))); ?></span>
+<?php if ($sch_call) : ?>
+    <div class="p-act">
+        <div class="p-hero__call is-<?php echo esc_attr($sch_call->status); ?>">
+            <span class="p-hero__call-i" aria-hidden="true"><?php echo sch_icon($sch_call->status === 'onway' ? 'check' : 'clock', 18); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <div class="p-hero__call-b">
+                <b><?php echo esc_html($sch_call->status === 'onway'
+                    ? __('المشرفة في الطريق', 'school-system')
+                    : __('وصل نداؤك — بانتظار المشرفة', 'school-system')); ?></b>
+                <span><?php echo esc_html($sch_call->status === 'onway'
+                    ? __('خرجت من الإدارة · قبل لحظات', 'school-system')
+                    : sprintf(/* translators: %s: مدّة */ __('%s · سيصلك إشعار عند خروجه', 'school-system'), SCH_App::when_label((string) $sch_call->created_at))); ?></span>
+            </div>
+            <form method="post">
+                <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_app_action" value="pickup_cancel">
+                <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+                <button type="submit" class="p-hero__x p-tap"><?php esc_html_e('إلغاء', 'school-system'); ?></button>
+            </form>
+        </div>
+    </div>
+<?php elseif ($hero === 'school') : ?>
+    <div class="p-act">
+        <form method="post" class="p-hero__cta">
+            <?php wp_nonce_field('sch_app_pickup', '_sch_nonce'); ?>
+            <input type="hidden" name="sch_app_action" value="pickup_call">
+            <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+            <button type="submit" class="p-btn p-tap">
+                <?php echo sch_icon('logout', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('استدعِ ابني للانصراف', 'school-system'); ?>
+            </button>
+        </form>
     </div>
 <?php endif; ?>

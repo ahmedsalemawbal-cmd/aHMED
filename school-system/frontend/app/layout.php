@@ -139,7 +139,7 @@ $p_hour  = (int) current_time('G');
         <nav class="p-tabs" aria-label="<?php esc_attr_e('التنقّل', 'school-system'); ?>">
             <?php foreach ([
                 'child'    => [__('اليوم', 'school-system'),   'home'],
-                'log'      => [__('السجل', 'school-system'),   'list'],
+                'log'      => [__('السجل', 'school-system'),   'chart'],
                 'invoices' => [__('الرسوم', 'school-system'),  'wallet'],
                 'card'     => [__('البطاقة', 'school-system'), 'badge'],
             ] as $p_slug => $p_tab) : ?>

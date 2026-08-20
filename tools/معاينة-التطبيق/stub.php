@@ -18,13 +18,18 @@ define('SCH_PATH', '/home/user/aHMED/school-system/');
 define('SCH_URL', '/wp-content/plugins/school-system/');
 define('SCH_VERSION', '9.7.1');
 define('MINUTE_IN_SECONDS', 60);
+define('HOUR_IN_SECONDS', 3600);
+define('DAY_IN_SECONDS', 86400);
+define('WEEK_IN_SECONDS', 604800);
 define('SCH_API_NS', 'school/v1');
 
 // ── دوال ووردبريس ───────────────────────────────────────────────────
 
 function __($t, $d = '') { return $t; }
 function _e($t, $d = '') { echo $t; }
-function _n($one, $many, $n, $d = '') { return $n == 1 ? $one : str_replace('%s', (string) $n, $many); }
+/* ووردبريس يُرجع النصّ بـ%s كما هو ليملأه sprintf بقيمة مُوطَّنة.
+   وضعُ الرقم الخام هنا كان يبتلع %s فيخرج رقمٌ لاتيني في شاشة عربية. */
+function _n($one, $many, $n, $d = '') { return $n == 1 ? $one : $many; }
 function _x($t, $c, $d = '') { return $t; }
 function esc_html__($t, $d = '') { return esc_html($t); }
 function esc_html($t) { return htmlspecialchars((string) $t, ENT_QUOTES, 'UTF-8'); }
@@ -55,6 +60,7 @@ function wp_date($f, $ts = null) {
 function current_time($f, $gmt = 0) { return $f === 'timestamp' ? time() : date($f); }
 function get_bloginfo($k = '') { return 'مدرسة الملك المنير الأهلية'; }
 function get_current_user_id() { return 7; }
+function get_user_by($f, $v) { return (object) ['ID' => (int) $v, 'display_name' => 'عبدالله الشمري', 'user_email' => 'driver@example.com']; }
 function wp_get_current_user() { return (object) ['ID' => 7, 'display_name' => 'أحمد سعد العتيبي']; }
 function wp_nonce_field($a = '', $n = '_wpnonce', $r = true, $e = true) { echo '<input type="hidden" name="' . esc_attr($n) . '" value="demo">'; }
 function wp_create_nonce($a = '') { return 'demo'; }
@@ -93,6 +99,12 @@ function sch_asset($p) { return SCH_URL . $p; }
 
 function sch_w($n) { return $n; }
 function sch_now() { return date('Y-m-d H:i:s'); }
+/* نسخةٌ حرفية من `includes/functions.php` — الوقت النصّي يُوطَّن كالأرقام */
+function sch_clock($hm) {
+    $hm = trim((string) $hm);
+    if ($hm === '' || !preg_match('/^(\d{1,2}):(\d{2})/', $hm, $m)) { return ''; }
+    return wp_date('H:i', mktime((int) $m[1], (int) $m[2], 0, 1, 1, 2000));
+}
 function sch_table($t) { return 'wp_sch_' . $t; }
 
 

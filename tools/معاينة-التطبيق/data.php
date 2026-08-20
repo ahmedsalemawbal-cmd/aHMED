@@ -45,6 +45,13 @@ final class SCH_Students {
     }
 }
 
+final class SCH_Years {
+    public static function current(): ?object {
+        return (object) ['id' => 1, 'name' => '١٤٤٦هـ', 'start_date' => '2024-08-18',
+                         'end_date' => '2025-06-12', 'is_current' => 1];
+    }
+}
+
 final class SCH_Classes {
     public static function label($c): string {
         return trim(($c->grade_level ?? '') . ($c->section ? ' / ' . $c->section : ''));
@@ -99,47 +106,109 @@ final class SCH_Attendance {
     public static function history(int $id, int $days = 30): array {
         $out = []; $pat = ['present','present','late','present','absent','present','present','excused','present','present','present','late','present','absent','present','present','present','present','present','present','present','present','present','absent'];
         foreach ($pat as $i => $st) { $out[] = (object) ['att_date' => date('Y-m-d', strtotime("-" . (count($pat) - $i) . " days")), 'status' => $st, 'minutes_late' => $st === 'late' ? 12 : 0]; }
-        return $out;
+        /* الطبقة الحقيقية `ORDER BY att_date DESC` — والأحدث أوّلًا ليس
+           تفصيلًا: القالب يقرأ `$days[0]` آخِرَ يوم و`end($days)` أوّلَه،
+           فترتيبٌ مقلوب هنا يجعل شبكة الشهر تُصيَّر خمس خانات لا عشرين. */
+        return array_reverse($out);
     }
 }
 
 final class SCH_Assessment {
+    /* الشكل الحقيقي في `SCH_Assessment::report_card`: خريطة مفتاحها اسم
+       المادة، وقيمتها ['exams'=>[], 'weighted'=>, 'weights'=>, 'percent'=>].
+       نسخةٌ بشكل مختلف هنا تجعل المعاينة تُخفي عطلًا أو تخترعه. */
     public static function report_card(int $id): array {
-        return ['subjects' => [
-            (object) ['subject_name' => 'رياضيات', 'score' => 96, 'max_score' => 100, 'percent' => 96],
-            (object) ['subject_name' => 'علوم', 'score' => 92, 'max_score' => 100, 'percent' => 92],
-            (object) ['subject_name' => 'لغة عربية', 'score' => 88, 'max_score' => 100, 'percent' => 88],
-            (object) ['subject_name' => 'لغة إنجليزية', 'score' => 84, 'max_score' => 100, 'percent' => 84],
-            (object) ['subject_name' => 'دراسات إسلامية', 'score' => 94, 'max_score' => 100, 'percent' => 94],
-        ], 'average' => 90.8];
+        $out = [];
+        foreach ([['رياضيات', 96.0], ['علوم', 92.0], ['لغة عربية', 88.0],
+                  ['لغة إنجليزية', 84.0], ['دراسات إسلامية', 94.0]] as [$name, $pct]) {
+            $out[$name] = [
+                'exams'    => [(object) ['id' => 1, 'title' => 'اختبار الوحدة', 'exam_type' => 'quiz',
+                                         'max_score' => 100, 'weight' => 100, 'exam_date' => '2026-08-10',
+                                         'subject_name' => $name, 'score' => $pct]],
+                'weighted' => $pct, 'weights' => 1.0, 'percent' => $pct,
+            ];
+        }
+        return $out;
     }
     public static function upcoming_exams(int $cid, int $n = 10): array {
-        return [(object) ['title' => 'اختبار الوحدة الثالثة', 'subject_name' => 'رياضيات', 'exam_date' => date('Y-m-d', strtotime('+3 days'))]];
+        return [(object) ['title' => 'اختبار الوحدة الثالثة', 'subject_id' => 0, 'subject_name' => 'رياضيات', 'exam_date' => date('Y-m-d', strtotime('+3 days'))]];
     }
     public static function grade_label(float $p): string { return $p >= 90 ? 'ممتاز' : ($p >= 80 ? 'جيد جدًا' : ($p >= 70 ? 'جيد' : 'مقبول')); }
 }
 
 final class SCH_Finance {
+    /* الأرقام هي أرقام التصميم: المتبقّي ٣٬١٠٠، والقسط المتأخّر ١٬٦٠٠،
+       والأقساط الأربعة على فاتورة الرسوم وحدها — فالمقارنة صورةً بصورة. */
     public static function invoices_of_student(int $id): array {
         return [
-            (object) ['id' => 3, 'title' => 'القسط الثالث', 'gross' => 1600, 'discount' => 0, 'discount_pct' => 0, 'total' => 1600, 'paid' => 0, 'status' => 'overdue', 'due_date' => date('Y-m-d', strtotime('-14 days')), 'created_at' => date('Y-m-d H:i:s', strtotime('-14 days'))],
-            (object) ['id' => 2, 'title' => 'رسوم النقل — الفصل الأول', 'gross' => 900, 'discount' => 0, 'discount_pct' => 0, 'total' => 900, 'paid' => 900, 'status' => 'paid', 'due_date' => '2024-11-03', 'created_at' => '2024-11-03 08:00:00'],
-            (object) ['id' => 1, 'title' => 'الزيّ المدرسي', 'gross' => 500, 'discount' => 80, 'discount_pct' => 16, 'total' => 420, 'paid' => 420, 'status' => 'paid', 'due_date' => '2024-09-12', 'created_at' => '2024-09-12 08:00:00'],
+            (object) ['id' => 1, 'title' => 'الرسوم الدراسية — العام ١٤٤٦هـ',
+                      'plan_name' => 'الخطة السنوية ١٤٤٦هـ',
+                      'gross' => 10000, 'discount' => 0, 'discount_pct' => 0, 'total' => 10000,
+                      'paid' => 6900, 'status' => 'partial', 'due_date' => date('Y-m-d', strtotime('-14 days')),
+                      'created_at' => '2024-08-20 08:00:00'],
+            (object) ['id' => 2, 'title' => 'رسوم النقل — الفصل الأول',
+                      'plan_name' => null,
+                      'gross' => 900, 'discount' => 0, 'discount_pct' => 0, 'total' => 900,
+                      'paid' => 900, 'status' => 'paid', 'due_date' => '2024-11-03',
+                      'created_at' => '2024-11-03 08:00:00'],
+            (object) ['id' => 3, 'title' => 'الزيّ المدرسي',
+                      'plan_name' => null,
+                      'gross' => 500, 'discount' => 80, 'discount_pct' => 16, 'total' => 420,
+                      'paid' => 420, 'status' => 'paid', 'due_date' => '2024-09-12',
+                      'created_at' => '2024-09-12 08:00:00'],
         ];
     }
-    public static function installments(int $id): array {
+
+    /* التوقيع الحقيقي `installments(int $invoice_id)` — والأقساط على
+       فاتورة الرسوم وحدها؛ فاتورةٌ مسدَّدة دفعةً واحدة لا أقساط لها. */
+    public static function installments(int $invoice_id): array {
+        if ($invoice_id !== 1) { return []; }
         return [
-            (object) ['id' => 1, 'seq' => 1, 'amount' => 3400, 'paid' => 3400, 'due_date' => '2024-09-01'],
-            (object) ['id' => 2, 'seq' => 2, 'amount' => 3500, 'paid' => 3500, 'due_date' => '2024-11-01'],
-            (object) ['id' => 3, 'seq' => 3, 'amount' => 1600, 'paid' => 0,    'due_date' => date('Y-m-d', strtotime('-14 days'))],
-            (object) ['id' => 4, 'seq' => 4, 'amount' => 1500, 'paid' => 0,    'due_date' => date('Y-m-d', strtotime('+40 days'))],
+            (object) ['id' => 1, 'invoice_id' => 1, 'seq' => 1, 'amount' => 3400, 'paid' => 3400, 'due_date' => '2024-09-01'],
+            (object) ['id' => 2, 'invoice_id' => 1, 'seq' => 2, 'amount' => 3500, 'paid' => 3500, 'due_date' => '2024-11-01'],
+            (object) ['id' => 3, 'invoice_id' => 1, 'seq' => 3, 'amount' => 1600, 'paid' => 0,    'due_date' => date('Y-m-d', strtotime('-14 days'))],
+            (object) ['id' => 4, 'invoice_id' => 1, 'seq' => 4, 'amount' => 1500, 'paid' => 0,    'due_date' => date('Y-m-d', strtotime('+40 days'))],
         ];
     }
 }
 
+final class SCH_Buses {
+    public static function get(int $id): ?object {
+        return (object) ['id' => $id, 'plate_no' => 'ر ح د ٤٢٩٨', 'model' => 'هيونداي',
+                         'capacity' => 24, 'driver_user_id' => 9, 'supervisor_user_id' => 10,
+                         'status' => 'active'];
+    }
+}
+
+final class SCH_Staff {
+    public static function get_by_user(int $uid): ?object {
+        return (object) ['id' => 3, 'user_id' => $uid, 'display_name' => 'عبدالله الشمري',
+                         'phone' => '٠٥٥ ١٢٣ ٤٤٨٧', 'job_title' => 'سائق'];
+    }
+}
+
 final class SCH_Routes {
+    public static function get(int $id): ?object {
+        return (object) ['id' => $id, 'name' => 'الياسمين', 'bus_id' => 1,
+                         'direction' => 'both', 'status' => 'active', 'duration_min' => 35];
+    }
+
+    public static function stops(int $route_id): array {
+        return [
+            (object) ['id' => 1, 'route_id' => $route_id, 'name' => 'حيّ الياسمين — أمام مسجد الفرقان',
+                      'sequence' => 3, 'lat' => 24.7742, 'lng' => 46.7386,
+                      'pickup_time' => '06:55', 'dropoff_time' => '12:55'],
+            (object) ['id' => 2, 'route_id' => $route_id, 'name' => 'حيّ النرجس — دوّار المدارس',
+                      'sequence' => 4, 'lat' => 24.7801, 'lng' => 46.7412,
+                      'pickup_time' => '07:05', 'dropoff_time' => '12:45'],
+        ];
+    }
+
     public static function subscription_of(int $id): ?object {
-        return $id === 3 ? null : (object) ['route_id' => 1, 'route_name' => 'الياسمين', 'stop_name' => 'حيّ الياسمين — أمام مسجد الفرقان', 'pickup_time' => '06:50', 'dropoff_time' => '13:00'];
+        return $id === 3 ? null : (object) ['id' => 5, 'student_id' => $id, 'route_id' => 1, 'stop_id' => 1,
+            'year_id' => 1, 'fee_amount' => 900, 'status' => 'active', 'route_name' => 'الياسمين',
+            'stop_name' => 'حيّ الياسمين — أمام مسجد الفرقان', 'stop_sequence' => 3,
+            'stop_lat' => 24.7742, 'stop_lng' => 46.7386];
     }
 }
 
@@ -152,7 +221,7 @@ final class SCH_Timetable {
         foreach (self::DAYS as $d => $_) {
             for ($p = 1; $p <= self::PERIODS; $p++) {
                 $n = $names[($d * 3 + $p) % count($names)];
-                $out[$d][$p] = (object) ['subject_name' => $n, 'teacher_name' => $subs[$n]];
+                $out[$d][$p] = (object) ['subject_id' => 0, 'subject_name' => $n, 'teacher_name' => $subs[$n]];
             }
         }
         return $out;
@@ -300,11 +369,11 @@ final class SCH_App {
         $t = [
             ['time' => '٦:٤٠',  'kind' => 'home',  'title' => 'خرج من البيت',   'detail' => '', 'state' => 'done'],
             ['time' => '٦:٥٢',  'kind' => 'bus',   'title' => 'صعد الباص — مسار «الياسمين»', 'detail' => '', 'state' => 'done'],
-            ['time' => '٧:١٤',  'kind' => 'route', 'title' => 'دخل بوابة المدرسة', 'detail' => '', 'state' => 'done'],
-            ['time' => '٧:٣٠',  'kind' => 'user-check', 'title' => 'حاضر في الفصل', 'detail' => '', 'state' => 'done'],
+            ['time' => '٧:١٤',  'kind' => 'login', 'title' => 'دخل بوابة المدرسة', 'detail' => '', 'state' => 'done'],
+            ['time' => '٧:٣٠',  'kind' => 'check', 'title' => 'حاضر في الفصل', 'detail' => '', 'state' => 'done'],
         ];
         if ($st === 'at_school') {
-            $t[] = ['time' => '١٢:٠٥', 'kind' => 'heart', 'title' => 'زيارة العيادة — صداع خفيف', 'detail' => '', 'state' => 'now'];
+            $t[] = ['time' => '١٢:٠٥', 'kind' => 'alert', 'title' => 'زيارة العيادة — صداع خفيف', 'detail' => '', 'state' => 'now'];
             $t[] = ['time' => '١:١٠', 'kind' => 'logout', 'title' => 'الانصراف', 'detail' => 'يخرج من البوابة', 'state' => 'next'];
         } else {
             $t[] = ['time' => '١٢:٢٥', 'kind' => 'bus', 'title' => 'صعد باص العودة', 'detail' => '', 'state' => 'now'];
