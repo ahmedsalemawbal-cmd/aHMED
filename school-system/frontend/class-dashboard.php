@@ -370,7 +370,12 @@ final class SCH_Dashboard
             'contact_parent'   => ['sch_handle_notes',     'do_contact_parent'],
             'mark_staff'       => ['sch_supervise_stage',  'do_mark_staff'],
             'mark_staff_bulk'  => ['sch_supervise_stage',  'do_mark_staff_bulk'],
+            'close_staff_day'  => ['sch_supervise_stage',  'do_close_staff_day'],
             'assign_sub'       => ['sch_supervise_stage',  'do_assign_sub'],
+            'cover_assign'     => ['sch_supervise_stage',  'do_cover_assign'],
+            'cover_unassign'   => ['sch_supervise_stage',  'do_cover_unassign'],
+            'cover_auto'       => ['sch_supervise_stage',  'do_cover_auto'],
+            'cover_notify'     => ['sch_supervise_stage',  'do_cover_notify'],
             'submit_timetable' => ['sch_build_timetable',  'do_submit_timetable'],
             'publish_timetable'=> ['sch_approve_timetable','do_publish_timetable'],
             'reopen_timetable' => ['sch_build_timetable',  'do_reopen_timetable'],
@@ -551,7 +556,7 @@ final class SCH_Dashboard
             exit;
         }
 
-        if (isset($_GET['sch_export']) && in_array($section, ['students', 'audit', 'attendance-report', 'staff-report'], true)) {
+        if (isset($_GET['sch_export']) && in_array($section, ['students', 'audit', 'attendance-report', 'staff-report', 'staff-day'], true)) {
             self::send_export($section);
         }
 
@@ -614,6 +619,14 @@ final class SCH_Dashboard
             // البقاء في شاشة التعديل بعد الحفظ: العودة للقائمة تُضيّع مكان المستخدم.
             if (isset($result['edit'])) {
                 $args['edit'] = (int) $result['edit'];
+            }
+            // موضع المستخدم في الشاشة (تصفية · بحث · صفحة · لوح مفتوح) يعود
+            // معه: من يرصد ثلاثين موظفًا واحدًا واحدًا لا يُعاد ثلاثين مرة
+            // إلى أعلى قائمةٍ بلا تصفية.
+            if (isset($result['keep']) && is_array($result['keep'])) {
+                foreach ($result['keep'] as $key => $value) {
+                    $args[sanitize_key((string) $key)] = (string) $value;
+                }
             }
         }
 
@@ -717,6 +730,33 @@ final class SCH_Dashboard
     {
         wp_safe_redirect(add_query_arg($args, self::url($section, $id)));
         exit;
+    }
+
+    /**
+     * حالة الشاشة القادمة مع النموذج، مُنقّاة — لتعود في رابط التحويل.
+     *
+     * القائمة بيضاء لا سوداء: النموذج يُرسَل من متصفّح المستخدم، وقبولُ أي
+     * مفتاح يعني حقن معاملات في رابطٍ نُعيد المستخدم إليه.
+     */
+    private static function keep_state(array $d): array
+    {
+        $raw  = (array) ($d['keep'] ?? []);
+        $keep = [];
+
+        foreach (['f', 'dept', 'pg', 'cover'] as $key) {
+            $value = sanitize_text_field((string) ($raw[$key] ?? ''));
+            if ($value !== '') {
+                $keep[$key] = $value;
+            }
+        }
+
+        // البحث نصّ حرّ يكتبه المستخدم — يُنقّى ولا يُقصّ إلى مفتاح.
+        $q = sanitize_text_field((string) ($raw['q'] ?? ''));
+        if ($q !== '') {
+            $keep['q'] = mb_substr($q, 0, 60);
+        }
+
+        return $keep;
     }
 
     // ---------- المعالجات ----------
@@ -823,27 +863,126 @@ final class SCH_Dashboard
     }
 
     /** حفظ كشف حضور الموظفين دفعةً واحدة — نفس نمط رصد الطلاب. */
-    private static function do_mark_staff_bulk(array $d, int $id): bool|WP_Error
+    /** رصد حالة واحدة على المحدَّدين — نمط الشاشة: حدِّد ثم اضغط الحالة. */
+    private static function do_mark_staff_bulk(array $d, int $id): array|WP_Error
     {
-        $statuses = (array) ($d['status'] ?? []);
+        $status = sanitize_key((string) ($d['status'] ?? ''));
 
-        foreach ($statuses as $user_id => $status) {
-            $status = (string) $status;
-            if ($status === '') {
-                continue; // «لم يُرصد» يُترك كما هو، لا يُكتب
-            }
-            $result = SCH_Deputy::mark_staff(absint($user_id), $status);
+        // مربّعات الاختيار تصل مصفوفةً (`ids[]`) فتعمل الشاشة بلا جافاسكربت،
+        // وتصل نصًّا مفصولًا بفواصل من الأدوات الجماعية المشتركة. والشكلان
+        // مقبولان: صياغةُ الطلب ليست ما يقرّر هل يُرصد الموظف.
+        $raw = $d['ids'] ?? [];
+        $ids = array_values(array_unique(array_filter(array_map(
+            'absint',
+            is_array($raw) ? $raw : explode(',', (string) $raw)
+        ))));
+
+        if ($ids === []) {
+            return sch_api_error('no_selection', __('لم تحدّد أحدًا.', 'school-system'), 422);
+        }
+        if (count($ids) > 300) {
+            return sch_api_error('too_many', __('لا تتجاوز ٣٠٠ سجل في العملية الواحدة.', 'school-system'), 422);
+        }
+
+        foreach ($ids as $user_id) {
+            $result = SCH_Deputy::mark_staff($user_id, $status);
             if (is_wp_error($result)) {
                 return $result;
             }
         }
 
-        return true;
+        return [
+            'msg'  => sprintf(
+                /* translators: 1: العدد 2: اسم الحالة */
+                __('رُصد %1$s موظفًا: %2$s.', 'school-system'),
+                number_format_i18n(count($ids)),
+                SCH_Deputy::STAFF_STATUSES[$status] ?? $status
+            ),
+            'keep' => self::keep_state($d),
+        ];
+    }
+
+    /** إغلاق كشف الموظفين — التاريخ من الخادم لا من النموذج. */
+    private static function do_close_staff_day(array $d, int $id): array
+    {
+        $count = SCH_Deputy::close_staff_day(current_time('Y-m-d'));
+
+        return [
+            'msg'  => $count > 0
+                ? sprintf(
+                    /* translators: %s: عدد من رُصد */
+                    __('أُغلق الكشف — رُصد %s موظفًا لم يُمسحوا.', 'school-system'),
+                    number_format_i18n($count)
+                )
+                : __('لا أحد بلا رصد — الكشف مُغلق أصلًا.', 'school-system'),
+            'keep' => self::keep_state($d),
+        ];
     }
 
     private static function do_assign_sub(array $d, int $id): bool|WP_Error
     {
         return SCH_Deputy::assign(absint($d['sub_id'] ?? 0), absint($d['teacher_id'] ?? 0));
+    }
+
+    /** تعيين بديل لحصة من لوح التغطية. */
+    private static function do_cover_assign(array $d, int $id): array|WP_Error
+    {
+        $result = SCH_Deputy::cover_assign(
+            absint($d['teacher_id'] ?? 0),
+            current_time('Y-m-d'),
+            absint($d['class_id'] ?? 0),
+            absint($d['period_no'] ?? 0),
+            absint($d['sub_teacher_id'] ?? 0)
+        );
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return ['msg' => __('عُيّن البديل وأُشعِر.', 'school-system'), 'keep' => self::keep_state($d)];
+    }
+
+    private static function do_cover_unassign(array $d, int $id): array|WP_Error
+    {
+        $result = SCH_Deputy::unassign(absint($d['sub_id'] ?? 0));
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return ['msg' => __('أُلغي التعيين وأُشعِر البديل.', 'school-system'), 'keep' => self::keep_state($d)];
+    }
+
+    private static function do_cover_auto(array $d, int $id): array
+    {
+        $done = SCH_Deputy::auto_assign(absint($d['teacher_id'] ?? 0), current_time('Y-m-d'));
+
+        return [
+            'msg'  => $done > 0
+                ? sprintf(
+                    /* translators: %s: عدد الحصص */
+                    __('غُطّيت %s حصص.', 'school-system'),
+                    number_format_i18n($done)
+                )
+                : __('لا مرشّح متاح لأي حصة — راجع الجدول.', 'school-system'),
+            'keep' => self::keep_state($d),
+        ];
+    }
+
+    private static function do_cover_notify(array $d, int $id): array
+    {
+        $sent = SCH_Deputy::notify_subs(absint($d['teacher_id'] ?? 0), current_time('Y-m-d'));
+
+        return [
+            'msg'  => $sent > 0
+                ? sprintf(
+                    /* translators: %s: عدد البدلاء */
+                    __('وصل التذكير %s بدلاء.', 'school-system'),
+                    number_format_i18n($sent)
+                )
+                : __('لا بديل معيَّن بعد.', 'school-system'),
+            'keep' => self::keep_state($d),
+        ];
     }
 
     private static function do_save_summary(array $d, int $id): bool|WP_Error
@@ -2085,6 +2224,31 @@ final class SCH_Dashboard
                     (string) $r->display_name, SCH_Staff::role_label((string) $r->role),
                     (int) $r->present, (int) $r->late, (int) $r->absent, (int) $r->leave_days,
                     (int) $r->late_minutes,
+                ]);
+            }
+        } elseif ($section === 'staff-day') {
+            fputcsv($out, [
+                __('الموظف', 'school-system'), __('الوظيفة', 'school-system'),
+                __('القسم', 'school-system'), __('رقم الموظف', 'school-system'),
+                __('الحالة', 'school-system'), __('البصمة', 'school-system'),
+                __('الانصراف', 'school-system'), __('دقائق التأخّر', 'school-system'),
+                __('حصص اليوم', 'school-system'), __('بلا بديل', 'school-system'),
+            ]);
+
+            foreach (SCH_Deputy::staff_day(current_time('Y-m-d')) as $r) {
+                fputcsv($out, [
+                    (string) $r->display_name,
+                    (string) ($r->job_title ?? ''),
+                    (string) ($r->department ?? ''),
+                    (string) ($r->employee_no ?? ''),
+                    $r->state === 'none'
+                        ? __('لم يُرصد', 'school-system')
+                        : (SCH_Deputy::STAFF_STATUSES[$r->state] ?? $r->state),
+                    $r->checked_at ? substr((string) $r->checked_at, 11, 5) : '',
+                    $r->checkout_at ? substr((string) $r->checkout_at, 11, 5) : '',
+                    (int) $r->minutes_late,
+                    (int) $r->lessons,
+                    (int) $r->cover_open,
                 ]);
             }
         }

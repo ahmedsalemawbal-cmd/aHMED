@@ -225,6 +225,12 @@ final class SCH_Routes {
 final class SCH_Timetable {
     const DAYS = [1 => 'الأحد', 2 => 'الاثنين', 3 => 'الثلاثاء', 4 => 'الأربعاء', 5 => 'الخميس'];
     const PERIODS = 7;
+    /* إيقاع اليوم — بالقيم نفسها في `modules/academic/class-assessment.php` */
+    const OPEN = 450; const LEN = 50; const BREAK_AFTER = 3; const BREAK_LEN = 30;
+    public static function period_start(int $p): int {
+        $m = self::OPEN + (max(1, $p) - 1) * self::LEN;
+        return $p > self::BREAK_AFTER ? $m + self::BREAK_LEN : $m;
+    }
     public static function grid(int $cid): array {
         $subs = ['رياضيات' => 'أ. خالد المطيري', 'علوم' => 'أ. هند الزهراني', 'لغة عربية' => 'أ. منى القحطاني', 'إنجليزي' => 'أ. هند الزهراني', 'إسلامية' => 'أ. خالد المطيري', 'اجتماعيات' => 'أ. منى القحطاني', 'رياضة' => 'أ. خالد المطيري'];
         $names = array_keys($subs); $out = [];

@@ -107,6 +107,34 @@ final class SCH_Timetable
     public const DAYS    = [1 => 'الأحد', 2 => 'الاثنين', 3 => 'الثلاثاء', 4 => 'الأربعاء', 5 => 'الخميس'];
     public const PERIODS = 8;
 
+    /** إيقاع اليوم: بدايته وطول الحصة والفسحة — رقمٌ واحد لكل شاشة تعرض وقتًا. */
+    public const OPEN        = 450; // ٧:٣٠ بالدقائق من منتصف الليل
+    public const LEN         = 50;
+    public const BREAK_AFTER = 3;
+    public const BREAK_LEN   = 30;
+
+    /**
+     * بداية الحصة بالدقائق من منتصف الليل.
+     *
+     * كان هذا الحساب مكتوبًا داخل شاشة جدول ولي الأمر وحدها، وشاشة تغطية
+     * الحصص تحتاجه أيضًا — ونسختان تعنيان يومًا يبدأ ٧:٣٠ في شاشة و٨:٠٠
+     * في أخرى بعد أول تعديل. فصار رقمًا واحدًا هنا.
+     */
+    public static function period_start(int $period): int
+    {
+        $m = self::OPEN + (max(1, $period) - 1) * self::LEN;
+
+        return $period > self::BREAK_AFTER ? $m + self::BREAK_LEN : $m;
+    }
+
+    /** بداية الحصة بصيغة «07:30» — للأرقام الجدولية اللاتينية في الداشبورد. */
+    public static function period_hhmm(int $period): string
+    {
+        $m = self::period_start($period);
+
+        return sprintf('%02d:%02d', intdiv($m, 60) % 24, $m % 60);
+    }
+
     /** وضع حصة في خانة — مع منع تعارض المعلم. */
     public static function set_slot(array $d): bool|WP_Error
     {

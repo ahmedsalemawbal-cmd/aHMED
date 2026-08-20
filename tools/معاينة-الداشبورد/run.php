@@ -45,4 +45,9 @@ echo '<!doctype html><html lang="ar" dir="rtl" data-theme="' . $theme . '"><head
     . '<style>body{margin:0}.sch-content{padding:26px 32px 40px}</style>'
     . '</head><body class="sch-body">'
     . '<main class="sch-content" id="sch-main-content">' . $body . '</main>'
+    // السكربتان المشتركان كما يُحمَّلان في `layout.php`: شاشةٌ تعتمد على
+    // التحديد أو النوافذ كانت تُعايَن ميّتة، فيبدو العطل في الشاشة وهو
+    // في غياب ملفٍ لا تراه المعاينة.
+    . '<script>' . file_get_contents(SCH_PATH . 'assets/list-tools.js') . '</script>'
+    . '<script>' . file_get_contents(SCH_PATH . 'assets/select.js') . '</script>'
     . '</body></html>';

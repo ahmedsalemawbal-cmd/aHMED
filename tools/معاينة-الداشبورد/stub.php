@@ -163,3 +163,35 @@ require SCH_PATH . 'includes/icons.php';
 // ── بيانات العرض ────────────────────────────────────────────────────
 
 require __DIR__ . '/data.php';
+
+function wp_unslash($v) { return is_array($v) ? array_map('wp_unslash', $v) : stripslashes((string) $v); }
+
+/** إيقاع اليوم — نسخةٌ من `SCH_Timetable` بالقيم نفسها. */
+final class SCH_Timetable
+{
+    public const PERIODS     = 8;
+    public const OPEN        = 450;
+    public const LEN         = 50;
+    public const BREAK_AFTER = 3;
+    public const BREAK_LEN   = 30;
+
+    public static function period_start(int $p): int
+    {
+        $m = self::OPEN + (max(1, $p) - 1) * self::LEN;
+        return $p > self::BREAK_AFTER ? $m + self::BREAK_LEN : $m;
+    }
+
+    public static function period_hhmm(int $p): string
+    {
+        $m = self::period_start($p);
+        return sprintf('%02d:%02d', intdiv($m, 60) % 24, $m % 60);
+    }
+}
+
+final class SCH_Dashboard
+{
+    public static function url(string $section = '', int $id = 0): string
+    {
+        return '/dashboard/' . $section . ($id > 0 ? '/' . $id : '') . '/';
+    }
+}

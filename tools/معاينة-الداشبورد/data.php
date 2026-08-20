@@ -149,3 +149,141 @@ final class SCH_Students
         return null;
     }
 }
+
+/**
+ * موظفو العرض — من بذرة التصميم نفسها، فتُقارَن الشاشة بإطارها صفًّا بصف.
+ *
+ * الأسماء الستة الأولى ثابتة كما في التصميم (إدارةٌ حاضرة، ومعلمٌ غائب،
+ * ومعلمةٌ في إجازة)، ثم يُولَّد الباقي بالقاعدة نفسها: واحدٌ غائب كل ١٩،
+ * وواحدٌ في إجازة كل ٢٣.
+ */
+final class SCH_Deputy
+{
+    public const STAFF_STATUSES = [
+        'present' => 'حاضر', 'late' => 'متأخر', 'absent' => 'غائب', 'leave' => 'في إجازة',
+    ];
+
+    public static function staff_day(string $date): array
+    {
+        $male   = ['محمد', 'أحمد', 'خالد', 'فهد', 'سعود', 'عبدالله', 'ناصر', 'ماجد', 'سلطان', 'بدر', 'طلال', 'يوسف', 'عمر', 'راشد', 'زياد', 'صالح'];
+        $female = ['نورة', 'سارة', 'هند', 'أمل', 'ريم', 'منى', 'لطيفة', 'عبير', 'دلال', 'مها', 'وفاء', 'أروى', 'بشرى', 'شذى'];
+        $last   = ['عوبل', 'الشامي', 'القحطاني', 'الحربي', 'العتيبي', 'الزهراني', 'الدوسري', 'الغامدي', 'السبيعي', 'المطيري', 'الشهري', 'البقمي'];
+        $subj   = ['رياضيات', 'لغة عربية', 'علوم', 'لغة إنجليزية', 'دراسات إسلامية', 'اجتماعيات', 'حاسب آلي', 'تربية فنية', 'تربية بدنية', 'مهارات رقمية'];
+
+        $fixed = [
+            ['Fahd Al-Qahtani', 'مدير المدرسة', 'إدارة', 398, 'in'],
+            ['اميره الشامي', 'وكيلة الشؤون التعليمية', 'إدارة', 407, 'in'],
+            ['جميله احمد', 'وكيلة شؤون الطالبات', 'إدارة', 415, 'in'],
+            ['دواد احمد عوبل', 'وكيل شؤون الطلاب', 'إدارة', 426, 'in'],
+            ['محمد عوبل', 'معلم رياضيات', 'رياضيات', 0, 'absent'],
+            ['وداد عوبل', 'معلمة لغة عربية', 'لغة عربية', 0, 'leave'],
+        ];
+
+        $mode = getenv('DEMO') ?: 'fresh';
+        $rows = [];
+
+        foreach ($fixed as $i => $f) {
+            $rows[] = self::row($i + 1, $f[0], $f[1], $f[2], $f[3], $f[4], $date, $mode, $i);
+        }
+
+        for ($i = 6; $i < 64; $i++) {
+            $fem  = $i % 3 === 0;
+            $s    = $subj[$i % count($subj)];
+            $name = ($fem ? $female[$i % count($female)] : $male[$i % count($male)]) . ' ' . $last[($i * 5) % count($last)];
+            $stat = $i % 19 === 7 ? 'absent' : ($i % 23 === 11 ? 'leave' : 'in');
+
+            $rows[] = self::row(
+                $i + 1,
+                $name,
+                ($fem ? 'معلمة ' : 'معلم ') . $s,
+                $s,
+                390 + (($i * 7) % 46),
+                $stat,
+                $date,
+                $mode,
+                $i
+            );
+        }
+
+        usort($rows, static fn ($a, $b) => strcmp($a->display_name, $b->display_name));
+
+        return $rows;
+    }
+
+    private static function row(int $id, string $name, string $job, string $dept, int $min, string $kind, string $date, string $mode, int $i): object
+    {
+        // «fresh» أول الصباح: لم يُمسح أحد بعد. و«mid» منتصف الطابور.
+        $scanned = $kind === 'in' && $mode !== 'fresh';
+        $state   = $kind === 'in' ? ($scanned ? ($min > 430 ? 'late' : 'present') : 'none') : $kind;
+        $lessons = $dept === 'إدارة' ? 0 : 2 + ($i % 3);
+        $done    = $state === 'absent' && $i % 2 === 0 ? 1 : 0;
+
+        return (object) [
+            'user_id'      => $id,
+            'display_name' => $name,
+            'job_title'    => $job,
+            'department'   => $dept,
+            'employee_no'  => '84201' . str_pad((string) $id, 2, '0', STR_PAD_LEFT),
+            'status'       => $state === 'none' ? null : $state,
+            'method'       => $state === 'none' ? null : ($kind === 'in' ? 'qr' : 'manual'),
+            'checked_at'   => $scanned ? $date . ' ' . sprintf('%02d:%02d:00', intdiv($min, 60), $min % 60) : null,
+            'checkout_at'  => null,
+            'minutes_late' => $state === 'late' ? $min - 430 : 0,
+            'note'         => null,
+            'on_leave'     => $kind === 'leave' ? 1 : 0,
+            'state'        => $state,
+            'lessons'      => $lessons,
+            'cover_done'   => $done,
+            'cover_by'     => $done > 0 ? 'سارة القحطاني' : null,
+            'needs'        => in_array($state, ['absent', 'leave'], true) && $lessons > 0,
+            'cover_open'   => in_array($state, ['absent', 'leave'], true) ? max(0, $lessons - $done) : 0,
+            'manual'       => $state !== 'none' && $kind !== 'in',
+        ];
+    }
+
+    public static function open_cover_count(array $sheet): int
+    {
+        $n = 0;
+        foreach ($sheet as $r) { $n += (int) $r->cover_open; }
+        return $n;
+    }
+
+    public static function coverage(int $teacher_id, string $date): array
+    {
+        $teacher = null;
+        foreach (self::staff_day($date) as $r) {
+            if ((int) $r->user_id === $teacher_id) { $teacher = $r; break; }
+        }
+        if (!$teacher) { return ['teacher' => null, 'rows' => [], 'open' => 0, 'total' => 0]; }
+
+        $grades = ['الأول/أ', 'الثاني/ب', 'الثالث/أ', 'الرابع/ب'];
+        $rows   = [];
+        $open   = 0;
+
+        for ($k = 0; $k < (int) $teacher->lessons; $k++) {
+            $on = $k < (int) $teacher->cover_done;
+            $open += $on ? 0 : 1;
+
+            $rows[] = (object) [
+                'class_id'              => 10 + $k,
+                'period_no'             => $k + 1,
+                'subject_id'            => 3,
+                'grade_level'           => explode('/', $grades[$k % 4])[0],
+                'section'               => explode('/', $grades[$k % 4])[1],
+                'subject_name'          => (string) $teacher->department,
+                'sub_id'                => 500 + $k,
+                'substitute_teacher_id' => $on ? 9 : null,
+                'substitute_name'       => $on ? 'سارة القحطاني' : null,
+                'time'                  => SCH_Timetable::period_hhmm($k + 1),
+                'assigned'              => $on,
+                'candidates'            => $on ? [] : [
+                    (object) ['user_id' => 21, 'display_name' => 'نورة الحربي',  'department' => $teacher->department, 'job_title' => 'معلمة', 'same_subject' => 1],
+                    (object) ['user_id' => 22, 'display_name' => 'خالد العتيبي', 'department' => 'علوم',              'job_title' => 'معلم',  'same_subject' => 0],
+                    (object) ['user_id' => 23, 'display_name' => 'أمل الزهراني', 'department' => 'اجتماعيات',         'job_title' => 'معلمة', 'same_subject' => 0],
+                ],
+            ];
+        }
+
+        return ['teacher' => $teacher, 'rows' => $rows, 'open' => $open, 'total' => count($rows)];
+    }
+}

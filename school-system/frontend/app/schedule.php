@@ -29,20 +29,15 @@ foreach ((array) ($sch_data['children'] ?? []) as $sch_c) {
 $sch_meta = implode(' · ', array_filter([$sch_kid, $class ? SCH_Classes::label($class) : '']));
 
 /**
- * المواقيت غير مخزَّنة: الجدول يحفظ **رقم الحصة** لا ساعتها، ولا دالّة
- * في الطبقة تُرجع ساعات اليوم. فتُشتق هنا من بداية دوامٍ ثابتة وطولِ
- * حصة ثابت — قيمةٌ معقولة تُقرأ، ولا يُخترع لها استدعاء لا وجود له.
- * ويوم تُخزَّن المواقيت تُستبدل هذه الأسطر الثلاثة وحدها.
+ * المواقيت غير مخزَّنة: الجدول يحفظ **رقم الحصة** لا ساعتها، فتُشتق من
+ * إيقاع اليوم في `SCH_Timetable` — وهو المصدر الوحيد لها الآن، بعدما
+ * صارت شاشة تغطية الحصص تعرض الوقت نفسه.
+ * ويوم تُخزَّن المواقيت يُستبدل ذلك الإيقاع وحده.
  */
-$sch_open    = 7 * 60 + 30;  // بداية اليوم ٧:٣٠
-$sch_len     = 50;           // طول الحصة بالدقائق
-$sch_brk_at  = 3;            // الفسحة بعد الحصة الثالثة
-$sch_brk_len = 30;
+$sch_len    = SCH_Timetable::LEN;
+$sch_brk_at = SCH_Timetable::BREAK_AFTER;
 
-$sch_at = static function (int $period) use ($sch_open, $sch_len, $sch_brk_at, $sch_brk_len): int {
-    $m = $sch_open + ($period - 1) * $sch_len;
-    return $period > $sch_brk_at ? $m + $sch_brk_len : $m;
-};
+$sch_at = static fn (int $period): int => SCH_Timetable::period_start($period);
 
 // الساعة بأرقام اللغة، ودقيقتان دائمًا: «٩:٥» تُقرأ رقمًا لا وقتًا.
 $sch_clock = static function (int $m): string {
