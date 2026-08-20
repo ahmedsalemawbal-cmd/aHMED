@@ -402,6 +402,7 @@ final class SCH_Dashboard
             'import_students'  => ['sch_manage_students',  'do_import'],
 
             'mark_attendance'  => ['sch_manage_attendance', 'do_mark_attendance'],
+            'close_attendance' => ['sch_manage_attendance', 'do_close_attendance'],
             'add_bus'          => ['sch_manage_transport',  'do_add_bus'],
             'add_route'        => ['sch_manage_transport',  'do_add_route'],
             'add_stop'         => ['sch_manage_transport',  'do_add_stop'],
@@ -1666,6 +1667,21 @@ final class SCH_Dashboard
         }
 
         return true;
+    }
+
+    /**
+     * إغلاق كشف اليوم: من لم يمسح بطاقته حتى الآن يُرصد غيابه.
+     *
+     * الفعل لا رجعة فيه ويُبلَّغ به أولياء الأمور، فيُحرَس بثلاثة:
+     * الصلاحية في جدول الأفعال، والنونس في النموذج، **والتاريخ من الخادم
+     * لا من النموذج** — تاريخٌ يأتي من المتصفّح يعني إغلاق يومٍ آخر بطلب
+     * مُلفَّق. والطبقة تتولّى بقيّة الحراسة: لا تمسّ من رُصد أصلًا.
+     */
+    private static function do_close_attendance(array $d, int $id): bool|WP_Error
+    {
+        $count = SCH_Attendance::close_day(current_time('Y-m-d'));
+
+        return $count >= 0;
     }
 
     private static function do_add_bus(array $d, int $id): array|WP_Error

@@ -125,6 +125,124 @@ final class SCH_Attendance
         )) ?: [];
     }
 
+    /**
+     * كشف اليوم على مستوى المدرسة — كل طالب نشط ومعه حالته اليوم إن رُصدت.
+     *
+     * `sheet()` تخدم شعبة واحدة وتبقى كما هي: شاشات الشُّعب تعتمد شكل مخرجاتها.
+     * وشاشة البوابة تحتاج المدرسة كلها في قائمة واحدة لأن الماسح لا يعرف شعبة
+     * القادم إليه — فالتصفية بالشعبة قرار عرض لا قرار استعلام.
+     *
+     * الضمّ الأيسر على الحضور هو ما يجعل «بانتظار المسح» حالةً قائمة بذاتها:
+     * `status` تعود NULL لمن لم يُرصد بعد، وهو تمييز لا يعطيه عدٌّ للمرصودين.
+     *
+     * والضمّ على التسجيل أيسر أيضًا عمدًا: الطالب النشط الذي لم يُسجَّل في شعبة
+     * بعدُ يبقى في الكشف — إسقاطه يعني بطاقةً تُمسح على البوابة ولا تجد صاحبها.
+     * والشعبة تُقرأ من تسجيل السنة الحالية، وتسقط على نسخة سجل الطالب المبسّطة
+     * إن لم يوجد تسجيل.
+     *
+     * @return array<int,object> صف لكل طالب: id · full_name · first_name ·
+     *                          academic_no · student_no · photo_file · stage ·
+     *                          grade_level · section · class_id · status ·
+     *                          method · note · checked_in_at · minutes_late
+     */
+    public static function day_sheet(string $date): array
+    {
+        global $wpdb;
+
+        return $wpdb->get_results($wpdb->prepare(
+            'SELECT s.id, s.full_name, s.first_name, s.academic_no, s.student_no, s.photo_file,
+                    COALESCE(c.stage, s.stage)             AS stage,
+                    COALESCE(c.grade_level, s.grade_level) AS grade_level,
+                    COALESCE(c.section, s.section)         AS section,
+                    c.id AS class_id,
+                    a.status, a.method, a.note, a.checked_in_at, a.minutes_late
+             FROM ' . sch_table('students') . ' s
+             LEFT JOIN ' . sch_table('enrollments') . ' e
+                    ON e.student_id = s.id AND e.year_id = %d AND e.status = %s
+             LEFT JOIN ' . sch_table('classes') . ' c ON c.id = e.class_id
+             LEFT JOIN ' . sch_table('attendance') . ' a
+                    ON a.student_id = s.id AND a.att_date = %s
+             WHERE s.status = %s
+             ORDER BY s.full_name',
+            SCH_Years::current_id(),
+            'active',
+            $date,
+            'active'
+        )) ?: [];
+    }
+
+    /**
+     * إغلاق كشف اليوم: يرصد غيابًا لكل من لم يُرصد بعدُ، ويُرجع عدد من رُصد.
+     *
+     * الأمان عند التكرار مبنيّ لا مفحوص: الشرط `a.id IS NULL` يستثني من له سجل
+     * أصلًا فلا يُغيَّر قرار قائم (حاضر أو متأخر أو غياب بعذر من إجازة معتمدة)،
+     * و`INSERT IGNORE` مع المفتاح الفريد (student_id, att_date) يحسم السباق بين
+     * ضغطتين متزامنتين — فالضغطة الثانية تكتب صفرًا وتُرجع صفرًا.
+     *
+     * وإدراج واحد لكل الغائبين لا نداء `mark()` لكل طالب: مدرسة بأربعمئة طالب
+     * كانت ستفتح أربعمئة استعلام قبل أن يعود الزرّ.
+     *
+     * @return int عدد من رُصد غيابه في هذه الضغطة (0 إن لم يبقَ أحد أو كان التاريخ غير صالح)
+     */
+    public static function close_day(string $date): int
+    {
+        global $wpdb;
+
+        // تاريخ لم يأتِ بعد لا غياب فيه — والإغلاق فعل لا رجعة فيه على كشف كامل.
+        if (!sch_sanitize_date($date) || $date > current_time('Y-m-d')) {
+            return 0;
+        }
+
+        // ختم زمني واحد لكل هذه الدفعة — به وحده نميّز من كتبته هذه الضغطة.
+        $now = sch_now();
+
+        $written = $wpdb->query($wpdb->prepare(
+            'INSERT IGNORE INTO ' . sch_table('attendance') . '
+                    (student_id, class_id, att_date, status, method, recorded_by, recorded_at)
+             SELECT s.id, e.class_id, %s, %s, %s, NULLIF(%d, 0), %s
+             FROM ' . sch_table('students') . ' s
+             LEFT JOIN ' . sch_table('enrollments') . ' e
+                    ON e.student_id = s.id AND e.year_id = %d AND e.status = %s
+             LEFT JOIN ' . sch_table('attendance') . ' a
+                    ON a.student_id = s.id AND a.att_date = %s
+             WHERE s.status = %s AND a.id IS NULL',
+            $date,
+            'absent',
+            'manual',
+            get_current_user_id(),
+            $now,
+            SCH_Years::current_id(),
+            'active',
+            $date,
+            'active'
+        ));
+
+        $count = max(0, (int) $written);
+
+        if ($count === 0) {
+            return 0;
+        }
+
+        // الإبلاغ يقع على من كتبته هذه الضغطة وحدها: الختم الزمني يفرزهم عمّن
+        // رُصد غيابه يدويًا قبل قليل، فلا يصل أهله إشعار ثانٍ عن الغياب نفسه.
+        $ids = $wpdb->get_col($wpdb->prepare(
+            'SELECT student_id FROM ' . sch_table('attendance') . '
+             WHERE att_date = %s AND status = %s AND method = %s AND recorded_at = %s',
+            $date,
+            'absent',
+            'manual',
+            $now
+        )) ?: [];
+
+        foreach ($ids as $id) {
+            self::notify_absence((int) $id, $date);
+        }
+
+        sch_audit('attendance.closed', 'attendance', null, ['date' => $date, 'count' => $count]);
+
+        return $count;
+    }
+
     /** ملخص اليوم على مستوى المدرسة. */
     public static function day_summary(string $date): array
     {
