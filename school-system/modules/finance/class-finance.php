@@ -103,9 +103,20 @@ final class SCH_Finance
         // full  — دفعة واحدة كاملة (الأصل)
         // bnpl  — تابي أو تمارا: المدرسة تقبض كاملًا والشركة تُحصّل من الأب
         // school— تقسيط على المدرسة: **امتياز يُمنَح** لمن يستحق، والمخاطرة على المدرسة
-        $mode = in_array($d['pay_mode'] ?? 'full', ['full', 'school', 'bnpl'], true)
-            ? (string) $d['pay_mode']
-            : 'full';
+        /*
+         * القيمة تُقرأ مرّةً واحدة ثم تُفحَص.
+         *
+         * كان الشرط `$d['pay_mode'] ?? 'full'` يحمي **الفحص** ولا يحمي فرعه:
+         * فحين يغيب المفتاح تمرّ `'full'` في `in_array` ثم يُقرأ
+         * `$d['pay_mode']` غير الموجود — تحذيرُ PHP في كل إصدار فاتورةٍ لا
+         * تُذكر فيها طريقة الدفع، وهو **الحال الافتراضيّ**. يصمت في الإنتاج
+         * و`WP_DEBUG` مطفأ، ويملأ السجلّ حين يُشتغَّل.
+         */
+        $mode = (string) ($d['pay_mode'] ?? 'full');
+
+        if (!in_array($mode, ['full', 'school', 'bnpl'], true)) {
+            $mode = 'full';
+        }
 
         $reason = sanitize_text_field((string) ($d['grant_reason'] ?? ''));
 

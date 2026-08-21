@@ -232,7 +232,19 @@ $days    = $due !== null && !$no_date
                 )); ?></b>
 
                 <?php if ($when !== '') : ?>
-                    <span class="p-inv__d"><?php echo esc_html(wp_date('j F Y', strtotime($when))); ?></span>
+                    <?php
+                    /*
+                     * `mysql2date` لا `wp_date(strtotime())`.
+                     *
+                     * `$when` قد تكون `created_at` وهو `DATETIME`. وووردبريس
+                     * يثبّت توقيت PHP على UTC، فـ`strtotime` تقرأ السلسلة
+                     * المحلّية كأنها UTC ثم تُضيف `wp_date` إزاحة الموقع
+                     * مرّةً ثانية — **ففاتورةٌ أُنشئت بعد التاسعة مساءً يرى
+                     * الأب تاريخها اليوم التالي**. و`due_date` تاريخٌ بلا وقت
+                     * فلا ينزلق، لكن الحقلين يمرّان من هنا معًا.
+                     */
+                    ?>
+                    <span class="p-inv__d"><?php echo esc_html(mysql2date('j F Y', $when)); ?></span>
                 <?php endif; ?>
 
                 <?php if ((float) $inv->discount > 0) : ?>
