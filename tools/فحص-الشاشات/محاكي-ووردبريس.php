@@ -24,6 +24,10 @@ define('SCH_API_NS', 'school/v1');
 define('MINUTE_IN_SECONDS', 60);
 define('HOUR_IN_SECONDS', 3600);
 define('DAY_IN_SECONDS', 86400);
+// ثوابت الحجم من نواة ووردبريس — تستعملها الإضافة في حدّ الرفع وفي فحص القرص.
+define('KB_IN_BYTES', 1024);
+define('MB_IN_BYTES', 1048576);
+define('GB_IN_BYTES', 1073741824);
 define('WEEK_IN_SECONDS', 604800);
 define('MONTH_IN_SECONDS', 2592000);
 define('YEAR_IN_SECONDS', 31536000);

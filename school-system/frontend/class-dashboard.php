@@ -83,6 +83,7 @@ final class SCH_Dashboard
         'settings-push'  => ['الإشعارات الفورية', 'sch_manage_settings', 'system', '',        'bell'],
         'rollover'   => ['ترقية العام',     'sch_manage_settings',   'system', '',           'calendar'],
         'backup'     => ['النسخ الاحتياطي',  'sch_manage_settings',   'system', '',           'shield'],
+        'ready'      => ['جاهزية النظام',    'sch_manage_settings',   'system', '',           'check'],
         'audit'      => ['سجل النظام',      'sch_view_audit',        'system', '',           'clock'],
     ];
 
@@ -182,7 +183,7 @@ final class SCH_Dashboard
         'المدرسة'           => ['settings', 'settings-years', 'rollover'],
         'اليوم والتنبيهات'  => ['settings-day', 'settings-push'],
         'الفريق والصلاحيات' => ['employees', 'staff-badges', 'perms'],
-        'البيانات والنظام'  => ['import', 'backup', 'audit'],
+        'البيانات والنظام'  => ['import', 'backup', 'ready', 'audit'],
     ];
 
     /** هل هذا القسم ضمن سياق الإعدادات؟ */
