@@ -1,0 +1,120 @@
+# التحقّق الآليّ — يعمل مع كل دفع.
+#
+# ستّ أدوات فحص بـ١٨٤ دعوى، و`audit.py` بأربعين فحصًا، كانت **تُشغَّل باليد
+# أو لا تُشغَّل**. وجولة v10.9 هي الدليل: ستون عطلًا تراكمت عبر إصدارات،
+# وكثيرٌ منها كان `audit.py` سيمسكه لو شُغِّل مع كل التزام.
+#
+# والبناء يفشل إن سقطت دعوى واحدة — فلا ينحدر النظام بصمت.
+
+name: فحص
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# دفعتان متتاليتان على الفرع نفسه: تُلغى الأولى ولا يُنتظر ما تجاوزه الزمن.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  فحص:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تهيئة PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # نسخة الإنتاج كما في ترويسة الإضافة (`Requires PHP: 8.2`).
+          php-version: '8.2'
+          # `zip` للنسخ الاحتياطي · `mbstring` للعربية · `intl` للتواريخ.
+          extensions: zip, mbstring, intl
+          coverage: none
+
+      - name: تهيئة Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── ① السلامة النحوية: لا ملفّ يُسلَّم وهو لا يُحلَّل ──
+      - name: فحص نحو PHP
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            if ! php -l "$f" > /dev/null 2>&1; then
+              echo "::error file=$f::خطأ نحويّ"
+              php -l "$f" || true
+              fail=1
+            fi
+          done < <(find school-system tools -name '*.php' -print0)
+          exit $fail
+
+      - name: فحص نحو JavaScript
+        run: |
+          fail=0
+          for f in school-system/assets/*.js; do
+            if ! node --check "$f" > /dev/null 2>&1; then
+              echo "::error file=$f::خطأ نحويّ"
+              node --check "$f" || true
+              fail=1
+            fi
+          done
+          exit $fail
+
+      # ── ② الفحص البنيويّ: أربعون فحصًا على الشفرة والمخطّط والأنماط ──
+      - name: audit.py
+        working-directory: school-system
+        run: python3 audit.py
+
+      # ── ③ الشاشات: تُرسَم فعلًا، بقاعدةٍ مملوءة ثم فارغة ──
+      #
+      # والفارغة ليست تكرارًا: هي **أوّل ما تراه مدرسة جديدة**، وفروعُها
+      # الفارغة لا يمرّ بها أحد في الاستعمال اليوميّ فتبقى أعطالها مستورة.
+      - name: معاينة الشاشات
+        run: php tools/فحص-الشاشات/run.php
+
+      - name: معاينة الشاشات — قاعدة فارغة
+        env:
+          EMPTY: '1'
+        run: php tools/فحص-الشاشات/run.php
+
+      # ── ④ الدعاوى ──
+      - name: فحص الدخول والتوجيه
+        run: php tools/فحص-الدخول/run.php
+
+      - name: فحص الصلاحيات
+        run: php tools/فحص-الصلاحيات/run.php
+
+      - name: فحص العهدة
+        run: php tools/فحص-العهدة/run.php
+
+      - name: فحص النسخ الاحتياطي
+        run: php tools/فحص-النسخ/run.php
+
+      - name: فحص محرّك الجداول
+        run: php tools/فحص-الجداول/محرّك-التوليد.php
+
+      - name: فحص حضور المعلمين والتغطية
+        run: python3 tools/فحص-الحضور/كشف-المعلمين-والتغطية.py
+
+      # ── ⑤ الإصدار: لا تُسلَّم نسخة بلا تحريكه ──
+      #
+      # القاعدة من v2.7.6: `SCH_VERSION` يقود ترحيل المخطّط ووسم الأصول،
+      # فترقيةٌ بلا تحريكه تُخدَم من الكاش القديم ولا يُنفَّذ ترحيلها.
+      # والتحذير هنا لا يُفشل البناء: أثناء العمل على فرعٍ لم يحن التسليم بعد.
+      - name: تطابق رقم الإصدار
+        run: |
+          h=$(grep -oP '^\s\*\sVersion:\s+\K[0-9.]+' school-system/school-system.php)
+          c=$(grep -oP "define\('SCH_VERSION',\s*'\K[0-9.]+" school-system/school-system.php)
+          echo "الترويسة $h · الثابت $c"
+          if [ "$h" != "$c" ]; then
+            echo "::error::رقم الإصدار في الترويسة ($h) لا يطابق SCH_VERSION ($c)"
+            exit 1
+          fi
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && git log -1 --format=%s | grep -qv "$c"; then
+            echo "::warning::تأكّد أن الإصدار حُرِّك مع هذا التسليم"
+          fi
