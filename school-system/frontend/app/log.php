@@ -41,14 +41,15 @@ $marks = SCH_Assessment::report_card($id);
             $sch_last_absent = (string) $d->att_date;
         }
         if ($s === 'late' && count($sch_late_days) < 2) {
-            $sch_late_days[] = wp_date('j M', strtotime((string) $d->att_date));
+            $sch_late_days[] = mysql2date('j M', (string) $d->att_date);
         }
     }
 
     $sch_total = count($days);
-    // **الإجازة المعتمدة لا تُحسب غيابًا.** النسبة العامة تقسم على كل الأيام،
-    // فطفلٌ في إجازة أذِنت بها المدرسة نفسها يظهر لأبيه بـ٤٦٪ كأنه متغيّب —
-    // وهذا نقضٌ لمعنى اعتماد الإجازة. هنا نقسم على **أيام الدوام المطلوبة**.
+    // **الإجازة المعتمدة لا تُحسب غيابًا** — والقاعدة صارت في
+    // `SCH_Attendance::rate()` نفسها، فتشترك فيها الشاشات الثلاث. وكان
+    // التصحيح هنا وحده، فتعطي هذه الشاشة رقمًا وتعطي «اليوم» وتطبيق الطالب
+    // رقمًا آخر للطفل نفسه.
     $sch_due  = max(0, $sch_total - $tally['excused']);
     $sch_came = $tally['present'] + $tally['late'];
     $sch_pct  = $sch_due > 0 ? (int) round($sch_came / $sch_due * 100) : 100;
@@ -58,8 +59,8 @@ $marks = SCH_Assessment::report_card($id);
     $sch_to   = (string) $days[0]->att_date;
     reset($days);
 
-    $sch_m_from = wp_date('F', strtotime($sch_from));
-    $sch_m_to   = wp_date('F', strtotime($sch_to));
+    $sch_m_from = mysql2date('F', $sch_from);
+    $sch_m_to   = mysql2date('F', $sch_to);
 
     // شبكة الأسابيع: عمودٌ لكل يوم دراسي (الأحد → الخميس) وصفٌّ لكل أسبوع،
     // فيُقرأ الغياب نمطًا («كل ثلاثاء») لا نقاطًا متفرّقة في شريط واحد.
@@ -151,7 +152,7 @@ $marks = SCH_Assessment::report_card($id);
                 ? sprintf(
                     /* translators: %s: تاريخ آخر غياب */
                     __('آخرها %s', 'school-system'),
-                    wp_date('j M', strtotime($sch_last_absent))
+                    mysql2date('j M', $sch_last_absent)
                 )
                 : __('لا غياب في السجل', 'school-system')); ?></span>
         </div>
@@ -225,7 +226,7 @@ $marks = SCH_Assessment::report_card($id);
                     default   => 'off',
                 }; ?>
                 <i class="p-cal__d p-cal__d--<?php echo esc_attr($tone); ?>"
-                   title="<?php echo esc_attr(wp_date('j M', strtotime((string) $sch_ymd)) . ' · ' . ($sch_labels[$sch_st] ?? __('عطلة', 'school-system'))); ?>"></i>
+                   title="<?php echo esc_attr(mysql2date('j M', (string) $sch_ymd) . ' · ' . ($sch_labels[$sch_st] ?? __('عطلة', 'school-system'))); ?>"></i>
             <?php endforeach; ?>
         </div>
 

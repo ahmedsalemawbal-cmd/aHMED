@@ -367,16 +367,25 @@ final class SCH_Attendance
     {
         global $wpdb;
 
+        /*
+         * **الإجازة المعتمدة لا تُحسب غيابًا** — والمقام أيام الدوام المطلوبة.
+         *
+         * كان `COUNT(*)` يضع `excused` في المقام، فطفلٌ أذِنت له المدرسة
+         * نفسها بالغياب يظهر بنسبةٍ منخفضة كأنه متغيّب. وشاشة «السجل» في
+         * تطبيق الأسرة كانت تُصحّح ذلك محليًّا بطرح `excused` — فالشاشتان
+         * تعطيان **رقمين مختلفين للطفل نفسه في اليوم نفسه**، وتطبيق الطالب
+         * (الذي يقرأ هذه الدالّة) يعطي ثالثًا. الرقم واحدٌ هنا الآن.
+         */
         $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT COUNT(*) AS total, SUM(status IN ('present','late')) AS present
+            "SELECT SUM(status <> 'excused') AS due, SUM(status IN ('present','late')) AS present
              FROM " . sch_table('attendance') . "
              WHERE student_id = %d AND att_date >= %s",
             $student_id,
             gmdate('Y-m-d', time() - $days * DAY_IN_SECONDS)
         ));
 
-        $total = (int) ($row->total ?? 0);
-        return $total === 0 ? 0.0 : round((int) $row->present / $total * 100, 1);
+        $due = (int) ($row->due ?? 0);
+        return $due === 0 ? 0.0 : round((int) $row->present / $due * 100, 1);
     }
 
     /**
@@ -517,7 +526,19 @@ final class SCH_Comms
             'created_at' => sch_now(),
         ]);
 
-        self::queue_delivery((int) $wpdb->insert_id, $user_id);
+        /*
+         * **الصامت صامتٌ فعلًا.**
+         *
+         * لاحقة `_silent` في `ref_type` كانت تُقرأ في اختيار الأيقونة وحدها
+         * (`alert_look()`)، فيخرج البريد والدفع لكل ملاحظةٍ إيجابية أو
+         * مشاركة — وهي التي وُضعت لتصل الأب **صامتةً في خطّه الزمني بلا
+         * إزعاج**. أبٌ بثلاثة أبناء يصله عشرة إشعارات في اليوم عن أشياء
+         * جميلة لم يطلب أن يُوقَظ لها، فيُطفئ الإشعارات كلّها — ويفوته
+         * إشعار الخروج المبكر بعد ذلك.
+         */
+        if (!is_string($ref_type) || !str_ends_with($ref_type, '_silent')) {
+            self::queue_delivery((int) $wpdb->insert_id, $user_id);
+        }
 
         return true;
     }

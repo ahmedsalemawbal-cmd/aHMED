@@ -285,7 +285,7 @@ final class SCH_TT
 
         $wpdb->insert(sch_table('tt_plans'), [
             'year_id'        => $year,
-            'name'           => wp_date('F Y', (int) strtotime($from)),
+            'name'           => mysql2date('F Y', $from),
             'effective_from' => $from,
             'effective_to'   => $to,
             'status'         => 'draft',

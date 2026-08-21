@@ -1471,6 +1471,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 }
 
 .p-flash--bad { background: var(--bad-tint); color: var(--bad); }
+.p-flash--ok  { background: var(--ok-tint);  color: var(--ok); }
 
 /* رأس الشاشة الفرعية: عودة على حافة، وعنوان يملأ ما بقي */
 .p-sub__h {

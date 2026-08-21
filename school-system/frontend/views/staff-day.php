@@ -82,7 +82,7 @@ $sch_keep = static function () use ($sch_f, $sch_q, $sch_dept, $sch_pg, $sch_ope
 };
 
 // اليوم بالعربية — «الخميس ٢٠ أغسطس».
-$sch_today_txt = wp_date('l j F', strtotime($sch_date . ' 12:00:00'));
+$sch_today_txt = mysql2date('l j F', $sch_date . ' 12:00:00');
 ?>
 
 <header class="sch-sd__hd">

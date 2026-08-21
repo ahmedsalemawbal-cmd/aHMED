@@ -596,7 +596,7 @@ $keep = static function () use ($tab): void {
 
                         <span class="sch-sp__ptill">
                             <span><?php esc_html_e('يسري حتى', 'school-system'); ?></span>
-                            <b><?php echo esc_html(wp_date('j M · H:i', strtotime((string) $dl->valid_until))); ?></b>
+                            <b><?php echo esc_html(mysql2date('j M · H:i', (string) $dl->valid_until)); ?></b>
                         </span>
 
                         <span class="sch-sp__pacts">
@@ -688,7 +688,7 @@ $keep = static function () use ($tab): void {
                                     ? esc_html(size_format((int) $doc->file_size) . ' · ' . sprintf(
                                         /* translators: %s: تاريخ الرفع */
                                         __('رُفع %s', 'school-system'),
-                                        wp_date('j F', strtotime((string) $doc->created_at))
+                                        mysql2date('j F', (string) $doc->created_at)
                                     ))
                                     : esc_html__('غير مرفوع', 'school-system'); ?></span>
                             </span>
@@ -722,7 +722,7 @@ $keep = static function () use ($tab): void {
                             <span class="sch-sp__ext"><?php echo esc_html($ext !== '' ? $ext : '—'); ?></span>
                             <span class="sch-sp__dt">
                                 <b><?php echo esc_html((string) $d->file_name); ?></b>
-                                <span><?php echo esc_html(size_format((int) $d->file_size) . ' · ' . wp_date('j F', strtotime((string) $d->created_at))); ?></span>
+                                <span><?php echo esc_html(size_format((int) $d->file_size) . ' · ' . mysql2date('j F', (string) $d->created_at)); ?></span>
                             </span>
                         </div>
                         <div class="sch-sp__dacts">
@@ -874,7 +874,7 @@ $keep = static function () use ($tab): void {
                                         ? sprintf(
                                             /* translators: %s: تاريخ الاستحقاق */
                                             __('الاستحقاق %s', 'school-system'),
-                                            wp_date('j F', strtotime((string) $inv->due_date))
+                                            mysql2date('j F', (string) $inv->due_date)
                                         )
                                         : __('بلا تاريخ استحقاق', 'school-system')); ?></span>
                                 </span>
@@ -915,7 +915,7 @@ $keep = static function () use ($tab): void {
                                     ? sprintf(
                                         /* translators: %s: تاريخ الاستحقاق */
                                         __('الاستحقاق %s', 'school-system'),
-                                        wp_date('j F', strtotime($fin['next_due']))
+                                        mysql2date('j F', $fin['next_due'])
                                     )
                                     : __('لا قسط مستحق', 'school-system')); ?></span>
                             </span>
@@ -980,7 +980,7 @@ $keep = static function () use ($tab): void {
                                 <div class="sch-sp__lrow">
                                     <b><?php echo esc_html(SCH_Audit::label((string) $r->action)); ?></b>
                                     <span><?php echo esc_html($r->display_name ?: __('النظام', 'school-system')); ?></span>
-                                    <code dir="ltr"><?php echo esc_html(wp_date('d-m H:i', strtotime((string) $r->created_at))); ?></code>
+                                    <code dir="ltr"><?php echo esc_html(mysql2date('d-m H:i', (string) $r->created_at)); ?></code>
                                 </div>
                             <?php endforeach; ?>
                         </div>

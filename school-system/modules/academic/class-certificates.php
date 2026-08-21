@@ -655,7 +655,7 @@ final class SCH_Certificates
         $reason = (string) ($cert->reason ?: '');
         $title  = (string) ($cert->title ?: (self::TYPES[$cert->type][1] ?? ''));
         $serial = (string) $cert->serial;
-        $date   = wp_date('j F Y', strtotime((string) $cert->issued_at));
+        $date   = mysql2date('j F Y', (string) $cert->issued_at);
 
         // القوالب الأربعة الأولى لها دوالّها الخاصة (ميزة معتمدة لا تُمسّ)،
         // وما بعدها يبنيه المحرّك من وصفه في السجلّ.

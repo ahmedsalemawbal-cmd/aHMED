@@ -98,6 +98,20 @@ function get_bloginfo($k = '') { return $k === 'charset' ? 'UTF-8' : 'مدرسة
 function number_format_i18n($n, $d = 0) {
     return apply_filters('number_format_i18n', number_format((float) $n, $d, '٫', '٬'));
 }
+/**
+ * `mysql2date` — تقرأ سلسلة القاعدة **بتوقيت الموقع** ثم تنسّقها به.
+ *
+ * وهي البديل الصحيح لـ`wp_date($f, strtotime($mysql))`: ووردبريس يثبّت
+ * توقيت PHP على UTC، فـ`strtotime` تقرأ السلسلة المحلّية كأنها UTC ثم
+ * تُضيف `wp_date` إزاحة الموقع مرّةً ثانية.
+ */
+function mysql2date($f, $date, $translate = true) {
+    if (empty($date)) { return false; }
+    $ts = strtotime((string) $date);
+    if ($ts === false) { return false; }
+    if ($f === 'U') { return $ts; }
+    return $translate ? wp_date($f, $ts) : date((string) $f, $ts);
+}
 function wp_date($f, $ts = null, $tz = null) {
     $ar_m = [1 => 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
     $ar_d = ['Sunday' => 'الأحد', 'Monday' => 'الاثنين', 'Tuesday' => 'الثلاثاء', 'Wednesday' => 'الأربعاء',

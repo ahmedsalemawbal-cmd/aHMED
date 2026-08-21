@@ -81,7 +81,7 @@ $tone  = match ($state) {
         </div>
         <div>
             <dt><?php esc_html_e('تاريخ الميلاد', 'school-system'); ?></dt>
-            <dd><?php echo esc_html($student->birth_date ? wp_date('j M Y', strtotime((string) $student->birth_date)) : '—'); ?></dd>
+            <dd><?php echo esc_html($student->birth_date ? mysql2date('j M Y', (string) $student->birth_date) : '—'); ?></dd>
         </div>
         <div>
             <dt><?php esc_html_e('النقل', 'school-system'); ?></dt>

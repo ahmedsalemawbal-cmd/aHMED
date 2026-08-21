@@ -138,6 +138,7 @@ var m=document.querySelector('meta[name=theme-color]');if(m){m.content=d?'#12131
         <?php endif; ?>
 
         <main class="p-main" id="p-content">
+            <?php SCH_App::flash(); // شريط الرسالة — مرّةً هنا لا في كل شاشة ?>
             <?php require file_exists($p_file) ? $p_file : SCH_PATH . 'frontend/app/child.php'; ?>
         </main>
 

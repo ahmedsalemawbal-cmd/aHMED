@@ -113,21 +113,38 @@ final class SCH_App
 
         $children = SCH_Students::children_of(get_current_user_id());
 
-        // ابن واحد فقط؟ افتح ملفه مباشرة بلا شاشة اختيار.
-        if ($section === '' && count($children) === 1) {
-            wp_safe_redirect(self::url('child', (int) $children[0]->id));
+        /*
+         * ابنٌ افتراضيّ دائمًا ما دام له ابنٌ واحد على الأقل.
+         *
+         * كان الشرط `count($children) === 1` وحده، وما عداه يسقط على
+         * `$section = ''` — أي شاشة **«لا يوجد أبناء مرتبطون بحسابك»**.
+         * فأبٌ بولدين يهبط عليها من كل رابطٍ عائليّ (التبويبات السفلية،
+         * وعودة الإشعارات، وعودة الرسائل — كلّها تبني `url(..., 0)`)، وفوقها
+         * سكّة أبنائه معروضة. رسالةٌ تنفي وجود ما تعرضه الشاشة نفسها.
+         *
+         * والتبديل بالسكّة لا بشاشة اختيار — قاعدة التطبيق منذ v2.2 — فالوجهة
+         * الصحيحة هي **آخر ابنٍ فُتح** ثم أوّل الأبناء.
+         */
+        $default_kid = self::default_child($children);
+
+        if ($section === '' && $default_kid > 0) {
+            wp_safe_redirect(self::url('child', $default_kid));
             exit;
         }
 
-        // أقسام الطالب: لو لم يُحدَّد ابن وكان له ابن واحد، افتحه تلقائيًا.
         $needs_child = ['child', 'log', 'invoices', 'schedule', 'kg', 'clinic', 'leave', 'card', 'transport', 'track', 'certificates'];
 
         if ($id === 0 && in_array($section, $needs_child, true)) {
-            if (count($children) === 1) {
-                wp_safe_redirect(self::url($section, (int) $children[0]->id));
+            if ($default_kid > 0) {
+                wp_safe_redirect(self::url($section, $default_kid));
                 exit;
             }
             $section = '';
+        }
+
+        // ويُحفَظ ما فُتح فعلًا: من يتصفّح ابنه الثاني يعود إليه لا إلى الأوّل.
+        if ($id > 0) {
+            self::remember_child($children, $id);
         }
 
         self::render($section === '' ? 'home' : $section, [
@@ -135,6 +152,38 @@ final class SCH_App
             'id'       => $id,
             'children' => $children,
         ]);
+    }
+
+    /**
+     * الابن الافتراضيّ: آخر من فُتح، ثم أوّل الأبناء.
+     *
+     * @param array<int,object> $children
+     */
+    private static function default_child(array $children): int
+    {
+        if ($children === []) {
+            return 0;
+        }
+
+        $ids  = array_map(static fn (object $c): int => (int) $c->id, $children);
+        $last = (int) get_user_meta(get_current_user_id(), 'sch_last_child', true);
+
+        return in_array($last, $ids, true) ? $last : (int) $ids[0];
+    }
+
+    /**
+     * حفظ آخر ابنٍ فُتح — ولا يُحفَظ إلا ما يخصّ صاحب الحساب.
+     *
+     * @param array<int,object> $children
+     */
+    private static function remember_child(array $children, int $student_id): void
+    {
+        foreach ($children as $c) {
+            if ((int) $c->id === $student_id) {
+                update_user_meta(get_current_user_id(), 'sch_last_child', $student_id);
+                return;
+            }
+        }
     }
 
     private static function handle_post(): void
@@ -240,7 +289,7 @@ final class SCH_App
                 ], $_FILES);
 
                 wp_safe_redirect(add_query_arg(
-                    is_wp_error($result) ? ['err' => $result->get_error_message()] : ['ok' => '1'],
+                    is_wp_error($result) ? ['err' => $result->get_error_code()] : ['ok' => 'leave'],
                     self::url('leave', $student_id)
                 ));
                 exit;
@@ -262,7 +311,7 @@ final class SCH_App
                 ], $_FILES);
 
                 wp_safe_redirect(add_query_arg(
-                    is_wp_error($result) ? ['err' => $result->get_error_message()] : ['ok' => '1'],
+                    is_wp_error($result) ? ['err' => $result->get_error_code()] : ['ok' => 'med'],
                     self::url('clinic', $student_id)
                 ));
                 exit;
@@ -300,7 +349,33 @@ final class SCH_App
 
         $saved = SCH_Enrollment::store_upload($_FILES['avatar'], $user_id, 'avatar');
 
-        if (!is_wp_error($saved) && $guardian) {
+        /*
+         * الخطأ يُقال لا يُبتلَع.
+         *
+         * كان فرع `WP_Error` بلا معالجة والتحويل بلا `?err=` — فمن رفع صورة
+         * أكبر من خمسة ميجابايت (وصورةُ جوالٍ حديث كذلك عادةً) يُعاد إلى
+         * الشاشة نفسها وصورتُه القديمة مكانها، بلا كلمةٍ تقول لماذا.
+         */
+        if (is_wp_error($saved)) {
+            wp_safe_redirect(add_query_arg('err', $saved->get_error_code(), self::url('account')));
+            exit;
+        }
+
+        /*
+         * وPDF ليس صورةً شخصية.
+         *
+         * `store_upload` تقبل الثلاثة (JPG · PNG · PDF) لأنها تخدم المستندات
+         * أيضًا، و`accept="image/…"` في النموذج تلميحٌ للمتصفّح لا فحصٌ في
+         * الخادم. فملفُّ PDF كان يُقبَل ويُخزَّن ثم يُقدَّم صورةً في رأس كل
+         * شاشة — أيقونةً مكسورة.
+         */
+        if (($saved['mime'] ?? '') === 'application/pdf') {
+            @unlink(SCH_Enrollment::private_dir() . '/' . $saved['stored']);
+            wp_safe_redirect(add_query_arg('err', 'bad_type', self::url('account')));
+            exit;
+        }
+
+        if ($guardian) {
             if ($guardian->photo_file) {
                 $old = SCH_Enrollment::private_dir() . '/' . $guardian->photo_file;
                 if (file_exists($old)) {
@@ -311,7 +386,7 @@ final class SCH_App
             $wpdb->update(sch_table('guardians'), ['photo_file' => $saved['stored']], ['user_id' => $user_id]);
         }
 
-        wp_safe_redirect(self::url('account'));
+        wp_safe_redirect(add_query_arg('ok', 'avatar', self::url('account')));
         exit;
     }
 
@@ -425,7 +500,7 @@ final class SCH_App
             return __('أمس', 'school-system');
         }
 
-        return wp_date('j F', strtotime($date)) ?: $date;
+        return mysql2date('j F', $date) ?: $date;
     }
 
     /**
@@ -534,7 +609,7 @@ final class SCH_App
         wp_set_auth_cookie($user->ID, true, is_ssl());
         wp_set_current_user($user->ID);
 
-        wp_safe_redirect(add_query_arg('ok', '1', self::url('account')));
+        wp_safe_redirect(add_query_arg('ok', 'password', self::url('account')));
         exit;
     }
 
@@ -710,10 +785,18 @@ JS;
             }
         }
 
+        /*
+         * المستحقّ **للسنة الجارية**.
+         *
+         * كان الاستعلام بلا `year_id`، وشاشة الرسوم تحسبه بها — فيرى الأب
+         * رقمين مختلفين في شاشتين متلاصقتين، والرابط بينهما يقول إن أحدهما
+         * كاذب. وفاتورةٌ مفتوحة من سنةٍ ماضية تنفخ رقم «اليوم» بلا سبب ظاهر.
+         */
         $due = (float) $wpdb->get_var($wpdb->prepare(
             "SELECT COALESCE(SUM(total - paid), 0) FROM " . sch_table('invoices') . "
-             WHERE student_id = %d AND status IN ('open','partial')",
-            $student_id
+             WHERE student_id = %d AND year_id = %d AND status IN ('open','partial')",
+            $student_id,
+            SCH_Years::current_id()
         ));
 
         return [
@@ -882,6 +965,77 @@ JS;
      * الأمراض المزمنة والملاحظات تبقى للعيادة — عرضها في تطبيق يُفتح يوميًا
      * يوسّع دائرة الاطلاع بلا فائدة تُذكر لولي الأمر الذي يعرفها أصلًا.
      */
+    /**
+     * شريط الرسالة في تطبيق الأسرة.
+     *
+     * كان `?err=` يُمرَّر في ثمانية مواضع — نداءُ انصرافٍ مرفوض، وتفويضٌ
+     * غير مسموح، وإجازةٌ متداخلة، وطلبُ دواء، وتغييرُ كلمة مرور — **ولا
+     * شاشةَ في التطبيق كلّه تقرؤه** إلا `pickers.php`. فيضغط الأب ويُعاد
+     * إلى الشاشة نفسها بلا كلمة، فيظنّ أن التطبيق معطوب فيعيد المحاولة.
+     *
+     * والرمز يُترجَم هنا: ما في الرابط نصٌّ يكتبه من يصنع الرابط، فلا يُطبع
+     * كما جاء. والقالب يستدعيها مرّةً واحدة فتغطّي الشاشات كلّها.
+     */
+    public static function flash(): void
+    {
+        $err = sanitize_key((string) ($_GET['err'] ?? ''));
+        $ok  = sanitize_key((string) ($_GET['ok'] ?? ''));
+
+        if ($err === '' && $ok === '') {
+            return;
+        }
+
+        if ($err !== '') {
+            $msg = match ($err) {
+                // نداء الانصراف والتفويض
+                'not_allowed'  => __('لا تملك صلاحية استلام هذا الطالب — راجع إدارة المدرسة.', 'school-system'),
+                'not_yours'    => __('لا تملك صلاحية الاستلام لهذا الطالب، فلا تفوّض فيه.', 'school-system'),
+                'not_inside'   => __('ابنك ليس داخل المدرسة الآن.', 'school-system'),
+                'already'      => __('النداء مفتوحٌ بالفعل — المشرفة تراه الآن.', 'school-system'),
+                'gone'         => __('هذا النداء أُغلق من قبل.', 'school-system'),
+                'no_person'    => __('اكتب اسم من ستفوّضه.', 'school-system'),
+                'no_until'     => __('حدّد وقت انتهاء التفويض.', 'school-system'),
+                'past'         => __('وقت الانتهاء يجب أن يكون في المستقبل.', 'school-system'),
+                'too_long'     => __('أقصى مدّة للتفويض أسبوع.', 'school-system'),
+
+                // الإجازة والدواء
+                'bad_reason'   => __('اختر سبب الإجازة.', 'school-system'),
+                'bad_dates'    => __('تواريخ الإجازة غير صحيحة.', 'school-system'),
+                'overlap'      => __('يوجد طلب إجازة يغطّي هذه الأيام.', 'school-system'),
+                'missing'      => __('اسم الدواء والجرعة مطلوبان.', 'school-system'),
+                'no_times'     => __('اختر موعدًا واحدًا على الأقل.', 'school-system'),
+
+                // الحساب والرفع
+                'wrong_current'=> __('كلمة المرور الحالية غير صحيحة.', 'school-system'),
+                'too_short'    => __('كلمة المرور الجديدة أقصر من ثمانية أحرف.', 'school-system'),
+                'mismatch'     => __('الكلمتان غير متطابقتين.', 'school-system'),
+                'too_big'      => __('الملف أكبر من خمسة ميجابايت — اختر صورة أصغر.', 'school-system'),
+                'bad_type'     => __('يُقبل JPG أو PNG فقط للصورة الشخصية.', 'school-system'),
+                'upload'       => __('تعذّر رفع الملف — أعد المحاولة.', 'school-system'),
+
+                'nonce'        => __('انتهت صلاحية الصفحة — حدّثها ثم أعد المحاولة.', 'school-system'),
+                default        => __('تعذّر تنفيذ العملية — أعد المحاولة.', 'school-system'),
+            };
+
+            printf(
+                '<div class="p-flash p-flash--bad" role="alert">%s</div>',
+                esc_html($msg)
+            );
+
+            return;
+        }
+
+        $msg = match ($ok) {
+            'leave'    => __('وصل طلب الإجازة — يصلك القرار في إشعار.', 'school-system'),
+            'med'      => __('وصل طلب الدواء إلى عيادة المدرسة.', 'school-system'),
+            'password' => __('تغيّرت كلمة المرور.', 'school-system'),
+            'avatar'   => __('حُدّثت صورتك.', 'school-system'),
+            default    => __('تمّ.', 'school-system'),
+        };
+
+        printf('<div class="p-flash p-flash--ok" role="status">%s</div>', esc_html($msg));
+    }
+
     public static function child_health(int $student_id): array
     {
         global $wpdb;

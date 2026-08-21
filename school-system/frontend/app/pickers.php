@@ -22,16 +22,9 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+// الرسالة تُعرض من `SCH_App::flash()` في القالب — كتلةٌ واحدة للتطبيق كلّه
+// بدل قائمةٍ محليّة في كل شاشة تتباعد عن أخواتها.
 $sch_kids = SCH_Students::children_of(get_current_user_id());
-$sch_err  = sanitize_key((string) ($_GET['err'] ?? ''));
-
-$sch_errors = [
-    'no_person' => __('اكتب اسم من ستفوّضه.', 'school-system'),
-    'no_until'  => __('حدّد وقت انتهاء التفويض.', 'school-system'),
-    'past'      => __('وقت الانتهاء يجب أن يكون في المستقبل.', 'school-system'),
-    'too_long'  => __('أقصى مدّة للتفويض أسبوع.', 'school-system'),
-    'not_yours' => __('لا تملك صلاحية الاستلام لهذا الطالب، فلا تفوّض فيه.', 'school-system'),
-];
 
 /**
  * قلبُ الجدول: من الطفل ← مخوَّلوه، إلى الشخص ← الأبناء الذين يستلمهم.
@@ -83,9 +76,6 @@ $sch_cap   = $sch_now->modify('+7 days')->format('Y-m-d\TH:i');
 
 <p class="p-sub"><?php esc_html_e('لن تُسلّم المدرسة أيًّا من أبنائك إلا لمن في هذه القائمة، بعد مطابقة الهوية.', 'school-system'); ?></p>
 
-<?php if ($sch_err && isset($sch_errors[$sch_err])) : ?>
-    <div class="p-flash p-flash--bad"><?php echo esc_html($sch_errors[$sch_err]); ?></div>
-<?php endif; ?>
 
 <?php $sch_i = -1; ?>
 <?php foreach ($sch_people as $sch_p) :

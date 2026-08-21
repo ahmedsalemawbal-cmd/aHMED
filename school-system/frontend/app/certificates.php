@@ -141,7 +141,7 @@ if ($cert && (int) $cert->student_id !== $id) {
                والوصل بالشرط لا بـ`trim` على «·»: المحرف عربيُّ الجوار
                متعدّد البايتات، و`trim` تقطع بالبايت فتُفسد آخر حرف. */
             $c_kind = (string) (SCH_Certificates::TYPES[$c->type][0] ?? '');
-            $c_meta = wp_date('j M', strtotime((string) $c->issued_at));
+            $c_meta = mysql2date('j M', (string) $c->issued_at);
 
             if ($c_kind !== '') {
                 $c_meta .= ' · ' . $c_kind;

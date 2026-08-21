@@ -186,10 +186,18 @@ final class SCH_Rest
             }
         }
 
+        /*
+         * المستحقّ **للسنة الجارية**.
+         *
+         * كان الاستعلام بلا `year_id`، وشاشة الرسوم تحسبه بها — فيرى الأب
+         * رقمين مختلفين في شاشتين متلاصقتين، والرابط بينهما يقول إن أحدهما
+         * كاذب. وفاتورةٌ مفتوحة من سنةٍ ماضية تنفخ رقم «اليوم» بلا سبب ظاهر.
+         */
         $due = (float) $wpdb->get_var($wpdb->prepare(
             "SELECT COALESCE(SUM(total - paid), 0) FROM " . sch_table('invoices') . "
-             WHERE student_id = %d AND status IN ('open','partial')",
-            $id
+             WHERE student_id = %d AND year_id = %d AND status IN ('open','partial')",
+            $id,
+            SCH_Years::current_id()
         ));
 
         return new WP_REST_Response([

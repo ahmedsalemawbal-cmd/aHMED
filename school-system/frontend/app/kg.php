@@ -42,7 +42,7 @@ $sch_class = SCH_Students::current_class($id);
 $sch_bits = array_filter([
     $sch_kid,
     $sch_class ? SCH_Classes::label($sch_class) : '',
-    $days !== [] ? (string) wp_date('l j M', strtotime((string) $days[0]->log_date)) : '',
+    $days !== [] ? (string) mysql2date('l j M', (string) $days[0]->log_date) : '',
 ]);
 ?>
 
@@ -85,7 +85,7 @@ $sch_bits = array_filter([
         <?php endif; ?>
 
         <?php if ($sch_i > 0) : ?>
-            <b class="p-h2"><?php echo esc_html(wp_date('l · j M', strtotime((string) $day->log_date))); ?></b>
+            <b class="p-h2"><?php echo esc_html(mysql2date('l · j M', (string) $day->log_date)); ?></b>
         <?php endif; ?>
 
         <!-- الوجبة والنوم: حقيقتان مستقلّتان، فبطاقتان لا صفّان في جدول -->

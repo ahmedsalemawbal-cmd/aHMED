@@ -459,7 +459,7 @@ $sch_on = array_filter($sch_f);
                         </td>
                         <td class="sch-col--lg"><?php echo esc_html($sch_kl); ?></td>
                         <td class="sch-mono"><?php echo esc_html((string) $sch_r->serial); ?></td>
-                        <td class="sch-col--xl"><?php echo esc_html(wp_date('j M Y', strtotime((string) $sch_r->issued_at))); ?></td>
+                        <td class="sch-col--xl"><?php echo esc_html(mysql2date('j M Y', (string) $sch_r->issued_at)); ?></td>
                         <td class="sch-col--xl"><?php
                             // من أخطأ يُعرَف: القيمة مخزَّنة منذ البداية ولم تكن تُعرض
                             echo esc_html($sch_by > 0 ? (get_userdata($sch_by)->display_name ?? '—') : '—');

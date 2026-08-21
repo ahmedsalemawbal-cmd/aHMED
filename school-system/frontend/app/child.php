@@ -20,16 +20,33 @@ $thread   = SCH_App::day_thread($id);
 $first    = $student->first_name ?: SCH_Enrollment::full_name($student);
 $class    = SCH_Students::current_class($id);
 
-// نوع البطل: حالة واحدة تُقرأ في لحظة.
+/*
+ * نوع البطل: حالة واحدة تُقرأ في لحظة.
+ *
+ * والباص لا يكون بطلًا لمجرّد أن رحلةً تجري على مساره.
+ *
+ * كان الشرط `elseif ($trip)`، و`$trip` تُبنى من **أيّ رحلةٍ جارية على مسار
+ * الطفل** بصرف النظر عن صعوده — فيرى الأب «في الباص · لم يُسجَّل صعوده بعد»
+ * وابنه نائمٌ في بيته لأنه مريض، أو خرج مبكرًا مع أمّه. والعبرة أن سطر
+ * الحالة الأوّل في التطبيق يجب أن يقول أين الطفل **هو** لا أين باصُه.
+ *
+ * والمعيار عهدةُ الطفل نفسه: `on_bus`، أو حدثُ صعودٍ مسجَّل في هذه الرحلة.
+ */
+$sch_on_bus = $student->custody_state === 'on_bus'
+           || ($trip && ($trip['state'] ?? null) === 'board');
+
 if ($leave) {
     $hero = 'home';
-} elseif ($trip) {
+} elseif ($sch_on_bus) {
     $hero = 'bus';
 } elseif ($student->custody_state === 'at_school') {
     $hero = 'school';
 } else {
     $hero = 'home';
 }
+
+// ورحلةٌ تجري ولم يصعد بعد: خبرٌ نافع في سطرٍ ثانٍ لا بطلٌ يكذب.
+$sch_bus_coming = !$sch_on_bus && $trip && ($trip['state'] ?? null) === null;
 ?>
 
 <?php
@@ -57,6 +74,11 @@ $sch_detail = match ($hero) {
     'school' => $today['attendance'] ? __('سُجّل دخوله وحضوره مؤكّد', 'school-system') : __('سُجّل دخوله من البوابة', 'school-system'),
     default  => $leave ? __('الباص لا ينتظره اليوم — أُبلغت المدرسة', 'school-system') : __('خارج عهدة المدرسة الآن', 'school-system'),
 };
+
+// وباصٌ في الطريق ولم يصعد بعد: خبرٌ نافع يُقال بلا أن يدّعي أنه فيه.
+if ($sch_bus_coming) {
+    $sch_detail = __('الباص في الطريق — لم يُسجَّل صعوده بعد', 'school-system');
+}
 ?>
 <div class="p-hero p-hero--<?php echo esc_attr($hero); ?>">
     <div class="p-hero__who">
@@ -79,7 +101,7 @@ $sch_detail = match ($hero) {
 
         <?php /* زرّ التتبّع داخل بطاقة البطل لحالة الباص وحدها: هو الفعل
                  الوحيد الذي يعني شيئًا وابنك على الطريق. */ ?>
-        <?php if ($hero === 'bus') : ?>
+        <?php if ($hero === 'bus' || $sch_bus_coming) : ?>
             <a class="p-hero__go p-tap" href="<?php echo esc_url(SCH_App::url('track', $id)); ?>">
                 <?php echo sch_icon('pin', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                 <?php esc_html_e('تتبّع الباص', 'school-system'); ?>
@@ -89,7 +111,7 @@ $sch_detail = match ($hero) {
 
     <div class="p-hero__foot">
         <span><?php echo esc_html($sch_detail); ?></span>
-        <em><?php echo esc_html(sprintf(/* translators: %s: وقت */ __('آخر تحديث %s', 'school-system'), wp_date('H:i', strtotime((string) ($student->custody_at ?: sch_now()))))); ?></em>
+        <em><?php echo esc_html(sprintf(/* translators: %s: وقت */ __('آخر تحديث %s', 'school-system'), mysql2date('H:i', (string) ($student->custody_at ?: sch_now())))); ?></em>
     </div>
 </div>
 

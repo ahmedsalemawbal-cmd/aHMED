@@ -60,7 +60,9 @@ final class SCH_Notes
             return sch_api_error('body_required', __('اكتب سطرًا واحدًا محددًا — القالب الجاهز يفقد قيمته من المرة الثالثة.', 'school-system'), 422);
         }
 
-        [$label, $route, $push] = self::CATEGORIES[$category];
+        // `$push` لم يعد يُقرأ هنا: التصنيفان اللذان يدفعان إشعارًا لا يمرّان
+        // بوليّ الأمر أصلًا — بل بالأخصائية أو العيادة، ومنهما `contact_parent()`.
+        [$label, $route] = self::CATEGORIES[$category];
 
         $wpdb->insert(sch_table('student_notes'), [
             'student_id'     => $student_id,
@@ -77,15 +79,30 @@ final class SCH_Notes
         $note_id = (int) $wpdb->insert_id;
         $name    = SCH_Enrollment::full_name($student);
 
-        // الإيجابي والمشاركة يذهبان مباشرة لخط ولي الأمر — صامتين بلا مرور بالأخصائية.
-        foreach (SCH_Guardians::of_student($student_id) as $g) {
-            SCH_Comms::notify(
-                (int) $g->user_id,
-                $push ? __('ملاحظة تحتاج متابعة', 'school-system') : $label,
-                $push ? sprintf('%s — %s', $name, $body) : $body,
-                $push ? 'note' : 'note_silent',
-                $student_id
-            );
+        /*
+         * الإيجابي والمشاركة وحدهما يذهبان لخط ولي الأمر — صامتين.
+         *
+         * وكانت الحلقة **بلا شرط**، فالتصنيفان الآخران يصلان الأب أيضًا:
+         * «يحتاج متابعة» تصله بعنوانها وبنصّ المعلم الخام (`$push = true`)،
+         * و«صحي» تصله كذلك. وهذا نقضٌ لثلاث قواعد في `CLAUDE.md` معًا:
+         * **المعلم لا يراسل وليّ الأمر أبدًا** · الأخصائية الصوت الوحيد في
+         * السلوكي · والعيادة الصوت الوحيد في الصحي. ودليل النيّة موجود في
+         * الشفرة نفسها: خيط اليوم في تطبيق الأسرة يُصفّي
+         * `category IN ('positive','participation')` عمدًا.
+         *
+         * والتصنيفان الآخران يبلغان الأب من بابهما: `contact_parent()` بعد
+         * أن تقرّر الأخصائية أو العيادة ماذا يُقال.
+         */
+        if ($route === 'none') {
+            foreach (SCH_Guardians::of_student($student_id) as $g) {
+                SCH_Comms::notify(
+                    (int) $g->user_id,
+                    $label,
+                    $body,
+                    'note_silent',
+                    $student_id
+                );
+            }
         }
 
         self::check_repeats($student_id, $category);

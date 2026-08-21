@@ -221,8 +221,8 @@ $sch_last = $sch_rows === [] ? 0 : (int) end($sch_rows);
         <?php foreach ($exams as $e) : ?>
             <div class="p-row">
                 <span class="p-date">
-                    <b><?php echo esc_html(wp_date('j', strtotime((string) $e->exam_date))); ?></b>
-                    <em><?php echo esc_html(wp_date('M', strtotime((string) $e->exam_date))); ?></em>
+                    <b><?php echo esc_html(mysql2date('j', (string) $e->exam_date)); ?></b>
+                    <em><?php echo esc_html(mysql2date('M', (string) $e->exam_date)); ?></em>
                 </span>
                 <span class="p-row__t">
                     <b><?php echo esc_html((string) $e->title); ?></b>

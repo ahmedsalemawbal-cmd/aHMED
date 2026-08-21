@@ -9,14 +9,24 @@ $student = SCH_Students::get($id);
 
 if (!$student) { require SCH_PATH . 'frontend/app/home.php'; return; }
 
-$health = SCH_Enrollment::health($id);
-$meds   = SCH_Medication::of_student($id);
-$visits = SCH_Clinic::of_student($id);
+/*
+ * `SCH_App::child_health()` لا `SCH_Enrollment::health()`.
+ *
+ * الثانية أوّل سطرٍ فيها `if (!current_user_can('sch_view_health')) return null;`
+ * — **ووليّ الأمر لا يملك هذه القدرة ولا يجوز أن يملكها**: قاعدة المشروع أن
+ * السجلّ الصحّي للمدير والعيادة، وأن الأب يرى منه **الحساسية وفصيلة الدم
+ * فقط**. فكانت `$health` تُرجع `null` دائمًا وتُعرض لافتة **«لا حساسية
+ * مسجّلة» خضراء لكل طفل** — ولو كان مصابًا بحساسية مسجَّلة في ملفّه.
+ * والدالّة الصحيحة مبنيّة منذ v2.2 ولا تُنادى من مكانٍ واحد.
+ */
+$sch_health = SCH_App::child_health($id);
+$meds       = SCH_Medication::of_student($id);
+$visits     = SCH_Clinic::of_student($id);
 
 /* تُقرأ مرّة هنا لأنها تحكم أيّ لافتة تُعرض أعلى الشاشة، والعرض بعدها
    يطبعها كما هي — فلا يُعاد حساب الشرط في ثلاثة مواضع. */
-$sch_allergy = trim((string) ($health->allergies ?? ''));
-$sch_blood   = trim((string) ($health->blood_type ?? ''));
+$sch_allergy = trim((string) ($sch_health['allergies'] ?? ''));
+$sch_blood   = trim((string) ($sch_health['blood_type'] ?? ''));
 
 /* نغمة حبّة الإذن تُشتق من `SCH_Medication::STATUSES` نفسها لا من اسم
    مخترَع: الحالات أربع (`active` · `pending` · `ended` · `rejected`)
@@ -67,16 +77,15 @@ $sch_today = wp_date('Y-m-d');
     </div>
 <?php endif; ?>
 
-<?php if (!empty($health->chronic)) : ?>
-    <div class="p-flag p-flag--warn">
-        <span class="p-flag__i"><?php echo sch_icon('heart', 22); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-        <span class="p-flag__t">
-            <b><?php esc_html_e('أمراض مزمنة', 'school-system'); ?></b>
-            <span><?php echo esc_html((string) $health->chronic); ?></span>
-        </span>
-    </div>
-<?php endif; ?>
-
+<?php
+/*
+ * لا لافتة «أمراض مزمنة» هنا.
+ *
+ * وليّ الأمر يرى من السجلّ الصحّي **الحساسية وفصيلة الدم فقط** — قاعدة
+ * المشروع منذ v2.2 — و`child_health()` لا تُرجع غيرهما. فالكتلة التي كانت
+ * تقرأ `$health->chronic` لم تكن لتظهر أبدًا، وظهورها لو ظهر خرقٌ للقاعدة.
+ */
+?>
 <div class="p-vit">
     <div class="p-vit__c">
         <span class="p-vit__k"><?php esc_html_e('فصيلة الدم', 'school-system'); ?></span>

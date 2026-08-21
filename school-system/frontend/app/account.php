@@ -188,15 +188,21 @@ $sch_kids = (array) ($sch_data['children'] ?? []);
 
             <div class="p-field">
                 <label for="p-cur"><?php esc_html_e('الحالية', 'school-system'); ?></label>
-                <input class="p-in" id="p-cur" type="password" name="current" required autocomplete="current-password">
+                <?php /* الأسماء كما يقرؤها `SCH_App::change_password()` حرفًا بحرف:
+                         كانت `current`/`new`/`confirm` والمعالج يقرأ
+                         `current_password`/… — فالثلاثة تصل فارغة،
+                         و`wp_check_password('', …)` تفشل، فيُعاد المستخدم
+                         بـ`?err=wrong_current` **ولا شاشةَ تقرؤه**. فتغيير
+                         كلمة المرور مستحيلٌ بلا رسالةٍ تقول لماذا. */ ?>
+                <input class="p-in" id="p-cur" type="password" name="current_password" required autocomplete="current-password">
             </div>
             <div class="p-field">
                 <label for="p-new"><?php esc_html_e('الجديدة', 'school-system'); ?></label>
-                <input class="p-in" id="p-new" type="password" name="new" required minlength="8" autocomplete="new-password">
+                <input class="p-in" id="p-new" type="password" name="new_password" required minlength="8" autocomplete="new-password">
             </div>
             <div class="p-field">
                 <label for="p-cnf"><?php esc_html_e('تأكيدها', 'school-system'); ?></label>
-                <input class="p-in" id="p-cnf" type="password" name="confirm" required minlength="8" autocomplete="new-password">
+                <input class="p-in" id="p-cnf" type="password" name="confirm_password" required minlength="8" autocomplete="new-password">
             </div>
 
             <button class="p-btn p-btn--brand p-tap"><?php esc_html_e('حفظ', 'school-system'); ?></button>
