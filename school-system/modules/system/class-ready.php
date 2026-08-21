@@ -42,7 +42,8 @@ final class SCH_Ready
             self::backup(),
             self::channels(),
             self::essentials(),
-            self::hosting()
+            self::hosting(),
+            self::growth()
         );
     }
 
@@ -266,6 +267,49 @@ final class SCH_Ready
         }
 
         return $out;
+    }
+
+    /**
+     * ما ينمو بلا حدّ — يُرى قبل أن يوقف شيئًا.
+     *
+     * الإشعارات وطابور التسليم يتراكمان بلا حذف، والتقليم الليليّ يذيبهما.
+     * لكن **إن توقّف الكرون توقّف التقليم معه** — فينتفخ الجدولان بصمت حتى
+     * تفشل نسخةٌ احتياطية في اللحظة التي يُحتاج فيها إليها. والعدّ هنا هو
+     * ما يجعل ذلك مرئيًّا.
+     */
+    private static function growth(): array
+    {
+        global $wpdb;
+
+        $t = sch_table('notifications');
+
+        if ((string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $t)) !== $t) {
+            return [];
+        }
+
+        $rows = (int) $wpdb->get_var("SELECT COUNT(*) FROM `{$t}`");
+
+        // العتبة من الواقع لا من الذوق: مدرسةٌ بأربعمئة طالب تُنتج نحو
+        // ٤٣٠ ألف صفٍّ في السنة، والتقليم يُبقيها دون ذلك بكثير. فتجاوزُ
+        // النصف مليون يعني أن التقليم لم يعمل منذ مدّة.
+        $high = $rows > 500000;
+
+        return [[
+            'key'    => 'growth',
+            'level'  => $high ? 'warn' : 'ok',
+            'title'  => $high
+                ? __('جدول الإشعارات منتفخ', 'school-system')
+                : __('حجم البيانات طبيعيّ', 'school-system'),
+            'detail' => sprintf(
+                /* translators: %s: عدد الصفوف */
+                __('%s إشعارًا مخزَّنًا.', 'school-system'),
+                number_format_i18n($rows)
+            ) . ' ' . ($high
+                ? __('التقليم الليليّ لا يعمل غالبًا — تحقّق من الحارس الآليّ أعلاه. والانتفاخ يُبطئ النسخ الاحتياطي وقد يُفشله.', 'school-system')
+                : __('يُقلَّم القديم كل ليلة تلقائيًّا.', 'school-system')),
+            'url'    => '',
+            'cta'    => '',
+        ]];
     }
 
     /** ما يخصّ الاستضافة: المساحة والاتّصال الآمن. */

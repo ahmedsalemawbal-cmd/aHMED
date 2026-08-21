@@ -2122,11 +2122,35 @@ final class SCH_Dashboard
             return ['msg' => __('الملف سليم. أعد الرفع مع تفعيل «تأكيد الاستيراد» لإتمام العملية.', 'school-system')];
         }
 
-        return ['msg' => sprintf(
-            /* translators: %d: عدد الطلاب */
-            __('اُستورد %d طالبًا.', 'school-system'),
-            $result['imported']
-        )];
+        /*
+         * النقص يُقال مع النجاح لا يُخفى خلفه.
+         *
+         * «اُستورد ٤٠٠ طالبًا» وحدها تُطمئن، بينما اثنا عشر منهم بلا وليّ
+         * أمر — أي بلا إشعار ولا تطبيق ولا من يستلمهم عند البوابة. ويُكتشف
+         * ذلك بعد أسبوع حين لا تصل الرسائل.
+         */
+        $orphans = (int) ($result['orphans'] ?? 0);
+
+        $msg = sprintf(
+            /* translators: %s: عدد الطلاب */
+            __('اُستورد %s طالبًا.', 'school-system'),
+            number_format_i18n((int) $result['imported'])
+        );
+
+        if ($orphans > 0) {
+            $msg .= ' ' . sprintf(
+                /* translators: %s: عدد الطلاب بلا وليّ أمر */
+                _n(
+                    'وواحدٌ منهم بلا وليّ أمر — راجعه في شاشة الطلاب.',
+                    'و%s منهم بلا وليّ أمر — راجعهم في شاشة الطلاب.',
+                    $orphans,
+                    'school-system'
+                ),
+                number_format_i18n($orphans)
+            );
+        }
+
+        return ['msg' => $msg];
     }
 
     // ---------- معالجات الوحدات ----------

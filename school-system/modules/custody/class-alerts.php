@@ -50,6 +50,16 @@ final class SCH_Alerts
         // ويُطلَق إنذار «بقي في الباص» كاذبًا كل يوم.
         add_action(self::HOOK_NIGHTLY, ['SCH_Custody', 'nightly_reset']);
 
+        /*
+         * التقليم مع الكنسة الليلية.
+         *
+         * الإشعارات وطابور التسليم ينموان بلا حدّ: ٤٠٠ طالب × وليّا أمر ×
+         * ٣ يوميًّا × ١٨٠ يومًا ≈ **٤٣٠ ألف صفّ في السنة**. ولا يُرى ذلك
+         * بأربعة طلاب — ويُرى حين تفشل نسخةٌ احتياطية لأنها تكتب كل صفّ
+         * منها في الأرشيف.
+         */
+        add_action(self::HOOK_NIGHTLY, ['SCH_Retention', 'sweep']);
+
         if (!wp_next_scheduled(self::HOOK_NIGHTLY)) {
             $local_2am = strtotime('tomorrow 02:00:00', current_time('timestamp'));
             $gmt_ts    = $local_2am - (int) (get_option('gmt_offset') * HOUR_IN_SECONDS);

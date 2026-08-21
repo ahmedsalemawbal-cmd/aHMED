@@ -208,6 +208,7 @@ final class SCH_Import
 
         $wpdb->query('START TRANSACTION');
         $imported = 0;
+        $orphans  = 0;   // طلابٌ لم يُربَط بهم وليّ أمر
 
         foreach ($rows as $row) {
             $created = SCH_Students::create([
@@ -224,24 +225,44 @@ final class SCH_Import
             }
 
             $imported++;
-            self::attach_guardian($row, (int) $created['id']);
+
+            /*
+             * ربطُ وليّ الأمر **يُعَدّ ولا يُسقط الاستيراد**.
+             *
+             * جوّالٌ خاطئ في صفٍّ واحد لا يجوز أن يرفض أربعمئة طالب — وهذا
+             * سبب ألّا يكون فشلُه خطأً. لكنه كان يُبتلَع تمامًا: يُستورَد
+             * الكشف ويُقال «تمّ ٤٠٠» **ولا يعرف أحد أن اثني عشر منهم بلا
+             * وليّ أمر** — أي بلا إشعار ولا تطبيق ولا من يستلمهم عند
+             * البوابة. فيُكتشف الأمر بعد أسبوع حين لا تصل الرسائل.
+             *
+             * فصار يُعَدّ ويُقال في نتيجة الاستيراد نفسها.
+             */
+            if (!self::attach_guardian($row, (int) $created['id'])) {
+                $orphans++;
+            }
         }
 
         $wpdb->query('COMMIT');
-        sch_audit('import.students', null, null, ['count' => $imported]);
+        sch_audit('import.students', null, null, ['count' => $imported, 'orphans' => $orphans]);
 
-        return ['ok' => true, 'imported' => $imported, 'errors' => []];
+        return ['ok' => true, 'imported' => $imported, 'orphans' => $orphans, 'errors' => []];
     }
 
-    private static function attach_guardian(array $row, int $student_id): void
+    /**
+     * ربط وليّ الأمر بالطالب.
+     *
+     * @return bool هل تمّ الربط؟ — الفشل يُعَدّ في نتيجة الاستيراد لا يُبتلَع
+     */
+    private static function attach_guardian(array $row, int $student_id): bool
     {
         global $wpdb;
 
         $phone = sch_normalize_phone($row['guardian_phone'] ?? '');
         $name  = $row['guardian_name'] ?? '';
 
+        // لا بيانات وليّ أمر في الصفّ أصلًا — وهو نقصٌ يُعَدّ كغيره.
         if ($phone === '' || $name === '') {
-            return;
+            return false;
         }
 
         // ولي أمر موجود؟ اربطه. غير موجود؟ أنشئه.
@@ -252,13 +273,19 @@ final class SCH_Import
 
         if ($user_id === 0) {
             $created = SCH_Guardians::create(['full_name' => $name, 'phone' => $phone]);
+
             if (is_wp_error($created)) {
-                return;
+                return false;
             }
+
             $user_id = (int) $created['user_id'];
         }
 
-        SCH_Guardians::link($user_id, $student_id, self::normalize_relation($row['relation'] ?? ''), true);
+        // `link()` تُرجع `bool|WP_Error` — والخطأ فشلٌ لا نجاح، ومقارنةٌ
+        // بـ`!== false` وحدها تعدّه ربطًا تمّ.
+        $linked = SCH_Guardians::link($user_id, $student_id, self::normalize_relation($row['relation'] ?? ''), true);
+
+        return $linked === true;
     }
 
     private static function normalize_stage(string $raw): ?string

@@ -51,6 +51,7 @@ final class SCH_Loader
         require_once SCH_PATH . 'modules/learning/class-homework.php';
         require_once SCH_PATH . 'modules/system/class-backup.php';
         require_once SCH_PATH . 'modules/system/class-ready.php';
+        require_once SCH_PATH . 'modules/system/class-retention.php';
         require_once SCH_PATH . 'modules/comms/class-push.php';
         require_once SCH_PATH . 'includes/class-files.php';
         require_once SCH_PATH . 'includes/class-brand.php';
