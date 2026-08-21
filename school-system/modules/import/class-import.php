@@ -189,7 +189,13 @@ final class SCH_Import
 
             $stage = self::normalize_stage($row['stage'] ?? '');
             if ($stage === null && ($row['stage'] ?? '') !== '') {
-                $errors[] = sprintf(__('السطر %d: المرحلة غير معروفة (رياض أطفال / ابتدائي / متوسط / ثانوي).', 'school-system'), $line);
+                // القائمة تُبنى من المفردة نفسها — فلا تتقادم مع أوّل مرحلةٍ تُضاف.
+                $errors[] = sprintf(
+                    /* translators: 1: رقم السطر 2: أسماء المراحل */
+                    __('السطر %1$d: المرحلة غير معروفة (%2$s).', 'school-system'),
+                    $line,
+                    implode(' / ', SCH_Classes::STAGES)
+                );
             }
 
             $phone = $row['guardian_phone'] ?? '';
@@ -288,15 +294,34 @@ final class SCH_Import
         return $linked === true;
     }
 
+    /**
+     * اسم المرحلة كما تُكتب في نور ← مفتاحها في النظام.
+     *
+     * **كانت تعرف أربعًا والنظام صار ستًّا** بعد توحيد المفردة في v10.10:
+     * فطالبُ حضانةٍ أو تمهيديٍّ يُردّ بـ«المرحلة غير معروفة» من نور ومن ملفّ
+     * Excel معًا — والمرحلتان مفتوحتان في شاشة الشعب.
+     *
+     * والمفاتيح تُقبل كما هي، والأسماء العربية بمرادفاتها المكتوبة فعلًا.
+     */
     private static function normalize_stage(string $raw): ?string
     {
         $map = [
-            'رياض أطفال' => 'kg', 'روضة' => 'kg', 'kg' => 'kg',
-            'ابتدائي' => 'primary', 'primary' => 'primary',
-            'متوسط' => 'intermediate', 'intermediate' => 'intermediate',
-            'ثانوي' => 'secondary', 'secondary' => 'secondary',
+            'الحضانة' => 'nursery', 'حضانة' => 'nursery',
+            'رياض أطفال' => 'kg', 'روضة' => 'kg', 'الروضة' => 'kg',
+            'التمهيدي' => 'prep', 'تمهيدي' => 'prep',
+            'ابتدائي' => 'primary', 'الابتدائي' => 'primary',
+            'متوسط' => 'intermediate', 'المتوسط' => 'intermediate',
+            'ثانوي' => 'secondary', 'الثانوي' => 'secondary',
         ];
-        return $map[trim($raw)] ?? null;
+
+        $one = trim($raw);
+
+        // المفتاح نفسه يُقبل — والجسر قد يُرسله من عمودٍ نُسخ من النظام.
+        if (array_key_exists($one, SCH_Classes::STAGES)) {
+            return $one;
+        }
+
+        return $map[$one] ?? null;
     }
 
     private static function normalize_relation(string $raw): string

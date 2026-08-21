@@ -619,6 +619,11 @@ final class SCH_Dashboard
             self::send_template();
         }
 
+        // الشاشة التي تُصدر المفتاح تُعطي الإضافة التي يُلصَق فيها.
+        if ($section === 'import' && isset($_GET['sch_bridge_zip'])) {
+            SCH_Bridge::download();
+        }
+
         if ($section === 'students' && isset($_GET['sch_file'])) {
             self::send_private_file(absint($_GET['sch_file']), $id);
         }

@@ -51,6 +51,41 @@ $errors = is_array($errors) ? $errors : [];
     <?php esc_html_e('إضافة متصفح تقرأ الجدول المعروض أمامك في نور وترسله هنا. تقرأ ولا تكتب، وتعمل بضغطتك لا في الخلفية.', 'school-system'); ?>
 </p>
 
+<?php
+/*
+ * الإضافة والمفتاح في بطاقةٍ واحدة.
+ *
+ * كانت الشاشة تُصدر مفتاحًا وتقول «الصقه في الإضافة داخل المتصفح» — **ولا
+ * إضافة**: نصفُ ميزةٍ تدعو المستخدم إليها ثم لا تُعطيه بابًا. والحزمة
+ * تُبنى في الطلب من ملفّات النسخة المثبَّتة، فلا تتباعد عمّا يفهمه الخادم.
+ */
+?>
+<div class="sch-card">
+    <div class="sch-head__acts">
+        <span class="sch-ex__savedt">
+            <b><?php esc_html_e('إضافة المتصفح', 'school-system'); ?></b>
+            <span><?php esc_html_e('كروم أو إيدج أو فايرفوكس — على جهاز من يستورد.', 'school-system'); ?></span>
+        </span>
+        <a class="sch-btn" href="<?php echo esc_url(add_query_arg('sch_bridge_zip', 1, SCH_Dashboard::url('import'))); ?>">
+            <?php esc_html_e('تنزيل الإضافة', 'school-system'); ?>
+        </a>
+    </div>
+
+    <ol class="sch-sub sch-mt">
+        <li><?php esc_html_e('فُكّ الضغط عن الملف في مجلّد ثابت لا يُحذف.', 'school-system'); ?></li>
+        <li><?php esc_html_e('افتح chrome://extensions ← فعّل «وضع المطوّر» ← «تحميل غير محزومة» ← اختر المجلّد.', 'school-system'); ?></li>
+        <li><?php esc_html_e('افتح الإضافة، والصق رابط المدرسة والمفتاح أدناه، ثم اضغط «تحقّق واربط».', 'school-system'); ?></li>
+    </ol>
+
+    <p class="sch-sub">
+        <?php echo esc_html(sprintf(
+            /* translators: %s: رابط المدرسة */
+            __('رابط مدرستك: %s', 'school-system'),
+            home_url()
+        )); ?>
+    </p>
+</div>
+
 <?php $sch_cred = SCH_Dashboard::pull_bridge_key(); ?>
 <?php if ($sch_cred) : ?>
     <!-- يُعرض مرة واحدة: المفتاح مخزَّن مجزّأً ولا يمكن استرجاعه -->

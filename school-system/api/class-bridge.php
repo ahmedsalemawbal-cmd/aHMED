@@ -113,6 +113,76 @@ final class SCH_Bridge
         return self::keys();
     }
 
+    // ---------- تنزيل الإضافة ----------
+
+    /**
+     * حزمة الإضافة — **تُبنى في الطلب من الملفّات المثبَّتة**.
+     *
+     * لا ملفٌّ جاهز يُرسَل بالبريد ويُنسى مع أوّل تحديث: الحزمة تخرج دائمًا
+     * مطابقةً للنسخة العاملة على الخادم، فلا تتباعد إضافةُ الوكيل عن
+     * نقطتَي `ping` و`import` اللتين تتحدّثان معها.
+     *
+     * والشاشة التي تُعطي المفتاح هي التي تُعطي الإضافة — والمفتاح وحده بلا
+     * إضافةٍ ورقةٌ لا تُلصق في شيء.
+     */
+    public static function download(): never
+    {
+        if (!current_user_can('sch_manage_students')) {
+            status_header(403);
+            exit;
+        }
+
+        $dir = SCH_PATH . 'bridge';
+
+        if (!class_exists('ZipArchive') || !is_dir($dir)) {
+            status_header(500);
+            echo esc_html__('تعذّر تجهيز الحزمة — الخادم لا يدعم ZipArchive.', 'school-system');
+            exit;
+        }
+
+        $tmp = wp_tempnam('sch-bridge');
+        $zip = new ZipArchive();
+
+        if ($tmp === '' || $zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            status_header(500);
+            echo esc_html__('تعذّر تجهيز الحزمة.', 'school-system');
+            exit;
+        }
+
+        $walk = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+        $n    = 0;
+
+        foreach ($walk as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            // المسار داخل الحزمة نسبيّ — فتُفَكّ في مجلّدٍ واحد يُحمَّل كما هو.
+            $zip->addFile($file->getPathname(), 'osool-noor-bridge/' . str_replace('\\', '/', substr($file->getPathname(), strlen($dir) + 1)));
+            $n++;
+        }
+
+        $zip->close();
+
+        if ($n === 0 || !is_readable($tmp)) {
+            @unlink($tmp);
+            status_header(500);
+            echo esc_html__('الحزمة فارغة — راجع تثبيت الإضافة.', 'school-system');
+            exit;
+        }
+
+        sch_audit('bridge.downloaded', 'user', get_current_user_id(), ['files' => $n]);
+
+        nocache_headers();
+        header('Content-Type: application/zip');
+        header('Content-Length: ' . (string) filesize($tmp));
+        header('Content-Disposition: attachment; filename="osool-noor-bridge.zip"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($tmp);
+        @unlink($tmp);
+        exit;
+    }
+
     // ---------- التحقق ----------
 
     private static function verify(WP_REST_Request $req): int|WP_Error

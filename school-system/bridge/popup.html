@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>أُصول — الجسر مع نور</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+<header class="hd">
+  <span class="hd__mark" aria-hidden="true"></span>
+  <span class="hd__t">
+    <b>الجسر مع نور</b>
+    <span id="who">غير مربوط بعد</span>
+  </span>
+  <button type="button" id="reset" class="hd__x" hidden title="فكّ الربط" aria-label="فكّ الربط">↺</button>
+</header>
+
+<!-- ① الإعداد -->
+<section id="setup" class="card">
+  <p class="lead">اربط الإضافة بنظام مدرستك مرّة واحدة. المفتاح يُصدَر من
+     <b>الاستيراد ← الجسر</b> في لوحة المدرسة.</p>
+
+  <label class="f" for="site">رابط المدرسة</label>
+  <input id="site" type="url" dir="ltr" placeholder="https://example.com" autocomplete="off">
+
+  <label class="f" for="key">مفتاح الربط</label>
+  <input id="key" type="password" dir="ltr" placeholder="sch_…" autocomplete="off">
+
+  <button type="button" id="verify" class="btn btn--go">تحقّق واربط</button>
+</section>
+
+<!-- ② القراءة -->
+<section id="read" class="card" hidden>
+  <p class="lead">افتح صفحة الجدول في نور، ثم اضغط:</p>
+  <button type="button" id="scan" class="btn btn--go">اقرأ الجدول المعروض</button>
+  <div id="tables" class="list"></div>
+</section>
+
+<!-- ③ المطابقة -->
+<section id="map" class="card" hidden>
+  <div class="ch">
+    <b>طابِق الأعمدة</b>
+    <button type="button" id="back" class="btn btn--sm">رجوع</button>
+  </div>
+  <div id="fields" class="fields"></div>
+  <button type="button" id="check" class="btn btn--go">فحص قبل الاستيراد</button>
+</section>
+
+<!-- ④ النتيجة -->
+<section id="result" class="card" hidden>
+  <div id="note" class="note"></div>
+  <ul id="errors" class="errs"></ul>
+  <div class="row">
+    <button type="button" id="commit" class="btn btn--go" hidden>استيراد نهائي</button>
+    <button type="button" id="again" class="btn">تعديل المطابقة</button>
+  </div>
+</section>
+
+<p class="foot">تقرأ ولا تكتب في نور · ولا تعمل إلا بضغطتك · والمفتاح على هذا الجهاز وحده.</p>
+
+<script src="popup.js"></script>
+</body>
+</html>

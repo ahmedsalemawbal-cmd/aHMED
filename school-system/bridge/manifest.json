@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "أُصول — الجسر مع نور",
+  "version": "1.0.0",
+  "description": "تقرأ الجدول المعروض أمامك في نور وترسله إلى نظام مدرستك. تقرأ ولا تكتب، وتعمل بضغطتك لا في الخلفية.",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_title": "أُصول — الجسر مع نور",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bridge@osool.school",
+      "strict_min_version": "115.0"
+    }
+  }
+}
