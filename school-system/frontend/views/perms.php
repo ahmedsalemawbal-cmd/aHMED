@@ -118,7 +118,7 @@ $applied = $custom ? $map : SCH_Perms::template($role);
     · <?php echo esc_html($custom ? __('صلاحيات مخصصة', 'school-system') : __('يعمل بصلاحيات دوره', 'school-system')); ?>
 </p>
 
-<form method="post" id="sch-perms-form">
+<form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-perms-form">
     <?php wp_nonce_field('sch_save_perms', '_sch_nonce'); ?>
     <input type="hidden" name="sch_action" value="save_perms">
     <?php /* الموظف المعروض يعبر POST: المعالجات الثلاثة تعيد `bool|WP_Error`
@@ -263,7 +263,7 @@ $applied = $custom ? $map : SCH_Perms::template($role);
 <div class="sch-card sch-mt">
     <h2><?php esc_html_e('أدوات سريعة', 'school-system'); ?></h2>
     <div class="sch-toolbar">
-        <form method="post" class="sch-toolbar">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
             <?php wp_nonce_field('sch_copy_perms', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="copy_perms">
             <?php /* الموظف المعروض يعبر POST — انظر التعليق أعلى النموذج الأول. */ ?>
@@ -283,7 +283,7 @@ $applied = $custom ? $map : SCH_Perms::template($role);
             <button class="sch-btn sch-btn--quiet"><?php esc_html_e('نسخ', 'school-system'); ?></button>
         </form>
 
-        <form method="post" onsubmit="return confirm('<?php esc_attr_e('سيعود لصلاحيات دوره الافتراضية. متابعة؟', 'school-system'); ?>');">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('سيعود لصلاحيات دوره الافتراضية. متابعة؟', 'school-system'); ?>');">
             <?php wp_nonce_field('sch_reset_perms', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="reset_perms">
             <?php /* الموظف المعروض يعبر POST — انظر التعليق أعلى النموذج الأول. */ ?>

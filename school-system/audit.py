@@ -788,6 +788,64 @@ if os.path.exists(base_path):
                                    f'فتُحقن قواعد الأساس في مكوّن الداشبورد. غيّر الاسم.')
 
 
+# ---------- مفردة المراحل: قائمةٌ واحدة لا اثنتان ----------
+# `SCH_Classes::STAGES` تقرّر أيّ مرحلةٍ تُنشأ لها شعبة، و`SCH_TT::PRESETS`
+# تقرّر أيّ مرحلةٍ تظهر بطاقةُ إيقاعٍ لها في شاشة الجداول. وافترقتا: الشاشة
+# تعرض «الحضانة» و«التمهيدي» ولا شعبة تُنشأ لهما — فالبطاقتان لا تُضيئان
+# مهما ضُغطتا، والوكيل يظنّ الشاشة معطّلة.
+#
+# ومعهما `SCH_Org::STAGE_MAP` — ومرحلةٌ غائبةٌ عنها تسقط إلى نطاق `none`،
+# أي **لا مشرف مرحلةٍ يراها ولا إشعار يصلها**.
+def _const_keys(src, const):
+    m = re.search(r'public\s+const\s+' + const + r'\s*=\s*\[(.*?)\n    \];', src, re.S)
+    if not m:
+        m = re.search(r'private\s+const\s+' + const + r'\s*=\s*\[(.*?)\n    \];', src, re.S)
+    # المفاتيح العليا وحدها: مفاتيح المصفوفة الداخلية تسكن أعمق في السطر.
+    return set(re.findall(r"^\s{8}'([a-z_]+)'\s*=>", m.group(1), re.M)) if m else None
+
+
+_stages = _const_keys(sources[os.path.join(ROOT, 'modules/academic/class-academic.php')], 'STAGES')
+_presets = _const_keys(sources[os.path.join(ROOT, 'modules/academic/class-tt.php')], 'PRESETS')
+_scoped = _const_keys(sources[os.path.join(ROOT, 'modules/org/class-org.php')], 'STAGE_MAP')
+
+if _stages and _presets and _stages != _presets:
+    add('STAGE_VOCAB', f'SCH_Classes::STAGES و SCH_TT::PRESETS مختلفتان — '
+                       f'زائد في PRESETS: {sorted(_presets - _stages)} · '
+                       f'ناقص منها: {sorted(_stages - _presets)}')
+
+if _stages and _scoped and _stages - _scoped:
+    add('STAGE_VOCAB', f'مراحل بلا نطاق إشراف في SCH_Org::STAGE_MAP: '
+                       f'{sorted(_stages - _scoped)} — تسقط إلى «none» فلا يراها مشرف')
+
+
+# ---------- نموذجُ POST بلا وجهة، وشاشةٌ تحمل حالتها في سطر الاستعلام ----------
+# نموذجٌ بلا `action` يُرسَل إلى الرابط الحاليّ **بسطر استعلامه**. وشاشات
+# الداشبورد تحمل حالتها هناك (`?cls=…&step=…`) وتُرسل الحالة التالية في حقولٍ
+# مخفيّة بالأسماء نفسها — فيصل الطلب وفيه المفتاح مرّتين بقيمتين.
+#
+# وووردبريس يرفض هذا منذ 5.0.1: يُنهي الطلب بـ«تمّ اكتشاف عدم تطابق متغيّر»،
+# صفحةٌ بيضاء بجملةٍ واحدة لا أثر لها في السجلّ. وهو ما كان يُعطّل بطاقات
+# المراحل في شاشة الجداول: البطاقة تُرسل `cls` غير الذي في السطر.
+#
+# فكل نموذج POST في الداشبورد يجب أن يحمل `action` صريحًا.
+VIEWS = os.path.join(ROOT, 'frontend', 'views')
+
+if os.path.isdir(VIEWS):
+    for name in sorted(os.listdir(VIEWS)):
+        if not name.endswith('.php'):
+            continue
+
+        src = open(os.path.join(VIEWS, name), encoding='utf-8').read()
+
+        for tag in re.findall(r'<form[^>]*?method="post"[^>]*?>', src, flags=re.S):
+            if 'action=' not in tag:
+                add('FORM_NO_ACTION',
+                    f'frontend/views/{name}: نموذج POST بلا action — يُرسَل إلى سطر '
+                    f'الاستعلام نفسه، وأيّ حقلٍ باسم مفتاحٍ فيه بقيمةٍ مختلفة يقتل '
+                    f'الطلب بـ«عدم تطابق متغيّر». استعمل '
+                    f'action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>"')
+
+
 if not issues:
     print('✅ لا توجد ملاحظات — كل الفحوص نظيفة.')
     sys.exit(0)

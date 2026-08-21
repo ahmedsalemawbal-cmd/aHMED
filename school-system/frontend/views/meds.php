@@ -33,13 +33,13 @@ $pending = $wpdb->get_results(
             <?php endif; ?>
 
             <div class="sch-toolbar sch-mt">
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_approve_med', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="approve_med">
                     <input type="hidden" name="med_id" value="<?php echo esc_attr((string) $m->id); ?>">
                     <button class="sch-btn"><?php esc_html_e('اعتماد', 'school-system'); ?></button>
                 </form>
-                <form method="post" class="sch-toolbar" onsubmit="return confirm('سيُرفض إذن الدواء ويصل إشعار لولي الأمر. متابعة؟');">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar" onsubmit="return confirm('سيُرفض إذن الدواء ويصل إشعار لولي الأمر. متابعة؟');">
                     <?php wp_nonce_field('sch_reject_med', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="reject_med">
                     <input type="hidden" name="med_id" value="<?php echo esc_attr((string) $m->id); ?>">
@@ -95,7 +95,7 @@ $pending = $wpdb->get_results(
                         </td>
                         <td>
                             <?php if (!$d->given_at) : ?>
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_give_dose', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="give_dose">
                                     <input type="hidden" name="dose_id" value="<?php echo esc_attr((string) $d->id); ?>">

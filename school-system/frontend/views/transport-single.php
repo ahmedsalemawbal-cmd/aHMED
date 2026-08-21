@@ -20,7 +20,7 @@ $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
     <p class="sch-sub"><?php esc_html_e('فتح الرحلة يسمح للسائق بمسح الطلاب من تطبيقه.', 'school-system'); ?></p>
     <div class="sch-toolbar">
         <?php foreach (['morning' => __('رحلة الذهاب', 'school-system'), 'afternoon' => __('رحلة العودة', 'school-system')] as $dir => $label) : ?>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_open_trip', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="open_trip">
                 <input type="hidden" name="route_id" value="<?php echo esc_attr((string) $route->id); ?>">
@@ -53,7 +53,7 @@ $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
                         <td dir="ltr"><?php echo esc_html($s->pickup_time ?: '—'); ?></td>
                         <td dir="ltr" class="sch-sub"><?php echo esc_html($s->lat ? $s->lat . ', ' . $s->lng : '—'); ?></td>
                         <td>
-                            <form method="post" onsubmit="return confirm('<?php esc_attr_e('حذف النقطة؟', 'school-system'); ?>');">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('حذف النقطة؟', 'school-system'); ?>');">
                                 <?php wp_nonce_field('sch_delete_stop', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="delete_stop">
                                 <input type="hidden" name="stop_id" value="<?php echo esc_attr((string) $s->id); ?>">
@@ -67,7 +67,7 @@ $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_stop', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_stop">
         <div class="sch-grid">
@@ -112,7 +112,7 @@ $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
                         <td><?php echo esc_html(trim(($s->grade_level ?: '') . ' ' . ($s->section ?: '')) ?: '—'); ?></td>
                         <td><?php echo esc_html($s->stop_name ?: '—'); ?></td>
                         <td>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_unsubscribe', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="unsubscribe">
                                 <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $s->id); ?>">
@@ -126,7 +126,7 @@ $students = SCH_Students::list(['status' => 'active', 'per_page' => 300]);
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_subscribe', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="subscribe">
         <input type="hidden" name="route_id" value="<?php echo esc_attr((string) $route->id); ?>">

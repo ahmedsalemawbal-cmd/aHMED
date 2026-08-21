@@ -41,7 +41,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
     <p class="sch-sub"><?php esc_html_e('تعديل بيانات الموظف. الصلاحيات لها شاشتها المستقلة.', 'school-system'); ?></p>
 
     <div class="sch-card">
-        <form method="post">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
             <?php wp_nonce_field('sch_update_employee', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="update_employee">
             <input type="hidden" name="employee_id" value="<?php echo esc_attr((string) $sch_edit->id); ?>">
@@ -208,7 +208,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                                     </a>
 
                                     <?php if ($emp->status === 'active') : ?>
-                                        <form method="post" onsubmit="return confirm('<?php esc_attr_e('إيقاف وصول هذا الموظف للنظام؟ لا يُحذف — يمكنك إعادته لاحقًا.', 'school-system'); ?>');">
+                                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('إيقاف وصول هذا الموظف للنظام؟ لا يُحذف — يمكنك إعادته لاحقًا.', 'school-system'); ?>');">
                                             <?php wp_nonce_field('sch_suspend_employee', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="suspend_employee">
                                             <input type="hidden" name="employee_id" value="<?php echo esc_attr((string) $emp->id); ?>">
@@ -218,7 +218,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
                                         </form>
                                     <?php else : ?>
                                         <!-- الموظف يُوقَف لا يُحذف — وإعادته بضغطة لا بإنشاء حساب جديد -->
-                                        <form method="post">
+                                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                             <?php wp_nonce_field('sch_restore_employee', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="restore_employee">
                                             <input type="hidden" name="employee_id" value="<?php echo esc_attr((string) $emp->id); ?>">
@@ -243,7 +243,7 @@ $sch_edit    = $sch_edit_id > 0 ? SCH_Staff::get($sch_edit_id) : null;
 
 
 <?php SCH_Modal::open('sch-add-emp', __('إضافة موظف', 'school-system'), __('بياناته ثم ما يظهر له في النظام', 'school-system')); ?>
-    <form method="post" id="sch-wiz-form" novalidate>
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-wiz-form" novalidate>
         <?php wp_nonce_field('sch_add_employee', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_employee">
 

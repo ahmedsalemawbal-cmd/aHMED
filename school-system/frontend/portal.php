@@ -40,9 +40,7 @@ $school = sch_settings('school_name', get_bloginfo('name'));
     <?php endif; ?>
 
     <link rel="apple-touch-icon" href="<?php echo esc_url(SCH_URL . 'assets/icon-192.png'); ?>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <?php sch_font_link(); ?>
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/parent.css')); ?>">
 </head>
 

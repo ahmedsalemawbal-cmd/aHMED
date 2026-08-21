@@ -42,7 +42,7 @@ $sch_calls = SCH_Pickup::board();
 
                 <div class="sch-call__acts">
                     <?php if ($sch_c->status === 'open') : ?>
-                        <form method="post">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                             <?php wp_nonce_field('sch_pickup_ack', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="pickup_ack">
                             <input type="hidden" name="call_id" value="<?php echo esc_attr((string) $sch_c->id); ?>">
@@ -53,14 +53,14 @@ $sch_calls = SCH_Pickup::board();
                     <?php endif; ?>
 
                     <?php /* التسليم يمرّ بآلة العهدة — فيُرفض إن لم يكن المستلم مخوَّلًا */ ?>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_pickup_done', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="pickup_done">
                         <input type="hidden" name="call_id" value="<?php echo esc_attr((string) $sch_c->id); ?>">
                         <button class="sch-btn"><?php esc_html_e('سُلّم', 'school-system'); ?></button>
                     </form>
 
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_pickup_drop', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="pickup_drop">
                         <input type="hidden" name="call_id" value="<?php echo esc_attr((string) $sch_c->id); ?>">

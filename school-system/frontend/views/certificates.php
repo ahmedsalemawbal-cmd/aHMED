@@ -290,7 +290,7 @@ SCH_Modal::head(
             </span>
         </header>
 
-        <form method="post" class="sch-sugg__form" data-sugg>
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sugg__form" data-sugg>
             <?php wp_nonce_field('sch_issue_certs_bulk', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="issue_certs_bulk">
             <input type="hidden" name="type" value="<?php echo esc_attr($sch_type); ?>">
@@ -495,7 +495,7 @@ $sch_on = array_filter($sch_f);
             __('إلغاء شهادة', 'school-system'),
             (string) $sch_rv->serial . ' · ' . (string) ($sch_rv->name_snapshot ?: $sch_rv->full_name)
         ); ?>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_revoke_cert', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="revoke_cert">
                 <input type="hidden" name="cert_id" value="<?php echo esc_attr((string) $sch_rv->id); ?>">
@@ -523,7 +523,7 @@ $sch_on = array_filter($sch_f);
     <?php /* مدخل واحد لا اثنان: قائمة تختار «طالب واحد» أو «مجموعة»،
              وتُفتح حقول ما اخترته وحدها. الباقي (النوع والعنوان والسبب
              والقالب) مشترك بين الحالتين فلا يُكتب مرتين. */ ?>
-    <form method="post" data-issue-form>
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" data-issue-form>
         <?php /* لكل فعل نونسه — والمعطَّل لا يُرسل، فيصل الخادم نونس الوضع المختار وحده */ ?>
         <span data-when="one"><?php wp_nonce_field('sch_issue_cert', '_sch_nonce'); ?></span>
         <span data-when="many" hidden>

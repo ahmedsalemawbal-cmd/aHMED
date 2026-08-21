@@ -69,7 +69,7 @@ SCH_Modal::head(
     <h2 hidden><?php esc_html_e('تسجيل زيارة', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('يصل إشعار لولي الأمر فور التسجيل.', 'school-system'); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_clinic', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_clinic">
         <div class="sch-grid">

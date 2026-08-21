@@ -69,7 +69,7 @@ SCH_Modal::head(
     <h2 hidden><?php esc_html_e('إضافة ولي أمر', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('رقم الجوال هو اسم الدخول للتطبيق. تظهر كلمة المرور مرة واحدة بعد الحفظ.', 'school-system'); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_guardian', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_guardian">
         <div class="sch-grid">

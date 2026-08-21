@@ -47,7 +47,7 @@ SCH_Modal::head(
                         <td dir="ltr"><?php echo esc_html($v->checked_out ?: '—'); ?></td>
                         <td>
                             <?php if (!$v->checked_out) : ?>
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_check_out', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="check_out">
                                     <input type="hidden" name="visitor_id" value="<?php echo esc_attr((string) $v->id); ?>">
@@ -65,7 +65,7 @@ SCH_Modal::head(
 
 <?php SCH_Modal::open('sch-add-visitor', __('تسجيل دخول زائر', 'school-system'), __('يُسجَّل خروجه بضغطة عند مغادرته', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('تسجيل دخول زائر', 'school-system'); ?></h2>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_check_in', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="check_in">
         <div class="sch-grid">

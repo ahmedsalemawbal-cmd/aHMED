@@ -22,6 +22,13 @@ defined('ABSPATH') || exit;
  */
 final class SCH_Perms
 {
+    /**
+     * ذاكرة الطلب الواحد — `map` و`custom` و`expired` لكل مستخدم.
+     *
+     * @var array<string,mixed>
+     */
+    private static array $memo = [];
+
     /** نطاق البيانات — البُعد الثاني للصلاحية. */
     public const SCOPES = [
         'all'   => 'كل المدرسة',
@@ -77,7 +84,13 @@ final class SCH_Perms
     {
         global $wpdb;
 
-        return (bool) $wpdb->get_var($wpdb->prepare(
+        $key = 'custom|' . $user_id;
+
+        if (isset(self::$memo[$key])) {
+            return (bool) self::$memo[$key];
+        }
+
+        return self::$memo[$key] = (bool) $wpdb->get_var($wpdb->prepare(
             'SELECT 1 FROM ' . sch_table('user_perms') . ' WHERE user_id = %d LIMIT 1',
             $user_id
         ));
@@ -88,10 +101,10 @@ final class SCH_Perms
     {
         global $wpdb;
 
-        static $cache = [];
+        $key = 'map|' . $user_id;
 
-        if (isset($cache[$user_id])) {
-            return $cache[$user_id];
+        if (isset(self::$memo[$key])) {
+            return (array) self::$memo[$key];
         }
 
         $rows = $wpdb->get_results($wpdb->prepare(
@@ -107,7 +120,7 @@ final class SCH_Perms
             ];
         }
 
-        return $cache[$user_id] = $out;
+        return self::$memo[$key] = $out;
     }
 
     /**
@@ -123,6 +136,19 @@ final class SCH_Perms
      * **لكل مستخدم بمن فيهم المدير** — والسببان المكتوبان في `LOCKED`
      * يقولان عكس ذلك حرفًا: «سجل العهدة لا يُعدَّل» و«سجل النظام للقراءة
      * فقط». شاشتان كاملتان كانتا خارج الخدمة.
+     */
+    /*
+     * **تُنادى خمسين مرّة في كل رسمة صفحة** — مرّةً لكل قسمٍ في الشريط
+     * الجانبي (`SCH_Dashboard::groups()`)، ثم مرّةً أخرى لأقسام الإعدادات.
+     * وكانت `is_custom()` و`expired()` تفتحان استعلامًا في كل نداء بلا
+     * ذاكرة: **مئةٌ وستّة وسبعون استعلامًا لرسم الشريط الجانبي وحده**،
+     * قبل أن تُقرأ بيانةٌ واحدة من بيانات الشاشة.
+     *
+     * وكل ضغطة زرٍّ في الداشبورد رسمتان (إرسالٌ ثم تحويلٌ ثم تحميل) — أي
+     * ثلاثمئة واثنان وخمسون. وهذا وحده يفسّر «التحميل يدور ويدور».
+     *
+     * والصلاحيات لا تتغيّر داخل الطلب الواحد، و`save()` تُفرّغ الذاكرة
+     * بنفسها. و`map()` كانت محفوظةً هكذا منذ بُنيت — فالنقص كان في أختيها.
      */
     public static function may(string $section, string $mode = 'view', ?int $user_id = null): bool
     {
@@ -235,10 +261,17 @@ final class SCH_Perms
             return [];
         }
 
+        // والجدول المنشور طرفٌ ثالث: `class_subjects` تُبنى الآن مع النشر،
+        // لكن مدرسةً نشرت جدولها قبل هذه النسخة لا صفوف لها فيه — ونطاقٌ
+        // فارغ يعني معلّمًا لا يرى طالبًا واحدًا. و«فصولي» في تطبيق المعلم
+        // تقرأ الثلاثة منذ v9، فيتّفق البابان.
         $ids = $wpdb->get_col($wpdb->prepare(
             'SELECT id FROM ' . sch_table('classes') . ' WHERE homeroom_teacher_id = %d
              UNION
-             SELECT class_id FROM ' . sch_table('class_subjects') . ' WHERE teacher_user_id = %d',
+             SELECT class_id FROM ' . sch_table('class_subjects') . ' WHERE teacher_user_id = %d
+             UNION
+             SELECT class_id FROM ' . sch_table('timetable') . ' WHERE teacher_user_id = %d',
+            $user_id,
             $user_id,
             $user_id
         ));
@@ -275,16 +308,35 @@ final class SCH_Perms
         global $wpdb;
 
         $user_id ??= get_current_user_id();
+        $key      = 'expired|' . $user_id;
+
+        if (isset(self::$memo[$key])) {
+            return (bool) self::$memo[$key];
+        }
 
         $until = $wpdb->get_var($wpdb->prepare(
             'SELECT expires_at FROM ' . sch_table('user_scope') . ' WHERE user_id = %d',
             $user_id
         ));
 
-        return $until !== null && (string) $until !== '' && (string) $until < current_time('Y-m-d');
+        return self::$memo[$key] = $until !== null && (string) $until !== '' && (string) $until < current_time('Y-m-d');
     }
 
     // ---------- الكتابة ----------
+
+    /**
+     * إسقاط ما حُفظ في ذاكرة الطلب لمستخدم.
+     *
+     * ثلاث ذاكرات ساكنة (`map` · `is_custom` · `expired`) تُملأ عند أوّل
+     * قراءة. وتُفرَّغ عند الكتابة وحدها: القراءة لا تُبطلها، والطلب ينتهي
+     * فتذهب معه.
+     */
+    public static function forget(int $user_id): void
+    {
+        foreach (['map', 'custom', 'expired'] as $kind) {
+            unset(self::$memo[$kind . '|' . $user_id]);
+        }
+    }
 
     /**
      * حفظ صلاحيات موظف.
@@ -312,6 +364,9 @@ final class SCH_Perms
         $before  = self::map($user_id);
         $added   = [];
         $granted = [];
+
+        // ما بعد هذا السطر يقرأ حالةً جديدة — والذاكرة المحفوظة تسبقها.
+        self::forget($user_id);
 
         $wpdb->delete(sch_table('user_perms'), ['user_id' => $user_id]);
 

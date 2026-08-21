@@ -44,7 +44,7 @@ SCH_Modal::head(
                             <?php endif; ?>
                         </td>
                         <td>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_return_book', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="return_book">
                                 <input type="hidden" name="loan_id" value="<?php echo esc_attr((string) $l->id); ?>">
@@ -59,7 +59,7 @@ SCH_Modal::head(
     <?php endif; ?>
 
     <?php if ($books !== []) : ?>
-    <form method="post" class="sch-toolbar sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_loan_book', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="loan_book">
         <select name="book_id" required aria-label="<?php esc_attr_e('الكتاب', 'school-system'); ?>">
@@ -109,7 +109,7 @@ SCH_Modal::head(
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-toolbar sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_add_book', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_book">
         <input type="text" name="title" placeholder="<?php esc_attr_e('العنوان', 'school-system'); ?>" required>

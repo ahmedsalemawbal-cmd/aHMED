@@ -100,7 +100,7 @@ $sch_today_txt = mysql2date('l j F', $sch_date . ' 12:00:00');
 
         <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg('sch_export', '1', $sch_url)); ?>"><?php esc_html_e('تصدير الكشف', 'school-system'); ?></a>
 
-        <form method="post" class="sch-sd__closef">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sd__closef">
             <?php wp_nonce_field('sch_close_staff_day', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="close_staff_day">
             <?php $sch_keep(); ?>
@@ -156,7 +156,7 @@ $sch_today_txt = mysql2date('l j F', $sch_date . ' 12:00:00');
     </div>
 <?php else : ?>
 
-<form method="post" id="sch-sd-form">
+<form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-sd-form">
     <?php wp_nonce_field('sch_mark_staff_bulk', '_sch_nonce'); ?>
     <input type="hidden" name="sch_action" value="mark_staff_bulk">
     <?php $sch_keep(); ?>
@@ -314,7 +314,7 @@ if ($sch_panel && $sch_panel['teacher']) :
                 number_format_i18n($sch_panel['total'])
             )); ?></span>
 
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_cover_auto', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="cover_auto">
                 <input type="hidden" name="teacher_id" value="<?php echo esc_attr((string) $sch_open); ?>">
@@ -360,7 +360,7 @@ if ($sch_panel && $sch_panel['teacher']) :
                         <div class="sch-sd__done">
                             <span class="sch-sd__ok" aria-hidden="true"></span>
                             <span class="sch-sd__donet"><?php echo esc_html((string) $sch_c->substitute_name); ?></span>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_cover_unassign', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="cover_unassign">
                                 <input type="hidden" name="sub_id" value="<?php echo esc_attr((string) $sch_c->sub_id); ?>">
@@ -369,7 +369,7 @@ if ($sch_panel && $sch_panel['teacher']) :
                             </form>
                         </div>
                     <?php elseif ($sch_c->candidates !== []) : ?>
-                        <form method="post" class="sch-sd__pick">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sd__pick">
                             <?php wp_nonce_field('sch_cover_assign', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="cover_assign">
                             <input type="hidden" name="teacher_id" value="<?php echo esc_attr((string) $sch_open); ?>">
@@ -398,7 +398,7 @@ if ($sch_panel && $sch_panel['teacher']) :
 
         <div class="sch-sd__pft">
             <a class="sch-btn sch-btn--block" href="<?php echo esc_url($sch_url); ?>"><?php esc_html_e('اعتماد التغطية', 'school-system'); ?></a>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_cover_notify', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="cover_notify">
                 <input type="hidden" name="teacher_id" value="<?php echo esc_attr((string) $sch_open); ?>">

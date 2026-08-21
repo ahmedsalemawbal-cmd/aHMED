@@ -44,7 +44,7 @@ $slips  = $run ? SCH_Payroll::payslips($run_id) : [];
         </div>
 
         <?php if ($run->status === 'draft') : ?>
-            <form method="post" class="sch-mt" onsubmit="return confirm('<?php esc_attr_e('الترحيل ينشئ قيدًا محاسبيًا ولا يمكن التراجع عنه. متابعة؟', 'school-system'); ?>');">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt" onsubmit="return confirm('<?php esc_attr_e('الترحيل ينشئ قيدًا محاسبيًا ولا يمكن التراجع عنه. متابعة؟', 'school-system'); ?>');">
                 <?php wp_nonce_field('sch_post_payroll', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="post_payroll">
                 <input type="hidden" name="run_id" value="<?php echo esc_attr((string) $run->id); ?>">
@@ -97,7 +97,7 @@ $slips  = $run ? SCH_Payroll::payslips($run_id) : [];
     <h2><?php esc_html_e('توليد مسير', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('يُحسب من العقود النشطة، وتُخصم أيام الإجازة بدون راتب تلقائيًا.', 'school-system'); ?></p>
 
-    <form method="post" class="sch-toolbar">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
         <?php wp_nonce_field('sch_run_payroll', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="run_payroll">
         <select name="period_month" required aria-label="الشهر">

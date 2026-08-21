@@ -80,7 +80,7 @@ if ($one > 0) {
                         </td>
                         <td>
                             <?php if ($r->sub_id) : ?>
-                                <form method="post" class="sch-toolbar">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
                                     <?php wp_nonce_field('sch_grade_homework', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="grade_homework">
                                     <input type="hidden" name="sub_id" value="<?php echo esc_attr((string) $r->sub_id); ?>">
@@ -177,7 +177,7 @@ $past     = $class_id > 0 ? SCH_Homework::for_class($class_id, false) : [];
 <?php SCH_Modal::open('sch-add-hw', __('واجب جديد', 'school-system'), __('يظهر في تطبيق الطالب فور نشره', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('واجب جديد', 'school-system'); ?></h2>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" enctype="multipart/form-data">
         <?php wp_nonce_field('sch_add_homework', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_homework">
 

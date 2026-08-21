@@ -19,7 +19,7 @@ $val = static fn (string $k, string $def): string => (string) ($s[$k] ?? '') !==
             <p><?php esc_html_e('من تجاوز الموعد + دقائق التسامح يُسجَّل «متأخرًا» عند المسح تلقائيًا.', 'school-system'); ?></p>
         </div>
     </header>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_save_timing', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="save_timing">
         <div class="sch-grid">
@@ -44,7 +44,7 @@ $val = static fn (string $k, string $def): string => (string) ($s[$k] ?? '') !==
             <p><?php esc_html_e('حدود الحارس الآلي: متى يُنبَّه على من لم يصعد الباص، أو لم يدخل، أو لم يُرصد حضوره.', 'school-system'); ?></p>
         </div>
     </header>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_save_alerts', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="save_alerts">
         <div class="sch-grid">

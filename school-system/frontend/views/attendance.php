@@ -173,7 +173,7 @@ $sch_last_at = $sch_last
         <?php else : ?>
             <?php /* نموذج واحد لكل الكشف: كل زرّ يحمل حالته باسمه وقيمته،
                      فلا يُرسَل إلا ما ضُغط عليه — والمعالج القائم يقرأه كما هو. */ ?>
-            <form method="post" id="sch-gate-form">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-gate-form">
                 <?php wp_nonce_field('sch_mark_attendance', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="mark_attendance">
                 <input type="hidden" name="att_date" value="<?php echo esc_attr($sch_date); ?>">
@@ -281,7 +281,7 @@ $sch_last_at = $sch_last
             </div>
 
             <?php /* فعل لا رجعة فيه: يكتب غيابًا على كل من لم يُرصد ويُبلغ أهلهم. */ ?>
-            <form method="post" onsubmit="return confirm('<?php esc_attr_e('سيُسجَّل غياب كل من لم تُقرأ بطاقته اليوم ويصل أهلهم إشعار. لا رجعة. متابعة؟', 'school-system'); ?>');">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('سيُسجَّل غياب كل من لم تُقرأ بطاقته اليوم ويصل أهلهم إشعار. لا رجعة. متابعة؟', 'school-system'); ?>');">
                 <?php wp_nonce_field('sch_close_attendance', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="close_attendance">
                 <button type="submit" class="sch-gate__close" <?php disabled($sch_n['none'], 0); ?>>

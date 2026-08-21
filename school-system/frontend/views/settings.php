@@ -33,7 +33,7 @@ $sch_cur = SCH_Years::current();
                     <p><?php esc_html_e('اسم المدرسة ووسائل التواصل والرقم الوزاري.', 'school-system'); ?></p>
                 </div>
             </header>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_save_settings', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="save_settings">
                 <div class="sch-grid">
@@ -63,7 +63,7 @@ $sch_cur = SCH_Years::current();
                 </div>
             </header>
 
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" enctype="multipart/form-data">
                 <?php wp_nonce_field('sch_save_brand', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="save_brand">
 

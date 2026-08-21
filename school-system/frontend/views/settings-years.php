@@ -31,7 +31,7 @@ $years = SCH_Years::all();
                             <?php if ($y->is_current) : ?>
                                 <span class="sch-badge sch-badge--ok"><?php esc_html_e('السنة النشطة', 'school-system'); ?></span>
                             <?php else : ?>
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_set_year', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="set_year">
                                     <input type="hidden" name="year_id" value="<?php echo esc_attr((string) $y->id); ?>">
@@ -46,7 +46,7 @@ $years = SCH_Years::all();
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_year', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_year">
         <div class="sch-grid">

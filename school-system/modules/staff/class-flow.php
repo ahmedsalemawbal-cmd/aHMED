@@ -163,7 +163,7 @@ final class SCH_Flow
                     __('المواد الدراسية', 'school-system'), 'book',
                     __('تُربط بالجدول والدرجات والواجبات', 'school-system'),
                     true, static fn (): bool => SCH_Subjects::all() !== [],
-                    static fn (): string => SCH_Dashboard::url('subjects'),
+                    static fn (): string => add_query_arg('step', 2, SCH_Dashboard::url('timetable')),
                 ],
                 'principal' => [
                     __('مدير المدرسة', 'school-system'), 'user',

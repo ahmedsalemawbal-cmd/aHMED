@@ -31,7 +31,7 @@ $errors = is_array($errors) ? $errors : [];
 
 <div class="sch-card">
     <h2><?php esc_html_e('رفع الملف', 'school-system'); ?></h2>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" enctype="multipart/form-data">
         <?php wp_nonce_field('sch_import_students', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="import_students">
         <div class="sch-field">
@@ -96,7 +96,7 @@ $errors = is_array($errors) ? $errors : [];
                                     : __('لم يُستخدم', 'school-system')); ?>
                             </td>
                             <td>
-                                <form method="post" onsubmit="return confirm('<?php esc_attr_e('إلغاء هذا المفتاح؟ سيتوقف الجهاز عن الإرسال فورًا.', 'school-system'); ?>');">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('إلغاء هذا المفتاح؟ سيتوقف الجهاز عن الإرسال فورًا.', 'school-system'); ?>');">
                                     <?php wp_nonce_field('sch_revoke_key', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="revoke_key">
                                     <input type="hidden" name="hash" value="<?php echo esc_attr((string) $sch_hash); ?>">
@@ -110,7 +110,7 @@ $errors = is_array($errors) ? $errors : [];
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-toolbar">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
         <?php wp_nonce_field('sch_issue_key', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="issue_key">
         <input type="text" name="label" maxlength="60"

@@ -28,7 +28,7 @@ SCH_Modal::head(
         $exam->grade_level, $exam->section, $exam->max_score
     )); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_save_scores', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="save_scores">
         <input type="hidden" name="exam_id" value="<?php echo esc_attr((string) $exam->id); ?>">
@@ -97,7 +97,7 @@ SCH_Modal::head(
 
 <?php SCH_Modal::open('sch-add-exam', __('إنشاء اختبار', 'school-system'), __('يظهر في تطبيق الطالب وولي الأمر فور إنشائه', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('إنشاء اختبار', 'school-system'); ?></h2>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_exam', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_exam">
         <div class="sch-grid">

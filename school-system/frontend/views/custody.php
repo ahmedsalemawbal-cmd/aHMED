@@ -87,7 +87,7 @@ $sch_may_fix = current_user_can('sch_manage_students') && SCH_Perms::may('custod
 
                         <?php if ($sch_may_fix) : ?>
                             <td>
-                                <form method="post" class="sch-toolbar">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
                                     <?php wp_nonce_field('sch_custody_manual', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="custody_manual">
                                     <input type="hidden" name="checkpoint" value="correction">

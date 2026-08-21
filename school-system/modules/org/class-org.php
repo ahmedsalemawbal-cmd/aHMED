@@ -32,7 +32,7 @@ final class SCH_Org
     /** نطاقات الإشراف — مبنية على المراحل لأنها لا تتداخل أبدًا. */
     public const SCOPES = [
         'none'   => 'بلا نطاق',
-        'early'  => 'روضة وابتدائي',
+        'early'  => 'ما قبل الابتدائي والابتدائي',
         'middle' => 'متوسط',
         'high'   => 'ثانوي',
         'all'    => 'كل المراحل',
@@ -52,7 +52,9 @@ final class SCH_Org
      * والمفاتيح الآن مفردات `SCH_Classes::STAGES` حرفًا بحرف.
      */
     private const STAGE_MAP = [
+        'nursery'      => 'early',
         'kg'           => 'early',
+        'prep'         => 'early',
         'primary'      => 'early',
         'intermediate' => 'middle',
         'secondary'    => 'high',

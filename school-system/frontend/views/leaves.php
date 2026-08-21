@@ -54,7 +54,7 @@ $pending = SCH_StudentLeave::pending();
             <?php endif; ?>
 
             <div class="sch-toolbar sch-mt">
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_decide_leave_s', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="decide_leave_s">
                     <input type="hidden" name="leave_id" value="<?php echo esc_attr((string) $l->id); ?>">
@@ -62,7 +62,7 @@ $pending = SCH_StudentLeave::pending();
                     <button class="sch-btn"><?php esc_html_e('اعتماد', 'school-system'); ?></button>
                 </form>
 
-                <form method="post" class="sch-toolbar">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
                     <?php wp_nonce_field('sch_decide_leave_s', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="decide_leave_s">
                     <input type="hidden" name="leave_id" value="<?php echo esc_attr((string) $l->id); ?>">

@@ -22,7 +22,7 @@ $sch_to_user = $sch_to > 0 ? get_userdata($sch_to) : false;
     )); ?></h2>
     <p class="sch-sub"><?php esc_html_e('تصل كإشعار في تطبيقه وحده — لا يراها غيره.', 'school-system'); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_send_message', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="send_message">
         <input type="hidden" name="audience" value="user">
@@ -46,7 +46,7 @@ $sch_to_user = $sch_to > 0 ? get_userdata($sch_to) : false;
     <h2><?php esc_html_e('رسالة جديدة', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('تصل كإشعار داخل التطبيق لكل من تختاره.', 'school-system'); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_send_message', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="send_message">
 

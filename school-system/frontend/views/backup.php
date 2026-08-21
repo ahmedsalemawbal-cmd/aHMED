@@ -66,7 +66,7 @@ $sch_why = [
         <?php esc_html_e('تشمل كل جداول النظام وملفّات الطلاب المحميّة — الصور والوصفات والتقارير. ويأخذ النظام نسخةً تلقائية قبل كل ترقية وقبل ترحيل السنة.', 'school-system'); ?>
     </p>
 
-    <form method="post" class="sch-toolbar sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_backup_now', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="backup_now">
         <button class="sch-btn"><?php esc_html_e('أنشئ نسخة', 'school-system'); ?></button>
@@ -103,7 +103,7 @@ $sch_why = [
                                     <?php esc_html_e('تنزيل', 'school-system'); ?>
                                 </a>
 
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_backup_delete', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="backup_delete">
                                     <input type="hidden" name="file" value="<?php echo esc_attr($sch_b['file']); ?>">
@@ -140,7 +140,7 @@ $sch_why = [
         <?php esc_html_e('الاستعادة تمحو كل بيانات النظام الآن وتضع مكانها ما في النسخة. ويأخذ النظام نسخةً من الحاضر قبل ذلك تلقائيًّا، فإن استعدتَ بالخطأ تعود.', 'school-system'); ?>
     </p>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_backup_restore', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="backup_restore">
 

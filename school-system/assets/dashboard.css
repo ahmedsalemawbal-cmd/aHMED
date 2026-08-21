@@ -5979,7 +5979,6 @@ body.sch-body {
    شريط الأشهر والخطوات والشعب يُقرأ كقائمة روابط لا كأزرار. */
 .sch-body a.sch-tt__b,
 .sch-body a.sch-tt__step,
-.sch-body a.sch-tt__m,
 .sch-body a.sch-tt__sec,
 .sch-body a.sch-tt__lensb,
 .sch-body a.sch-tt__chip,
@@ -6090,24 +6089,8 @@ body.sch-body {
     border-radius: var(--sch-radius-lg); box-shadow: var(--sch-e1);
 }
 .sch-tt__months > b { font-size: 12.5px; font-weight: 600; color: var(--sch-ink-soft); flex: none; }
-.sch-body a.sch-tt__m {
-    display: inline-flex; align-items: center; gap: 6px; flex: none;
-    padding: var(--sch-2) var(--sch-3);
-    border: 1px solid var(--sch-line); border-radius: 9px;
-    background: var(--sch-surface); color: var(--sch-ink-soft);
-    font-size: 12.5px; font-weight: 500; white-space: nowrap;
-}
-.sch-body a.sch-tt__m:hover { border-color: var(--sch-line-strong); color: var(--sch-ink); }
-.sch-body a.sch-tt__m.is-on {
-    background: var(--sch-accent); border-color: var(--sch-accent);
-    color: var(--sch-on-accent); font-weight: 700;
-}
-.sch-tt__m i {
-    inline-size: 6px; block-size: 6px; border-radius: var(--sch-r-full); flex: none;
-    background: var(--sch-line-strong);
-}
-.sch-tt__m.is-filled i { background: var(--sch-success); }
-.sch-tt__m.is-on i { background: var(--sch-on-accent); }
+.sch-tt__mform { display: flex; align-items: center; gap: var(--sch-2); flex: none; }
+.sch-tt__mform .sch-tt__sel { min-inline-size: 210px; }
 .sch-tt__mnote { font-size: 11px; font-weight: 400; color: var(--sch-muted); flex: none; white-space: nowrap; }
 
 /* ---------- البطاقة العامّة ---------- */

@@ -131,7 +131,7 @@ $keep = static function () use ($tab): void {
              */
             $sch_watch = SCH_Views::watch_state($id);
             ?>
-            <form method="post" class="sch-sp__watchf">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sp__watchf">
                 <?php wp_nonce_field('sch_toggle_watch', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="toggle_watch">
                 <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
@@ -284,7 +284,7 @@ $keep = static function () use ($tab): void {
                 <?php endif; ?>
 
                 <?php if ($can) : ?>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_student_login', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="student_login">
                         <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $student->id); ?>">
@@ -451,7 +451,7 @@ $keep = static function () use ($tab): void {
                     <span class="sch-sp__ct"><b><?php esc_html_e('الفصل', 'school-system'); ?></b></span>
 
                     <?php if ($can) : ?>
-                        <form method="post" class="sch-sp__row">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sp__row">
                             <?php wp_nonce_field('sch_enroll_student', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="enroll_student">
                             <?php $keep(); ?>
@@ -547,7 +547,7 @@ $keep = static function () use ($tab): void {
 
                             <?php /* حقّ الاستلام يُنفَّذ عند البوابة — فهو حالة تُبدَّل لا وسمٌ يُقرأ. */ ?>
                             <?php if ($can_g) : ?>
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_toggle_pickup', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="toggle_pickup">
                                     <input type="hidden" name="guardian_user_id" value="<?php echo esc_attr((string) $g->user_id); ?>">
@@ -570,7 +570,7 @@ $keep = static function () use ($tab): void {
                             <?php endif; ?>
 
                             <?php if ($can_g) : ?>
-                                <form method="post" onsubmit="return confirm('<?php esc_attr_e('فك الارتباط؟', 'school-system'); ?>');">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('فك الارتباط؟', 'school-system'); ?>');">
                                     <?php wp_nonce_field('sch_unlink_guardian', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="unlink_guardian">
                                     <input type="hidden" name="guardian_user_id" value="<?php echo esc_attr((string) $g->user_id); ?>">
@@ -584,7 +584,7 @@ $keep = static function () use ($tab): void {
             <?php endif; ?>
 
             <?php if ($can_g) : ?>
-                <form method="post" class="sch-sp__add">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sp__add">
                     <?php wp_nonce_field('sch_link_guardian', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="link_guardian">
                     <?php $keep(); ?>
@@ -644,7 +644,7 @@ $keep = static function () use ($tab): void {
                         <span class="sch-sp__pacts">
                             <?php if ($live) : ?>
                                 <span class="sch-sp__pill is-in"><i aria-hidden="true"></i><?php esc_html_e('ساري', 'school-system'); ?></span>
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_revoke_delegation', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="revoke_delegation">
                                     <input type="hidden" name="delegation_id" value="<?php echo esc_attr((string) $dl->id); ?>">
@@ -660,7 +660,7 @@ $keep = static function () use ($tab): void {
                     </div>
                 <?php endforeach; ?>
 
-                <form method="post" class="sch-sp__add">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-sp__add">
                     <?php wp_nonce_field('sch_delegate_pickup', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="delegate_pickup">
                     <?php $keep(); ?>
@@ -742,7 +742,7 @@ $keep = static function () use ($tab): void {
                                    href="<?php echo esc_url(add_query_arg('sch_file', (int) $doc->id, $base)); ?>"><?php esc_html_e('فتح', 'school-system'); ?></a>
                                 <button type="button" class="sch-sp__mini" data-modal-open="sch-upload-doc"
                                         data-pick-name="doc_type" data-pick-value="<?php echo esc_attr($slug); ?>"><?php esc_html_e('استبدال', 'school-system'); ?></button>
-                                <form method="post" onsubmit="return confirm('<?php esc_attr_e('حذف المستند؟', 'school-system'); ?>');">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('حذف المستند؟', 'school-system'); ?>');">
                                     <?php wp_nonce_field('sch_delete_doc', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="delete_doc">
                                     <input type="hidden" name="doc_id" value="<?php echo esc_attr((string) $doc->id); ?>">
@@ -770,7 +770,7 @@ $keep = static function () use ($tab): void {
                         <div class="sch-sp__dacts">
                             <a class="sch-sp__mini sch-sp__mini--wide" target="_blank" rel="noopener"
                                href="<?php echo esc_url(add_query_arg('sch_file', (int) $d->id, $base)); ?>"><?php esc_html_e('فتح', 'school-system'); ?></a>
-                            <form method="post" onsubmit="return confirm('<?php esc_attr_e('حذف المستند؟', 'school-system'); ?>');">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('حذف المستند؟', 'school-system'); ?>');">
                                 <?php wp_nonce_field('sch_delete_doc', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="delete_doc">
                                 <input type="hidden" name="doc_id" value="<?php echo esc_attr((string) $d->id); ?>">
@@ -1095,7 +1095,7 @@ $keep = static function () use ($tab): void {
 
 <?php if ($can) : ?>
     <?php SCH_Modal::open('sch-edit-student', __('تعديل الملف', 'school-system'), __('الاسم والمرحلة والصف والحالة — والشعبة تُغيَّر من صفحة «الفصل»', 'school-system')); ?>
-        <form method="post">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
             <?php wp_nonce_field('sch_update_student', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="update_student">
             <?php $keep(); ?>
@@ -1148,7 +1148,7 @@ $keep = static function () use ($tab): void {
 
 <?php if ($can_docs) : ?>
     <?php SCH_Modal::open('sch-upload-doc', __('رفع مستند', 'school-system'), __('يُخزَّن خارج المجلد العام، ويُسجَّل كل فتح له في سجل النظام', 'school-system')); ?>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" enctype="multipart/form-data">
             <?php wp_nonce_field('sch_upload_doc', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="upload_doc">
             <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
@@ -1176,7 +1176,7 @@ $keep = static function () use ($tab): void {
 
 <?php if ($can_health) : ?>
     <?php SCH_Modal::open('sch-edit-health', __('السجل الصحي', 'school-system'), __('يراه المدير والصحة المدرسية فقط', 'school-system')); ?>
-        <form method="post">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
             <?php wp_nonce_field('sch_save_health', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="save_health">
             <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
@@ -1219,7 +1219,7 @@ $keep = static function () use ($tab): void {
 
 <?php if ($can_notes) : ?>
     <?php SCH_Modal::open('sch-edit-memory', __('الذاكرة عبر السنوات', 'school-system'), __('ثلاثة أسطر تفتحها معلمة العام القادم في أول يوم', 'school-system')); ?>
-        <form method="post">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
             <?php wp_nonce_field('sch_save_summary', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="save_summary">
             <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">

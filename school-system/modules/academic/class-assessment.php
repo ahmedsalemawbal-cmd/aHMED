@@ -50,55 +50,14 @@ final class SCH_Subjects
         return $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . sch_table('subjects') . ' WHERE id = %d', $id)) ?: null;
     }
 
-    /** إسناد مادة لشعبة مع معلمها. */
-    public static function assign(array $d): bool|WP_Error
-    {
-        global $wpdb;
+    /*
+     * `assign()` و`of_class()` حُذفتا مع شاشة «المواد الدراسية».
+     *
+     * كانتا الكاتب والقارئ الوحيدَين خارج دورة الخطة. و`class_subjects`
+     * تُبنى الآن في `SCH_TT::publish()` من نصاب الخطة المعتمدة — كاتبٌ واحد،
+     * فلا يفترق ما يراه المعلم في «فصولي» عمّا يقوله الجدول.
+     */
 
-        $class_id   = absint($d['class_id'] ?? 0);
-        $subject_id = absint($d['subject_id'] ?? 0);
-
-        if (!SCH_Classes::get($class_id) || !self::get($subject_id)) {
-            return sch_api_error('not_found', __('الشعبة أو المادة غير موجودة.', 'school-system'), 404);
-        }
-
-        $teacher = absint($d['teacher_user_id'] ?? 0) ?: null;
-
-        $existing = $wpdb->get_var($wpdb->prepare(
-            'SELECT id FROM ' . sch_table('class_subjects') . ' WHERE class_id = %d AND subject_id = %d',
-            $class_id,
-            $subject_id
-        ));
-
-        if ($existing) {
-            $wpdb->update(sch_table('class_subjects'), ['teacher_user_id' => $teacher], ['id' => (int) $existing]);
-        } else {
-            $wpdb->insert(sch_table('class_subjects'), [
-                'class_id'        => $class_id,
-                'subject_id'      => $subject_id,
-                'teacher_user_id' => $teacher,
-                'created_at'      => sch_now(),
-            ]);
-        }
-
-        return true;
-    }
-
-    /** مواد شعبة مع أسماء معلميها. */
-    public static function of_class(int $class_id): array
-    {
-        global $wpdb;
-
-        return $wpdb->get_results($wpdb->prepare(
-            'SELECT cs.*, s.name AS subject_name, s.code, u.display_name AS teacher_name
-             FROM ' . sch_table('class_subjects') . ' cs
-             INNER JOIN ' . sch_table('subjects') . ' s ON s.id = cs.subject_id
-             LEFT JOIN ' . $wpdb->users . ' u ON u.ID = cs.teacher_user_id
-             WHERE cs.class_id = %d
-             ORDER BY s.name',
-            $class_id
-        )) ?: [];
-    }
 }
 
 /** الجدول الدراسي الأسبوعي. */
@@ -212,77 +171,17 @@ final class SCH_Timetable
         return ['now' => $now, 'next' => $next];
     }
 
-    /** وضع حصة في خانة — مع منع تعارض المعلم. */
-    public static function set_slot(array $d): bool|WP_Error
-    {
-        global $wpdb;
-
-        $class_id   = absint($d['class_id'] ?? 0);
-        $subject_id = absint($d['subject_id'] ?? 0);
-        $day        = (int) ($d['day_of_week'] ?? 0);
-        $period     = (int) ($d['period_no'] ?? 0);
-        $teacher    = absint($d['teacher_user_id'] ?? 0) ?: null;
-
-        if (!array_key_exists($day, self::DAYS) || $period < 1 || $period > self::PERIODS) {
-            return sch_api_error('bad_slot', __('اليوم أو رقم الحصة غير صحيح.', 'school-system'), 422);
-        }
-        if (!SCH_Classes::get($class_id) || !SCH_Subjects::get($subject_id)) {
-            return sch_api_error('not_found', __('الشعبة أو المادة غير موجودة.', 'school-system'), 404);
-        }
-
-        // معلم واحد لا يكون في شعبتين في نفس الحصة.
-        if ($teacher) {
-            $clash = $wpdb->get_row($wpdb->prepare(
-                'SELECT t.*, c.grade_level, c.section
-                 FROM ' . sch_table('timetable') . ' t
-                 INNER JOIN ' . sch_table('classes') . ' c ON c.id = t.class_id
-                 WHERE t.teacher_user_id = %d AND t.day_of_week = %d AND t.period_no = %d AND t.class_id <> %d
-                 LIMIT 1',
-                $teacher,
-                $day,
-                $period,
-                $class_id
-            ));
-
-            if ($clash) {
-                return sch_api_error('teacher_clash', sprintf(
-                    /* translators: 1: الصف 2: الشعبة */
-                    __('المعلم مشغول في هذه الحصة مع %1$s / %2$s.', 'school-system'),
-                    $clash->grade_level,
-                    $clash->section
-                ), 409);
-            }
-        }
-
-        $existing = $wpdb->get_var($wpdb->prepare(
-            'SELECT id FROM ' . sch_table('timetable') . ' WHERE class_id = %d AND day_of_week = %d AND period_no = %d',
-            $class_id,
-            $day,
-            $period
-        ));
-
-        $data = ['subject_id' => $subject_id, 'teacher_user_id' => $teacher];
-
-        if ($existing) {
-            $wpdb->update(sch_table('timetable'), $data, ['id' => (int) $existing]);
-        } else {
-            $wpdb->insert(sch_table('timetable'), $data + [
-                'class_id'    => $class_id,
-                'day_of_week' => $day,
-                'period_no'   => $period,
-                'created_at'  => sch_now(),
-            ]);
-        }
-
-        return true;
-    }
-
-    public static function clear_slot(int $class_id, int $day, int $period): bool
-    {
-        global $wpdb;
-        $wpdb->delete(sch_table('timetable'), ['class_id' => $class_id, 'day_of_week' => $day, 'period_no' => $period]);
-        return true;
-    }
+    /*
+     * `set_slot()` و`clear_slot()` حُذفتا مع شاشة «المواد الدراسية».
+     *
+     * كانتا تكتبان في `timetable` مباشرةً — **وهو مُخرَج النشر لا مدخله**:
+     * حصةٌ تُوضع من هناك لا خطةَ لها ولا نصاب ولا اعتماد، وأوّل «اعتماد» من
+     * شاشة الجداول يمسحها بلا أثر (`publish()` تحذف صفوف الشعبة ثم تكتب من
+     * الخطة). فالوكيل يبني نصف جدولٍ من شاشةٍ ويفقده من الأخرى.
+     *
+     * والكاتب الوحيد في هذا الجدول اليوم هو `SCH_TT::publish()`، والقراءة
+     * تبقى هنا (`grid()` · `running_period()` · `school_day()`).
+     */
 
     /** جدول شعبة كمصفوفة [يوم][حصة]. */
     public static function grid(int $class_id): array

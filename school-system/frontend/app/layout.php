@@ -48,9 +48,7 @@ var m=document.querySelector('meta[name=theme-color]');if(m){m.content=d?'#12131
     <link rel="apple-touch-icon" href="<?php echo esc_url(SCH_URL . 'assets/icon-192.png'); ?>">
     <link rel="manifest" href="<?php echo esc_url(SCH_App::url('manifest.webmanifest')); ?>">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <?php sch_font_link(); ?>
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/parent.css')); ?>">
 </head>
 

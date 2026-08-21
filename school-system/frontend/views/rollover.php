@@ -58,7 +58,7 @@ foreach ($sch_plan as $sch_c) {
 <?php elseif ($sch_from > 0 && $sch_to > 0 && $sch_from === $sch_to) : ?>
     <div class="sch-notice sch-notice--error"><?php esc_html_e('سنة المصدر والهدف متطابقتان — اختر سنتين مختلفتين.', 'school-system'); ?></div>
 <?php elseif ($sch_from > 0 && $sch_to > 0 && $sch_grades !== []) : ?>
-    <form method="post" class="sch-card" onsubmit="return confirm('<?php esc_attr_e('تنفيذ الترقية الآن؟ تأكّد أنك اخترت السنة الصحيحة.', 'school-system'); ?>');">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-card" onsubmit="return confirm('<?php esc_attr_e('تنفيذ الترقية الآن؟ تأكّد أنك اخترت السنة الصحيحة.', 'school-system'); ?>');">
         <?php wp_nonce_field('sch_run_rollover', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="run_rollover">
         <input type="hidden" name="from_year" value="<?php echo esc_attr((string) $sch_from); ?>">

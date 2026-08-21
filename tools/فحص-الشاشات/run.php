@@ -53,9 +53,10 @@ if ($only !== '') {
     }
 }
 
-$fatals = [];
-$noisy  = [];
-$clean  = 0;
+$fatals  = [];
+$noisy   = [];
+$skipped = [];
+$clean   = 0;
 
 printf("\n══════════════════════════════════════════════════════════════\n");
 printf("  فحص الشاشات على قاعدة فارغة — %d شاشة\n", count($screens));
@@ -82,6 +83,12 @@ foreach ($screens as [$label, $name, $dir, $id]) {
     if (!is_array($res)) {
         $fatals[] = [$label, $name, 'العمليّة ماتت بلا نتيجة: ' . trim(mb_substr($raw, 0, 200))];
         printf("  ✗ %-22s العمليّة ماتت\n", $name);
+        continue;
+    }
+
+    if (($res['skip'] ?? '') !== '') {
+        $skipped[] = [$label, $name, (string) $res['skip']];
+        printf("  ‑ %-22s %s\n", $name, (string) $res['skip']);
         continue;
     }
 
@@ -115,7 +122,13 @@ foreach ($screens as [$label, $name, $dir, $id]) {
 }
 
 printf("\n══════════════════════════════════════════════════════════════\n");
-printf("  نظيفة %d · بتحذيرات %d · ساقطة %d\n", $clean, count($noisy), count($fatals));
+printf(
+    "  نظيفة %d · بتحذيرات %d · ساقطة %d · متعذّرة %d\n",
+    $clean,
+    count($noisy),
+    count($fatals),
+    count($skipped)
+);
 printf("══════════════════════════════════════════════════════════════\n");
 
 if ($fatals !== []) {

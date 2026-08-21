@@ -36,7 +36,7 @@ $works  = SCH_Assets::work_orders();
                         </td>
                         <td>
                             <?php if ($w->status !== 'done') : ?>
-                                <form method="post" class="sch-inline">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-inline">
                                     <?php wp_nonce_field('sch_set_work', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="set_work">
                                     <input type="hidden" name="work_id" value="<?php echo esc_attr((string) $w->id); ?>">
@@ -56,7 +56,7 @@ $works  = SCH_Assets::work_orders();
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_work', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_work">
         <div class="sch-grid">
@@ -121,7 +121,7 @@ $works  = SCH_Assets::work_orders();
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-toolbar sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_add_asset', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_asset">
         <input type="text" name="asset_code" placeholder="<?php esc_attr_e('الرمز', 'school-system'); ?>" dir="ltr" required style="max-width:120px">

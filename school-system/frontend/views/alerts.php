@@ -69,7 +69,7 @@ $health = SCH_Alerts::health();
 
                 <div class="sch-toolbar sch-mt">
                     <?php if ($a->status === 'open') : ?>
-                        <form method="post">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                             <?php wp_nonce_field('sch_ack_alert', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="ack_alert">
                             <input type="hidden" name="alert_id" value="<?php echo esc_attr((string) $a->id); ?>">
@@ -79,7 +79,7 @@ $health = SCH_Alerts::health();
                         <span class="sch-badge sch-badge--muted"><?php esc_html_e('قيد المعالجة', 'school-system'); ?></span>
                     <?php endif; ?>
 
-                    <form method="post" class="sch-toolbar">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
                         <?php wp_nonce_field('sch_close_alert', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="close_alert">
                         <input type="hidden" name="alert_id" value="<?php echo esc_attr((string) $a->id); ?>">

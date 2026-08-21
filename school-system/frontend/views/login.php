@@ -15,7 +15,7 @@ $sch_error = (string) ($sch_data['error'] ?? '');
             <div class="sch-notice sch-notice--error"><?php echo esc_html($sch_error); ?></div>
         <?php endif; ?>
 
-        <form method="post" autocomplete="on">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" autocomplete="on">
             <?php wp_nonce_field('sch_login', '_sch_nonce'); ?>
             <input type="hidden" name="sch_login" value="1">
 

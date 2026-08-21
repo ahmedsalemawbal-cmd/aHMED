@@ -39,7 +39,7 @@ $sheet    = $class_id > 0 ? SCH_KG::sheet($class_id, $date) : [];
     <?php else : ?>
         <div class="sch-kg-list">
             <?php foreach ($sheet as $child) : ?>
-                <form method="post" class="sch-kg-card">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-kg-card">
                     <?php wp_nonce_field('sch_save_kg', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="save_kg">
                     <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $child->id); ?>">

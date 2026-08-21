@@ -58,7 +58,7 @@ SCH_Modal::head(
                         </td>
                         <td>
                             <?php if ((int) $c->enrolled === 0) : ?>
-                                <form method="post" onsubmit="return confirm('<?php esc_attr_e('حذف هذه الشعبة؟', 'school-system'); ?>');">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('حذف هذه الشعبة؟', 'school-system'); ?>');">
                                     <?php wp_nonce_field('sch_delete_class', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="delete_class">
                                     <input type="hidden" name="class_id" value="<?php echo esc_attr((string) $c->id); ?>">
@@ -79,7 +79,7 @@ SCH_Modal::head(
 
 <?php SCH_Modal::open('sch-add-class', __('إضافة شعبة', 'school-system'), __('المرحلة تحدد مشرفها تلقائيًا', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('إضافة شعبة', 'school-system'); ?></h2>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_class', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_class">
         <div class="sch-grid">

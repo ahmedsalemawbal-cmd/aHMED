@@ -36,8 +36,11 @@ final class SCH_Dashboard
         'pickup'     => ['نداء الانصراف',   'sch_scan_gate',         'school', 'اليوم الدراسي','bell'],
         'attendance' => ['الحضور',          'sch_manage_attendance', 'school', 'اليوم الدراسي','check'],
         'attendance-report' => ['تقرير الحضور الشهري', 'sch_manage_attendance', 'school', 'اليوم الدراسي','chart'],
-        'timetable'  => ['بناء الجدول',     'sch_build_timetable',   'school', 'اليوم الدراسي','calendar'],
-        'subjects'   => ['المواد والجداول', 'sch_manage_subjects',   'school', 'اليوم الدراسي','book'],
+        // شاشة «المواد الدراسية» حُذفت: كانت تكتب في `timetable` مباشرةً —
+        // أي في **مُخرَج** النشر — متجاوزةً الخطة والاعتماد كلَّيهما. فمصدرا
+        // حقيقةٍ لجدولٍ واحد، وشاشتان تتنازعان الجدول نفسه. والمواد تُضاف
+        // وتُسنَد الآن داخل خطوتَي «النصاب» و«المعلمون».
+        'timetable'  => ['المواد والجداول', 'sch_build_timetable',   'school', 'اليوم الدراسي','calendar'],
         'homework'   => ['الواجبات',        'sch_manage_homework',   'school', 'اليوم الدراسي','pen'],
         'exams'      => ['الاختبارات',      'sch_manage_exams',      'school', 'اليوم الدراسي','clipboard'],
         'content'    => ['المحتوى التعليمي','sch_manage_content',    'school', 'اليوم الدراسي','play'],
@@ -131,6 +134,32 @@ final class SCH_Dashboard
         return home_url($path . '/');
     }
 
+    /**
+     * وجهة كل نموذج POST في الداشبورد — الرابط النظيف بلا سطر استعلام.
+     *
+     * نموذجٌ بلا `action` يُرسَل إلى **الرابط الحاليّ بسطر استعلامه**. وشاشات
+     * الداشبورد تحمل حالتها في السطر (`?m=…&cls=…&step=…`)، وترسل الحالة
+     * التالية في حقولٍ مخفيّة بالأسماء نفسها — فيصل الطلب وفيه `cls` في
+     * `$_GET` بقيمة، و`cls` في `$_POST` بقيمةٍ أخرى.
+     *
+     * وووردبريس (منذ 5.0.1) يرفض هذا: مفتاحٌ في الاثنين بقيمتين مختلفتين
+     * يُنهي الطلب بـ **«تمّ اكتشاف عدم تطابق متغيّر»** — صفحةٌ بيضاء بجملةٍ
+     * واحدة، لا رسالة خطأٍ من النظام ولا أثرٌ في السجلّ. وهو ما كان يجعل
+     * بطاقات المراحل «لا تُضغط»: البطاقة تُرسل `cls` الشعبةِ الأولى في
+     * مرحلتها، والسطر يحمل `cls` الشعبةِ المعروضة.
+     *
+     * والعلاج أن يُرسَل النموذج إلى المسار وحده: `$_GET` يصير فارغًا فلا
+     * مفتاح يتصادم أصلًا. والقسم والمعرّف يُقرآن من المسار كما يقرؤهما
+     * الموجّه، فلا يضيع سياق شاشة الطالب الواحد.
+     */
+    public static function post_url(): string
+    {
+        return self::url(
+            sanitize_key((string) get_query_var('sch_section')),
+            absint(get_query_var('sch_id'))
+        );
+    }
+
     public static function sections(): array
     {
         return self::SECTIONS;
@@ -200,6 +229,12 @@ final class SCH_Dashboard
     /** تنقّل الإعدادات مجمّعًا — مُصفّى بصلاحيات المستخدم كالتنقّل الرئيسي. */
     public static function settings_nav(): array
     {
+        static $built = null;
+
+        if ($built !== null) {
+            return $built;
+        }
+
         $out = [];
         foreach (self::SETTINGS_NAV as $label => $slugs) {
             $items = [];
@@ -218,7 +253,7 @@ final class SCH_Dashboard
             }
         }
 
-        return $out;
+        return $built = $out;
     }
 
     /** أول قسم إعدادات متاح — مقصد زرّ «الإعدادات» المثبّت في التنقّل الرئيسي. */
@@ -234,6 +269,14 @@ final class SCH_Dashboard
     /** المجموعات التي يملك المستخدم قسمًا واحدًا فيها على الأقل. */
     public static function groups(): array
     {
+        // تُبنى مرّةً في الطلب: الموجّه يسألها، والشريط الجانبي يسألها، وشاشة
+        // «النظرة العامة» تسألها ثالثةً — وكلٌّ كان يُعيد خمسين فحص صلاحية.
+        static $built = null;
+
+        if ($built !== null) {
+            return $built;
+        }
+
         $out = [];
 
         foreach (self::GROUP_META as $key => [$label, $icon]) {
@@ -267,7 +310,7 @@ final class SCH_Dashboard
             ];
         }
 
-        return $out;
+        return $built = $out;
     }
 
     /** مفتاح مجموعة قسم معيّن — لإبراز البلاطة النشطة. */
@@ -392,6 +435,7 @@ final class SCH_Dashboard
             'tt_spread'        => ['sch_build_timetable',  'do_tt_spread'],
             'tt_subject'       => ['sch_manage_subjects',  'do_tt_subject'],
             'tt_publish'       => ['sch_approve_timetable','do_tt_publish'],
+            'tt_reopen'        => ['sch_approve_timetable','do_tt_reopen'],
             'save_summary'     => ['sch_handle_notes',     'do_save_summary'],
             'approve_summary'  => ['sch_manage_deputy',    'do_approve_summary'],
             'update_student'   => ['sch_manage_students',  'do_update_student'],
@@ -432,10 +476,6 @@ final class SCH_Dashboard
             'unsubscribe'      => ['sch_manage_transport',  'do_unsubscribe'],
             'open_trip'        => ['sch_manage_transport',  'do_open_trip'],
             'close_trip'       => ['sch_manage_transport',  'do_close_trip'],
-            'add_subject'      => ['sch_manage_subjects',   'do_add_subject'],
-            'assign_subject'   => ['sch_manage_subjects',   'do_assign_subject'],
-            'set_slot'         => ['sch_manage_subjects',   'do_set_slot'],
-            'clear_slot'       => ['sch_manage_subjects',   'do_clear_slot'],
             'add_exam'         => ['sch_manage_exams',      'do_add_exam'],
             'save_scores'      => ['sch_manage_exams',      'do_save_scores'],
             'add_fee_plan'     => ['sch_manage_finance',    'do_add_fee_plan'],
@@ -509,6 +549,13 @@ final class SCH_Dashboard
 
         if ($section === 'login') {
             wp_safe_redirect(self::url());
+            exit;
+        }
+
+        // شاشة «المواد الدراسية» صارت خطوتين داخل شاشة الجداول. والرابط
+        // المحفوظ في مفضّلة الوكيل — أو في رسالةٍ قديمة — يُحوَّل ولا يسقط.
+        if ($section === 'subjects') {
+            wp_safe_redirect(add_query_arg('step', 2, self::url('timetable')));
             exit;
         }
 
@@ -1490,7 +1537,7 @@ final class SCH_Dashboard
     private static function tt_keep(array $d): array
     {
         $out = [];
-        foreach (['m' => 7, 'step' => 2, 'cls' => 12, 'lens' => 10, 'day' => 2, 'p' => 3] as $k => $len) {
+        foreach (['m' => 7, 'step' => 2, 'cls' => 12, 'lens' => 10, 'day' => 2, 'p' => 3, 'stage' => 20] as $k => $len) {
             $v = sanitize_text_field((string) ($d[$k] ?? ''));
             if ($v !== '') {
                 $out[$k] = mb_substr($v, 0, $len);
@@ -1498,6 +1545,13 @@ final class SCH_Dashboard
         }
 
         return $out;
+    }
+
+    private static function do_tt_reopen(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_TT::reopen(absint($d['plan_id'] ?? 0));
+
+        return is_wp_error($done) ? $done : $done + ['keep' => self::tt_keep($d)];
     }
 
     private static function do_tt_bell(array $d, int $id): array|WP_Error
@@ -2223,30 +2277,6 @@ final class SCH_Dashboard
     private static function do_close_trip(array $d, int $id): bool|WP_Error
     {
         return SCH_Trips::close(absint($d['trip_id'] ?? 0));
-    }
-
-    private static function do_add_subject(array $d, int $id): array|WP_Error
-    {
-        return SCH_Subjects::create($d);
-    }
-
-    private static function do_assign_subject(array $d, int $id): bool|WP_Error
-    {
-        return SCH_Subjects::assign($d);
-    }
-
-    private static function do_set_slot(array $d, int $id): bool|WP_Error
-    {
-        return SCH_Timetable::set_slot($d);
-    }
-
-    private static function do_clear_slot(array $d, int $id): bool
-    {
-        return SCH_Timetable::clear_slot(
-            absint($d['class_id'] ?? 0),
-            (int) ($d['day_of_week'] ?? 0),
-            (int) ($d['period_no'] ?? 0)
-        );
     }
 
     private static function do_add_exam(array $d, int $id): array|WP_Error

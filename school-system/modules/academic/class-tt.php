@@ -18,18 +18,30 @@ defined('ABSPATH') || exit;
 final class SCH_TT
 {
     /**
+     * ذاكرة الطلب الواحد لخانات الخطّة — «معرّف الخطّة|معرّف الشعبة».
+     *
+     * @var array<string,array<int,object>>
+     */
+    private static array $slot_memo = [];
+
+    /**
      * إعدادات جاهزة لكل مرحلة.
      *
      * ليست زينة: الروضة تخرج ١٠:١٢ والابتدائي ١:١٥، ومن يفتح الشاشة أول مرة
      * لا يعرف كم حصة للتمهيدي. الضغطة الواحدة تملأ اليوم كاملًا ثم يعدّل.
      */
+    /**
+     * إيقاعٌ جاهز لكل مرحلة. **والاسم ليس هنا** — يُقرأ من
+     * `SCH_Classes::STAGES`: اسمان لمرحلةٍ واحدة يفترقان عند أوّل تعديل،
+     * وقد افترقا فعلًا («الروضة» هنا و«رياض أطفال» هناك).
+     */
     public const PRESETS = [
-        'nursery'      => ['label' => 'الحضانة',   'periods' => 5,  'len' => 20, 'start' => 450, 'break_after' => 2, 'break_len' => 30, 'note' => 'حصص قصيرة ووقت لعب أطول'],
-        'kg'           => ['label' => 'الروضة',    'periods' => 6,  'len' => 22, 'start' => 450, 'break_after' => 3, 'break_len' => 30, 'note' => 'توازن بين الأنشطة واللعب'],
-        'prep'         => ['label' => 'التمهيدي',  'periods' => 7,  'len' => 25, 'start' => 435, 'break_after' => 3, 'break_len' => 30, 'note' => 'تمهيد لمهارات الابتدائي'],
-        'primary'      => ['label' => 'ابتدائي',   'periods' => 10, 'len' => 32, 'start' => 435, 'break_after' => 4, 'break_len' => 40, 'note' => 'الفسحة بعد الرابعة للجميع'],
-        'intermediate' => ['label' => 'متوسط',     'periods' => 8,  'len' => 40, 'start' => 435, 'break_after' => 4, 'break_len' => 30, 'note' => 'حصص أطول وفسحة أقصر'],
-        'secondary'    => ['label' => 'ثانوي',     'periods' => 7,  'len' => 45, 'start' => 435, 'break_after' => 3, 'break_len' => 30, 'note' => 'نظام المسارات — ٧ حصص'],
+        'nursery'      => ['periods' => 5,  'len' => 20, 'start' => 450, 'break_after' => 2, 'break_len' => 30, 'note' => 'حصص قصيرة ووقت لعب أطول'],
+        'kg'           => ['periods' => 6,  'len' => 22, 'start' => 450, 'break_after' => 3, 'break_len' => 30, 'note' => 'توازن بين الأنشطة واللعب'],
+        'prep'         => ['periods' => 7,  'len' => 25, 'start' => 435, 'break_after' => 3, 'break_len' => 30, 'note' => 'تمهيد لمهارات الابتدائي'],
+        'primary'      => ['periods' => 10, 'len' => 32, 'start' => 435, 'break_after' => 4, 'break_len' => 40, 'note' => 'الفسحة بعد الرابعة للجميع'],
+        'intermediate' => ['periods' => 8,  'len' => 40, 'start' => 435, 'break_after' => 4, 'break_len' => 30, 'note' => 'حصص أطول وفسحة أقصر'],
+        'secondary'    => ['periods' => 7,  'len' => 45, 'start' => 435, 'break_after' => 3, 'break_len' => 30, 'note' => 'نظام المسارات — ٧ حصص'],
     ];
 
     /** أيام الأسبوع الستة المحتملة — والقناع يقول أيّها دوام. */
@@ -100,7 +112,7 @@ final class SCH_TT
         global $wpdb;
 
         $stage = sanitize_text_field((string) ($d['stage'] ?? ''));
-        if (!array_key_exists($stage, SCH_Classes::STAGES) && !array_key_exists($stage, self::PRESETS)) {
+        if (!array_key_exists($stage, SCH_Classes::STAGES)) {
             return sch_api_error('bad_stage', __('المرحلة غير معروفة.', 'school-system'), 422);
         }
 
@@ -303,31 +315,56 @@ final class SCH_TT
     }
 
     /**
-     * أشهر السنة الدراسية — من تاريخَي بدايتها ونهايتها.
+     * أشهر الجدول — **دورةٌ ميلادية كاملة** تبدأ من شهر بداية السنة الدراسية.
      *
-     * لا قائمة مكتوبة تبدأ بأغسطس: السنة قد تبدأ في سبتمبر، ومدرسةٌ تفتح في
-     * محرّم لها أشهرٌ أخرى. والمصدر هو سجلّ السنة نفسه.
+     * لا قائمة مكتوبة تبدأ بأغسطس: المصدر سجلّ السنة نفسه، ومدرسةٌ تفتح في
+     * محرّم يبدأ عدّها من شهرها.
      *
-     * @return array<string,string> 'YYYY-MM' => الاسم
+     * وكانت تقف عند تاريخ نهاية السنة. ومدرسةٌ سُجّلت سنتها «سبتمبر ← يناير»
+     * ترى خمسة أشهر فقط، **وما بعدها لا سبيل إليه من الشاشة إطلاقًا** — لا
+     * لأن الجدول يمنعه، بل لأن القائمة لا تعرضه. والاثنا عشر تعني أن كل شهرٍ
+     * ميلاديّ حاضرٌ مرّة واحدة، وأن تصحيح تاريخَي السنة في الإعدادات لم يعد
+     * شرطًا لبناء جدول مارس.
+     *
+     * @return array<string,string> 'YYYY-MM' => 'نوفمبر 2026'
      */
     public static function months(): array
+    {
+        $span = self::year_span();
+        [$y, $m] = array_map('intval', explode('-', $span['from']));
+        $out = [];
+
+        // اثنا عشر شهرًا من شهر البداية — فكل شهرٍ ميلاديّ حاضرٌ مرّة واحدة.
+        // و`gmmktime` تطوي تجاوز الشهر إلى السنة التالية وحدها.
+        for ($i = 0; $i < 12; $i++) {
+            $ym = gmdate('Y-m', gmmktime(12, 0, 0, $m + $i, 1, $y));
+
+            // الاسم من `mysql2date` لا من `wp_date(strtotime())`: ووردبريس
+            // يثبّت توقيت PHP على UTC، فالثانية تُضيف إزاحة الموقع فوق سلسلةٍ
+            // محلّيّة أصلًا — ومنتصفُ ليل الأوّل ينزلق إلى الشهر السابق في
+            // كل موقعٍ إزاحتُه سالبة.
+            $out[$ym] = (string) mysql2date('F Y', $ym . '-01');
+        }
+
+        return $out;
+    }
+
+    /**
+     * مدى السنة الدراسية بالأشهر — «من» و«إلى» بصيغة `Y-m`.
+     *
+     * القائمة أعلاه تتجاوز هذا المدى عمدًا، والشاشة تُعلّم ما خرج عنه: أن
+     * ترى الشهر وتعرف أنه خارج سنتك المسجَّلة **خيرٌ من ألّا تراه**.
+     *
+     * @return array{from:string,to:string}
+     */
+    public static function year_span(): array
     {
         $year = SCH_Years::current();
 
         $from = $year && $year->start_date ? (string) $year->start_date : gmdate('Y-08-01');
-        $to   = $year && $year->end_date ? (string) $year->end_date : gmdate('Y-06-30', strtotime('+1 year'));
+        $to   = $year && $year->end_date ? (string) $year->end_date : gmdate('Y-06-30', (int) strtotime('+1 year'));
 
-        $cur  = (int) strtotime(substr($from, 0, 7) . '-01');
-        $end  = (int) strtotime(substr($to, 0, 7) . '-01');
-        $out  = [];
-        $stop = 0;
-
-        while ($cur <= $end && $stop++ < 24) {
-            $out[gmdate('Y-m', $cur)] = wp_date('F', $cur);
-            $cur = (int) strtotime('+1 month', $cur);
-        }
-
-        return $out;
+        return ['from' => substr($from, 0, 7), 'to' => substr($to, 0, 7)];
     }
 
     /** الأشهر التي فيها خطة بخانات — النقطة الخضراء في شريط الأشهر. @return array<string,int> */
@@ -625,11 +662,41 @@ final class SCH_TT
      */
     public static function grid(int $plan_id, int $class_id): array
     {
+        $grid = [];
+
+        foreach (self::slots_of($plan_id, $class_id) as $r) {
+            $grid[(int) $r->day_of_week][(int) $r->period_no] = $r;
+        }
+
+        return $grid;
+    }
+
+    /**
+     * خانات شعبةٍ في خطّة، بأسمائها وعلامة تعارضها — **استعلامٌ واحد لا اثنان**.
+     *
+     * `grid()` و`health()` كانتا تفتحان استعلامَين متطابقَين تقريبًا في العرض
+     * الواحد، وكلاهما يحمل استعلامًا مرتبطًا (`EXISTS`) يُنفَّذ لكل خانة —
+     * أي أن الحساب كان يجري مرّتين كاملتين لتُقرأ منه مرّةً الشبكةُ ومرّةً
+     * العدّادات. وهما سؤالٌ واحد عن الشيء نفسه.
+     *
+     * والذاكرة تُفرَّغ مع كل كتابة (`place` · `clear` · `wipe` · `generate` …)،
+     * فلا تُقرأ خانةٌ محذوفة.
+     *
+     * @return array<int,object>
+     */
+    private static function slots_of(int $plan_id, int $class_id): array
+    {
         global $wpdb;
+
+        $key = $plan_id . '|' . $class_id;
+
+        if (isset(self::$slot_memo[$key])) {
+            return self::$slot_memo[$key];
+        }
 
         $t = sch_table('tt_slots');
 
-        $rows = $wpdb->get_results($wpdb->prepare(
+        return self::$slot_memo[$key] = $wpdb->get_results($wpdb->prepare(
             "SELECT s.*, sub.name AS subject_name, u.display_name AS teacher_name,
                     EXISTS (SELECT 1 FROM {$t} x
                              WHERE x.plan_id = s.plan_id AND x.teacher_user_id = s.teacher_user_id
@@ -642,18 +709,19 @@ final class SCH_TT
             $plan_id,
             $class_id
         )) ?: [];
+    }
 
-        $grid = [];
-        foreach ($rows as $r) {
-            $grid[(int) $r->day_of_week][(int) $r->period_no] = $r;
-        }
-
-        return $grid;
+    /** كل كتابةٍ في الخانات تُسقط ما حُفظ منها. */
+    private static function forget_slots(): void
+    {
+        self::$slot_memo = [];
     }
 
     public static function place(int $plan_id, int $class_id, int $day, int $period, int $subject_id): bool|WP_Error
     {
         global $wpdb;
+
+        self::forget_slots();
 
         $class = SCH_Classes::get($class_id);
         if (!$class) {
@@ -709,6 +777,8 @@ final class SCH_TT
     {
         global $wpdb;
 
+        self::forget_slots();
+
         if (!SCH_Org::may_touch_class($class_id)) {
             return false;
         }
@@ -758,6 +828,8 @@ final class SCH_TT
     {
         global $wpdb;
 
+        self::forget_slots();
+
         $sql = 'DELETE FROM ' . sch_table('tt_slots') . ' WHERE plan_id = %d AND class_id = %d';
         if ($keep_locked) {
             $sql .= ' AND locked = 0';
@@ -783,7 +855,6 @@ final class SCH_TT
         $class = SCH_Classes::get($class_id);
         $stage = $class ? (string) $class->stage : 'primary';
         $bell  = self::bell($stage);
-        $t     = sch_table('tt_slots');
 
         $demand = (int) $wpdb->get_var($wpdb->prepare(
             'SELECT COALESCE(SUM(weekly), 0) FROM ' . sch_table('tt_quota') . '
@@ -792,18 +863,7 @@ final class SCH_TT
             $class_id
         ));
 
-        $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT s.day_of_week, s.period_no, s.teacher_user_id, sub.name AS subject_name,
-                    EXISTS (SELECT 1 FROM {$t} x
-                             WHERE x.plan_id = s.plan_id AND x.teacher_user_id = s.teacher_user_id
-                               AND x.day_of_week = s.day_of_week AND x.period_no = s.period_no
-                               AND x.class_id <> s.class_id) AS clash
-             FROM {$t} s
-             INNER JOIN " . sch_table('subjects') . ' sub ON sub.id = s.subject_id
-             WHERE s.plan_id = %d AND s.class_id = %d',
-            $plan_id,
-            $class_id
-        )) ?: [];
+        $rows = self::slots_of($plan_id, $class_id);
 
         $conflicts = 0;
         $late      = 0;
@@ -890,6 +950,8 @@ final class SCH_TT
     public static function generate(int $plan_id, array $class_ids): array|WP_Error
     {
         global $wpdb;
+
+        self::forget_slots();
 
         $plan = self::get_plan($plan_id);
         if (!$plan) {
@@ -1141,6 +1203,8 @@ final class SCH_TT
     {
         global $wpdb;
 
+        self::forget_slots();
+
         $plan = self::get_plan($plan_id);
         if (!$plan) {
             return sch_api_error('no_plan', __('الخطة غير موجودة.', 'school-system'), 404);
@@ -1168,6 +1232,8 @@ final class SCH_TT
 
         $tt   = sch_table('timetable');
         $ts   = sch_table('tt_slots');
+        $cs   = sch_table('class_subjects');
+        $tq   = sch_table('tt_quota');
         $now  = sch_now();
 
         $wpdb->query('START TRANSACTION');
@@ -1223,6 +1289,45 @@ final class SCH_TT
             $now,
             $plan_id
         ));
+
+        if ($ok === false) {
+            $wpdb->query('ROLLBACK');
+            return sch_api_error('db_error', sprintf(
+                /* translators: %s: رسالة قاعدة البيانات */
+                __('تعذّر النشر — %s', 'school-system'),
+                (string) $wpdb->last_error
+            ), 500);
+        }
+
+        /*
+         * مواد الشعبة ومعلموها — تُشتقّ من الخطة المعتمدة لا تُكتب باليد.
+         *
+         * `class_subjects` مقروءٌ في ثلاثة مواضع لا صلة لها بالجدول ظاهريًّا:
+         * نطاق صلاحيات المعلم (`SCH_Perms::class_ids_for`) · شاشة التغطية عند
+         * الوكيل · و«فصولي» في تطبيق المعلم. **وكاتبُه الوحيد كان شاشة
+         * «المواد الدراسية»** — وهي شاشةٌ ثانية تكتب في جدولٍ ثالث خارج
+         * دورة الخطة والاعتماد.
+         *
+         * فمن بنى جدوله من شاشة الجداول وحدها — وهو المسار الصحيح — لم
+         * يُكتب له صفٌّ واحد هنا: معلّم المادة لا شعبة في نطاقه، والتغطية
+         * تحسبه بلا مواد. والصفوف الآن تُبنى مع النشر، فمصدر الحقيقة واحد.
+         */
+        $ok = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$cs} WHERE class_id IN ({$in})",
+            ...array_map('intval', $classes)
+        ));
+
+        if ($ok !== false) {
+            $ok = $wpdb->query($wpdb->prepare(
+                "INSERT INTO {$cs} (class_id, subject_id, teacher_user_id, created_at)
+                 SELECT q.class_id, q.subject_id, q.teacher_user_id, %s
+                 FROM {$tq} q
+                 WHERE q.plan_id = %d AND q.weekly > 0 AND q.class_id IN ({$in})",
+                $now,
+                $plan_id,
+                ...array_map('intval', $classes)
+            ));
+        }
 
         if ($ok === false) {
             $wpdb->query('ROLLBACK');
@@ -1289,6 +1394,54 @@ final class SCH_TT
     }
 
     /**
+     * فتح خطةٍ منشورة للتعديل.
+     *
+     * الاعتماد كان بابًا في اتجاهٍ واحد: بعده تُقفَل الشاشة كلّها فلا تُبدَّل
+     * حصةٌ ولا يُغيَّر معلّم — **ومن أخطأ في خانةٍ واحدة لا حيلة له إلا أن
+     * يبني شهرًا جديدًا من الصفر**. وهذا ليس أمانًا، هو عجزٌ يدفع الوكيل
+     * إلى تركِ الخطأ في الجدول.
+     *
+     * **والمنشور لا يُمَسّ هنا.** صفوف `timetable` تبقى كما هي، وراية السنة
+     * كذلك: المعلم ووليّ الأمر يريان آخر جدولٍ اعتُمد **حتى يُعتمَد التالي**.
+     * فالتعديل يجري على نسخةٍ جانبية، والاعتماد وحده يُنزلها إلى الناس —
+     * ولا يستيقظ أحدٌ على جدولٍ تغيّر تحت قدميه بينما الوكيل يجرّب.
+     *
+     * والقفل هو التحديث نفسه (كما في `publish()`): ضغطتان في ثانيةٍ واحدة
+     * لا تفتحان الخطة مرّتين، فالثانية تُصيب صفر صفوف وتُردّ.
+     */
+    public static function reopen(int $plan_id): array|WP_Error
+    {
+        global $wpdb;
+
+        $plan = self::get_plan($plan_id);
+
+        if (!$plan) {
+            return sch_api_error('no_plan', __('الخطة غير موجودة.', 'school-system'), 404);
+        }
+        if ((string) $plan->status !== 'published') {
+            return sch_api_error('not_published', __('الجدول مفتوح للتعديل أصلًا.', 'school-system'), 409);
+        }
+
+        $won = $wpdb->query($wpdb->prepare(
+            'UPDATE ' . sch_table('tt_plans') . "
+             SET status = 'draft', updated_at = %s
+             WHERE id = %d AND status = 'published'",
+            sch_now(),
+            $plan_id
+        ));
+
+        if ((int) $won !== 1) {
+            return sch_api_error('already', __('فُتحت الخطة للتوّ — حدّث الصفحة.', 'school-system'), 409);
+        }
+
+        sch_audit('tt.reopened', 'tt_plan', $plan_id, ['month' => substr((string) $plan->effective_from, 0, 7)]);
+
+        return [
+            'msg' => __('فُتح الجدول للتعديل — والمنشور باقٍ عند المعلمين وأولياء الأمور حتى تعتمده من جديد.', 'school-system'),
+        ];
+    }
+
+    /**
      * نسخ جدول شعبة إلى شعب أخرى.
      *
      * تُنسَخ **المادة دون المعلم**: نسخ المعلم يعني حجزه في شعبتين في الحصة
@@ -1297,6 +1450,8 @@ final class SCH_TT
     public static function copy_to(int $plan_id, int $from_class, array $to_classes): int
     {
         global $wpdb;
+
+        self::forget_slots();
 
         $src = $wpdb->get_results($wpdb->prepare(
             'SELECT day_of_week, period_no, subject_id FROM ' . sch_table('tt_slots') . '
@@ -1373,6 +1528,8 @@ final class SCH_TT
     public static function spread(int $plan_id, int $class_id): array
     {
         global $wpdb;
+
+        self::forget_slots();
 
         $plan = self::get_plan($plan_id);
         if (!$plan || !SCH_Classes::get($class_id)) {

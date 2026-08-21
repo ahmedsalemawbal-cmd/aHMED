@@ -79,7 +79,7 @@ asort($present_roles);
             <b id="sch-count" class="sch-pickbar__n">٠</b>
 
             <span class="sch-pickbar__acts">
-                <form method="post" id="sch-print-form">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-print-form">
                     <?php wp_nonce_field('sch_print_staff_badges', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="print_staff_badges">
                     <input type="hidden" name="ids" id="sch-ids">

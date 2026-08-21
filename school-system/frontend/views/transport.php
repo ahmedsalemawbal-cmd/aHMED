@@ -123,7 +123,7 @@ $expiring = SCH_Buses::expiring();
 </div>
 
 <?php SCH_Modal::open('sch-add-route', __('إضافة مسار', 'school-system'), __('النقاط وإحداثياتها تُضاف بعد الإنشاء', 'school-system')); ?>
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_route', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_route">
         <div class="sch-grid">
@@ -154,7 +154,7 @@ $expiring = SCH_Buses::expiring();
 <?php SCH_Modal::close(); ?>
 
 <?php SCH_Modal::open('sch-add-bus', __('إضافة باص', 'school-system'), __('اللوحة والسعة والسائق', 'school-system')); ?>
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_bus', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_bus">
         <div class="sch-grid">

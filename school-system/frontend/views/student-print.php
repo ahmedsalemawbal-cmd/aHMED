@@ -33,6 +33,8 @@ $photo_url = $student->photo_file
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($full . ' — ' . ($student->academic_no ?: '')); ?></title>
 
+    <?php /* حاجبٌ عمدًا هنا وحده: الورقة تُطبَع فور تحميلها، وخطٌّ يصل
+             بعد أمر الطباعة يصل متأخّرًا عن الورق. انظر `sch_font_link()`. */ ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">

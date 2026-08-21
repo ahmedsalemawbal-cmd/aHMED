@@ -87,7 +87,7 @@ SCH_Modal::head(
                                 $sch_stale = $c->review_at !== null && $c->review_at <= current_time('Y-m-d');
                                 ?>
                                 <?php if ($sch_stale && $c->status === 'published') : ?>
-                                    <form method="post">
+                                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                         <?php wp_nonce_field('sch_content_renew', '_sch_nonce'); ?>
                                         <input type="hidden" name="sch_action" value="content_renew">
                                         <input type="hidden" name="content_id" value="<?php echo esc_attr((string) $c->id); ?>">
@@ -97,7 +97,7 @@ SCH_Modal::head(
 
                                 <?php foreach (['published' => __('نشر', 'school-system'), 'archived' => __('أرشفة', 'school-system')] as $slug => $label) : ?>
                                     <?php if ($c->status !== $slug) : ?>
-                                        <form method="post">
+                                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                             <?php wp_nonce_field('sch_content_status', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="content_status">
                                             <input type="hidden" name="content_id" value="<?php echo esc_attr((string) $c->id); ?>">
@@ -119,7 +119,7 @@ SCH_Modal::head(
 <?php SCH_Modal::open('sch-add-content', __('إضافة محتوى', 'school-system'), __('كتاب أو فيديو أو لعبة معزولة', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('إضافة محتوى', 'school-system'); ?></h2>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" enctype="multipart/form-data">
         <?php wp_nonce_field('sch_add_content', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_content">
 

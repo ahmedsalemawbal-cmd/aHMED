@@ -57,7 +57,7 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
 
         <div id="sch-lookup-result" class="sch-lookup__result" hidden></div>
 
-        <form method="post" id="sch-link-form" hidden>
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-link-form" hidden>
             <?php wp_nonce_field('sch_add_child', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="add_child">
             <input type="hidden" name="academic_no" id="sch-link-no">
@@ -111,7 +111,7 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
                         <td><?php echo esc_html(SCH_Guardians::relation_label($child->relation)); ?></td>
                         <td><?php echo $child->is_primary ? '<span class="sch-badge sch-badge--ok">' . esc_html__('نعم', 'school-system') . '</span>' : '—'; ?></td>
                         <td>
-                            <form method="post" onsubmit="return confirm('<?php esc_attr_e('فك ارتباط هذا الطالب؟', 'school-system'); ?>');">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('فك ارتباط هذا الطالب؟', 'school-system'); ?>');">
                                 <?php wp_nonce_field('sch_unlink_guardian', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="unlink_guardian">
                                 <input type="hidden" name="guardian_user_id" value="<?php echo esc_attr((string) $guardian->user_id); ?>">
@@ -128,7 +128,7 @@ $children = SCH_Guardians::children_of_guardian((int) $guardian->user_id);
 </div>
 
 <?php SCH_Modal::open('sch-edit-guardian', __('تعديل البيانات', 'school-system'), __('حدّث جوّال ولي الأمر وعنوانه وبياناته', 'school-system')); ?>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_update_guardian', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="update_guardian">
 

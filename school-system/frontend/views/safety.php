@@ -44,7 +44,7 @@ SCH_Modal::head(
                         </td>
                         <td>
                             <?php if ($i->status === 'open') : ?>
-                                <form method="post" onsubmit="return confirm('سيُغلق البلاغ ولا يمكن إعادة فتحه. متابعة؟');">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('سيُغلق البلاغ ولا يمكن إعادة فتحه. متابعة؟');">
                                     <?php wp_nonce_field('sch_close_incident', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="close_incident">
                                     <input type="hidden" name="incident_id" value="<?php echo esc_attr((string) $i->id); ?>">
@@ -62,7 +62,7 @@ SCH_Modal::head(
 
 <?php SCH_Modal::open('sch-add-incident', __('تسجيل بلاغ سلامة', 'school-system'), __('يصل للمدير فورًا', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('تسجيل بلاغ', 'school-system'); ?></h2>
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_incident', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_incident">
         <div class="sch-grid">

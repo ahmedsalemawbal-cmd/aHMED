@@ -30,7 +30,7 @@ $sch_step = !$sch_ready ? 1 : ($sch_devices === 0 ? 2 : 3);
 
             <?php if (!$sch_ready) : ?>
                 <p class="sch-sub"><?php esc_html_e('لم يُولَّد بعد — فلا إشعار يخرج. اضغط الزر مرة واحدة.', 'school-system'); ?></p>
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_push_keys', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="push_keys">
                     <button class="sch-btn sch-mt"><?php esc_html_e('توليد المفتاح', 'school-system'); ?></button>
@@ -54,7 +54,7 @@ $sch_step = !$sch_ready ? 1 : ($sch_devices === 0 ? 2 : 3);
                         <strong><?php esc_html_e('هذا يُبطل كل الأجهزة المشتركة.', 'school-system'); ?></strong>
                         <p><?php esc_html_e('كل ولي أمر سيتوقف عن استقبال الإشعارات حتى يفتح التطبيق ويفعّلها من جديد — ولن يُنبَّه أحد. لا تفعلها إلا إن تسرّب المفتاح.', 'school-system'); ?></p>
                     </div>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_push_keys', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="push_keys">
                         <label class="sch-field">
@@ -109,7 +109,7 @@ $sch_step = !$sch_ready ? 1 : ($sch_devices === 0 ? 2 : 3);
                     <p><?php esc_html_e('يصلك أنت وحدك — الدليل الوحيد أن السلسلة كاملة تعمل قبل أن يُعتمد عليها.', 'school-system'); ?></p>
                 </div>
             </header>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_push_test', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="push_test">
                 <button class="sch-btn"<?php disabled(!$sch_ready); ?>><?php esc_html_e('أرسل لي إشعارًا الآن', 'school-system'); ?></button>
@@ -150,7 +150,7 @@ $sch_step = !$sch_ready ? 1 : ($sch_devices === 0 ? 2 : 3);
                     <p><?php esc_html_e('إيقافها لا يمسّ المفاتيح ولا الاشتراكات — يوقف الإرسال فقط.', 'school-system'); ?></p>
                 </div>
             </header>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_push_channel', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="push_channel">
                 <label class="sch-check">

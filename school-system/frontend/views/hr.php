@@ -65,7 +65,7 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_add_contract', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_contract">
         <div class="sch-grid">
@@ -153,7 +153,7 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
                             <?php if ($l->status === 'pending') : ?>
                                 <div class="sch-inline">
                                     <?php foreach (['approved' => __('اعتماد', 'school-system'), 'rejected' => __('رفض', 'school-system')] as $dec => $label) : ?>
-                                        <form method="post">
+                                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                             <?php wp_nonce_field('sch_decide_leave', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="decide_leave">
                                             <input type="hidden" name="leave_id" value="<?php echo esc_attr((string) $l->id); ?>">
@@ -171,7 +171,7 @@ $staff     = SCH_Staff::list(['status' => 'active', 'per_page' => 200]);
         </div>
     <?php endif; ?>
 
-    <form method="post" class="sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
         <?php wp_nonce_field('sch_request_leave', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="request_leave">
         <div class="sch-grid">

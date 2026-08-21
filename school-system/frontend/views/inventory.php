@@ -52,7 +52,7 @@ SCH_Modal::head(
             </table>
         </div>
 
-        <form method="post" class="sch-toolbar sch-mt">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
             <?php wp_nonce_field('sch_move_stock', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="move_stock">
             <select name="item_id" required aria-label="الصنف">
@@ -75,7 +75,7 @@ SCH_Modal::head(
 
 <?php SCH_Modal::open('sch-add-item', __('إضافة صنف', 'school-system'), __('يدخل المستودع بكميته الابتدائية', 'school-system')); ?>
     <h2 hidden><?php esc_html_e('إضافة صنف', 'school-system'); ?></h2>
-    <form method="post" class="sch-toolbar">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
         <?php wp_nonce_field('sch_add_item', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_item">
         <input type="text" name="sku" placeholder="<?php esc_attr_e('الرمز', 'school-system'); ?>" dir="ltr" style="max-width:120px">

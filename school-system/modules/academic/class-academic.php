@@ -6,6 +6,10 @@ defined('ABSPATH') || exit;
 /** السنوات الدراسية. كل سجل أكاديمي يُنسب لسنة. */
 final class SCH_Years
 {
+    /** ذاكرة الطلب الواحد للسنة الجارية. */
+    private static ?object $memo = null;
+    private static bool $loaded  = false;
+
     public static function create(array $input): array|WP_Error
     {
         global $wpdb;
@@ -49,6 +53,7 @@ final class SCH_Years
         $wpdb->query("UPDATE " . sch_table('academic_years') . " SET is_current = 0");
         $wpdb->update(sch_table('academic_years'), ['is_current' => 1], ['id' => $id]);
         update_option('sch_current_year_id', $id, false);
+        self::forget();
 
         // مزامنة الحقول المبسّطة على سجل الطالب من تسجيله في السنة التي صارت
         // حالية — فالمرحلة/الصف/الشعبة تعكس العام الجاري لا الماضي (بعد الترقية).
@@ -74,13 +79,38 @@ final class SCH_Years
         ) ?: [];
     }
 
+    /**
+     * السنة الجارية — **مرّةً واحدة في الطلب**.
+     *
+     * `current_id()` تُنادى من كل طبقةٍ تقريبًا: الشعب والجداول والفواتير
+     * والحضور والاشتراكات كلّها مقيّدة بالسنة. وبلا ذاكرةٍ كان كل نداءٍ منها
+     * استعلامًا جديدًا بالنصّ نفسه — **عشرات الاستعلامات المتطابقة في رسمة
+     * الصفحة الواحدة**، وضِعفها في كل ضغطة زرّ (إرسالٌ ثمّ تحويلٌ ثمّ تحميل).
+     *
+     * والسنة لا تتبدّل داخل الطلب إلا في `set_current()` — وهي تُفرّغ.
+     */
     public static function current(): ?object
     {
         global $wpdb;
+
+        if (self::$loaded) {
+            return self::$memo;
+        }
+
         $row = $wpdb->get_row(
             'SELECT * FROM ' . sch_table('academic_years') . ' WHERE is_current = 1 LIMIT 1'
         );
-        return $row ?: null;
+
+        self::$loaded = true;
+
+        return self::$memo = ($row ?: null);
+    }
+
+    /** تُنادى بعد كل كتابةٍ تمسّ السنة الجارية. */
+    public static function forget(): void
+    {
+        self::$loaded = false;
+        self::$memo   = null;
     }
 
     public static function current_id(): int
@@ -93,8 +123,27 @@ final class SCH_Years
 /** الصفوف والشعب. */
 final class SCH_Classes
 {
+    /**
+     * ذاكرة الطلب الواحد — معرّف الشعبة => صفّها (أو `null` إن لم توجد).
+     *
+     * @var array<int,?object>
+     */
+    private static array $memo = [];
+
+    /**
+     * مراحل المدرسة — **مفردةٌ واحدة يقرأها النظام كلّه**.
+     *
+     * كانت أربعًا، وشاشة الجداول تعرض ستّ بطاقاتٍ للإيقاع (`SCH_TT::PRESETS`)
+     * فيها «الحضانة» و«التمهيدي». ومرحلةٌ خارج هذه القائمة **لا تُنشأ لها
+     * شعبة أصلًا** (`create()` ترفضها) — فالبطاقتان لا تُضيئان أبدًا مهما
+     * ضُغطتا، والوكيل يظنّ الشاشة معطّلة.
+     *
+     * والقائمتان الآن واحدة، و`audit.py` يمنع افتراقهما ثانيةً.
+     */
     public const STAGES = [
-        'kg'           => 'رياض أطفال',
+        'nursery'      => 'الحضانة',
+        'kg'           => 'الروضة',
+        'prep'         => 'التمهيدي',
         'primary'      => 'ابتدائي',
         'intermediate' => 'متوسط',
         'secondary'    => 'ثانوي',
@@ -135,11 +184,24 @@ final class SCH_Classes
         return ['id' => (int) $wpdb->insert_id];
     }
 
+    /**
+     * شعبةٌ بمعرّفها — **مرّةً واحدة لكلّ معرّف في الطلب**.
+     *
+     * شاشة الجداول وحدها تسألها ستّ مرّات عن الشعبة نفسها في العرض الواحد
+     * (`capacity()` · `days()` · `health()` · العرض)، والمولّد يسألها لكل
+     * شعبةٍ يمرّ بها. والصفّ لا يتغيّر داخل الطلب إلا بحذفه.
+     */
     public static function get(int $id): ?object
     {
         global $wpdb;
+
+        if (array_key_exists($id, self::$memo)) {
+            return self::$memo[$id];
+        }
+
         $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . sch_table('classes') . ' WHERE id = %d', $id));
-        return $row ?: null;
+
+        return self::$memo[$id] = ($row ?: null);
     }
 
     /** الصفوف مع عدد الطلاب المسجّلين في كل شعبة. */
@@ -207,6 +269,7 @@ final class SCH_Classes
         }
 
         $wpdb->delete(sch_table('classes'), ['id' => $id]);
+        unset(self::$memo[$id]);
         sch_audit('class.deleted', 'class', $id);
 
         return true;

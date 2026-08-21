@@ -90,7 +90,7 @@ $unchecked  = array_values(array_filter($staff, static fn (object $s): bool => $
                 <?php if ($v->status === 'proposed' && $v->candidates !== []) : ?>
                     <div class="sch-candidates">
                         <?php foreach ($v->candidates as $i => $c) : ?>
-                            <form method="post" class="sch-candidate<?php echo $i === 0 ? ' is-best' : ''; ?>">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-candidate<?php echo $i === 0 ? ' is-best' : ''; ?>">
                                 <?php wp_nonce_field('sch_assign_sub', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="assign_sub">
                                 <input type="hidden" name="sub_id" value="<?php echo esc_attr((string) $v->id); ?>">

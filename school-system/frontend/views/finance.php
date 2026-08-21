@@ -39,7 +39,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
         <?php if ($invoice->status === 'void') : ?>
             <p class="sch-mt"><span class="sch-badge sch-badge--muted"><?php esc_html_e('فاتورة ملغاة', 'school-system'); ?></span></p>
         <?php elseif ((float) $invoice->paid == 0 && current_user_can('sch_manage_finance')) : ?>
-            <form method="post" class="sch-toolbar sch-mt" onsubmit="return confirm('<?php esc_attr_e('إلغاء هذه الفاتورة وعكس قيدها المحاسبي؟ لا رجعة.', 'school-system'); ?>');">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt" onsubmit="return confirm('<?php esc_attr_e('إلغاء هذه الفاتورة وعكس قيدها المحاسبي؟ لا رجعة.', 'school-system'); ?>');">
                 <?php wp_nonce_field('sch_void_invoice', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="void_invoice">
                 <input type="hidden" name="invoice_id" value="<?php echo esc_attr((string) $invoice->id); ?>">
@@ -81,7 +81,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
 
     <div class="sch-card">
         <h2><?php esc_html_e('تسجيل دفعة', 'school-system'); ?></h2>
-        <form method="post" class="sch-toolbar">
+        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
             <?php wp_nonce_field('sch_record_payment', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="record_payment">
             <input type="hidden" name="invoice_id" value="<?php echo esc_attr((string) $invoice->id); ?>">
@@ -120,7 +120,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
                                 <?php if ($p->refunded_at) : ?>
                                     <span class="sch-badge sch-badge--muted"><?php esc_html_e('مستردّة', 'school-system'); ?></span>
                                 <?php elseif (current_user_can('sch_manage_finance')) : ?>
-                                    <form method="post" class="sch-toolbar" onsubmit="return confirm('<?php esc_attr_e('استرداد هذه الدفعة وعكس قيدها المحاسبي؟', 'school-system'); ?>');">
+                                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar" onsubmit="return confirm('<?php esc_attr_e('استرداد هذه الدفعة وعكس قيدها المحاسبي؟', 'school-system'); ?>');">
                                         <?php wp_nonce_field('sch_refund_payment', '_sch_nonce'); ?>
                                         <input type="hidden" name="sch_action" value="refund_payment">
                                         <input type="hidden" name="payment_id" value="<?php echo esc_attr((string) $p->id); ?>">
@@ -343,7 +343,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
         </p>
     <?php endif; ?>
 
-    <form method="post" class="sch-toolbar sch-mt">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar sch-mt">
         <?php wp_nonce_field('sch_add_fee_plan', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_fee_plan">
         <input type="text" name="name" placeholder="<?php esc_attr_e('اسم الخطة', 'school-system'); ?>" required>
@@ -357,7 +357,7 @@ $sch_pick = SCH_Students::list(['status' => 'active', 'per_page' => 400, 'with' 
     <h2 hidden><?php esc_html_e('إصدار فاتورة', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('الأصل دفعة واحدة. وتقسيط المدرسة امتياز يُمنَح بسبب مكتوب، لا خيار يُفتح للجميع.', 'school-system'); ?></p>
 
-    <form method="post" id="sch-inv-form">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" id="sch-inv-form">
         <?php wp_nonce_field('sch_issue_invoice', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="issue_invoice">
 

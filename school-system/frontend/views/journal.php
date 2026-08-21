@@ -43,14 +43,14 @@ $accounts = SCH_Accounts::all();
 
         <div class="sch-toolbar sch-mt">
             <?php if ($entry->status === 'draft') : ?>
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_post_journal', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="post_journal">
                     <input type="hidden" name="entry_id" value="<?php echo esc_attr((string) $entry->id); ?>">
                     <button class="sch-btn"><?php esc_html_e('ترحيل القيد', 'school-system'); ?></button>
                 </form>
             <?php else : ?>
-                <form method="post" onsubmit="return confirm('<?php esc_attr_e('سيُنشأ قيد عكسي. القيود المرحّلة لا تُحذف. متابعة؟', 'school-system'); ?>');">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('سيُنشأ قيد عكسي. القيود المرحّلة لا تُحذف. متابعة؟', 'school-system'); ?>');">
                     <?php wp_nonce_field('sch_reverse_journal', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="reverse_journal">
                     <input type="hidden" name="entry_id" value="<?php echo esc_attr((string) $entry->id); ?>">
@@ -105,7 +105,7 @@ $accounts = SCH_Accounts::all();
     <h2><?php esc_html_e('قيد يدوي', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('مجموع المدين يجب أن يساوي مجموع الدائن، وإلا رُفض القيد.', 'school-system'); ?></p>
 
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
         <?php wp_nonce_field('sch_add_journal', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_journal">
 

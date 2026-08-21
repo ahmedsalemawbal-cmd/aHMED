@@ -72,7 +72,7 @@ $stale = 3;
 
             <div class="sch-toolbar sch-mt">
                 <?php if ($n->status === 'open') : ?>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_take_note', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="take_note">
                         <input type="hidden" name="note_id" value="<?php echo esc_attr((string) $n->id); ?>">
@@ -81,7 +81,7 @@ $stale = 3;
                 <?php endif; ?>
             </div>
 
-            <form method="post" class="sch-mt">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
                 <?php wp_nonce_field('sch_contact_parent', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="contact_parent">
                 <input type="hidden" name="note_id" value="<?php echo esc_attr((string) $n->id); ?>">
@@ -91,7 +91,7 @@ $stale = 3;
                 </div>
             </form>
 
-            <form method="post" class="sch-mt">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-mt">
                 <?php wp_nonce_field('sch_close_note', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="close_note">
                 <input type="hidden" name="note_id" value="<?php echo esc_attr((string) $n->id); ?>">

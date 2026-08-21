@@ -380,3 +380,32 @@ function sch_logout_ok(): bool
 {
     return wp_verify_nonce((string) ($_GET['_sch_out'] ?? ''), 'sch_logout') !== false;
 }
+
+/**
+ * خطّ الواجهة — **بلا حجب أوّل رسمة**.
+ *
+ * كان الوسم `<link rel="stylesheet">` عاديًّا في تسع شاشات: المتصفّح يقف
+ * عنده ولا يرسم حرفًا واحدًا حتى تصل ورقة أنماطٍ من خادمٍ خارجيّ. وكل ضغطة
+ * زرٍّ في الداشبورد إرسالُ نموذجٍ ثمّ تحويلٌ ثمّ تحميلُ صفحةٍ كاملة — أي
+ * **وقفتان على خادم جوجل في كل ضغطة**. وفي شبكةٍ بطيئة أو مرشَّحة تصير
+ * الوقفة ثوانيَ، وهذا بعينه ما يراه الوكيل «تحميلًا يدور ويدور».
+ *
+ * والحيلة قياسية: يُحمَّل الوسم بوسيط `print` فلا يحجب الرسم، ثمّ يُحوَّل إلى
+ * `all` حين يصل. فيُرسَم النصّ فورًا بخطّ النظام ويُبدَّل بعد لحظة —
+ * و`display=swap` في الرابط أصلًا يطلب هذا التبديل نفسه لملفّ الخطّ.
+ * ومن لا جافاسكربت عنده يأخذه من `<noscript>` كما كان.
+ *
+ * ولا يُستعمل في شاشة الطباعة: الورقة تُطبَع فور تحميلها، وخطٌّ يصل بعد أمر
+ * الطباعة يصل متأخّرًا عن الورق.
+ */
+function sch_font_link(): void
+{
+    $href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';
+    ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="<?php echo esc_url($href); ?>" rel="stylesheet" media="print"
+          onload="this.media='all';this.onload=null;">
+    <noscript><link href="<?php echo esc_url($href); ?>" rel="stylesheet"></noscript>
+    <?php
+}

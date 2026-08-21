@@ -58,7 +58,7 @@ SCH_Modal::head(
     <h2 hidden><?php esc_html_e('إضافة حساب', 'school-system'); ?></h2>
     <p class="sch-sub"><?php esc_html_e('الحسابات النظامية يعتمد عليها الترحيل التلقائي ولا تُحذف.', 'school-system'); ?></p>
 
-    <form method="post" class="sch-toolbar">
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-toolbar">
         <?php wp_nonce_field('sch_add_account', '_sch_nonce'); ?>
         <input type="hidden" name="sch_action" value="add_account">
         <input type="text" name="code" placeholder="<?php esc_attr_e('الرمز', 'school-system'); ?>" dir="ltr" required style="max-width:110px">

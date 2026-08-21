@@ -20,6 +20,7 @@ $can_sub = current_user_can('sch_manage_subjects');
 
 $months = SCH_TT::months();
 $filled = SCH_TT::months_with_slots();
+$span_y = SCH_TT::year_span();
 
 $ym = sanitize_text_field((string) ($_GET['m'] ?? ''));
 if (!isset($months[$ym])) {
@@ -45,13 +46,42 @@ if ($classes === []) {
     return;
 }
 
+$step = max(1, min(4, (int) ($_GET['step'] ?? 1)));
+$lens = in_array((string) ($_GET['lens'] ?? ''), ['teacher', 'school'], true) ? (string) $_GET['lens'] : 'section';
+$pick = absint($_GET['pick'] ?? 0);
+$hl   = sanitize_key((string) ($_GET['hl'] ?? ''));
+
 $cls = absint($_GET['cls'] ?? 0);
 if ($cls <= 0 || !SCH_Classes::get($cls)) {
     $cls = (int) $classes[0]->id;
 }
 
 $class  = SCH_Classes::get($cls);
-$stage  = (string) $class->stage;
+
+/*
+ * المرحلة المعروضة — من الشعبة، أو من السطر في خطوة الإعدادات.
+ *
+ * بطاقة المرحلة تنقل إلى أوّل شعبةٍ فيها. **ومرحلةٌ لا شعبة فيها بعدُ كانت
+ * تُبقي الشاشة على شعبتها الحالية**: يُحفظ إيقاعها في القاعدة ولا يتحرّك في
+ * الشاشة شيء — فتبدو البطاقة كأنها لا تُضغَط أصلًا. وهذا حال «الحضانة»
+ * و«التمهيدي» في كل مدرسةٍ لم تفتح لهما شعبًا بعد.
+ *
+ * وإيقاع اليوم **للمرحلة لا للشعبة**، فلا مانع أن تُضبَط مرحلةٌ قبل أن
+ * تُفتح أوّل شعبةٍ فيها — بل هذا هو الترتيب الطبيعيّ عند التجهيز.
+ */
+$stage = (string) $class->stage;
+
+if ($step === 1) {
+    $want = sanitize_key((string) ($_GET['stage'] ?? ''));
+
+    if ($want !== '' && isset(SCH_Classes::STAGES[$want])) {
+        $stage = $want;
+    }
+}
+
+/** هل الشعبة المعروضة من هذه المرحلة؟ لا، حين تُعرض مرحلةٌ بلا شعب. */
+$stage_live = (string) $class->stage === $stage;
+
 $bell   = SCH_TT::bell($stage);
 $days   = SCH_TT::days($stage);
 $ribbon = SCH_TT::ribbon($stage);
@@ -69,11 +99,6 @@ foreach ($rows as $r) {
 $grid   = SCH_TT::grid($plan_id, $cls);
 $health = SCH_TT::health($plan_id, $cls);
 $rules  = SCH_TT::rules_of($plan);
-
-$step = max(1, min(4, (int) ($_GET['step'] ?? 1)));
-$lens = in_array((string) ($_GET['lens'] ?? ''), ['teacher', 'school'], true) ? (string) $_GET['lens'] : 'section';
-$pick = absint($_GET['pick'] ?? 0);
-$hl   = sanitize_key((string) ($_GET['hl'] ?? ''));
 
 $base = SCH_Dashboard::url('timetable');
 $here = static fn (array $args): string => add_query_arg(
@@ -162,13 +187,14 @@ $steps = [
 
         <div class="sch-tt__acts">
             <span class="sch-tt__span">
-                <b><?php echo esc_html((SCH_Classes::STAGES[$stage] ?? $stage) . ' — ' . $sec_lb); ?></b>
+                <?php // شعبةٌ من مرحلةٍ أخرى لا تُلصَق باسم المرحلة المعروضة — الوكيل يقرأها عنوانًا فيصدّقها. ?>
+                <b><?php echo esc_html((SCH_Classes::STAGES[$stage] ?? $stage) . ($stage_live ? ' — ' . $sec_lb : '')); ?></b>
                 <i aria-hidden="true"></i>
                 <code dir="ltr"><?php echo esc_html(SCH_TT::hhmm((int) $bell->start_min) . ' → ' . $span['end']); ?></code>
             </span>
 
             <?php if ($live) : ?>
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_tt_bell', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="tt_bell">
                     <?php $bell_hidden(); ?>
@@ -179,14 +205,14 @@ $steps = [
                 </form>
 
                 <?php if ($step === 4 && $can_pub) : ?>
-                    <form method="post" onsubmit="return confirm('<?php esc_attr_e('اعتماد الجدول ونشره للمعلمين وأولياء الأمور؟', 'school-system'); ?>');">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('اعتماد الجدول ونشره للمعلمين وأولياء الأمور؟', 'school-system'); ?>');">
                         <?php wp_nonce_field('sch_tt_publish', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="tt_publish">
                         <?php $keep(); ?>
                         <button class="sch-tt__b sch-tt__b--go"><?php esc_html_e('اعتماد ونشر', 'school-system'); ?></button>
                     </form>
                 <?php else : ?>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_tt_generate', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="tt_generate">
                         <input type="hidden" name="scope" value="class">
@@ -196,6 +222,19 @@ $steps = [
                 <?php endif; ?>
             <?php else : ?>
                 <span class="sch-tt__chip"><i aria-hidden="true"></i><?php esc_html_e('منشور', 'school-system'); ?></span>
+
+                <?php if ($can_pub) : ?>
+                    <?php // الاعتماد ليس بابًا في اتجاهٍ واحد: يُفتح للتعديل، والمنشور باقٍ حتى يُعتمد التالي. ?>
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>"
+                          onsubmit="return confirm('<?php esc_attr_e('سيُفتح الجدول للتعديل. والمنشور يبقى كما هو عند المعلمين وأولياء الأمور حتى تعتمده من جديد. متابعة؟', 'school-system'); ?>');">
+                        <?php wp_nonce_field('sch_tt_reopen', '_sch_nonce'); ?>
+                        <input type="hidden" name="sch_action" value="tt_reopen">
+                        <?php $keep(); ?>
+                        <button class="sch-tt__b" title="<?php esc_attr_e('يُعاد الجدول مسوّدةً — ولا يتغيّر شيء عند المعلمين حتى تعتمده ثانيةً', 'school-system'); ?>">
+                            <?php esc_html_e('فتح للتعديل', 'school-system'); ?>
+                        </button>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
@@ -212,17 +251,47 @@ $steps = [
         <?php endforeach; ?>
     </nav>
 
-    <!-- ══ شريط الأشهر ══ -->
+    <!-- ══ الشهر ══ -->
+    <?php
+    /*
+     * قائمة منسدلة لا شريط شرائح: الأشهر اثنا عشر الآن لا خمسة، وشريطٌ
+     * أفقيّ بها يمتدّ خارج الشاشة فتُختار الأشهر الأخيرة بالسحب.
+     *
+     * ونموذج `GET` لا `POST`: اختيار شهرٍ قراءةٌ لا كتابة، ورابطُه يُنسَخ
+     * ويُحفظ. والاختيار يُرسِل نفسه (`data-tt-submit`)، وزرّ «عرض» يظهر لمن
+     * لا جافاسكربت عنده.
+     */
+    ?>
     <div class="sch-tt__months">
         <b><?php esc_html_e('الشهر', 'school-system'); ?></b>
-        <?php foreach ($months as $key => $label) : ?>
-            <a class="sch-tt__m<?php echo $key === $ym ? ' is-on' : ''; ?><?php echo isset($filled[$key]) ? ' is-filled' : ''; ?>"
-               href="<?php echo esc_url(add_query_arg(['m' => $key, 'cls' => $cls, 'step' => $step, 'lens' => $lens], $base)); ?>">
-                <i aria-hidden="true"></i><?php echo esc_html($label); ?>
-            </a>
-        <?php endforeach; ?>
+
+        <form method="get" action="<?php echo esc_url($base); ?>" class="sch-tt__mform">
+            <input type="hidden" name="cls" value="<?php echo esc_attr((string) $cls); ?>">
+            <input type="hidden" name="step" value="<?php echo esc_attr((string) $step); ?>">
+            <input type="hidden" name="lens" value="<?php echo esc_attr($lens); ?>">
+
+            <select class="sch-tt__sel is-on" name="m" data-tt-submit
+                    aria-label="<?php esc_attr_e('شهر الجدول', 'school-system'); ?>">
+                <?php foreach ($months as $key => $label) :
+                    $out_of = $key < $span_y['from'] || $key > $span_y['to']; ?>
+                    <option value="<?php echo esc_attr($key); ?>" <?php selected($key, $ym); ?>>
+                        <?php echo esc_html($label
+                            . (isset($filled[$key]) ? ' · ' . __('فيه جدول', 'school-system') : '')
+                            . ($out_of ? ' · ' . __('خارج السنة', 'school-system') : '')); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <noscript><button class="sch-tt__b sch-tt__b--sm"><?php esc_html_e('عرض', 'school-system'); ?></button></noscript>
+        </form>
+
         <span class="sch-tt__gap" aria-hidden="true"></span>
-        <span class="sch-tt__mnote"><?php esc_html_e('نفس الأسبوع يتكرر داخل الشهر المحدد', 'school-system'); ?></span>
+        <span class="sch-tt__mnote"><?php echo esc_html(sprintf(
+            /* translators: 1: شهر البداية 2: شهر النهاية */
+            __('نفس الأسبوع يتكرر داخل الشهر المحدد · السنة المسجَّلة %1$s ← %2$s', 'school-system'),
+            (string) ($months[$span_y['from']] ?? $span_y['from']),
+            (string) ($months[$span_y['to']] ?? $span_y['to'])
+        )); ?></span>
     </div>
 
     <?php // ══════════════════ ① الإعدادات ══════════════════ ?>
@@ -245,9 +314,10 @@ $steps = [
                 ?>
                 <?php foreach (SCH_TT::PRESETS as $slug => $p) :
                     $on   = $slug === $stage;
+                    $plb  = (string) (SCH_Classes::STAGES[$slug] ?? $slug);
                     $end  = SCH_TT::hhmm($p['start'] + $p['periods'] * $p['len'] + $p['break_len']);
                     $goto = (string) ($first_of[$slug] ?? $cls); ?>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_tt_bell', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="tt_bell">
                         <?php $bell_hidden([
@@ -264,10 +334,10 @@ $steps = [
                                 title="<?php echo esc_attr(sprintf(
                                     /* translators: %s: اسم المرحلة */
                                     __('انتقل إلى %s وطبّق إيقاعها', 'school-system'),
-                                    $p['label']
+                                    $plb
                                 )); ?>">
                             <span class="sch-tt__ph">
-                                <b><?php echo esc_html($p['label']); ?></b>
+                                <b><?php echo esc_html($plb); ?></b>
                                 <span class="sch-tt__pdot" aria-hidden="true"></span>
                             </span>
                             <span class="sch-tt__pfacts">
@@ -281,6 +351,15 @@ $steps = [
                     </form>
                 <?php endforeach; ?>
             </div>
+
+            <?php if (!$stage_live) : ?>
+                <?php // المرحلة معروضة وشعبها لم تُفتح بعد — يُقال صراحةً، فالإيقاع محفوظٌ ينتظرها. ?>
+                <span class="sch-tt__hint"><?php echo esc_html(sprintf(
+                    /* translators: %s: اسم المرحلة */
+                    __('لا شعب في %s بعد — الإيقاع يُحفظ لها الآن ويسري على أوّل شعبةٍ تُفتح فيها.', 'school-system'),
+                    SCH_Classes::STAGES[$stage] ?? $stage
+                )); ?></span>
+            <?php endif; ?>
         </div>
 
         <div class="sch-tt__c">
@@ -295,7 +374,7 @@ $steps = [
                 ] as [$name, $label, $value, $min, $max]) : ?>
                     <div class="sch-tt__f">
                         <span class="sch-tt__flab" id="ttl-<?php echo esc_attr($name); ?>"><?php echo esc_html($label); ?></span>
-                        <form method="post" class="sch-tt__num" aria-labelledby="ttl-<?php echo esc_attr($name); ?>">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-tt__num" aria-labelledby="ttl-<?php echo esc_attr($name); ?>">
                             <?php wp_nonce_field('sch_tt_bell', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="tt_bell">
                             <?php $bell_hidden([$name => null]); ?>
@@ -323,7 +402,7 @@ $steps = [
 
                 <div class="sch-tt__f sch-tt__f--time">
                     <label class="sch-tt__flab" for="tt-start"><?php esc_html_e('بداية الحصة الأولى', 'school-system'); ?></label>
-                    <form method="post">
+                    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                         <?php wp_nonce_field('sch_tt_bell', '_sch_nonce'); ?>
                         <input type="hidden" name="sch_action" value="tt_bell">
                         <?php $bell_hidden(['start' => null]); ?>
@@ -341,7 +420,7 @@ $steps = [
                             $bit  = 1 << ($n - 1);
                             $on   = (bool) ((int) $bell->days_mask & $bit);
                             $next = $on ? ((int) $bell->days_mask & ~$bit) : ((int) $bell->days_mask | $bit); ?>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_tt_bell', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="tt_bell">
                                 <?php $bell_hidden(['days_mask' => (string) $next]); ?>
@@ -465,7 +544,7 @@ $steps = [
                         ))); ?></span>
             </span>
 
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_tt_seed', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="tt_seed">
                 <?php $keep(); ?>
@@ -489,7 +568,7 @@ $steps = [
                     </span>
 
                     <span class="sch-tt__num sch-tt__num--lg">
-                        <form method="post">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                             <?php wp_nonce_field('sch_tt_quota', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="tt_quota">
                             <input type="hidden" name="subject_id" value="<?php echo esc_attr((string) $sid); ?>">
@@ -502,7 +581,7 @@ $steps = [
                             )); ?>">−</button>
                         </form>
                         <b dir="ltr"><?php echo esc_html((string) $n); ?></b>
-                        <form method="post">
+                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                             <?php wp_nonce_field('sch_tt_quota', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_action" value="tt_quota">
                             <input type="hidden" name="subject_id" value="<?php echo esc_attr((string) $sid); ?>">
@@ -519,7 +598,7 @@ $steps = [
             <?php endforeach; ?>
 
             <?php if ($can_sub) : ?>
-                <form method="post" class="sch-tt__add">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-tt__add">
                     <?php wp_nonce_field('sch_tt_subject', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="tt_subject">
                     <input type="hidden" name="stage" value="<?php echo esc_attr($stage); ?>">
@@ -551,7 +630,7 @@ $steps = [
                 <span><?php esc_html_e('لكل مادة معلم. النظام يمنع تعارض المعلم بين شعبتين في نفس الحصة.', 'school-system'); ?></span>
             </span>
             <span class="sch-tt__row">
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_tt_auto_assign', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="tt_auto_assign">
                     <?php $keep(); ?>
@@ -584,7 +663,7 @@ $steps = [
                             $has   = $t > 0 ? (int) ($load[$t] ?? 0) : 0;
                             $ratio = $tcap > 0 ? $has / $tcap : 0;
                             $lt    = $ratio > 1 ? 'is-over' : ($ratio > 0.8 ? 'is-warn' : ''); ?>
-                            <form method="post" class="sch-tt__arow">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-tt__arow">
                                 <?php wp_nonce_field('sch_tt_teacher', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="tt_teacher">
                                 <input type="hidden" name="subject_id" value="<?php echo esc_attr((string) $r->subject_id); ?>">
@@ -629,7 +708,7 @@ $steps = [
                         <?php foreach (SCH_TT::RULES as $key => $label) :
                             $on   = in_array($key, $rules, true);
                             $next = $on ? array_values(array_diff($rules, [$key])) : array_merge($rules, [$key]); ?>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_tt_rules', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="tt_rules">
                                 <input type="hidden" name="max_daily" value="<?php echo esc_attr((string) $plan->max_daily); ?>">
@@ -654,7 +733,7 @@ $steps = [
                         <?php foreach ([[-1, '−', __('إنقاص الحد', 'school-system')], [1, '+', __('زيادة الحد', 'school-system')]] as $i => [$delta, $glyph, $aria]) :
                             $to = max(1, min(14, $md + $delta)); ?>
                             <?php if ($i === 1) : ?><b dir="ltr"><?php echo esc_html((string) $md); ?></b><?php endif; ?>
-                            <form method="post">
+                            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                 <?php wp_nonce_field('sch_tt_rules', '_sch_nonce'); ?>
                                 <input type="hidden" name="sch_action" value="tt_rules">
                                 <input type="hidden" name="max_daily" value="<?php echo esc_attr((string) $to); ?>">
@@ -703,7 +782,7 @@ $steps = [
             <?php endforeach; ?>
 
             <?php if ($live) : ?>
-                <form method="post">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                     <?php wp_nonce_field('sch_tt_generate', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="tt_generate">
                     <input type="hidden" name="scope" value="school">
@@ -713,12 +792,14 @@ $steps = [
                         <?php esc_html_e('توليد من جديد', 'school-system'); ?>
                     </button>
                 </form>
-                <form method="post" onsubmit="return confirm('<?php esc_attr_e('تفريغ جدول هذه الشعبة؟', 'school-system'); ?>');">
+                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('تفريغ جدول هذه الشعبة؟', 'school-system'); ?>');">
                     <?php wp_nonce_field('sch_tt_wipe', '_sch_nonce'); ?>
                     <input type="hidden" name="sch_action" value="tt_wipe">
                     <?php $keep(); ?>
                     <button class="sch-tt__b sch-tt__b--quiet"><?php esc_html_e('تفريغ', 'school-system'); ?></button>
                 </form>
+            <?php else : ?>
+                <span class="sch-tt__hint"><?php esc_html_e('الجدول معتمد ومنشور — اضغط «فتح للتعديل» في الأعلى لتغييره.', 'school-system'); ?></span>
             <?php endif; ?>
             <button type="button" class="sch-tt__b" data-sch-print><?php esc_html_e('طباعة A5', 'school-system'); ?></button>
         </div>
@@ -912,7 +993,7 @@ $steps = [
                                             <?php if ($cell) : ?><span><?php echo esc_html($cell->teacher_name ?: __('بلا معلم', 'school-system')); ?></span><?php endif; ?>
                                         </span>
                                     <?php else : ?>
-                                        <form method="post" class="sch-tt__cf">
+                                        <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" class="sch-tt__cf">
                                             <?php wp_nonce_field('sch_tt_place', '_sch_nonce'); ?>
                                             <input type="hidden" name="sch_action" value="tt_place">
                                             <input type="hidden" name="subject_id" value="<?php echo esc_attr((string) $pick); ?>">
@@ -992,7 +1073,7 @@ $steps = [
                             <span class="sch-tt__hint"><?php esc_html_e('هذا الشهر يتكرر أسبوعيًا حتى تغيّره — نسخه على الأشهر القادمة يوفّر التكرار.', 'school-system'); ?></span>
 
                             <div class="sch-tt__pub">
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_tt_copy', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="tt_copy">
                                     <?php $keep(); ?>
@@ -1006,7 +1087,7 @@ $steps = [
                                     </button>
                                 </form>
 
-                                <form method="post">
+                                <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                                     <?php wp_nonce_field('sch_tt_spread', '_sch_nonce'); ?>
                                     <input type="hidden" name="sch_action" value="tt_spread">
                                     <?php $keep(); ?>
@@ -1054,7 +1135,7 @@ $steps = [
         }); ?></span>
 
         <?php if ($step === 3 && $live) : ?>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
                 <?php wp_nonce_field('sch_tt_generate', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="tt_generate">
                 <input type="hidden" name="scope" value="school">
@@ -1068,13 +1149,21 @@ $steps = [
                 <?php echo esc_html($steps[$step + 1][0]); ?> <span aria-hidden="true">›</span>
             </a>
         <?php elseif ($can_pub && $live) : ?>
-            <form method="post" onsubmit="return confirm('<?php esc_attr_e('اعتماد الجدول ونشره؟', 'school-system'); ?>');">
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>" onsubmit="return confirm('<?php esc_attr_e('اعتماد الجدول ونشره؟', 'school-system'); ?>');">
                 <?php wp_nonce_field('sch_tt_publish', '_sch_nonce'); ?>
                 <input type="hidden" name="sch_action" value="tt_publish">
                 <?php $keep(); ?>
                 <button class="sch-tt__b sch-tt__b--go">
                     <?php esc_html_e('اعتماد', 'school-system'); ?> <span aria-hidden="true">›</span>
                 </button>
+            </form>
+        <?php elseif (!$live && $can_pub) : ?>
+            <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>"
+                  onsubmit="return confirm('<?php esc_attr_e('سيُفتح الجدول للتعديل. والمنشور يبقى كما هو عند المعلمين وأولياء الأمور حتى تعتمده من جديد. متابعة؟', 'school-system'); ?>');">
+                <?php wp_nonce_field('sch_tt_reopen', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_action" value="tt_reopen">
+                <?php $keep(); ?>
+                <button class="sch-tt__b"><?php esc_html_e('فتح للتعديل', 'school-system'); ?></button>
             </form>
         <?php else : ?>
             <span class="sch-tt__b is-off"><?php esc_html_e('النهاية', 'school-system'); ?></span>

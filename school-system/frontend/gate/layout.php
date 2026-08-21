@@ -25,9 +25,7 @@ $sch_user     = wp_get_current_user();
         <link rel="apple-touch-icon" href="<?php echo esc_url($sch_fav); ?>">
     <?php endif; ?>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <?php sch_font_link(); ?>
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/shared-ui.css')); ?>">
     <link rel="stylesheet" href="<?php echo esc_url(sch_asset('assets/gate.css')); ?>">
 </head>
