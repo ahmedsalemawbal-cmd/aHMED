@@ -85,19 +85,14 @@ window.SCH_GATE = <?php echo wp_json_encode([
 <script src="<?php echo esc_url(sch_asset('assets/gate.js')); ?>" defer></script>
 <?php endif; ?>
 
-<?php
-/*
- * نطاق عامل الخدمة يُشتقّ من **مجلّد السكربت**. و`SCH_Gate::url()` تُلحق
- * شرطةً مائلة، فـ`/gate/sw.js/` نطاقُه `/gate/sw.js/` — أي لا صفحة واحدة:
- * لا عملَ بلا شبكة (وهو أول ما يُوعَد به تطبيق البوابة)، و`serviceWorker.ready`
- * لا تُحلّ أبدًا فيتجمّد `SCH_Push::boot()` قبل أن يطلب الإذن.
- */
-$sch_sw = untrailingslashit(SCH_Gate::url('sw.js'));
-?>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(<?php echo wp_json_encode($sch_sw); ?>, { scope: <?php echo wp_json_encode(SCH_Gate::url()); ?> });
+    // نطاق عامل الخدمة يُشتقّ من **مجلّد السكربت**، و`url()` تُلحق شرطة
+    // مائلة — فـ`/gate/sw.js/` نطاقُه `/gate/sw.js/` أي **لا صفحة واحدة**:
+    // لا عملَ بلا شبكة (وهو أوّل ما يُوعَد به تطبيق البوابة)، و
+    // `serviceWorker.ready` لا تُحلّ أبدًا فيتجمّد `SCH_Push::boot()`.
+    navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_Gate::url('sw.js'))); ?>, { scope: <?php echo wp_json_encode(SCH_Gate::url()); ?> });
   });
 }
 </script>

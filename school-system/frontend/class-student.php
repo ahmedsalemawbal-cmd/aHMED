@@ -253,9 +253,16 @@ JS;
     /** الوضع حسب المرحلة: يحدد اللغة والطول والتنافس. */
     public static function mode(object $student): string
     {
+        /*
+         * `intermediate` لا `middle`: مفردات المراحل في `SCH_Classes::STAGES`
+         * هي `kg · primary · intermediate · secondary`، و`'middle'` مفردةٌ
+         * ثالثة لا تُكتب في عمودٍ واحد. فوضع «mid» لم يتحقّق لطالبٍ واحد
+         * منذ بُني، و«تحدّي الفصول» — وهو التنافس المسموح في المتوسط وحده —
+         * لم يظهر لأحد أبدًا، وكل طالب متوسط كان يقع في وضع الثانوي بلا تلعيب.
+         */
         return match ((string) $student->stage) {
             'kg', 'primary' => 'young',
-            'middle'        => 'mid',
+            'intermediate'  => 'mid',
             default         => 'senior',
         };
     }
@@ -315,34 +322,64 @@ JS;
             $since
         )) ?: [];
 
-        $out = [];
-
+        /*
+         * ثلاثة استعلامات لا خمسون.
+         *
+         * كانت الحلقة تستعلم عن جدول **كل يوم غياب** على حدة، ثم عن مصادر
+         * **كل حصة** فيه: خمسة أيام × عشر حصص = واحدٌ وخمسون استعلامًا لرسم
+         * بطاقةٍ واحدة في تطبيق طالب. ولا يظهر البطء اليوم لأن المكتبة صغيرة
+         * والغياب قليل — يظهر في الأسبوع الذي يمرض فيه نصف الفصل.
+         */
+        $by_day = [];
         foreach ($days as $date) {
-            $weekday = (int) gmdate('w', strtotime((string) $date));
-            $day     = $weekday === 0 ? 1 : ($weekday <= 4 ? $weekday + 1 : 0);
-
-            if ($day === 0) {
-                continue;
-            }
-
-            $periods = $wpdb->get_results($wpdb->prepare(
-                'SELECT t.period_no, t.subject_id, s.name AS subject_name
-                 FROM ' . sch_table('timetable') . ' t
-                 INNER JOIN ' . sch_table('subjects') . ' s ON s.id = t.subject_id
-                 WHERE t.class_id = %d AND t.day_of_week = %d
-                 ORDER BY t.period_no',
-                (int) $class->id,
-                $day
-            )) ?: [];
-
-            foreach ($periods as $p) {
-                $p->date      = $date;
-                $p->resources = SCH_Content::for_lesson((int) $p->subject_id, (string) $student->stage, 2);
-                $out[]        = $p;
+            $day = SCH_Timetable::school_day((string) $date);
+            if ($day > 0) {
+                $by_day[$day][] = (string) $date;
             }
         }
 
-        return array_slice($out, 0, 12);
+        if ($by_day === []) {
+            return [];
+        }
+
+        $day_nums = array_keys($by_day);
+        $in       = implode(',', array_fill(0, count($day_nums), '%d'));
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT t.day_of_week, t.period_no, t.subject_id, s.name AS subject_name
+             FROM ' . sch_table('timetable') . " t
+             INNER JOIN " . sch_table('subjects') . " s ON s.id = t.subject_id
+             WHERE t.class_id = %d AND t.day_of_week IN ({$in})
+             ORDER BY t.day_of_week, t.period_no",
+            ...[(int) $class->id, ...array_map('intval', $day_nums)]
+        )) ?: [];
+
+        $subject_ids = array_map(static fn (object $r): int => (int) $r->subject_id, $rows);
+        $resources   = SCH_Content::for_lessons($subject_ids, (string) $student->stage, 2);
+
+        $out = [];
+
+        // الأيام بترتيبها الأصليّ (الأحدث أولًا) لا بترتيب رقم اليوم.
+        foreach ($days as $date) {
+            $day = SCH_Timetable::school_day((string) $date);
+
+            foreach ($rows as $row) {
+                if ((int) $row->day_of_week !== $day) {
+                    continue;
+                }
+
+                $p            = clone $row;
+                $p->date      = $date;
+                $p->resources = $resources[(int) $row->subject_id] ?? [];
+                $out[]        = $p;
+
+                if (count($out) >= 12) {
+                    return $out;
+                }
+            }
+        }
+
+        return $out;
     }
 
     // ---------- التقدّم ----------

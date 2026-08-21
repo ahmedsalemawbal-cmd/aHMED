@@ -226,7 +226,10 @@ var m=document.querySelector('meta[name=theme-color]');if(m){m.content=d?'#12131
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_App::url('sw.js')); ?>).catch(function () {});
+        // نطاق عامل الخدمة يُشتقّ من **مجلّد السكربت**، و`url()` تُلحق شرطة
+        // مائلة — فـ`/app/sw.js/` نطاقُه `/app/sw.js/` أي **لا صفحة واحدة**:
+        // لا عملَ بلا شبكة، و`serviceWorker.ready` لا تُحلّ فيتجمّد الدفع.
+        navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_App::url('sw.js'))); ?>, { scope: <?php echo wp_json_encode(SCH_App::url()); ?> }).catch(function () {});
       });
     }
     </script>

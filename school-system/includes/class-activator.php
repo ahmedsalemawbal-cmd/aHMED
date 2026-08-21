@@ -41,6 +41,34 @@ final class SCH_Activator
      * فتُطوى المكرّرات أولًا (يبقى الأقدم، ويُلغى ما بعده بسبب مكتوب لا يُحذف،
      * فالحذف يزوّر الدفتر).
      */
+    /**
+     * توحيد مفردات المرحلة في المكتبة الرقمية.
+     *
+     * `content.stage` كانت `ENUM('kg','primary','middle','high')` — وهي
+     * المفردة الوحيدة في المخطّط كلّه التي تخالف `SCH_Classes::STAGES`
+     * (`kg · primary · intermediate · secondary`). و`dbDelta` توسّع ENUM إلى
+     * `VARCHAR(30)` بلا فقد، فتُصحَّح البنية وحدها.
+     *
+     * ويبقى ما كُتب: القيم الجديدة كانت تُرفض فتُخزَّن **فراغًا** في الوضع
+     * المتساهل — فالصفوف المعطوبة قيمتها `''` لا `'middle'`، ولا أحد يعرف
+     * مرحلتها الصحيحة فتبقى تحت «كل المراحل» حتى يُصحّحها المنسّق. والقيمتان
+     * القديمتان تُترجَمان دفاعًا لا لأنّهما كُتبتا: لا وجود لسلسلتَي
+     * `'middle'` و`'high'` في شفرة المحتوى أصلًا.
+     */
+    private static function migrate_content_stage(): void
+    {
+        global $wpdb;
+
+        $t = sch_table('content');
+
+        if ((string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $t)) !== $t) {
+            return;
+        }
+
+        $wpdb->query("UPDATE `{$t}` SET stage = 'intermediate' WHERE stage = 'middle'");
+        $wpdb->query("UPDATE `{$t}` SET stage = 'secondary'    WHERE stage = 'high'");
+    }
+
     private static function guard_certificates(): void
     {
         global $wpdb;
@@ -115,6 +143,7 @@ final class SCH_Activator
             }
 
             self::guard_certificates();
+            self::migrate_content_stage();
 
             update_option('sch_db_version', SCH_VERSION);
 
@@ -1246,7 +1275,12 @@ final class SCH_Activator
             content_type ENUM('book','video','game','link') NOT NULL DEFAULT 'book',
             title        VARCHAR(190)    NOT NULL,
             description  VARCHAR(500)    DEFAULT NULL,
-            stage        ENUM('kg','primary','middle','high') NOT NULL DEFAULT 'primary',
+            -- `VARCHAR(30)` كبقيّة أعمدة المرحلة في المخطّط كلّه. وكانت ENUM
+            -- بمفردات لا يعرفها النظام (`middle`/`high`) بينما
+            -- `SCH_Content::create()` تتحقّق بـ`SCH_Classes::STAGES` ثم تكتب
+            -- `intermediate` — فتُخزَّن فراغًا في الوضع المتساهل ويفشل الإدراج
+            -- في الصارم، **والمكتبة الرقمية فارغة أبدًا للمتوسط والثانوي**.
+            stage        VARCHAR(30)     NOT NULL DEFAULT 'primary',
             grade_level  VARCHAR(40)     DEFAULT NULL,
             subject_id   BIGINT UNSIGNED DEFAULT NULL,
             lesson_ref   VARCHAR(120)    DEFAULT NULL,

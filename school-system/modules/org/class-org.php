@@ -38,12 +38,24 @@ final class SCH_Org
         'all'    => 'كل المراحل',
     ];
 
-    /** المرحلة في جدول الشعب => نطاق الإشراف */
+    /**
+     * المرحلة في جدول الشعب => نطاق الإشراف.
+     *
+     * وكانت مفاتيحها `middle` و`high` — **وهما ليستا من مفردات النظام**:
+     * `SCH_Classes::STAGES` تقول `kg · primary · intermediate · secondary`.
+     * فالمرحلتان الأخيرتان تسقطان خارج الخريطة، وكان الافتراض `'early'`
+     * يفتحهما بدل أن يُغلقهما: **مشرفة الابتدائي تجتاز `may_touch_class()`
+     * لكل شعبة في المدرسة بما فيها الثانوي**، ومشرف المتوسط لا يجتازها
+     * لشعبةٍ واحدة — وهو نطاقه هو. و`supervisor_of_stage()` تُوجّه إشعارات
+     * المرحلتين إلى مشرف الروضة.
+     *
+     * والمفاتيح الآن مفردات `SCH_Classes::STAGES` حرفًا بحرف.
+     */
     private const STAGE_MAP = [
-        'kg'      => 'early',
-        'primary' => 'early',
-        'middle'  => 'middle',
-        'high'    => 'high',
+        'kg'           => 'early',
+        'primary'      => 'early',
+        'intermediate' => 'middle',
+        'secondary'    => 'high',
     ];
 
     // ---------- سلسلة الإنشاء ----------
@@ -111,9 +123,15 @@ final class SCH_Org
 
     // ---------- النطاقات ----------
 
+    /**
+     * نطاق الإشراف لمرحلة — والمجهول **يُغلَق لا يُفتَح**.
+     *
+     * كان الافتراض `'early'`: مرحلةٌ لا تعرفها الخريطة تُعامَل معاملة
+     * الابتدائي، فتُفتح لمشرفه. والافتراض الآمن في الصلاحيات هو المنع.
+     */
     public static function scope_of_stage(?string $stage): string
     {
-        return self::STAGE_MAP[$stage ?? ''] ?? 'early';
+        return self::STAGE_MAP[$stage ?? ''] ?? 'none';
     }
 
     /** نطاق المستخدم الحالي: مشرف مرحلة، أم كل المدرسة؟ */
@@ -216,7 +234,14 @@ final class SCH_Org
 
         $class = SCH_Classes::get($class_id);
 
-        return $class !== null && self::scope_of_stage($class->stage) === $scope;
+        if ($class === null) {
+            return false;
+        }
+
+        $class_scope = self::scope_of_stage($class->stage);
+
+        // مرحلةٌ مجهولة لا تُطابق أحدًا — ولا من نطاقه `none` أيضًا.
+        return $class_scope !== 'none' && $class_scope === $scope;
     }
 
     // ---------- مراحل الجدول ----------
@@ -227,6 +252,14 @@ final class SCH_Org
         'published' => 'منشور',
     ];
 
+    /**
+     * حالة جدول السنة.
+     *
+     * وكُتّاب `tt_status` كانوا ثلاثة أفعالٍ من تدفّق v10.6 **لا نموذج لأيّها
+     * في المشروع كلّه** — حُذفت، وصار `SCH_TT::publish()` يرفع الراية داخل
+     * معاملته: النشر والراية حقيقةٌ واحدة، وفصلهما هو ما جعل الدالّة كاذبةً
+     * أبدًا ومعها «ما فاتك» وسكّة «اليوم».
+     */
     public static function timetable_state(): object
     {
         global $wpdb;
@@ -245,108 +278,8 @@ final class SCH_Org
         return self::timetable_state()->tt_status === 'published';
     }
 
-    /**
-     * إرسال الجدول للاعتماد.
-     * يُرفض إن كان فيه تعارض أو حصة بلا معلم — لا يُنشر جدول ناقص.
-     */
-    public static function submit_timetable(): array|WP_Error
-    {
-        global $wpdb;
 
-        $year_id = SCH_Years::current_id();
-        if ($year_id === 0) {
-            return sch_api_error('no_year', __('لا توجد سنة دراسية نشطة.', 'school-system'), 422);
-        }
 
-        $problems = self::timetable_problems();
-
-        if ($problems['conflicts'] > 0) {
-            return sch_api_error('conflicts', sprintf(
-                /* translators: %d: عدد التعارضات */
-                __('يوجد %d تعارض في الجدول — عالجها قبل الإرسال.', 'school-system'),
-                $problems['conflicts']
-            ), 422);
-        }
-
-        if ($problems['unassigned'] > 0) {
-            return sch_api_error('unassigned', sprintf(
-                /* translators: %d: عدد الحصص */
-                __('%d حصة بلا معلم — أسندها أو احذفها.', 'school-system'),
-                $problems['unassigned']
-            ), 422);
-        }
-
-        $wpdb->update(sch_table('academic_years'), [
-            'tt_status'  => 'pending',
-            'tt_sent_by' => get_current_user_id() ?: null,
-            'tt_sent_at' => sch_now(),
-        ], ['id' => $year_id]);
-
-        $principal = self::principal_user_id();
-        if ($principal) {
-            SCH_Comms::notify(
-                $principal,
-                __('جدول الحصص بانتظار اعتمادك', 'school-system'),
-                __('أرسله الوكيل للمراجعة.', 'school-system'),
-                'timetable',
-                $year_id
-            );
-        }
-
-        sch_audit('timetable.submitted', 'year', $year_id);
-
-        return ['status' => 'pending'];
-    }
-
-    /** اعتماد المدير — هنا فقط يراه المعلمون وأولياء الأمور. */
-    public static function publish_timetable(): bool|WP_Error
-    {
-        global $wpdb;
-
-        $year_id = SCH_Years::current_id();
-        $state   = self::timetable_state();
-
-        if ($state->tt_status !== 'pending') {
-            return sch_api_error('not_pending', __('الجدول ليس بانتظار الاعتماد.', 'school-system'), 409);
-        }
-
-        $wpdb->update(sch_table('academic_years'), [
-            'tt_status' => 'published',
-            'tt_ok_by'  => get_current_user_id() ?: null,
-            'tt_ok_at'  => sch_now(),
-        ], ['id' => $year_id]);
-
-        // الجدول لا يُرسَل — يُنشَر، فيقرؤه كل معلم من مكانه.
-        foreach (get_users(['role' => 'sch_teacher', 'fields' => 'ID']) as $teacher_id) {
-            SCH_Comms::notify(
-                (int) $teacher_id,
-                __('نُشر جدول الحصص', 'school-system'),
-                __('افتح تطبيقك لترى حصصك.', 'school-system'),
-                'timetable',
-                $year_id
-            );
-        }
-
-        sch_audit('timetable.published', 'year', $year_id);
-
-        return true;
-    }
-
-    /** إعادة الجدول لمسودة — أي تعديل بعد النشر يمر بالدورة من جديد. */
-    public static function reopen_timetable(): bool
-    {
-        global $wpdb;
-
-        $wpdb->update(
-            sch_table('academic_years'),
-            ['tt_status' => 'draft'],
-            ['id' => SCH_Years::current_id()]
-        );
-
-        sch_audit('timetable.reopened', 'year', SCH_Years::current_id());
-
-        return true;
-    }
 
     /** ما يمنع النشر: تعارض معلم، أو حصة بلا معلم. */
     public static function timetable_problems(): array

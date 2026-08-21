@@ -252,11 +252,53 @@ final class SCH_Content
         )) ?: [];
     }
 
+    /**
+     * مصادر عدّة موادّ دفعةً واحدة.
+     *
+     * `for_lesson()` استعلامٌ لكل مادة — وشاشة «ما فاتك» تُناديها لكل حصة في
+     * كل يوم غياب: خمسة أيام × عشر حصص = **خمسون استعلامًا** لرسم بطاقةٍ
+     * واحدة، ولا يظهر البطء اليوم لأن المكتبة صغيرة.
+     *
+     * @param array<int,int> $subject_ids
+     * @return array<int,array<int,object>> subject_id => صفوف
+     */
+    public static function for_lessons(array $subject_ids, string $stage, int $per = 3): array
+    {
+        global $wpdb;
+
+        $ids = array_values(array_unique(array_filter(array_map('intval', $subject_ids))));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '%d'));
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM " . sch_table('content') . "
+             WHERE subject_id IN ({$in}) AND stage = %s AND status = 'published'
+             ORDER BY subject_id, updated_at DESC",
+            ...[...$ids, $stage]
+        )) ?: [];
+
+        // الحدّ لكل مادة يُطبَّق هنا: `LIMIT` واحد على استعلامٍ جامع يقصّ
+        // المواد الأخيرة كلّها، فيخرج بعضُها بلا مصدرٍ واحد.
+        $out = [];
+        foreach ($rows as $row) {
+            $sid = (int) $row->subject_id;
+            if (count($out[$sid] ?? []) >= $per) {
+                continue;
+            }
+            $out[$sid][] = $row;
+        }
+
+        return $out;
+    }
+
     // ---------- التشغيل ----------
 
-    /** تسجيل فتح — عدّاد الفتح يخبر المنسق أي محتوى يستحق الإنتاج. */
     /**
-     * تسجيل فتح محتوى.
+     * تسجيل فتح محتوى — وعدّاد الفتح يخبر المنسق أيّ محتوى يستحقّ الإنتاج.
      *
      * والفتح **بلا نتيجة** يُسجَّل مرة واحدة في الساعة لكل طالب ومحتوى:
      * شاشة المكتبة تُناديه في كل رسمٍ للصفحة، فالتحديث يُضاعف العدّاد، وضغطة

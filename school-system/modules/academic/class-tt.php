@@ -1243,6 +1243,32 @@ final class SCH_TT
             $plan_id
         ));
 
+        /*
+         * راية السنة تُرفَع مع النشر — داخل المعاملة نفسها.
+         *
+         * `SCH_Org::timetable_published()` تقرأ `academic_years.tt_status`،
+         * وكُتّاب هذا العمود ثلاثةُ أفعالٍ من تدفّق v10.6 **لا نموذج لأيّها
+         * في المشروع كلّه**. ومسار النشر الحيّ (هنا) كان يكتب `tt_plans.status`
+         * وصفوف `timetable` ولا يمسّ `academic_years` إطلاقًا — فالدالّة
+         * كاذبةٌ أبدًا، وتحتها يسقط صامتَين:
+         *
+         *   • «ما فاتك» في تطبيق الطالب — `missed()` يرجع `[]` فورًا.
+         *   • سكّة «اليوم» ورأس «حصتك القادمة» في تطبيق المعلم —
+         *     `today_periods()` يرجع `[]`.
+         *
+         * وكتابتها هنا لا في فعلٍ منفصل: النشر والراية حقيقةٌ واحدة، وفصلهما
+         * هو ما أنتج العطل أصلًا.
+         */
+        $wpdb->update(
+            sch_table('academic_years'),
+            [
+                'tt_status' => 'published',
+                'tt_ok_by'  => get_current_user_id() ?: null,
+                'tt_ok_at'  => $now,
+            ],
+            ['id' => (int) $plan->year_id]
+        );
+
         $wpdb->query('COMMIT');
 
         sch_audit('tt.published', 'tt_plan', $plan_id, [

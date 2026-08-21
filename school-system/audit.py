@@ -621,6 +621,66 @@ for m in re.finditer(r'CREATE TABLE \{\$p\}(\w+) \((.*?)\) \{\$charset\}', _act,
                 add('SCHEMA_KEY_ORPHAN', f'{_tbl}: مفتاح على عمود غير موجود «{_kc}»')
 
 
+# ---------- `[hidden]` يُغلَب بأي صنف يضبط `display` ----------
+# أولوية `[hidden]` في ورقة المتصفّح (0,0,1,0 على `display:none`) أضعف من أي
+# صنفٍ يضبط `display` — فعنصرٌ يحمل السمة وصنفُه `display:flex` يبقى ظاهرًا.
+# وقع هذا مع `.schg-card` فبقيت بطاقة التأكيد غطاءً على كاميرا البوابة بقيّة
+# اليوم، ومع `.t-theme__moon/__sun` فظهرت الأيقونتان معًا.
+
+_HIDDEN_GUARD = re.compile(r'\[hidden\][^{]*\{[^}]*display\s*:\s*none', re.S)
+
+# الأصناف التي تحمل `hidden` في أيّ قالب
+_hidden_classes = set()
+for _p, _src in sources.items():
+    if not _p.endswith('.php'):
+        continue
+    for _m in re.finditer(r'class="([^"]*)"[^>]*?\shidden(?=[\s/>])', _src):
+        _hidden_classes |= {c for c in _m.group(1).split() if c.startswith(('sch', 't-', 'p-', 's-'))}
+    for _m in re.finditer(r'\shidden\s[^>]*?class="([^"]*)"', _src):
+        _hidden_classes |= {c for c in _m.group(1).split() if c.startswith(('sch', 't-', 'p-', 's-'))}
+
+# ومَن يضبط `display` في ورقةٍ بلا حارس
+for _css in sorted(glob.glob(os.path.join(ROOT, 'assets', '*.css'))):
+    _text = open(_css, encoding='utf-8').read()
+
+    if _HIDDEN_GUARD.search(_text):
+        continue
+
+    _offenders = sorted({
+        _cls for _cls in _hidden_classes
+        if re.search(r'\.' + re.escape(_cls) + r'\s*(?:[,{][^{]*)?\{[^}]*\bdisplay\s*:', _text)
+    })
+
+    if _offenders:
+        add('HIDDEN_OVERRIDDEN',
+            f'{os.path.basename(_css)}: بلا قاعدة [hidden] وفيها أصناف تضبط display: '
+            + '، '.join(_offenders[:6]))
+
+
+# ---------- مفردات المرحلة: مفردة واحدة لا أربع ----------
+# `SCH_Classes::STAGES` هي المرجع. وكان `content.stage` عمود ENUM بمفردات
+# أخرى (`middle`/`high`)، والطبقة تتحقّق بالمرجع ثم تكتب في العمود — فالقيمة
+# تجتاز التحقّق وتُرفض في القاعدة، **والمكتبة فارغة أبدًا للمتوسط والثانوي**.
+# وكل عمود `stage` آخر في المخطّط `VARCHAR(30)`؛ هذا الفحص يمنع عودة الشذوذ.
+
+_stages_src = sources.get(os.path.join(ROOT, 'modules', 'academic', 'class-academic.php'), '')
+_stages_m = re.search(r'const STAGES\s*=\s*\[(.*?)\];', _stages_src, re.S)
+_STAGES = set(re.findall(r"'(\w+)'\s*=>", _stages_m.group(1))) if _stages_m else set()
+
+if _STAGES:
+    for _m in re.finditer(r"^\s*(\w*stage\w*)\s+ENUM\(([^)]*)\)", activator, re.M | re.I):
+        _col = _m.group(1)
+        _vals = set(re.findall(r"'(\w+)'", _m.group(2)))
+        # `stage_scope` مفرداتُه نطاقات إشراف لا مراحل — استثناء مقصود
+        if _col == 'stage_scope':
+            continue
+        _alien = _vals - _STAGES
+        if _alien:
+            add('STAGE_VOCAB',
+                f'العمود «{_col}» يحمل مفردات ليست في SCH_Classes::STAGES: '
+                + '، '.join(sorted(_alien)))
+
+
 # ---------- كتل CSS مكررة حرفيًا ----------
 # تعديل نصّي يطبَّق على كل التطابقات بدل الأول يكرّر الكتلة ويُسقط شروطها.
 # وقع هذا فتكرّر عمود الشريط الجانبي وسقط شرط الاتجاه، فظهر عمود أسود

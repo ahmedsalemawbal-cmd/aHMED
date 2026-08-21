@@ -121,6 +121,43 @@ $GLOBALS['SCH_CURRENT_USER'] = 77;
 $got = SCH_Portal::home_for(9);
 ok('وجهة وليّ الأمر تُبنى صحيحة والمدير هو المُشغِّل', str_contains($got, '/app/'), 'ذهب إلى ' . $got);
 
+echo "\n⑤ نطاق عامل الخدمة في التطبيقات الخمسة\n";
+
+/*
+ * نطاق عامل الخدمة يُشتقّ من **مجلّد السكربت**. و`url()` في كل صنف تطبيق
+ * تُلحق شرطةً مائلة، فـ`url('sw.js')` تُخرج `/app/sw.js/` ونطاقُه
+ * `/app/sw.js/` — أي **لا صفحة واحدة**: لا عملَ بلا شبكة (وهو أوّل وعد
+ * تطبيقَي البوابة والسائق)، و`serviceWorker.ready` لا تُحلّ أبدًا لصفحةٍ
+ * بلا متحكّم فيتجمّد `SCH_Push::boot()` قبل أن يطلب الإذن.
+ *
+ * الدعوى تفحص القالب نفسه: أنّ التسجيل يمرّ بـ`untrailingslashit`.
+ */
+$ROOT_PLUGIN = dirname(__DIR__, 2) . '/school-system';
+
+$layouts = [
+    'البوابة' => 'frontend/gate/layout.php',
+    'السائق'  => 'frontend/driver/layout.php',
+    'المعلم'  => 'frontend/teacher/layout.php',
+    'الطالب'  => 'frontend/student/layout.php',
+    'الأسرة'  => 'frontend/app/layout.php',
+];
+
+foreach ($layouts as $label => $rel) {
+    $src = (string) file_get_contents($ROOT_PLUGIN . '/' . $rel);
+
+    if (!preg_match('/serviceWorker\.register\((.*?)\)\s*[;.]/s', $src, $m)) {
+        ok("عامل خدمة {$label} مُسجَّل", false, 'لا تسجيل في القالب');
+        continue;
+    }
+
+    $call = $m[1];
+    ok(
+        "نطاق عامل خدمة {$label} جذرُ التطبيق لا مسار السكربت",
+        str_contains($call, 'untrailingslashit('),
+        'التسجيل: ' . trim(preg_replace('/\s+/', ' ', $call))
+    );
+}
+
 echo "\n══════════════════════════════════════════════\n";
 printf("  نجح %d · فشل %d\n", $pass, $fail);
 echo "══════════════════════════════════════════════\n";

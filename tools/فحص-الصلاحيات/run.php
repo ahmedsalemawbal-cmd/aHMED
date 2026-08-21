@@ -108,6 +108,33 @@ ok('custody مقفل عن المنح', SCH_Perms::is_locked('custody'));
 ok('audit مقفل عن المنح', SCH_Perms::is_locked('audit'));
 ok('students ليس مقفلًا', !SCH_Perms::is_locked('students'));
 
+echo "\n⑥ نطاق الإشراف يتبع مفردات المراحل — والمجهول يُغلَق\n";
+
+/*
+ * `SCH_Org::STAGE_MAP` كانت مفاتيحها `middle` و`high`، ومفردات النظام
+ * (`SCH_Classes::STAGES`) هي `kg · primary · intermediate · secondary`.
+ * فالمرحلتان الأخيرتان تسقطان خارج الخريطة وكان الافتراض `'early'`
+ * **يفتحهما** بدل أن يُغلقهما:
+ *
+ *   • مشرفة الابتدائي تجتاز `may_touch_class()` لكل شعبة في المدرسة
+ *     بما فيها الثانوي.
+ *   • ومشرف المتوسط لا يجتازها لشعبةٍ واحدة — وهو نطاقه هو.
+ */
+ok('الروضة ← early',        SCH_Org::scope_of_stage('kg') === 'early',           SCH_Org::scope_of_stage('kg'));
+ok('الابتدائي ← early',     SCH_Org::scope_of_stage('primary') === 'early',      SCH_Org::scope_of_stage('primary'));
+ok('المتوسط ← middle',      SCH_Org::scope_of_stage('intermediate') === 'middle', SCH_Org::scope_of_stage('intermediate'));
+ok('الثانوي ← high',        SCH_Org::scope_of_stage('secondary') === 'high',     SCH_Org::scope_of_stage('secondary'));
+ok('الثانوي ليس early',     SCH_Org::scope_of_stage('secondary') !== 'early',    SCH_Org::scope_of_stage('secondary'));
+ok('المتوسط ليس early',     SCH_Org::scope_of_stage('intermediate') !== 'early', SCH_Org::scope_of_stage('intermediate'));
+ok('المرحلة المجهولة تُغلَق', SCH_Org::scope_of_stage('زُهاء') === 'none',        SCH_Org::scope_of_stage('زُهاء'));
+ok('الفراغ يُغلَق',          SCH_Org::scope_of_stage('') === 'none',              SCH_Org::scope_of_stage(''));
+ok('null يُغلَق',            SCH_Org::scope_of_stage(null) === 'none',            SCH_Org::scope_of_stage(null));
+
+// كل مفردة في STAGES لها نطاقٌ معلوم — وإلا فمرحلةٌ بلا مشرف
+foreach (SCH_Classes::STAGES as $slug => $label) {
+    ok("STAGES: «{$slug}» له نطاق إشراف", SCH_Org::scope_of_stage($slug) !== 'none', SCH_Org::scope_of_stage($slug));
+}
+
 echo "\n══════════════════════════════════════════════\n";
 printf("  نجح %d · فشل %d\n", $pass, $fail);
 echo "══════════════════════════════════════════════\n";

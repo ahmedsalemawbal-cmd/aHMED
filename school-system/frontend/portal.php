@@ -101,7 +101,7 @@ $school = sch_settings('school_name', get_bloginfo('name'));
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Apps::url($sch_pk, 'sw.js')); ?>, { scope: '/' });
+    navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_Apps::url($sch_pk, 'sw.js'))); ?>, { scope: '/' });
   });
 }
 </script>

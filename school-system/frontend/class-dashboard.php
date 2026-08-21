@@ -390,9 +390,6 @@ final class SCH_Dashboard
             'tt_spread'        => ['sch_build_timetable',  'do_tt_spread'],
             'tt_subject'       => ['sch_manage_subjects',  'do_tt_subject'],
             'tt_publish'       => ['sch_approve_timetable','do_tt_publish'],
-            'submit_timetable' => ['sch_build_timetable',  'do_submit_timetable'],
-            'publish_timetable'=> ['sch_approve_timetable','do_publish_timetable'],
-            'reopen_timetable' => ['sch_build_timetable',  'do_reopen_timetable'],
             'save_summary'     => ['sch_handle_notes',     'do_save_summary'],
             'approve_summary'  => ['sch_manage_deputy',    'do_approve_summary'],
             'update_student'   => ['sch_manage_students',  'do_update_student'],
@@ -1402,20 +1399,8 @@ final class SCH_Dashboard
         return true;
     }
 
-    private static function do_submit_timetable(array $d, int $id): array|WP_Error
-    {
-        return SCH_Org::submit_timetable();
-    }
 
-    private static function do_publish_timetable(array $d, int $id): bool|WP_Error
-    {
-        return SCH_Org::publish_timetable();
-    }
 
-    private static function do_reopen_timetable(array $d, int $id): bool
-    {
-        return SCH_Org::reopen_timetable();
-    }
 
     private static function do_give_dose(array $d, int $id): bool|WP_Error
     {
