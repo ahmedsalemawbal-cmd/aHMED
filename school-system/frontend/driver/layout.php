@@ -46,6 +46,20 @@ $sch_trip     = $sch_data['trip'] ?? null;
 </main>
 
 <?php if (!$sch_is_login) : ?>
+<!-- اختيار المستلم عند النزول: الروضة والابتدائي لا يُسلَّمان بلا مخوَّل.
+     كان السائق يُسأل الاسم كتابةً، والخادم يشترط مفتاحًا من قائمة الأب —
+     فكان كل نزولٍ لطفلٍ صغير يُرفض والعهدة تبقى «في الباص» إلى الصباح. -->
+<div class="schd-pick" id="schd-pick" hidden>
+    <div class="schd-pick__box" role="dialog" aria-modal="true" aria-labelledby="schd-pick-h">
+        <h2 class="schd-pick__h" id="schd-pick-h"><?php esc_html_e('من يستلم الطالب؟', 'school-system'); ?></h2>
+        <p class="schd-pick__who" id="schd-pick-who"></p>
+        <div class="schd-pick__list" id="schd-pick-list"></div>
+        <button type="button" class="schd-pick__x" id="schd-pick-cancel"><?php esc_html_e('إلغاء', 'school-system'); ?></button>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!$sch_is_login) : ?>
     <?php
     $sch_section = sanitize_key(str_replace('.js', '', (string) get_query_var('sch_drv_section')));
     $sch_nav = [
@@ -72,6 +86,9 @@ $sch_trip     = $sch_data['trip'] ?? null;
 window.SCH_DRIVER = <?php echo wp_json_encode([
     'api'    => esc_url_raw(rest_url(SCH_API_NS . '/')),
     'nonce'  => wp_create_nonce('wp_rest'),
+    // النونس ينتهي بعد ١٢ ساعة والرحلة قد تمتدّ بعده — يُجدَّد بدل أن
+    // تُمحى تسجيلات السائق من الطابور بردّ 403.
+    'nonceUrl' => esc_url_raw(admin_url('admin-ajax.php?action=rest-nonce')),
     'tripId' => (int) $sch_trip->id,
     'home'   => SCH_Driver::url(),
     'i18n'   => [
@@ -87,6 +104,10 @@ window.SCH_DRIVER = <?php echo wp_json_encode([
         'gpsDenied'=> __('صلاحية الموقع مرفوضة', 'school-system'),
         'confirm'  => __('إنهاء الرحلة؟', 'school-system'),
         'receiver' => __('من استلم الطالب؟', 'school-system'),
+        'noPickers'=> __('لا مخوَّل باستلام هذا الطالب — اتصل بالإدارة قبل تسليمه.', 'school-system'),
+        'pickErr'  => __('تعذّر جلب قائمة المخوَّلين — أعد المحاولة.', 'school-system'),
+        'until'    => __('حتى', 'school-system'),
+        'rejected' => __('لم يُقبل التسجيل', 'school-system'),
         'blocked'  => __('لا يمكن الإنهاء قبل تسجيل نزول كل من صعد.', 'school-system'),
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
@@ -98,7 +119,9 @@ window.SCH_DRIVER = <?php echo wp_json_encode([
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Driver::url('sw.js')); ?>);
+    // بلا `untrailingslashit` يصير النطاق `/driver/sw.js/` — أي لا صفحة
+    // واحدة: لا عملَ بلا شبكة، و`serviceWorker.ready` لا تُحلّ أبدًا.
+    navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_Driver::url('sw.js'))); ?>, { scope: <?php echo wp_json_encode(SCH_Driver::url()); ?> });
   });
 }
 </script>

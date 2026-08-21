@@ -105,25 +105,50 @@ final class SCH_Gate
         }
 
         $action = sanitize_key((string) ($_POST['sch_gate_action'] ?? ''));
+        $nonce  = (string) ($_POST['_sch_nonce'] ?? '');
 
-        if ($action === 'visitor_in' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_gate_visitor')) {
-            SCH_Security::check_in([
-                'full_name'   => wp_unslash((string) ($_POST['full_name'] ?? '')),
+        if ($action !== 'visitor_in' && $action !== 'visitor_out') {
+            return;
+        }
+
+        /*
+         * النونس المنتهي كان يُسقط النموذج بصمت: الحارس يملأ بيانات الزائر
+         * ويضغط، فتُعاد الشاشة كما هي بلا رسالة ولا صفٍّ مكتوب. وجهاز
+         * البوابة يبقى مفتوحًا من السابعة إلى الثانية، فالنونس ينتهي في
+         * منتصف يوم عمله لا في نهايته.
+         */
+        $expect = $action === 'visitor_in' ? 'sch_gate_visitor' : 'sch_gate_visitor_out';
+
+        if (!wp_verify_nonce($nonce, $expect)) {
+            wp_safe_redirect(add_query_arg('err', 'nonce', self::url('visitors')));
+            exit;
+        }
+
+        if ($action === 'visitor_in') {
+            $name = trim(wp_unslash((string) ($_POST['full_name'] ?? '')));
+
+            if ($name === '') {
+                wp_safe_redirect(add_query_arg('err', 'name', self::url('visitors')));
+                exit;
+            }
+
+            $done = SCH_Security::check_in([
+                'full_name'   => $name,
                 'national_id' => (string) ($_POST['national_id'] ?? ''),
                 'phone'       => (string) ($_POST['phone'] ?? ''),
                 'purpose'     => wp_unslash((string) ($_POST['purpose'] ?? '')),
             ]);
 
-            wp_safe_redirect(add_query_arg('ok', '1', self::url('visitors')));
+            wp_safe_redirect(is_wp_error($done)
+                ? add_query_arg('err', $done->get_error_code(), self::url('visitors'))
+                : add_query_arg('ok', '1', self::url('visitors')));
             exit;
         }
 
-        if ($action === 'visitor_out' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_gate_visitor_out')) {
-            SCH_Security::check_out(absint($_POST['visitor_id'] ?? 0));
+        SCH_Security::check_out(absint($_POST['visitor_id'] ?? 0));
 
-            wp_safe_redirect(self::url('visitors'));
-            exit;
-        }
+        wp_safe_redirect(self::url('visitors'));
+        exit;
     }
 
     // ---------- الدخول ----------

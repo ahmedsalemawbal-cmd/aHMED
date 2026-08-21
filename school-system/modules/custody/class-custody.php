@@ -305,13 +305,18 @@ final class SCH_Custody
             return SCH_Pass::verify($token, $scanned_at);
         }
 
+        /*
+         * الرمز العشوائي وحده. الرقم الأكاديمي **مطبوع نصًّا ظاهرًا على وجه
+         * البطاقة**، والقارئ يقبل `code_128` — فمن صوّر بطاقة زميله وطبع
+         * رقمها شريطًا صار يفتح بوابته: يُعلِّم حضوره ويُغلق إنذاراته باسمه.
+         * و`WORKFLOW.md:352` يمنع هذا حرفًا، والمسار اليدوي (البحث بالاسم)
+         * يُرسل `student_id` مباشرةً فلا حاجة إلى هذا الباب أصلًا.
+         */
         $row = $wpdb->get_row($wpdb->prepare(
             'SELECT * FROM ' . sch_table('students') . '
-             WHERE (badge_token = %s OR qr_token = %s OR academic_no = %s OR student_no = %s)
+             WHERE (badge_token = %s OR qr_token = %s)
                AND status = %s
              LIMIT 1',
-            $token,
-            $token,
             $token,
             $token,
             'active'
@@ -376,8 +381,20 @@ final class SCH_Custody
         $from = (string) ($student->custody_state ?? 'home');
         $to   = self::RESULT[$checkpoint] ?? $from;
 
-        // الخروج نهاية الدوام: راكب الباص يذهب للباص لا للبيت.
-        if ($checkpoint === 'gate_out' && self::rides_bus($student_id)) {
+        $picker_key = sanitize_text_field((string) ($d['picker'] ?? ''));
+
+        /*
+         * الخروج نهاية الدوام: راكب الباص يذهب للباص لا للبيت — **ما لم
+         * يستلمه إنسان**. وكان الشرط بلا استثناء، فنداء الانصراف لطالبٍ
+         * مشترك بالنقل (`SCH_Pickup::deliver()` يمرّ من هنا) يُكتب `on_bus`:
+         * الطفل ذهب مع أبيه والنظام يقول إنه في الباص، **ويُتخطّى فحص
+         * `may_pick_up()` كلّه** لأن الفحص كان مشروطًا بالوجهة — فيصير
+         * النداء بابًا خلفيًّا على إنفاذ `can_pickup`.
+         */
+        if ($checkpoint === 'gate_out'
+            && self::rides_bus($student_id)
+            && $picker_key === ''
+            && trim((string) ($d['receiver_name'] ?? '')) === '') {
             $to = 'on_bus';
         }
 
@@ -387,6 +404,21 @@ final class SCH_Custody
         }
 
         $occurred = sch_sanitize_datetime($d['occurred_at'] ?? null) ?? sch_now();
+
+        /*
+         * المستلم اسمًا يُشتقّ من مفتاحه لا يُكتب مرّتين: الواجهة تُرسل
+         * المفتاح (وهو ما يُفحص)، والاسم يلزم للإشعار الذي يصل الأب.
+         */
+        $receiver = sanitize_text_field((string) ($d['receiver_name'] ?? ''));
+
+        if ($receiver === '' && $picker_key !== '') {
+            foreach (self::pickers($student_id) as $p) {
+                if ($p['key'] === $picker_key) {
+                    $receiver = (string) $p['name'];
+                    break;
+                }
+            }
+        }
 
         // سجلّ الأحداث مصدر الحقيقة — فالإدراج وتحديث الحالة معاملة واحدة:
         // إما أن يثبتا معًا أو لا شيء، فلا تنفصل حالة الطالب عن سجلّه.
@@ -398,10 +430,10 @@ final class SCH_Custody
             'to_state'          => $to,
             'checkpoint'        => $checkpoint,
             'actor_user_id'     => get_current_user_id() ?: null,
-            'receiver_name'     => sanitize_text_field((string) ($d['receiver_name'] ?? '')) ?: null,
+            'receiver_name'     => $receiver ?: null,
             'receiver_relation' => sanitize_text_field((string) ($d['receiver_relation'] ?? '')) ?: null,
             // مفتاح المخوَّل الذي أُثبت حقّه لحظة التسليم — لا اسمًا حرًّا وحده
-            'picked_by'         => sanitize_text_field((string) ($d['picker'] ?? '')) ?: null,
+            'picked_by'         => $picker_key ?: null,
             'reason'            => sanitize_text_field((string) ($d['reason'] ?? '')) ?: null,
             'lat'               => is_numeric($d['lat'] ?? null) ? number_format((float) $d['lat'], 7, '.', '') : null,
             'lng'               => is_numeric($d['lng'] ?? null) ? number_format((float) $d['lng'], 7, '.', '') : null,
@@ -449,7 +481,7 @@ final class SCH_Custody
 
         $wpdb->query('COMMIT');
 
-        self::after_record($student, $from, $to, $checkpoint, $occurred);
+        self::after_record($student, $from, $to, $checkpoint, $occurred, $receiver);
 
         return ['event_id' => $event_id, 'state' => $to, 'student' => $student, 'duplicate' => false];
     }
@@ -490,19 +522,14 @@ final class SCH_Custody
         // ولا يسأل «هل يحقّ له» — وهذا هو الفرق بين دفتر وبين حارس.
         $handover = in_array($checkpoint, ['gate_out', 'early_out', 'bus_alight'], true);
 
-        if ($handover && $to !== 'on_bus') {
+        if ($handover) {
             $picker = sanitize_text_field((string) ($d['picker'] ?? ''));
-            $young  = in_array((string) $student->stage, ['kg', 'primary'], true);
 
-            // الصغار لا يخرجون بلا مستلم محدَّد من القائمة المخوَّلة
-            if ($picker === '' && $young) {
-                return sch_api_error('picker_required', sprintf(
-                    /* translators: %s: اسم الطالب */
-                    __('%s في مرحلة لا يُسلَّم فيها الطفل إلا لمخوَّل — اختر المستلم.', 'school-system'),
-                    $name
-                ), 422);
-            }
-
+            /*
+             * الفحص أوّلًا وبلا شرط الوجهة: من ذُكر مفتاحه يُطابَق بقائمة
+             * المخوَّلين دائمًا. وكان الشرط كلّه مغلَّفًا بـ`$to !== 'on_bus'`،
+             * فالطالب المشترك بالنقل يمرّ تسليمه بلا فحصٍ واحد.
+             */
             if ($picker !== '' && !self::may_pick_up($student_id, $picker)) {
                 self::log_rejection($student_id, $from, $to, $checkpoint);
 
@@ -512,29 +539,49 @@ final class SCH_Custody
                     $name
                 ), 403);
             }
-        }
 
-        // الروضة والابتدائي: لا تسليم بلا تحديد المستلم.
-        if ($checkpoint === 'bus_alight'
-            && in_array((string) $student->stage, ['kg', 'primary'], true)
-            && trim((string) ($d['receiver_name'] ?? '')) === '') {
-            return sch_api_error('receiver_required', sprintf(
-                /* translators: %s: اسم الطالب */
-                __('%s في مرحلة تتطلب تحديد من استلمه.', 'school-system'),
-                $name
-            ), 422);
-        }
+            /*
+             * ومتى يكون المستلم إجباريًّا؟ `WORKFLOW.md` يفصل النقاط الثلاث:
+             *
+             *   الخروج المبكر  ⟵ «مسح + اختيار المستلم من قائمة المصرّح لهم
+             *                      فقط + سبب» — لكل المراحل بلا استثناء.
+             *   النزول من الباص ⟵ «تأكيد من استلم — إجباري للروضة والابتدائي».
+             *   خروج نهاية الدوام ⟵ «طالب السيارة: مسح الحارس ← home».
+             *                      مسحُ الحارس وحده، ولا مستلم يُطلَب.
+             *
+             * وكان الشرط يطلب المستلم في النقاط الثلاث لكل صغير — وواجهة
+             * اختيار المستلم لم تُبنَ بعد في تطبيق البوابة (الوثيقة نفسها
+             * تعدّه عملًا قادمًا). فكانت النتيجة أن **كل طفل روضة أو ابتدائي
+             * يُرفض خروجه من البوابة**، وتبقى عهدته «في المدرسة» طوال الليل
+             * ويرى أبوه ذلك في تطبيقه.
+             *
+             * ولا يُطلَب مستلمٌ لمن وجهته الباص — حالته `on_bus` لا `home`.
+             */
+            $young    = in_array((string) $student->stage, ['kg', 'primary'], true);
+            $required = $to !== 'on_bus'
+                     && ($checkpoint === 'early_out' || ($checkpoint === 'bus_alight' && $young));
 
-        if ($checkpoint === 'early_out' && trim((string) ($d['receiver_name'] ?? '')) === '') {
-            return sch_api_error('receiver_required', __('الخروج المبكر يتطلب تحديد المستلم.', 'school-system'), 422);
+            if ($picker === '' && $required) {
+                return sch_api_error('picker_required', sprintf(
+                    /* translators: %s: اسم الطالب */
+                    __('%s لا يُسلَّم إلا لمخوَّل — اختر المستلم من القائمة.', 'school-system'),
+                    $name
+                ), 422);
+            }
         }
 
         return true;
     }
 
     /** ما يترتب على الانتقال: حضور، إشعارات، إغلاق إنذارات. */
-    private static function after_record(object $student, string $from, string $to, string $checkpoint, string $when): void
-    {
+    private static function after_record(
+        object $student,
+        string $from,
+        string $to,
+        string $checkpoint,
+        string $when,
+        string $receiver = ''
+    ): void {
         $student_id = (int) $student->id;
         $name       = SCH_Enrollment::full_name($student);
         $today      = current_time('Y-m-d');
@@ -555,14 +602,25 @@ final class SCH_Custody
         // الاستثناء فقط يُدفع. الباقي صامت في الخط الزمني.
         $push = match ($checkpoint) {
             'bus_alight' => [__('تم تسليم الطالب', 'school-system'), $name],
+            /*
+             * `receiver_name` عمودٌ في `custody_events` لا في `students` —
+             * فقراءته من سجلّ الطالب تُخرج فراغًا دائمًا، والأب يصله
+             * «استلمه: » مبتورًا في أهمّ إشعارٍ يصله في يومه.
+             */
             'early_out'  => [
                 __('خروج مبكر', 'school-system'),
-                sprintf(
-                    /* translators: 1: اسم الطالب 2: اسم المستلم */
-                    __('غادر %1$s المدرسة — استلمه: %2$s', 'school-system'),
-                    $name,
-                    (string) ($student->receiver_name ?? '')
-                ),
+                $receiver !== ''
+                    ? sprintf(
+                        /* translators: 1: اسم الطالب 2: اسم المستلم */
+                        __('غادر %1$s المدرسة — استلمه: %2$s', 'school-system'),
+                        $name,
+                        $receiver
+                    )
+                    : sprintf(
+                        /* translators: %s: اسم الطالب */
+                        __('غادر %s المدرسة مبكرًا.', 'school-system'),
+                        $name
+                    ),
             ],
             // الأب واقف بسيارته ينتظر — الإشعار هنا فائدة لا خبر.
             'gate_out'   => $to === 'home'

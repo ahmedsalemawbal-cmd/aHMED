@@ -245,6 +245,27 @@ final class SCH_Security
         )) ?: [];
     }
 
+    /**
+     * من هو بالداخل الآن — بالتصفية في القاعدة لا في PHP.
+     *
+     * كانت الشاشة تجلب آخر ٥٠ زائرًا ثم تُبقي من لم يخرج منهم. فمن دخل
+     * صباحًا ولم يُسجَّل خروجه يسقط من النافذة بعد خمسين زائرًا بعده —
+     * **فلا يراه أحد ولا يُخرجه أحد**، ويظلّ عدّاد «بالداخل الآن» يتصاعد
+     * أبدًا وهو مبنيّ على استعلامٍ آخر يعدّ الصفوف كلّها. والأقدم أولًا:
+     * من طال بقاؤه هو من يُسأل عنه.
+     */
+    public static function visitors_inside(): array
+    {
+        global $wpdb;
+
+        return $wpdb->get_results(
+            'SELECT v.*, s.full_name AS student_name FROM ' . sch_table('visitors') . ' v
+             LEFT JOIN ' . sch_table('students') . ' s ON s.id = v.student_id
+             WHERE v.checked_out IS NULL
+             ORDER BY v.checked_in ASC'
+        ) ?: [];
+    }
+
     public static function inside_now(): int
     {
         global $wpdb;

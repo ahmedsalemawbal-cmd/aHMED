@@ -79,6 +79,15 @@
 
 *,*::before,*::after { box-sizing:border-box; }
 
+/*
+ * حارس `[hidden]`.
+ *
+ * أولوية `[hidden]` في ورقة المتصفّح أضعف من **أي** صنف يضبط `display`،
+ * فعنصرٌ يحمل السمة وصنفُه `display: flex` يبقى ظاهرًا. وكانت الورقة بلا
+ * قاعدةٍ واحدة، فالإخفاء بجافاسكربت لا يُخفي شيئًا.
+ */
+[hidden] { display: none !important; }
+
 body.t-body {
   margin:0;
   background:var(--t-bg);

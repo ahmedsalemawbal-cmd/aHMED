@@ -394,6 +394,33 @@ final class SCH_Trips
             return ['id' => (int) $dupe->id, 'duplicate' => true, 'student_id' => (int) $dupe->student_id];
         }
 
+        /*
+         * نقل العهدة **قبل** كتابة حدث الرحلة، لا بعده.
+         *
+         * `SCH_Custody::record()` تُصادق على الانتقال — والنزول لطفل روضة أو
+         * ابتدائي يُرفض بلا مستلمٍ مخوَّل. وكانت نتيجتها تُهمَل بعد أن كُتب
+         * حدث الرحلة، فيرى السائق «نزل» ✔ وتبقى عهدة الطفل `on_bus` إلى
+         * الصباح، ويرى أبوه في تطبيقه أنه ما زال في الباص. والصحيح أن يُبلَّغ
+         * السائق بالرفض قبل أن يُكتب شيء.
+         */
+        if ($type === 'board' || $type === 'alight') {
+            $moved = SCH_Custody::record([
+                'student_id'    => $student_id,
+                'checkpoint'    => $type === 'board' ? 'bus_board' : 'bus_alight',
+                'client_uuid'   => $uuid . '-c',
+                'receiver_name' => sanitize_text_field((string) ($d['receiver_name'] ?? '')),
+                // مفتاح المخوَّل — بلا تمريره لا ينزل طفلٌ صغير من الباص أبدًا
+                'picker'        => sanitize_text_field((string) ($d['picker'] ?? '')),
+                'lat'           => $d['lat'] ?? null,
+                'lng'           => $d['lng'] ?? null,
+                'occurred_at'   => $d['occurred_at'] ?? null,
+            ]);
+
+            if (is_wp_error($moved)) {
+                return $moved;
+            }
+        }
+
         $wpdb->insert(sch_table('trip_events'), [
             'trip_id'     => $trip_id,
             'student_id'  => $student_id,
@@ -409,19 +436,6 @@ final class SCH_Trips
         // النزول خارج الترتيب يُسجَّل ولا يُمنع — أحيانًا يلتقي ولي الأمر بالباص في الطريق.
         if ($type === 'alight' && self::out_of_order($trip_id, $student_id)) {
             sch_audit('trip.out_of_order', 'student', $student_id, ['trip' => $trip_id]);
-        }
-
-        // نقل العهدة: الصعود والنزول انتقالان لا مجرد سجلين.
-        if ($type === 'board' || $type === 'alight') {
-            SCH_Custody::record([
-                'student_id'    => $student_id,
-                'checkpoint'    => $type === 'board' ? 'bus_board' : 'bus_alight',
-                'client_uuid'   => $uuid . '-c',
-                'receiver_name' => sanitize_text_field((string) ($d['receiver_name'] ?? '')),
-                'lat'           => $d['lat'] ?? null,
-                'lng'           => $d['lng'] ?? null,
-                'occurred_at'   => $d['occurred_at'] ?? null,
-            ]);
         }
 
         // صعود الصباح يُسجَّل حضورًا مبدئيًا.

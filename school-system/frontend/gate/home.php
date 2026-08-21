@@ -43,6 +43,25 @@ $counters = SCH_Gate::counters();
     </div>
 </div>
 
+<!-- اختيار المستلم: الخروج المبكر لا يمرّ بلا مخوَّل من القائمة.
+     كان الحارس يُسأل الاسم كتابةً، والخادم يشترط مفتاحًا من قائمة
+     المصرّح لهم — فلا يخرج طفلٌ صغير أبدًا، ويخرج الكبير لمن كتب اسمه
+     أيًّا كان. والقائمة هنا هي قائمة الأب لا خانةُ كتابة. -->
+<div class="schg-pick" id="schg-pick" hidden>
+    <div class="schg-pick__box" role="dialog" aria-modal="true" aria-labelledby="schg-pick-h">
+        <h2 class="schg-pick__h" id="schg-pick-h"><?php esc_html_e('من يستلم الطالب؟', 'school-system'); ?></h2>
+        <p class="schg-pick__who" id="schg-pick-who"></p>
+
+        <div class="schg-pick__list" id="schg-pick-list"></div>
+
+        <label class="schg-pick__lbl" for="schg-pick-reason"><?php esc_html_e('سبب الخروج المبكر', 'school-system'); ?></label>
+        <input type="text" id="schg-pick-reason" autocomplete="off"
+               placeholder="<?php esc_attr_e('موعد طبي، ظرف عائلي…', 'school-system'); ?>">
+
+        <button type="button" class="schg-pick__x" id="schg-pick-cancel"><?php esc_html_e('إلغاء', 'school-system'); ?></button>
+    </div>
+</div>
+
 <!-- البحث بالاسم: بديل حين تفقد البطاقة أو تتعطل الكاميرا -->
 <div class="schg-manual">
     <input type="text" id="schg-search" inputmode="search"

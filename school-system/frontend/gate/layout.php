@@ -57,8 +57,13 @@ $sch_user     = wp_get_current_user();
 window.SCH_GATE = <?php echo wp_json_encode([
     'api'         => esc_url_raw(rest_url(SCH_API_NS . '/')),
     'nonce'       => wp_create_nonce('wp_rest'),
+    // نونس REST ينتهي بعد ١٢ ساعة وجهاز البوابة يبقى مفتوحًا أطول من ذلك —
+    // فيُجدَّد من هنا بدل أن تُمحى المسحات من الطابور بردّ 403.
+    'nonceUrl'    => esc_url_raw(admin_url('admin-ajax.php?action=rest-nonce')),
     'defaultMode' => SCH_Gate::default_mode(),
-    'photoBase'   => esc_url_raw(SCH_Dashboard::url('students')),
+    // صورة الطالب من `SCH_Files` لا من مسار الداشبورد: الحارس لا يملك
+    // `sch_view_students`، فكانت الصورة مكسورة مع كل مسح.
+    'photoBase'   => esc_url_raw(add_query_arg(['sch_file' => 'photo', 'sch_file_id' => ''], home_url('/'))),
     'i18n'        => [
         'offline'   => __('لا يوجد اتصال', 'school-system'),
         'queued'    => __('محفوظ — سيُرسل عند عودة الشبكة', 'school-system'),
@@ -68,6 +73,11 @@ window.SCH_GATE = <?php echo wp_json_encode([
         'noCamera'  => __('الكاميرا غير متاحة — استخدم البحث بالاسم', 'school-system'),
         'receiver'  => __('من استلم الطالب؟', 'school-system'),
         'reason'    => __('سبب الخروج المبكر', 'school-system'),
+        'noPickers' => __('لا مخوَّل باستلام هذا الطالب — راجع الإدارة قبل تسليمه.', 'school-system'),
+        'pickErr'   => __('تعذّر جلب قائمة المخوَّلين — أعد المحاولة.', 'school-system'),
+        'until'     => __('حتى', 'school-system'),
+        'lookupErr' => __('تعذّر التعرّف على الطالب — أعد المسح أو ابحث بالاسم.', 'school-system'),
+        'cancel'    => __('إلغاء', 'school-system'),
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 </script>
@@ -75,10 +85,19 @@ window.SCH_GATE = <?php echo wp_json_encode([
 <script src="<?php echo esc_url(sch_asset('assets/gate.js')); ?>" defer></script>
 <?php endif; ?>
 
+<?php
+/*
+ * نطاق عامل الخدمة يُشتقّ من **مجلّد السكربت**. و`SCH_Gate::url()` تُلحق
+ * شرطةً مائلة، فـ`/gate/sw.js/` نطاقُه `/gate/sw.js/` — أي لا صفحة واحدة:
+ * لا عملَ بلا شبكة (وهو أول ما يُوعَد به تطبيق البوابة)، و`serviceWorker.ready`
+ * لا تُحلّ أبدًا فيتجمّد `SCH_Push::boot()` قبل أن يطلب الإذن.
+ */
+$sch_sw = untrailingslashit(SCH_Gate::url('sw.js'));
+?>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Gate::url('sw.js')); ?>);
+    navigator.serviceWorker.register(<?php echo wp_json_encode($sch_sw); ?>, { scope: <?php echo wp_json_encode(SCH_Gate::url()); ?> });
   });
 }
 </script>

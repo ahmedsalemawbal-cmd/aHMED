@@ -3,6 +3,10 @@
  *
  * يستخدم المحرك الميداني المشترك (field-core.js) للطابور ومنع التكرار.
  * المسح عبر BarcodeDetector حيث توفّر، والبحث بالاسم بديل دائم يعمل في كل جهاز.
+ *
+ * والخروج المبكر لا يمرّ بخانة كتابة: `SCH_Custody` تشترط مفتاحًا من قائمة
+ * المخوَّلين، وكان الحارس يُسأل الاسم نصًّا — فلا يخرج طفلٌ صغير أبدًا،
+ * ويخرج الكبير مع من كتب الحارس اسمه أيًّا كان. والقائمة هنا قائمةُ الأب.
  */
 (function () {
   'use strict';
@@ -11,6 +15,7 @@
   if (!CFG || !window.SCHField) { return; }
 
   var netEl    = document.getElementById('schg-net');
+  var countsEl = document.getElementById('schg-counts');
   var modesEl  = document.getElementById('schg-modes');
   var cardEl   = document.getElementById('schg-card');
   var photoEl  = document.getElementById('schg-photo');
@@ -23,15 +28,33 @@
   var resEl    = document.getElementById('schg-results');
   var recentEl = document.getElementById('schg-recent');
 
+  var pickEl    = document.getElementById('schg-pick');
+  var pickWho   = document.getElementById('schg-pick-who');
+  var pickList  = document.getElementById('schg-pick-list');
+  var pickWhy   = document.getElementById('schg-pick-reason');
+  var pickX     = document.getElementById('schg-pick-cancel');
+
   var mode = CFG.defaultMode;
   var lastToken = '';
   var lastAt = 0;
+  var busy = false;
+
+  function api(path) {
+    return fetch(CFG.api + path, {
+      credentials: 'same-origin',
+      headers: { 'X-WP-Nonce': CFG.nonce }
+    }).then(function (r) {
+      if (!r.ok) { throw new Error(String(r.status)); }
+      return r.json();
+    });
+  }
 
   var queue = new window.SCHField.Queue({
     key: 'sch_gate_queue',
     endpoint: 'custody/scan',
     api: CFG.api,
     nonce: CFG.nonce,
+    nonceUrl: CFG.nonceUrl,
     onChange: function (pending, online) {
       if (!online) {
         netEl.textContent = CFG.i18n.offline + (pending ? ' · ' + pending : '');
@@ -52,6 +75,12 @@
         addRecent(b.student.name, b.checkpoint_label);
       } else if (b && b.message) {
         show({ name: b.message }, '', true);
+      }
+
+      // العدّاد كان مجمَّدًا منذ فتح الصفحة — والحارس على الشاشة نفسها من
+      // السابعة إلى الثانية. الخادم يعيده مُنسَّقًا مع كل مسح.
+      if (res.ok && b && b.counts && countsEl) {
+        countsEl.textContent = b.counts;
       }
     }
   });
@@ -83,12 +112,12 @@
     cardEl.classList.toggle('is-late', !!student.late);
 
     nameEl.textContent = student.name || '';
-    metaEl.textContent = student.klass || student.academic_no || '';
+    metaEl.textContent = student.klass || student.class || student.academic_no || '';
     stateEl.textContent = stateLabel || '';
 
     if (student.id && !bad) {
       photoEl.hidden = false;
-      photoEl.src = CFG.photoBase + student.id + '/?sch_photo=1';
+      photoEl.src = CFG.photoBase + student.id;
     } else {
       photoEl.hidden = true;
       photoEl.removeAttribute('src');
@@ -98,6 +127,11 @@
 
     clearTimeout(hideTimer);
     hideTimer = setTimeout(function () { cardEl.hidden = true; }, 3000);
+  }
+
+  /** رسالة خطأ في مكان البطاقة — الصمت عند البوابة أسوأ من الرسالة. */
+  function fail(message) {
+    show({ name: message }, '', true);
   }
 
   function addRecent(name, label) {
@@ -118,20 +152,103 @@
     while (recentEl.children.length > 10) { recentEl.removeChild(recentEl.lastChild); }
   }
 
-  // ---------- التسجيل ----------
+  // ---------- نافذة اختيار المستلم ----------
 
-  function submit(payload) {
-    // الخروج المبكر يتطلب المستلم والسبب — يُسألان قبل الإرسال.
-    if (mode === 'early_out') {
-      var receiver = window.prompt(CFG.i18n.receiver);
-      if (!receiver) { return; }
-      var reason = window.prompt(CFG.i18n.reason) || '';
-      payload.receiver_name = receiver;
-      payload.reason = reason;
+  function closePick() {
+    pickEl.hidden = true;
+    pickList.textContent = '';
+    pickWhy.value = '';
+    busy = false;
+  }
+
+  pickX.addEventListener('click', closePick);
+
+  /**
+   * تُفتح للخروج المبكر: قائمة المخوَّلين أزرارًا، وسببٌ اختياري.
+   * ومن لا مخوَّل له تُعرض له رسالة صريحة بدل خانة كتابة — الحارس لا يُطلب
+   * منه أن يقرّر من يستلم الطفل.
+   */
+  function openPick(student, pickers) {
+    if (!pickers.length) {
+      fail(CFG.i18n.noPickers);
+      busy = false;
+      return;
     }
 
+    pickList.textContent = '';
+    pickWhy.value = '';
+    pickWho.textContent = student.name + (student.class ? ' — ' + student.class : '');
+
+    pickers.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'schg-pick__one';
+
+      var strong = document.createElement('strong');
+      strong.textContent = p.name;
+      b.appendChild(strong);
+
+      var sub = document.createElement('span');
+      sub.textContent = p.until
+        ? p.relation + ' · ' + CFG.i18n.until + ' ' + String(p.until).slice(0, 10)
+        : p.relation;
+      b.appendChild(sub);
+
+      b.addEventListener('click', function () {
+        var reason = pickWhy.value.trim();
+        closePick();
+        send({ student_id: student.id, picker: p.key, reason: reason });
+      });
+
+      pickList.appendChild(b);
+    });
+
+    pickEl.hidden = false;
+    pickWhy.focus();
+  }
+
+  // ---------- التسجيل ----------
+
+  /** الإرسال النهائي — الحمولة كاملة ونقطة التحقق مضافة. */
+  function send(payload) {
     payload.checkpoint = mode;
     queue.push(payload);
+  }
+
+  /**
+   * بوابة كل عملية: الخروج المبكر يمرّ بنافذة الاختيار، وما عداه يُرسَل فورًا.
+   *
+   * @param {{token?: string, student?: object}} what
+   */
+  function submit(what) {
+    if (mode !== 'early_out') {
+      send(what.token ? { badge_token: what.token } : { student_id: what.student.id });
+      return;
+    }
+
+    if (busy) { return; }
+    busy = true;
+
+    // المسح يعطي رمزًا لا معرّفًا، وقائمة المخوَّلين تحتاج المعرّف.
+    var resolve = what.student
+      ? Promise.resolve(what.student)
+      : api('gate/search?token=' + encodeURIComponent(what.token))
+          .then(function (d) {
+            var s = (d.items || [])[0];
+            if (!s) { throw new Error('not_found'); }
+            return s;
+          });
+
+    resolve
+      .then(function (student) {
+        return api('gate/pickers/' + student.id).then(function (d) {
+          openPick(student, d.items || []);
+        });
+      })
+      .catch(function (e) {
+        fail(String(e && e.message) === 'not_found' ? CFG.i18n.notFound : CFG.i18n.pickErr);
+        busy = false;
+      });
   }
 
   function scanned(token) {
@@ -141,7 +258,7 @@
     lastToken = token;
     lastAt = now;
 
-    submit({ badge_token: token });
+    submit({ token: token });
   }
 
   // ---------- الكاميرا ----------
@@ -162,6 +279,7 @@
 
         setInterval(function () {
           if (videoEl.readyState !== 4) { return; }
+          if (!pickEl.hidden) { return; } // النافذة مفتوحة — لا مسح فوق قرارٍ معلَّق
           detector.detect(videoEl)
             .then(function (codes) {
               if (codes && codes.length) { scanned(codes[0].rawValue); }
@@ -180,30 +298,37 @@
     clearTimeout(searchTimer);
     var q = searchEl.value.trim();
 
-    if (q.length < 2) { resEl.innerHTML = ''; return; }
+    if (q.length < 2) { resEl.textContent = ''; return; }
 
     searchTimer = setTimeout(function () {
-      fetch(CFG.api + 'students?search=' + encodeURIComponent(q) + '&per_page=6', {
-        credentials: 'same-origin',
-        headers: { 'X-WP-Nonce': CFG.nonce }
-      })
-        .then(function (r) { return r.json(); })
+      // `students` مشروط بـ`sch_view_students` والحارس لا يملكها، فكان
+      // البديلُ الوحيد حين تتعطّل الكاميرا يردّ 403. و`gate/search` مسارٌ
+      // ضيّق: اسم وشعبة وحالة، بصلاحية من يعمل في الميدان.
+      api('gate/search?q=' + encodeURIComponent(q))
         .then(function (data) {
-          resEl.innerHTML = '';
+          resEl.textContent = '';
           (data.items || []).forEach(function (s) {
             var b = document.createElement('button');
             b.type = 'button';
             b.className = 'schg-result';
-            b.textContent = s.full_name + ' — ' + (s.grade_level || '');
+
+            var strong = document.createElement('strong');
+            strong.textContent = s.name;
+            b.appendChild(strong);
+
+            var sub = document.createElement('span');
+            sub.textContent = [s.class, s.state_label].filter(Boolean).join(' · ');
+            b.appendChild(sub);
+
             b.addEventListener('click', function () {
-              submit({ student_id: s.id });
               searchEl.value = '';
-              resEl.innerHTML = '';
+              resEl.textContent = '';
+              submit({ student: s });
             });
             resEl.appendChild(b);
           });
         })
-        .catch(function () {});
+        .catch(function () { resEl.textContent = ''; });
     }, 300);
   });
 

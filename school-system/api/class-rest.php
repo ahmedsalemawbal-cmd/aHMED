@@ -44,6 +44,16 @@ final class SCH_Rest
         self::route('/custody/scan', 'POST', 'custody_scan', static fn (): bool => current_user_can('sch_scan_gate') || current_user_can('sch_manage_transport'));
         self::route('/custody/board', 'GET', 'custody_board', static fn (): bool => current_user_can('sch_view_custody'));
 
+        /*
+         * مسارا الميدان: من يقف عند البوابة أو يقود الحافلة يحتاج شيئين لا
+         * ثالث لهما — أن يجد الطالب حين تتعطّل الكاميرا، وأن يعرف من يحقّ له
+         * استلامه. وكلاهما كان يمرّ عبر `/students` التي تشترط
+         * `sch_view_students` — ولا يملكها الحارس ولا السائق، فيُرَدّان بـ403.
+         * وهما مسارا **قراءة ضيّقة**: اسمٌ وشعبةٌ وحالة، لا ملفّ طالب.
+         */
+        self::route('/gate/search', 'GET', 'gate_search', [self::class, 'can_work_field']);
+        self::route('/gate/pickers/(?P<id>\\d+)', 'GET', 'gate_pickers', [self::class, 'can_work_field']);
+
         // ===== التعلّم =====
         self::route('/content/(?P<id>\\d+)/open', 'POST', 'content_open', static fn (): bool => current_user_can('sch_learn'));
         self::route('/student/pass', 'GET', 'student_pass', static fn (): bool => current_user_can('sch_learn'));
@@ -422,12 +432,24 @@ final class SCH_Rest
         $student = $result['student'];
         $class   = SCH_Students::current_class((int) $student->id);
 
+        // العدّاد يعود مع كل مسح: «في المدرسة ١٤٢ من ٣٠٠» كان مجمَّدًا منذ
+        // فتح الصفحة، والحارس يعمل على الشاشة نفسها من السابعة إلى الثانية.
+        $counters = SCH_Gate::counters();
+
         return new WP_REST_Response([
             'ok'               => true,
             'duplicate'        => $result['duplicate'],
             'state'            => $result['state'],
             'state_label'      => SCH_Custody::state_label($result['state']),
             'checkpoint_label' => SCH_Custody::CHECKPOINTS[(string) $r->get_param('checkpoint')] ?? '',
+            // مُنسَّقة من الخادم: `number_format_i18n` تُخرج أرقامًا عربية،
+            // فلو نسّقتها الواجهة قفز العدّاد من «١٤٢» إلى «142» بعد أوّل مسح.
+            'counts'           => sprintf(
+                /* translators: 1: عدد من في المدرسة 2: الإجمالي */
+                __('في المدرسة %1$s من %2$s', 'school-system'),
+                number_format_i18n($counters['inside']),
+                number_format_i18n($counters['total'])
+            ),
             'student'          => [
                 'id'          => (int) $student->id,
                 'name'        => SCH_Enrollment::full_name($student),
@@ -564,6 +586,87 @@ final class SCH_Rest
 
         return current_user_can('sch_view_own_children')
             && SCH_Students::guardian_has_child(get_current_user_id(), (int) $r->get_param('id'));
+    }
+
+    /** من يعمل في الميدان: الحارس والمشرف والسائق — ومن يدير الطلاب أصلًا. */
+    public static function can_work_field(): bool
+    {
+        return current_user_can('sch_scan_gate')
+            || current_user_can('sch_drive_trip')
+            || current_user_can('sch_manage_transport')
+            || current_user_can('sch_view_students');
+    }
+
+    /**
+     * بحث البوابة — البديل الوحيد حين تتعطّل الكاميرا أو تتلف البطاقة.
+     *
+     * يُرجع ما يكفي للتعرّف على الطفل عند الباب وحده: اسمٌ وشعبةٌ وحالة عهدة
+     * ورقمٌ أكاديمي. ولا يُرجع ملفًّا: لا هاتف ولا عنوان ولا صحّة ولا مال.
+     */
+    public static function gate_search(WP_REST_Request $r): WP_REST_Response
+    {
+        $q     = trim((string) $r->get_param('q'));
+        $token = trim((string) $r->get_param('token'));
+
+        // البطاقة المقروءة تُحلّ إلى طالبها: الخروج المبكر يحتاج المعرّف
+        // ليجلب قائمة المخوَّلين، والمسح وحده يعطي رمزًا لا معرّفًا.
+        if ($token !== '') {
+            $one = SCH_Custody::find_by_badge($token);
+            $rows = $one ? [$one] : [];
+        } elseif (mb_strlen($q) >= 2) {
+            $rows = SCH_Students::list(['search' => $q, 'status' => 'active', 'per_page' => 8])['items'];
+        } else {
+            return new WP_REST_Response(['items' => []]);
+        }
+
+        $items = [];
+        foreach ($rows as $s) {
+            $class = SCH_Students::current_class((int) $s->id);
+
+            $items[] = [
+                'id'          => (int) $s->id,
+                'name'        => SCH_Enrollment::full_name($s),
+                'academic_no' => (string) ($s->academic_no ?? ''),
+                'class'       => $class ? SCH_Classes::label($class) : null,
+                'stage'       => (string) ($s->stage ?? ''),
+                'state'       => (string) ($s->custody_state ?? 'home'),
+                'state_label' => SCH_Custody::state_label((string) ($s->custody_state ?? 'home')),
+            ];
+        }
+
+        return new WP_REST_Response(['items' => $items]);
+    }
+
+    /**
+     * من يحقّ له استلام هذا الطالب — أولياء أمره المخوَّلون وتفويضاته السارية.
+     *
+     * بلا هذا المسار لا واجهة لاختيار المستلم، وبلا اختيارٍ لا يخرج طفل روضة
+     * ولا ابتدائي خروجًا مبكرًا ولا ينزل من الباص — لأن `SCH_Custody` تشترطه.
+     */
+    public static function gate_pickers(WP_REST_Request $r): WP_REST_Response
+    {
+        $student_id = (int) $r->get_param('id');
+        $student    = SCH_Students::get($student_id);
+
+        if (!$student) {
+            return new WP_REST_Response(['items' => [], 'required' => false]);
+        }
+
+        $items = [];
+        foreach (SCH_Custody::pickers($student_id) as $p) {
+            $items[] = [
+                'key'      => (string) $p['key'],
+                'name'     => (string) $p['name'],
+                'relation' => (string) $p['relation'],
+                'until'    => $p['until'],
+            ];
+        }
+
+        return new WP_REST_Response([
+            'items' => $items,
+            // الصغار لا ينزلون من الباص بلا تأكيد — والواجهة تعرف ذلك منها
+            'young' => in_array((string) $student->stage, ['kg', 'primary'], true),
+        ]);
     }
 
     /** السائق لا يصل إلا لرحلته هو. */

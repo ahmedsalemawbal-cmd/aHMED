@@ -65,7 +65,7 @@
   function stopIcon(state) {
     var cls = 'sch-stop sch-stop--' + state;
     var inner = state === 'mine'
-      ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="#0F766E"><path d="M4 12 12 5l8 7v8h-6v-5h-4v5H4z"/></svg>'
+      ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M4 12 12 5l8 7v8h-6v-5h-4v5H4z"/></svg>'
       : '';
 
     return L.divIcon({
@@ -166,13 +166,26 @@
       d.child.onboard ? 'على متن الحافلة' : 'لم يصعد بعد';
     el('trk-kid').classList.toggle('is-off', !d.child.onboard);
 
+    /*
+     * اسم المحطّة نصٌّ حرّ يكتبه من يملك `sch_manage_transport` — وحقنُه
+     * بـ`innerHTML` يجعله شفرةً تعمل في صفحةٍ تطبع نونس `wp_rest` حيًّا
+     * وبجلسة وليّ الأمر. `textContent` يقفل الباب.
+     *
+     * (وكان المتغيّر المحليّ اسمه `el` فيطمس الدالة `el()` المعرَّفة أعلاه
+     * في الملفّ نفسه — اسمٌ مستعارٌ لا يظهر أثره إلا حين يُستدعى بعده.)
+     */
     var bar = el('trk-stops');
-    bar.innerHTML = '';
+    bar.textContent = '';
     d.stops.forEach(function (s) {
-      var el = document.createElement('span');
-      el.className = 'scha-stp' + (s.done ? ' is-past' : '') + (s.mine ? ' is-mine' : '');
-      el.innerHTML = '<i></i><span>' + s.name + '</span>';
-      bar.appendChild(el);
+      var dot = document.createElement('span');
+      dot.className = 'scha-stp' + (s.done ? ' is-past' : '') + (s.mine ? ' is-mine' : '');
+      dot.appendChild(document.createElement('i'));
+
+      var label = document.createElement('span');
+      label.textContent = s.name;
+      dot.appendChild(label);
+
+      bar.appendChild(dot);
     });
   }
 

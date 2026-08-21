@@ -3961,3 +3961,56 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
   border-radius: var(--r3);
   box-shadow: 0 10px 26px color-mix(in srgb, var(--pri) 32%, transparent);
 }
+
+
+/* =========================================================
+   علامات الخريطة الحيّة.
+
+   `track.js` يبني الباص والمحطّات بـ`L.divIcon` بهذه الأصناف — **ولم تكن
+   معرَّفة في أي ورقة**، فالمحطّات مربّعاتٌ شفّافة ١٦×١٦ لا تُرى، وقرص
+   الباص بلا خلفية فوق شارعٍ أبيض. واللوح السفلي كان يقول الحقيقة والخريطة
+   فارغة.
+   ========================================================= */
+
+.sch-bus-icon { position: relative; }
+
+.sch-bus__halo {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--p-brand) 26%, transparent);
+  animation: sch-bus-pulse 2.4s ease-out infinite;
+}
+
+.sch-bus__disc {
+  position: absolute; inset: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; border-radius: 50%;
+  box-shadow: 0 3px 10px rgba(9, 20, 33, .34);
+}
+
+@keyframes sch-bus-pulse {
+  0%   { transform: scale(.72); opacity: .85; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sch-bus__halo { animation: none; opacity: .5; }
+}
+
+/* المحطّات: دائرة صغيرة تقول حالتها بلونها — والتي تخصّني أكبر ومعلَّمة */
+.sch-stop {
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--p-faint);
+  box-shadow: 0 1px 4px rgba(9, 20, 33, .3);
+}
+.sch-stop--done { background: var(--p-ok); }
+.sch-stop--next { background: var(--p-warn); }
+.sch-stop--mine {
+  display: flex; align-items: center; justify-content: center;
+  /* رمز البيت داخلها يرث `currentColor` — لا لونًا مكتوبًا في السكربت */
+  color: var(--p-brand);
+  background: #fff;
+  border: 3px solid var(--p-brand);
+  box-shadow: 0 2px 8px rgba(9, 20, 33, .36);
+}

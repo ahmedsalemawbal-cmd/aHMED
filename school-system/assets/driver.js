@@ -21,6 +21,11 @@
   var countsEl = document.getElementById('schd-counts');
   var endBtn   = document.getElementById('schd-end');
 
+  var pickEl   = document.getElementById('schd-pick');
+  var pickWho  = document.getElementById('schd-pick-who');
+  var pickList = document.getElementById('schd-pick-list');
+  var pickX    = document.getElementById('schd-pick-cancel');
+
   var students = [];
   var lastSent = 0;
   var wakeLock = null;
@@ -47,6 +52,51 @@
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': CFG.nonce }
     }, options || {}));
+  }
+
+  function apiJson(path) {
+    return api(path).then(function (r) {
+      if (!r.ok) { throw new Error(String(r.status)); }
+      return r.json();
+    });
+  }
+
+  /**
+   * تجديد نونس REST — الجلسة سارية والنونس وحده انتهى، والرحلة قد تمتدّ
+   * بعد اثنتي عشرة ساعة فتُمحى تسجيلات السائق كلّها بردّ 403.
+   */
+  var renewing = false;
+
+  function renewNonce() {
+    if (renewing || !CFG.nonceUrl) { return; }
+    renewing = true;
+
+    fetch(CFG.nonceUrl, { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (t) {
+        t = (t || '').trim();
+        if (/^[A-Za-z0-9]{8,20}$/.test(t)) { CFG.nonce = t; }
+      })
+      .catch(function () {})
+      .then(function () { renewing = false; });
+  }
+
+  /** رسالة فوق القائمة — الرفض الصامت يجعل السائق يظنّ أن كل شيء تمّ. */
+  function toast(message) {
+    var box = document.getElementById('schd-toast');
+
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'schd-toast';
+      box.className = 'schd-toast';
+      box.setAttribute('role', 'status');
+      (listEl.parentNode || document.body).insertBefore(box, listEl);
+    }
+
+    box.textContent = message;
+    box.hidden = false;
+    clearTimeout(box._t);
+    box._t = setTimeout(function () { box.hidden = true; }, 6000);
   }
 
   function readQueue() {
@@ -132,19 +182,91 @@
     countsEl.textContent = 'في الباص ' + onboard + ' · نزل ' + done + ' · الإجمالي ' + students.length;
   }
 
+  // ---------- اختيار المستلم ----------
+
+  var picking = false;
+
+  function closePick() {
+    pickEl.hidden = true;
+    pickList.textContent = '';
+    picking = false;
+  }
+
+  if (pickX) { pickX.addEventListener('click', closePick); }
+
+  /**
+   * قائمة الأب لا خانة كتابة.
+   *
+   * `SCH_Custody` تشترط مفتاحًا من `pickers()`، وكان السائق يُسأل الاسم
+   * نصًّا — فلا ينزل طفل روضة ولا ابتدائي أبدًا وتبقى عهدته `on_bus` إلى
+   * الصباح. ومن لا مخوَّل له تُعرض رسالة صريحة: قرار التسليم ليس للسائق.
+   */
+  function askPicker(student, done) {
+    if (picking) { return; }
+    picking = true;
+
+    apiJson('gate/pickers/' + student.student_id)
+      .then(function (d) {
+        var items = d.items || [];
+
+        if (!items.length) {
+          closePick();
+          toast(CFG.i18n.noPickers);
+          return;
+        }
+
+        pickList.textContent = '';
+        pickWho.textContent = student.name + (student.stop ? ' — ' + student.stop : '');
+
+        items.forEach(function (p) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'schd-pick__one';
+
+          var strong = document.createElement('strong');
+          strong.textContent = p.name;
+          b.appendChild(strong);
+
+          var sub = document.createElement('span');
+          sub.textContent = p.until
+            ? p.relation + ' · ' + CFG.i18n.until + ' ' + String(p.until).slice(0, 10)
+            : p.relation;
+          b.appendChild(sub);
+
+          b.addEventListener('click', function () {
+            closePick();
+            done(p);
+          });
+
+          pickList.appendChild(b);
+        });
+
+        pickEl.hidden = false;
+      })
+      .catch(function () {
+        closePick();
+        toast(CFG.i18n.pickErr);
+      });
+  }
+
   function mark(student, type) {
     // النقطة القادمة أولًا — النزول خارج الترتيب تحذير لا منع.
     if (type === 'alight' && !student.is_next) {
       if (!window.confirm('نقطته لم تصل بعد. متأكد أنه ينزل هنا؟')) { return; }
     }
 
-    // الروضة والابتدائي: لا تسليم بلا تحديد من استلم.
+    // الروضة والابتدائي: لا تسليم بلا مخوَّل من قائمة الأب.
     if (type === 'alight' && student.needs_receiver) {
-      var receiver = window.prompt(CFG.i18n.receiver || 'من استلم الطالب؟');
-      if (!receiver) { return; }
-      student.receiver = receiver;
+      askPicker(student, function (p) {
+        commit(student, type, p.key, p.name);
+      });
+      return;
     }
 
+    commit(student, type, '', '');
+  }
+
+  function commit(student, type, pickerKey, pickerName) {
     // تحديث فوري في الواجهة — السائق لا ينتظر الشبكة.
     if (type === 'board')  { student.boarded_at = new Date().toISOString(); student.absent = false; }
     if (type === 'alight') { student.alighted_at = new Date().toISOString(); }
@@ -155,7 +277,8 @@
     q.push({
       student_id: student.student_id,
       type: type,
-      receiver_name: student.receiver || '',
+      picker: pickerKey || '',
+      receiver_name: pickerName || '',
       client_uuid: uuid(),
       occurred_at: localStamp()
     });
@@ -181,11 +304,37 @@
       body: JSON.stringify(item)
     })
       .then(function (r) {
-        // 4xx غير قابل للإصلاح بإعادة المحاولة — أسقطه حتى لا يعلق الطابور.
-        if (r.ok || (r.status >= 400 && r.status < 500)) {
-          var rest = readQueue();
-          rest.shift();
-          writeQueue(rest);
+        /*
+         * 401/403 = نونس انتهى، و408/429/5xx حالات عابرة — كلّها تُعاد
+         * لا تُسقَط. وكان الشرط يُسقط كل 4xx، فرحلةٌ امتدّت بعد انتهاء
+         * النونس تُمحى تسجيلاتها كلّها والسائق يرى «تمت المزامنة».
+         */
+        var retry = r.status === 401 || r.status === 403
+                 || r.status === 408 || r.status === 429 || r.status >= 500;
+
+        if (retry) {
+          if (r.status === 401 || r.status === 403) { renewNonce(); }
+
+          var q2 = readQueue();
+          if (q2.length && q2[0].client_uuid === item.client_uuid) {
+            q2[0]._tries = (q2[0]._tries || 0) + 1;
+            if (q2[0]._tries >= 12) { q2.shift(); }
+            writeQueue(q2);
+          }
+          return;
+        }
+
+        var rest = readQueue();
+        rest.shift();
+        writeQueue(rest);
+
+        // رفضٌ من الخادم: الواجهة كانت تُحدَّث تفاؤلًا قبل القبول، فيرى
+        // السائق «نزل» ✔ والعهدة لم تنتقل. نُبلّغه ونُعيد الحالة الحقيقية.
+        if (!r.ok) {
+          return r.json().catch(function () { return {}; }).then(function (body) {
+            toast(body && body.message ? body.message : CFG.i18n.rejected);
+            loadManifest();
+          });
         }
       })
       .catch(function () { /* الشبكة — نعيد لاحقًا */ })

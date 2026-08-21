@@ -2,10 +2,9 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
-$inside = array_values(array_filter(
-    SCH_Security::visitors(50),
-    static fn (object $v): bool => $v->checked_out === null
-));
+// التصفية في القاعدة: نافذة الخمسين كانت تُسقط الزائر القديم من الشاشة
+// فلا يُخرجه أحد، والعدّاد يعدّ الصفوف كلّها فيتصاعد أبدًا.
+$inside = SCH_Security::visitors_inside();
 ?>
 <h1 class="schg-h1"><?php esc_html_e('الزوّار', 'school-system'); ?></h1>
 <p class="schg-sub">
@@ -18,6 +17,22 @@ $inside = array_values(array_filter(
 
 <?php if (isset($_GET['ok'])) : ?>
     <div class="schg-alert schg-alert--ok"><?php esc_html_e('سُجّل دخول الزائر.', 'school-system'); ?></div>
+<?php endif; ?>
+
+<?php
+/*
+ * فشل النونس كان صامتًا تمامًا: النموذج يُرسَل، ولا شيء يُكتب، ولا رسالة —
+ * على جهازٍ يبقى مفتوحًا من السابعة إلى الثانية فينتهي نونسه في منتصف اليوم.
+ */
+?>
+<?php if (isset($_GET['err'])) : ?>
+    <div class="schg-alert schg-alert--bad">
+        <?php echo esc_html(match (sanitize_key((string) $_GET['err'])) {
+            'nonce'  => __('انتهت صلاحية الصفحة — حدّثها ثم أعد التسجيل.', 'school-system'),
+            'name'   => __('اسم الزائر مطلوب.', 'school-system'),
+            default  => __('تعذّر تنفيذ العملية.', 'school-system'),
+        }); ?>
+    </div>
 <?php endif; ?>
 
 <form method="post" class="schg-form">

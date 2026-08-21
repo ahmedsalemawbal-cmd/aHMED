@@ -21,7 +21,17 @@ final class SCH_Files
         'answer'   => 'إجابة طالب',
         'leave'    => 'تقرير إجازة',
         'rx'       => 'وصفة دواء',
+        'photo'    => 'صورة الطالب',
     ];
+
+    /**
+     * ما لا يُسجَّل في التدقيق.
+     *
+     * صورة الطالب تُطلب مع كل مسحٍ عند البوابة — وتسجيلها يغرق سجلّ التدقيق
+     * بمئات الأسطر يوميًّا فيُخفي ما يُبحث عنه فعلًا. والمسح نفسه مسجَّل في
+     * `custody_events`، فالأثر موجود حيث يُقرأ.
+     */
+    private const NO_AUDIT = ['photo'];
 
     public static function init(): void
     {
@@ -73,6 +83,7 @@ final class SCH_Files
             'answer'   => self::answer_file($id),
             'leave'    => self::leave_file($id),
             'rx'       => self::rx_file($id),
+            'photo'    => self::photo_file($id),
             default    => null,
         };
 
@@ -88,7 +99,9 @@ final class SCH_Files
             exit;
         }
 
-        sch_audit('file.opened', 'file', $id, ['kind' => $kind]);
+        if (!in_array($kind, self::NO_AUDIT, true)) {
+            sch_audit('file.opened', 'file', $id, ['kind' => $kind]);
+        }
 
         $type = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
             'pdf'        => 'application/pdf',
@@ -198,6 +211,40 @@ final class SCH_Files
         return SCH_Students::guardian_has_child(get_current_user_id(), (int) $leave->student_id)
             ? (string) $leave->file_stored
             : null;
+    }
+
+    /**
+     * صورة الطالب: لمن يقف في الميدان ومن يديره ومن يخصّه.
+     *
+     * بطاقة التأكيد عند البوابة تعرض الصورة ثلاث ثوانٍ — وهي كل ما يمنع
+     * تسليم طفلٍ لغير أهله. وكانت تُطلب من مسار الداشبورد المشروط بـ
+     * `sch_view_students`، **والحارس لا يملكها**، فكانت صورةً مكسورة مع
+     * كل مسحٍ منذ بُنيت الشاشة. والسائق مثله عند النزول.
+     *
+     * @param int $id معرّف الطالب — لا معرّف ملفّ
+     */
+    private static function photo_file(int $id): ?string
+    {
+        $student = SCH_Students::get($id);
+
+        if (!$student || !$student->photo_file) {
+            return null;
+        }
+
+        if (current_user_can('sch_view_students')
+            || current_user_can('sch_scan_gate')
+            || current_user_can('sch_drive_trip')
+            || current_user_can('sch_manage_transport')) {
+            return (string) $student->photo_file;
+        }
+
+        if (SCH_Students::guardian_has_child(get_current_user_id(), $id)) {
+            return (string) $student->photo_file;
+        }
+
+        $me = current_user_can('sch_learn') ? SCH_Student::me() : null;
+
+        return $me && (int) $me->id === $id ? (string) $student->photo_file : null;
     }
 
     /** الوصفة: لولي الأمر وللعيادة — بيانات صحية لا تُفتح لغيرهما. */

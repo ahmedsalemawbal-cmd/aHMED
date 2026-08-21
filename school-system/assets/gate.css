@@ -24,6 +24,16 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/*
+ * حارس `[hidden]`.
+ *
+ * أولوية `[hidden]` في ورقة المتصفّح أضعف من أي صنف يضبط `display` — و
+ * `.schg-card` تضبط `display: flex`. فبطاقة التأكيد كانت **لا تختفي أبدًا**
+ * بعد أوّل مسح: تبقى غطاءً على منطقة الكاميرا باسم آخر طالب بقيّة اليوم،
+ * والحارس يعمل بها كل صباح. وكل صنفٍ يضبط `display` يحتاج هذا الحارس.
+ */
+[hidden] { display: none !important; }
+
 .schg {
   margin: 0;
   background: var(--g-bg);
@@ -115,6 +125,52 @@
 .schg-card__text span { display: block; color: var(--g-muted); font-size: 14px; }
 .schg-card__state { color: var(--g-accent) !important; font-weight: 700; }
 
+/* اختيار المستلم — الخروج المبكر لا يمرّ بلا مخوَّل من القائمة */
+.schg-pick {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0; background: rgba(4, 8, 7, .72);
+}
+.schg-pick__box {
+  width: 100%; max-width: 640px;
+  max-height: 88vh; overflow-y: auto;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  background: var(--g-surface);
+  border-top: 1px solid var(--g-line);
+  border-radius: 20px 20px 0 0;
+}
+.schg-pick__h { margin: 0 0 4px; font-size: 19px; font-weight: 700; }
+.schg-pick__who { margin: 0 0 14px; color: var(--g-muted); font-size: 14px; }
+
+.schg-pick__list { display: grid; gap: 8px; margin-bottom: 16px; }
+.schg-pick__one {
+  display: block; width: 100%; min-height: 56px;
+  padding: 12px 14px; text-align: start;
+  font-family: inherit; color: var(--g-ink);
+  background: var(--g-bg); border: 1px solid var(--g-line);
+  border-radius: var(--g-r); cursor: pointer;
+}
+.schg-pick__one:active { border-color: var(--g-accent); background: var(--g-line); }
+.schg-pick__one strong { display: block; font-size: 17px; font-weight: 700; }
+.schg-pick__one span   { display: block; font-size: 13px; color: var(--g-muted); }
+
+.schg-pick__lbl { display: block; margin-bottom: 6px; font-size: 14px; color: var(--g-muted); }
+.schg-pick input[type="text"] {
+  width: 100%; min-height: 48px; padding: 12px 14px; margin-bottom: 14px;
+  font-family: inherit; font-size: 16px;
+  color: var(--g-ink); background: var(--g-bg);
+  border: 1px solid var(--g-line); border-radius: var(--g-r);
+}
+.schg-pick input[type="text"]:focus { outline: 2px solid var(--g-accent); outline-offset: 1px; }
+
+.schg-pick__x {
+  width: 100%; min-height: 48px;
+  font-family: inherit; font-size: 16px; font-weight: 700;
+  color: var(--g-muted); background: transparent;
+  border: 1px solid var(--g-line); border-radius: var(--g-r); cursor: pointer;
+}
+.schg-pick__x:active { background: var(--g-line); }
+
 /* البحث بالاسم */
 .schg-manual { margin-top: 16px; }
 .schg-manual input {
@@ -132,6 +188,8 @@
   border-radius: var(--g-r); cursor: pointer;
 }
 .schg-result:active { background: var(--g-line); }
+.schg-result strong { display: block; font-weight: 700; }
+.schg-result span   { display: block; font-size: 13px; color: var(--g-muted); }
 
 /* آخر العمليات */
 .schg-h2 { font-size: 15px; font-weight: 700; color: var(--g-muted); margin: 22px 0 8px; }
@@ -229,7 +287,8 @@ input[dir="ltr"] { text-align: start; }
 .schg-h2 { font-size: 17px; font-weight: 700; margin: 26px 0 10px; }
 .schg-sub { font-size: 14px; color: var(--g-muted); margin: 0 0 16px; }
 
-.schg-alert--ok { background: rgba(16,185,129,.16); color: #6EE7B7; }
+.schg-alert--ok  { background: rgba(16,185,129,.16); color: #6EE7B7; }
+.schg-alert--bad { background: rgba(248,113,113,.18); color: #FCA5A5; }
 
 .schg-visitor {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
