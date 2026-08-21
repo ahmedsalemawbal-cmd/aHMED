@@ -64,3 +64,37 @@ $val = static fn (string $k, string $def): string => (string) ($s[$k] ?? '') !==
         <button class="sch-btn sch-mt"><?php esc_html_e('حفظ الحدود', 'school-system'); ?></button>
     </form>
 </div>
+
+<?php
+/*
+ * نافذة الاختبارات: أين تبدأ الدورة، وفي أيّ قاعات.
+ *
+ * الدورة الشهرية تبدأ من منتصف شهرها وحدها، والنهائيّ ونصف الفصل يحتاجان
+ * تاريخًا — **وبلا هذين الحقلين يُشتقّان من مدى السنة**، وهو تخمينٌ يعمل
+ * ولا يعرف تقويم المدرسة. والقاعات قائمةٌ يُختار منها في الجدول، فاسمٌ
+ * حرٌّ في كل صفّ يجعل «تعارض القاعة» غير قابلٍ للحساب أصلًا.
+ */
+?>
+<div class="sch-card sch-mt">
+    <header class="sch-set__head">
+        <span class="sch-set__ic"><?php echo sch_icon('clipboard', 19); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <div>
+            <h2><?php esc_html_e('نافذة الاختبارات والقاعات', 'school-system'); ?></h2>
+            <p><?php esc_html_e('منها يبني النظام أيام كل دورة، ومنها تُملأ قائمة القاعات في جدول الاختبارات.', 'school-system'); ?></p>
+        </div>
+    </header>
+    <form method="post" action="<?php echo esc_url(SCH_Dashboard::post_url()); ?>">
+        <?php wp_nonce_field('sch_save_exam_setup', '_sch_nonce'); ?>
+        <input type="hidden" name="sch_action" value="save_exam_setup">
+        <div class="sch-grid">
+            <label class="sch-field"><span><?php esc_html_e('بداية اختبارات نصف الفصل', 'school-system'); ?></span>
+                <input type="date" name="exam_start_mid" dir="ltr" aria-label="<?php esc_attr_e('بداية اختبارات نصف الفصل', 'school-system'); ?>" value="<?php echo esc_attr($val('exam_start_mid', '')); ?>"></label>
+            <label class="sch-field"><span><?php esc_html_e('بداية الاختبارات النهائية', 'school-system'); ?></span>
+                <input type="date" name="exam_start_final" dir="ltr" aria-label="<?php esc_attr_e('بداية الاختبارات النهائية', 'school-system'); ?>" value="<?php echo esc_attr($val('exam_start_final', '')); ?>"></label>
+            <label class="sch-field sch-col--lg"><span><?php esc_html_e('القاعات — واحدة في كل سطر', 'school-system'); ?></span>
+                <textarea name="exam_rooms" rows="4" aria-label="<?php esc_attr_e('القاعات', 'school-system'); ?>"
+                          placeholder="<?php esc_attr_e("قاعة 1\nقاعة 2\nالمعمل", 'school-system'); ?>"><?php echo esc_textarea((string) sch_settings('exam_rooms', '')); ?></textarea></label>
+        </div>
+        <button class="sch-btn sch-mt"><?php esc_html_e('حفظ إعداد الاختبارات', 'school-system'); ?></button>
+    </form>
+</div>

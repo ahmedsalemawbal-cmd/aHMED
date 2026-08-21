@@ -614,7 +614,8 @@ final class SCH_Certificates
              FROM " . sch_table('students') . " s
              INNER JOIN " . sch_table('exam_results') . " r ON r.student_id = s.id
              INNER JOIN " . sch_table('exams') . " e ON e.id = r.exam_id
-             WHERE s.status = 'active' AND r.score IS NOT NULL"
+             WHERE s.status = 'active' AND r.score IS NOT NULL
+               AND e.approved_at IS NOT NULL"
             . $taken('excellence') .
             " GROUP BY s.id HAVING pct >= 95 ORDER BY pct DESC LIMIT 60"
         ) ?: [];

@@ -464,3 +464,73 @@
     form.requestSubmit ? form.requestSubmit() : form.submit();
   });
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   شاشة الاختبارات — طبقةٌ فوق ما يعمل بلا جافاسكربت.
+
+   الجدول يُبنى أصلًا بـ«اضغط مادة من السلّة ثم اضغط يومًا» (روابط ونماذج
+   حقيقية)، والدرجة تُحفظ بزرّ الإرسال في نموذجها. وهذه الطبقة تضيف:
+   إرسال القائمة والحقل عند التغيير · والسحب من السلّة إلى يومٍ فارغ.
+
+   **والإفلات على الأيام الفارغة وحدها** — والسلّة لا تحمل إلا ما لا موعد
+   له، فليس ثمّ سحبٌ من يومٍ إلى يوم أصلًا. وإزاحة المشغول تبقى للخادم.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var root = document.querySelector('[data-sch-ex]');
+  if (!root) { return; }
+
+  function send(form) {
+    if (!form) { return; }
+    form.requestSubmit ? form.requestSubmit() : form.submit();
+  }
+
+  /* ── القائمة والحقل يُرسلان نموذجهما عند التغيير ── */
+  root.addEventListener('change', function (e) {
+    var el = e.target.closest('[data-ex-submit]');
+    if (!el) { return; }
+    send(el.form || el.closest('form'));
+  });
+
+  /* ── السحب من السلّة ── */
+  var drag = null;
+
+  root.addEventListener('dragstart', function (e) {
+    var pick = e.target.closest('[data-ex-pick]');
+    if (!pick) { return; }
+
+    drag = pick.dataset.exPick || '';
+    if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'copy'; e.dataTransfer.setData('text/plain', 'sch'); }
+  });
+
+  root.addEventListener('dragend', function () { drag = null; });
+
+  root.addEventListener('dragover', function (e) {
+    var day = e.target.closest('[data-ex-day]');
+    if (drag && day && day.querySelector('[name="date"]')) { e.preventDefault(); }
+  });
+
+  root.addEventListener('drop', function (e) {
+    var day = e.target.closest('[data-ex-day]');
+    if (!drag || !day) { return; }
+
+    /* نموذج الوضع لا يُرسَم إلا في يومٍ فارغ — فاليوم المشغول لا يقبل إفلاتًا،
+       ولا يُخترع له مسارٌ ثانٍ يتخطّى ما يراه من لا جافاسكربت عنده. */
+    var field = day.querySelector('[name="subject_id"]');
+    var form  = field ? (field.form || field.closest('form')) : null;
+
+    if (!form || !form.querySelector('[name="date"]')) { drag = null; return; }
+
+    e.preventDefault();
+    field.value = drag;
+    drag = null;
+
+    /* الزرّ معطَّل حين لا مادة مختارة — والإفلات يختار، فيُفكّ القفل قبل الإرسال. */
+    var go = form.querySelector('button');
+    if (go) { go.disabled = false; }
+
+    send(form);
+  });
+})();

@@ -20,6 +20,8 @@
   --d-display: 'Cairo', system-ui, sans-serif;
   --d-body:    'Cairo', system-ui, sans-serif;
   --d-r: 10px;
+  /* الظلّ رمزٌ لا رقم: كان مكتوبًا بديلًا داخل `var()` لرمزٍ من ورقةٍ أخرى. */
+  --d-lift: 0 10px 22px -12px rgba(0,0,0,.7);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -325,7 +327,7 @@ textarea[dir="ltr"] {
 
 
 /* النقطة القادمة تتقدّم الكشف */
-.schd-row--next { border-inline-start-color: var(--d-accent); box-shadow: var(--d-lift-2, 0 10px 22px -12px rgba(0,0,0,.7)); }
+.schd-row--next { border-inline-start-color: var(--d-accent); box-shadow: var(--d-lift); }
 .schd-stop-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
   margin: 20px 0 8px; padding: 0 2px;

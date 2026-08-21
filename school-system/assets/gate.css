@@ -20,6 +20,8 @@
   --g-bad:     #DE6459;
   --g-f: 'Cairo', system-ui, sans-serif;
   --g-r: 12px;
+  /* الظلّ رمزٌ لا رقم: كان مكتوبًا بديلًا داخل `var()` لرمزٍ من ورقةٍ أخرى. */
+  --g-lift: 0 18px 34px -16px rgba(0,0,0,.8);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -232,7 +234,7 @@ input[dir="ltr"] { text-align: start; }
 
 
 /* بطاقة التأكيد: الحارس يطابق الوجه قبل أن يمضي */
-.schg-card { box-shadow: var(--lift-2, 0 18px 34px -16px rgba(0,0,0,.8)); }
+.schg-card { box-shadow: var(--g-lift); }
 .schg-card__text strong { font-size: 19px; }
 .schg-card__state { font-weight: 700; }
 

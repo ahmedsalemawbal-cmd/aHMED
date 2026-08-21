@@ -216,32 +216,16 @@ final class SCH_Assessment
         'participation' => 'مشاركة وأعمال',
     ];
 
-    public static function create_exam(array $d): array|WP_Error
-    {
-        global $wpdb;
-
-        $title      = sanitize_text_field((string) ($d['title'] ?? ''));
-        $class_id   = absint($d['class_id'] ?? 0);
-        $subject_id = absint($d['subject_id'] ?? 0);
-
-        if ($title === '' || !SCH_Classes::get($class_id) || !SCH_Subjects::get($subject_id)) {
-            return sch_api_error('invalid_exam', __('العنوان والشعبة والمادة مطلوبة.', 'school-system'), 422);
-        }
-
-        $wpdb->insert(sch_table('exams'), [
-            'class_id'   => $class_id,
-            'subject_id' => $subject_id,
-            'title'      => $title,
-            'exam_type'  => array_key_exists($d['exam_type'] ?? '', self::EXAM_TYPES) ? $d['exam_type'] : 'quiz',
-            'exam_date'  => sch_sanitize_date($d['exam_date'] ?? null),
-            'max_score'  => max(1, (float) ($d['max_score'] ?? 100)),
-            'weight'     => max(0, min(100, (float) ($d['weight'] ?? 100))),
-            'created_at' => sch_now(),
-        ]);
-
-        sch_audit('exam.created', 'exam', (int) $wpdb->insert_id);
-        return ['id' => (int) $wpdb->insert_id];
-    }
+    /*
+     * `create_exam()` حُذفت مع نافذة «إنشاء اختبار» الحرّة.
+     *
+     * كانت تُنشئ اختبارًا بعنوانٍ حرّ ودرجةٍ عظمى ووزن — خارج أيّ دورة، فلا
+     * موعد له ولا قاعة ولا اعتماد. والاختبارات تأتي دورات، والإنشاء صار في
+     * `SCH_Exams::ensure_pair()` مربوطًا بشعبةٍ ومادةٍ ودورة.
+     *
+     * والصفوف القديمة تبقى: `session = 'legacy'` بعد الترحيل، تُقرأ في ملفّ
+     * الطالب والشهادات كما كانت ولا تظهر في الشاشة الجديدة.
+     */
 
     public static function get_exam(int $id): ?object
     {
@@ -278,7 +262,13 @@ final class SCH_Assessment
         return $wpdb->get_results($sql . ' ORDER BY e.exam_date DESC, e.id DESC LIMIT 100') ?: [];
     }
 
-    /** اختبارات قادمة لشعبة — ما تاريخه اليوم أو بعده. */
+    /**
+     * اختبارات قادمة لشعبة — ما تاريخه اليوم أو بعده **وحُفظ جدوله**.
+     *
+     * `published_at` هي ما تضعه `SCH_Exams::save_schedule()`. وبدونها كان
+     * وليّ الأمر يرى الموعد **لحظة وضعه على اليوم**، فيقرأ جدولًا يتغيّر
+     * تحت عينه بينما الوكيل يجرّب مواضع المواد.
+     */
     public static function upcoming_exams(int $class_id, int $limit = 10): array
     {
         global $wpdb;
@@ -288,6 +278,7 @@ final class SCH_Assessment
              FROM ' . sch_table('exams') . ' e
              INNER JOIN ' . sch_table('subjects') . ' s ON s.id = e.subject_id
              WHERE e.class_id = %d AND e.exam_date IS NOT NULL AND e.exam_date >= %s
+               AND e.published_at IS NOT NULL
              ORDER BY e.exam_date
              LIMIT %d',
             $class_id,
@@ -296,73 +287,15 @@ final class SCH_Assessment
         )) ?: [];
     }
 
-    /** كشف درجات اختبار — كل طلاب الشعبة مع درجاتهم إن وُجدت. */
-    public static function result_sheet(int $exam_id): array
-    {
-        global $wpdb;
-
-        $exam = self::get_exam($exam_id);
-        if (!$exam) {
-            return [];
-        }
-
-        return $wpdb->get_results($wpdb->prepare(
-            'SELECT s.id, s.full_name, r.score, r.note
-             FROM ' . sch_table('enrollments') . ' e
-             INNER JOIN ' . sch_table('students') . ' s ON s.id = e.student_id
-             LEFT JOIN ' . sch_table('exam_results') . ' r ON r.student_id = s.id AND r.exam_id = %d
-             WHERE e.class_id = %d AND e.status = %s AND s.status = %s
-             ORDER BY s.full_name',
-            $exam_id,
-            (int) $exam->class_id,
-            'active',
-            'active'
-        )) ?: [];
-    }
-
-    /** حفظ درجات دفعة واحدة. */
-    public static function save_scores(int $exam_id, array $scores): bool|WP_Error
-    {
-        global $wpdb;
-
-        $exam = self::get_exam($exam_id);
-        if (!$exam) {
-            return sch_api_error('not_found', __('الاختبار غير موجود.', 'school-system'), 404);
-        }
-
-        foreach ($scores as $student_id => $raw) {
-            $student_id = absint($student_id);
-            if ($student_id === 0) {
-                continue;
-            }
-
-            $score = ($raw === '' || $raw === null) ? null : (float) $raw;
-            if ($score !== null && ($score < 0 || $score > (float) $exam->max_score)) {
-                return sch_api_error('score_range', sprintf(
-                    /* translators: %s: الدرجة العظمى */
-                    __('الدرجة يجب أن تكون بين 0 و %s.', 'school-system'),
-                    $exam->max_score
-                ), 422);
-            }
-
-            $existing = $wpdb->get_var($wpdb->prepare(
-                'SELECT id FROM ' . sch_table('exam_results') . ' WHERE exam_id = %d AND student_id = %d',
-                $exam_id,
-                $student_id
-            ));
-
-            $data = ['score' => $score, 'recorded_by' => get_current_user_id() ?: null, 'recorded_at' => sch_now()];
-
-            if ($existing) {
-                $wpdb->update(sch_table('exam_results'), $data, ['id' => (int) $existing]);
-            } else {
-                $wpdb->insert(sch_table('exam_results'), $data + ['exam_id' => $exam_id, 'student_id' => $student_id]);
-            }
-        }
-
-        sch_audit('exam.graded', 'exam', $exam_id, ['count' => count($scores)]);
-        return true;
-    }
+    /*
+     * `result_sheet()` و`save_scores()` حُذفتا مع كشف الدرجة الواحدة.
+     *
+     * الدرجة صارت **مركّبة** — أعمال سنةٍ ونهائيّ بوزنين — ولها حالة
+     * (مرصودة · مُرسَلة · معتمدة) وعذرٌ يُقصي من المتوسط. وكشفٌ يكتب رقمًا
+     * واحدًا بلا وزنٍ ولا حالة يتخطّى قفل الإرسال وحدّ كل نصف.
+     *
+     * والبديل `SCH_Exams::roster()` و`save_score()`.
+     */
 
     /**
      * كشف درجات الطالب في كل المواد مع النسبة المرجّحة.
@@ -372,6 +305,11 @@ final class SCH_Assessment
      * وفي ملفّه بوصفه «المتوسّط العام» للسنة الحالية — فطالبٌ تحسّن هذا العام
      * يظلّ يُقرأ بمتوسّط سنواته السابقة. والامتحان يحمل `class_id`، والشعبة
      * تحمل `year_id`، فالضمّ يحسمها في الاستعلام نفسه.
+     *
+     * **والمعتمَد وحده.** هذه الدالّة منفذ كل ما تراه الأسرة — تطبيق وليّ
+     * الأمر وملفّ الطالب والروضة وواجهة REST — فالاعتماد يُفحَص هنا مرّةً
+     * لا في أربع شاشات تنسى إحداها. والدرجات المرصودة قبل هذه النسخة
+     * عُلِّمت معتمدةً في الترحيل، فلا تختفي درجةٌ يراها أهلُها اليوم.
      *
      * @param int|null $year_id سنةٌ بعينها، أو `null` للسنة الجارية
      */
@@ -389,6 +327,7 @@ final class SCH_Assessment
              INNER JOIN ' . sch_table('subjects') . ' s ON s.id = e.subject_id
              INNER JOIN ' . sch_table('classes') . ' c ON c.id = e.class_id
              WHERE r.student_id = %d AND c.year_id = %d AND r.score IS NOT NULL
+               AND e.approved_at IS NOT NULL
              ORDER BY s.name, e.exam_date',
             $student_id,
             $year_id

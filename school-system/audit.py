@@ -788,6 +788,37 @@ if os.path.exists(base_path):
                                    f'فتُحقن قواعد الأساس في مكوّن الداشبورد. غيّر الاسم.')
 
 
+# ---------- رمزُ لونٍ لا وجود له ----------
+# `var(--sch-danger-ink)` والاسم الحقيقيّ `--sch-danger`: **لا يفشل — يختفي**.
+# العنصر يُرسم شفّافًا أو بلا حدّ، ولا تحذير في المتصفّح ولا في أي فحص.
+# وقع مع `--p-brand` في `parent.css` (واسمها `--pri`), ومع سبعة رموز
+# اخترعتُها في كتلة شاشة الاختبارات.
+#
+# والتعريف يُقبل من الملفّ نفسه أو من `shared-ui.css` — فهو بيت الرموز
+# المشتركة، والملفّات المستقلّة (`parent.css` · `admin.css`) تعرّف رموزها.
+_shared_path = os.path.join(ROOT, 'assets', 'shared-ui.css')
+_shared_defs = set()
+
+if os.path.exists(_shared_path):
+    _shared_defs = set(re.findall(r'(--[a-z0-9-]+)\s*:', open(_shared_path, encoding='utf-8').read()))
+
+# ورمزٌ تضبطه القوالب في `style="--c:#0F1720"` معرَّفٌ فعلًا — من PHP لا من CSS.
+_inline_defs = set()
+for _php_src in sources.values():
+    _inline_defs |= set(re.findall(r'style="[^"]*?(--[a-z0-9-]+)\s*:', _php_src))
+
+for _css in sorted(glob.glob(os.path.join(ROOT, 'assets', '*.css'))):
+    _rel = os.path.relpath(_css, ROOT)
+    _src = re.sub(r'/\*.*?\*/', '', open(_css, encoding='utf-8').read(), flags=re.S)
+
+    _defs = set(re.findall(r'(--[a-z0-9-]+)\s*:', _src)) | _shared_defs | _inline_defs
+    _used = set(re.findall(r'var\(\s*(--[a-z0-9-]+)', _src))
+
+    for _tok in sorted(_used - _defs):
+        add('CSS_TOKEN_MISSING',
+            f'{_rel}: {_tok} يُستعمل ولا يُعرَّف — لا يفشل بل يُرسم شفّافًا بلا أي تحذير')
+
+
 # ---------- مفردة المراحل: قائمةٌ واحدة لا اثنتان ----------
 # `SCH_Classes::STAGES` تقرّر أيّ مرحلةٍ تُنشأ لها شعبة، و`SCH_TT::PRESETS`
 # تقرّر أيّ مرحلةٍ تظهر بطاقةُ إيقاعٍ لها في شاشة الجداول. وافترقتا: الشاشة

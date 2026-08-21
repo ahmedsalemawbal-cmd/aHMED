@@ -458,6 +458,7 @@ final class SCH_Dashboard
             'save_brand'       => ['sch_manage_settings',  'do_save_brand'],
             'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
             'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
+            'save_exam_setup'  => ['sch_manage_settings',  'do_save_exam_setup'],
             'pickup_ack'       => ['sch_scan_gate',       'do_pickup_ack'],
             'pickup_done'      => ['sch_scan_gate',       'do_pickup_done'],
             'pickup_drop'      => ['sch_scan_gate',       'do_pickup_drop'],
@@ -476,8 +477,18 @@ final class SCH_Dashboard
             'unsubscribe'      => ['sch_manage_transport',  'do_unsubscribe'],
             'open_trip'        => ['sch_manage_transport',  'do_open_trip'],
             'close_trip'       => ['sch_manage_transport',  'do_close_trip'],
-            'add_exam'         => ['sch_manage_exams',      'do_add_exam'],
-            'save_scores'      => ['sch_manage_exams',      'do_save_scores'],
+
+            // الاختبارات: الجدول يبنيه الموظّف، والدرجات يرصدها معلّم المادة،
+            // والاعتماد وحده ينزل بها إلى وليّ الأمر.
+            'ex_place'         => ['sch_manage_exams',      'do_ex_place'],
+            'ex_clear'         => ['sch_manage_exams',      'do_ex_clear'],
+            'ex_field'         => ['sch_manage_exams',      'do_ex_field'],
+            'ex_save'          => ['sch_manage_exams',      'do_ex_save'],
+            'ex_weight'        => ['sch_manage_grades',     'do_ex_weight'],
+            'ex_score'         => ['sch_manage_grades',     'do_ex_score'],
+            'ex_excuse'        => ['sch_manage_grades',     'do_ex_excuse'],
+            'ex_submit'        => ['sch_manage_grades',     'do_ex_submit'],
+            'ex_approve'       => ['sch_approve_grades',    'do_ex_approve'],
             'add_fee_plan'     => ['sch_manage_finance',    'do_add_fee_plan'],
             'issue_invoice'    => ['sch_manage_finance',    'do_issue_invoice'],
             'record_payment'   => ['sch_manage_finance',    'do_record_payment'],
@@ -2029,6 +2040,30 @@ final class SCH_Dashboard
         return ['msg' => __('حُدّثت هوية المدرسة.', 'school-system')];
     }
 
+    /** نافذة الاختبارات وقاعاتها — تاريخان وقائمةُ أسماء. */
+    private static function do_save_exam_setup(array $d, int $id): bool
+    {
+        $rooms = [];
+
+        foreach (preg_split('/[\r\n]+/', (string) ($d['exam_rooms'] ?? '')) ?: [] as $one) {
+            $one = trim(sanitize_text_field($one));
+
+            if ($one !== '') {
+                $rooms[] = mb_substr($one, 0, 60);
+            }
+        }
+
+        $settings = sch_settings();
+        $settings['exam_start_mid']   = sch_sanitize_date($d['exam_start_mid'] ?? '') ?? '';
+        $settings['exam_start_final'] = sch_sanitize_date($d['exam_start_final'] ?? '') ?? '';
+        $settings['exam_rooms']       = implode("\n", array_slice($rooms, 0, 40));
+
+        update_option('sch_settings', $settings);
+        sch_audit('settings.exam_setup', 'settings', null);
+
+        return true;
+    }
+
     private static function do_save_timing(array $d, int $id): bool
     {
         $time = static fn (mixed $v): string => preg_match('/^\d{2}:\d{2}$/', (string) $v) ? (string) $v : '';
@@ -2279,14 +2314,168 @@ final class SCH_Dashboard
         return SCH_Trips::close(absint($d['trip_id'] ?? 0));
     }
 
-    private static function do_add_exam(array $d, int $id): array|WP_Error
+    /**
+     * موضع شاشة الاختبارات يعود مع كل نموذج.
+     *
+     * الشعبة والدورة والشهر والتبويبة والمادة — ومن يرصد درجات سبع مواد لا
+     * يُعاد سبع مرّات إلى الشعبة الأولى في الدورة الأولى.
+     */
+    private static function ex_keep(array $d): array
     {
-        return SCH_Assessment::create_exam($d);
+        $out = [];
+
+        foreach (['cls' => 12, 'ses' => 10, 'mo' => 2, 'tab' => 10, 'sub' => 12, 'stage' => 20] as $k => $len) {
+            $v = sanitize_text_field((string) ($d[$k] ?? ''));
+
+            if ($v !== '') {
+                $out[$k] = mb_substr($v, 0, $len);
+            }
+        }
+
+        return $out;
     }
 
-    private static function do_save_scores(array $d, int $id): bool|WP_Error
+    /** الدورة والشهر كما يقرؤهما `SCH_Exams` — مقصوصَين. @return array{0:string,1:?int} */
+    private static function ex_scope(array $d): array
     {
-        return SCH_Assessment::save_scores(absint($d['exam_id'] ?? 0), (array) ($d['score'] ?? []));
+        $session = sanitize_key((string) ($d['ses'] ?? 'final'));
+
+        if (!SCH_Exams::valid_session($session)) {
+            $session = 'final';
+        }
+
+        return [$session, $session === 'monthly' ? max(1, min(12, (int) ($d['mo'] ?? 1))) : null];
+    }
+
+    private static function do_ex_place(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::place(
+            absint($d['cls'] ?? 0),
+            absint($d['subject_id'] ?? 0),
+            $session,
+            $month,
+            sanitize_text_field((string) ($d['date'] ?? ''))
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_clear(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::clear(absint($d['cls'] ?? 0), absint($d['subject_id'] ?? 0), $session, $month);
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_field(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::set_slot_field(
+            absint($d['cls'] ?? 0),
+            absint($d['subject_id'] ?? 0),
+            $session,
+            $month,
+            sanitize_key((string) ($d['field'] ?? '')),
+            sanitize_text_field((string) ($d['value'] ?? ''))
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_save(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $res = SCH_Exams::save_schedule(absint($d['cls'] ?? 0), $session, $month);
+
+        if (is_wp_error($res)) {
+            return $res;
+        }
+
+        return [
+            'msg' => $res['updated']
+                ? sprintf(
+                    /* translators: %d: عدد المواد */
+                    __('حُدّث الجدول المحفوظ — %d مادة. ولا نسخة مكرّرة لهذه الشعبة في هذه الدورة.', 'school-system'),
+                    $res['count']
+                )
+                : sprintf(
+                    /* translators: %d: عدد المواد */
+                    __('حُفظ الجدول — %d مادة، ويراها وليّ الأمر والطالب الآن.', 'school-system'),
+                    $res['count']
+                ),
+            'keep' => self::ex_keep($d),
+        ];
+    }
+
+    private static function do_ex_weight(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::set_weight(
+            absint($d['cls'] ?? 0),
+            absint($d['sub'] ?? 0),
+            $session,
+            $month,
+            (int) ($d['year_weight'] ?? 40)
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_score(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::save_score(
+            absint($d['cls'] ?? 0),
+            absint($d['sub'] ?? 0),
+            $session,
+            $month,
+            absint($d['student_id'] ?? 0),
+            sanitize_key((string) ($d['part'] ?? '')),
+            sanitize_text_field((string) ($d['score'] ?? ''))
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_excuse(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $done = SCH_Exams::toggle_excused(
+            absint($d['cls'] ?? 0),
+            absint($d['sub'] ?? 0),
+            $session,
+            $month,
+            absint($d['student_id'] ?? 0)
+        );
+
+        return is_wp_error($done) ? $done : ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_submit(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $res = SCH_Exams::submit(absint($d['cls'] ?? 0), absint($d['sub'] ?? 0), $session, $month);
+
+        return is_wp_error($res) ? $res : $res + ['keep' => self::ex_keep($d)];
+    }
+
+    private static function do_ex_approve(array $d, int $id): array|WP_Error
+    {
+        [$session, $month] = self::ex_scope($d);
+
+        $res = SCH_Exams::approve(absint($d['cls'] ?? 0), absint($d['sub'] ?? 0), $session, $month);
+
+        return is_wp_error($res) ? $res : $res + ['keep' => self::ex_keep($d)];
     }
 
     private static function do_add_fee_plan(array $d, int $id): array|WP_Error

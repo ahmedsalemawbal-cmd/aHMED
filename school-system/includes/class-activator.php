@@ -69,6 +69,41 @@ final class SCH_Activator
         $wpdb->query("UPDATE `{$t}` SET stage = 'secondary'    WHERE stage = 'high'");
     }
 
+    /**
+     * الدرجات المرصودة قبل هذه النسخة تُعامَل **معتمدةً ومنشورة**.
+     *
+     * الاعتماد صار شرطًا لرؤية وليّ الأمر (`report_card()`), والجدول صار
+     * يظهر بـ`published_at`. وبلا هذا السطر تختفي **كل درجةٍ وكل موعدٍ في
+     * المدرسة** من أمام الأهل في اللحظة التي تُرفَع فيها النسخة — لا لأن
+     * شيئًا تعطّل، بل لأن عمودًا جديدًا فارغ.
+     *
+     * ويُنفَّذ مرّةً: بعده لا يبقى صفٌّ بـ`approved_at IS NULL` إلا ما يُنشأ
+     * من الشاشة الجديدة، وهو الذي **يجب** أن ينتظر اعتماده.
+     */
+    private static function migrate_exams_approved(): void
+    {
+        global $wpdb;
+
+        $t = sch_table('exams');
+
+        if ((string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $t)) !== $t) {
+            return;
+        }
+
+        // العمود قد لا يكون قد أُضيف بعد في تركيبةٍ نادرة — والتحقّق أرخص
+        // من استعلامٍ يسقط بخطأٍ يوقف الترقية كلّها.
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM `{$t}` LIKE %s", 'approved_at')) === null) {
+            return;
+        }
+
+        $wpdb->query(
+            "UPDATE `{$t}`
+                SET approved_at  = COALESCE(approved_at, created_at),
+                    published_at = COALESCE(published_at, created_at)
+              WHERE approved_at IS NULL OR published_at IS NULL"
+        );
+    }
+
     private static function guard_certificates(): void
     {
         global $wpdb;
@@ -155,6 +190,7 @@ final class SCH_Activator
 
             self::guard_certificates();
             self::migrate_content_stage();
+            self::migrate_exams_approved();
 
             update_option('sch_db_version', SCH_VERSION);
 
@@ -636,25 +672,55 @@ final class SCH_Activator
             KEY idx_class (class_id, due_date)
         ) {$charset};";
 
+        /*
+         * الاختبار: صفٌّ واحد يحمل موعده ومكانه ومراقبه ودورة اعتماد درجته.
+         *
+         * **ولا مفتاح فريد على (شعبة · مادة · دورة).** القاعدة القائمة قد
+         * تحمل اختبارَي `quiz` لنفس الشعبة والمادة من الشاشة القديمة، ومفتاحٌ
+         * فريد يُفشل `dbDelta` على كل مدرسةٍ تُرقّي. والتفرّد يُحرَس في
+         * `SCH_Exams` بقراءةٍ ثم كتابةٍ داخل معاملة.
+         *
+         * و`session` تفتح بـ`'legacy'`: صفوف الشاشة القديمة تسقط في دورةٍ لا
+         * تعرضها الشاشة الجديدة أبدًا، **وتبقى مقروءةً** في ملفّ الطالب
+         * والشهادات كما كانت.
+         */
         $sql[] = "CREATE TABLE {$p}exams (
-            id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            class_id   BIGINT UNSIGNED NOT NULL,
-            subject_id BIGINT UNSIGNED NOT NULL,
-            title      VARCHAR(190)    NOT NULL,
-            exam_type  ENUM('quiz','midterm','final','participation') NOT NULL DEFAULT 'quiz',
-            exam_date  DATE            DEFAULT NULL,
-            max_score  DECIMAL(6,2)    NOT NULL DEFAULT 100,
-            weight     DECIMAL(5,2)    NOT NULL DEFAULT 100,
-            created_at DATETIME        NOT NULL,
+            id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            class_id        BIGINT UNSIGNED NOT NULL,
+            subject_id      BIGINT UNSIGNED NOT NULL,
+            title           VARCHAR(190)    NOT NULL,
+            exam_type       ENUM('quiz','midterm','final','participation') NOT NULL DEFAULT 'quiz',
+            session         VARCHAR(20)     NOT NULL DEFAULT 'legacy',
+            session_month   TINYINT UNSIGNED DEFAULT NULL,
+            exam_date       DATE            DEFAULT NULL,
+            room            VARCHAR(60)     DEFAULT NULL,
+            proctor_user_id BIGINT UNSIGNED DEFAULT NULL,
+            max_score       DECIMAL(6,2)    NOT NULL DEFAULT 100,
+            weight          DECIMAL(5,2)    NOT NULL DEFAULT 100,
+            published_at    DATETIME        DEFAULT NULL,
+            submitted_at    DATETIME        DEFAULT NULL,
+            submitted_by    BIGINT UNSIGNED DEFAULT NULL,
+            approved_at     DATETIME        DEFAULT NULL,
+            approved_by     BIGINT UNSIGNED DEFAULT NULL,
+            created_at      DATETIME        NOT NULL,
+            updated_at      DATETIME        DEFAULT NULL,
             PRIMARY KEY (id),
-            KEY idx_class (class_id, exam_date)
+            KEY idx_class (class_id, exam_date),
+            KEY idx_session (class_id, session, session_month),
+            KEY idx_room (room, exam_date),
+            KEY idx_proctor (proctor_user_id, exam_date),
+            KEY idx_approved (approved_at)
         ) {$charset};";
 
+        // `excused` عمودٌ لا ملاحظة: الغياب بعذر **حالة** تُقصي الطالب من
+        // المتوسط وتضعه في كشف الدور البديل — ونصٌّ حرّ في `note` لا يُستعلَم
+        // عنه ولا يُعتمد عليه في حساب.
         $sql[] = "CREATE TABLE {$p}exam_results (
             id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             exam_id     BIGINT UNSIGNED NOT NULL,
             student_id  BIGINT UNSIGNED NOT NULL,
             score       DECIMAL(6,2)    DEFAULT NULL,
+            excused     TINYINT(1)      NOT NULL DEFAULT 0,
             note        VARCHAR(255)    DEFAULT NULL,
             recorded_by BIGINT UNSIGNED DEFAULT NULL,
             recorded_at DATETIME        NOT NULL,
@@ -1701,6 +1767,7 @@ final class SCH_Activator
                 'label' => __('مدير المدرسة', 'school-system'),
                 'caps'  => ['sch_grant_installments', 'read', 'sch_view_students', 'sch_view_custody', 'sch_manage_alerts',
                             'sch_view_insights', 'sch_view_audit', 'sch_approve_timetable',
+                            'sch_approve_grades',
                             'sch_manage_staff', 'sch_manage_settings'],
             ],
             'sch_supervisor' => [
@@ -1715,7 +1782,7 @@ final class SCH_Activator
                             'sch_manage_exams', 'sch_manage_attendance', 'sch_view_custody',
                             'sch_manage_alerts', 'sch_send_messages', 'sch_view_insights',
                             'sch_manage_deputy', 'sch_grant_installments', 'sch_handle_notes', 'sch_write_notes', 'sch_decide_leaves',
-                            'sch_build_timetable', 'sch_manage_staff'],
+                            'sch_build_timetable', 'sch_approve_grades', 'sch_manage_staff'],
             ],
             'sch_content' => [
                 'label' => __('منسق المحتوى التعليمي', 'school-system'),
@@ -1752,7 +1819,7 @@ final class SCH_Activator
                 'sch_manage_subjects', 'sch_manage_exams', 'sch_send_messages', 'sch_manage_accounting',
                 'sch_manage_hr', 'sch_manage_services', 'sch_manage_assets', 'sch_manage_kg', 'sch_view_insights',
                 'sch_view_health', 'sch_manage_docs', 'sch_scan_gate', 'sch_view_custody', 'sch_manage_alerts',
-                'sch_write_notes', 'sch_handle_notes', 'sch_manage_deputy', 'sch_grant_installments', 'sch_manage_meds', 'sch_decide_leaves', 'sch_supervise_stage', 'sch_approve_timetable', 'sch_build_timetable',
+                'sch_write_notes', 'sch_handle_notes', 'sch_manage_deputy', 'sch_grant_installments', 'sch_manage_meds', 'sch_decide_leaves', 'sch_supervise_stage', 'sch_approve_timetable', 'sch_approve_grades', 'sch_build_timetable',
                 'sch_manage_content', 'sch_manage_homework', 'sch_learn',
                 'sch_manage_content', 'sch_manage_homework', 'sch_student_app',
             ] as $cap) {
