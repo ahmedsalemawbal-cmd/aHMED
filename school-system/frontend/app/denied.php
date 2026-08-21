@@ -13,7 +13,7 @@ defined('ABSPATH') || exit;
         <p class="p-auth__hint" style="margin:0 0 14px">
             <?php esc_html_e('حسابك ليس حساب ولي أمر. تواصل مع إدارة المدرسة إن كان هذا خطأ.', 'school-system'); ?>
         </p>
-        <a class="p-btn p-btn--quiet p-tap" href="<?php echo esc_url(SCH_App::url('logout')); ?>">
+        <a class="p-btn p-btn--quiet p-tap" href="<?php echo esc_url(sch_logout_url(SCH_App::url())); ?>">
             <?php esc_html_e('تسجيل الخروج', 'school-system'); ?>
         </a>
     </div>

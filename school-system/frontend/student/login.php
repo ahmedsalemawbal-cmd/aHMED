@@ -2,6 +2,18 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+/**
+ * شاشة «حسابك غير مرتبط بسجل طالب».
+ *
+ * كانت نموذج دخولٍ كامل بحقلين ونونس `sch_stu_login` — **ولا معالج له**:
+ * بوابة الدخول الموحّدة (v3.2.0) صارت الباب الوحيد، و`render_login()` تعيد
+ * التوجيه إليها بلا شرط. فالنموذج يُرسَل ولا يفعل شيئًا بصمت.
+ *
+ * والمسار الحيّ الوحيد لهذه الشاشة هو حالةٌ أخرى تمامًا: طالبٌ دخل بحسابه
+ * فعلًا لكن حسابه غير مربوط بسجلّ طالب — وهي حالة إدارية لا تُصلَح بكلمة
+ * مرور، فتُقال كما هي ويُعطى المستخدم مخرجًا.
+ */
+
 $sch_error = (string) ($sch_data['error'] ?? '');
 ?>
 <div class="schs-auth">
@@ -11,22 +23,17 @@ $sch_error = (string) ($sch_data['error'] ?? '');
         <p><?php esc_html_e('واجباتك ومكتبتك وألعابك', 'school-system'); ?></p>
     </div>
 
-    <?php if ($sch_error !== '') : ?>
-        <div class="schs-flash schs-flash--bad"><?php echo esc_html($sch_error); ?></div>
-    <?php endif; ?>
+    <div class="schs-flash schs-flash--bad">
+        <?php echo esc_html($sch_error !== ''
+            ? $sch_error
+            : __('حسابك غير مرتبط بسجل طالب.', 'school-system')); ?>
+    </div>
 
-    <form method="post" class="schs-form">
-        <?php wp_nonce_field('sch_stu_login', '_sch_nonce'); ?>
-        <input type="hidden" name="sch_stu_login" value="1">
+    <p class="schs-auth__note">
+        <?php esc_html_e('راجع إدارة المدرسة لربط حسابك — لا يُصلَح هذا بكلمة مرور.', 'school-system'); ?>
+    </p>
 
-        <label class="schs-field-label" for="s-user"><?php esc_html_e('اسم المستخدم', 'school-system'); ?></label>
-        <input class="schs-input" id="s-user" type="text" name="username" dir="ltr" autocomplete="username" required autofocus>
-
-        <label class="schs-field-label" for="s-pass"><?php esc_html_e('كلمة المرور', 'school-system'); ?></label>
-        <input class="schs-input" id="s-pass" type="password" name="password" autocomplete="current-password" required>
-
-        <button class="schs-btn" type="submit"><?php esc_html_e('دخول', 'school-system'); ?></button>
-    </form>
-
-    <p class="schs-auth__note"><?php esc_html_e('اسم المستخدم يبدأ بحرف s متبوعًا برقمك الأكاديمي.', 'school-system'); ?></p>
+    <a class="schs-btn" href="<?php echo esc_url(sch_logout_url(SCH_Student::url())); ?>">
+        <?php esc_html_e('تسجيل الخروج', 'school-system'); ?>
+    </a>
 </div>

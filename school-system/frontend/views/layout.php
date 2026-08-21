@@ -99,7 +99,7 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                     <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
                     <span><?php esc_html_e('حساب الإدارة', 'school-system'); ?></span>
                 </span>
-                <a class="sch-side__out" href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>"
+                <a class="sch-side__out" href="<?php echo esc_url(sch_logout_url(SCH_Dashboard::url())); ?>"
                    aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
                     <?php echo sch_icon('route', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                 </a>

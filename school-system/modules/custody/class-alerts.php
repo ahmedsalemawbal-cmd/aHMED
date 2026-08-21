@@ -79,13 +79,16 @@ final class SCH_Alerts
 
     public static function run(): void
     {
-        // يوم دراسي فقط: الجمعة والسبت لا فحص.
-        $weekday = (int) current_time('w');
-        if (in_array($weekday, [5, 6], true)) {
+        // يوم دراسي فقط. والسبت يوم دوامٍ في مدارس — `SCH_Timetable::school_day()`
+        // هي المرجع الواحد، فلا تُسكَت إنذارات يومٍ فيه أطفال.
+        if (SCH_Timetable::school_day() === 0) {
             return;
         }
 
         $now = current_time('H:i');
+
+        // إشعار الغياب بعد مهلة التصحيح لا في لحظة الرصد.
+        SCH_Attendance::sweep_absence_notices();
 
         self::rule_no_board($now);
         self::rule_no_arrival($now);

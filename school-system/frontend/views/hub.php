@@ -34,7 +34,7 @@ $user  = wp_get_current_user();
         <?php endforeach; ?>
     </div>
 
-    <a class="sch-hub__out" href="<?php echo esc_url(SCH_Dashboard::url('logout')); ?>">
+    <a class="sch-hub__out" href="<?php echo esc_url(sch_logout_url(SCH_Dashboard::url())); ?>">
         <?php esc_html_e('تسجيل الخروج', 'school-system'); ?>
     </a>
 </div>

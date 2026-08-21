@@ -115,8 +115,10 @@ for s in app_sections:
         add('APP_VIEW_MISSING', f'قسم التطبيق "{s}" بلا ملف frontend/app/{name}.php')
 
 
+# شاشة الدخول لم تعد من شاشات التطبيق: بوابة الدخول الموحّدة (v3.2.0) هي
+# الباب الوحيد، و`render_login()` تعيد التوجيه إليها بلا شرط.
 drv_views = {f[:-4] for f in os.listdir(os.path.join(ROOT, 'frontend', 'driver')) if f.endswith('.php')}
-for need in ('layout', 'login', 'home', 'trip'):
+for need in ('layout', 'home', 'trip'):
     if need not in drv_views:
         add('DRIVER_VIEW_MISSING', f'frontend/driver/{need}.php')
 

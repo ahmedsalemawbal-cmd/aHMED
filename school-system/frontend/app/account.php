@@ -206,7 +206,7 @@ $sch_kids = (array) ($sch_data['children'] ?? []);
 
 <!-- الخروج بطاقة وحده: فعلٌ لا إعداد، وفصله يمنع ضغطة عابرة -->
 <div class="p-set p-set--solo">
-    <a class="p-set__row p-set__row--out p-tap" href="<?php echo esc_url(SCH_App::url('logout')); ?>">
+    <a class="p-set__row p-set__row--out p-tap" href="<?php echo esc_url(sch_logout_url(SCH_App::url())); ?>">
         <span class="p-set__i p-set__i--bad"><?php echo sch_icon('logout', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
         <span class="p-set__t"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></span>
     </a>

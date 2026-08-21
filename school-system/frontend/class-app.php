@@ -68,7 +68,11 @@ final class SCH_App
         self::no_cache_headers();
 
         if ($section === 'logout') {
-            wp_logout();
+            // بنونسٍ لا بمجرّد زيارة: الخروج بـGET يُنفَّذ بصورةٍ في صفحةٍ أخرى.
+            if (sch_logout_ok()) {
+                wp_logout();
+            }
+
             wp_safe_redirect(self::url());
             exit;
         }
@@ -542,76 +546,9 @@ final class SCH_App
         // وأبًا يفتح باب الطالب فيُقال له «لا صلاحية» وهو محق في حسابه.
         wp_safe_redirect(SCH_Portal::url());
         exit;
-
-        $error = '';
-
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['sch_app_login'])) {
-            $error = self::attempt_login();
-        }
-
-        self::render('login', ['error' => $error]);
     }
 
-    private static function attempt_login(): string
-    {
-        if (!wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_app_login')) {
-            return __('انتهت صلاحية الصفحة. حدّثها وحاول مرة أخرى.', 'school-system');
-        }
 
-        $input = sanitize_text_field(wp_unslash((string) ($_POST['username'] ?? '')));
-        $key   = 'sch_applock_' . md5($input . '|' . (string) ($_SERVER['REMOTE_ADDR'] ?? ''));
-
-        if ((int) get_transient($key) >= 5) {
-            return __('محاولات كثيرة. أعد المحاولة بعد 15 دقيقة.', 'school-system');
-        }
-
-        // الدخول برقم الجوال مباشرة — أسهل على ولي الأمر من اسم مستخدم.
-        $login = self::resolve_login($input);
-
-        $user = wp_signon([
-            'user_login'    => $login,
-            'user_password' => (string) ($_POST['password'] ?? ''),
-            'remember'      => true,
-        ], is_ssl());
-
-        if (is_wp_error($user)) {
-            set_transient($key, (int) get_transient($key) + 1, 15 * MINUTE_IN_SECONDS);
-            sch_audit('app.login_failed', 'user', null, ['login' => $input]);
-            return __('رقم الجوال أو كلمة المرور غير صحيحة.', 'school-system');
-        }
-
-        delete_transient($key);
-        wp_set_current_user($user->ID);
-        sch_audit('app.login', 'user', $user->ID);
-
-        wp_safe_redirect(self::url());
-        exit;
-    }
-
-    /** يقبل رقم الجوال أو اسم المستخدم. */
-    private static function resolve_login(string $input): string
-    {
-        global $wpdb;
-
-        $phone = sch_normalize_phone($input);
-        if ($phone === '') {
-            return $input;
-        }
-
-        $user_id = (int) $wpdb->get_var($wpdb->prepare(
-            'SELECT user_id FROM ' . sch_table('guardians') . ' WHERE phone = %s LIMIT 1',
-            $phone
-        ));
-
-        if ($user_id > 0) {
-            $user = get_user_by('id', $user_id);
-            if ($user instanceof WP_User) {
-                return $user->user_login;
-            }
-        }
-
-        return $input;
-    }
 
     // ---------- ملفات التطبيق ----------
 

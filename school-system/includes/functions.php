@@ -352,3 +352,23 @@ function sch_attendance_calendar(string $ym, array $status): string
 
     return $h;
 }
+
+/**
+ * رابط الخروج مع نونسه.
+ *
+ * الخروج بـGET بلا نونس فعلٌ يُنفَّذ **بصورة** في صفحةٍ أخرى: يكفي
+ * `<img src="…/teacher/logout/">` في تعليقٍ أو بريد ليخرج المعلم من حسابه
+ * وسط رصده للحضور. وووردبريس نفسه يوقّع `wp_logout_url()` لهذا السبب.
+ *
+ * @param string $home جذر التطبيق — نعود إليه بعد الخروج
+ */
+function sch_logout_url(string $home): string
+{
+    return add_query_arg('_sch_out', wp_create_nonce('sch_logout'), trailingslashit($home) . 'logout/');
+}
+
+/** هل جاء طلب الخروج موقَّعًا؟ */
+function sch_logout_ok(): bool
+{
+    return wp_verify_nonce((string) ($_GET['_sch_out'] ?? ''), 'sch_logout') !== false;
+}

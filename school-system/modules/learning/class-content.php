@@ -255,9 +255,32 @@ final class SCH_Content
     // ---------- التشغيل ----------
 
     /** تسجيل فتح — عدّاد الفتح يخبر المنسق أي محتوى يستحق الإنتاج. */
+    /**
+     * تسجيل فتح محتوى.
+     *
+     * والفتح **بلا نتيجة** يُسجَّل مرة واحدة في الساعة لكل طالب ومحتوى:
+     * شاشة المكتبة تُناديه في كل رسمٍ للصفحة، فالتحديث يُضاعف العدّاد، وضغطة
+     * «رجوع» ثم دخول تُضاعفه ثالثة — و«الأكثر فتحًا» يقيس عدد مرات التحديث
+     * لا عدد من قرأ. أمّا النتيجة فحدثٌ حقيقيّ يُسجَّل دائمًا: لعبةٌ لُعبت
+     * مرتين نتيجتان.
+     */
     public static function record_open(int $content_id, int $student_id, ?int $score = null, int $seconds = 0): void
     {
         global $wpdb;
+
+        if ($score === null) {
+            $recent = (int) $wpdb->get_var($wpdb->prepare(
+                'SELECT COUNT(*) FROM ' . sch_table('content_opens') . '
+                  WHERE content_id = %d AND student_id = %d AND opened_at > %s',
+                $content_id,
+                $student_id,
+                gmdate('Y-m-d H:i:s', strtotime(sch_now()) - HOUR_IN_SECONDS)
+            ));
+
+            if ($recent > 0) {
+                return;
+            }
+        }
 
         $wpdb->insert(sch_table('content_opens'), [
             'content_id' => $content_id,

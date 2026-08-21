@@ -150,6 +150,68 @@ final class SCH_Timetable
             : self::PERIODS;
     }
 
+    /**
+     * يوم الأسبوع الدراسيّ من تقويم اليوم — أو صفرٌ إن كان اليوم عطلة.
+     *
+     * `date('w')` يبدأ الأحد بصفر، وأيامنا تبدأ الأحد بواحد. **والسبت يوم
+     * دوامٍ في مدارس** — `SCH_TT::WEEK` يدعمه منذ بُني المحرّك، وكانت
+     * الشاشات تسقطه فيرى معلّم السبت يومًا فارغًا وجدولُه ممتلئ.
+     */
+    public static function school_day(?string $date = null): int
+    {
+        $w = $date !== null ? (int) mysql2date('w', $date) : (int) current_time('w');
+
+        return match ($w) {
+            0       => 1,  // الأحد
+            1, 2, 3, 4 => $w + 1,  // الاثنين … الخميس
+            6       => 6,  // السبت
+            default => 0,  // الجمعة
+        };
+    }
+
+    /**
+     * أيّ حصةٍ تجري الآن، وأيّها التالية.
+     *
+     * كان الحساب مكتوبًا باليد في قالب المعلم: `floor((الدقائق - 450) / 50)`
+     * ومعه `min(7, …)` — فهو (أ) يفترض جرسًا واحدًا لكل المراحل بينما الروضة
+     * تخرج ١٠:١٢ والابتدائي ١:١٥، (ب) يتجاهل الفسحة، (ج) **يجعل حصّتَي
+     * الابتدائي التاسعة والعاشرة غير قابلتين للوصول**، (د) ويُسمّي الحصة
+     * الجارية «القادمة» — فالسكّة تقول «جارية الآن» والرأس يقول «القادمة»
+     * عن الحصة نفسها.
+     *
+     * @param string $stage مرحلة الشعبة — الجرس يتبعها
+     * @return array{now:int,next:int} رقما الحصة الجارية والتالية، وصفرٌ حيث لا شيء
+     */
+    public static function running_period(string $stage = ''): array
+    {
+        $minutes = (int) current_time('G') * 60 + (int) current_time('i');
+        $count   = self::periods($stage);
+        $length  = class_exists('SCH_TT')
+            ? SCH_TT::bell($stage !== '' ? $stage : 'primary')->period_len
+            : self::LEN;
+
+        $now  = 0;
+        $next = 0;
+
+        for ($p = 1; $p <= $count; $p++) {
+            $start = self::period_start($p, $stage);
+            $end   = $start + $length;
+
+            if ($minutes >= $start && $minutes < $end) {
+                $now = $p;
+                $next = $p < $count ? $p + 1 : 0;
+                break;
+            }
+
+            if ($minutes < $start) {
+                $next = $p;
+                break;
+            }
+        }
+
+        return ['now' => $now, 'next' => $next];
+    }
+
     /** وضع حصة في خانة — مع منع تعارض المعلم. */
     public static function set_slot(array $d): bool|WP_Error
     {

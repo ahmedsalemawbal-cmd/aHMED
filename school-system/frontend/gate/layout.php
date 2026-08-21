@@ -43,7 +43,7 @@ $sch_user     = wp_get_current_user();
                     ? esc_html__('المسح', 'school-system')
                     : esc_html__('الزوّار', 'school-system'); ?>
             </a>
-            <a class="schg-top__out" href="<?php echo esc_url(SCH_Gate::url('logout')); ?>"><?php esc_html_e('خروج', 'school-system'); ?></a>
+            <a class="schg-top__out" href="<?php echo esc_url(sch_logout_url(SCH_Gate::url())); ?>"><?php esc_html_e('خروج', 'school-system'); ?></a>
         </span>
     </header>
 <?php endif; ?>

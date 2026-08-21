@@ -74,7 +74,11 @@ final class SCH_Gate
         $section = sanitize_key(str_replace('.js', '', $raw));
 
         if ($section === 'logout') {
-            wp_logout();
+            // بنونسٍ لا بمجرّد زيارة: الخروج بـGET يُنفَّذ بصورةٍ في صفحةٍ أخرى.
+            if (sch_logout_ok()) {
+                wp_logout();
+            }
+
             wp_safe_redirect(self::url());
             exit;
         }
@@ -159,73 +163,9 @@ final class SCH_Gate
         // وأبًا يفتح باب الطالب فيُقال له «لا صلاحية» وهو محق في حسابه.
         wp_safe_redirect(SCH_Portal::url());
         exit;
-
-        $error = '';
-
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['sch_gate_login'])) {
-            $error = self::attempt_login();
-        }
-
-        self::render('login', ['error' => $error]);
     }
 
-    private static function attempt_login(): string
-    {
-        if (!wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_gate_login')) {
-            return __('انتهت صلاحية الصفحة. حدّثها وحاول مرة أخرى.', 'school-system');
-        }
 
-        $input = sanitize_text_field(wp_unslash((string) ($_POST['username'] ?? '')));
-        $key   = 'sch_gatelock_' . md5($input . '|' . (string) ($_SERVER['REMOTE_ADDR'] ?? ''));
-
-        if ((int) get_transient($key) >= 5) {
-            return __('محاولات كثيرة. أعد المحاولة بعد 15 دقيقة.', 'school-system');
-        }
-
-        $user = wp_signon([
-            'user_login'    => self::resolve_login($input),
-            'user_password' => (string) ($_POST['password'] ?? ''),
-            'remember'      => true,
-        ], is_ssl());
-
-        if (is_wp_error($user)) {
-            set_transient($key, (int) get_transient($key) + 1, 15 * MINUTE_IN_SECONDS);
-            sch_audit('gate.login_failed', 'user', null, ['login' => $input]);
-            return __('بيانات الدخول غير صحيحة.', 'school-system');
-        }
-
-        $employee = SCH_Staff::get_by_user($user->ID);
-        if ($employee && $employee->status !== 'active') {
-            wp_logout();
-            return __('هذا الحساب موقوف. راجع إدارة المدرسة.', 'school-system');
-        }
-
-        delete_transient($key);
-        wp_set_current_user($user->ID);
-        sch_audit('gate.login', 'user', $user->ID);
-
-        wp_safe_redirect(self::url());
-        exit;
-    }
-
-    private static function resolve_login(string $input): string
-    {
-        global $wpdb;
-
-        $phone = sch_normalize_phone($input);
-        if ($phone === '') {
-            return $input;
-        }
-
-        $user_id = (int) $wpdb->get_var($wpdb->prepare(
-            'SELECT user_id FROM ' . sch_table('employees') . ' WHERE phone = %s LIMIT 1',
-            $phone
-        ));
-
-        $user = $user_id > 0 ? get_user_by('id', $user_id) : null;
-
-        return $user instanceof WP_User ? $user->user_login : $input;
-    }
 
     // ---------- ملفات التطبيق ----------
 

@@ -21,12 +21,23 @@ final class SCH_Homework
         'none'    => 'بلا تسليم',
     ];
 
-    /** مفتاح الأسبوع: 2026-W32 — يثبّت العرض الأسبوعي بلا حسابات تاريخ. */
+    /**
+     * مفتاح الأسبوع: 2026-W32 — يثبّت العرض الأسبوعي بلا حسابات تاريخ.
+     *
+     * وأسبوعنا يبدأ **الأحد** وISO يبدأ الاثنين: فواجب الأحد كان يقع في مفتاح
+     * الأسبوع السابق، وبدءًا من صباح الاثنين يختفي من «هذا الأسبوع» ويظهر
+     * تحت «السابقة» — وهو أوّل يومٍ يحتاجه الطلاب فيه.
+     *
+     * والإصلاح إزاحةُ يومٍ واحد لا تغييرُ صيغة: الأحد → الخميس كلّها تقع الآن
+     * في مفتاح الاثنين الذي يليها، فالصيغة والترتيب ومقارنات «الأسابيع
+     * السابقة» تبقى كما هي **بلا ترحيل**. والصفوف القديمة كانت صحيحة أصلًا
+     * إلا ما أُنشئ يوم أحد.
+     */
     public static function week_key(?string $date = null): string
     {
         $ts = strtotime($date ?? current_time('Y-m-d')) ?: time();
 
-        return gmdate('o-\WW', $ts);
+        return gmdate('o-\WW', $ts + DAY_IN_SECONDS);
     }
 
     // ---------- الإنشاء ----------
@@ -51,9 +62,14 @@ final class SCH_Homework
         $stored = null;
         if (!empty($files['attachment']['tmp_name'])) {
             $saved = SCH_Enrollment::store_upload($files['attachment'], $class_id, 'hw');
-            if (!is_wp_error($saved)) {
-                $stored = $saved['stored'];
+
+            // نفس البلع الصامت في مسار المعلم: الملف يُرفض ويُنشَر الواجب
+            // بمرفقٍ فارغ، فيبحث الطلاب عن ورقةٍ لم تصل.
+            if (is_wp_error($saved)) {
+                return $saved;
             }
+
+            $stored = $saved['stored'];
         }
 
         $wpdb->insert(sch_table('homework'), [
@@ -140,8 +156,11 @@ final class SCH_Homework
         $week = self::week_key();
 
         return $wpdb->get_results($wpdb->prepare(
+            // `sub.answer_text` كان غائبًا عن قائمة الاختيار، وشاشة الطالب
+            // تعرض `$hw->answer_text` — فصندوق إجابته فارغٌ أبدًا ولو سلّم.
             'SELECT h.*, s.name AS subject_name,
-                    sub.id AS sub_id, sub.submitted_at, sub.score, sub.feedback
+                    sub.id AS sub_id, sub.submitted_at, sub.score, sub.feedback,
+                    sub.answer_text, sub.file_stored AS answer_file
              FROM ' . sch_table('homework') . ' h
              LEFT JOIN ' . sch_table('subjects') . ' s ON s.id = h.subject_id
              LEFT JOIN ' . sch_table('homework_subs') . ' sub
@@ -170,6 +189,16 @@ final class SCH_Homework
             return sch_api_error('forbidden', __('هذا الواجب ليس لشعبتك.', 'school-system'), 403);
         }
 
+        /*
+         * المغلق يُرفض — و`status` عمودٌ موجودٌ منذ بُني الجدول ولا يقرؤه أحد.
+         *
+         * أمّا `due_date` فلا يُقفل الباب عمدًا: قاعدة المشروع «الواجب أسبوعي
+         * ولا يُحذف — الغائب يحتاجه»، فالمتأخّر يُعلَّم متأخّرًا ولا يُمنَع.
+         */
+        if ((string) $hw->status === 'closed') {
+            return sch_api_error('closed', __('أُغلق هذا الواجب — راجع معلّمك.', 'school-system'), 409);
+        }
+
         $text   = sanitize_textarea_field((string) ($d['answer_text'] ?? ''));
         $stored = null;
 
@@ -178,9 +207,18 @@ final class SCH_Homework
             $stored = self::store_drawing((string) $d['drawing'], $student_id);
         } elseif (!empty($files['answer_file']['tmp_name'])) {
             $saved = SCH_Enrollment::store_upload($files['answer_file'], $student_id, 'hwans');
-            if (!is_wp_error($saved)) {
-                $stored = $saved['stored'];
+
+            /*
+             * الخطأ يُعاد لا يُبتلَع. `store_upload` ترفض ما تجاوز خمسة
+             * ميجابايت وما ليس JPG/PNG/PDF — وكان الرفض يُهمَل فيسقط الطالب
+             * على «اكتب إجابتك أو أرفق رسمك» عن صورةٍ أرفقها فعلًا. ونموذج
+             * «ملف» بلا حقل نصّ، فالمسار حتميّ لا نادر.
+             */
+            if (is_wp_error($saved)) {
+                return $saved;
             }
+
+            $stored = $saved['stored'];
         }
 
         if ($text === '' && $stored === null && $hw->answer_type !== 'none') {
@@ -200,7 +238,17 @@ final class SCH_Homework
         ];
 
         if ($existing) {
-            $wpdb->update(sch_table('homework_subs'), $data, ['id' => (int) $existing]);
+            /*
+             * التسليم الثاني يُصفّر التقييم: إجابةٌ جديدة تحت درجةٍ قديمة
+             * تعني أن الطالب يرى «٩/١٠» على نصٍّ لم يقرأه معلّمه، وأن المعلم
+             * يرى الواجب مُقيَّمًا فلا يعود إليه.
+             */
+            $wpdb->update(sch_table('homework_subs'), $data + [
+                'score'     => null,
+                'feedback'  => null,
+                'graded_by' => null,
+                'graded_at' => null,
+            ], ['id' => (int) $existing]);
         } else {
             $wpdb->insert(sch_table('homework_subs'), $data + [
                 'homework_id' => $homework_id,

@@ -81,7 +81,11 @@ final class SCH_Student
         $id      = absint(get_query_var('sch_stu_id'));
 
         if ($section === 'logout') {
-            wp_logout();
+            // بنونسٍ لا بمجرّد زيارة: الخروج بـGET يُنفَّذ بصورةٍ في صفحةٍ أخرى.
+            if (sch_logout_ok()) {
+                wp_logout();
+            }
+
             wp_safe_redirect(self::url());
             exit;
         }
@@ -162,45 +166,8 @@ final class SCH_Student
         // وأبًا يفتح باب الطالب فيُقال له «لا صلاحية» وهو محق في حسابه.
         wp_safe_redirect(SCH_Portal::url());
         exit;
-
-        $error = '';
-
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['sch_stu_login'])) {
-            $error = self::attempt_login();
-        }
-
-        self::render('login', ['error' => $error]);
     }
 
-    private static function attempt_login(): string
-    {
-        if (!wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_stu_login')) {
-            return __('انتهت صلاحية الصفحة. حدّثها وحاول مرة أخرى.', 'school-system');
-        }
-
-        $input = sanitize_user(wp_unslash((string) ($_POST['username'] ?? '')));
-        $key   = 'sch_stulock_' . md5($input . '|' . (string) ($_SERVER['REMOTE_ADDR'] ?? ''));
-
-        if ((int) get_transient($key) >= 6) {
-            return __('محاولات كثيرة. أعد المحاولة بعد 15 دقيقة.', 'school-system');
-        }
-
-        $user = wp_signon([
-            'user_login'    => $input,
-            'user_password' => (string) ($_POST['password'] ?? ''),
-            'remember'      => true,
-        ], is_ssl());
-
-        if (is_wp_error($user)) {
-            set_transient($key, (int) get_transient($key) + 1, 15 * MINUTE_IN_SECONDS);
-            return __('اسم المستخدم أو كلمة المرور غير صحيحة.', 'school-system');
-        }
-
-        delete_transient($key);
-        wp_set_current_user($user->ID);
-        wp_safe_redirect(self::url());
-        exit;
-    }
 
     // ---------- ملفات التطبيق ----------
 

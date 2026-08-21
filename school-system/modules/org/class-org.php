@@ -416,8 +416,9 @@ final class SCH_Org
             return [];
         }
 
-        $weekday = (int) current_time('w');
-        $day     = $weekday === 0 ? 1 : ($weekday <= 4 ? $weekday + 1 : 0);
+        // السبت يوم دوامٍ في مدارس، و`SCH_TT::WEEK` يدعمه منذ بُني المحرّك —
+        // وكانت هذه الصيغة تُسقطه فيرى معلّم السبت يومًا فارغًا وجدولُه ممتلئ.
+        $day = SCH_Timetable::school_day();
 
         if ($day === 0) {
             return [];
@@ -427,7 +428,7 @@ final class SCH_Org
 
         // الاحتياط يعلو على الجدول: من أُسند اليوم يظهر في مكانه.
         return $wpdb->get_results($wpdb->prepare(
-            "SELECT t.period_no, c.grade_level, c.section, s.name AS subject_name, 0 AS is_sub
+            "SELECT t.period_no, c.stage, c.grade_level, c.section, s.name AS subject_name, 0 AS is_sub
              FROM " . sch_table('timetable') . " t
              INNER JOIN " . sch_table('classes') . " c ON c.id = t.class_id
              INNER JOIN " . sch_table('subjects') . " s ON s.id = t.subject_id
@@ -440,7 +441,7 @@ final class SCH_Org
 
              UNION ALL
 
-             SELECT sb.period_no, c2.grade_level, c2.section, s2.name AS subject_name, 1 AS is_sub
+             SELECT sb.period_no, c2.stage, c2.grade_level, c2.section, s2.name AS subject_name, 1 AS is_sub
              FROM " . sch_table('substitutions') . " sb
              INNER JOIN " . sch_table('classes') . " c2 ON c2.id = sb.class_id
              LEFT JOIN " . sch_table('subjects') . " s2 ON s2.id = sb.subject_id

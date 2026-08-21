@@ -45,13 +45,34 @@ $sch_user     = wp_get_current_user();
     <div class="t-app">
         <?php
         $sch_today_p = SCH_Org::today_periods($sch_user->ID);
-        $sch_now     = null;
-        $sch_hour    = (int) current_time('G');
 
-        // الحصة الجارية تقريبًا: كل حصة ~50 دقيقة من 7:30.
-        $sch_idx = max(0, min(7, (int) floor((($sch_hour * 60 + (int) current_time('i')) - 450) / 50)));
+        /*
+         * الحصة الجارية من جرس المرحلة لا من حسابٍ مكتوب باليد.
+         *
+         * كان السطر `floor((الدقائق − 450) / 50)` يفترض جرسًا واحدًا للمدرسة
+         * كلّها (والروضة تخرج ١٠:١٢ والابتدائي ١:١٥)، ويتجاهل الفسحة،
+         * و`min(7, …)` يجعل حصّتَي الابتدائي التاسعة والعاشرة **غير قابلتين
+         * للوصول** — ثم يُسمّي ما يجده «حصتك القادمة» وهي الجارية نفسها،
+         * فالسكّة تقول «جارية الآن» والرأس يقول «القادمة» عن الحصة عينها.
+         */
+        $sch_stage = (string) ($sch_today_p[0]->stage ?? '');
+        $sch_clock = SCH_Timetable::running_period($sch_stage);
+
+        $sch_now      = null;
+        $sch_now_live = false;
+
         foreach ($sch_today_p as $sch_p) {
-            if ((int) $sch_p->period_no >= $sch_idx + 1) { $sch_now = $sch_p; break; }
+            if ($sch_clock['now'] > 0 && (int) $sch_p->period_no === $sch_clock['now']) {
+                $sch_now      = $sch_p;
+                $sch_now_live = true;
+                break;
+            }
+        }
+
+        if (!$sch_now) {
+            foreach ($sch_today_p as $sch_p) {
+                if ((int) $sch_p->period_no >= max(1, $sch_clock['next'])) { $sch_now = $sch_p; break; }
+            }
         }
         ?>
         <header class="t-top">
@@ -83,7 +104,9 @@ $sch_user     = wp_get_current_user();
                     <span class="t-now__t">
                         <b><?php echo esc_html(trim((string) $sch_now->grade_level . ' / ' . (string) $sch_now->section)
                             . ' · ' . (string) ($sch_now->subject_name ?: '')); ?></b>
-                        <span><?php esc_html_e('حصتك القادمة', 'school-system'); ?></span>
+                        <span><?php echo esc_html($sch_now_live
+                            ? __('حصتك الآن', 'school-system')
+                            : __('حصتك القادمة', 'school-system')); ?></span>
                     </span>
                 </div>
             <?php endif; ?>
@@ -91,11 +114,25 @@ $sch_user     = wp_get_current_user();
 
         <main class="t-main" id="sch-main-content">
             <?php
+            /*
+             * الرسالة تُترجَم من رمزٍ لا تُطبع كما جاءت في الرابط: النصّ
+             * الخام في `?err=` يُعرض للمستخدم كما يكتبه من يصنع الرابط.
+             * والصمت أسوأ — فشل النونس وفشل الرصد كانا يُبتلعان تمامًا.
+             */
             if (isset($_GET['ok'])) {
-                echo '<div class="t-alert t-alert--ok">' . esc_html__('حُفظت الملاحظة.', 'school-system') . '</div>';
+                echo '<div class="t-alert t-alert--ok">' . esc_html(match (sanitize_key((string) $_GET['ok'])) {
+                    'attend' => __('سُجّل الحضور.', 'school-system'),
+                    default  => __('حُفظت الملاحظة.', 'school-system'),
+                }) . '</div>';
             }
             if (isset($_GET['err'])) {
-                echo '<div class="t-alert t-alert--error">' . esc_html(wp_unslash((string) $_GET['err'])) . '</div>';
+                echo '<div class="t-alert t-alert--error">' . esc_html(match (sanitize_key((string) $_GET['err'])) {
+                    'nonce'     => __('انتهت صلاحية الصفحة — حدّثها ثم أعد الحفظ.', 'school-system'),
+                    'forbidden' => __('هذا الطالب ليس في فصولك.', 'school-system'),
+                    'empty'     => __('اكتب سطرًا واحدًا يصف ما حدث.', 'school-system'),
+                    'save'      => __('تعذّر الحفظ — أعد المحاولة.', 'school-system'),
+                    default     => __('تعذّر تنفيذ العملية.', 'school-system'),
+                }) . '</div>';
             }
             require $file;
             ?>
@@ -118,7 +155,9 @@ $sch_user     = wp_get_current_user();
     /* عامل الخدمة كان مبنيًّا ولا يُسجَّل — فالمعلم وحده بلا تثبيت ولا إشعار. */
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-            navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Teacher::url('sw.js')); ?>).catch(function () {});
+            // بلا `untrailingslashit` يصير النطاق `/teacher/sw.js/` — أي لا
+            // صفحة واحدة، و`serviceWorker.ready` لا تُحلّ أبدًا.
+            navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_Teacher::url('sw.js'))); ?>, { scope: <?php echo wp_json_encode(SCH_Teacher::url()); ?> }).catch(function () {});
         });
     }
     </script>

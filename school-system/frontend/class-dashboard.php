@@ -493,7 +493,12 @@ final class SCH_Dashboard
         $id      = absint(get_query_var('sch_id'));
 
         if ($section === 'logout') {
-            self::handle_logout();
+            if (sch_logout_ok()) {
+                wp_logout();
+            }
+
+            wp_safe_redirect(self::url());
+            exit;
         }
 
         if (!is_user_logged_in()) {

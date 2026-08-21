@@ -14,8 +14,8 @@ $id      = (int) ($sch_data['id'] ?? 0);
 $class   = SCH_Students::current_class($id);
 $grid    = $class ? SCH_Timetable::grid((int) $class->id) : [];
 $exams   = $class ? SCH_Assessment::upcoming_exams((int) $class->id) : [];
-$w       = (int) current_time('w');
-$day_now = $w === 0 ? 1 : ($w <= 4 ? $w + 1 : 0);
+// المرجع الواحد ليوم الأسبوع الدراسيّ — والسبت منها.
+$day_now = SCH_Timetable::school_day();
 
 // اسم الابن من قائمة الأبناء المحمَّلة أصلًا في القالب — بلا استعلام
 // ثانٍ لاسمٍ بين أيدينا.

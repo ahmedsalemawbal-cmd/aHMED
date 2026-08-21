@@ -75,7 +75,11 @@ final class SCH_Teacher
         $id      = absint(get_query_var('sch_tch_id'));
 
         if ($section === 'logout') {
-            wp_logout();
+            // بنونسٍ لا بمجرّد زيارة: الخروج بـGET يُنفَّذ بصورةٍ في صفحةٍ أخرى.
+            if (sch_logout_ok()) {
+                wp_logout();
+            }
+
             wp_safe_redirect(self::url());
             exit;
         }
@@ -95,7 +99,35 @@ final class SCH_Teacher
             $section = '';
         }
 
+        // القراءة تُفحص كالكتابة: رابطٌ مكتوب باليد لا يفتح فصل زميل.
+        if (($section === 'klass'   && !self::may_touch_class($id))
+         || ($section === 'student' && !self::may_touch_student($id))) {
+            self::render('home', ['section' => '', 'id' => 0, 'denied' => true]);
+        }
+
         self::render($section === '' ? 'home' : $section, ['section' => $section, 'id' => $id]);
+    }
+
+    /**
+     * إلى أين نعود بعد الحفظ.
+     *
+     * `wp_get_referer()` تُرجع **`false`** حين يساوي المُحيل الطلبَ نفسه —
+     * وهذا بالضبط ما يحدث في نمط POST/Redirect/GET: النموذج يُرسَل من
+     * الصفحة إلى نفسها. فكان كل رصد حضور وكل ملاحظة يقذفان المعلم إلى
+     * «فصولي»، ومن يرصد ثلاثين طالبًا يُعاد ثلاثين مرة.
+     *
+     * والوجهة تُبنى من حقلٍ مُصرَّح به لا من ترويسةٍ يرسلها المتصفّح —
+     * `klass:12` أو `student:412` — فلا تُفتح ثغرة إعادة توجيه.
+     */
+    private static function back_to(): string
+    {
+        $raw = sanitize_text_field((string) ($_POST['back'] ?? ''));
+
+        if (preg_match('/^(klass|student):(\d+)$/', $raw, $m) === 1) {
+            return self::url($m[1], (int) $m[2]);
+        }
+
+        return self::url();
     }
 
     private static function handle_post(): void
@@ -105,33 +137,74 @@ final class SCH_Teacher
         }
 
         $action = sanitize_key((string) ($_POST['sch_tch_action'] ?? ''));
-        $back   = wp_get_referer() ?: self::url();
 
-        if ($action === 'note' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_tch_note')) {
+        if ($action !== 'note' && $action !== 'attend') {
+            return;
+        }
+
+        $back       = self::back_to();
+        $student_id = absint($_POST['student_id'] ?? 0);
+        $nonce      = (string) ($_POST['_sch_nonce'] ?? '');
+
+        // النونس مكتوبٌ حرفًا لا مُركَّبًا: الاسم المُركَّب يعمل، لكنه يُخفي
+        // العقد عن القارئ وعن `audit.py` معًا — والفحص هو ما يُبقيه صحيحًا.
+        $expect = $action === 'note' ? 'sch_tch_note' : 'sch_tch_attend';
+
+        // وفشل النونس كان يُبتلَع بصمت: المعلم يكتب ملاحظته ويضغط «حفظ»
+        // فتُعاد الشاشة كما هي بلا سطرٍ مكتوب ولا رسالة.
+        if (!wp_verify_nonce($nonce, $expect)) {
+            wp_safe_redirect(add_query_arg('err', 'nonce', $back));
+            exit;
+        }
+
+        /*
+         * الملكيّة تُفحص في الخادم: لم يكن شيء يمنع أي حساب يحمل
+         * `sch_write_notes` من رصد حضور **أي طالب في المدرسة** وإشعار أهله،
+         * أو كتابة ملاحظةٍ باسمه على ملفٍّ لا يخصّه.
+         */
+        if (!self::may_touch_student($student_id)) {
+            wp_safe_redirect(add_query_arg('err', 'forbidden', $back));
+            exit;
+        }
+
+        if ($action === 'note') {
             $result = SCH_Notes::create([
-                'student_id' => absint($_POST['student_id'] ?? 0),
+                'student_id' => $student_id,
                 'category'   => sanitize_key((string) ($_POST['category'] ?? '')),
                 'body'       => wp_unslash((string) ($_POST['body'] ?? '')),
             ]);
 
             wp_safe_redirect(add_query_arg(
-                is_wp_error($result) ? ['err' => $result->get_error_message()] : ['ok' => '1'],
+                is_wp_error($result) ? ['err' => $result->get_error_code()] : ['ok' => 'note'],
                 $back
             ));
             exit;
         }
 
-        if ($action === 'attend' && wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_tch_attend')) {
-            SCH_Attendance::mark(
-                absint($_POST['student_id'] ?? 0),
-                current_time('Y-m-d'),
-                sanitize_key((string) ($_POST['status'] ?? 'present')),
-                'manual'
-            );
-
-            wp_safe_redirect($back);
+        /*
+         * الحضور صلاحيةٌ مستقلّة عن كتابة الملاحظات: الأخصائي الاجتماعي
+         * يملك `sch_write_notes` ولا يملك `sch_manage_attendance`، والداشبورد
+         * يمنعه — وكان هذا المسار يفتح له ما أُغلق هناك.
+         */
+        if (!current_user_can('sch_manage_attendance')) {
+            wp_safe_redirect(add_query_arg('err', 'forbidden', $back));
             exit;
         }
+
+        $marked = SCH_Attendance::mark(
+            $student_id,
+            current_time('Y-m-d'),
+            sanitize_key((string) ($_POST['status'] ?? 'present')),
+            'manual'
+        );
+
+        wp_safe_redirect(add_query_arg(
+            is_wp_error($marked) || $marked === false
+                ? ['err' => is_wp_error($marked) ? $marked->get_error_code() : 'save']
+                : ['ok' => 'attend'],
+            $back
+        ));
+        exit;
     }
 
     // ---------- الدخول ----------
@@ -142,45 +215,8 @@ final class SCH_Teacher
         // وأبًا يفتح باب الطالب فيُقال له «لا صلاحية» وهو محق في حسابه.
         wp_safe_redirect(SCH_Portal::url());
         exit;
-
-        $error = '';
-
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['sch_tch_login'])) {
-            $error = self::attempt_login();
-        }
-
-        self::render('login', ['error' => $error]);
     }
 
-    private static function attempt_login(): string
-    {
-        if (!wp_verify_nonce((string) ($_POST['_sch_nonce'] ?? ''), 'sch_tch_login')) {
-            return __('انتهت صلاحية الصفحة. حدّثها وحاول مرة أخرى.', 'school-system');
-        }
-
-        $input = sanitize_text_field(wp_unslash((string) ($_POST['username'] ?? '')));
-        $key   = 'sch_tchlock_' . md5($input . '|' . (string) ($_SERVER['REMOTE_ADDR'] ?? ''));
-
-        if ((int) get_transient($key) >= 5) {
-            return __('محاولات كثيرة. أعد المحاولة بعد 15 دقيقة.', 'school-system');
-        }
-
-        $user = wp_signon([
-            'user_login'    => $input,
-            'user_password' => (string) ($_POST['password'] ?? ''),
-            'remember'      => true,
-        ], is_ssl());
-
-        if (is_wp_error($user)) {
-            set_transient($key, (int) get_transient($key) + 1, 15 * MINUTE_IN_SECONDS);
-            return __('بيانات الدخول غير صحيحة.', 'school-system');
-        }
-
-        delete_transient($key);
-        wp_set_current_user($user->ID);
-        wp_safe_redirect(self::url());
-        exit;
-    }
 
     // ---------- ملفات التطبيق ----------
 
@@ -213,9 +249,16 @@ final class SCH_Teacher
         header('Content-Type: application/javascript; charset=utf-8');
         header('Service-Worker-Allowed: ' . wp_parse_url(self::url(), PHP_URL_PATH));
 
-        $css = sch_asset('assets/app.css');
+        /*
+         * `teacher.css` لا `app.css`: القالب يطلب الأولى وعامل الخدمة كان
+         * يُخزّن الثانية — فالتطبيق بلا شبكة يفتح **بلا تنسيقٍ إطلاقًا**،
+         * وهو أسوأ من ألّا يفتح لأنه يبدو معطوبًا لا مقطوعًا.
+         */
+        $css   = sch_asset('assets/teacher.css');
+        $core  = sch_asset('assets/shared-ui.css');
+        $tools = sch_asset('assets/list-tools.js');
 
-        echo "const CACHE='sch-tch-" . SCH_VERSION . "';\nconst SHELL=['{$css}'];\n";
+        echo "const CACHE='sch-tch-" . SCH_VERSION . "';\nconst SHELL=['{$css}','{$core}','{$tools}'];\n";
         echo <<<'JS'
 
 self.addEventListener('install', (e) => {
@@ -262,7 +305,14 @@ JS;
 
     // ---------- البيانات ----------
 
-    /** شعب المعلم من الجدول ومن إسناد المواد. */
+    /**
+     * شعب المعلم من الجدول ومن إسناد المواد.
+     *
+     * والعمود `homeroom_teacher_id` لا `homeroom_user_id`: الاسم المخترَع
+     * كان يجعل MySQL يرفض **الاستعلام كلّه**، فتكون «فصولي» فارغة لكل معلم
+     * في المدرسة — لا لمن ليس مربّي فصل وحده. وقيمة العمود تُقرأ من
+     * `class-activator.php` لا من الذاكرة.
+     */
     public static function my_classes(int $user_id): array
     {
         global $wpdb;
@@ -270,7 +320,7 @@ JS;
         return $wpdb->get_results($wpdb->prepare(
             'SELECT DISTINCT c.* FROM ' . sch_table('classes') . ' c
              WHERE c.year_id = %d AND (
-                   c.homeroom_user_id = %d
+                   c.homeroom_teacher_id = %d
                 OR c.id IN (SELECT cs.class_id FROM ' . sch_table('class_subjects') . ' cs WHERE cs.teacher_user_id = %d)
                 OR c.id IN (SELECT t.class_id FROM ' . sch_table('timetable') . ' t WHERE t.teacher_user_id = %d)
              )
@@ -280,6 +330,52 @@ JS;
             $user_id,
             $user_id
         )) ?: [];
+    }
+
+    /**
+     * هل هذه الشعبة من شعبي؟
+     *
+     * كانت `/teacher/klass/17/` تُفتح لأي حساب يملك `sch_write_notes` —
+     * أي معلّمٍ في المدرسة يرى شبكة وجوه فصلٍ ليس له، بصور الطلاب وحالة
+     * عهدتهم؛ و`/teacher/student/412/` تكشف ملاحظاتٍ صحّية وسلوكية.
+     * والفحص في الخادم دائمًا: التطبيق لا يُؤتمن أبدًا.
+     */
+    public static function may_touch_class(int $class_id, ?int $user_id = null): bool
+    {
+        if ($class_id <= 0) {
+            return false;
+        }
+
+        // من يدير الطلاب يرى الجميع أصلًا في الداشبورد — فلا نُغلقها عليه هنا.
+        if (current_user_can('sch_manage_students')) {
+            return true;
+        }
+
+        $user_id ??= get_current_user_id();
+
+        foreach (self::my_classes($user_id) as $c) {
+            if ((int) $c->id === $class_id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** وهل هذا الطالب في إحدى شعبي؟ */
+    public static function may_touch_student(int $student_id, ?int $user_id = null): bool
+    {
+        if ($student_id <= 0) {
+            return false;
+        }
+
+        if (current_user_can('sch_manage_students')) {
+            return true;
+        }
+
+        $class = SCH_Students::current_class($student_id);
+
+        return $class !== null && self::may_touch_class((int) $class->id, $user_id);
     }
 
     /** طلاب شعبة مع حالتهم اليوم — الأساس لشاشة الفصل. */
@@ -312,10 +408,17 @@ JS;
         ));
     }
 
+    /**
+     * صورة الطالب من `SCH_Files` — الباب الواحد للملفّات المحمية.
+     *
+     * كانت تُطلب من مسار الداشبورد، وهو يمرّ بفحص القسم وبـ`SCH_Perms::may()`
+     * قبل أن يصل إلى الصورة — فمعلّمٌ صلاحياته المخصّصة تستثني «الطلاب»
+     * يرى شبكة وجوهٍ فارغة في فصله هو.
+     */
     public static function photo_url(object $student): string
     {
         return $student->photo_file
-            ? add_query_arg('sch_photo', '1', SCH_Dashboard::url('students', (int) $student->id))
+            ? SCH_Files::url('photo', (int) $student->id)
             : '';
     }
 }

@@ -6,6 +6,13 @@ $classes   = SCH_Teacher::my_classes(get_current_user_id());
 $sch_today = SCH_Org::today_periods(get_current_user_id());
 ?>
 
+<?php if (!empty($sch_data['denied'])) : ?>
+    <?php /* رابطٌ لفصلٍ أو طالبٍ ليس من فصولي — القراءة تُفحص كالكتابة. */ ?>
+    <div class="t-alert t-alert--error">
+        <?php esc_html_e('هذا الفصل ليس من فصولك.', 'school-system'); ?>
+    </div>
+<?php endif; ?>
+
 <?php if ($sch_today !== []) : ?>
     <!-- سكة اليوم: يوم المعلم سلسلة حصص، فتُعرض كخط زمني لا كقائمة -->
     <div class="t-sect">
@@ -85,4 +92,17 @@ $sch_today = SCH_Org::today_periods(get_current_user_id());
     </div>
 <?php endif; ?>
 
-<a class="t-btn t-btn--quiet t-tap" href="<?php echo esc_url(SCH_Teacher::url('logout')); ?>"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></a>
+<?php
+/*
+ * زرّ الإشعارات.
+ *
+ * `SCH_Push::boot()` محمَّلٌ في قالب المعلم منذ v9.4، و`push.js` لا يطلب
+ * الإذن إلا من ضغطة صاحب الجهاز (`[data-sch-push]`) — **ولا زرّ في التطبيق
+ * كلّه**. فالمعلم لا يستطيع الاشتراك أصلًا، ويبدو أن الإشعارات لا تعمل.
+ */
+?>
+<button type="button" class="t-btn t-btn--quiet t-tap" data-sch-push>
+    <span data-sch-push-label><?php esc_html_e('تفعيل الإشعارات', 'school-system'); ?></span>
+</button>
+
+<a class="t-btn t-btn--quiet t-tap" href="<?php echo esc_url(sch_logout_url(SCH_Teacher::url())); ?>"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></a>

@@ -66,6 +66,9 @@ $notes    = SCH_Notes::of_student($id, 8);
     <form method="post" id="t-note-form">
         <?php wp_nonce_field('sch_tch_note', '_sch_nonce'); ?>
         <input type="hidden" name="sch_tch_action" value="note">
+        <?php /* الوجهة صريحة: `wp_get_referer()` تُرجع `false` حين يساوي المُحيل
+                 الطلب نفسه، فكانت كل ملاحظةٍ تقذف المعلم خارج ملفّ الطالب. */ ?>
+        <input type="hidden" name="back" value="student:<?php echo esc_attr((string) $id); ?>">
         <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
         <input type="hidden" name="category" id="t-cat-field" value="positive">
 

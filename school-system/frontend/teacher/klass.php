@@ -61,6 +61,11 @@ $unmarked = SCH_Teacher::unmarked($roster);
                         <form method="post">
                             <?php wp_nonce_field('sch_tch_attend', '_sch_nonce'); ?>
                             <input type="hidden" name="sch_tch_action" value="attend">
+                            <?php /* الوجهة من حقلٍ مُصرَّح به لا من `wp_get_referer()` —
+                                     وهي تُرجع `false` حين يساوي المُحيل الطلب نفسه، وهو
+                                     حال POST/Redirect/GET دائمًا. فكان كل رصدٍ يقذف
+                                     المعلم إلى «فصولي»، وثلاثون طالبًا ثلاثون قذفة. */ ?>
+                            <input type="hidden" name="back" value="klass:<?php echo esc_attr((string) $class_id); ?>">
                             <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $s->id); ?>">
                             <input type="hidden" name="status" value="<?php echo esc_attr($slug); ?>">
                             <button class="t-mini t-mini--<?php echo $slug === 'present' ? 'y' : 'n'; ?> t-tap">
@@ -70,8 +75,36 @@ $unmarked = SCH_Teacher::unmarked($roster);
                     <?php endforeach; ?>
                 </span>
             <?php else : ?>
-                <span class="t-state t-state--<?php echo esc_attr($s->att_status === 'absent' ? 'no' : 'ok'); ?>">
-                    <i></i><?php echo esc_html(SCH_Attendance::STATUSES[$s->att_status] ?? ''); ?>
+                <?php
+                /*
+                 * الرصد قابل للتصحيح.
+                 *
+                 * كانت الأزرار تختفي بعد أوّل ضغطة فتتجمّد الحالة إلى الأبد —
+                 * وضغطةٌ بالخطأ على «غائب» لا رجعة عنها من التطبيق، والمعلم
+                 * يقف في فصله بلا وسيلة. والزرّ المقابل وحده يظهر: من رُصد
+                 * حاضرًا يُصحَّح غائبًا والعكس، وإشعار الأهل يتأخّر مهلةً
+                 * تكفي للتدارك.
+                 */
+                $sch_flip = $s->att_status === 'absent' ? 'present' : 'absent';
+                ?>
+                <span class="t-pupil__acts">
+                    <span class="t-state t-state--<?php echo esc_attr($s->att_status === 'absent' ? 'no' : 'ok'); ?>">
+                        <i></i><?php echo esc_html(SCH_Attendance::STATUSES[$s->att_status] ?? ''); ?>
+                    </span>
+                    <form method="post">
+                        <?php wp_nonce_field('sch_tch_attend', '_sch_nonce'); ?>
+                        <input type="hidden" name="sch_tch_action" value="attend">
+                        <input type="hidden" name="back" value="klass:<?php echo esc_attr((string) $class_id); ?>">
+                        <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $s->id); ?>">
+                        <input type="hidden" name="status" value="<?php echo esc_attr($sch_flip); ?>">
+                        <button class="t-mini t-mini--undo t-tap"
+                                aria-label="<?php echo esc_attr(sprintf(
+                                    /* translators: 1: اسم الطالب 2: الحالة الجديدة */
+                                    __('تصحيح رصد %1$s إلى %2$s', 'school-system'),
+                                    $name,
+                                    SCH_Attendance::STATUSES[$sch_flip] ?? ''
+                                )); ?>"><?php esc_html_e('تصحيح', 'school-system'); ?></button>
+                    </form>
                 </span>
             <?php endif; ?>
         </div>

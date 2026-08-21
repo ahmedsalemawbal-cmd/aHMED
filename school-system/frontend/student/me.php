@@ -31,4 +31,14 @@ $class    = SCH_Students::current_class((int) $student->id);
     <div class="schs-row"><span><?php esc_html_e('حضورك', 'school-system'); ?></span><strong><?php echo esc_html(number_format($progress['attendance'], 1)); ?>%</strong></div>
 </div>
 
-<a class="schs-logout" href="<?php echo esc_url(SCH_Student::url('logout')); ?>"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></a>
+<?php
+/*
+ * زرّ الإشعارات — `SCH_Push::boot()` محمَّل في القالب و`push.js` لا يطلب
+ * الإذن إلا من ضغطة صاحب الجهاز، ولا زرّ في التطبيق كلّه.
+ */
+?>
+<button type="button" class="schs-logout" data-sch-push>
+    <span data-sch-push-label><?php esc_html_e('تفعيل الإشعارات', 'school-system'); ?></span>
+</button>
+
+<a class="schs-logout" href="<?php echo esc_url(sch_logout_url(SCH_Student::url())); ?>"><?php esc_html_e('تسجيل الخروج', 'school-system'); ?></a>

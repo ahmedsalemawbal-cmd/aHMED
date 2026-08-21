@@ -203,6 +203,8 @@ img { max-width:100%; }
   font-size:var(--t-t5); font-weight:800; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
 .t-mini--y { background:var(--t-ok); color:var(--t-on-color); }
 .t-mini--n { background:var(--t-danger); color:var(--t-on-color); }
+/* التصحيح فعلٌ ثانويّ: يُرى ولا يزاحم الحالة المرصودة */
+.t-mini--undo { background:transparent; color:var(--t-muted); border:1px solid var(--t-line); }
 .t-state { display:inline-flex; align-items:center; gap:6px; padding:5px 13px; border-radius:99px;
   font-size:var(--t-t6); font-weight:800; }
 .t-state i { width:7px; height:7px; border-radius:50%; }

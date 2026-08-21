@@ -99,11 +99,52 @@ final class SCH_Attendance
             ]);
         }
 
-        if ($status === 'absent') {
-            self::notify_absence($student_id, $date);
-        }
-
+        /*
+         * لا إشعار فوريّ بالغياب.
+         *
+         * كان الأب يصله «سُجّل غياب محمد» في اللحظة نفسها — قبل أن يتدارك
+         * المعلم ضغطةً بالخطأ، وقبل أن يصل الطالب متأخّرًا خمس دقائق. فصار
+         * الإشعار يُرسَل من الكنس الدوريّ بعد **مهلة تصحيح** (`GRACE`)،
+         * ومن صُحّح رصده خلالها لا يصل أهله شيء أصلًا.
+         */
         return true;
+    }
+
+    /** مهلة تصحيح رصد الغياب قبل إشعار الأهل — بالدقائق. */
+    public const ABSENCE_GRACE = 12;
+
+    /**
+     * كنس دوريّ: يُشعر أهل من بقي غائبًا بعد مهلة التصحيح.
+     *
+     * استعلامٌ واحد: غياب اليوم الذي مضى على رصده أكثر من `ABSENCE_GRACE`
+     * ولم يُشعَر به أحد بعد — و«لم يُشعَر» تُقرأ من جدول الإشعارات نفسه فلا
+     * يحتاج الأمر عمودًا جديدًا ولا ترحيلًا.
+     */
+    public static function sweep_absence_notices(): void
+    {
+        global $wpdb;
+
+        $today  = current_time('Y-m-d');
+        $cutoff = gmdate('Y-m-d H:i:s', strtotime(sch_now()) - self::ABSENCE_GRACE * MINUTE_IN_SECONDS);
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT a.student_id
+               FROM ' . sch_table('attendance') . " a
+              WHERE a.att_date = %s AND a.status = 'absent' AND a.recorded_at <= %s
+                AND NOT EXISTS (
+                      SELECT 1 FROM " . sch_table('notifications') . " n
+                       WHERE n.ref_type = 'attendance' AND n.ref_id = a.student_id
+                         AND n.created_at >= %s
+                    )
+              LIMIT 300",
+            $today,
+            $cutoff,
+            $today . ' 00:00:00'
+        )) ?: [];
+
+        foreach ($rows as $row) {
+            self::notify_absence((int) $row->student_id, $today);
+        }
     }
 
     /** كشف حضور شعبة في يوم. */

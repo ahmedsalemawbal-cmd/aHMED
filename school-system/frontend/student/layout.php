@@ -73,7 +73,15 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             echo '<div class="schs-flash schs-flash--ok">' . esc_html__('أحسنت — وصلت إجابتك.', 'school-system') . '</div>';
         }
         if (isset($_GET['err'])) {
-            echo '<div class="schs-flash schs-flash--bad">' . esc_html(wp_unslash((string) $_GET['err'])) . '</div>';
+            // رمزٌ يُترجَم لا نصٌّ خام: ما في الرابط يكتبه من يصنع الرابط.
+            echo '<div class="schs-flash schs-flash--bad">' . esc_html(match (sanitize_key((string) $_GET['err'])) {
+                'empty_answer' => __('اكتب إجابتك أو أرفق رسمك.', 'school-system'),
+                'too_big'      => __('الملف أكبر من خمسة ميجابايت — اختر صورة أصغر.', 'school-system'),
+                'bad_type'     => __('يُقبل JPG أو PNG أو PDF فقط.', 'school-system'),
+                'closed'       => __('أُغلق هذا الواجب.', 'school-system'),
+                'nonce'        => __('انتهت صلاحية الصفحة — حدّثها ثم أعد الإرسال.', 'school-system'),
+                default        => __('تعذّر الإرسال — أعد المحاولة.', 'school-system'),
+            }) . '</div>';
         }
         require $file;
         ?>
@@ -96,13 +104,27 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
         <?php endforeach; ?>
     </nav>
 
+<?php endif; ?>
+
+<?php
+/*
+ * `student.js` **خارج** الفروع.
+ *
+ * كان محمَّلًا في فرع `else` وحده، وشاشة التصريح (`pass`) لها فرعها الخاصّ
+ * أوّلَ القالب — فالرمز المتجدّد يُرسَم مرة واحدة ويتجمّد: عدّاده لا يعمل،
+ * ولا يُجدَّد بعد ثلاثين ثانية، فيصير بعد ٩٠ ثانية رمزًا ميتًا يُرفض عند
+ * البوابة بلا أن يعرف الطالب لماذا. وهي الشاشة الوحيدة التي **تحتاجه**.
+ */
+?>
+<?php if (!$sch_is_login) : ?>
     <script src="<?php echo esc_url(sch_asset('assets/student.js')); ?>" defer></script>
 <?php endif; ?>
 
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(<?php echo wp_json_encode(SCH_Student::url('sw.js')); ?>);
+    // بلا `untrailingslashit` يصير النطاق `/student/sw.js/` — أي لا صفحة واحدة.
+    navigator.serviceWorker.register(<?php echo wp_json_encode(untrailingslashit(SCH_Student::url('sw.js'))); ?>, { scope: <?php echo wp_json_encode(SCH_Student::url()); ?> });
   });
 }
 </script>

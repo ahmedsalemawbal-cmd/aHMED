@@ -37,7 +37,7 @@ $sch_trip     = $sch_data['trip'] ?? null;
 <?php if (!$sch_is_login) : ?>
     <header class="schd-top">
         <span class="schd-top__who"><?php echo esc_html($sch_user->display_name); ?></span>
-        <a class="schd-top__out" href="<?php echo esc_url(SCH_Driver::url('logout')); ?>"><?php esc_html_e('خروج', 'school-system'); ?></a>
+        <a class="schd-top__out" href="<?php echo esc_url(sch_logout_url(SCH_Driver::url())); ?>"><?php esc_html_e('خروج', 'school-system'); ?></a>
     </header>
 <?php endif; ?>
 
