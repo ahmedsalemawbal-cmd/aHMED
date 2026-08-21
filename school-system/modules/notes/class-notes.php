@@ -259,6 +259,41 @@ final class SCH_Notes
     }
 
     /** رد ولي الأمر — ثلاثة أزرار وسطر اختياري. */
+    /**
+     * ردود وليّ الأمر على مجموعة ملاحظات — استعلامٌ واحد لقائمة الرسائل.
+     *
+     * الشاشة تعرض زرَّي الرد لما لم يُردّ عليه بعد، وسؤالُ كل صفٍّ على حدة
+     * يعني أربعين استعلامًا لصفحةٍ واحدة.
+     *
+     * @param array<int,int> $note_ids
+     * @return array<int,string> note_id => الرد
+     */
+    public static function responses_of(array $note_ids): array
+    {
+        global $wpdb;
+
+        $ids = array_values(array_unique(array_filter(array_map('intval', $note_ids))));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '%d'));
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            'SELECT id, parent_response FROM ' . sch_table('student_notes') . "
+              WHERE id IN ({$in}) AND parent_response IS NOT NULL",
+            ...$ids
+        )) ?: [];
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(int) $r->id] = (string) $r->parent_response;
+        }
+
+        return $out;
+    }
+
     public static function parent_reply(int $note_id, string $response, string $body = ''): bool|WP_Error
     {
         global $wpdb;

@@ -778,6 +778,7 @@ final class SCH_Dashboard
             'inv',                                    // المالية: الفاتورة المفتوحة
             'user_id',                                // الصلاحيات: الموظف المعروض
             'sec', 'kind', 'y', 'm',                 // مدًى ونطاق مشتركان
+            'state',                                  // لوحة العهدة: الشريحة المفتوحة
         ];
 
         foreach ($keys as $key) {
@@ -1458,12 +1459,21 @@ final class SCH_Dashboard
     /** إدخال إداري — حين يفرغ جوال الحارس أو يُنسى مسح. */
     private static function do_custody_manual(array $d, int $id): array|WP_Error
     {
-        return SCH_Custody::record([
+        $done = SCH_Custody::record([
             'student_id'  => absint($d['student_id'] ?? 0),
-            'checkpoint'  => sanitize_key((string) ($d['checkpoint'] ?? 'manual')),
+            'checkpoint'  => sanitize_key((string) ($d['checkpoint'] ?? 'correction')),
+            // الوجهة صريحة: بلاها لا يتغيّر شيء — وهذا ما كان يحدث.
+            'to_state'    => sanitize_key((string) ($d['to_state'] ?? '')),
             'client_uuid' => wp_generate_uuid4(),
-            'reason'      => (string) ($d['reason'] ?? __('إدخال إداري', 'school-system')),
+            'reason'      => sanitize_text_field((string) ($d['reason'] ?? '')),
         ]);
+
+        if (is_wp_error($done)) {
+            return $done;
+        }
+
+        // ويبقى المستخدم على الشريحة التي كان يصحّح منها.
+        return ['keep' => ['state' => sanitize_key((string) ($d['keep']['state'] ?? ''))]];
     }
 
     // ═══════════════════════ محرّك الجداول (v10.7) ═══════════════════════

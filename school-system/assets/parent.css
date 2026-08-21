@@ -3978,7 +3978,7 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .sch-bus__halo {
   position: absolute; inset: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--p-brand) 26%, transparent);
+  background: color-mix(in srgb, var(--pri) 26%, transparent);
   animation: sch-bus-pulse 2.4s ease-out infinite;
 }
 
@@ -4002,16 +4002,43 @@ textarea.p-in { min-height: 96px; resize: vertical; line-height: 1.6; }
 .sch-stop {
   border-radius: 50%;
   border: 2px solid #fff;
-  background: var(--p-faint);
+  background: var(--slate);
   box-shadow: 0 1px 4px rgba(9, 20, 33, .3);
 }
-.sch-stop--done { background: var(--p-ok); }
-.sch-stop--next { background: var(--p-warn); }
+.sch-stop--done { background: var(--ok); }
+.sch-stop--next { background: var(--warn); }
 .sch-stop--mine {
   display: flex; align-items: center; justify-content: center;
   /* رمز البيت داخلها يرث `currentColor` — لا لونًا مكتوبًا في السكربت */
-  color: var(--p-brand);
+  color: var(--pri-ink);
   background: #fff;
-  border: 3px solid var(--p-brand);
+  border: 3px solid var(--pri);
   box-shadow: 0 2px 8px rgba(9, 20, 33, .36);
 }
+
+
+/* مواعيد إعطاء الدواء: مواعيد اليوم الدراسي وحدها، تُلمس لا تُكتب */
+.p-med__slots { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.p-med__slot {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 0 var(--s3);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r2); cursor: pointer;
+  font-size: var(--t2); font-weight: 600; color: var(--ink2);
+}
+.p-med__slot:has(input:checked) { border-color: var(--pri); color: var(--pri-ink); background: var(--pri-tint); }
+.p-med__slot span { font-variant-numeric: tabular-nums; }
+
+
+/* ردّ وليّ الأمر على ملاحظة: ثلاثة قرارات لا حقلُ كتابة */
+.p-inb__reply { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+.p-body button.p-inb__rb {
+  flex: 1 1 auto; min-height: 40px; padding: 0 var(--s3);
+  font-family: inherit; font-size: var(--t2); font-weight: 600;
+  color: var(--ink2); background: var(--card2);
+  border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer;
+}
+.p-body button.p-inb__rb.is-call { color: var(--warn); border-color: var(--warn); }
+.p-body button.p-inb__rb:active  { background: var(--pri-tint); }
+
+.p-inb__done { display: block; margin-top: var(--s2); font-size: var(--t1); color: var(--muted); }

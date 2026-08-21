@@ -98,6 +98,11 @@ final class SCH_Gate
             self::render('visitors', []);
         }
 
+        // لوحة نداء الانصراف — الطرف الأخير من حلقةٍ كانت مقطوعة عند الحارس.
+        if ($section === 'pickup') {
+            self::render('pickup', []);
+        }
+
         self::render('home', []);
     }
 
@@ -110,6 +115,33 @@ final class SCH_Gate
 
         $action = sanitize_key((string) ($_POST['sch_gate_action'] ?? ''));
         $nonce  = (string) ($_POST['_sch_nonce'] ?? '');
+
+        $pickup = ['pickup_ack', 'pickup_done', 'pickup_drop'];
+
+        if (in_array($action, $pickup, true)) {
+            if (!wp_verify_nonce($nonce, 'sch_gate_pickup')) {
+                wp_safe_redirect(add_query_arg('err', 'nonce', self::url('pickup')));
+                exit;
+            }
+
+            $call_id = absint($_POST['call_id'] ?? 0);
+
+            /*
+             * الأفعال هي أفعال الداشبورد نفسها — قشرةٌ على المحرّك لا محرّك
+             * ثانٍ. والتسليم يمرّ بـ`SCH_Custody::record()` فيُرفض إن لم يكن
+             * المنتظِر مخوَّلًا، والرفض يُقال للحارس لا يُبتلَع.
+             */
+            $done = match ($action) {
+                'pickup_ack'  => SCH_Pickup::ack($call_id),
+                'pickup_done' => SCH_Pickup::deliver($call_id),
+                default       => SCH_Pickup::cancel($call_id),
+            };
+
+            wp_safe_redirect(is_wp_error($done)
+                ? add_query_arg('err', $done->get_error_code(), self::url('pickup'))
+                : self::url('pickup'));
+            exit;
+        }
 
         if ($action !== 'visitor_in' && $action !== 'visitor_out') {
             return;

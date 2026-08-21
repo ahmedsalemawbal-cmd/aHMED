@@ -116,6 +116,37 @@ $keep = static function () use ($tab): void {
         </div>
 
         <div class="sch-sp__acts">
+            <?php
+            /*
+             * قائمة الانتباه.
+             *
+             * الفعل `toggle_watch` مسجَّلٌ بمعالجه، و`SCH_Views::toggle_watch()`
+             * و`watch_state()` مبنيّتان، والعرض المحفوظ «المتابَعون» وعدّاده
+             * ومُرشِّحه في `SCH_Students::list()` كلّها تعمل — **ولا زرّ في
+             * المشروع كلّه يرسل الفعل**، فجدول `watchlist` لا يُكتب فيه صفٌّ
+             * واحد والعرض يعود فارغًا أبدًا.
+             *
+             * والقاعدة التي تخدمها: «الطالب غير المرئي قائمة انتباه لا اتهام»
+             * — فهي خاصّة بمن أضافها، لا تُعرض للمعلم ولا لوليّ الأمر.
+             */
+            $sch_watch = SCH_Views::watch_state($id);
+            ?>
+            <form method="post" class="sch-sp__watchf">
+                <?php wp_nonce_field('sch_toggle_watch', '_sch_nonce'); ?>
+                <input type="hidden" name="sch_action" value="toggle_watch">
+                <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+                <input type="hidden" name="keep[tab]" value="<?php echo esc_attr($tab); ?>">
+                <button class="sch-sp__act<?php echo $sch_watch['watched'] ? ' is-on' : ''; ?>"
+                        title="<?php echo esc_attr($sch_watch['watched']
+                            ? __('أزِله من قائمة انتباهك', 'school-system')
+                            : __('أضِفه إلى قائمة انتباهك — تراه أنت وحدك', 'school-system')); ?>">
+                    <?php echo sch_icon('award', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    <?php echo esc_html($sch_watch['watched']
+                        ? __('في قائمة انتباهك', 'school-system')
+                        : __('قائمة الانتباه', 'school-system')); ?>
+                </button>
+            </form>
+
             <button type="button" class="sch-sp__act" data-sch-print><?php esc_html_e('طباعة الملف', 'school-system'); ?></button>
             <?php
             /*

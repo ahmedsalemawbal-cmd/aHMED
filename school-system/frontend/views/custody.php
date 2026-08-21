@@ -6,6 +6,20 @@ $board  = SCH_Custody::board();
 $health = SCH_Alerts::health();
 $focus  = isset($_GET['state']) ? sanitize_key(wp_unslash((string) $_GET['state'])) : '';
 $list   = $focus !== '' && isset(SCH_Custody::STATES[$focus]) ? SCH_Custody::students_in($focus) : [];
+
+/*
+ * التصحيح الإداريّ.
+ *
+ * `left_early` كانت **حالةً بلا مخرج في النظام كلّه**: لا مسحَ ينتج الخروج
+ * منها (فالخروج المبكر انتهى)، و`custody_manual` — الفعل المسجَّل بمعالجه
+ * منذ إصدارات — لم يكن يغيّر شيئًا لأن `RESULT` بلا مفتاحٍ له، فـ`$to`
+ * تساوي `$from` دائمًا. فطفلٌ خرج مبكرًا يبقى «غادر مبكرًا» إلى الأبد
+ * وعدّاد اللوحة يعدّه كل يوم.
+ *
+ * والتصحيح **حدثٌ مضادّ** لا تعديلٌ للسجلّ — قاعدة المشروع — ويشترط سببًا
+ * مكتوبًا في الطبقة نفسها لا في الشاشة وحدها.
+ */
+$sch_may_fix = current_user_can('sch_manage_students') && SCH_Perms::may('custody', 'edit');
 ?>
 <h1 class="sch-title"><?php echo sch_icon('shield', 22); ?><?php esc_html_e('لوحة العهدة', 'school-system'); ?></h1>
 <p class="sch-sub"><?php esc_html_e('كل طالب في عهدة جهة معلومة. الرقم الأحمر هو ما يحتاج تدخلًا الآن.', 'school-system'); ?></p>
@@ -55,6 +69,9 @@ $list   = $focus !== '' && isset(SCH_Custody::STATES[$focus]) ? SCH_Custody::stu
                     <th><?php esc_html_e('الطالب', 'school-system'); ?></th>
                     <th><?php esc_html_e('الصف', 'school-system'); ?></th>
                     <th><?php esc_html_e('منذ', 'school-system'); ?></th>
+                    <?php if ($sch_may_fix) : ?>
+                        <th class="sch-col--xl"><?php esc_html_e('تصحيح الحالة', 'school-system'); ?></th>
+                    <?php endif; ?>
                 </tr></thead>
                 <tbody>
                 <?php foreach ($list as $s) : ?>
@@ -67,6 +84,39 @@ $list   = $focus !== '' && isset(SCH_Custody::STATES[$focus]) ? SCH_Custody::stu
                         </td>
                         <td><?php echo esc_html(trim(($s->grade_level ?? '') . ' / ' . ($s->section ?? '')) ?: '—'); ?></td>
                         <td dir="ltr"><?php echo esc_html($s->custody_at ?: '—'); ?></td>
+
+                        <?php if ($sch_may_fix) : ?>
+                            <td>
+                                <form method="post" class="sch-toolbar">
+                                    <?php wp_nonce_field('sch_custody_manual', '_sch_nonce'); ?>
+                                    <input type="hidden" name="sch_action" value="custody_manual">
+                                    <input type="hidden" name="checkpoint" value="correction">
+                                    <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $s->id); ?>">
+                                    <input type="hidden" name="keep[state]" value="<?php echo esc_attr($focus); ?>">
+
+                                    <select name="to_state" required
+                                            aria-label="<?php echo esc_attr(sprintf(
+                                                /* translators: %s: اسم الطالب */
+                                                __('الحالة الصحيحة لـ%s', 'school-system'),
+                                                SCH_Enrollment::full_name($s)
+                                            )); ?>">
+                                        <?php foreach (SCH_Custody::STATES as $sch_st => $sch_lbl) : ?>
+                                            <?php if ($sch_st === $focus) { continue; } ?>
+                                            <option value="<?php echo esc_attr($sch_st); ?>"><?php echo esc_html($sch_lbl); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <input type="text" name="reason" required maxlength="190"
+                                           placeholder="<?php esc_attr_e('السبب — إجباري', 'school-system'); ?>"
+                                           aria-label="<?php esc_attr_e('سبب التصحيح', 'school-system'); ?>">
+
+                                    <button class="sch-btn sch-btn--quiet sch-btn--sm"
+                                            data-confirm="<?php esc_attr_e('يُسجَّل حدثٌ مضادّ باسمك ولا يُحذف. متابعة؟', 'school-system'); ?>">
+                                        <?php esc_html_e('تصحيح', 'school-system'); ?>
+                                    </button>
+                                </form>
+                            </td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

@@ -5857,6 +5857,13 @@ body.sch-body {
  * من التنسيق (`.sch-body a { color }` أولويّتها تغلب أي صنفٍ وحده).
  */
 .sch-body a.sch-sp__fee { color: inherit; text-decoration: none; }
+
+/* قائمة الانتباه: زرٌّ في صفّ الأفعال، والمُعلَّم يُلتقط بلونه */
+.sch-sp__watchf { display: inline-flex; }
+.sch-body button.sch-sp__act.is-on {
+    color: var(--sch-gold, var(--sch-accent));
+    border-color: currentColor;
+}
 .sch-body a.sch-sp__fee:hover { background: var(--sch-surface-alt); }
 .sch-sp__fee.is-due { background: var(--sch-danger-soft); }
 .sch-sp__fk { display: flex; flex-direction: column; gap: 2px; min-width: 0; }

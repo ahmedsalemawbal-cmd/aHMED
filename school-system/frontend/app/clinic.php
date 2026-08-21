@@ -187,4 +187,80 @@ $sch_today = wp_date('Y-m-d');
     <?php endforeach; ?>
 <?php endif; ?>
 
-<p class="p-fine"><?php esc_html_e('التشخيصات والأدوية الموصوفة لدى عيادة المدرسة.', 'school-system'); ?></p>
+<?php
+/*
+ * نموذج طلب إذن الدواء.
+ *
+ * المعالج `request_med` ونونسه `sch_app_med` و`SCH_Medication::request()`
+ * كلّها مبنيّة وتعمل — **ولا نموذجَ في المشروع كلّه يرسلها**. والشاشة نفسها
+ * تدعو الأب صراحةً: «اطلب إذنًا إن كان ابنك يحتاج دواءً في المدرسة»، ثم لا
+ * تعطيه زرًّا. وهذا أسوأ من غياب الميزة: يبحث عنها ولا يجدها فيظنّ التطبيق
+ * ناقصًا.
+ *
+ * والقاعدة التي يخدمها: «لا يُعطى الطفل دواء بلا إذن سارٍ» — والإذن يبدأ
+ * من هنا، ثم تعتمده الصحة المدرسية.
+ */
+?>
+<h2 class="p-h2"><?php esc_html_e('طلب إذن دواء', 'school-system'); ?></h2>
+
+<details class="p-set">
+    <summary class="p-set__row p-tap">
+        <span class="p-set__i"><?php echo sch_icon('pill', 17); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+        <span class="p-set__t"><?php esc_html_e('اطلب إذنًا جديدًا', 'school-system'); ?></span>
+    </summary>
+
+    <form method="post" class="p-set__body" enctype="multipart/form-data">
+        <?php wp_nonce_field('sch_app_med', '_sch_nonce'); ?>
+        <input type="hidden" name="sch_app_action" value="request_med">
+        <input type="hidden" name="student_id" value="<?php echo esc_attr((string) $id); ?>">
+
+        <div class="p-field">
+            <label for="p-med-name"><?php esc_html_e('اسم الدواء', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-name" type="text" name="med_name" required maxlength="120">
+        </div>
+
+        <div class="p-field">
+            <label for="p-med-dose"><?php esc_html_e('الجرعة', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-dose" type="text" name="dose" required maxlength="120"
+                   placeholder="<?php esc_attr_e('مثال: ملعقة صغيرة', 'school-system'); ?>">
+        </div>
+
+        <div class="p-field">
+            <span><?php esc_html_e('مواعيد الإعطاء', 'school-system'); ?></span>
+            <?php /* مواعيد اليوم الدراسي وحدها — والوقت خارجها شأن البيت لا المدرسة. */ ?>
+            <div class="p-med__slots">
+                <?php foreach (SCH_Medication::SLOTS as $sch_slot) : ?>
+                    <label class="p-med__slot">
+                        <input type="checkbox" name="times[]" value="<?php echo esc_attr($sch_slot); ?>">
+                        <span dir="ltr"><?php echo esc_html($sch_slot); ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="p-field">
+            <label for="p-med-start"><?php esc_html_e('يبدأ من', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-start" type="date" name="start_date"
+                   value="<?php echo esc_attr(current_time('Y-m-d')); ?>">
+        </div>
+
+        <div class="p-field">
+            <label for="p-med-days"><?php esc_html_e('عدد الأيام', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-days" type="number" name="days" min="1" max="30" value="3">
+        </div>
+
+        <div class="p-field">
+            <label for="p-med-rx"><?php esc_html_e('الوصفة الطبية (اختيارية)', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-rx" type="file" name="prescription" accept="image/jpeg,image/png,application/pdf">
+        </div>
+
+        <div class="p-field">
+            <label for="p-med-note"><?php esc_html_e('ملاحظة للعيادة', 'school-system'); ?></label>
+            <input class="p-in" id="p-med-note" type="text" name="note" maxlength="190">
+        </div>
+
+        <button class="p-btn p-btn--brand p-tap"><?php esc_html_e('إرسال الطلب', 'school-system'); ?></button>
+    </form>
+</details>
+
+<p class="p-fine"><?php esc_html_e('التشخيصات والأدوية الموصوفة لدى عيادة المدرسة. والإذن لا يسري حتى تعتمده الصحة المدرسية.', 'school-system'); ?></p>

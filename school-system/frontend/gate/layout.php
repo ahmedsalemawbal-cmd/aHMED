@@ -37,6 +37,24 @@ $sch_user     = wp_get_current_user();
     <header class="schg-top">
         <span class="schg-top__who"><?php echo esc_html($sch_user->display_name); ?></span>
         <span class="schg-top__acts">
+            <?php
+            /*
+             * باب لوحة النداء — وشارتُه.
+             *
+             * `SCH_Pickup::waiting()` مبنيّة منذ v9.7 **بلا مُنادٍ واحد**:
+             * الأب يضغط «أنا عند البوابة» في تطبيقه ولا أحد يرى. والشارة
+             * هنا هي ما يجعله يُرى، فالحارس لا يفتح لوحةً ليكتشف أن فيها
+             * أحدًا — الشاشة تناديه.
+             */
+            $sch_waiting = SCH_Pickup::waiting();
+            ?>
+            <a class="schg-top__link<?php echo $sch_view === 'pickup' ? ' is-on' : ''; ?>"
+               href="<?php echo esc_url(SCH_Gate::url('pickup')); ?>">
+                <?php esc_html_e('النداء', 'school-system'); ?>
+                <?php if ($sch_waiting > 0) : ?>
+                    <b class="schg-badge" dir="ltr"><?php echo esc_html((string) $sch_waiting); ?></b>
+                <?php endif; ?>
+            </a>
             <a class="schg-top__link<?php echo $sch_view === 'visitors' ? ' is-on' : ''; ?>"
                href="<?php echo esc_url(SCH_Gate::url($sch_view === 'visitors' ? '' : 'visitors')); ?>">
                 <?php echo $sch_view === 'visitors'

@@ -329,7 +329,9 @@ final class SCH_App
                 wp_unslash((string) ($_POST['reply_body'] ?? ''))
             );
 
-            wp_safe_redirect(wp_get_referer() ?: self::url('alerts'));
+            // `wp_get_referer()` تُرجع `false` حين يساوي المُحيل الطلب نفسه —
+            // وهو حال POST/Redirect/GET دائمًا. والوجهة صريحة هنا.
+            wp_safe_redirect(self::url('messages', absint($_POST['kid'] ?? 0)));
             exit;
         }
     }

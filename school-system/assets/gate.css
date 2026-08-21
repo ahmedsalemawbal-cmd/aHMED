@@ -308,3 +308,59 @@ input[dir="ltr"] { text-align: start; }
 
 .schg-empty { text-align: center; padding: 36px 16px; color: var(--g-muted); }
 .schg-empty strong { display: block; font-size: 17px; color: var(--g-ink); }
+
+
+/* =========================================================
+   لوحة نداء الانصراف — الطرف الأخير من الحلقة عند الحارس
+   ========================================================= */
+
+.schg-back { display: inline-block; margin-bottom: 10px; color: var(--g-muted); font-size: 14px; text-decoration: none; }
+.schg-h1   { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+.schg-sub  { margin: 0 0 16px; color: var(--g-muted); font-size: 14px; line-height: 1.6; }
+
+/* الشارة: رقمٌ صغير على باب اللوحة — هو ما يجعل النداء يُرى */
+.schg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; margin-inline-start: 5px; padding: 0 5px;
+  background: var(--g-bad); color: #fff;
+  border-radius: 100px; font-size: 12px; font-weight: 700;
+}
+
+.schg-calls { display: grid; gap: 10px; }
+
+.schg-call {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  padding: 14px;
+  background: var(--g-surface);
+  border: 1px solid var(--g-line);
+  border-inline-start: 3px solid var(--g-line);
+  border-radius: var(--g-r);
+}
+/* الانتظار الطويل يُلتقط بنظرة على القائمة لا بقراءتها */
+.schg-call.is-slow  { border-inline-start-color: var(--g-bad); }
+.schg-call.is-onway { border-inline-start-color: var(--g-warn); }
+
+.schg-call__no {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700; line-height: 1.15;
+}
+.schg-call__no em { font-size: 11px; font-style: normal; color: var(--g-muted); }
+.schg-call.is-slow .schg-call__no { color: var(--g-bad); }
+
+.schg-call__b { min-width: 0; }
+.schg-call__b b    { display: block; font-size: 18px; font-weight: 700; }
+.schg-call__b span { display: block; font-size: 13px; color: var(--g-muted); }
+.schg-call__who    { margin-top: 2px; }
+.schg-call__note   { margin-top: 4px; font-style: italic; }
+
+.schg-call__acts {
+  grid-column: 1 / -1;
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+}
+.schg-call__acts form { flex: 1 1 auto; }
+.schg-call__acts .schg-mini { width: 100%; }
+
+.schg-mini--go { background: var(--g-accent); color: var(--g-on); }
+.schg-mini--x  { background: transparent; color: var(--g-muted); border: 1px solid var(--g-line); }

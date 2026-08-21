@@ -379,7 +379,29 @@ final class SCH_Custody
         }
 
         $from = (string) ($student->custody_state ?? 'home');
-        $to   = self::RESULT[$checkpoint] ?? $from;
+
+        /*
+         * **المخرج من `left_early`.**
+         *
+         * `RESULT` تربط كل نقطة تحقّقٍ بحالتها، ولا مفتاح فيها لـ`manual` ولا
+         * `correction` — فـ`$to` كانت تساوي `$from` دائمًا في الإدخال الإداريّ:
+         * الفعل يُسجَّل حدثًا في السجلّ **ولا يغيّر حالة الطالب**. وفعلُ
+         * `custody_manual` مسجَّلٌ في الداشبورد منذ إصدارات بمعالجٍ يعمل
+         * وشاشةٍ لا تُرسله.
+         *
+         * والنتيجة أن `left_early` **حالةٌ بلا مخرج في النظام كلّه**:
+         * `ALLOWED` تسمح لها بـ`home`، ولا مسحَ ينتجها (فالخروج المبكر
+         * انتهى)، ولا إدخال إداريّ يقدر عليها. فطفلٌ خرج مبكرًا يبقى «غادر
+         * مبكرًا» إلى الأبد، وعدّاد اللوحة يعدّه كل يوم.
+         *
+         * والوجهة تُذكَر صراحةً الآن، و`validate()` تُصادق عليها.
+         */
+        if ($checkpoint === 'manual' || $checkpoint === 'correction') {
+            $want = sanitize_key((string) ($d['to_state'] ?? ''));
+            $to   = isset(self::STATES[$want]) ? $want : $from;
+        } else {
+            $to = self::RESULT[$checkpoint] ?? $from;
+        }
 
         $picker_key = sanitize_text_field((string) ($d['picker'] ?? ''));
 
@@ -492,7 +514,25 @@ final class SCH_Custody
         $student_id = (int) $student->id;
         $name       = SCH_Enrollment::full_name($student);
 
+        /*
+         * الإدخال الإداريّ يتخطّى مصفوفة الانتقالات — فهو **الحدث المضادّ**
+         * الذي تقول به قاعدة المشروع: «السجلّ لا يُعدَّل ولا يُحذف، والخطأ
+         * يُصحَّح بحدث مضادّ». لكنه يشترط سببًا مكتوبًا: تصحيحٌ بلا سبب يُفرغ
+         * السجلّ من معناه، ومن يصحّح حالة طفلٍ يجب أن يقول لماذا.
+         */
         if ($checkpoint === 'manual' || $checkpoint === 'correction') {
+            if (trim((string) ($d['reason'] ?? '')) === '') {
+                return sch_api_error('reason_required', __('التصحيح يتطلّب سببًا مكتوبًا.', 'school-system'), 422);
+            }
+
+            if ($to === $from) {
+                return sch_api_error('same_state', sprintf(
+                    /* translators: %s: الحالة */
+                    __('الطالب في «%s» أصلًا — اختر الحالة الصحيحة.', 'school-system'),
+                    self::state_label($from)
+                ), 422);
+            }
+
             return true;
         }
 
