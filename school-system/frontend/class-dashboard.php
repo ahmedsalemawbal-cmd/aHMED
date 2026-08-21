@@ -82,6 +82,7 @@ final class SCH_Dashboard
         'settings-day'   => ['مواعيد الحضور والتنبيهات', 'sch_manage_settings', 'system', '', 'clock'],
         'settings-push'  => ['الإشعارات الفورية', 'sch_manage_settings', 'system', '',        'bell'],
         'rollover'   => ['ترقية العام',     'sch_manage_settings',   'system', '',           'calendar'],
+        'backup'     => ['النسخ الاحتياطي',  'sch_manage_settings',   'system', '',           'shield'],
         'audit'      => ['سجل النظام',      'sch_view_audit',        'system', '',           'clock'],
     ];
 
@@ -181,7 +182,7 @@ final class SCH_Dashboard
         'المدرسة'           => ['settings', 'settings-years', 'rollover'],
         'اليوم والتنبيهات'  => ['settings-day', 'settings-push'],
         'الفريق والصلاحيات' => ['employees', 'staff-badges', 'perms'],
-        'البيانات والنظام'  => ['import', 'audit'],
+        'البيانات والنظام'  => ['import', 'backup', 'audit'],
     ];
 
     /** هل هذا القسم ضمن سياق الإعدادات؟ */
@@ -406,6 +407,9 @@ final class SCH_Dashboard
             'add_year'         => ['sch_manage_settings',  'do_add_year'],
             'set_year'         => ['sch_manage_settings',  'do_set_year'],
             'save_settings'    => ['sch_manage_settings',  'do_save_settings'],
+            'backup_now'       => ['sch_manage_settings',  'do_backup_now'],
+            'backup_restore'   => ['sch_manage_settings',  'do_backup_restore'],
+            'backup_delete'    => ['sch_manage_settings',  'do_backup_delete'],
             'save_brand'       => ['sch_manage_settings',  'do_save_brand'],
             'save_timing'      => ['sch_manage_settings',  'do_save_timing'],
             'save_alerts'      => ['sch_manage_settings',  'do_save_alerts'],
@@ -1881,6 +1885,37 @@ final class SCH_Dashboard
             $s = [];
         }
         update_option('sch_settings', array_merge($s, $patch));
+    }
+
+    /*
+     * النسخ الاحتياطي.
+     *
+     * والاستعادة تُطلب مرّتين: تأكيدٌ من النموذج، **وكلمة `RESET` تُكتب بيد
+     * المستخدم**. لأنها الفعل الوحيد في النظام كلّه الذي يمحو حاضرًا كاملًا
+     * ويضع مكانه ماضيًا — والتأكيد بنقرةٍ واحدة لا يليق به. (وهي القاعدة
+     * نفسها التي تحمي إعادة توليد مفتاح الإشعارات منذ v9.4.)
+     */
+    private static function do_backup_now(array $d, int $id): array|WP_Error
+    {
+        $done = SCH_Backup::create('manual');
+
+        return is_wp_error($done) ? $done : ['ok' => 'backup_made'];
+    }
+
+    private static function do_backup_restore(array $d, int $id): array|WP_Error
+    {
+        if (strtoupper(trim((string) ($d['confirm'] ?? ''))) !== 'RESET') {
+            return sch_api_error('need_word', __('اكتب RESET بالضبط لتأكيد الاستعادة.', 'school-system'), 422);
+        }
+
+        $done = SCH_Backup::restore(sanitize_file_name((string) ($d['file'] ?? '')));
+
+        return is_wp_error($done) ? $done : ['ok' => 'backup_restored'];
+    }
+
+    private static function do_backup_delete(array $d, int $id): bool
+    {
+        return SCH_Backup::delete(sanitize_file_name((string) ($d['file'] ?? '')));
     }
 
     private static function do_save_settings(array $d, int $id): bool

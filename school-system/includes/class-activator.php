@@ -132,6 +132,17 @@ final class SCH_Activator
     {
         if (get_option('sch_db_version') !== SCH_VERSION) {
             SCH_Loader::load_modules();
+
+            /*
+             * نسخةٌ قبل الترقية — واللحظة هذه إحدى اثنتين يضيع فيهما العمل.
+             * ومن يحتاجها لا يتذكّرها، فتُؤخذ بلا سؤال. وفشلُها لا يوقف
+             * الترقية: تعطيلُها لأن القرص ممتلئ أسوأ من ترقيةٍ بلا نسخة —
+             * والفشل يُسجَّل في التدقيق ليُرى.
+             */
+            if (get_option('sch_db_version') !== false && class_exists('SCH_Backup')) {
+                SCH_Backup::auto('before_upgrade');
+            }
+
             self::create_tables();
             self::register_roles();
             SCH_Accounts::seed();
@@ -171,7 +182,7 @@ final class SCH_Activator
         $p       = $wpdb->prefix . 'sch_';
         $missing = [];
 
-        foreach (self::expected_tables() as $name) {
+        foreach (self::table_names() as $name) {
             $full = $p . $name;
 
             if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $full)) !== $full) {
@@ -182,7 +193,16 @@ final class SCH_Activator
         return $missing;
     }
 
-    private static function expected_tables(): array
+    /**
+     * أسماء جداول النظام — مُشتقّة من `CREATE TABLE` نفسها لا من قائمةٍ ثانية.
+     *
+     * وهي عامّة لأن النسخ الاحتياطي يحتاجها: قائمةٌ مكتوبة بيدٍ ثانية تنسى
+     * الجدول الذي أُضيف اليوم، **فتُؤخذ نسخةٌ ناقصة ولا يعلم أحد** حتى تُستعاد.
+     * المصدر واحد هنا، فما يُنشأ يُنسَخ.
+     *
+     * @return array<int,string>
+     */
+    public static function table_names(): array
     {
         static $names = null;
 

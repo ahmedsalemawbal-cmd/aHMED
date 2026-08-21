@@ -22,6 +22,7 @@ final class SCH_Files
         'leave'    => 'تقرير إجازة',
         'rx'       => 'وصفة دواء',
         'photo'    => 'صورة الطالب',
+        'backup'   => 'نسخة احتياطية',
     ];
 
     /**
@@ -84,6 +85,7 @@ final class SCH_Files
             'leave'    => self::leave_file($id),
             'rx'       => self::rx_file($id),
             'photo'    => self::photo_file($id),
+            'backup'   => self::backup_file($id),
             default    => null,
         };
 
@@ -107,6 +109,7 @@ final class SCH_Files
             'pdf'        => 'application/pdf',
             'png'        => 'image/png',
             'jpg', 'jpeg'=> 'image/jpeg',
+            'zip'        => 'application/zip',
             default      => 'application/octet-stream',
         };
 
@@ -115,7 +118,9 @@ final class SCH_Files
         header('Content-Length: ' . (string) filesize($path));
         header('X-Content-Type-Options: nosniff');
         // inline لا attachment: الكتاب يُقرأ في المتصفح والرسم يُرى بلا تنزيل.
-        header('Content-Disposition: inline; filename="' . rawurlencode(basename($path)) . '"');
+        // إلا النسخة الاحتياطية — هي ملفٌّ يُحفَظ لا يُقرأ.
+        header('Content-Disposition: ' . ($kind === 'backup' ? 'attachment' : 'inline')
+            . '; filename="' . rawurlencode(basename($path)) . '"');
 
         readfile($path);
         exit;
@@ -211,6 +216,28 @@ final class SCH_Files
         return SCH_Students::guardian_has_child(get_current_user_id(), (int) $leave->student_id)
             ? (string) $leave->file_stored
             : null;
+    }
+
+    /**
+     * النسخة الاحتياطية: لمن يدير الإعدادات وحده.
+     *
+     * وهي **أخطر ملفّ في النظام** — فيها كشف الطلاب وسجلّهم الصحّي وفواتير
+     * أهاليهم. ولذلك تُخزَّن في المجلّد المحميّ لا في مجلّد الرفع العام، ولا
+     * يُخدَم عنوانها إلا بعد فحص الصلاحية.
+     *
+     * والمعرّف هنا **ترتيبُ النسخة في القائمة** لا معرّف صفّ: الملفّات لا
+     * صفوف لها في القاعدة، واسمُها يأتي من القرص لا من المستخدم.
+     */
+    private static function backup_file(int $id): ?string
+    {
+        if (!current_user_can('sch_manage_settings')) {
+            return null;
+        }
+
+        $all = SCH_Backup::all();
+        $one = $all[$id - 1] ?? null;
+
+        return $one !== null ? 'backups/' . $one['file'] : null;
     }
 
     /**

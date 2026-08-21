@@ -46,6 +46,11 @@ final class SCH_Rollover
      */
     public static function run(int $from_year, int $to_year, array $grade_map, array $graduate): array|WP_Error
     {
+        // واللحظة الثانية: ترحيل السنة ينقل كل طالبٍ ويُخرّج دفعةً كاملة.
+        if (class_exists('SCH_Backup')) {
+            SCH_Backup::auto('before_rollover');
+        }
+
         global $wpdb;
 
         if ($from_year <= 0 || $to_year <= 0 || $from_year === $to_year) {
