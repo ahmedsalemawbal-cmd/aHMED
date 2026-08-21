@@ -99,6 +99,22 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
                     <b><?php echo esc_html($sch_user_ob->display_name); ?></b>
                     <span><?php esc_html_e('حساب الإدارة', 'school-system'); ?></span>
                 </span>
+                <?php
+                /*
+                 * باب تطبيق المعلم.
+                 *
+                 * الروابط السبعة إلى `SCH_Teacher::url()` كلّها **داخل**
+                 * `frontend/teacher/` — أي لا مدخل إليه من خارجه. فمعلّمٌ هبط
+                 * على الداشبورد لا يجد طريقًا إلى تطبيقه إلا أن يحفظ رابطه.
+                 */
+                ?>
+                <?php if (current_user_can('sch_manage_attendance') || current_user_can('sch_write_notes')) : ?>
+                    <a class="sch-side__out" href="<?php echo esc_url(SCH_Teacher::url()); ?>"
+                       title="<?php esc_attr_e('تطبيق المعلم — فصولي ورصد الحضور', 'school-system'); ?>"
+                       aria-label="<?php esc_attr_e('تطبيق المعلم', 'school-system'); ?>">
+                        <?php echo sch_icon('users', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                    </a>
+                <?php endif; ?>
                 <a class="sch-side__out" href="<?php echo esc_url(sch_logout_url(SCH_Dashboard::url())); ?>"
                    aria-label="<?php esc_attr_e('خروج', 'school-system'); ?>">
                     <?php echo sch_icon('route', 16); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -107,12 +123,38 @@ $sch_current  = (string) ($sch_data['section'] ?? '');
             <div class="sch-side__sep"></div>
 
             <?php if ($sch_in_set) : /* ── سياق الإعدادات: يستولي على الشريط الجانبي ── */ ?>
-                <?php $sch_back = current_user_can('sch_view_students') ? SCH_Dashboard::url('overview') : SCH_Dashboard::url(); ?>
+                <?php
+                /*
+                 * وجهة الرجوع تُحسَب كما يحسبها الموجّه: القدرة **و**
+                 * `SCH_Perms::may()` معًا. وكان الفحص بالقدرة وحدها، و
+                 * `may()` تردّ `false` لأي قسمٍ غائبٍ عن خريطةٍ مخصّصة —
+                 * فمن صلاحياته المخصّصة لا تشمل «النظرة العامة» ودورُه يحمل
+                 * `sch_view_students` يُرسَل إلى 403 **بلا رابط رجوع**.
+                 * وبديلُه أوّلُ قسمٍ مسموحٍ له فعلًا لا جذرُ الداشبورد.
+                 */
+                $sch_back = '';
+
+                if (current_user_can('sch_view_students') && SCH_Perms::may('overview', 'view')) {
+                    $sch_back = SCH_Dashboard::url('overview');
+                } else {
+                    // `sections` مفتاحُها اسم القسم وقيمتُها بياناته.
+                    foreach (SCH_Dashboard::groups() as $sch_g) {
+                        $sch_first = array_key_first((array) ($sch_g['sections'] ?? []));
+
+                        if ($sch_first !== null) {
+                            $sch_back = SCH_Dashboard::url((string) $sch_first);
+                            break;
+                        }
+                    }
+                }
+                ?>
+                <?php if ($sch_back !== '') : ?>
                 <a class="sch-side__back" href="<?php echo esc_url($sch_back); ?>"
                    title="<?php esc_attr_e('رجوع إلى النظام', 'school-system'); ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     <span><?php esc_html_e('رجوع إلى النظام', 'school-system'); ?></span>
                 </a>
+                <?php endif; ?>
                 <div class="sch-side__settl">
                     <?php echo sch_icon('cog', 20); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                     <b><?php esc_html_e('الإعدادات', 'school-system'); ?></b>

@@ -19,6 +19,14 @@ $routes  = SCH_Routes::all();
 // يُبنى على متغيّرٍ غير معرَّف.
 $can_health = current_user_can('sch_view_health');
 
+/*
+ * قسما «الشهادات» و«البطاقات» يشترطان `sch_manage_students`، والمعلم يملك
+ * `sch_view_students` وحدها — فيضغط الأيقونة ويسقط على 403 **بلا رابط
+ * رجوع**. والحارس يطابق شرطَي الموجّه معًا: القدرة و`SCH_Perms::may()`.
+ */
+$sch_may_cert  = current_user_can('sch_manage_students') && SCH_Perms::may('certificates', 'view');
+$sch_may_badge = current_user_can('sch_manage_students') && SCH_Perms::may('badges', 'view');
+
 $q        = isset($_GET['s']) ? sanitize_text_field(wp_unslash((string) $_GET['s'])) : '';
 $stage    = isset($_GET['stage']) ? sanitize_key(wp_unslash((string) $_GET['stage'])) : '';
 $grade    = isset($_GET['g']) ? sanitize_text_field(wp_unslash((string) $_GET['g'])) : '';
@@ -250,16 +258,20 @@ SCH_Modal::head(
                     </span>
 
                     <span class="sch-stu__acts">
+                        <?php if ($sch_may_badge) : ?>
                         <a href="<?php echo esc_url(SCH_Dashboard::url('badges')); ?>"
                            title="<?php esc_attr_e('بطاقة الطالب', 'school-system'); ?>"
                            aria-label="<?php esc_attr_e('بطاقة الطالب', 'school-system'); ?>">
                             <?php echo sch_icon('badge', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                         </a>
+                        <?php endif; ?>
+                        <?php if ($sch_may_cert) : ?>
                         <a href="<?php echo esc_url(add_query_arg('student', $sch_id, SCH_Dashboard::url('certificates'))); ?>"
                            title="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>"
                            aria-label="<?php esc_attr_e('إصدار شهادة', 'school-system'); ?>">
                             <?php echo sch_icon('award', 15); // phpcs:ignore WordPress.Security.EscapeOutput ?>
                         </a>
+                        <?php endif; ?>
                         <a href="<?php echo esc_url(SCH_Dashboard::url('students', $sch_id)); ?>"
                            title="<?php esc_attr_e('ملف الطالب', 'school-system'); ?>"
                            aria-label="<?php esc_attr_e('ملف الطالب', 'school-system'); ?>">
@@ -452,8 +464,12 @@ if ($sch_one) :
             <a class="sch-btn sch-btn--block" href="<?php echo esc_url(SCH_Dashboard::url('students', $sch_open)); ?>">
                 <?php esc_html_e('الملف الكامل', 'school-system'); ?>
             </a>
+            <?php if ($sch_may_badge) : ?>
             <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(SCH_Dashboard::url('badges')); ?>"><?php esc_html_e('بطاقة', 'school-system'); ?></a>
+            <?php endif; ?>
+            <?php if ($sch_may_cert) : ?>
             <a class="sch-btn sch-btn--quiet" href="<?php echo esc_url(add_query_arg('student', $sch_open, SCH_Dashboard::url('certificates'))); ?>"><?php esc_html_e('شهادة', 'school-system'); ?></a>
+            <?php endif; ?>
         </div>
     </aside>
 </div>

@@ -125,6 +125,34 @@
      لا قالب ولا وحدة تُخرج أيًّا من هذه السمات، فكانتا شفرةً تُحمَّل على
      كل شاشة ولا تُنفَّذ. ومن أرادهما فليُخرج السمات أوّلًا. */
 
+  /*
+   * التأكيد على أي زرّ إرسال يحمل `data-confirm`.
+   *
+   * كان القارئ الوحيد للسمة داخل معالج الشريط الجماعي **ومشروطًا بـ
+   * `[data-op]`** — فزرّ «إغلاق كشف حضور المعلمين» يحمل التأكيد ولا يقرؤه
+   * أحد، وهو يرصد **غياب كل من لم يُمسح بعد فورًا** بضغطةٍ واحدة لا رجعة
+   * فيها. وقاعدة المشروع أن ما لا رجعة فيه يسأل قبل التنفيذ.
+   *
+   * وأزرار الشريط الجماعي `type="button"` وتُرسِل النموذج برمجيًّا، فلا
+   * يمرّان من هنا ولا يُسأل المستخدم مرّتين.
+   */
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || form.tagName !== 'FORM') { return; }
+
+    var btn = (e.submitter && e.submitter.dataset && e.submitter.dataset.confirm)
+      ? e.submitter
+      : form.querySelector('[data-confirm]');
+
+    if (!btn || !btn.dataset.confirm) { return; }
+    if (btn.disabled) { return; }
+
+    if (!window.confirm(btn.dataset.confirm)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
   sync();
 })();
 

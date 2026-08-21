@@ -40,19 +40,24 @@ final class SCH_Flow
                     __('تحديد الصف والشعبة', 'school-system'), 'grid',
                     __('بدونه لا حضور ولا جدول ولا معلم — النظام لا يعرف أين يضعه', 'school-system'),
                     true, static fn (int $id): bool => SCH_Students::current_class($id) !== null,
-                    static fn (int $id): string => SCH_Dashboard::url('classes'),
+                    // النموذج في تبويبة «اليوم الدراسي» من ملفّ الطالب نفسه
+                    // (`enroll_student`) — والخطوة تعرف معرّفه فلا تُهمله وتذهب
+                    // بالمستخدم إلى قائمة الشعب العامّة ليبحث عمّن جاء منه للتوّ.
+                    static fn (int $id): string => add_query_arg('tab', 'day', SCH_Dashboard::url('students', $id)),
                 ],
                 'guardian' => [
                     __('ربط ولي الأمر', 'school-system'), 'users',
                     __('بدونه لا إشعار ولا تطبيق ولا من يستلمه عند البوابة', 'school-system'),
                     true, [self::class, 'has_guardian'],
-                    static fn (int $id): string => SCH_Dashboard::url('guardians'),
+                    // `link_guardian` في تبويبة «الناس» من ملفّ الطالب.
+                    static fn (int $id): string => add_query_arg('tab', 'ppl', SCH_Dashboard::url('students', $id)),
                 ],
                 'fees' => [
                     __('الرسوم الدراسية', 'school-system'), 'wallet',
                     __('تُولَّد الفاتورة وأقساطها', 'school-system'),
                     true, [self::class, 'has_invoice'],
-                    static fn (int $id): string => SCH_Dashboard::url('finance'),
+                    // ورسومه في تبويبة «المال».
+                    static fn (int $id): string => add_query_arg('tab', 'money', SCH_Dashboard::url('students', $id)),
                 ],
                 'bus' => [
                     __('النقل المدرسي', 'school-system'), 'bus',

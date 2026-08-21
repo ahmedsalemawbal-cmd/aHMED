@@ -16,7 +16,9 @@ $unchecked  = array_values(array_filter($staff, static fn (object $s): bool => $
     $items = [
         ['red',    $board['vacant'],      __('حصص بلا معلم', 'school-system'),        __('اعتمد المقترحات أدناه', 'school-system'), ''],
         ['red',    $board['critical'],    __('إنذار حرج مفتوح', 'school-system'),     __('يحتاج تدخلًا فوريًا', 'school-system'), SCH_Dashboard::url('alerts')],
-        ['orange', count($unchecked),     __('موظفون بلا رصد حضور', 'school-system'), __('حدّدهم في الكشف أدناه', 'school-system'), ''],
+        // «أدناه» كانت تكذب: الملفّ ١٥٣ سطرًا ولا كشفَ فيه — `staff_sheet()`
+        // تُحمَّل لحساب العدد وحده. والبند بلا رابط، فلا شيء يقود إلى الكشف.
+        ['orange', count($unchecked),     __('موظفون بلا رصد حضور', 'school-system'), __('افتح كشف حضور المعلمين', 'school-system'), SCH_Dashboard::url('staff-day')],
         ['orange', $board['clinic'],      __('إحالة صحية مفتوحة', 'school-system'),  __('راجع صندوق الصحة المدرسية', 'school-system'), add_query_arg('t', 'clinic', SCH_Dashboard::url('inbox'))],
         ['orange', $board['leaves'],      __('طلب إجازة بانتظار القرار', 'school-system'), __('اعتمد أو ارفض بسبب', 'school-system'), SCH_Dashboard::url('leaves')],
         ['yellow', $board['meds'],        __('إذن دواء بانتظار الصحة المدرسية', 'school-system'),  __('راجعه واعتمده', 'school-system'), SCH_Dashboard::url('meds')],

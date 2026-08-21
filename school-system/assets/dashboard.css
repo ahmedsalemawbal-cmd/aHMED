@@ -5852,6 +5852,12 @@ body.sch-body {
     container-type: inline-size;
 }
 .sch-sp__fee:last-child { border-block-end: 0; }
+/*
+ * الصفّ صار رابطًا يفتح فاتورته — والعنصران يُذكران معًا وإلا خرج الرابط
+ * من التنسيق (`.sch-body a { color }` أولويّتها تغلب أي صنفٍ وحده).
+ */
+.sch-body a.sch-sp__fee { color: inherit; text-decoration: none; }
+.sch-body a.sch-sp__fee:hover { background: var(--sch-surface-alt); }
 .sch-sp__fee.is-due { background: var(--sch-danger-soft); }
 .sch-sp__fk { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .sch-sp__fk > b { font-size: var(--sch-text-sm); font-weight: 600; color: var(--sch-ink); }

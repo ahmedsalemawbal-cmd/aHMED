@@ -117,7 +117,18 @@ $keep = static function () use ($tab): void {
 
         <div class="sch-sp__acts">
             <button type="button" class="sch-sp__act" data-sch-print><?php esc_html_e('طباعة الملف', 'school-system'); ?></button>
-            <a class="sch-sp__act" href="<?php echo esc_url(add_query_arg('student', $id, SCH_Dashboard::url('certificates'))); ?>"><?php esc_html_e('إصدار شهادة', 'school-system'); ?></a>
+            <?php
+            /*
+             * الرابط داخل حارسه: قسما «الشهادات» و«البطاقات» يشترطان
+             * `sch_manage_students`، والمعلم يملك `sch_view_students` وحدها —
+             * فيضغط الزرّ ويسقط على 403 **بلا رابط رجوع**. والحارس يطابق
+             * شرطَي الموجّه معًا: القدرة و`SCH_Perms::may()`.
+             */
+            $sch_may_cert = current_user_can('sch_manage_students') && SCH_Perms::may('certificates', 'view');
+            ?>
+            <?php if ($sch_may_cert) : ?>
+                <a class="sch-sp__act" href="<?php echo esc_url(add_query_arg('student', $id, SCH_Dashboard::url('certificates'))); ?>"><?php esc_html_e('إصدار شهادة', 'school-system'); ?></a>
+            <?php endif; ?>
             <?php if ($can) : ?>
                 <button type="button" class="sch-sp__act sch-sp__act--go" data-modal-open="sch-edit-student"><?php esc_html_e('تعديل الملف', 'school-system'); ?></button>
             <?php endif; ?>
@@ -857,8 +868,21 @@ $keep = static function () use ($tab): void {
             <div class="sch-sp__c">
                 <div class="sch-sp__ch">
                     <span class="sch-sp__ct"><b><?php esc_html_e('الرسوم', 'school-system'); ?></b></span>
+                    <?php
+                    /*
+                     * الرابط يفتح **فاتورة هذا الطالب** لا قائمة المالية كلّها.
+                     *
+                     * `finance.php` تقرأ `?inv=<id>` منذ بُنيت فتفتح لوح الفاتورة
+                     * ونموذج الدفع؛ وقائمتها تُصفّى بالحالة وحدها **بلا مرشّح
+                     * طالب**. فمن ضغط «تسجيل دفعة» من ملفّ طالبٍ كان يهبط على
+                     * قائمةٍ عامّة يبحث فيها عمّن جاء منه للتوّ.
+                     */
+                    $sch_pay = $invoices !== []
+                        ? add_query_arg('inv', (int) $invoices[0]->id, SCH_Dashboard::url('finance'))
+                        : SCH_Dashboard::url('finance');
+                    ?>
                     <?php if (current_user_can('sch_manage_finance')) : ?>
-                        <a class="sch-sp__act sch-sp__act--go" href="<?php echo esc_url(SCH_Dashboard::url('finance')); ?>"><?php esc_html_e('تسجيل دفعة', 'school-system'); ?></a>
+                        <a class="sch-sp__act sch-sp__act--go" href="<?php echo esc_url($sch_pay); ?>"><?php esc_html_e('تسجيل دفعة', 'school-system'); ?></a>
                     <?php endif; ?>
                 </div>
 
@@ -867,7 +891,14 @@ $keep = static function () use ($tab): void {
                 <?php else : ?>
                     <div class="sch-sp__fees">
                         <?php foreach ($invoices as $inv) : ?>
+                            <?php $sch_open_inv = current_user_can('sch_manage_finance')
+                                ? add_query_arg('inv', (int) $inv->id, SCH_Dashboard::url('finance'))
+                                : ''; ?>
+                            <?php if ($sch_open_inv !== '') : ?>
+                            <a class="sch-sp__fee" href="<?php echo esc_url($sch_open_inv); ?>">
+                            <?php else : ?>
                             <div class="sch-sp__fee">
+                            <?php endif; ?>
                                 <span class="sch-sp__fk">
                                     <b><?php echo esc_html($inv->plan_name ?: __('الرسوم الدراسية', 'school-system')); ?></b>
                                     <span><?php echo esc_html($inv->due_date
@@ -879,7 +910,11 @@ $keep = static function () use ($tab): void {
                                         : __('بلا تاريخ استحقاق', 'school-system')); ?></span>
                                 </span>
                                 <span class="sch-sp__fv" dir="ltr"><?php echo esc_html(number_format((float) $inv->total, 0)); ?></span>
+                            <?php if ($sch_open_inv !== '') : ?>
+                            </a>
+                            <?php else : ?>
                             </div>
+                            <?php endif; ?>
                         <?php endforeach; ?>
 
                         <?php if ($sub) : ?>

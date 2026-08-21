@@ -86,6 +86,21 @@ if ($one > 0) {
                                     <input type="hidden" name="sub_id" value="<?php echo esc_attr((string) $r->sub_id); ?>">
                                     <input type="number" name="score" step="0.5" min="0" max="100" style="width:80px"
                                            value="<?php echo esc_attr((string) ($r->score ?? '')); ?>" aria-label="الدرجة">
+                                    <?php
+                                    /*
+                                     * حقل الملاحظة.
+                                     *
+                                     * كان المعالج يمرّر `$d['feedback']` والطبقة تكتب
+                                     * `sanitize_text_field('') ?: null` — **ولا حقلَ باسمه في
+                                     * المشروع كلّه**. فالعمود يُصفَّر مع **كل** حفظ، وشاشة
+                                     * الطالب التي تعرض ملاحظة معلّمه لا تعرض شيئًا أبدًا،
+                                     * وحتى لو كُتبت قيمةٌ من مسارٍ آخر لمُحيت في أوّل حفظ.
+                                     */
+                                    ?>
+                                    <input type="text" name="feedback" maxlength="190" style="width:180px"
+                                           value="<?php echo esc_attr((string) ($r->feedback ?? '')); ?>"
+                                           placeholder="<?php esc_attr_e('ملاحظة للطالب (اختيارية)', 'school-system'); ?>"
+                                           aria-label="<?php esc_attr_e('ملاحظة المعلم', 'school-system'); ?>">
                                     <button class="sch-btn sch-btn--quiet"><?php esc_html_e('حفظ', 'school-system'); ?></button>
                                 </form>
                             <?php else : ?>

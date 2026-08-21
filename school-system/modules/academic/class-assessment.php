@@ -465,10 +465,22 @@ final class SCH_Assessment
         return true;
     }
 
-    /** كشف درجات الطالب في كل المواد مع النسبة المرجّحة. */
-    public static function report_card(int $student_id): array
+    /**
+     * كشف درجات الطالب في كل المواد مع النسبة المرجّحة.
+     *
+     * **للسنة الجارية افتراضًا.** كان الاستعلام بلا قيدٍ على السنة، فتُطوى
+     * نتائج الطالب **من سنواته كلّها** في متوسّطٍ واحد يُعرض في تطبيق الأسرة
+     * وفي ملفّه بوصفه «المتوسّط العام» للسنة الحالية — فطالبٌ تحسّن هذا العام
+     * يظلّ يُقرأ بمتوسّط سنواته السابقة. والامتحان يحمل `class_id`، والشعبة
+     * تحمل `year_id`، فالضمّ يحسمها في الاستعلام نفسه.
+     *
+     * @param int|null $year_id سنةٌ بعينها، أو `null` للسنة الجارية
+     */
+    public static function report_card(int $student_id, ?int $year_id = null): array
     {
         global $wpdb;
+
+        $year_id ??= SCH_Years::current_id();
 
         $rows = $wpdb->get_results($wpdb->prepare(
             'SELECT e.id, e.title, e.exam_type, e.max_score, e.weight, e.exam_date,
@@ -476,9 +488,11 @@ final class SCH_Assessment
              FROM ' . sch_table('exam_results') . ' r
              INNER JOIN ' . sch_table('exams') . ' e ON e.id = r.exam_id
              INNER JOIN ' . sch_table('subjects') . ' s ON s.id = e.subject_id
-             WHERE r.student_id = %d AND r.score IS NOT NULL
+             INNER JOIN ' . sch_table('classes') . ' c ON c.id = e.class_id
+             WHERE r.student_id = %d AND c.year_id = %d AND r.score IS NOT NULL
              ORDER BY s.name, e.exam_date',
-            $student_id
+            $student_id,
+            $year_id
         )) ?: [];
 
         $by_subject = [];

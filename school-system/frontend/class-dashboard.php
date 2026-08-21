@@ -761,7 +761,26 @@ final class SCH_Dashboard
         $raw  = (array) ($d['keep'] ?? []);
         $keep = [];
 
-        foreach (['f', 'dept', 'pg', 'cover', 'tab'] as $key) {
+        /*
+         * كل مفتاح حالةٍ تقرؤه شاشة يجب أن يعبر POST.
+         *
+         * كانت القائمة خمسة مفاتيح وشاشةُ الشهادات وحدها تقرأ عشرة
+         * (`view`/`cat`/`type`/`stage`/`from`/`to`/`off`/`st`/`class_id`/`g`)،
+         * وشاشة المالية تقرأ `st` و`inv` — فمن صفّى مئتَي شهادة ثم أصدر
+         * واحدة يعود إلى قائمةٍ بلا تصفية، ومن فتح فاتورة ثم سجّل دفعةً
+         * يعود إلى رأس القائمة. والمفاتيح هنا مجموعة اتّحادٍ لما تقرؤه
+         * الشاشات فعلًا لا لما خطر ببال من كتب السطر.
+         */
+        $keys = [
+            'f', 'dept', 'pg', 'cover', 'tab',      // ما كان
+            'view', 'cat', 'type', 'stage',          // الشهادات: الشريحة والتصنيف
+            'from', 'to', 'off', 'st', 'class_id', 'g',
+            'inv',                                    // المالية: الفاتورة المفتوحة
+            'user_id',                                // الصلاحيات: الموظف المعروض
+            'sec', 'kind', 'y', 'm',                 // مدًى ونطاق مشتركان
+        ];
+
+        foreach ($keys as $key) {
             $value = sanitize_text_field((string) ($raw[$key] ?? ''));
             if ($value !== '') {
                 $keep[$key] = $value;
@@ -2392,7 +2411,16 @@ final class SCH_Dashboard
         wp_set_current_user($user->ID);
         sch_audit('auth.login', 'user', $user->ID, ['via' => 'dashboard']);
 
-        wp_safe_redirect(self::url());
+        /*
+         * الوجهة تُحسَب لصاحب الحساب لا تُفترَض.
+         *
+         * كان النموذج ينتهي بـ`self::url()` ثابتة، و`after_login_redirect`
+         * موصولةٌ بمرشّح `login_redirect` الذي تُطلقه `wp-login.php` وحدها —
+         * فلا تمرّ من هنا أصلًا. والنتيجة أن معلّمًا يدخل من باب الداشبورد
+         * (وهو يملك `sch_view_students` فله مجالٌ فيه) يهبط على الداشبورد
+         * لا على تطبيقه، وكذلك الحارس.
+         */
+        wp_safe_redirect(SCH_Portal::home_for($user->ID));
         exit;
     }
 

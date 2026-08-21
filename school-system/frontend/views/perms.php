@@ -121,6 +121,11 @@ $applied = $custom ? $map : SCH_Perms::template($role);
 <form method="post" id="sch-perms-form">
     <?php wp_nonce_field('sch_save_perms', '_sch_nonce'); ?>
     <input type="hidden" name="sch_action" value="save_perms">
+    <?php /* الموظف المعروض يعبر POST: المعالجات الثلاثة تعيد `bool|WP_Error`
+             بلا مفتاح `keep`، و`back()` تسقط على `perms` بـ`user_id = 0` —
+             أي منتقي الموظفين. فمن حفظ صلاحيات موظفٍ يُقذف عنه. */ ?>
+    <input type="hidden" name="keep[user_id]" value="<?php echo esc_attr((string) $target_id); ?>">
+
     <input type="hidden" name="user_id" value="<?php echo esc_attr((string) $target_id); ?>">
 
     <!-- شريط الأدوات: القالب والنسخ والنطاق والمدة -->
@@ -261,6 +266,9 @@ $applied = $custom ? $map : SCH_Perms::template($role);
         <form method="post" class="sch-toolbar">
             <?php wp_nonce_field('sch_copy_perms', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="copy_perms">
+            <?php /* الموظف المعروض يعبر POST — انظر التعليق أعلى النموذج الأول. */ ?>
+            <input type="hidden" name="keep[user_id]" value="<?php echo esc_attr((string) $target_id); ?>">
+
             <input type="hidden" name="user_id" value="<?php echo esc_attr((string) $target_id); ?>">
             <select name="source_id" required aria-label="المصدر">
                 <option value=""><?php esc_html_e('انسخ صلاحيات من…', 'school-system'); ?></option>
@@ -278,6 +286,9 @@ $applied = $custom ? $map : SCH_Perms::template($role);
         <form method="post" onsubmit="return confirm('<?php esc_attr_e('سيعود لصلاحيات دوره الافتراضية. متابعة؟', 'school-system'); ?>');">
             <?php wp_nonce_field('sch_reset_perms', '_sch_nonce'); ?>
             <input type="hidden" name="sch_action" value="reset_perms">
+            <?php /* الموظف المعروض يعبر POST — انظر التعليق أعلى النموذج الأول. */ ?>
+            <input type="hidden" name="keep[user_id]" value="<?php echo esc_attr((string) $target_id); ?>">
+
             <input type="hidden" name="user_id" value="<?php echo esc_attr((string) $target_id); ?>">
             <button class="sch-link-danger"><?php esc_html_e('العودة لصلاحيات الدور', 'school-system'); ?></button>
         </form>
