@@ -15,6 +15,7 @@ final class MDD_Loader
     /** الترتيب مقصود: الدوالّ ثمّ البوّابة ثمّ من يبني عليها. */
     private const CORE = [
         'includes/functions.php',
+        'includes/icons.php',
         'includes/class-db.php',
         'includes/class-tenant.php',
         'includes/class-member.php',
