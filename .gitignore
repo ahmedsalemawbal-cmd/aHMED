@@ -6,3 +6,4 @@ osool-cloud/app/node_modules/
 osool-cloud/app/dist/
 osool-cloud/app/.env.local
 osool-cloud/app/tsconfig.tsbuildinfo
+__pycache__/
