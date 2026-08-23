@@ -1,7 +1,13 @@
 name: بناء تطبيق أندرويد (APK)
 
+# التشغيل اليدويّ يتطلّب وجود الملفّ على الفرع الافتراضي، فنُشغّله بالدفع أيضًا
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/educational-platform-setup-ct0iwr]
+    paths:
+      - 'midad/apps/mobile/**'
+      - '.github/workflows/build-android.yml'
 
 permissions:
   contents: write
