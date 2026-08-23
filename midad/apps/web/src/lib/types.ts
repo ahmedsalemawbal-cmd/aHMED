@@ -70,3 +70,26 @@ export interface GeneralSettings {
   platform_name: string; tagline: string; whatsapp: string; email: string; working_hours: string
 }
 export type Database = any
+
+/* ---------- الإدارة الصفّية ---------- */
+export type AttendanceStatus = 'present' | 'late' | 'absent' | 'excused'
+export type StudentStatus = 'active' | 'transferred' | 'withdrawn'
+
+export interface ClassRow {
+  id: string; subscriber_id: string; name: string
+  stage: string | null; room: string | null; sort: number; created_at: string
+}
+export interface Student {
+  id: string; subscriber_id: string; class_id: string | null
+  full_name: string; national_id: string | null; guardian_phone: string | null
+  status: StudentStatus; sort: number; created_at: string
+}
+export interface Period {
+  id: string; subscriber_id: string; teacher_id: string | null; class_id: string | null
+  subject: string; weekday: number; slot: number
+  starts_at: string; ends_at: string; room: string | null; created_at: string
+}
+export interface AttendanceRow {
+  id: string; subscriber_id: string; period_id: string; student_id: string
+  taken_by: string | null; on_date: string; status: AttendanceStatus; note: string | null
+}

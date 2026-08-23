@@ -24,6 +24,7 @@ import Library from './pages/app/Library'
 import TemplateDetail from './pages/app/TemplateDetail'
 import Editor from './pages/app/Editor'
 import MyFiles from './pages/app/MyFiles'
+import Classroom from './pages/app/Classroom'
 import NoorList from './pages/app/NoorList'
 import NoorKey from './pages/app/NoorKey'
 import NoorTableView from './pages/app/NoorTableView'
@@ -120,6 +121,7 @@ export default function App() {
         <Route path="library" element={<Library />} />
         <Route path="template/:slug" element={<TemplateDetail />} />
         <Route path="files" element={<MyFiles />} />
+        <Route path="classroom" element={<Classroom />} />
         <Route path="noor" element={<NoorList />} />
         <Route path="noor/key" element={<NoorKey />} />
         <Route path="noor/:id" element={<NoorTableView />} />

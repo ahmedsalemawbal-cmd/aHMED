@@ -19,7 +19,9 @@ import Noor from './screens/Noor'
 import NoorTable from './screens/NoorTable'
 import Account from './screens/Account'
 import Blocked from './screens/Blocked'
-import { IcHome, IcLibrary, IcFiles, IcTable, IcUser } from './ui/icons'
+import Attendance from './screens/Attendance'
+import Timetable from './screens/Timetable'
+import { IcHome, IcLibrary, IcFiles, IcTable, IcUser, IcCheck } from './ui/icons'
 import { fontFor } from './lib/theme'
 
 const Tab = createBottomTabNavigator()
@@ -44,10 +46,10 @@ function Tabs() {
         options={{ tabBarIcon: ({ color, focused }) => <IcHome size={22} color={color} filled={focused} /> }} />
       <Tab.Screen name="القوالب" component={Library}
         options={{ tabBarIcon: ({ color, focused }) => <IcLibrary size={22} color={color} filled={focused} /> }} />
+      <Tab.Screen name="الرصد" component={Attendance}
+        options={{ tabBarIcon: ({ color, focused }) => <IcCheck size={22} color={color} /> }} />
       <Tab.Screen name="ملفّاتي" component={MyFiles}
         options={{ tabBarIcon: ({ color, focused }) => <IcFiles size={22} color={color} filled={focused} /> }} />
-      <Tab.Screen name="جداول نور" component={Noor}
-        options={{ tabBarIcon: ({ color, focused }) => <IcTable size={22} color={color} filled={focused} /> }} />
       <Tab.Screen name="حسابي" component={Account}
         options={{ tabBarIcon: ({ color, focused }) => <IcUser size={22} color={color} filled={focused} /> }} />
     </Tab.Navigator>
@@ -93,6 +95,8 @@ function Root() {
             <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
             <Stack.Screen name="TemplateDetail" component={TemplateDetail} options={{ title: 'القالب' }} />
             <Stack.Screen name="Editor" component={Editor} options={{ title: 'الملفّ' }} />
+            <Stack.Screen name="Timetable" component={Timetable} options={{ title: 'جدولي' }} />
+            <Stack.Screen name="Noor" component={Noor} options={{ title: 'جداول نور' }} />
             <Stack.Screen name="NoorTable" component={NoorTable} options={{ title: 'الجدول' }} />
           </>
         )}

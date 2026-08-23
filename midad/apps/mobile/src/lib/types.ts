@@ -35,3 +35,26 @@ export interface Plan {
   seats: number; template_categories: string[]; ai_quota_monthly: number; features_ar: string[]
 }
 export interface Role { key: string; name_ar: string; blurb_ar: string | null; sort: number }
+
+/* ---------- الإدارة الصفّية ---------- */
+export type AttendanceStatus = 'present' | 'late' | 'absent' | 'excused'
+
+export interface ClassRow {
+  id: string; subscriber_id: string; name: string
+  stage: string | null; room: string | null; sort: number
+}
+export interface Student {
+  id: string; subscriber_id: string; class_id: string | null
+  full_name: string; national_id: string | null; guardian_phone: string | null
+  status: 'active' | 'transferred' | 'withdrawn'; sort: number
+}
+export interface Period {
+  id: string; subscriber_id: string; teacher_id: string | null; class_id: string | null
+  subject: string; weekday: number; slot: number
+  starts_at: string; ends_at: string; room: string | null
+  classes?: ClassRow | null
+}
+export interface AttendanceRow {
+  id: string; subscriber_id: string; period_id: string; student_id: string
+  taken_by: string | null; on_date: string; status: AttendanceStatus; note: string | null
+}

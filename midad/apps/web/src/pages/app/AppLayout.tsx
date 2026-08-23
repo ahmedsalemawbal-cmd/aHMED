@@ -14,6 +14,7 @@ const NAV = [
   { to: '/app/library', label: 'مكتبة القوالب', icon: IcLibrary },
   { to: '/app/files', label: 'ملفّاتي', icon: IcFiles },
   { to: '/app/noor', label: 'جداول نور', icon: IcTable },
+  { to: '/app/classroom', label: 'الفصول والطلاب', icon: IcTeam },
 ]
 const NAV_ACCOUNT = [
   { to: '/app/team', label: 'الفريق', icon: IcTeam, schoolOnly: false },

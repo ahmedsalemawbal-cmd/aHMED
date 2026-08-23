@@ -9,7 +9,7 @@ import { initials } from '../lib/format'
 import { IcFiles } from './icons'
 
 export function T({ children, size = 14, weight = '400', color, style, numberOfLines, align }: {
-  children: React.ReactNode; size?: number; weight?: '400' | '600' | '700'
+  children: React.ReactNode; size?: number; weight?: '400' | '500' | '600' | '700'
   color?: string; style?: any; numberOfLines?: number; align?: 'auto' | 'left' | 'right' | 'center'
 }) {
   const { c } = useApp()

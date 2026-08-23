@@ -4,10 +4,11 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Badge, Button, Card, Empty, Loading, Row, Screen, T } from '../ui/kit'
-import { IcLibrary, IcFiles, IcChevron, IcTable, IcTeam } from '../ui/icons'
+import { IcLibrary, IcFiles, IcChevron, IcTable, IcTeam, IcClock, IcCheck } from '../ui/icons'
 import { SPACE, RADIUS } from '../lib/theme'
 import { daysLabel, fmtBoth, fmtNum, fmtRelative, greeting } from '../lib/format'
-import type { DocumentRow } from '../lib/types'
+import type { DocumentRow, Period } from '../lib/types'
+import { fetchMyPeriods, fetchTakenToday, isoDate, periodState, todayWeekday, WEEKDAYS } from '../lib/classroom'
 
 export default function Dashboard() {
   const { profile, subscriber, access, trialDays, roles, c, plan } = useApp()
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [docs, setDocs] = useState<DocumentRow[]>([])
   const [noor, setNoor] = useState(0)
   const [team, setTeam] = useState(0)
+  const [periods, setPeriods] = useState<Period[]>([])
+  const [taken, setTaken] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -30,8 +33,17 @@ export default function Dashboard() {
     setDocs((d.data || []) as DocumentRow[])
     setNoor(n.count || 0)
     setTeam(t.count || 0)
+    if (profile?.id) {
+      try {
+        const [ps, tk] = await Promise.all([
+          fetchMyPeriods(subscriber.id, profile.id),
+          fetchTakenToday(subscriber.id, isoDate()),
+        ])
+        setPeriods(ps); setTaken(tk)
+      } catch { /* الجدول اختياريّ — لا يُسقط الرئيسية */ }
+    }
     setLoading(false)
-  }, [subscriber?.id])
+  }, [subscriber?.id, profile?.id])
 
   useFocusEffect(useCallback(() => { load() }, [load]))
 
@@ -71,6 +83,40 @@ export default function Dashboard() {
             {!isSolo && <Stat label="الفريق" value={`${team} من ${plan?.seats ?? '—'}`} />}
           </Row>
 
+          {(() => {
+            const today = periods.filter((p) => p.weekday === todayWeekday())
+            if (!today.length) return null
+            const now = today.find((p) => periodState(p, taken) === 'now')
+            const next = today.find((p) => periodState(p, taken) === 'next')
+            const live = now || next
+            if (!live) return null
+            const isNow = !!now
+            return (
+              <Card style={{
+                gap: 12, borderColor: isNow ? c.accent : c.border,
+                borderWidth: isNow ? 2 : 1,
+              }}>
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <Row gap={8}>
+                    <IcClock size={16} color={isNow ? c.accent : c.text3} />
+                    <T size={12.5} weight="700" color={isNow ? c.accent : c.text3}>
+                      {isNow ? 'الآن' : 'التالية'} · الحصّة {live.slot}
+                    </T>
+                  </Row>
+                  <T size={11.5} color={c.text3}>
+                    {live.starts_at?.slice(0, 5)} — {live.ends_at?.slice(0, 5)}
+                  </T>
+                </Row>
+                <T size={17} weight="700">{live.subject} — {live.classes?.name || ''}</T>
+                {live.room ? <T size={12} color={c.text3}>{live.room}</T> : null}
+                <Button label="ابدأ رصد الحضور" variant={isNow ? 'primary' : 'soft'} small
+                  icon={<IcCheck size={15} color={isNow ? c.onAccent : c.accentSoftFg} />}
+                  onPress={() => nav.navigate('الرصد', { periodId: live.id })}
+                  style={{ alignSelf: 'flex-start' }} />
+              </Card>
+            )
+          })()}
+
           <Card onPress={() => nav.navigate('القوالب')} style={{ gap: 12 }}>
             <View style={{
               width: 44, height: 44, borderRadius: 13, backgroundColor: c.accentSoft,
@@ -85,6 +131,19 @@ export default function Dashboard() {
             <Button label="تصفّح القوالب" variant="primary" small
               onPress={() => nav.navigate('القوالب')} style={{ alignSelf: 'flex-start' }} />
           </Card>
+
+          <Row gap={12}>
+            <Card onPress={() => nav.navigate('Timetable')} style={{ flex: 1, gap: 8, padding: SPACE.s4 }}>
+              <IcTable size={20} color={c.accent} />
+              <T size={14} weight="700">جدولي</T>
+              <T size={11.5} color={c.text3}>{periods.length} حصّة أسبوعيًّا</T>
+            </Card>
+            <Card onPress={() => nav.navigate('Noor')} style={{ flex: 1, gap: 8, padding: SPACE.s4 }}>
+              <IcFiles size={20} color={c.accent} />
+              <T size={14} weight="700">جداول نور</T>
+              <T size={11.5} color={c.text3}>{noor} جدولًا</T>
+            </Card>
+          </Row>
 
           <View style={{ gap: SPACE.s3 }}>
             <Row style={{ justifyContent: 'space-between' }}>
