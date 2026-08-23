@@ -10,9 +10,10 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/app.js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name][extname]',
+        // بصمةٌ في الاسم: تحديثُ النشر لا يترك متصفّحًا على نسخةٍ قديمة
+        entryFileNames: 'assets/app.[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash][extname]',
         manualChunks: undefined,
       },
     },
