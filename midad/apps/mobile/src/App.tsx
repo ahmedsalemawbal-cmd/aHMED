@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ActivityIndicator, View, I18nManager } from 'react-native'
+import * as SplashScreen from 'expo-splash-screen'
+import { useFonts, Cairo_400Regular, Cairo_500Medium, Cairo_600SemiBold, Cairo_700Bold } from '@expo-google-fonts/cairo'
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { Text } from 'react-native'
 
 import { AppProvider, useApp } from './lib/store'
 import Login from './screens/Login'
@@ -18,13 +19,13 @@ import Noor from './screens/Noor'
 import NoorTable from './screens/NoorTable'
 import Account from './screens/Account'
 import Blocked from './screens/Blocked'
+import { IcHome, IcLibrary, IcFiles, IcTable, IcUser } from './ui/icons'
+import { fontFor } from './lib/theme'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
-function TabIcon({ label, focused, color }: { label: string; focused: boolean; color: string }) {
-  return <Text style={{ fontSize: focused ? 20 : 18, color }}>{label}</Text>
-}
+type TabIconFn = (p: { focused: boolean; color: string; size: number }) => React.ReactNode
 
 function Tabs() {
   const { c } = useApp()
@@ -32,23 +33,23 @@ function Tabs() {
     <Tab.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: c.card },
-        headerTitleStyle: { color: c.text, fontWeight: '700' },
+        headerTitleStyle: { color: c.text, fontFamily: fontFor('700'), fontSize: 17 },
         headerTintColor: c.text,
         tabBarStyle: { backgroundColor: c.card, borderTopColor: c.border, height: 62, paddingBottom: 8, paddingTop: 6 },
         tabBarActiveTintColor: c.accent,
         tabBarInactiveTintColor: c.text3,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: fontFor('600') },
       }}>
       <Tab.Screen name="الرئيسية" component={Dashboard}
-        options={{ tabBarIcon: (p) => <TabIcon label="🏠" {...p} /> }} />
-      <Tab.Screen name="المكتبة" component={Library}
-        options={{ tabBarIcon: (p) => <TabIcon label="📚" {...p} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <IcHome size={22} color={color} filled={focused} /> }} />
+      <Tab.Screen name="القوالب" component={Library}
+        options={{ tabBarIcon: ({ color, focused }) => <IcLibrary size={22} color={color} filled={focused} /> }} />
       <Tab.Screen name="ملفّاتي" component={MyFiles}
-        options={{ tabBarIcon: (p) => <TabIcon label="📄" {...p} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <IcFiles size={22} color={color} filled={focused} /> }} />
       <Tab.Screen name="جداول نور" component={Noor}
-        options={{ tabBarIcon: (p) => <TabIcon label="📊" {...p} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <IcTable size={22} color={color} filled={focused} /> }} />
       <Tab.Screen name="حسابي" component={Account}
-        options={{ tabBarIcon: (p) => <TabIcon label="👤" {...p} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <IcUser size={22} color={color} filled={focused} /> }} />
     </Tab.Navigator>
   )
 }
@@ -78,7 +79,7 @@ function Root() {
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: c.card },
-          headerTitleStyle: { color: c.text, fontWeight: '700' },
+          headerTitleStyle: { color: c.text, fontFamily: fontFor('700'), fontSize: 17 },
           headerTintColor: c.text,
           headerBackTitleVisible: false,
           contentStyle: { backgroundColor: c.bg },
@@ -100,9 +101,22 @@ function Root() {
   )
 }
 
+SplashScreen.preventAutoHideAsync().catch(() => {})
+
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    Cairo_400Regular, Cairo_500Medium, Cairo_600SemiBold, Cairo_700Bold,
+  })
+
+  const onReady = useCallback(() => {
+    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {})
+  }, [fontsLoaded, fontError])
+
+  // لا نرسم قبل وصول Cairo — وإلّا ومض النصّ بخطّ النظام ثمّ قفز
+  if (!fontsLoaded && !fontError) return null
+
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider onLayout={onReady}>
       <AppProvider>
         <Root />
       </AppProvider>

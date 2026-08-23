@@ -4,6 +4,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Badge, Button, Card, Empty, Loading, Row, Screen, T } from '../ui/kit'
+import { IcLibrary, IcFiles, IcChevron, IcTable, IcTeam } from '../ui/icons'
 import { SPACE, RADIUS } from '../lib/theme'
 import { daysLabel, fmtBoth, fmtNum, fmtRelative, greeting } from '../lib/format'
 import type { DocumentRow } from '../lib/types'
@@ -67,16 +68,22 @@ export default function Dashboard() {
           <Row gap={12}>
             <Stat label="ملفّاتي" value={fmtNum(docs.length)} />
             <Stat label="جداول نور" value={fmtNum(noor)} />
-            {!isSolo && <Stat label="الفريق" value={`${team}/${plan?.seats ?? '—'}`} />}
+            {!isSolo && <Stat label="الفريق" value={`${team} من ${plan?.seats ?? '—'}`} />}
           </Row>
 
-          <Card onPress={() => nav.navigate('المكتبة')} style={{ gap: 10 }}>
+          <Card onPress={() => nav.navigate('القوالب')} style={{ gap: 12 }}>
+            <View style={{
+              width: 44, height: 44, borderRadius: 13, backgroundColor: c.accentSoft,
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <IcLibrary size={22} color={c.accentSoftFg} />
+            </View>
             <T size={17} weight="700">ابدأ ملفًّا جديدًا</T>
             <T size={13} color={c.text2}>
               اختر قالبًا من المكتبة، املأ حقوله في جوّالك، وصدّره PDF جاهزًا للطباعة.
             </T>
-            <Button label="تصفّح المكتبة" variant="primary" small
-              onPress={() => nav.navigate('المكتبة')} style={{ alignSelf: 'flex-start' }} />
+            <Button label="تصفّح القوالب" variant="primary" small
+              onPress={() => nav.navigate('القوالب')} style={{ alignSelf: 'flex-start' }} />
           </Card>
 
           <View style={{ gap: SPACE.s3 }}>
@@ -92,7 +99,8 @@ export default function Dashboard() {
                 <Empty
                   title="لم تُنشئ ملفًّا بعد"
                   line="اختر قالبًا من المكتبة، املأه، وصدّره. يبقى محفوظًا في حسابك."
-                  action={<Button label="تصفّح المكتبة" variant="primary" onPress={() => nav.navigate('المكتبة')} />}
+                  art={<IcFiles size={30} color={c.text3} />}
+                action={<Button label="تصفّح القوالب" variant="primary" onPress={() => nav.navigate('القوالب')} />}
                 />
               </Card>
             ) : (
@@ -105,6 +113,7 @@ export default function Dashboard() {
                     </View>
                     <Badge label={d.status === 'complete' ? 'مكتمل' : 'مسوّدة'}
                       tone={d.status === 'complete' ? 'success' : 'neutral'} />
+                    <IcChevron size={15} color={c.text3} />
                   </Row>
                 </Card>
               ))

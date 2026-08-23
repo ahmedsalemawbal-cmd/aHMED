@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Badge, Button, Card, Empty, Input, Loading, Row, T } from '../ui/kit'
+import { IcSearch, IcChevron, IcLock, IcLibrary } from '../ui/icons'
 import { RADIUS, SPACE } from '../lib/theme'
 import type { Template } from '../lib/types'
 
@@ -50,7 +51,13 @@ export default function Library() {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <View style={{ padding: SPACE.s4, gap: SPACE.s3 }}>
-        <Input value={q} onChangeText={setQ} placeholder="ابحث باسم القالب — مثال: سجلّ متابعة" />
+        <View>
+          <Input value={q} onChangeText={setQ} placeholder="ابحث باسم القالب — مثال: سجلّ متابعة"
+            style={{ paddingRight: 42 }} />
+          <View style={{ position: 'absolute', right: 13, top: 15 }} pointerEvents="none">
+            <IcSearch size={17} color={c.text3} />
+          </View>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8 }}>
           {chips.map((ch) => {
@@ -82,6 +89,7 @@ export default function Library() {
           }
           ListEmptyComponent={
             <Empty
+              art={<IcLibrary size={30} color={c.text3} />}
               title={q ? `لم نجد قالبًا باسم «${q}»` : 'لا قوالب في هذه الفئة'}
               line="جرّب كلمةً أقصر، أو امسح الفئة، أو تصفّح كلّ الفئات."
               action={<Button label="امسح البحث" variant="primary" onPress={() => { setQ(''); setCat('all') }} />}
@@ -103,7 +111,10 @@ export default function Library() {
                   <T size={11.5} color={c.text3}>
                     {item.fields?.length || 0} حقلًا · نحو {item.estimated_minutes} دقائق
                   </T>
-                  <T size={12.5} weight="700" color={c.accent}>{lk ? 'ارفع باقتك' : 'ابدأ ←'}</T>
+                  <Row gap={5}>
+                    <T size={12.5} weight="700" color={lk ? c.text3 : c.accent}>{lk ? 'ارفع باقتك' : 'ابدأ'}</T>
+                    {lk ? <IcLock size={14} color={c.text3} /> : <IcChevron size={14} color={c.accent} />}
+                  </Row>
                 </Row>
               </Card>
             )

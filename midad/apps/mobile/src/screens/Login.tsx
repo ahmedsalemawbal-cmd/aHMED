@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, View, Linking } from 'react-native'
 import { useApp } from '../lib/store'
-import { Alert, Button, Input, T } from '../ui/kit'
+import { Alert, Button, Input, Row, T } from '../ui/kit'
+import { IcLogo, IcEye, IcEyeOff, IcExternal } from '../ui/icons'
 import { SPACE, RADIUS } from '../lib/theme'
 import { WEB_APP_URL } from '../lib/config'
 
@@ -27,10 +28,12 @@ export default function Login() {
         keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: 'center', gap: 12, marginBottom: SPACE.s4 }}>
           <View style={{
-            width: 72, height: 72, borderRadius: 22, backgroundColor: c.accent,
+            width: 78, height: 78, borderRadius: 24, backgroundColor: c.accent,
             alignItems: 'center', justifyContent: 'center',
+            shadowColor: c.accentDeep, shadowOpacity: 0.28, shadowRadius: 18,
+            shadowOffset: { width: 0, height: 8 }, elevation: 6,
           }}>
-            <T size={34} weight="700" color={c.onAccent}>م</T>
+            <IcLogo size={46} color={c.onAccent} />
           </View>
           <T size={26} weight="700" align="center">مِـداد</T>
           <T size={13.5} color={c.text2} align="center">
@@ -52,6 +55,7 @@ export default function Login() {
           textContentType="password" onSubmitEditing={submit} returnKeyType="go"
         />
         <Button label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} variant="ghost" small
+          icon={show ? <IcEyeOff size={15} color={c.accent} /> : <IcEye size={15} color={c.accent} />}
           onPress={() => setShow((v) => !v)} style={{ alignSelf: 'flex-start' }} />
 
         <Button label="دخول" variant="primary" onPress={submit} loading={busy} />
@@ -64,6 +68,7 @@ export default function Login() {
             التسجيل والاشتراك يتمّان من موقع مِداد — سبعة أيّام تجربة بلا بطاقة، ثمّ تدخل هنا بجوّالك.
           </T>
           <Button label="افتح موقع مِداد" variant="soft" small
+            icon={<IcExternal size={14} color={c.accentSoftFg} />}
             onPress={() => Linking.openURL(WEB_APP_URL + '/#/join')} />
         </View>
 

@@ -21,9 +21,17 @@ export default function AuthShell({ children, aside, wide }: {
       </div>
       <aside className="mdd-auth-aside" aria-hidden="true">
         <div style={{ maxWidth: 380 }}>
+          {/* الشعار فوق النصّ — يظهر في كلّ صفحات هذا الباب */}
+          <div className="mdd-row mdd-enter mdd-enter--fade" style={{ gap: 12, marginBlockEnd: 34, color: '#fff' }}>
+            <IcLogo size={46} />
+            <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.35 }}>
+              <span style={{ fontSize: 24, fontWeight: 700 }}>مِـداد</span>
+              <span style={{ fontSize: 12.5, color: 'oklch(1 0 0 / .66)' }}>منصّة الملفّات المدرسية والجداول</span>
+            </span>
+          </div>
           {aside || (
             <>
-              <h2 style={{ fontSize: 26, lineHeight: 1.5, color: '#fff' }}>
+              <h2 className="mdd-enter mdd-d1" style={{ fontSize: 26, lineHeight: 1.5, color: '#fff' }}>
                 ملفّاتك المدرسية تُملأ في الشاشة، وتخرج جاهزةً للطباعة.
               </h2>
               <p style={{ marginBlockStart: 14, fontSize: 14.5, lineHeight: 1.9, color: 'oklch(1 0 0 / .78)' }}>

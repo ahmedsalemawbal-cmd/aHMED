@@ -32,8 +32,8 @@ export default function Login() {
   return (
     <AuthShell aside={
       <>
-        <h2 style={{ fontSize: 26, lineHeight: 1.5, color: '#fff' }}>أهلًا بعودتك.</h2>
-        <p style={{ marginBlockStart: 14, fontSize: 14.5, lineHeight: 1.9, color: 'oklch(1 0 0 / .78)' }}>
+        <h2 className="mdd-enter mdd-d1" style={{ fontSize: 26, lineHeight: 1.5, color: '#fff' }}>أهلًا بعودتك.</h2>
+        <p className="mdd-enter mdd-d2" style={{ marginBlockStart: 14, fontSize: 14.5, lineHeight: 1.9, color: 'oklch(1 0 0 / .78)' }}>
           ملفّاتك وجداولك كما تركتها — تفتحها وتُكمل من حيث وقفت.
         </p>
       </>

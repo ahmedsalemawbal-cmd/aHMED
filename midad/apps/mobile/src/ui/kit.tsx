@@ -4,8 +4,9 @@ import {
   TextInputProps, View, ViewStyle,
 } from 'react-native'
 import { useApp } from '../lib/store'
-import { RADIUS, SPACE } from '../lib/theme'
+import { RADIUS, SPACE, fontFor } from '../lib/theme'
 import { initials } from '../lib/format'
+import { IcFiles } from './icons'
 
 export function T({ children, size = 14, weight = '400', color, style, numberOfLines, align }: {
   children: React.ReactNode; size?: number; weight?: '400' | '600' | '700'
@@ -16,8 +17,8 @@ export function T({ children, size = 14, weight = '400', color, style, numberOfL
     <Text
       numberOfLines={numberOfLines}
       style={[{
-        fontSize: size, fontWeight: weight, color: color || c.text,
-        lineHeight: size * 1.7, textAlign: align || 'right', writingDirection: 'rtl',
+        fontSize: size, fontFamily: fontFor(weight), color: color || c.text,
+        lineHeight: size * 1.75, textAlign: align || 'right', writingDirection: 'rtl',
       }, style]}>
       {children}
     </Text>
@@ -67,7 +68,7 @@ export function Button({ label, onPress, variant = 'secondary', loading, disable
         opacity: off ? 0.55 : pressed ? 0.82 : 1,
       }, style]}>
       {loading ? <ActivityIndicator size="small" color={s.fg} /> : icon}
-      <Text style={{ color: s.fg, fontWeight: '700', fontSize: small ? 13 : 14.5, writingDirection: 'rtl' }}>
+      <Text style={{ color: s.fg, fontFamily: fontFor('700'), fontSize: small ? 13 : 14.5, writingDirection: 'rtl' }}>
         {label}
       </Text>
     </Pressable>
@@ -88,6 +89,7 @@ export function Input({ label, help, error, style, ...rest }: TextInputProps & {
           borderWidth: 1, borderColor: error ? c.danger : c.border, borderRadius: 11,
           backgroundColor: c.card, color: c.text, paddingHorizontal: 13, paddingVertical: 12,
           fontSize: 14.5, minHeight: 48, textAlign: 'right', writingDirection: 'rtl',
+          fontFamily: fontFor('500'),
         }, style]}
       />
       {error ? <T size={11.5} color={c.danger}>{error}</T>
@@ -110,7 +112,7 @@ export function Badge({ label, tone = 'neutral' }: {
   }[tone]
   return (
     <View style={{ backgroundColor: map.bg, borderRadius: RADIUS.pill, paddingHorizontal: 11, paddingVertical: 4, alignSelf: 'flex-start' }}>
-      <Text style={{ color: map.fg, fontSize: 11.5, fontWeight: '600', writingDirection: 'rtl' }}>{label}</Text>
+      <Text style={{ color: map.fg, fontSize: 11.5, fontFamily: fontFor('600'), writingDirection: 'rtl' }}>{label}</Text>
     </View>
   )
 }
@@ -122,7 +124,7 @@ export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
       width: size, height: size, borderRadius: size / 2, backgroundColor: c.accentSoft,
       alignItems: 'center', justifyContent: 'center',
     }}>
-      <Text style={{ color: c.accentSoftFg, fontWeight: '700', fontSize: size * 0.34 }}>{initials(name)}</Text>
+      <Text style={{ color: c.accentSoftFg, fontFamily: fontFor('700'), fontSize: size * 0.34 }}>{initials(name)}</Text>
     </View>
   )
 }
@@ -138,15 +140,17 @@ export function Progress({ value, max = 100, tone }: { value: number; max?: numb
   )
 }
 
-export function Empty({ title, line, action }: { title: string; line?: string; action?: React.ReactNode }) {
+export function Empty({ title, line, action, art }: {
+  title: string; line?: string; action?: React.ReactNode; art?: React.ReactNode
+}) {
   const { c } = useApp()
   return (
     <View style={{ alignItems: 'center', paddingVertical: SPACE.s8, paddingHorizontal: SPACE.s5, gap: SPACE.s3 }}>
       <View style={{
-        width: 68, height: 68, borderRadius: RADIUS.xl, backgroundColor: c.sunken,
+        width: 72, height: 72, borderRadius: RADIUS.xxl, backgroundColor: c.sunken,
         alignItems: 'center', justifyContent: 'center',
       }}>
-        <Text style={{ fontSize: 28 }}>📄</Text>
+        {art || <IcFiles size={30} color={c.text3} />}
       </View>
       <T size={17} weight="700" align="center">{title}</T>
       {line ? <T size={13.5} color={c.text2} align="center">{line}</T> : null}
@@ -189,7 +193,7 @@ export function Alert({ children, tone = 'info' }: {
   }[tone]
   return (
     <View style={{ backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 13 }}>
-      <Text style={{ color: map.fg, fontSize: 13, lineHeight: 22, writingDirection: 'rtl', textAlign: 'right' }}>
+      <Text style={{ color: map.fg, fontSize: 13, lineHeight: 22, writingDirection: 'rtl', textAlign: 'right', fontFamily: fontFor('500') }}>
         {children}
       </Text>
     </View>

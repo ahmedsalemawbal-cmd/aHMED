@@ -27,9 +27,40 @@ export const DARK: Palette = {
   danger: '#e1705f', dangerSoft: '#3d2622', info: '#7ab4ee', infoSoft: '#1f3245',
 }
 
-export const RADIUS = { sm: 10, md: 12, lg: 16, xl: 22, pill: 999 }
+/* أنصاف الأقطار وسلّم الخطّ من ملفّ تصميم المالك «تطبيق مداد للجوال» */
+export const RADIUS = { xs: 9, sm: 10, md: 12, lg: 14, xl: 17, xxl: 20, pill: 999 }
 export const SPACE = { s1: 4, s2: 8, s3: 12, s4: 16, s5: 20, s6: 24, s7: 32, s8: 40 }
-export const FONT = { regular: '400' as const, semi: '600' as const, bold: '700' as const }
+
+/** أسماء عائلات Cairo كما تُحمَّل — تُستعمل بدل fontWeight
+ *  لأنّ أندرويد لا يربط الأوزان بأسماء العائلة تلقائيًّا. */
+export const FAMILY = {
+  regular: 'Cairo_400Regular',
+  medium: 'Cairo_500Medium',
+  semi: 'Cairo_600SemiBold',
+  bold: 'Cairo_700Bold',
+} as const
+
+/** سلّم الخطّ من التصميم: 6 → 14، ثمّ مقاسات العناوين */
+export const TYPE = {
+  micro: 10,
+  caption: 11,
+  small: 11.5,
+  body: 12.5,
+  bodyLg: 13.5,
+  base: 14,
+  lead: 15,
+  h3: 16,
+  h2: 18,
+  h1: 22,
+  display: 26,
+} as const
+
+export function fontFor(weight?: '400' | '500' | '600' | '700'): string {
+  if (weight === '700') return FAMILY.bold
+  if (weight === '600') return FAMILY.semi
+  if (weight === '500') return FAMILY.medium
+  return FAMILY.regular
+}
 
 export function systemIsDark(): boolean {
   return Appearance.getColorScheme() === 'dark'

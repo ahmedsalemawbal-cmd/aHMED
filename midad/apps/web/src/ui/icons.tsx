@@ -59,3 +59,11 @@ export const IcLogo = ({ size }: P) => (
     <path d="M28.4 12.5v13.2c0 1 .8 1.8 1.8 1.8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
   </svg>
 )
+
+/** زرّ طيّ الشريط — المساران من ملفَّي تصميم الشريط الجانبيّ حرفيًّا */
+export const IcCollapse = ({ size, className, style, collapsed }: P & { collapsed?: boolean }) => (
+  <svg {...S(size)} className={className} style={style}>
+    <path d={collapsed ? 'M8 6 14 12 8 18' : 'M14 6 8 12 14 18'}
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)

@@ -10,6 +10,7 @@ import {
 } from '../ui/kit'
 import { RADIUS, SPACE } from '../lib/theme'
 import { fieldSections, filledCount, emptyRow, paperHtml } from '../lib/render'
+import { IcSpark, IcDownload, IcCheck, IcChevronDown, IcPlus, IcTrash } from '../ui/icons'
 import { fmtRelative } from '../lib/format'
 import type { DocumentRow, Template, TemplateField } from '../lib/types'
 
@@ -158,9 +159,14 @@ export default function Editor() {
                   flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between',
                 }}>
                 <T size={14} weight="700">{sec.name}</T>
-                <T size={12} color={c.text3}>
-                  {sec.fields.filter((f) => filledCount([f], data)).length}/{sec.fields.length} {isOpen ? '▲' : '▼'}
-                </T>
+                <Row gap={7}>
+                  <T size={12} color={c.text3}>
+                    {sec.fields.filter((f) => filledCount([f], data)).length}/{sec.fields.length}
+                  </T>
+                  <View style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}>
+                    <IcChevronDown size={15} color={c.text3} />
+                  </View>
+                </Row>
               </Pressable>
               {isOpen && (
                 <View style={{ padding: SPACE.s4, gap: SPACE.s4 }}>
@@ -185,6 +191,7 @@ export default function Editor() {
         <Button label="حفظ" variant="secondary" style={{ flex: 1 }}
           onPress={() => { dirty.current = true; persist() }} />
         <Button label="تصدير PDF" variant="primary" style={{ flex: 1 }}
+          icon={<IcDownload size={16} color={c.onAccent} />}
           loading={exporting} onPress={exportPdf} />
       </View>
     </KeyboardAvoidingView>
@@ -212,7 +219,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
             <Row style={{ justifyContent: 'space-between' }}>
               <T size={12} weight="700" color={c.text2}>الصفّ {i + 1}</T>
               {!readOnly && (
-                <Button label="حذف" variant="danger" small
+                <Button label="حذف" variant="danger" small icon={<IcTrash size={13} color={c.danger} />}
                   onPress={() => onChange(rows.filter((_, ri) => ri !== i))} />
               )}
             </Row>
@@ -225,7 +232,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
           </View>
         ))}
         {!readOnly && (
-          <Button label="أضف صفًّا" variant="soft" small
+          <Button label="أضف صفًّا" variant="soft" small icon={<IcPlus size={14} color={c.accentSoftFg} />}
             onPress={() => onChange([...rows, emptyRow(cols)])} style={{ alignSelf: 'flex-start' }} />
         )}
       </View>
@@ -266,7 +273,8 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
             {field.label}{field.required ? ' *' : ''}
           </T>
           {onImprove && !readOnly && (
-            <Button label="حسّن ✨" variant="soft" small onPress={onImprove} loading={improving} />
+            <Button label="حسّن" variant="soft" small onPress={onImprove} loading={improving}
+              icon={<IcSpark size={14} color={c.accentSoftFg} />} />
           )}
         </Row>
         <Input value={String(value ?? '')} onChangeText={onChange} multiline numberOfLines={4}

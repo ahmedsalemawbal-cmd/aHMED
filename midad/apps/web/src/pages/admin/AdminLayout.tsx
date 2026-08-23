@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../../lib/store'
+import { useSidebarCollapsed } from '../../lib/sidebar'
 import { Avatar } from '../../ui/kit'
 import {
   IcHome, IcTeam, IcCard, IcInvoice, IcPuzzle, IcShield, IcLibrary, IcSpark,
-  IcSettings, IcHistory, IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcBack,
+  IcSettings, IcHistory, IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcBack, IcCollapse,
 } from '../../ui/icons'
 
 const NAV_MAIN = [
@@ -29,6 +30,7 @@ const NAV_SYSTEM = [
 export default function AdminLayout() {
   const { profile, general, theme, setTheme, signOut } = useApp()
   const [open, setOpen] = useState(false)
+  const { collapsed, toggle } = useSidebarCollapsed()
   const loc = useLocation()
   const nav = useNavigate()
 
@@ -49,45 +51,48 @@ export default function AdminLayout() {
 
         <nav className="mdd-sidebar__nav">
           {NAV_MAIN.map((n) => (
-            <NavLink key={n.to} to={n.to} end={(n as any).end} className="mdd-navlink">
+            <NavLink key={n.to} to={n.to} end={(n as any).end} className="mdd-navlink" title={collapsed ? n.label : undefined}>
               <n.icon size={18} /><span>{n.label}</span>
             </NavLink>
           ))}
 
           <div className="mdd-sidebar__group">المال</div>
           {NAV_MONEY.map((n) => (
-            <NavLink key={n.to} to={n.to} className="mdd-navlink">
+            <NavLink key={n.to} to={n.to} className="mdd-navlink" title={collapsed ? n.label : undefined}>
               <n.icon size={18} /><span>{n.label}</span>
             </NavLink>
           ))}
 
           <div className="mdd-sidebar__group">المحتوى</div>
           {NAV_CONTENT.map((n) => (
-            <NavLink key={n.to} to={n.to} className="mdd-navlink">
+            <NavLink key={n.to} to={n.to} className="mdd-navlink" title={collapsed ? n.label : undefined}>
               <n.icon size={18} /><span>{n.label}</span>
             </NavLink>
           ))}
 
           <div className="mdd-sidebar__group">النظام</div>
           {NAV_SYSTEM.map((n) => (
-            <NavLink key={n.to} to={n.to} className="mdd-navlink">
+            <NavLink key={n.to} to={n.to} className="mdd-navlink" title={collapsed ? n.label : undefined}>
               <n.icon size={18} /><span>{n.label}</span>
             </NavLink>
           ))}
 
           <div className="mdd-sidebar__group">العودة</div>
-          <Link to="/app" className="mdd-navlink">
+          <Link to="/app" className="mdd-navlink" title={collapsed ? 'عُد إلى لوحتي' : undefined}>
             <IcBack size={18} /><span>عُد إلى لوحتي</span>
           </Link>
         </nav>
 
-        <div style={{
-          marginBlockStart: 'auto', padding: 'var(--mdd-s-4)',
-          borderBlockStart: '1px solid var(--mdd-border)',
-        }}>
-          <div className="mdd-row" style={{ gap: 10 }}>
+        <div className="mdd-sidebar__foot">
+          <button className="mdd-collapse-btn" onClick={toggle}
+            title={collapsed ? 'وسّع القائمة' : 'طيّ القائمة'}
+            aria-label={collapsed ? 'وسّع القائمة' : 'طيّ القائمة'} aria-expanded={!collapsed}>
+            <IcCollapse size={15} collapsed={collapsed} />
+            <span>طيّ القائمة</span>
+          </button>
+          <div className="mdd-row mdd-sidebar__who" style={{ gap: 10, paddingBlockStart: 10, borderBlockStart: '1px solid oklch(1 0 0 / .14)' }}>
             <Avatar name={profile?.full_name || 'مالك المنصّة'} size="sm" />
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="mdd-sidebar__who-text" style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {profile?.full_name || 'مالك المنصّة'}
               </div>

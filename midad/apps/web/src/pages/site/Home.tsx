@@ -5,6 +5,8 @@ import { useAsync } from '../../lib/hooks'
 import { fetchTemplates } from '../../lib/data'
 import { fmtMoney, fmtNum } from '../../lib/format'
 import { Badge, Button, Card, Skeleton } from '../../ui/kit'
+import ProductShot from './ProductShot'
+import { useReveal } from '../../lib/reveal'
 import { IcLibrary, IcTable, IcCheck, IcChevron, IcUser, IcTeam, IcBook, IcChart, IcClock } from '../../ui/icons'
 
 const ON_DEEP = 'oklch(1 0 0 / .95)'
@@ -14,6 +16,7 @@ export default function Home() {
   const { plans, roles } = useApp()
   const howRef = useRef<HTMLDivElement>(null)
   const { data: templates, loading } = useAsync(fetchTemplates, [])
+  useReveal([templates])
 
   const total = templates?.length || 0
   const sample = useMemo(() => (templates || []).slice(0, 6), [templates])
@@ -23,31 +26,40 @@ export default function Home() {
   return (
     <>
       {/* ============ البطل ============ */}
-      <section className="mdd-section" style={{ paddingBlockEnd: 'var(--mdd-s-8)' }}>
-        <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)', alignItems: 'flex-start' }}>
-          <span className="mdd-eyebrow">خدمتان مستقلّتان في حسابٍ واحد</span>
-          <h1 className="mdd-hero-title">ملفّاتك المدرسية وجداول نور — في مكانٍ واحد</h1>
-          <p className="mdd-hero-sub">
-            املأ قوالب الملفّات المدرسية في المتصفّح وصدّرها PDF أو وورد أو إكسل،
-            ونزّل كشوف نور إلى حسابك بضغطة واحدة. بلا برامج تُثبَّت على جهازك.
-          </p>
-          <div className="mdd-row mdd-row--wrap" style={{ gap: 'var(--mdd-s-3)' }}>
-            <Link to="/join"><Button auto size="lg" variant="primary">جرّب سبعة أيّام مجّانًا</Button></Link>
-            <Button
-              auto
-              size="lg"
-              variant="secondary"
-              onClick={() => howRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            >
-              شاهد كيف يعمل
-            </Button>
-          </div>
+      <section className="mdd-hero">
+        <div className="mdd-site-wrap">
+          <div className="mdd-hero__grid">
+            <div>
+              <span className="mdd-eyebrow mdd-enter mdd-enter--fade">خدمتان مستقلّتان في حسابٍ واحد</span>
+              <h1 className="mdd-hero__title mdd-enter mdd-d1" style={{ marginBlockStart: 16 }}>
+                ملفّاتك المدرسية وجداول نور — في مكانٍ واحد
+              </h1>
+              <p className="mdd-hero__lede mdd-enter mdd-d2">
+                املأ قوالب الملفّات المدرسية في المتصفّح وصدّرها PDF أو وورد أو إكسل،
+                ونزّل كشوف نور إلى حسابك بضغطة واحدة. بلا برامج تُثبَّت على جهازك.
+              </p>
 
-          {/* شريط الثقة */}
-          <div className="mdd-row mdd-row--wrap" style={{ gap: 'var(--mdd-s-5)', marginBlockStart: 'var(--mdd-s-3)' }}>
-            <TrustItem icon={<IcCheck size={15} />} text="بلا بطاقة" />
-            <TrustItem icon={<IcClock size={15} />} text="سبعة أيّام كاملة" />
-            <TrustItem icon={<IcCheck size={15} />} text="يعمل على الجوّال" />
+              <div className="mdd-hero__cta mdd-enter mdd-d3">
+                <Link to="/join"><Button auto size="lg" variant="primary">جرّب سبعة أيّام مجّانًا</Button></Link>
+                <Button
+                  auto size="lg" variant="secondary"
+                  onClick={() => howRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                >
+                  شاهد كيف يعمل
+                </Button>
+              </div>
+
+              <div className="mdd-hero__trust mdd-enter mdd-d4">
+                <span><IcCheck size={15} /> بلا بطاقة</span>
+                <span><IcClock size={15} /> سبعة أيّام كاملة</span>
+                <span><IcCheck size={15} /> يعمل على الجوّال</span>
+                {total > 0 && <span><IcBook size={15} /><span className="mdd-num">{total}</span> قالبًا جاهزًا</span>}
+              </div>
+            </div>
+
+            <div className="mdd-enter mdd-enter--side mdd-d3">
+              <ProductShot />
+            </div>
           </div>
         </div>
       </section>
@@ -56,7 +68,7 @@ export default function Home() {
       <section className="mdd-section" style={{ background: 'var(--mdd-sunken)' }}>
         <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)' }}>
           <div className="mdd-col" style={{ gap: 10 }}>
-            <h2 className="mdd-h2">خدمتان لا تلتقيان — تستعمل ما تحتاجه</h2>
+            <h2 className="mdd-h2 mdd-reveal">خدمتان لا تلتقيان — تستعمل ما تحتاجه</h2>
             <p className="mdd-prose" style={{ fontSize: 14.5 }}>
               كلّ خدمةٍ لها شاشاتها وطريقتها. لا يُجبرك مِداد على استعمال إحداهما لتصل إلى الأخرى.
             </p>
@@ -96,7 +108,7 @@ export default function Home() {
       {/* ============ كيف يعمل ============ */}
       <section className="mdd-section" ref={howRef as any}>
         <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)' }}>
-          <h2 className="mdd-h2">كيف يعمل — ثلاث خطوات</h2>
+          <h2 className="mdd-h2 mdd-reveal">كيف يعمل — ثلاث خطوات</h2>
           <div className="mdd-grid mdd-grid--3">
             <Step n={1} title="اختر قالبًا" line="افتح المكتبة، صفّها بدورك — مدير أو وكيل أو معلّم أو موجّه — واختر الملفّ الذي تحتاجه." />
             <Step n={2} title="املأه" line="حقولٌ واضحة بالعربية، وحفظٌ تلقائيّ كلّما كتبت، ومعاينةٌ حيّة للورقة كما ستُطبع." />
@@ -109,7 +121,7 @@ export default function Home() {
       <section className="mdd-section" style={{ background: 'var(--mdd-sunken)' }}>
         <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)' }}>
           <div className="mdd-col" style={{ gap: 10 }}>
-            <h2 className="mdd-h2">لمن مِداد؟</h2>
+            <h2 className="mdd-h2 mdd-reveal">لمن مِداد؟</h2>
             <p className="mdd-prose" style={{ fontSize: 14.5 }}>
               المكتبة مقسّمة على <span className="mdd-num">{fmtNum(roles.length)}</span> فئاتٍ مهنيّة،
               فلا ترى إلّا ما يخصّ عملك.
@@ -129,7 +141,7 @@ export default function Home() {
         <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)' }}>
           <div className="mdd-row mdd-row--between mdd-row--wrap" style={{ gap: 'var(--mdd-s-3)' }}>
             <div className="mdd-col" style={{ gap: 8 }}>
-              <h2 className="mdd-h2">عيّنة من المكتبة</h2>
+              <h2 className="mdd-h2 mdd-reveal">عيّنة من المكتبة</h2>
               <p className="mdd-prose" style={{ fontSize: 14.5 }}>
                 {loading
                   ? 'جارٍ تحميل القوالب…'
@@ -176,7 +188,7 @@ export default function Home() {
       <section className="mdd-section" style={{ background: 'var(--mdd-sunken)' }}>
         <div className="mdd-site-wrap mdd-col" style={{ gap: 'var(--mdd-s-6)' }}>
           <div className="mdd-col" style={{ gap: 10 }}>
-            <h2 className="mdd-h2">باقتان، لا أكثر</h2>
+            <h2 className="mdd-h2 mdd-reveal">باقتان، لا أكثر</h2>
             <p className="mdd-prose" style={{ fontSize: 14.5 }}>
               سبعة أيّام تجربة كاملة بلا بطاقة، ثمّ تختار ما يناسبك.
             </p>

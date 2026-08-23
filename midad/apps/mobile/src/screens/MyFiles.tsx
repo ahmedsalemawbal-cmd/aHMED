@@ -63,7 +63,7 @@ export default function MyFiles() {
                 title={q ? 'لا نتيجة لهذا البحث' : 'لم تُنشئ ملفًّا بعد'}
                 line={q ? 'جرّب كلمةً أقصر.' : 'اختر قالبًا من المكتبة، املأه، وصدّره. يبقى محفوظًا في حسابك تفتحه متى شئت.'}
                 action={<Button label={q ? 'امسح البحث' : 'تصفّح المكتبة'} variant="primary"
-                  onPress={() => (q ? setQ('') : nav.navigate('المكتبة'))} />}
+                  onPress={() => (q ? setQ('') : nav.navigate('القوالب'))} />}
               />
             </Card>
             {!q && suggest.length > 0 && (

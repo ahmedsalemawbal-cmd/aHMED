@@ -149,7 +149,7 @@ export default function Team() {
         <div className="mdd-row mdd-row--between mdd-row--wrap" style={{ gap: 12 }}>
           <div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>
-              <span className="mdd-num">{used}</span> من <span className="mdd-num">{seats}</span> مقاعد مستعملة
+              <span className="mdd-num">{used}</span> من <span className="mdd-num">{seats}</span> مقاعد مستعملة — بينها حسابك
             </div>
             <span style={{ fontSize: 12.5, color: 'var(--mdd-text-3)' }}>
               {plan?.name_ar || 'باقتك الحالية'} — العضو الموقوف لا يشغل مقعدًا.
@@ -255,7 +255,7 @@ export default function Team() {
               <span style={{ color: 'var(--mdd-accent-soft-fg)' }}><IcTeam size={44} /></span>
               <h3 style={{ fontSize: 17 }}>أنت وحدك في الحساب حتّى الآن</h3>
               <p className="mdd-prose" style={{ fontSize: 13, maxWidth: 480 }}>
-                باقتك تفتح <span className="mdd-num">{seats}</span> مقاعد. أضف وكيلًا أو مرشدًا أو معلّمًا،
+                باقتك تفتح <span className="mdd-num">{seats}</span> مقاعد — بينها حسابك أنت. أضف وكيلًا أو مرشدًا أو معلّمًا،
                 فيدخل بجوّاله وكلمة المرور التي تعطيه إيّاها، ويرى قوالب دوره.
               </p>
               <Button auto variant="primary" disabled={full || !profile?.is_owner} onClick={openAdd}>أضف أوّل عضو</Button>

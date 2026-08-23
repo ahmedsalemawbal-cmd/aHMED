@@ -15,13 +15,14 @@ on conflict (key) do update set name_ar = excluded.name_ar, blurb_ar = excluded.
 insert into public.plans (key, name_ar, account_type, price_sar, period_months, seats,
                           template_categories, noor_enabled, ai_quota_monthly, features_ar,
                           is_active, is_default, sort) values
-  ('school_annual', 'باقة المدرسة', 'school', 999, 12, 10, '{}', true, 500,
-    array['حتى 10 مقاعد بأدوار مختلفة','كلّ فئات القوالب — 71 ملفًّا','جداول نور بلا حدّ',
-          '500 تحسين بالذكاء شهريًّا','ترويسة المدرسة وشعارها','فاتورة واحدة للمدرسة','دعم عبر واتساب'],
+  ('school_annual', 'باقة المدرسة', 'school', 749, 12, 10, '{}', true, 500,
+    array['10 مقاعد — بينها حساب المدير','أدوارٌ حرّة: وكيل · معلّم · مشرف · موجّه',
+          'كلّ فئات القوالب — 71 ملفًّا','جداول نور بلا حدّ','500 تحسين بالذكاء شهريًّا',
+          'ترويسة المدرسة وشعارها','فاتورة واحدة للمدرسة','دعم عبر واتساب'],
     true, true, 1),
-  ('teacher_annual', 'باقة المعلّم', 'teacher', 299, 12, 1, '{teacher,general}', true, 100,
-    array['مقعد واحد','ملفّات دورك والملفّات العامّة','جداول نور بلا حدّ',
-          '100 تحسين بالذكاء شهريًّا','ترويسة باسمك','دعم عبر واتساب'],
+  ('teacher_annual', 'باقة المعلّم', 'teacher', 99, 12, 1, '{teacher,general}', true, 100,
+    array['مقعد واحد باسمك','ملفّات دورك والملفّات العامّة','جداول نور بلا حدّ',
+          '100 تحسين بالذكاء شهريًّا','ترويسة باسمك على كلّ ملفّ','دعم عبر واتساب'],
     true, true, 2)
 on conflict (key) do update set
   name_ar = excluded.name_ar, price_sar = excluded.price_sar, seats = excluded.seats,

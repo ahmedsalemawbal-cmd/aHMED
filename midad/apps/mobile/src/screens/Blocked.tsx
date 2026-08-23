@@ -1,7 +1,8 @@
 import React from 'react'
 import { Linking, View } from 'react-native'
 import { useApp } from '../lib/store'
-import { Alert, Button, Card, Screen, T } from '../ui/kit'
+import { Alert, Button, Card, Row, Screen, T } from '../ui/kit'
+import { IcLock, IcClock, IcCheck } from '../ui/icons'
 import { SPACE, RADIUS } from '../lib/theme'
 import { fmtBoth, fmtMoney } from '../lib/format'
 import { WEB_APP_URL } from '../lib/config'
@@ -21,7 +22,7 @@ export default function Blocked() {
           backgroundColor: suspended ? c.dangerSoft : c.warnSoft,
           alignItems: 'center', justifyContent: 'center',
         }}>
-          <T size={34}>{suspended ? '🔒' : '⏳'}</T>
+          {suspended ? <IcLock size={34} color={c.danger} /> : <IcClock size={34} color={c.warn} />}
         </View>
         <T size={22} weight="700" align="center">
           {suspended
@@ -50,8 +51,11 @@ export default function Blocked() {
               <T size={17} weight="700">{suggested.name_ar}</T>
               <T size={26} weight="700" color={c.accent}>{fmtMoney(suggested.price_sar)}</T>
               <T size={12} color={c.text3}>سنويًّا · شامل الضريبة</T>
-              {(suggested.features_ar || []).slice(0, 5).map((f) => (
-                <T key={f} size={12.5} color={c.text2}>✓  {f}</T>
+              {(suggested.features_ar || []).slice(0, 6).map((f) => (
+                <Row key={f} gap={9} style={{ alignItems: 'flex-start' }}>
+                  <IcCheck size={15} color={c.accent} />
+                  <T size={12.5} color={c.text2} style={{ flex: 1 }}>{f}</T>
+                </Row>
               ))}
             </Card>
           )}

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import {
   Alert, Avatar, Badge, Button, Card, Divider, Input, Progress, Row, Screen, T,
 } from '../ui/kit'
+import { IcCard, IcSettings, IcLock, IcLogout, IcExternal } from '../ui/icons'
 import { SPACE, RADIUS } from '../lib/theme'
 import { daysLabel, fmtBoth, fmtMoney } from '../lib/format'
 import { WEB_APP_URL } from '../lib/config'
@@ -53,7 +54,7 @@ export default function Account() {
       </Card>
 
       <Card style={{ gap: 12 }}>
-        <T size={16} weight="700">الاشتراك</T>
+        <Row gap={9}><IcCard size={18} color={c.text2} /><T size={16} weight="700">الاشتراك</T></Row>
         <KV k="الباقة" v={plan?.name_ar || '— لا باقة —'} />
         {plan ? <KV k="السعر السنويّ" v={fmtMoney(plan.price_sar)} /> : null}
         {access === 'trial' ? (
@@ -67,6 +68,7 @@ export default function Account() {
           <Alert tone="danger">انتهى اشتراكك. ملفّاتك محفوظة كلّها وتعود إليك فور التجديد.</Alert>
         )}
         <Button label="افتح الاشتراك والفواتير" variant="primary"
+          icon={<IcExternal size={16} color={c.onAccent} />}
           onPress={() => Linking.openURL(WEB_APP_URL + '/#/app/subscription')} />
         <T size={11.5} color={c.text3}>
           الدفع والفواتير من الموقع — يفتح في متصفّح جوّالك بحسابك نفسه.
@@ -74,7 +76,7 @@ export default function Account() {
       </Card>
 
       <Card style={{ gap: 12 }}>
-        <T size={16} weight="700">المظهر</T>
+        <Row gap={9}><IcSettings size={18} color={c.text2} /><T size={16} weight="700">المظهر</T></Row>
         <Row gap={8}>
           {([
             { k: 'light' as const, l: 'فاتح' },
@@ -91,7 +93,7 @@ export default function Account() {
       </Card>
 
       <Card style={{ gap: 12 }}>
-        <T size={16} weight="700">كلمة المرور</T>
+        <Row gap={9}><IcLock size={18} color={c.text2} /><T size={16} weight="700">كلمة المرور</T></Row>
         {msg && <Alert tone={msg.tone === 'success' ? 'success' : 'danger'}>{msg.text}</Alert>}
         <Input label="كلمة المرور الجديدة" value={pw.next} secureTextEntry autoCapitalize="none"
           onChangeText={(v) => setPw((p) => ({ ...p, next: v }))} />
@@ -100,7 +102,7 @@ export default function Account() {
         <Button label="غيّر كلمة المرور" variant="secondary" onPress={changePassword} loading={busy} />
       </Card>
 
-      <Button label="خروج" variant="danger" onPress={signOut} />
+      <Button label="خروج" variant="danger" icon={<IcLogout size={16} color={c.danger} />} onPress={signOut} />
       <T size={11} color={c.text3} align="center">مِداد · الإصدار 1.0.0</T>
     </Screen>
   )
