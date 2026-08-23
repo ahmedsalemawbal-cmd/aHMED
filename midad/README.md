@@ -169,3 +169,29 @@ eas build -p ios --profile production       # IPA لمتجر آبل (يلزم ح
 | الموجّه الطلابيّ | ملفّات التوجيه · الحالات · البرامج الوقائية + العامّة |
 
 الدور يحدّد **ما يُرى** لا **ما يُمنع**: الغاية أن يجد كلٌّ ملفّاته بلا بحثٍ في إحدى وسبعين ورقة.
+
+---
+
+## الاستضافة
+
+| الاستضافة | الرابط | الحالة |
+|---|---|---|
+| **Supabase Edge Function** (الأساسية) | `https://ehimyixcqnmnwgbqrdmr.supabase.co/functions/v1/app` | تعمل الآن |
+| GitHub Pages (اختيارية) | `https://ahmedsalemawbal-cmd.github.io/aHMED/` | تحتاج تفعيلًا لمرّة واحدة |
+
+**لتفعيل GitHub Pages:** المستودع ← Settings ← Pages ← Source: **GitHub Actions**،
+ثمّ من تبويب Actions شغّل سير العمل «نشر مِداد على GitHub Pages».
+(الصلاحية محجوبة عن التشغيل الآليّ، فلا بدّ من هذه الضغطة مرّةً واحدة.)
+
+### تحديث الاستضافة الأساسية بعد أيّ تعديل
+
+```bash
+cd midad/apps/web && npm run build
+cp -r dist/* ../../deploy/ && cd ../..
+git add deploy && git commit -m "نشر" && git push
+```
+
+ثمّ حدّث `APP_JS` و `APP_CSS` في `supabase/functions/app/shell.ts` بأسماء الملفّات
+الجديدة (تحمل بصمة المحتوى)، وأعد نشر دالّة `app`.
+هيكل الصفحة مضمَّن في الدالّة عمدًا: طبقة تخزين GitHub كانت تُبقي المستخدمين
+على نسخةٍ قديمة بعد كلّ نشر.

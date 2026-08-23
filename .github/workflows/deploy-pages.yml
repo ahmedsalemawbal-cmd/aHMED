@@ -1,10 +1,9 @@
 name: نشر مِداد على GitHub Pages
 
+# يدويّ فقط: GitHub Pages يحتاج تفعيلًا لمرّةٍ واحدة من صاحب المستودع
+# (Settings ← Pages ← Source: GitHub Actions)، ثمّ شغّل هذا السير من تبويب Actions.
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/educational-platform-setup-ct0iwr]
-    paths: ['midad/deploy/**', '.github/workflows/deploy-pages.yml']
 
 permissions:
   contents: read
