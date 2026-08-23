@@ -47,9 +47,10 @@ export function Field({ label, help, error, children, style }: {
 export function Input({ error, ltr, className = '', ...rest }: React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean; ltr?: boolean }) {
   return <input {...rest} className={['mdd-input', error ? 'mdd-input--error' : '', ltr ? 'mdd-input--ltr' : '', className].filter(Boolean).join(' ')} />
 }
-export function Textarea({ error, className = '', ...rest }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }) {
-  return <textarea {...rest} className={['mdd-textarea', error ? 'mdd-textarea--error' : '', className].filter(Boolean).join(' ')} />
-}
+export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }>(
+  function Textarea({ error, className = '', ...rest }, ref) {
+    return <textarea ref={ref} {...rest} className={['mdd-textarea', error ? 'mdd-textarea--error' : '', className].filter(Boolean).join(' ')} />
+  })
 export function Select({ error, children, className = '', ...rest }: React.SelectHTMLAttributes<HTMLSelectElement> & { error?: boolean }) {
   return (
     <span className="mdd-select-wrap">

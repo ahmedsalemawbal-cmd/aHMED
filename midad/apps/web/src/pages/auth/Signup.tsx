@@ -4,8 +4,8 @@ import AuthShell from './AuthShell'
 import { Alert, Badge, Button, Checkbox, Field, Input, Select } from '../../ui/kit'
 import { IcEye, IcEyeOff } from '../../ui/icons'
 import { useApp } from '../../lib/store'
-import { callFunction } from '../../lib/supabase'
-import { isValidPhone, normalizePhone } from '../../lib/config'
+import { callFunction, supabase } from '../../lib/supabase'
+import { isValidPhone, normalizePhone, phoneToAuthEmail } from '../../lib/config'
 
 const CITIES = ['الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'الدمام', 'الخبر', 'أبها', 'بريدة', 'تبوك', 'حائل', 'جازان', 'نجران', 'الطائف', 'الأحساء', 'أخرى']
 
@@ -72,8 +72,6 @@ export default function Signup({ type }: { type: 'school' | 'teacher' }) {
         role_key: f.roleKey,
         password: f.password,
       })
-      const { supabase } = await import('../../lib/supabase')
-      const { phoneToAuthEmail } = await import('../../lib/config')
       const { error } = await supabase.auth.signInWithPassword({
         email: phoneToAuthEmail(f.phone), password: f.password,
       })
