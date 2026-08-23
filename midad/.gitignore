@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.expo/
+*.log
+.DS_Store
+apps/web/node_modules/
+apps/mobile/node_modules/
+supabase/functions/*/index.deploy.ts
+supabase/functions/*/util.ts
+!supabase/functions/_shared/util.ts

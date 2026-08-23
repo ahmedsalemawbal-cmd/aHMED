@@ -1,0 +1,72 @@
+export type AccountType = 'school' | 'teacher'
+export type SubscriberStatus = 'trial' | 'active' | 'expired' | 'suspended'
+export type MemberStatus = 'active' | 'suspended'
+export type InvoiceStatus = 'unpaid' | 'under_review' | 'paid' | 'rejected' | 'cancelled'
+export type DocumentStatus = 'draft' | 'complete'
+export type TemplateStatus = 'draft' | 'published'
+export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'radio' | 'table'
+
+export interface TemplateColumn { key: string; label: string; type: 'text' | 'number' | 'date' | 'select'; options?: string[] }
+export interface TemplateField {
+  key: string; label: string; type: FieldType; required?: boolean; section?: string
+  placeholder?: string; help?: string; options?: string[]; columns?: TemplateColumn[]; default?: string
+}
+
+export interface Role { id: string; key: string; name_ar: string; blurb_ar: string | null; sort: number; is_system: boolean }
+export interface Plan {
+  id: string; key: string; name_ar: string; account_type: AccountType; price_sar: number
+  period_months: number; seats: number; template_categories: string[]; noor_enabled: boolean
+  ai_quota_monthly: number; features_ar: string[]; is_active: boolean; is_default: boolean; sort: number
+}
+export interface Subscriber {
+  id: string; name: string; account_type: AccountType; city: string | null; school_type: string | null
+  education_dept: string | null; academic_year: string | null; semester: string | null
+  principal_name: string | null; contact_phone: string | null; logo_url: string | null
+  status: SubscriberStatus; suspended_reason: string | null; trial_ends_at: string
+  plan_id: string | null; ai_quota_override: number | null; created_at: string
+}
+export interface Profile {
+  id: string; subscriber_id: string | null; full_name: string; phone: string; email: string | null
+  role_key: string; is_owner: boolean; status: MemberStatus; theme_pref: string
+  email_notifications: boolean; last_login_at: string | null; created_at: string
+}
+export interface Template {
+  id: string; slug: string; title: string; category_key: string; description: string | null
+  body: string; fields: TemplateField[]; outputs: string[]; estimated_minutes: number
+  version: number; status: TemplateStatus; usage_count: number; is_new: boolean; sort: number
+  created_at: string; updated_at: string
+}
+export interface DocumentRow {
+  id: string; subscriber_id: string; owner_id: string; template_id: string | null
+  title: string; data: Record<string, any>; status: DocumentStatus; created_at: string; updated_at: string
+}
+export interface NoorTable {
+  id: string; subscriber_id: string; owner_id: string; title: string
+  columns: string[]; rows: string[][]; row_count: number; source_url: string | null; created_at: string
+}
+export interface LinkKey {
+  id: string; subscriber_id: string; user_id: string; key: string
+  created_at: string; expires_at: string; last_used_at: string | null; revoked_at: string | null
+}
+export interface Subscription {
+  id: string; subscriber_id: string; plan_id: string; status: 'active' | 'expired' | 'cancelled'
+  starts_at: string; ends_at: string; amount_sar: number; created_at: string; cancelled_at: string | null
+}
+export interface Invoice {
+  id: string; number: string; subscriber_id: string; subscription_id: string | null; plan_id: string | null
+  description_ar: string | null; amount_sar: number; tax_rate: number; tax_amount: number; total_sar: number
+  status: InvoiceStatus; issued_at: string; paid_at: string | null; submitted_at: string | null
+  receipt_url: string | null; internal_note: string | null; rejected_reason: string | null; created_at: string
+}
+export interface AuditEntry {
+  id: string; subscriber_id: string | null; actor_id: string | null; actor_name: string | null
+  event_type: string; message_ar: string; meta: Record<string, any>; created_at: string
+}
+export interface PublicPaymentSettings {
+  payments_enabled: boolean; beneficiary: string; bank: string; iban: string
+  tax_rate: number; tax_number: string; show_tax: boolean
+}
+export interface GeneralSettings {
+  platform_name: string; tagline: string; whatsapp: string; email: string; working_hours: string
+}
+export type Database = any
