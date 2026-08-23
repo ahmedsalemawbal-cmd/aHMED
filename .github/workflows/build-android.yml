@@ -1,0 +1,76 @@
+name: بناء تطبيق أندرويد (APK)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: midad/apps/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: تثبيت الاعتماديات
+        run: npm install --no-audit --no-fund
+
+      - name: توليد مشروع أندرويد
+        run: npx expo prebuild --platform android --no-install --clean
+        env:
+          CI: 1
+
+      - name: إعداد Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: بناء APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: تسمية الملف
+        id: apk
+        run: |
+          SRC=$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)
+          echo "وجدنا: $SRC"
+          mkdir -p ../../../out
+          cp "$SRC" ../../../out/midad-android.apk
+          echo "size=$(du -h ../../../out/midad-android.apk | cut -f1)" >> $GITHUB_OUTPUT
+
+      - name: رفع الملفّ كأثر
+        uses: actions/upload-artifact@v4
+        with:
+          name: midad-android-apk
+          path: out/midad-android.apk
+          retention-days: 30
+
+      - name: إصدار عامّ فيه رابط التنزيل
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v1.0.0
+          name: مِداد لأندرويد — 1.0.0
+          body: |
+            تطبيق مِداد لأندرويد.
+
+            **التثبيت:** نزّل `midad-android.apk` من جوّالك، ثمّ افتحه.
+            لو ظهرت رسالة «مصدر غير معروف» فاسمح للمتصفّح بتثبيت التطبيقات مرّةً واحدة.
+
+            الدخول: `0555555555` / `Midad@2026`
+
+            الحجم: ${{ steps.apk.outputs.size }}
+          files: out/midad-android.apk
+          make_latest: true
