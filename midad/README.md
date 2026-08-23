@@ -174,16 +174,24 @@ eas build -p ios --profile production       # IPA لمتجر آبل (يلزم ح
 
 ## الاستضافة
 
+> **درسٌ مهمّ:** Supabase تستبدل `text/html` بـ `text/plain` في **دوالّ الحافّة والتخزين معًا**
+> (سياسة مكافحة تصيّد). فحصٌ مباشر: `text/html` → `text/plain`، بينما `text/css` و
+> `application/json` و `image/svg+xml` تمرّ سليمة. لذلك **لا يمكن استضافة الواجهة على Supabase**
+> — تظهر نصًّا خامًا لا صفحةً مرسومة.
+
 | الاستضافة | الرابط | الحالة |
 |---|---|---|
-| **Supabase Edge Function** (الأساسية) | `https://ehimyixcqnmnwgbqrdmr.supabase.co/functions/v1/app` | تعمل الآن |
-| GitHub Pages (اختيارية) | `https://ahmedsalemawbal-cmd.github.io/aHMED/` | تحتاج تفعيلًا لمرّة واحدة |
+| **raw.githack.com** (الحالية) | `https://raw.githack.com/ahmedsalemawbal-cmd/aHMED/claude/educational-platform-setup-ct0iwr/midad/deploy/index.html` | تعمل — تقدّم `text/html` صحيحًا |
+| رابط قصير (تحويل 302) | `https://ehimyixcqnmnwgbqrdmr.supabase.co/functions/v1/app` | يحوّل إلى githack |
+| GitHub Pages (الأفضل للإنتاج) | `https://ahmedsalemawbal-cmd.github.io/aHMED/` | تحتاج تفعيلًا لمرّة واحدة |
 
 **لتفعيل GitHub Pages:** المستودع ← Settings ← Pages ← Source: **GitHub Actions**،
 ثمّ من تبويب Actions شغّل سير العمل «نشر مِداد على GitHub Pages».
-(الصلاحية محجوبة عن التشغيل الآليّ، فلا بدّ من هذه الضغطة مرّةً واحدة.)
+(صلاحية إنشاء موقع Pages محجوبة عن `GITHUB_TOKEN` الآليّ، فلا بدّ من هذه الضغطة مرّةً واحدة.)
 
-### تحديث الاستضافة الأساسية بعد أيّ تعديل
+githack مناسبة للتجربة والعرض لا للإنتاج المستمرّ — فهي محدودة المعدّل.
+
+### تحديث الاستضافة بعد أيّ تعديل
 
 ```bash
 cd midad/apps/web && npm run build
@@ -191,7 +199,10 @@ cp -r dist/* ../../deploy/ && cd ../..
 git add deploy && git commit -m "نشر" && git push
 ```
 
-ثمّ حدّث `APP_JS` و `APP_CSS` في `supabase/functions/app/shell.ts` بأسماء الملفّات
-الجديدة (تحمل بصمة المحتوى)، وأعد نشر دالّة `app`.
-هيكل الصفحة مضمَّن في الدالّة عمدًا: طبقة تخزين GitHub كانت تُبقي المستخدمين
-على نسخةٍ قديمة بعد كلّ نشر.
+githack تقرأ من الفرع مباشرةً، فالتحديث يظهر بلا خطوةٍ إضافية.
+أسماء الأصول تحمل بصمة محتوى، فلا يعلق متصفّحٌ على نسخةٍ قديمة.
+
+### CORS
+
+الواجهة تُقدَّم من نطاقٍ (githack) والبيانات من نطاقٍ آخر (Supabase).
+تحقّقنا أنّ Supabase يردّ `access-control-allow-origin: https://raw.githack.com` — فالطلبات تمرّ.
