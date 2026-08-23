@@ -8,7 +8,8 @@ import { supabase, callFunction } from '../lib/supabase'
 import {
   Alert, Badge, Button, Card, Divider, ErrorView, Input, Loading, Progress, Row, T,
 } from '../ui/kit'
-import { RADIUS, SPACE } from '../lib/theme'
+import { AppHeader } from '../ui/AppHeader'
+import { RADIUS, SPACE, TYPE } from '../lib/theme'
 import { fieldSections, filledCount, emptyRow, paperHtml } from '../lib/render'
 import { IcSpark, IcDownload, IcCheck, IcChevronDown, IcPlus, IcTrash } from '../ui/icons'
 import { fmtRelative } from '../lib/format'
@@ -124,8 +125,10 @@ export default function Editor() {
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-      <ScrollView contentContainerStyle={{ padding: SPACE.s4, paddingBottom: 120, gap: SPACE.s4 }}
-        keyboardShouldPersistTaps="handled">
+      <AppHeader title={title || 'الملفّ'} back
+        subtitle={saving === 'saving' ? 'يُحفظ…' : saving === 'error' ? 'تعذّر الحفظ' : 'الحفظ تلقائيّ'} />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: SPACE.s5, paddingBottom: 120, gap: SPACE.s4 }}
+        keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         <Input label="اسم الملفّ" value={title}
           onChangeText={(v) => { setTitle(v); markDirty() }}
@@ -133,12 +136,12 @@ export default function Editor() {
 
         <Card style={{ gap: 10 }}>
           <Row style={{ justifyContent: 'space-between' }}>
-            <T size={12.5} weight="600" color={c.text2}>{done} من {total} حقلًا</T>
+            <T size={TYPE.body} weight="600" color={c.text2}>{done} من {total} حقلًا</T>
             <Badge label={done === total && total > 0 ? 'مكتمل' : 'قيد الملء'}
               tone={done === total && total > 0 ? 'success' : 'neutral'} />
           </Row>
           <Progress value={done} max={total || 1} />
-          <T size={11.5} color={c.text3}>
+          <T size={TYPE.small} color={c.text3}>
             {saving === 'saving' ? 'جارٍ الحفظ…'
               : saving === 'error' ? 'تعذّر الحفظ — سنحاول مرّة أخرى'
               : savedAt ? `حُفظ ${fmtRelative(savedAt)}` : 'الحفظ تلقائيّ'}
@@ -158,9 +161,9 @@ export default function Editor() {
                   backgroundColor: c.sunken, paddingHorizontal: SPACE.s4, paddingVertical: 14,
                   flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                <T size={14} weight="700">{sec.name}</T>
+                <T size={TYPE.base} weight="700">{sec.name}</T>
                 <Row gap={7}>
-                  <T size={12} color={c.text3}>
+                  <T size={TYPE.body} color={c.text3}>
                     {sec.fields.filter((f) => filledCount([f], data)).length}/{sec.fields.length}
                   </T>
                   <View style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}>
@@ -209,15 +212,15 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
     const rows: any[] = Array.isArray(value) ? value : []
     return (
       <View style={{ gap: 10 }}>
-        <T size={12} weight="600" color={c.text2}>{field.label}</T>
-        {rows.length === 0 && <T size={12} color={c.text3}>لا صفوف بعد — أضف الصفّ الأوّل.</T>}
+        <T size={TYPE.body} weight="600" color={c.text2}>{field.label}</T>
+        {rows.length === 0 && <T size={TYPE.body} color={c.text3}>لا صفوف بعد — أضف الصفّ الأوّل.</T>}
         {rows.map((r, i) => (
           <View key={i} style={{
             borderWidth: 1, borderColor: c.border, borderRadius: RADIUS.md,
             padding: SPACE.s3, gap: SPACE.s3, backgroundColor: c.sunken,
           }}>
             <Row style={{ justifyContent: 'space-between' }}>
-              <T size={12} weight="700" color={c.text2}>الصفّ {i + 1}</T>
+              <T size={TYPE.body} weight="700" color={c.text2}>الصفّ {i + 1}</T>
               {!readOnly && (
                 <Button label="حذف" variant="danger" small icon={<IcTrash size={13} color={c.danger} />}
                   onPress={() => onChange(rows.filter((_, ri) => ri !== i))} />
@@ -242,7 +245,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
   if (field.type === 'select' || field.type === 'radio') {
     return (
       <View style={{ gap: 8 }}>
-        <T size={12} weight="600" color={c.text2}>
+        <T size={TYPE.body} weight="600" color={c.text2}>
           {field.label}{field.required ? ' *' : ''}
         </T>
         <View style={{ flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8 }}>
@@ -255,12 +258,12 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
                   borderWidth: 1, borderRadius: RADIUS.pill, paddingHorizontal: 14,
                   paddingVertical: 9, minHeight: 40, justifyContent: 'center',
                 }}>
-                <T size={12.5} weight="600" color={on ? c.onPrimary : c.text2}>{o}</T>
+                <T size={TYPE.body} weight="600" color={on ? c.onPrimary : c.text2}>{o}</T>
               </Pressable>
             )
           })}
         </View>
-        {field.help ? <T size={11.5} color={c.text3}>{field.help}</T> : null}
+        {field.help ? <T size={TYPE.small} color={c.text3}>{field.help}</T> : null}
       </View>
     )
   }
@@ -269,7 +272,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
     return (
       <View style={{ gap: 8 }}>
         <Row style={{ justifyContent: 'space-between' }}>
-          <T size={12} weight="600" color={c.text2}>
+          <T size={TYPE.body} weight="600" color={c.text2}>
             {field.label}{field.required ? ' *' : ''}
           </T>
           {onImprove && !readOnly && (

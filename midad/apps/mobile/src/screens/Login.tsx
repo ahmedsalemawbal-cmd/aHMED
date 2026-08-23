@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View, Linking } from 'react
 import { useApp } from '../lib/store'
 import { Alert, Button, Input, Row, T } from '../ui/kit'
 import { IcLogo, IcEye, IcEyeOff, IcExternal } from '../ui/icons'
-import { SPACE, RADIUS } from '../lib/theme'
+import { SPACE, RADIUS, TYPE } from '../lib/theme'
 import { WEB_APP_URL } from '../lib/config'
 
 export default function Login() {
@@ -35,8 +35,8 @@ export default function Login() {
           }}>
             <IcLogo size={46} color={c.onPrimary} />
           </View>
-          <T size={26} weight="700" align="center">مِـداد</T>
-          <T size={13.5} color={c.text2} align="center">
+          <T size={TYPE.display} weight="700" align="center">مِـداد</T>
+          <T size={TYPE.base} color={c.text2} align="center">
             ملفّاتك المدرسية وجداول نور — في جوّالك.
           </T>
         </View>
@@ -63,8 +63,8 @@ export default function Login() {
         <View style={{
           backgroundColor: c.sunken, borderRadius: RADIUS.md, padding: SPACE.s4, gap: 8,
         }}>
-          <T size={13} weight="700">ليس لديك حساب؟</T>
-          <T size={12.5} color={c.text2}>
+          <T size={TYPE.bodyLg} weight="700">ليس لديك حساب؟</T>
+          <T size={TYPE.body} color={c.text2}>
             التسجيل والاشتراك يتمّان من موقع مِداد — سبعة أيّام تجربة بلا بطاقة، ثمّ تدخل هنا بجوّالك.
           </T>
           <Button label="افتح موقع مِداد" variant="soft" small
@@ -72,7 +72,7 @@ export default function Login() {
             onPress={() => Linking.openURL(WEB_APP_URL + '/#/join')} />
         </View>
 
-        <T size={11.5} color={c.text3} align="center">
+        <T size={TYPE.small} color={c.text3} align="center">
           الجوّال هو اسم الدخول. ولاستعادة كلمة المرور تواصل مع إدارة حسابك.
         </T>
       </ScrollView>

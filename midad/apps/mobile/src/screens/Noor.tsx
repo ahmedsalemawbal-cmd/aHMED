@@ -4,7 +4,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase, callFunction } from '../lib/supabase'
 import { Alert, Badge, Button, Card, Empty, Loading, Row, T } from '../ui/kit'
-import { RADIUS, SPACE } from '../lib/theme'
+import { AppHeader } from '../ui/AppHeader'
+import { RADIUS, SPACE, TYPE } from '../lib/theme'
 import { fmtNum, fmtRelative, fmtDate } from '../lib/format'
 import { WEB_APP_URL } from '../lib/config'
 import type { NoorTable } from '../lib/types'
@@ -56,7 +57,7 @@ export default function Noor() {
       ListHeaderComponent={
         tables.length > 0 ? null : (
           <View style={{ gap: SPACE.s4 }}>
-            <T size={20} weight="700">اربط نور في ثلاث خطوات</T>
+            <T size={TYPE.h1} weight="700">اربط نور في ثلاث خطوات</T>
             {err ? <Alert tone="danger">{err}</Alert> : null}
 
             <Step n={1} title="ثبّت إضافة المتصفّح"
@@ -73,7 +74,7 @@ export default function Noor() {
                     backgroundColor: c.sunken, borderRadius: RADIUS.sm, padding: 12,
                     borderWidth: 1, borderColor: c.border,
                   }}>
-                    <T size={13} weight="700" style={{ textAlign: 'left', writingDirection: 'ltr' }}>{key.key}</T>
+                    <T size={TYPE.bodyLg} weight="700" style={{ textAlign: 'left', writingDirection: 'ltr' }}>{key.key}</T>
                   </View>
                 : <Button label="أنشئ مفتاحًا" variant="primary" small onPress={createKey} loading={busy} />} />
 
@@ -89,12 +90,12 @@ export default function Noor() {
       ListEmptyComponent={null}
       renderItem={({ item }) => (
         <Card onPress={() => nav.navigate('NoorTable', { id: item.id })} style={{ gap: 8 }}>
-          <T size={14.5} weight="700" numberOfLines={2}>{item.title}</T>
+          <T size={TYPE.lead} weight="700" numberOfLines={2}>{item.title}</T>
           <Row style={{ justifyContent: 'space-between' }}>
-            <T size={11.5} color={c.text3}>
+            <T size={TYPE.small} color={c.text3}>
               {fmtNum(item.row_count)} صفًّا · {item.columns?.length || 0} أعمدة
             </T>
-            <T size={11.5} color={c.text3}>{fmtRelative(item.created_at)}</T>
+            <T size={TYPE.small} color={c.text3}>{fmtRelative(item.created_at)}</T>
           </Row>
         </Card>
       )}
@@ -111,11 +112,11 @@ function Step({ n, title, line, action }: { n: number; title: string; line: stri
           width: 28, height: 28, borderRadius: 9, backgroundColor: c.primary,
           alignItems: 'center', justifyContent: 'center',
         }}>
-          <T size={13} weight="700" color={c.onPrimary}>{n}</T>
+          <T size={TYPE.bodyLg} weight="700" color={c.onPrimary}>{n}</T>
         </View>
-        <T size={15} weight="700" style={{ flex: 1 }}>{title}</T>
+        <T size={TYPE.lead} weight="700" style={{ flex: 1 }}>{title}</T>
       </Row>
-      <T size={12.5} color={c.text2}>{line}</T>
+      <T size={TYPE.body} color={c.text2}>{line}</T>
       {action}
     </Card>
   )

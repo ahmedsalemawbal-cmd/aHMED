@@ -7,8 +7,9 @@ import {
 } from '../lib/classroom'
 import type { Period } from '../lib/types'
 import { Badge, Button, Card, Empty, ErrorView, Loading, Row, T } from '../ui/kit'
+import { AppHeader } from '../ui/AppHeader'
 import { IcTable, IcCheck, IcClock, IcChevron } from '../ui/icons'
-import { RADIUS, SPACE } from '../lib/theme'
+import { RADIUS, SPACE, TYPE } from '../lib/theme'
 
 export default function Timetable() {
   const { c, subscriber, profile } = useApp()
@@ -51,6 +52,7 @@ export default function Timetable() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <AppHeader title="جدولي" back />
       <View style={{ backgroundColor: c.card, borderBottomWidth: 1, borderBottomColor: c.border, paddingVertical: SPACE.s3 }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8, paddingHorizontal: SPACE.s4 }}>
@@ -64,7 +66,7 @@ export default function Timetable() {
                   borderRadius: RADIUS.pill, paddingHorizontal: 16, paddingVertical: 9, minHeight: 42,
                   justifyContent: 'center',
                 }}>
-                <T size={12.5} weight={on ? '700' : '500'} color={on ? c.onPrimary : c.text2}>
+                <T size={TYPE.body} weight={on ? '700' : '500'} color={on ? c.onPrimary : c.text2}>
                   {w}{perDay[i] ? ` (${perDay[i]})` : ''}
                 </T>
               </Pressable>
@@ -107,11 +109,11 @@ export default function Timetable() {
                     backgroundColor: st === 'now' ? c.primary : c.sunken,
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <T size={13} weight="700" color={st === 'now' ? c.onPrimary : c.text2}>{p.slot}</T>
+                    <T size={TYPE.bodyLg} weight="700" color={st === 'now' ? c.onPrimary : c.text2}>{p.slot}</T>
                   </View>
                   <View>
-                    <T size={14.5} weight="700">{p.subject} — {p.classes?.name || '—'}</T>
-                    <T size={11.5} color={c.text3}>
+                    <T size={TYPE.lead} weight="700">{p.subject} — {p.classes?.name || '—'}</T>
+                    <T size={TYPE.small} color={c.text3}>
                       {p.starts_at?.slice(0, 5)} — {p.ends_at?.slice(0, 5)}{p.room ? ` · ${p.room}` : ''}
                     </T>
                   </View>
@@ -119,7 +121,7 @@ export default function Timetable() {
                 {meta.label ? <Badge label={meta.label} tone={meta.tone} /> : null}
               </Row>
               <Row style={{ justifyContent: 'space-between' }}>
-                <T size={12} weight="700" color={st === 'done' ? c.success : c.primary}>
+                <T size={TYPE.body} weight="700" color={st === 'done' ? c.success : c.primary}>
                   {st === 'done' ? 'عرض الرصد' : 'ابدأ رصد الحضور'}
                 </T>
                 <IcChevron size={15} color={c.text3} />

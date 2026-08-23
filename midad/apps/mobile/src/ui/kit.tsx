@@ -241,17 +241,66 @@ export function Alert({ children, tone = 'info', icon }: {
   )
 }
 
-export function Screen({ children, scroll = true, refreshControl }: {
+export function Screen({ children, scroll = true, refreshControl, header, pad }: {
   children: React.ReactNode; scroll?: boolean; refreshControl?: React.ReactElement
+  /** يُرسم ثابتًا فوق المحتوى — لا يتحرّك مع التمرير */
+  header?: React.ReactNode
+  pad?: number
 }) {
   const { c } = useApp()
-  if (!scroll) return <View style={{ flex: 1, backgroundColor: c.bg }}>{children}</View>
-  return (
+  const body = scroll ? (
     <ScrollView
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: SPACE.s4, paddingBottom: SPACE.s8, gap: SPACE.s4 }}
+      contentContainerStyle={{
+        paddingHorizontal: pad ?? SPACE.s5, paddingTop: header ? 0 : SPACE.s4,
+        paddingBottom: SPACE.s8, gap: SPACE.s4,
+      }}
       keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
       refreshControl={refreshControl}>
+      {children}
+    </ScrollView>
+  ) : (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>{children}</View>
+  )
+  if (!header) return body
+  return <View style={{ flex: 1, backgroundColor: c.bg }}>{header}{body}</View>
+}
+
+/** قسمٌ بعنوان وإجراءٍ اختياريّ على يساره */
+export function Section({ title, action, children, gap = SPACE.s3 }: {
+  title: string; action?: React.ReactNode; children: React.ReactNode; gap?: number
+}) {
+  const { c } = useApp()
+  return (
+    <View style={{ gap }}>
+      <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{
+          color: c.text, fontFamily: fontFor('700'), fontSize: TYPE.h3,
+          textAlign: 'right', writingDirection: 'rtl',
+        }}>{title}</Text>
+        {action}
+      </View>
+      {children}
+    </View>
+  )
+}
+
+/**
+ * شريطٌ يمرّ أفقيًّا — والعربيّة تبدأ من اليمين، فنقلب الترتيب ونبدأ التمرير
+ * من أقصى اليمين كي لا يظهر أوّل عنصرٍ مقصوصًا.
+ */
+export function HScroll({ children, gap = 10, pad = SPACE.s5 }: {
+  children: React.ReactNode; gap?: number; pad?: number
+}) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ marginHorizontal: -pad }}
+      contentContainerStyle={{
+        flexDirection: 'row-reverse', gap, paddingHorizontal: pad, alignItems: 'stretch',
+      }}>
       {children}
     </ScrollView>
   )

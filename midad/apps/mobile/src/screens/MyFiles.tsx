@@ -4,7 +4,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Badge, Button, Card, Empty, Input, Loading, Row, T } from '../ui/kit'
-import { SPACE } from '../lib/theme'
+import { AppHeader } from '../ui/AppHeader'
+import { SPACE, TYPE } from '../lib/theme'
 import { fmtRelative } from '../lib/format'
 import type { DocumentRow, Template } from '../lib/types'
 
@@ -43,6 +44,7 @@ export default function MyFiles() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <AppHeader title="ملفّاتي" />
       {docs.length > 0 && (
         <View style={{ padding: SPACE.s4 }}>
           <Input value={q} onChangeText={setQ} placeholder="ابحث في ملفّاتك" />
@@ -68,11 +70,11 @@ export default function MyFiles() {
             </Card>
             {!q && suggest.length > 0 && (
               <View style={{ gap: SPACE.s3 }}>
-                <T size={15} weight="700">مقترَحٌ لدورك</T>
+                <T size={TYPE.lead} weight="700">مقترَحٌ لدورك</T>
                 {suggest.map((t) => (
                   <Card key={t.id} onPress={() => nav.navigate('TemplateDetail', { slug: t.slug })} style={{ gap: 6 }}>
-                    <T size={14} weight="700">{t.title}</T>
-                    <T size={12} color={c.text3}>{t.fields?.length || 0} حقلًا · نحو {t.estimated_minutes} دقائق</T>
+                    <T size={TYPE.base} weight="700">{t.title}</T>
+                    <T size={TYPE.body} color={c.text3}>{t.fields?.length || 0} حقلًا · نحو {t.estimated_minutes} دقائق</T>
                   </Card>
                 ))}
               </View>
@@ -82,11 +84,11 @@ export default function MyFiles() {
         renderItem={({ item }) => (
           <Card onPress={() => nav.navigate('Editor', { id: item.id })} style={{ gap: 8 }}>
             <Row style={{ justifyContent: 'space-between' }}>
-              <T size={14.5} weight="700" numberOfLines={1} style={{ flex: 1 }}>{item.title}</T>
+              <T size={TYPE.lead} weight="700" numberOfLines={1} style={{ flex: 1 }}>{item.title}</T>
               <Badge label={item.status === 'complete' ? 'مكتمل' : 'مسوّدة'}
                 tone={item.status === 'complete' ? 'success' : 'neutral'} />
             </Row>
-            <T size={11.5} color={c.text3}>آخر تعديل {fmtRelative(item.updated_at)}</T>
+            <T size={TYPE.small} color={c.text3}>آخر تعديل {fmtRelative(item.updated_at)}</T>
           </Card>
         )}
       />

@@ -4,7 +4,8 @@ import { useRoute } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Button, Card, Empty, ErrorView, Input, Loading, Row, T } from '../ui/kit'
-import { SPACE, RADIUS } from '../lib/theme'
+import { AppHeader } from '../ui/AppHeader'
+import { SPACE, RADIUS, TYPE } from '../lib/theme'
 import { fmtNum, fmtDate } from '../lib/format'
 import type { NoorTable as NT } from '../lib/types'
 
@@ -45,7 +46,7 @@ export default function NoorTable() {
       contentContainerStyle={{ padding: SPACE.s4, gap: SPACE.s3, paddingBottom: SPACE.s8 }}>
       <View style={{ gap: 6 }}>
         <T size={19} weight="700">{t.title}</T>
-        <T size={12} color={c.text3}>
+        <T size={TYPE.body} color={c.text3}>
           {fmtNum(t.row_count)} صفًّا · {t.columns?.length || 0} أعمدة · نُزِّل {fmtDate(t.created_at)}
         </T>
       </View>
@@ -56,14 +57,14 @@ export default function NoorTable() {
         <Empty title="لا نتيجة لهذا البحث" line="جرّب كلمةً أقصر أو امسح البحث." />
       ) : (
         <>
-          <T size={12} color={c.text3}>{fmtNum(rows.length)} صفًّا مطابقًا</T>
+          <T size={TYPE.body} color={c.text3}>{fmtNum(rows.length)} صفًّا مطابقًا</T>
           {/* الجداول تصير بطاقات على الجوّال — لا تمرير أفقيّ */}
           {rows.slice(0, limit).map((r, i) => (
             <Card key={i} style={{ gap: 6, padding: SPACE.s4 }}>
               {(t.columns || []).map((col, ci) => (
                 <Row key={ci} style={{ justifyContent: 'space-between', alignItems: 'flex-start' }} gap={12}>
-                  <T size={11.5} weight="600" color={c.text3} style={{ flex: 1 }}>{col}</T>
-                  <T size={12.5} style={{ flex: 1.4 }}>{String(r[ci] ?? '—')}</T>
+                  <T size={TYPE.small} weight="600" color={c.text3} style={{ flex: 1 }}>{col}</T>
+                  <T size={TYPE.body} style={{ flex: 1.4 }}>{String(r[ci] ?? '—')}</T>
                 </Row>
               ))}
             </Card>

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ActivityIndicator, View, I18nManager } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import * as SplashScreen from 'expo-splash-screen'
 import { useFonts, Cairo_400Regular, Cairo_500Medium, Cairo_600SemiBold, Cairo_700Bold } from '@expo-google-fonts/cairo'
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native'
@@ -21,8 +21,8 @@ import Account from './screens/Account'
 import Blocked from './screens/Blocked'
 import Attendance from './screens/Attendance'
 import Timetable from './screens/Timetable'
-import { IcHome, IcLibrary, IcFiles, IcTable, IcUser, IcCheck } from './ui/icons'
-import { fontFor } from './lib/theme'
+import { IcHome, IcLibrary, IcFiles, IcUser, IcCheck } from './ui/icons'
+import { fontFor, TYPE, RADIUS } from './lib/theme'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -33,26 +33,44 @@ function Tabs() {
   const { c } = useApp()
   return (
     <Tab.Navigator
+      /* لا هيدر افتراضيّ: هو يُرسم LTR ويضع الرجوع في الجهة الخطأ.
+         كلّ شاشةٍ ترسم AppHeader الخاصّ بها، عربيًّا من اليمين. */
       screenOptions={{
-        headerStyle: { backgroundColor: c.card },
-        headerTitleStyle: { color: c.text, fontFamily: fontFor('700'), fontSize: 17 },
-        headerTintColor: c.text,
-        tabBarStyle: { backgroundColor: c.card, borderTopColor: c.border, height: 62, paddingBottom: 8, paddingTop: 6 },
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: c.card, borderTopWidth: 0, height: 64,
+          paddingBottom: 9, paddingTop: 7, elevation: 0,
+        },
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.text3,
-        tabBarLabelStyle: { fontSize: 11, fontFamily: fontFor('600') },
+        tabBarLabelStyle: { fontSize: TYPE.micro, fontFamily: fontFor('600') },
+        tabBarItemStyle: { paddingTop: 2 },
       }}>
       <Tab.Screen name="الرئيسية" component={Dashboard}
-        options={{ tabBarIcon: ({ color, focused }) => <IcHome size={22} color={color} filled={focused} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcHome size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="القوالب" component={Library}
-        options={{ tabBarIcon: ({ color, focused }) => <IcLibrary size={22} color={color} filled={focused} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcLibrary size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="الرصد" component={Attendance}
-        options={{ tabBarIcon: ({ color, focused }) => <IcCheck size={22} color={color} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcCheck size={21} color={color} /></TabIcon> }} />
       <Tab.Screen name="ملفّاتي" component={MyFiles}
-        options={{ tabBarIcon: ({ color, focused }) => <IcFiles size={22} color={color} filled={focused} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcFiles size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="حسابي" component={Account}
-        options={{ tabBarIcon: ({ color, focused }) => <IcUser size={22} color={color} filled={focused} /> }} />
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcUser size={21} color={color} filled={focused} /></TabIcon> }} />
     </Tab.Navigator>
+  )
+}
+
+/** التبويب النشط تحته وسادةٌ ملوّنة — إشارةٌ أوضح من تغيّر اللون وحده */
+function TabIcon({ children, focused }: { children: React.ReactNode; focused: boolean }) {
+  const { c } = useApp()
+  return (
+    <View style={{
+      width: 46, height: 30, borderRadius: RADIUS.pill,
+      backgroundColor: focused ? c.primarySoft : 'transparent',
+      alignItems: 'center', justifyContent: 'center',
+    }}>
+      {children}
+    </View>
   )
 }
 
@@ -80,24 +98,23 @@ function Root() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: c.card },
-          headerTitleStyle: { color: c.text, fontFamily: fontFor('700'), fontSize: 17 },
-          headerTintColor: c.text,
-          headerBackTitleVisible: false,
+          headerShown: false,
           contentStyle: { backgroundColor: c.bg },
+          /* الدفع من اليمين — فالرجوع في العربيّة إلى اليمين */
+          animation: 'slide_from_left',
         }}>
         {access === 'anon' ? (
           <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         ) : access === 'expired' || access === 'suspended' || access === 'member_suspended' ? (
-          <Stack.Screen name="Blocked" component={Blocked} options={{ title: 'مِداد' }} />
+          <Stack.Screen name="Blocked" component={Blocked} />
         ) : (
           <>
             <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
-            <Stack.Screen name="TemplateDetail" component={TemplateDetail} options={{ title: 'القالب' }} />
-            <Stack.Screen name="Editor" component={Editor} options={{ title: 'الملفّ' }} />
-            <Stack.Screen name="Timetable" component={Timetable} options={{ title: 'جدولي' }} />
-            <Stack.Screen name="Noor" component={Noor} options={{ title: 'جداول نور' }} />
-            <Stack.Screen name="NoorTable" component={NoorTable} options={{ title: 'الجدول' }} />
+            <Stack.Screen name="TemplateDetail" component={TemplateDetail} />
+            <Stack.Screen name="Editor" component={Editor} />
+            <Stack.Screen name="Timetable" component={Timetable} />
+            <Stack.Screen name="Noor" component={Noor} />
+            <Stack.Screen name="NoorTable" component={NoorTable} />
           </>
         )}
       </Stack.Navigator>

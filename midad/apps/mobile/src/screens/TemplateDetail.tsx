@@ -4,7 +4,8 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Alert, Badge, Button, Card, Divider, ErrorView, Loading, Row, Screen, T } from '../ui/kit'
-import { SPACE } from '../lib/theme'
+import { AppHeader } from '../ui/AppHeader'
+import { SPACE, TYPE } from '../lib/theme'
 import { fieldSections } from '../lib/render'
 import type { Template } from '../lib/types'
 
@@ -50,11 +51,11 @@ export default function TemplateDetail() {
   }
 
   return (
-    <Screen>
+    <Screen header={<AppHeader title="القالب" back />}>
       <View style={{ gap: 10 }}>
         <Badge label={roles.find((r) => r.key === tpl.category_key)?.name_ar || tpl.category_key} tone="primary" />
-        <T size={23} weight="700">{tpl.title}</T>
-        {tpl.description ? <T size={14} color={c.text2}>{tpl.description}</T> : null}
+        <T size={TYPE.h1} weight="700">{tpl.title}</T>
+        {tpl.description ? <T size={TYPE.base} color={c.text2}>{tpl.description}</T> : null}
         <Row gap={8}>
           <Badge label={`${tpl.fields?.length || 0} حقلًا`} />
           <Badge label={`نحو ${tpl.estimated_minutes} دقائق`} />
@@ -79,14 +80,14 @@ export default function TemplateDetail() {
       )}
 
       <Card style={{ gap: SPACE.s3 }}>
-        <T size={16} weight="700">ما ستملأ</T>
+        <T size={TYPE.h3} weight="700">ما ستملأ</T>
         {sections.map((sec) => (
           <View key={sec.name} style={{ gap: 6 }}>
-            <T size={13} weight="700" color={c.primarySoftFg}>{sec.name}</T>
+            <T size={TYPE.bodyLg} weight="700" color={c.primarySoftFg}>{sec.name}</T>
             {sec.fields.map((f) => (
               <Row key={f.key} gap={8} style={{ paddingVertical: 2 }}>
-                <T size={12.5} color={c.text2}>•</T>
-                <T size={12.5} color={c.text2} style={{ flex: 1 }}>
+                <T size={TYPE.body} color={c.text2}>•</T>
+                <T size={TYPE.body} color={c.text2} style={{ flex: 1 }}>
                   {f.label}{f.required ? ' (مطلوب)' : ''}
                   {f.type === 'table' ? ' — جدول' : ''}
                 </T>

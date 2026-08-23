@@ -4,8 +4,9 @@ import { useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { Badge, Button, Card, Empty, Input, Loading, Row, T } from '../ui/kit'
+import { AppHeader } from '../ui/AppHeader'
 import { IcSearch, IcChevron, IcLock, IcLibrary } from '../ui/icons'
-import { RADIUS, SPACE } from '../lib/theme'
+import { RADIUS, SPACE, TYPE } from '../lib/theme'
 import type { Template } from '../lib/types'
 
 export default function Library() {
@@ -50,6 +51,7 @@ export default function Library() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <AppHeader title="القوالب" />
       <View style={{ padding: SPACE.s4, gap: SPACE.s3 }}>
         <View>
           <Input value={q} onChangeText={setQ} placeholder="ابحث باسم القالب — مثال: سجلّ متابعة"
@@ -69,7 +71,7 @@ export default function Library() {
                   borderWidth: 1, borderRadius: RADIUS.pill, paddingHorizontal: 14,
                   paddingVertical: 9, minHeight: 40, justifyContent: 'center',
                 }}>
-                <T size={12.5} weight="600" color={on ? c.onPrimary : c.text2}>
+                <T size={TYPE.body} weight="600" color={on ? c.onPrimary : c.text2}>
                   {ch.label} ({ch.n})
                 </T>
               </Pressable>
@@ -105,14 +107,14 @@ export default function Library() {
                   <Badge label={roles.find((r) => r.key === item.category_key)?.name_ar || item.category_key} tone="primary" />
                   {lk ? <Badge label="باقة المدرسة" /> : item.is_new ? <Badge label="جديد" tone="info" /> : null}
                 </Row>
-                <T size={15.5} weight="700">{item.title}</T>
-                {item.description ? <T size={12.5} color={c.text2} numberOfLines={2}>{item.description}</T> : null}
+                <T size={TYPE.h3} weight="700">{item.title}</T>
+                {item.description ? <T size={TYPE.body} color={c.text2} numberOfLines={2}>{item.description}</T> : null}
                 <Row style={{ justifyContent: 'space-between' }}>
-                  <T size={11.5} color={c.text3}>
+                  <T size={TYPE.small} color={c.text3}>
                     {item.fields?.length || 0} حقلًا · نحو {item.estimated_minutes} دقائق
                   </T>
                   <Row gap={5}>
-                    <T size={12.5} weight="700" color={lk ? c.text3 : c.primary}>{lk ? 'ارفع باقتك' : 'ابدأ'}</T>
+                    <T size={TYPE.body} weight="700" color={lk ? c.text3 : c.primary}>{lk ? 'ارفع باقتك' : 'ابدأ'}</T>
                     {lk ? <IcLock size={14} color={c.text3} /> : <IcChevron size={14} color={c.primary} />}
                   </Row>
                 </Row>
