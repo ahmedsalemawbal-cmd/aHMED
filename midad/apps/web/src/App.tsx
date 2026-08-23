@@ -56,8 +56,12 @@ import NotFound from './pages/site/NotFound'
 
 function FullLoader() {
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--mdd-accent)' }}>
+    <div style={{
+      minHeight: '100vh', display: 'grid', placeItems: 'center',
+      gap: 14, alignContent: 'center', color: 'var(--mdd-accent)',
+    }}>
       <IcSpinner size={34} />
+      <span style={{ fontSize: 13, color: 'var(--mdd-text-3)' }}>جارٍ فتح مِداد…</span>
     </div>
   )
 }
@@ -86,8 +90,6 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { ready } = useApp()
-  if (!ready) return <FullLoader />
   return (
     <Routes>
       <Route element={<SiteLayout />}>

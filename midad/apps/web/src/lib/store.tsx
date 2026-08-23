@@ -22,6 +22,7 @@ interface AppValue {
   access: AccessState
   isAdmin: boolean
   ready: boolean
+  offline: boolean
   theme: ThemeMode
   setTheme: (t: ThemeMode) => void
   refresh: () => Promise<void>
@@ -55,6 +56,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [payment, setPayment] = useState<PublicPaymentSettings>(DEFAULT_PAYMENT)
   const [isAdmin, setIsAdmin] = useState(false)
   const [ready, setReady] = useState(false)
+  const [offline, setOffline] = useState(false)
   const [theme, setThemeState] = useState<ThemeMode>(getTheme())
   const [toastMsg, setToastMsg] = useState<{ msg: string; kind: 'ok' | 'danger' } | null>(null)
   const toastTimer = useRef<any>(null)
@@ -73,21 +75,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const loadPublic = useCallback(async () => {
-    const [p, r, s] = await Promise.all([
-      supabase.from('plans').select('*').eq('is_active', true).order('sort'),
-      supabase.from('roles').select('*').order('sort'),
-      supabase.from('platform_settings').select('key,value'),
-    ])
-    if (p.data) setPlans(p.data as Plan[])
-    if (r.data) setRoles(r.data as Role[])
-    for (const row of (s.data || []) as any[]) {
-      if (row.key === 'general') setGeneral({ ...DEFAULT_GENERAL, ...row.value })
-      if (row.key === 'payment_public') setPayment({ ...DEFAULT_PAYMENT, ...row.value })
+    try {
+      const [p, r, s] = await Promise.all([
+        supabase.from('plans').select('*').eq('is_active', true).order('sort'),
+        supabase.from('roles').select('*').order('sort'),
+        supabase.from('platform_settings').select('key,value'),
+      ])
+      if (p.data) setPlans(p.data as Plan[])
+      if (r.data) setRoles(r.data as Role[])
+      for (const row of (s.data || []) as any[]) {
+        if (row.key === 'general') setGeneral({ ...DEFAULT_GENERAL, ...row.value })
+        if (row.key === 'payment_public') setPayment({ ...DEFAULT_PAYMENT, ...row.value })
+      }
+      setOffline(false)
+    } catch {
+      // انقطاع الشبكة لا يمنع عرض المنتج — نكمل بالقيم الافتراضية ونُظهر شريط انقطاع
+      setOffline(true)
     }
   }, [])
 
   const loadMe = useCallback(async (uid: string | undefined) => {
     if (!uid) { setProfile(null); setSubscriber(null); setIsAdmin(false); return }
+    try {
     const { data: prof } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
     setProfile((prof as Profile) || null)
     if (prof?.theme_pref && ['light', 'dark', 'auto'].includes(prof.theme_pref)) {
@@ -99,6 +108,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else setSubscriber(null)
     const { data: adm } = await supabase.from('platform_admins').select('user_id').eq('user_id', uid).maybeSingle()
     setIsAdmin(!!adm)
+    setOffline(false)
+    } catch {
+      setOffline(true)
+    }
   }, [])
 
   const refresh = useCallback(async () => {
@@ -110,18 +123,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     applyTheme(getTheme())
     let alive = true
+    // حارس: مهما تعطّلت الشبكة، الواجهة تُعرض خلال 7 ثوانٍ ولا تبقى دوّارةً إلى الأبد
+    const guard = setTimeout(() => { if (alive) { setOffline(true); setReady(true) } }, 4000)
     ;(async () => {
-      const { data } = await supabase.auth.getSession()
-      if (!alive) return
-      setSession(data.session)
-      await Promise.all([loadPublic(), loadMe(data.session?.user?.id)])
-      if (alive) setReady(true)
+      try {
+        const { data } = await supabase.auth.getSession()
+        if (!alive) return
+        setSession(data.session)
+        await Promise.all([loadPublic(), loadMe(data.session?.user?.id)])
+      } catch {
+        if (alive) setOffline(true)
+      } finally {
+        if (alive) { clearTimeout(guard); setReady(true) }
+      }
     })()
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s)
       loadMe(s?.user?.id)
     })
-    return () => { alive = false; sub.subscription.unsubscribe() }
+    return () => { alive = false; clearTimeout(guard); sub.subscription.unsubscribe() }
   }, [loadPublic, loadMe])
 
   const signIn = useCallback(async (phone: string, password: string) => {
@@ -167,11 +187,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppValue = {
     session, profile, subscriber, plan, plans, roles, general, payment,
-    trialDays, access, isAdmin, ready, theme, setTheme, refresh, signIn, signOut, toast,
+    trialDays, access, isAdmin, ready, offline, theme, setTheme, refresh, signIn, signOut, toast,
   }
 
   return (
     <Ctx.Provider value={value}>
+      {offline && (
+        <div className="mdd-offline" role="status">
+          لا اتّصال بالخادم — بعض البيانات قد لا تظهر. سنحفظ عملك حين يعود.
+        </div>
+      )}
       {children}
       {toastMsg && (
         <div className={'mdd-toast' + (toastMsg.kind === 'danger' ? ' mdd-toast--danger' : '')} role="status">
