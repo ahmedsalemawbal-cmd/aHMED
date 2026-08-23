@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مِداد</title>
+<style>
+  :root {
+    --bg:#f2f5f1; --card:#fff; --sunken:#eef1ed; --border:#dfe4dd;
+    --text:#222924; --text2:#5d6660; --text3:#727b75;
+    --accent:#1f7a4d; --accent-soft:#e2f4e8; --accent-soft-fg:#155e3c; --on-accent:#fff;
+    --danger:#b32d20; --danger-soft:#fae5e2; --success:#1c7346; --success-soft:#e1f4e7;
+    --warn:#8a6410; --warn-soft:#f8efd9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#151b17; --card:#1d241f; --sunken:#191f1b; --border:#333c36;
+      --text:#e9efe9; --text2:#b3bdb6; --text3:#909a94;
+      --accent:#4ec98a; --accent-soft:#26402f; --accent-soft-fg:#a9e8c4; --on-accent:#0d1410;
+      --danger:#e1705f; --danger-soft:#3d2622; --success:#5ad294; --success-soft:#22402f;
+      --warn:#e0b552; --warn-soft:#3a3120;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    width: 360px; margin: 0; padding: 14px;
+    font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 13.5px; line-height: 1.7;
+  }
+  .head { display: flex; align-items: center; gap: 9px; margin-block-end: 14px; }
+  .logo {
+    width: 30px; height: 30px; border-radius: 9px; background: var(--accent);
+    color: var(--on-accent); display: grid; place-items: center; font-weight: 700; font-size: 15px;
+  }
+  .brand { font-weight: 700; font-size: 15px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); margin-inline-start: auto; }
+  .dot.on { background: var(--success); }
+  .dot.off { background: var(--danger); }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px; margin-block-end: 10px;
+  }
+  label { display: block; font-size: 11.5px; font-weight: 600; color: var(--text2); margin-block-end: 6px; }
+  input {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 9px;
+    background: var(--card); color: var(--text); font-size: 13px; font-family: inherit;
+    direction: ltr; text-align: start;
+  }
+  input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  button {
+    width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--accent);
+    background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 13.5px;
+    cursor: pointer; font-family: inherit; min-height: 42px;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.06); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--accent); border-color: var(--border); }
+  button.small { padding: 8px 12px; font-size: 12.5px; min-height: 36px; width: auto; }
+  .row { display: flex; align-items: center; gap: 9px; }
+  .between { justify-content: space-between; }
+  .muted { color: var(--text3); font-size: 11.5px; }
+  .t { font-weight: 700; font-size: 13.5px; }
+  .msg { padding: 10px 12px; border-radius: 9px; font-size: 12.5px; margin-block-end: 10px; }
+  .msg.err { background: var(--danger-soft); color: var(--danger); }
+  .msg.ok { background: var(--success-soft); color: var(--success); }
+  .msg.warn { background: var(--warn-soft); color: var(--warn); }
+  .tbl { border: 1px solid var(--border); border-radius: 10px; padding: 11px; margin-block-end: 8px; background: var(--card); }
+  .hide { display: none; }
+  a { color: var(--accent); font-weight: 600; font-size: 12px; text-decoration: none; }
+  .foot { display: flex; justify-content: space-between; padding-block-start: 10px; border-block-start: 1px solid var(--border); }
+  .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid currentColor;
+          border-inline-start-color: transparent; border-radius: 50%; animation: sp .8s linear infinite; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="head">
+    <span class="logo">م</span>
+    <span class="brand">مِداد</span>
+    <span class="dot" id="dot" title="حالة الاتّصال"></span>
+  </div>
+
+  <div id="msg"></div>
+
+  <!-- غير مربوطة -->
+  <section id="link" class="hide">
+    <div class="card">
+      <label for="key">مفتاح الربط</label>
+      <input id="key" placeholder="MDD-XXXXXXXX-XXXXXXXX-XXXXXXXX" autocomplete="off" spellcheck="false">
+      <p class="muted" style="margin:8px 0 10px">
+        انسخ المفتاح من مِداد: جداول نور ← الإضافة ومفتاح الربط. وهو صالحٌ 90 يومًا ويمكن إلغاؤه في أيّ لحظة.
+      </p>
+      <button id="btnLink">اربط الإضافة</button>
+    </div>
+  </section>
+
+  <!-- مربوطة -->
+  <section id="linked" class="hide">
+    <div id="who" class="card">
+      <div class="row between">
+        <span class="t" id="subName">—</span>
+        <button class="ghost small" id="btnUnlink">فكّ الربط</button>
+      </div>
+      <p class="muted" id="userName"></p>
+    </div>
+
+    <div id="found"></div>
+
+    <div id="none" class="card hide">
+      <p class="t">لم نجد جدولًا في هذه الصفحة</p>
+      <p class="muted">افتح كشفًا في نور (كشف الطلاب أو الدرجات أو الحضور) ثمّ اضغط أيقونة مِداد مرّةً أخرى.</p>
+    </div>
+  </section>
+
+  <div class="foot">
+    <a id="openApp" href="#" target="_blank">افتح مِداد</a>
+    <span class="muted">الإصدار 1.0.0</span>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

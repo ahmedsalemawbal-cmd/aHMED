@@ -1,0 +1,115 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { FlatList, Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useApp } from '../lib/store'
+import { supabase } from '../lib/supabase'
+import { Badge, Button, Card, Empty, Input, Loading, Row, T } from '../ui/kit'
+import { RADIUS, SPACE } from '../lib/theme'
+import type { Template } from '../lib/types'
+
+export default function Library() {
+  const { c, roles, plan } = useApp()
+  const nav = useNavigation<any>()
+  const [all, setAll] = useState<Template[]>([])
+  const [q, setQ] = useState('')
+  const [cat, setCat] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const load = useCallback(async () => {
+    const { data } = await supabase.from('templates').select('*')
+      .eq('status', 'published').order('sort').order('title')
+    setAll((data || []) as Template[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const allowed = plan?.template_categories?.length ? plan.template_categories : null
+  const locked = (t: Template) => !!allowed && !allowed.includes(t.category_key)
+
+  const counts = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const t of all) m.set(t.category_key, (m.get(t.category_key) || 0) + 1)
+    return m
+  }, [all])
+
+  const chips = useMemo(() => ([
+    { key: 'all', label: 'الكلّ', n: all.length },
+    ...roles.map((r) => ({ key: r.key, label: r.name_ar, n: counts.get(r.key) || 0 })).filter((x) => x.n > 0),
+  ]), [roles, counts, all.length])
+
+  const shown = useMemo(() => {
+    let list = all
+    if (cat !== 'all') list = list.filter((t) => t.category_key === cat)
+    const term = q.trim()
+    if (term) list = list.filter((t) => t.title.includes(term) || (t.description || '').includes(term))
+    return list
+  }, [all, cat, q])
+
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <View style={{ padding: SPACE.s4, gap: SPACE.s3 }}>
+        <Input value={q} onChangeText={setQ} placeholder="ابحث باسم القالب — مثال: سجلّ متابعة" />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8 }}>
+          {chips.map((ch) => {
+            const on = cat === ch.key
+            return (
+              <Pressable key={ch.key} onPress={() => setCat(ch.key)}
+                style={{
+                  backgroundColor: on ? c.accent : c.card, borderColor: on ? c.accent : c.border,
+                  borderWidth: 1, borderRadius: RADIUS.pill, paddingHorizontal: 14,
+                  paddingVertical: 9, minHeight: 40, justifyContent: 'center',
+                }}>
+                <T size={12.5} weight="600" color={on ? c.onAccent : c.text2}>
+                  {ch.label} ({ch.n})
+                </T>
+              </Pressable>
+            )
+          })}
+        </ScrollView>
+      </View>
+
+      {loading ? <Loading label="جارٍ تحميل المكتبة…" /> : (
+        <FlatList
+          data={shown}
+          keyExtractor={(t) => t.id}
+          contentContainerStyle={{ padding: SPACE.s4, paddingTop: 0, paddingBottom: SPACE.s8, gap: SPACE.s3 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} tintColor={c.accent}
+              onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false) }} />
+          }
+          ListEmptyComponent={
+            <Empty
+              title={q ? `لم نجد قالبًا باسم «${q}»` : 'لا قوالب في هذه الفئة'}
+              line="جرّب كلمةً أقصر، أو امسح الفئة، أو تصفّح كلّ الفئات."
+              action={<Button label="امسح البحث" variant="primary" onPress={() => { setQ(''); setCat('all') }} />}
+            />
+          }
+          renderItem={({ item }) => {
+            const lk = locked(item)
+            return (
+              <Card
+                onPress={() => nav.navigate('TemplateDetail', { slug: item.slug })}
+                style={{ gap: 10, opacity: lk ? 0.7 : 1 }}>
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <Badge label={roles.find((r) => r.key === item.category_key)?.name_ar || item.category_key} tone="accent" />
+                  {lk ? <Badge label="باقة المدرسة" /> : item.is_new ? <Badge label="جديد" tone="info" /> : null}
+                </Row>
+                <T size={15.5} weight="700">{item.title}</T>
+                {item.description ? <T size={12.5} color={c.text2} numberOfLines={2}>{item.description}</T> : null}
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <T size={11.5} color={c.text3}>
+                    {item.fields?.length || 0} حقلًا · نحو {item.estimated_minutes} دقائق
+                  </T>
+                  <T size={12.5} weight="700" color={c.accent}>{lk ? 'ارفع باقتك' : 'ابدأ ←'}</T>
+                </Row>
+              </Card>
+            )
+          }}
+        />
+      )}
+    </View>
+  )
+}
