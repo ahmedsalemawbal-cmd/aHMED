@@ -28,12 +28,12 @@ export default function Login() {
         keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: 'center', gap: 12, marginBottom: SPACE.s4 }}>
           <View style={{
-            width: 78, height: 78, borderRadius: 24, backgroundColor: c.accent,
+            width: 78, height: 78, borderRadius: 24, backgroundColor: c.primary,
             alignItems: 'center', justifyContent: 'center',
-            shadowColor: c.accentDeep, shadowOpacity: 0.28, shadowRadius: 18,
+            shadowColor: c.primaryDeep, shadowOpacity: 0.28, shadowRadius: 18,
             shadowOffset: { width: 0, height: 8 }, elevation: 6,
           }}>
-            <IcLogo size={46} color={c.onAccent} />
+            <IcLogo size={46} color={c.onPrimary} />
           </View>
           <T size={26} weight="700" align="center">مِـداد</T>
           <T size={13.5} color={c.text2} align="center">
@@ -55,7 +55,7 @@ export default function Login() {
           textContentType="password" onSubmitEditing={submit} returnKeyType="go"
         />
         <Button label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} variant="ghost" small
-          icon={show ? <IcEyeOff size={15} color={c.accent} /> : <IcEye size={15} color={c.accent} />}
+          icon={show ? <IcEyeOff size={15} color={c.primary} /> : <IcEye size={15} color={c.primary} />}
           onPress={() => setShow((v) => !v)} style={{ alignSelf: 'flex-start' }} />
 
         <Button label="دخول" variant="primary" onPress={submit} loading={busy} />
@@ -68,7 +68,7 @@ export default function Login() {
             التسجيل والاشتراك يتمّان من موقع مِداد — سبعة أيّام تجربة بلا بطاقة، ثمّ تدخل هنا بجوّالك.
           </T>
           <Button label="افتح موقع مِداد" variant="soft" small
-            icon={<IcExternal size={14} color={c.accentSoftFg} />}
+            icon={<IcExternal size={14} color={c.primarySoftFg} />}
             onPress={() => Linking.openURL(WEB_APP_URL + '/#/join')} />
         </View>
 

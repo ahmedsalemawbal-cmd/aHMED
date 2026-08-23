@@ -146,7 +146,7 @@ export default function Editor() {
         </Card>
 
         {readOnly && <Alert tone="warn">انتهى اشتراكك — يمكنك القراءة والتصدير، ولا يُحفظ أيّ تعديل.</Alert>}
-        {notice && <Alert tone="accent">{notice}</Alert>}
+        {notice && <Alert tone="primary">{notice}</Alert>}
 
         {sections.map((sec) => {
           const isOpen = open[sec.name] !== false
@@ -191,7 +191,7 @@ export default function Editor() {
         <Button label="حفظ" variant="secondary" style={{ flex: 1 }}
           onPress={() => { dirty.current = true; persist() }} />
         <Button label="تصدير PDF" variant="primary" style={{ flex: 1 }}
-          icon={<IcDownload size={16} color={c.onAccent} />}
+          icon={<IcDownload size={16} color={c.onPrimary} />}
           loading={exporting} onPress={exportPdf} />
       </View>
     </KeyboardAvoidingView>
@@ -232,7 +232,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
           </View>
         ))}
         {!readOnly && (
-          <Button label="أضف صفًّا" variant="soft" small icon={<IcPlus size={14} color={c.accentSoftFg} />}
+          <Button label="أضف صفًّا" variant="soft" small icon={<IcPlus size={14} color={c.primarySoftFg} />}
             onPress={() => onChange([...rows, emptyRow(cols)])} style={{ alignSelf: 'flex-start' }} />
         )}
       </View>
@@ -251,11 +251,11 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
             return (
               <Pressable key={o} disabled={readOnly} onPress={() => onChange(o)}
                 style={{
-                  backgroundColor: on ? c.accent : c.card, borderColor: on ? c.accent : c.border,
+                  backgroundColor: on ? c.primary : c.card, borderColor: on ? c.primary : c.border,
                   borderWidth: 1, borderRadius: RADIUS.pill, paddingHorizontal: 14,
                   paddingVertical: 9, minHeight: 40, justifyContent: 'center',
                 }}>
-                <T size={12.5} weight="600" color={on ? c.onAccent : c.text2}>{o}</T>
+                <T size={12.5} weight="600" color={on ? c.onPrimary : c.text2}>{o}</T>
               </Pressable>
             )
           })}
@@ -274,7 +274,7 @@ function FieldRow({ field, value, onChange, onImprove, improving, readOnly }: {
           </T>
           {onImprove && !readOnly && (
             <Button label="حسّن" variant="soft" small onPress={onImprove} loading={improving}
-              icon={<IcSpark size={14} color={c.accentSoftFg} />} />
+              icon={<IcSpark size={14} color={c.primarySoftFg} />} />
           )}
         </Row>
         <Input value={String(value ?? '')} onChangeText={onChange} multiline numberOfLines={4}

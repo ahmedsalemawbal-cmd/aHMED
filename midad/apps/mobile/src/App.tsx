@@ -38,7 +38,7 @@ function Tabs() {
         headerTitleStyle: { color: c.text, fontFamily: fontFor('700'), fontSize: 17 },
         headerTintColor: c.text,
         tabBarStyle: { backgroundColor: c.card, borderTopColor: c.border, height: 62, paddingBottom: 8, paddingTop: 6 },
-        tabBarActiveTintColor: c.accent,
+        tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.text3,
         tabBarLabelStyle: { fontSize: 11, fontFamily: fontFor('600') },
       }}>
@@ -63,14 +63,14 @@ function Root() {
     ...(isDark ? DarkTheme : DefaultTheme),
     colors: {
       ...(isDark ? DarkTheme : DefaultTheme).colors,
-      background: c.bg, card: c.card, text: c.text, border: c.border, primary: c.accent,
+      background: c.bg, card: c.card, text: c.text, border: c.border, primary: c.primary,
     },
   }
 
   if (!ready || access === 'loading') {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg }}>
-        <ActivityIndicator size="large" color={c.accent} />
+        <ActivityIndicator size="large" color={c.primary} />
       </View>
     )
   }

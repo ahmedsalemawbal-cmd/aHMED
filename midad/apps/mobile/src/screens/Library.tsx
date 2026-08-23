@@ -65,11 +65,11 @@ export default function Library() {
             return (
               <Pressable key={ch.key} onPress={() => setCat(ch.key)}
                 style={{
-                  backgroundColor: on ? c.accent : c.card, borderColor: on ? c.accent : c.border,
+                  backgroundColor: on ? c.primary : c.card, borderColor: on ? c.primary : c.border,
                   borderWidth: 1, borderRadius: RADIUS.pill, paddingHorizontal: 14,
                   paddingVertical: 9, minHeight: 40, justifyContent: 'center',
                 }}>
-                <T size={12.5} weight="600" color={on ? c.onAccent : c.text2}>
+                <T size={12.5} weight="600" color={on ? c.onPrimary : c.text2}>
                   {ch.label} ({ch.n})
                 </T>
               </Pressable>
@@ -84,7 +84,7 @@ export default function Library() {
           keyExtractor={(t) => t.id}
           contentContainerStyle={{ padding: SPACE.s4, paddingTop: 0, paddingBottom: SPACE.s8, gap: SPACE.s3 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} tintColor={c.accent}
+            <RefreshControl refreshing={refreshing} tintColor={c.primary}
               onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false) }} />
           }
           ListEmptyComponent={
@@ -102,7 +102,7 @@ export default function Library() {
                 onPress={() => nav.navigate('TemplateDetail', { slug: item.slug })}
                 style={{ gap: 10, opacity: lk ? 0.7 : 1 }}>
                 <Row style={{ justifyContent: 'space-between' }}>
-                  <Badge label={roles.find((r) => r.key === item.category_key)?.name_ar || item.category_key} tone="accent" />
+                  <Badge label={roles.find((r) => r.key === item.category_key)?.name_ar || item.category_key} tone="primary" />
                   {lk ? <Badge label="باقة المدرسة" /> : item.is_new ? <Badge label="جديد" tone="info" /> : null}
                 </Row>
                 <T size={15.5} weight="700">{item.title}</T>
@@ -112,8 +112,8 @@ export default function Library() {
                     {item.fields?.length || 0} حقلًا · نحو {item.estimated_minutes} دقائق
                   </T>
                   <Row gap={5}>
-                    <T size={12.5} weight="700" color={lk ? c.text3 : c.accent}>{lk ? 'ارفع باقتك' : 'ابدأ'}</T>
-                    {lk ? <IcLock size={14} color={c.text3} /> : <IcChevron size={14} color={c.accent} />}
+                    <T size={12.5} weight="700" color={lk ? c.text3 : c.primary}>{lk ? 'ارفع باقتك' : 'ابدأ'}</T>
+                    {lk ? <IcLock size={14} color={c.text3} /> : <IcChevron size={14} color={c.primary} />}
                   </Row>
                 </Row>
               </Card>

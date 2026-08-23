@@ -50,7 +50,7 @@ export default function Noor() {
       keyExtractor={(t) => t.id}
       contentContainerStyle={{ padding: SPACE.s4, gap: SPACE.s3, paddingBottom: SPACE.s8 }}
       refreshControl={
-        <RefreshControl refreshing={refreshing} tintColor={c.accent}
+        <RefreshControl refreshing={refreshing} tintColor={c.primary}
           onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false) }} />
       }
       ListHeaderComponent={
@@ -108,10 +108,10 @@ function Step({ n, title, line, action }: { n: number; title: string; line: stri
     <Card style={{ gap: 10 }}>
       <Row gap={10}>
         <View style={{
-          width: 28, height: 28, borderRadius: 9, backgroundColor: c.accent,
+          width: 28, height: 28, borderRadius: 9, backgroundColor: c.primary,
           alignItems: 'center', justifyContent: 'center',
         }}>
-          <T size={13} weight="700" color={c.onAccent}>{n}</T>
+          <T size={13} weight="700" color={c.onPrimary}>{n}</T>
         </View>
         <T size={15} weight="700" style={{ flex: 1 }}>{title}</T>
       </Row>

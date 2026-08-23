@@ -147,14 +147,14 @@ th{background:#f1f1f1}.s{display:flex;gap:8mm;margin-top:5mm;font-size:10pt}</st
             return (
               <Pressable key={p.id} onPress={() => setActiveId(p.id)}
                 style={{
-                  backgroundColor: on ? c.accent : c.sunken,
-                  borderColor: on ? c.accent : c.border, borderWidth: 1,
+                  backgroundColor: on ? c.primary : c.sunken,
+                  borderColor: on ? c.primary : c.border, borderWidth: 1,
                   borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 9, minWidth: 96,
                 }}>
-                <T size={13} weight="700" color={on ? c.onAccent : c.text} align="center">
+                <T size={13} weight="700" color={on ? c.onPrimary : c.text} align="center">
                   {p.classes?.name || '—'}
                 </T>
-                <T size={10.5} color={on ? c.onAccent : c.text3} align="center">
+                <T size={10.5} color={on ? c.onPrimary : c.text3} align="center">
                   الحصّة {p.slot} · {p.starts_at?.slice(0, 5)}
                 </T>
               </Pressable>
@@ -236,7 +236,7 @@ th{background:#f1f1f1}.s{display:flex;gap:8mm;margin-top:5mm;font-size:10pt}</st
         <Button label="علِّم الكلّ حاضرًا" variant="secondary" style={{ flex: 1 }}
           icon={<IcCheck size={15} color={c.text} />} onPress={markAll} disabled={!students.length} />
         <Button label="ولّد كشفًا" variant="soft" style={{ flex: 0.8 }}
-          icon={<IcPrint size={15} color={c.accentSoftFg} />} onPress={exportSheet} disabled={!students.length} />
+          icon={<IcPrint size={15} color={c.primarySoftFg} />} onPress={exportSheet} disabled={!students.length} />
         <Button label="احفظ الرصد" variant="primary" style={{ flex: 1 }}
           loading={busy} disabled={!students.length} onPress={save} />
       </View>

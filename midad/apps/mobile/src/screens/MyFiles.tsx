@@ -53,7 +53,7 @@ export default function MyFiles() {
         keyExtractor={(d) => d.id}
         contentContainerStyle={{ padding: SPACE.s4, paddingTop: docs.length ? 0 : SPACE.s4, gap: SPACE.s3, paddingBottom: SPACE.s8 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} tintColor={c.accent}
+          <RefreshControl refreshing={refreshing} tintColor={c.primary}
             onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false) }} />
         }
         ListEmptyComponent={

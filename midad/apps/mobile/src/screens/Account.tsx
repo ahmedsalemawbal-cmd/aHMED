@@ -43,7 +43,7 @@ export default function Account() {
             <T size={12.5} color={c.text2}>{roleName} · {subscriber?.name}</T>
             <Row gap={8}>
               <Badge label={stateLabel} tone={stateTone as any} />
-              {profile?.is_owner && <Badge label="صاحب الحساب" tone="accent" />}
+              {profile?.is_owner && <Badge label="صاحب الحساب" tone="primary" />}
             </Row>
           </View>
         </Row>
@@ -68,7 +68,7 @@ export default function Account() {
           <Alert tone="danger">انتهى اشتراكك. ملفّاتك محفوظة كلّها وتعود إليك فور التجديد.</Alert>
         )}
         <Button label="افتح الاشتراك والفواتير" variant="primary"
-          icon={<IcExternal size={16} color={c.onAccent} />}
+          icon={<IcExternal size={16} color={c.onPrimary} />}
           onPress={() => Linking.openURL(WEB_APP_URL + '/#/app/subscription')} />
         <T size={11.5} color={c.text3}>
           الدفع والفواتير من الموقع — يفتح في متصفّح جوّالك بحسابك نفسه.

@@ -52,11 +52,11 @@ export default function Dashboard() {
   const isSolo = subscriber?.account_type === 'teacher'
 
   return (
-    <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.accent} />}>
+    <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />}>
       <View style={{ gap: 4 }}>
         <T size={22} weight="700">{greeting()}، {(profile?.full_name || '').split(' ')[0]}</T>
         <T size={12.5} color={c.text3}>{fmtBoth(new Date())}</T>
-        {roleName ? <Badge label={roleName} tone="accent" /> : null}
+        {roleName ? <Badge label={roleName} tone="primary" /> : null}
       </View>
 
       {access === 'trial' && (
@@ -93,13 +93,13 @@ export default function Dashboard() {
             const isNow = !!now
             return (
               <Card style={{
-                gap: 12, borderColor: isNow ? c.accent : c.border,
+                gap: 12, borderColor: isNow ? c.primary : c.border,
                 borderWidth: isNow ? 2 : 1,
               }}>
                 <Row style={{ justifyContent: 'space-between' }}>
                   <Row gap={8}>
-                    <IcClock size={16} color={isNow ? c.accent : c.text3} />
-                    <T size={12.5} weight="700" color={isNow ? c.accent : c.text3}>
+                    <IcClock size={16} color={isNow ? c.primary : c.text3} />
+                    <T size={12.5} weight="700" color={isNow ? c.primary : c.text3}>
                       {isNow ? 'الآن' : 'التالية'} · الحصّة {live.slot}
                     </T>
                   </Row>
@@ -110,7 +110,7 @@ export default function Dashboard() {
                 <T size={17} weight="700">{live.subject} — {live.classes?.name || ''}</T>
                 {live.room ? <T size={12} color={c.text3}>{live.room}</T> : null}
                 <Button label="ابدأ رصد الحضور" variant={isNow ? 'primary' : 'soft'} small
-                  icon={<IcCheck size={15} color={isNow ? c.onAccent : c.accentSoftFg} />}
+                  icon={<IcCheck size={15} color={isNow ? c.onPrimary : c.primarySoftFg} />}
                   onPress={() => nav.navigate('الرصد', { periodId: live.id })}
                   style={{ alignSelf: 'flex-start' }} />
               </Card>
@@ -119,10 +119,10 @@ export default function Dashboard() {
 
           <Card onPress={() => nav.navigate('القوالب')} style={{ gap: 12 }}>
             <View style={{
-              width: 44, height: 44, borderRadius: 13, backgroundColor: c.accentSoft,
+              width: 44, height: 44, borderRadius: 13, backgroundColor: c.primarySoft,
               alignItems: 'center', justifyContent: 'center',
             }}>
-              <IcLibrary size={22} color={c.accentSoftFg} />
+              <IcLibrary size={22} color={c.primarySoftFg} />
             </View>
             <T size={17} weight="700">ابدأ ملفًّا جديدًا</T>
             <T size={13} color={c.text2}>
@@ -134,12 +134,12 @@ export default function Dashboard() {
 
           <Row gap={12}>
             <Card onPress={() => nav.navigate('Timetable')} style={{ flex: 1, gap: 8, padding: SPACE.s4 }}>
-              <IcTable size={20} color={c.accent} />
+              <IcTable size={20} color={c.primary} />
               <T size={14} weight="700">جدولي</T>
               <T size={11.5} color={c.text3}>{periods.length} حصّة أسبوعيًّا</T>
             </Card>
             <Card onPress={() => nav.navigate('Noor')} style={{ flex: 1, gap: 8, padding: SPACE.s4 }}>
-              <IcFiles size={20} color={c.accent} />
+              <IcFiles size={20} color={c.primary} />
               <T size={14} weight="700">جداول نور</T>
               <T size={11.5} color={c.text3}>{noor} جدولًا</T>
             </Card>

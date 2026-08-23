@@ -1,10 +1,10 @@
 import React from 'react'
 import {
-  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput,
+  ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput,
   TextInputProps, View, ViewStyle,
 } from 'react-native'
 import { useApp } from '../lib/store'
-import { RADIUS, SPACE, fontFor } from '../lib/theme'
+import { RADIUS, SPACE, TYPE, fontFor, elevation } from '../lib/theme'
 import { initials } from '../lib/format'
 import { IcFiles } from './icons'
 
@@ -28,8 +28,8 @@ export function T({ children, size = 14, weight = '400', color, style, numberOfL
 export function Card({ children, style, onPress }: { children: React.ReactNode; style?: ViewStyle; onPress?: () => void }) {
   const { c } = useApp()
   const base: ViewStyle = {
-    backgroundColor: c.card, borderColor: c.border, borderWidth: 1,
-    borderRadius: RADIUS.lg, padding: SPACE.s5,
+    backgroundColor: c.card, borderRadius: RADIUS.lg, padding: SPACE.s5,
+    ...elevation(c, 1),
   }
   if (onPress) {
     return (
@@ -41,36 +41,50 @@ export function Card({ children, style, onPress }: { children: React.ReactNode; 
   return <View style={[base, style]}>{children}</View>
 }
 
-type BtnVariant = 'primary' | 'secondary' | 'soft' | 'danger' | 'ghost'
-export function Button({ label, onPress, variant = 'secondary', loading, disabled, style, small, icon }: {
-  label: string; onPress?: () => void; variant?: BtnVariant; loading?: boolean
-  disabled?: boolean; style?: ViewStyle; small?: boolean; icon?: React.ReactNode
+type BtnVariant = 'primary' | 'secondary' | 'soft' | 'danger' | 'ghost' | 'tint'
+export function Button({ label, onPress, variant = 'secondary', loading, disabled, style, small, icon, tint }: {
+  label?: string; onPress?: () => void; variant?: BtnVariant; loading?: boolean
+  disabled?: boolean; style?: ViewStyle; small?: boolean; icon?: React.ReactNode; tint?: string
 }) {
   const { c } = useApp()
   const map: Record<BtnVariant, { bg: string; fg: string; border: string }> = {
-    primary: { bg: c.accent, fg: c.onAccent, border: c.accent },
+    primary: { bg: c.primary, fg: c.onPrimary, border: c.primary },
     secondary: { bg: c.card, fg: c.text, border: c.borderStrong },
-    soft: { bg: c.accentSoft, fg: c.accentSoftFg, border: 'transparent' },
+    soft: { bg: c.primarySoft, fg: c.primarySoftFg, border: 'transparent' },
     danger: { bg: c.dangerSoft, fg: c.danger, border: 'transparent' },
-    ghost: { bg: 'transparent', fg: c.accent, border: 'transparent' },
+    ghost: { bg: 'transparent', fg: c.primary, border: 'transparent' },
+    tint: { bg: (tint || c.primary) + '1F', fg: tint || c.primary, border: 'transparent' },
   }
   const s = map[variant]
   const off = disabled || loading
+  const iconOnly = !label
   return (
     <Pressable
       onPress={onPress} disabled={off}
       style={({ pressed }) => [{
         backgroundColor: s.bg, borderColor: s.border, borderWidth: 1,
         borderRadius: small ? RADIUS.sm : RADIUS.md,
-        paddingVertical: small ? 9 : 13, paddingHorizontal: small ? 14 : 20,
-        minHeight: small ? 38 : 48, flexDirection: 'row-reverse',
-        alignItems: 'center', justifyContent: 'center', gap: 8,
-        opacity: off ? 0.55 : pressed ? 0.82 : 1,
-      }, style]}>
+        paddingVertical: small ? 9 : 12,
+        paddingHorizontal: iconOnly ? 0 : (small ? 12 : 16),
+        width: iconOnly ? (small ? 36 : 44) : undefined,
+        minHeight: small ? 36 : 46, flexDirection: 'row-reverse',
+        alignItems: 'center', justifyContent: 'center', gap: label && icon ? 7 : 0,
+        opacity: off ? 0.5 : pressed ? 0.82 : 1,
+      }, variant === 'primary' && !off ? elevation(c, 1) : null, style]}>
       {loading ? <ActivityIndicator size="small" color={s.fg} /> : icon}
-      <Text style={{ color: s.fg, fontFamily: fontFor('700'), fontSize: small ? 13 : 14.5, writingDirection: 'rtl' }}>
-        {label}
-      </Text>
+      {label ? (
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.82}
+          style={{
+            color: s.fg, fontFamily: fontFor('700'),
+            fontSize: small ? TYPE.body : TYPE.base,
+            writingDirection: 'rtl', flexShrink: 1,
+          }}>
+          {label}
+        </Text>
+      ) : null}
     </Pressable>
   )
 }
@@ -86,9 +100,9 @@ export function Input({ label, help, error, style, ...rest }: TextInputProps & {
         placeholderTextColor={c.text3}
         {...rest}
         style={[{
-          borderWidth: 1, borderColor: error ? c.danger : c.border, borderRadius: 11,
-          backgroundColor: c.card, color: c.text, paddingHorizontal: 13, paddingVertical: 12,
-          fontSize: 14.5, minHeight: 48, textAlign: 'right', writingDirection: 'rtl',
+          borderWidth: 1, borderColor: error ? c.danger : c.border, borderRadius: RADIUS.sm,
+          backgroundColor: c.cardAlt, color: c.text, paddingHorizontal: 14, paddingVertical: 12,
+          fontSize: TYPE.lead, minHeight: 48, textAlign: 'right', writingDirection: 'rtl',
           fontFamily: fontFor('500'),
         }, style]}
       />
@@ -98,8 +112,10 @@ export function Input({ label, help, error, style, ...rest }: TextInputProps & {
   )
 }
 
-export function Badge({ label, tone = 'neutral' }: {
-  label: string; tone?: 'neutral' | 'success' | 'warn' | 'danger' | 'info' | 'accent'
+export function Badge({ label, tone = 'neutral', color }: {
+  label: string
+  tone?: 'neutral' | 'success' | 'warn' | 'danger' | 'info' | 'primary'
+  color?: string
 }) {
   const { c } = useApp()
   const map = {
@@ -108,23 +124,38 @@ export function Badge({ label, tone = 'neutral' }: {
     warn: { bg: c.warnSoft, fg: c.warn },
     danger: { bg: c.dangerSoft, fg: c.danger },
     info: { bg: c.infoSoft, fg: c.info },
-    accent: { bg: c.accentSoft, fg: c.accentSoftFg },
+    primary: { bg: c.primarySoft, fg: c.primarySoftFg },
   }[tone]
+  const bg = color ? color + '1F' : map.bg
+  const fg = color || map.fg
   return (
-    <View style={{ backgroundColor: map.bg, borderRadius: RADIUS.pill, paddingHorizontal: 11, paddingVertical: 4, alignSelf: 'flex-start' }}>
-      <Text style={{ color: map.fg, fontSize: 11.5, fontFamily: fontFor('600'), writingDirection: 'rtl' }}>{label}</Text>
+    <View style={{
+      backgroundColor: bg, borderRadius: RADIUS.pill,
+      paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start',
+    }}>
+      <Text numberOfLines={1} style={{
+        color: fg, fontSize: TYPE.small, fontFamily: fontFor('600'), writingDirection: 'rtl',
+      }}>{label}</Text>
     </View>
   )
 }
 
-export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 40, uri, ring }: {
+  name: string; size?: number; uri?: string | null; ring?: boolean
+}) {
   const { c } = useApp()
+  const box: ViewStyle = {
+    width: size, height: size, borderRadius: size / 2,
+    backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden',
+    ...(ring ? { borderWidth: 2, borderColor: c.primary } : null),
+  }
+  if (uri) return <View style={box}><Image source={{ uri }} style={{ width: '100%', height: '100%' }} /></View>
   return (
-    <View style={{
-      width: size, height: size, borderRadius: size / 2, backgroundColor: c.accentSoft,
-      alignItems: 'center', justifyContent: 'center',
-    }}>
-      <Text style={{ color: c.accentSoftFg, fontFamily: fontFor('700'), fontSize: size * 0.34 }}>{initials(name)}</Text>
+    <View style={box}>
+      <Text style={{ color: c.primarySoftFg, fontFamily: fontFor('700'), fontSize: size * 0.36 }}>
+        {initials(name)}
+      </Text>
     </View>
   )
 }
@@ -132,9 +163,9 @@ export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
 export function Progress({ value, max = 100, tone }: { value: number; max?: number; tone?: 'warn' | 'danger' }) {
   const { c } = useApp()
   const pct = Math.max(0, Math.min(100, (value / (max || 1)) * 100))
-  const color = tone === 'danger' ? c.danger : tone === 'warn' ? c.warn : c.accent
+  const color = tone === 'danger' ? c.danger : tone === 'warn' ? c.warn : c.primary
   return (
-    <View style={{ height: 8, borderRadius: RADIUS.pill, backgroundColor: c.sunken, overflow: 'hidden' }}>
+    <View style={{ height: 9, borderRadius: RADIUS.pill, backgroundColor: c.sunken, overflow: 'hidden' }}>
       <View style={{ height: '100%', width: `${pct}%`, backgroundColor: color, borderRadius: RADIUS.pill }} />
     </View>
   )
@@ -163,7 +194,7 @@ export function Loading({ label }: { label?: string }) {
   const { c } = useApp()
   return (
     <View style={{ paddingVertical: SPACE.s8, alignItems: 'center', gap: 12 }}>
-      <ActivityIndicator color={c.accent} size="large" />
+      <ActivityIndicator color={c.primary} size="large" />
       {label ? <T size={13} color={c.text3}>{label}</T> : null}
     </View>
   )
@@ -180,8 +211,10 @@ export function ErrorView({ message, onRetry }: { message?: string; onRetry?: ()
   )
 }
 
-export function Alert({ children, tone = 'info' }: {
-  children: React.ReactNode; tone?: 'info' | 'warn' | 'danger' | 'success' | 'accent'
+export function Alert({ children, tone = 'info', icon }: {
+  children: React.ReactNode
+  tone?: 'info' | 'warn' | 'danger' | 'success' | 'primary'
+  icon?: React.ReactNode
 }) {
   const { c } = useApp()
   const map = {
@@ -189,11 +222,19 @@ export function Alert({ children, tone = 'info' }: {
     warn: { bg: c.warnSoft, fg: c.warn },
     danger: { bg: c.dangerSoft, fg: c.danger },
     success: { bg: c.successSoft, fg: c.success },
-    accent: { bg: c.accentSoft, fg: c.accentSoftFg },
+    primary: { bg: c.primarySoft, fg: c.primarySoftFg },
   }[tone]
   return (
-    <View style={{ backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 13 }}>
-      <Text style={{ color: map.fg, fontSize: 13, lineHeight: 22, writingDirection: 'rtl', textAlign: 'right', fontFamily: fontFor('500') }}>
+    <View style={{
+      backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 13,
+      flexDirection: 'row-reverse', alignItems: 'flex-start', gap: icon ? 9 : 0,
+      borderRightWidth: 3, borderRightColor: map.fg,
+    }}>
+      {icon}
+      <Text style={{
+        color: map.fg, fontSize: TYPE.body, lineHeight: 22, flex: 1,
+        writingDirection: 'rtl', textAlign: 'right', fontFamily: fontFor('500'),
+      }}>
         {children}
       </Text>
     </View>

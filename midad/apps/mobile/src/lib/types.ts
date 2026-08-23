@@ -29,6 +29,7 @@ export interface Subscriber {
 export interface Profile {
   id: string; subscriber_id: string | null; full_name: string; phone: string
   email: string | null; role_key: string; is_owner: boolean; status: 'active' | 'suspended'
+  avatar_url?: string | null
 }
 export interface Plan {
   id: string; key: string; name_ar: string; account_type: AccountType; price_sar: number

@@ -188,12 +188,155 @@ export const IcRefresh = ({ size, color, strokeWidth }: IconProps) => {
 /* ---------- الشعار ---------- */
 export const IcLogo = ({ size = 40, color }: IconProps) => {
   const { c } = useApp()
-  const mark = color || c.onAccent
+  const mark = color || c.onPrimary
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <Path d="M9.5 27.5V15.2c0-1 1.2-1.6 2-1L16 17.6c.5.4 1.2.4 1.7 0l4.6-3.4c.8-.6 2 0 2 1v12.3"
         stroke={mark} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
       <Path d="M28.4 12.5v13.2c0 1 .8 1.8 1.8 1.8" stroke={mark} strokeWidth={2.6} strokeLinecap="round" />
     </Svg>
+  )
+}
+
+/* ---------- الهيدر والدُّرج ---------- */
+export const IcMenu = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M3.6 6.2h14.8" stroke={s} {...S(strokeWidth)} />
+      <Path d="M3.6 11h14.8" stroke={s} {...S(strokeWidth)} />
+      <Path d="M3.6 15.8h9.4" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcBell = ({ size, color, strokeWidth, filled }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M5.6 9.4a5.4 5.4 0 1 1 10.8 0c0 3 .8 4.5 1.6 5.4H4c.8-.9 1.6-2.4 1.6-5.4Z"
+        stroke={s} {...S(strokeWidth)} fill={filled ? s : 'none'} fillOpacity={filled ? 0.14 : 0} />
+      <Path d="M9 17.6a2.2 2.2 0 0 0 4 0" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcCamera = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M3 8.4a1.6 1.6 0 0 1 1.6-1.6h1.9l1-1.9h5l1 1.9h1.9A1.6 1.6 0 0 1 17 8.4v7.2a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 15.6Z"
+        stroke={s} {...S(strokeWidth)} />
+      <Circle cx="10" cy="11.8" r="3.1" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcImage = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Rect x="3.2" y="4.4" width="15.6" height="13.2" rx="2.4" stroke={s} {...S(strokeWidth)} />
+      <Circle cx="8" cy="9" r="1.5" stroke={s} {...S(strokeWidth)} />
+      <Path d="M3.6 15 8 11.2l3.2 2.6 3-2.4 3.2 2.8" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcCalendar = ({ size, color, strokeWidth, filled }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Rect x="3.2" y="4.8" width="15.6" height="13.4" rx="2.4" stroke={s} {...S(strokeWidth)}
+        fill={filled ? s : 'none'} fillOpacity={filled ? 0.12 : 0} />
+      <Path d="M3.2 9.2h15.6M7.4 3.2v3M14.6 3.2v3" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcChart = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M3.4 18.4h15.2" stroke={s} {...S(strokeWidth)} />
+      <Path d="M6.4 18.4v-5.2M11 18.4V6.6M15.6 18.4v-8" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcPdf = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M5 3.4h6.6L17 8.8v9.8a1.6 1.6 0 0 1-1.6 1.6H5a1.6 1.6 0 0 1-1.6-1.6V5a1.6 1.6 0 0 1 1.6-1.6Z"
+        stroke={s} {...S(strokeWidth)} />
+      <Path d="M11.4 3.6v5.2H16.8" stroke={s} {...S(strokeWidth)} />
+      <Path d="M6.6 16.4v-3.6h1.2a1.1 1.1 0 0 1 0 2.2H6.6" stroke={s} {...S(strokeWidth)} />
+      <Path d="M10.6 16.4v-3.6h1.1a1.8 1.8 0 0 1 0 3.6Z" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcWord = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M5 3.4h6.6L17 8.8v9.8a1.6 1.6 0 0 1-1.6 1.6H5a1.6 1.6 0 0 1-1.6-1.6V5a1.6 1.6 0 0 1 1.6-1.6Z"
+        stroke={s} {...S(strokeWidth)} />
+      <Path d="M11.4 3.6v5.2H16.8" stroke={s} {...S(strokeWidth)} />
+      <Path d="m6.2 12.6.9 3.8 1.1-2.8 1.1 2.8.9-3.8" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcExcel = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M5 3.4h6.6L17 8.8v9.8a1.6 1.6 0 0 1-1.6 1.6H5a1.6 1.6 0 0 1-1.6-1.6V5a1.6 1.6 0 0 1 1.6-1.6Z"
+        stroke={s} {...S(strokeWidth)} />
+      <Path d="M11.4 3.6v5.2H16.8" stroke={s} {...S(strokeWidth)} />
+      <Path d="m6.4 12.6 3.4 3.8M9.8 12.6l-3.4 3.8" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcHelp = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Circle cx="11" cy="11" r="7.7" stroke={s} {...S(strokeWidth)} />
+      <Path d="M8.9 8.8a2.1 2.1 0 1 1 2.9 1.9c-.5.3-.8.7-.8 1.3v.4" stroke={s} {...S(strokeWidth)} />
+      <Path d="M11 15.4v.05" stroke={s} {...S(strokeWidth)} strokeWidth={2.2} />
+    </Base>
+  )
+}
+
+export const IcMoon = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M17.6 13.4A7.2 7.2 0 0 1 8.6 4.4a7.4 7.4 0 1 0 9 9Z" stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcSun = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Circle cx="11" cy="11" r="4" stroke={s} {...S(strokeWidth)} />
+      <Path d="M11 1.9v2.2M11 17.9v2.2M1.9 11h2.2M17.9 11h2.2M4.6 4.6l1.6 1.6M15.8 15.8l1.6 1.6M17.4 4.6l-1.6 1.6M6.2 15.8l-1.6 1.6"
+        stroke={s} {...S(strokeWidth)} />
+    </Base>
+  )
+}
+
+export const IcFilter = ({ size, color, strokeWidth }: IconProps) => {
+  const s = useColor(color)
+  return (
+    <Base size={size}>
+      <Path d="M3.4 5.4h15.2l-5.9 6.9v5.2l-3.4 1.8v-7L3.4 5.4Z" stroke={s} {...S(strokeWidth)} />
+    </Base>
   )
 }

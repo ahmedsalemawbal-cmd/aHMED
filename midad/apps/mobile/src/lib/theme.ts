@@ -1,38 +1,74 @@
 import { Appearance } from 'react-native'
 
+/**
+ * نظام تصميم مِداد للجوّال.
+ *
+ * قاعدة اللون: الهوية **بنفسجيّ نيليّ**، والأخضر **دلالةٌ لا هوية** —
+ * يعني «حاضر» و«نجح» و«مكتمل» فقط. وكلّ فئةٍ في الوصول السريع لها لونها،
+ * فيتكوّن تسلسلٌ بصريّ بدل لونٍ واحدٍ يعمّ الشاشة.
+ */
 export interface Palette {
-  bg: string; card: string; sunken: string; border: string; borderStrong: string
+  bg: string; card: string; cardAlt: string; sunken: string
+  border: string; borderStrong: string
   text: string; text2: string; text3: string
-  accent: string; accentHover: string; accentSoft: string; accentSoftFg: string; accentDeep: string; onAccent: string
-  success: string; successSoft: string; warn: string; warnSoft: string
-  danger: string; dangerSoft: string; info: string; infoSoft: string
+
+  primary: string; primaryPress: string; primarySoft: string; primarySoftFg: string
+  primaryDeep: string; onPrimary: string
+
+  success: string; successSoft: string
+  warn: string; warnSoft: string
+  danger: string; dangerSoft: string
+  info: string; infoSoft: string
+
+  /** ألوان الفئات — لبلاطات الوصول السريع وشارات الأدوار */
+  tint: { violet: string; teal: string; amber: string; blue: string; rose: string; lime: string }
+  tintSoft: { violet: string; teal: string; amber: string; blue: string; rose: string; lime: string }
+
+  shadow: string
 }
 
-/** نفس رموز نظام تصميم الويب — محوّلةً إلى sRGB لأنّ React Native لا يفهم oklch. */
 export const LIGHT: Palette = {
-  bg: '#f2f5f1', card: '#ffffff', sunken: '#eef1ed', border: '#dfe4dd', borderStrong: '#c3ccc0',
-  text: '#222924', text2: '#5d6660', text3: '#727b75',
-  accent: '#1f7a4d', accentHover: '#186640', accentSoft: '#e2f4e8', accentSoftFg: '#155e3c', accentDeep: '#0f3524',
-  onAccent: '#ffffff',
-  success: '#1c7346', successSoft: '#e1f4e7', warn: '#8a6410', warnSoft: '#f8efd9',
-  danger: '#b32d20', dangerSoft: '#fae5e2', info: '#2b6cb0', infoSoft: '#e4eefa',
+  bg: '#F5F4FB', card: '#FFFFFF', cardAlt: '#FBFAFF', sunken: '#EFEEF8',
+  border: '#E4E2F0', borderStrong: '#CFCCE4',
+  text: '#191733', text2: '#5B5878', text3: '#8B88A6',
+
+  primary: '#5B4BD6', primaryPress: '#4A3BC0', primarySoft: '#ECE9FC',
+  primarySoftFg: '#4436B4', primaryDeep: '#241C63', onPrimary: '#FFFFFF',
+
+  success: '#0E9F6E', successSoft: '#E2F6EE',
+  warn: '#B4791B', warnSoft: '#FBF0DC',
+  danger: '#D64545', dangerSoft: '#FCE9E9',
+  info: '#2E7BD6', infoSoft: '#E6F0FC',
+
+  tint: { violet: '#6C5CE7', teal: '#0EA5A5', amber: '#E08D2B', blue: '#3B82F6', rose: '#DB4E8B', lime: '#5AA02C' },
+  tintSoft: { violet: '#EEEBFD', teal: '#DFF4F4', amber: '#FBEEDC', blue: '#E6EFFE', rose: '#FBE7F0', lime: '#EAF5E1' },
+
+  shadow: '#231F45',
 }
 
 export const DARK: Palette = {
-  bg: '#151b17', card: '#1d241f', sunken: '#191f1b', border: '#333c36', borderStrong: '#454f48',
-  text: '#e9efe9', text2: '#b3bdb6', text3: '#909a94',
-  accent: '#4ec98a', accentHover: '#63d698', accentSoft: '#26402f', accentSoftFg: '#a9e8c4',
-  accentDeep: '#1d3327', onAccent: '#0d1410',
-  success: '#5ad294', successSoft: '#22402f', warn: '#e0b552', warnSoft: '#3a3120',
-  danger: '#e1705f', dangerSoft: '#3d2622', info: '#7ab4ee', infoSoft: '#1f3245',
+  bg: '#12111C', card: '#1C1A2B', cardAlt: '#211F33', sunken: '#181626',
+  border: '#2E2B44', borderStrong: '#403C5C',
+  text: '#EDECF7', text2: '#B3B0C9', text3: '#8A87A3',
+
+  primary: '#8B7CF0', primaryPress: '#9C8FF5', primarySoft: '#2A2450',
+  primarySoftFg: '#C4BAFB', primaryDeep: '#1A153C', onPrimary: '#141033',
+
+  success: '#3FCB96', successSoft: '#183A2E',
+  warn: '#E3B155', warnSoft: '#3A2F1A',
+  danger: '#F0736B', dangerSoft: '#3D2028',
+  info: '#6BA9F0', infoSoft: '#1B2C45',
+
+  tint: { violet: '#9B8DF5', teal: '#3ECFCF', amber: '#F0AE5C', blue: '#6BA1F8', rose: '#F07AB0', lime: '#8CCB5C' },
+  tintSoft: { violet: '#2A2450', teal: '#123536', amber: '#3A2C16', blue: '#16263F', rose: '#3A1B2C', lime: '#1F2E14' },
+
+  shadow: '#000000',
 }
 
-/* أنصاف الأقطار وسلّم الخطّ من ملفّ تصميم المالك «تطبيق مداد للجوال» */
-export const RADIUS = { xs: 9, sm: 10, md: 12, lg: 14, xl: 17, xxl: 20, pill: 999 }
+/** أنصاف أقطار أكبر قليلًا — كما في المراجع المعتمدة */
+export const RADIUS = { xs: 10, sm: 12, md: 14, lg: 18, xl: 22, xxl: 26, pill: 999 }
 export const SPACE = { s1: 4, s2: 8, s3: 12, s4: 16, s5: 20, s6: 24, s7: 32, s8: 40 }
 
-/** أسماء عائلات Cairo كما تُحمَّل — تُستعمل بدل fontWeight
- *  لأنّ أندرويد لا يربط الأوزان بأسماء العائلة تلقائيًّا. */
 export const FAMILY = {
   regular: 'Cairo_400Regular',
   medium: 'Cairo_500Medium',
@@ -40,19 +76,22 @@ export const FAMILY = {
   bold: 'Cairo_700Bold',
 } as const
 
-/** سلّم الخطّ من التصميم: 6 → 14، ثمّ مقاسات العناوين */
+/**
+ * سلّم الخطّ — خُفّض عن السابق لأنّ العربية أعرض من اللاتينية،
+ * فالمقاسات الكبيرة كانت تكسر أسطر الأزرار على شاشة 390 بكسل.
+ */
 export const TYPE = {
-  micro: 10,
-  caption: 11,
-  small: 11.5,
-  body: 12.5,
-  bodyLg: 13.5,
-  base: 14,
-  lead: 15,
-  h3: 16,
-  h2: 18,
-  h1: 22,
-  display: 26,
+  micro: 9.5,
+  caption: 10.5,
+  small: 11,
+  body: 12,
+  bodyLg: 13,
+  base: 13.5,
+  lead: 14.5,
+  h3: 15.5,
+  h2: 17,
+  h1: 20,
+  display: 24,
 } as const
 
 export function fontFor(weight?: '400' | '500' | '600' | '700'): string {
@@ -60,6 +99,22 @@ export function fontFor(weight?: '400' | '500' | '600' | '700'): string {
   if (weight === '600') return FAMILY.semi
   if (weight === '500') return FAMILY.medium
   return FAMILY.regular
+}
+
+/** ظلٌّ ناعم موحّد — بديل الحدود الثقيلة */
+export function elevation(c: Palette, level: 1 | 2 | 3 = 1) {
+  const cfg = {
+    1: { o: 0.05, r: 8, h: 2, e: 2 },
+    2: { o: 0.08, r: 16, h: 6, e: 5 },
+    3: { o: 0.12, r: 26, h: 12, e: 9 },
+  }[level]
+  return {
+    shadowColor: c.shadow,
+    shadowOpacity: cfg.o,
+    shadowRadius: cfg.r,
+    shadowOffset: { width: 0, height: cfg.h },
+    elevation: cfg.e,
+  }
 }
 
 export function systemIsDark(): boolean {

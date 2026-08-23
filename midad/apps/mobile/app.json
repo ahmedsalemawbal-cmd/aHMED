@@ -38,6 +38,15 @@
     "extra": {
       "supabaseUrl": "https://ehimyixcqnmnwgbqrdmr.supabase.co",
       "supabaseKey": "sb_publishable_R5HC6lAC5-VVaQTmzRQdmA_g5S9NFDr"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "يحتاج مِداد إذن الصور لتختار صورتك الشخصيّة.",
+          "cameraPermission": "يحتاج مِداد إذن الكاميرا لتلتقط صورتك الشخصيّة."
+        }
+      ]
+    ]
   }
 }

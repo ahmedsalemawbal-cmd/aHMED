@@ -47,13 +47,13 @@ export default function Blocked() {
       ) : (
         <>
           {suggested && (
-            <Card style={{ gap: 12, borderColor: c.accent }}>
+            <Card style={{ gap: 12, borderColor: c.primary }}>
               <T size={17} weight="700">{suggested.name_ar}</T>
-              <T size={26} weight="700" color={c.accent}>{fmtMoney(suggested.price_sar)}</T>
+              <T size={26} weight="700" color={c.primary}>{fmtMoney(suggested.price_sar)}</T>
               <T size={12} color={c.text3}>سنويًّا · شامل الضريبة</T>
               {(suggested.features_ar || []).slice(0, 6).map((f) => (
                 <Row key={f} gap={9} style={{ alignItems: 'flex-start' }}>
-                  <IcCheck size={15} color={c.accent} />
+                  <IcCheck size={15} color={c.primary} />
                   <T size={12.5} color={c.text2} style={{ flex: 1 }}>{f}</T>
                 </Row>
               ))}

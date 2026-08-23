@@ -49,11 +49,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [systemDark, setSystemDark] = useState(Appearance.getColorScheme() === 'dark')
 
   useEffect(() => {
-    // العربية من اليمين — بنيةً في التطبيق كلّه
-    if (!I18nManager.isRTL) {
-      I18nManager.allowRTL(true)
-      I18nManager.forceRTL(true)
-    }
+    // العربيّة من اليمين — صراحةً في كلّ عنصر، لا بقلب المحرّك.
+    // forceRTL لا يسري إلّا بعد إعادة تشغيلٍ كاملة، فيختلف أوّل تشغيلٍ عمّا بعده
+    // ويُقلَب ما قُلِب أصلًا. فنُثبّت المحرّك على LTR ونكتب الاتّجاه بأيدينا.
+    I18nManager.allowRTL(false)
+    if (I18nManager.isRTL) I18nManager.forceRTL(false)
     const sub = Appearance.addChangeListener(({ colorScheme }) => setSystemDark(colorScheme === 'dark'))
     AsyncStorage.getItem(THEME_KEY).then((v) => {
       if (v === 'light' || v === 'dark' || v === 'auto') setThemeModeState(v)
@@ -96,18 +96,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let alive = true
+    // حارسٌ زمنيّ: شبكةٌ متعثّرة يجب ألّا تترك المستخدم أمام دوّارةٍ لا تنتهي
+    const guard = setTimeout(() => { if (alive) setReady(true) }, 6000)
     ;(async () => {
-      const { data } = await supabase.auth.getSession()
-      if (!alive) return
-      setSession(data.session)
-      await Promise.all([loadPublic(), loadMe(data.session?.user?.id)])
-      if (alive) setReady(true)
+      try {
+        const { data } = await supabase.auth.getSession()
+        if (!alive) return
+        setSession(data.session)
+        await Promise.all([loadPublic(), loadMe(data.session?.user?.id)])
+      } catch {
+        /* نمضي بما لدينا — الشاشات تتعامل مع الغياب */
+      } finally {
+        if (alive) { clearTimeout(guard); setReady(true) }
+      }
     })()
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s)
       loadMe(s?.user?.id)
     })
-    return () => { alive = false; sub.subscription.unsubscribe() }
+    return () => { alive = false; clearTimeout(guard); sub.subscription.unsubscribe() }
   }, [loadPublic, loadMe])
 
   const signIn = useCallback(async (phone: string, password: string) => {

@@ -59,12 +59,12 @@ export default function Timetable() {
             return (
               <Pressable key={w} onPress={() => setDay(i)}
                 style={{
-                  backgroundColor: on ? c.accent : c.sunken,
-                  borderColor: on ? c.accent : c.border, borderWidth: 1,
+                  backgroundColor: on ? c.primary : c.sunken,
+                  borderColor: on ? c.primary : c.border, borderWidth: 1,
                   borderRadius: RADIUS.pill, paddingHorizontal: 16, paddingVertical: 9, minHeight: 42,
                   justifyContent: 'center',
                 }}>
-                <T size={12.5} weight={on ? '700' : '500'} color={on ? c.onAccent : c.text2}>
+                <T size={12.5} weight={on ? '700' : '500'} color={on ? c.onPrimary : c.text2}>
                   {w}{perDay[i] ? ` (${perDay[i]})` : ''}
                 </T>
               </Pressable>
@@ -75,7 +75,7 @@ export default function Timetable() {
 
       <ScrollView
         contentContainerStyle={{ padding: SPACE.s4, gap: SPACE.s3, paddingBottom: SPACE.s8 }}
-        refreshControl={<RefreshControl refreshing={refreshing} tintColor={c.accent}
+        refreshControl={<RefreshControl refreshing={refreshing} tintColor={c.primary}
           onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false) }} />}>
 
         {ofDay.length === 0 ? (
@@ -88,7 +88,7 @@ export default function Timetable() {
           const st = isToday ? periodState(p, taken) : (taken.has(p.id) ? 'done' : 'upcoming')
           const meta =
             st === 'done' ? { label: 'رُصدت', tone: 'success' as const, border: c.success }
-            : st === 'now' ? { label: 'الآن', tone: 'accent' as const, border: c.accent }
+            : st === 'now' ? { label: 'الآن', tone: 'primary' as const, border: c.primary }
             : st === 'next' ? { label: 'انتظار', tone: 'info' as const, border: c.border }
             : st === 'past' ? { label: 'فاتت بلا رصد', tone: 'warn' as const, border: c.warn }
             : { label: '', tone: 'neutral' as const, border: c.border }
@@ -104,10 +104,10 @@ export default function Timetable() {
                 <Row gap={9}>
                   <View style={{
                     width: 34, height: 34, borderRadius: RADIUS.sm,
-                    backgroundColor: st === 'now' ? c.accent : c.sunken,
+                    backgroundColor: st === 'now' ? c.primary : c.sunken,
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <T size={13} weight="700" color={st === 'now' ? c.onAccent : c.text2}>{p.slot}</T>
+                    <T size={13} weight="700" color={st === 'now' ? c.onPrimary : c.text2}>{p.slot}</T>
                   </View>
                   <View>
                     <T size={14.5} weight="700">{p.subject} — {p.classes?.name || '—'}</T>
@@ -119,7 +119,7 @@ export default function Timetable() {
                 {meta.label ? <Badge label={meta.label} tone={meta.tone} /> : null}
               </Row>
               <Row style={{ justifyContent: 'space-between' }}>
-                <T size={12} weight="700" color={st === 'done' ? c.success : c.accent}>
+                <T size={12} weight="700" color={st === 'done' ? c.success : c.primary}>
                   {st === 'done' ? 'عرض الرصد' : 'ابدأ رصد الحضور'}
                 </T>
                 <IcChevron size={15} color={c.text3} />

@@ -52,7 +52,7 @@ export default function TemplateDetail() {
   return (
     <Screen>
       <View style={{ gap: 10 }}>
-        <Badge label={roles.find((r) => r.key === tpl.category_key)?.name_ar || tpl.category_key} tone="accent" />
+        <Badge label={roles.find((r) => r.key === tpl.category_key)?.name_ar || tpl.category_key} tone="primary" />
         <T size={23} weight="700">{tpl.title}</T>
         {tpl.description ? <T size={14} color={c.text2}>{tpl.description}</T> : null}
         <Row gap={8}>
@@ -82,7 +82,7 @@ export default function TemplateDetail() {
         <T size={16} weight="700">ما ستملأ</T>
         {sections.map((sec) => (
           <View key={sec.name} style={{ gap: 6 }}>
-            <T size={13} weight="700" color={c.accentSoftFg}>{sec.name}</T>
+            <T size={13} weight="700" color={c.primarySoftFg}>{sec.name}</T>
             {sec.fields.map((f) => (
               <Row key={f.key} gap={8} style={{ paddingVertical: 2 }}>
                 <T size={12.5} color={c.text2}>•</T>
