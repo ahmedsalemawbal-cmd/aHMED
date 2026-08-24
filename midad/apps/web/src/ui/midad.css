@@ -413,7 +413,16 @@ button, input, select, textarea { font-family: inherit; }
 .mdd-section--tight { padding: 48px 0; }
 .mdd-hero-title { font-size: 44px; font-weight: 700; line-height: 1.2; letter-spacing: -.5px; }
 .mdd-hero-sub { font-size: 17px; color: var(--mdd-text-2); line-height: 1.8; max-width: 52ch; }
-.mdd-eyebrow { font-size: 13px; font-weight: 600; color: var(--mdd-accent-soft-fg); background: var(--mdd-accent-soft); padding: 5px 13px; border-radius: var(--mdd-r-pill); display: inline-block; }
+/* الشارة تحتضن نصّها ولا تمتدّ. و`inline-block` وحده لا يكفي: هذه الشارة
+   تسكن أعمدةً مرنة، والعمود المرن يمطّ أبناءه بعرضه لأنّ `stretch` هو
+   أصل `align-items` — فيُلغي الاحتضان. و`align-self` يُبطل ذلك، وهو مُهمَلٌ
+   خارج المرن فلا يضرّ الشارة حيثما وقعت. */
+.mdd-eyebrow {
+  font-size: 13px; font-weight: 600;
+  color: var(--mdd-accent-soft-fg); background: var(--mdd-accent-soft);
+  padding: 5px 13px; border-radius: var(--mdd-r-pill);
+  display: inline-block; align-self: flex-start;
+}
 .mdd-h2 { font-size: 30px; font-weight: 700; letter-spacing: -.3px; }
 .mdd-footer { background: var(--mdd-card); border-block-start: 1px solid var(--mdd-border); padding: var(--mdd-s-8) 0 var(--mdd-s-6); }
 
