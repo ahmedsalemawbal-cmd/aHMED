@@ -62,10 +62,42 @@ class PageOut:
 
 # ─────────────────────── استخراج الأسطر ───────────────────────
 
+DIGITS = set('0123456789٠١٢٣٤٥٦٧٨٩')
+
+
+def fix_digit_runs(chars: list[tuple[str, float]]) -> str:
+    """
+    يُصلح مقاطع الأرقام المخزَّنة بترتيبها البصريّ.
+
+    الرقم في النصّ المختلط اتّجاهه من اليسار دائمًا، لكنّ بعض ملفّات PDF
+    تخزّن محارفه بترتيب الرسم من اليمين — فتخرج «١٤٤٦» على أنّها «٦٤٤١».
+    والعين لا ترى الفرق في الـPDF، ويراه من يقرأ الملفّ المُحوَّل.
+
+    لا نُخمّن أيّ الترتيبين أصحّ: **نقيسه**. إن تناقصت الإحداثيّة الأفقيّة
+    على امتداد مقطع الأرقام فترتيب التخزين من اليمين، فنعكسه. وهذا حكمٌ
+    هندسيّ لا احتماليّ.
+    """
+    out: list[str] = []
+    i = 0
+    n = len(chars)
+    while i < n:
+        if chars[i][0] not in DIGITS:
+            out.append(chars[i][0]); i += 1; continue
+        j = i
+        while j < n and chars[j][0] in DIGITS:
+            j += 1
+        run = chars[i:j]
+        if len(run) > 1 and run[0][1] > run[-1][1]:
+            run = list(reversed(run))
+        out.extend(c for c, _ in run)
+        i = j
+    return ''.join(out)
+
+
 def page_lines(page) -> list[Line]:
-    """أسطر النصّ بمواضعها وأحجامها، مع تطبيع العربيّة."""
+    """أسطر النصّ بمواضعها وأحجامها، مع تطبيع العربيّة وإصلاح الأرقام."""
     out: list[Line] = []
-    d = page.get_text('dict')
+    d = page.get_text('rawdict')
     for blk in d.get('blocks', []):
         if blk.get('type') != 0:
             continue
@@ -73,13 +105,19 @@ def page_lines(page) -> list[Line]:
             spans = ln.get('spans', [])
             if not spans:
                 continue
-            raw = ''.join(s.get('text', '') for s in spans)
+            chars = [(c['c'], c['bbox'][0]) for s in spans for c in s.get('chars', [])]
+            raw = fix_digit_runs(chars) if chars else ''.join(s.get('text', '') for s in spans)
             txt = A.normalize(raw)
             if not txt.strip():
                 continue
             x0, y0, x1, y1 = ln['bbox']
-            sizes = [s.get('size', 0) for s in spans if s.get('text', '').strip()]
-            flags = [s.get('flags', 0) for s in spans if s.get('text', '').strip()]
+            # rawdict لا يحمل مفتاح text في الشريحة بل chars — فنبني نصّها
+            # منها. إغفال هذا يجعل كلّ الأحجام صفرًا وكلّ سطرٍ عنوانًا.
+            def _txt(sp) -> str:
+                return sp.get('text') or ''.join(c['c'] for c in sp.get('chars', []))
+            live = [sp for sp in spans if _txt(sp).strip()]
+            sizes = [sp.get('size', 0) for sp in live]
+            flags = [sp.get('flags', 0) for sp in live]
             # البتّ ٤ في flags يعني عريض في PyMuPDF
             bold = bool(flags) and sum(1 for f in flags if f & (1 << 4)) > len(flags) / 2
             out.append(Line(txt, x0, y0, x1, y1,
@@ -90,6 +128,32 @@ def page_lines(page) -> list[Line]:
 
 # ─────────────────────────── الجداول ───────────────────────────
 
+def digit_repairs(page) -> dict[str, str]:
+    """خريطةُ مقاطعِ أرقامٍ فاسدةٍ إلى مُصلَحة، تُبنى من مواضع محارف الصفحة."""
+    fixes: dict[str, str] = {}
+    for blk in page.get_text('rawdict').get('blocks', []):
+        if blk.get('type') != 0:
+            continue
+        for ln in blk.get('lines', []):
+            for sp in ln.get('spans', []):
+                cs = [(c['c'], c['bbox'][0]) for c in sp.get('chars', [])]
+                i, n = 0, len(cs)
+                while i < n:
+                    if cs[i][0] not in DIGITS:
+                        i += 1; continue
+                    j = i
+                    while j < n and cs[j][0] in DIGITS:
+                        j += 1
+                    run = cs[i:j]
+                    if len(run) > 1 and run[0][1] > run[-1][1]:
+                        bad = ''.join(c for c, _ in run)
+                        good = ''.join(c for c, _ in reversed(run))
+                        if bad != good:
+                            fixes[bad] = good
+                    i = j
+    return fixes
+
+
 def page_tables(page) -> list[dict]:
     """
     جداول الصفحة بخطوط الرسم. لكلّ جدول: صناديقه وخلاياه المطبَّعة.
@@ -99,6 +163,7 @@ def page_tables(page) -> list[dict]:
     فنترجمها إلى امتدادٍ في HTML.
     """
     found = []
+    repairs = digit_repairs(page)
     try:
         tabs = page.find_tables(strategy='lines_strict')
         if not tabs.tables:
@@ -117,7 +182,14 @@ def page_tables(page) -> list[dict]:
             continue
         rows = []
         for r in grid:
-            rows.append([A.normalize(c) if isinstance(c, str) else '' for c in r])
+            row = []
+            for c in r:
+                v = A.normalize(c) if isinstance(c, str) else ''
+                for bad, good in repairs.items():
+                    if bad in v:
+                        v = v.replace(bad, good)
+                row.append(v)
+            rows.append(row)
         # جدولٌ بصفٍّ واحدٍ وعمودٍ واحد ليس جدولًا
         if len(rows) < 2 and len(rows[0]) < 2:
             continue
