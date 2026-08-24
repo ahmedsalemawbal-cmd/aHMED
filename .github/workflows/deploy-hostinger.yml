@@ -1,16 +1,15 @@
 name: نشر مِداد على هوستنجر
 
-# يعمل تلقائيًّا عند كلّ دفعةٍ تمسّ تطبيق الويب، ويدويًّا من تبويب Actions.
+# يبني تطبيق الويب ويدفع نتيجته إلى فرع hostinger-deploy، وهوستنجر
+# تستنسخ ذلك الفرع إلى public_html عبر تطبيقها على جيت هب.
 #
-# قبل أوّل تشغيل: أضف ثلاثة أسرارٍ في المستودع
-# (Settings ← Secrets and variables ← Actions ← New repository secret):
+# ولمَ فرعٌ منفصل؟ لأنّ هوستنجر تستنسخ ولا تبني: لا npm install ولا
+# npm run build. ومِداد يحتاج بناءً، وموقعه ليس في جذر المستودع بل في
+# midad/apps/web. فلو وصلناها بفرع التطوير مباشرةً لاستنسخت الشيفرة
+# المصدريّة كلّها — لا موقعًا يعمل، ولصار مصدر المشروع قابلًا للتنزيل
+# من الموقع نفسه. فالبناء يجري هنا، ونتيجته وحدها تُدفع هناك.
 #
-#   HOSTINGER_FTP_HOST   عنوان الخادم من hPanel ← Files ← FTP Accounts
-#   HOSTINGER_FTP_USER   اسم المستخدم من الصفحة نفسها
-#   HOSTINGER_FTP_PASS   كلمة المرور التي تضعها أنت هناك
-#
-# وسرٌّ رابعٌ اختياريّ إن لم يكن الموقع في المجلّد الافتراضيّ:
-#   HOSTINGER_FTP_DIR    الافتراضيّ public_html
+# لا يحتاج أسرارًا: الدفع بـGITHUB_TOKEN الممنوح للسير.
 
 on:
   push:
@@ -19,22 +18,25 @@ on:
       - 'midad/apps/web/**'
       - '.github/workflows/deploy-hostinger.yml'
   workflow_dispatch:
-    inputs:
-      wipe:
-        description: 'امسح ما في المجلّد قبل الرفع (نظّف الأصول المتراكمة)'
-        type: boolean
-        default: false
 
-# دفعتان متتاليتان لا ترفعان معًا: الثانية تنتظر الأولى فلا تختلط الملفّات
+permissions:
+  contents: write
+
+# دفعتان متتاليتان لا تتسابقان على الفرع
 concurrency:
-  group: hostinger
+  group: hostinger-deploy
   cancel-in-progress: false
+
+env:
+  PUB_BRANCH: hostinger-deploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -56,48 +58,51 @@ jobs:
         working-directory: midad/apps/web
         run: |
           test -f dist/index.html || { echo '::error::لا index.html في dist'; exit 1; }
-          test -f dist/.htaccess || echo '::warning::لا .htaccess — سيُخزَّن index.html مؤقّتًا عند الزائر'
-          echo "حجم الحزمة: $(du -sh dist | cut -f1)"
-          ls -la dist
+          test -f dist/.htaccess  || { echo '::error::لا .htaccess — سيبقى الزائر على نسخةٍ قديمة'; exit 1; }
+          test -d dist/assets     || { echo '::error::لا مجلّد assets'; exit 1; }
+          echo "الحجم: $(du -sh dist | cut -f1) · الملفّات: $(find dist -type f | wc -l)"
 
-      - name: تثبيت lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
-
-      - name: الرفع إلى هوستنجر
-        env:
-          HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
-          USER: ${{ secrets.HOSTINGER_FTP_USER }}
-          PASS: ${{ secrets.HOSTINGER_FTP_PASS }}
-          DIR: ${{ secrets.HOSTINGER_FTP_DIR || 'public_html' }}
-          WIPE: ${{ inputs.wipe }}
-        working-directory: midad/apps/web
+      - name: الدفع إلى فرع النشر
         run: |
-          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$PASS" ]; then
-            echo '::error::أسرار FTP ناقصة. راجع التعليق في رأس هذا الملفّ.'
-            exit 1
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # شجرة عملٍ منفصلة على الفرع نفسه: تاريخه يتراكم ولا يُعاد كتابته،
+          # فيبقى `git pull` عند هوستنجر تقديمًا سريعًا لا صدامًا.
+          #
+          # وإن غاب الفرع أنشأناه يتيمًا — لا يرث تاريخ التطوير، فلا يحمل
+          # فرعُ نشرٍ حجمَ مستودعٍ كامل. وبهذا يقوم السير وحده من الصفر
+          # ولا يشترط أن يكون أحدٌ بذر الفرع يدويًّا قبله.
+          if git ls-remote --exit-code --heads origin "$PUB_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$PUB_BRANCH" --depth=1
+            git worktree add /tmp/pub -B "$PUB_BRANCH" "origin/$PUB_BRANCH"
+          else
+            echo "الفرع $PUB_BRANCH غير موجود — نُنشئه."
+            git worktree add --orphan -b "$PUB_BRANCH" /tmp/pub
           fi
 
-          # --delete مطفأ افتراضيًّا عن قصد. الأصول مبصومةٌ بمحتواها، فالقديمة
-          # منها لا يشير إليها index.html الجديد ولا تضرّ — بل تُبقي تبويبًا
-          # مفتوحًا على النسخة القديمة يعمل بدل أن ينكسر في وجه صاحبه.
-          # وإن تراكمت فشغّل السير يدويًّا واختر «امسح».
-          DEL=""
-          [ "$WIPE" = "true" ] && DEL="--delete"
+          # نمسح القديم أوّلًا: بغيره يبقى أصلٌ حُذف من البناء قابعًا للأبد.
+          # و.git وحده يُستثنى — ومحوُه يُتلف الشجرة.
+          find /tmp/pub -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 
-          lftp -c "
-            set ftp:ssl-force true;
-            set ftp:ssl-protect-data true;
-            set ssl:verify-certificate no;
-            set net:max-retries 3;
-            set net:timeout 20;
-            open -u '$USER','$PASS' '$HOST';
-            mirror -R $DEL --parallel=4 --verbose \
-              --exclude-glob .DS_Store \
-              dist/ '$DIR/';
-          "
+          cp -r midad/apps/web/dist/. /tmp/pub/
+          cp .github/deploy-branch-README.md /tmp/pub/README.md
 
-      - name: خلاصة
-        run: |
-          echo "### نُشِر على هوستنجر ✅" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "الإيداع: \`${GITHUB_SHA::7}\`" >> $GITHUB_STEP_SUMMARY
+          cd /tmp/pub
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'لا تغيير في البناء — لا نشرة.'
+            echo "### لا تغيير في المخرجات ⏭️" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -q -m "بناء مِداد من ${GITHUB_SHA::7}
+
+          المصدر: $GITHUB_REF_NAME
+          السير:  #$GITHUB_RUN_NUMBER"
+          git push origin "$PUB_BRANCH"
+
+          {
+            echo "### دُفِع إلى \`$PUB_BRANCH\` ✅"
+            echo ""
+            echo "من الإيداع \`${GITHUB_SHA::7}\`. هوستنجر تستنسخه خلال دقيقة."
+          } >> "$GITHUB_STEP_SUMMARY"
