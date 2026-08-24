@@ -274,7 +274,88 @@ function tableXml(tbl: Element, availTw: number): string {
 
 /* ═══════════════════ المشي على الكتل ═══════════════════ */
 
-interface Ctx { align?: string; inCell?: boolean; listLevel?: number; availTw?: number }
+interface Ctx { align?: string; inCell?: boolean; listLevel?: number; availTw?: number; media?: MediaMap }
+
+/**
+ * صور المستند بعد جلبها: مفتاحها `src` كما ورد في المتن.
+ * `id` رقم العلاقة في الوورد، و`w`/`h` بالبكسل لحساب المقاس.
+ */
+export interface MediaItem { id: number; ext: string; mime: string; bytes: Uint8Array; w: number; h: number }
+export type MediaMap = Map<string, MediaItem>
+
+/** بكسلٌ واحد = ٩٥٢٥ وحدة EMU عند ٩٦ نقطةً في البوصة. */
+const EMU_PER_PX = 9525
+/** تويبٌ واحد = ٦٣٥ وحدة EMU. */
+const EMU_PER_TW = 635
+
+/**
+ * صورةٌ في الوورد: علاقةٌ إلى ملفٍّ في word/media، ومقاسٌ بوحدات EMU.
+ *
+ * والمقاس يُقيَّد بعرض الصفحة المتاح: شعارٌ أصله ٣٠٠٠px يخرج بلا هذا
+ * أعرضَ من الورقة، فيقصّه الوورد أو يُخرجه عن الحدّ.
+ */
+function drawing(it: MediaItem, availTw: number): string {
+  const maxEmu = availTw * EMU_PER_TW
+  let w = it.w * EMU_PER_PX
+  let h = it.h * EMU_PER_PX
+  if (w > maxEmu) { h = Math.round(h * (maxEmu / w)); w = maxEmu }
+  const rid = `rIdImg${it.id}`
+  return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">`
+    + `<wp:extent cx="${Math.round(w)}" cy="${Math.round(h)}"/>`
+    + `<wp:docPr id="${it.id}" name="Image${it.id}"/>`
+    + `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">`
+    + `<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">`
+    + `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">`
+    + `<pic:nvPicPr><pic:cNvPr id="${it.id}" name="Image${it.id}"/><pic:cNvPicPr/></pic:nvPicPr>`
+    + `<pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>`
+    + `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${Math.round(w)}" cy="${Math.round(h)}"/></a:xfrm>`
+    + `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>`
+    + `</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`
+}
+
+/**
+ * يجلب صور المتن ويقرأ مقاساتها.
+ *
+ * ولمَ الجلب هنا لا عند الرسم؟ لأنّ بناء الوورد تركيبُ نصٍّ متزامن،
+ * والشبكة غير متزامنة. فنجمعها أوّلًا ثمّ نبني.
+ *
+ * وما تعذّر جلبه يُطرح بصمتٍ ويُذكر في الحصيلة: خيرٌ من ملفٍّ لا يفتحه
+ * الوورد لأنّ فيه علاقةً إلى ملفٍّ غير موجود.
+ */
+export async function collectMedia(bodyHtml: string): Promise<{ media: MediaMap; failed: number }> {
+  const dom = new DOMParser().parseFromString(`<div>${bodyHtml}</div>`, 'text/html')
+  const srcs = Array.from(new Set(
+    Array.from(dom.querySelectorAll('img')).map((im) => im.getAttribute('src') || '').filter(Boolean),
+  ))
+  const media: MediaMap = new Map()
+  let failed = 0
+  let id = 1
+
+  const EXT: Record<string, string> = {
+    'image/png': 'png', 'image/jpeg': 'jpeg', 'image/gif': 'gif', 'image/webp': 'webp',
+  }
+
+  for (const src of srcs) {
+    try {
+      const res = await fetch(src, { mode: 'cors' })
+      if (!res.ok) throw new Error(String(res.status))
+      const blob = await res.blob()
+      const mime = blob.type || 'image/png'
+      const ext = EXT[mime]
+      /* SVG لا يُضمَّن: الوورد لا يعرضه في هذا الموضع. وإسقاطه أصدق من
+         ملفٍّ يفتح على مربّعٍ فارغ. */
+      if (!ext) { failed++; continue }
+      const bmp = await createImageBitmap(blob)
+      media.set(src, {
+        id: id++, ext, mime,
+        bytes: new Uint8Array(await blob.arrayBuffer()),
+        w: bmp.width, h: bmp.height,
+      })
+      bmp.close?.()
+    } catch { failed++ }
+  }
+  return { media, failed }
+}
 
 const HEAD = { h1: { pt: 19, style: 'Heading1' }, h2: { pt: 15.5, style: 'Heading2' }, h3: { pt: 13.5, style: 'Heading3' } }
 
@@ -329,7 +410,22 @@ function blocksIn(root: Node, m: Marks, ctx: Ctx = {}): string {
       return
     }
 
+    if (tag === 'img') {
+      const it = ctx.media?.get(el.getAttribute('src') || '')
+      if (it) out.push(`<w:p>${pPr({ align: 'center', spaceAfter: 120 })}${drawing(it, avail)}</w:p>`)
+      return
+    }
+
     if (tag === 'p') {
+      /* فقرةٌ ليس فيها إلّا صورة — وهكذا يلفّها ProseMirror أحيانًا.
+         فلو مررناها على inlineRuns لخرجت فقرةً فارغة والصورة ضائعة. */
+      const only = el.children.length === 1 && el.children[0].tagName.toLowerCase() === 'img'
+        && !(el.textContent || '').trim()
+      if (only) {
+        const it = ctx.media?.get(el.children[0].getAttribute('src') || '')
+        if (it) out.push(`<w:p>${pPr({ align: 'center', spaceAfter: 120 })}${drawing(it, avail)}</w:p>`)
+        return
+      }
       const r = inlineRuns(el, marksOf(el, m))
       out.push(`<w:p>${pPr({ align })}${r}</w:p>`)
       return
@@ -429,7 +525,9 @@ export interface DocxOpts {
   page?: { orientation?: 'portrait' | 'landscape'; margins?: { top: number; right: number; bottom: number; left: number } }
 }
 
-export function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Blob {
+export async function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Promise<Blob> {
+  /* الصور تُجلب أوّلًا: بناء الوورد تركيبُ نصٍّ متزامن، والشبكة ليست كذلك. */
+  const { media } = await collectMedia(bodyHtml)
   const portrait = opts.page?.orientation !== 'landscape'
   const mg = opts.page?.margins || { top: 18, right: 16, bottom: 18, left: 16 }
   const pgW = portrait ? 11906 : 16838
@@ -438,7 +536,7 @@ export function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Blob {
 
   const dom = new DOMParser().parseFromString(`<div id="r">${bodyHtml}</div>`, 'text/html')
   const root = dom.getElementById('r')
-  const body = root ? blocksIn(root, {}, { availTw }) : ''
+  const body = root ? blocksIn(root, {}, { availTw, media }) : ''
 
   const h = opts.header
   const headerXml = h && (h.school || h.dept || h.year || h.semester)
@@ -453,7 +551,7 @@ export function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Blob {
     : ''
 
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
 <w:body>${wm}${headerXml}${body}
 <w:sectPr><w:bidi/>
   <w:pgSz w:w="${pgW}" w:h="${pgH}"${portrait ? '' : ' w:orient="landscape"'}/>
@@ -461,12 +559,21 @@ export function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Blob {
 </w:sectPr>
 </w:body></w:document>`
 
+  const items = [...media.values()]
+  /* نوعٌ افتراضيّ لكلّ امتدادٍ مستعمَل مرّةً واحدة: تكرار Default لامتدادٍ
+     واحد يُفسد الحزمة ويرفضها الوورد بلا بيان. */
+  const exts = [...new Set(items.map((i) => i.ext))]
+  const mimeOf: Record<string, string> = {
+    png: 'image/png', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
+  }
+
   return new Blob([zipSync([
     {
       name: '[Content_Types].xml', content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
+${exts.map((e) => `<Default Extension="${e}" ContentType="${mimeOf[e]}"/>`).join('\n')}
 <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
 <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
@@ -483,10 +590,12 @@ export function buildRichDocx(bodyHtml: string, opts: DocxOpts = {}): Blob {
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+${items.map((i) => `<Relationship Id="rIdImg${i.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image${i.id}.${i.ext}"/>`).join('\n')}
 </Relationships>`,
     },
     { name: 'word/document.xml', content: documentXml },
     { name: 'word/styles.xml', content: stylesXml() },
     { name: 'word/numbering.xml', content: numberingXml() },
+    ...items.map((i) => ({ name: `word/media/image${i.id}.${i.ext}`, content: i.bytes })),
   ])], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
 import { supabase } from '../../lib/supabase'
-import { fetchTemplateBySlug, fetchTemplates, templateLocked } from '../../lib/data'
+import { fetchTemplateBySlug, fetchTemplates, fetchFolders, templateLocked } from '../../lib/data'
 import type { Template } from '../../lib/types'
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from '../../ui/kit'
 import { IcBack, IcCheck, IcChevron, IcClock, IcLock, IcPrint } from '../../ui/icons'
@@ -104,13 +104,28 @@ export default function TemplateDetail() {
     if (!tpl) return { tpl: null as Template | null, similar: [] as Template[] }
     const all = await fetchTemplates()
     const similar = all.filter((t) => t.category_key === tpl.category_key && t.id !== tpl.id).slice(0, 4)
-    return { tpl, similar }
+    /* المجلّد هو اسم القالب عند المعلّم: «المتابعة والتقييم» لا مفتاحُ
+       فئةٍ داخليّ. ونُحمّله هنا لا في مكوّنٍ آخر كي لا تُطلب الشبكة مرّتين. */
+    const folders = tpl.folder_id ? await fetchFolders() : []
+    const folder = folders.find((f) => f.id === tpl.folder_id) || null
+    return { tpl, similar, folder }
   }, [slug])
 
   const tpl = data?.tpl || null
   const similar = data?.similar || []
   const locked = tpl ? templateLocked(tpl, plan) : false
-  const roleName = roles.find((r) => r.key === tpl?.category_key)?.name_ar || tpl?.category_key || ''
+  /**
+   * تسمية القالب في الشارة.
+   *
+   * كانت تسقط إلى `category_key` نفسه حين لا يُطابق دورًا، فتظهر «general»
+   * إنجليزيّةً وسط واجهةٍ عربيّة. والمفتاح الداخليّ لا يُعرض على مستخدمٍ
+   * أبدًا: إمّا اسمٌ يفهمه، وإمّا لا شارة.
+   */
+  const folder = data?.folder || null
+  const label =
+    folder?.name
+    || roles.find((r) => r.key === tpl?.category_key)?.name_ar
+    || ''
 
   async function start() {
     if (!tpl || !subscriber || !profile) return
@@ -182,7 +197,7 @@ export default function TemplateDetail() {
         <div className="mdd-col" style={{ gap: 'var(--mdd-s-4)' }}>
           <Card className="mdd-col" style={{ gap: 14 }}>
             <div className="mdd-row mdd-row--wrap" style={{ gap: 8 }}>
-              <Badge tone="accent">{roleName}</Badge>
+              {label && <Badge tone="accent">{label}</Badge>}
               {tpl.is_new && <Badge tone="info">جديد</Badge>}
               {locked && <Badge tone="neutral"><IcLock size={11} /> باقة المدرسة</Badge>}
             </div>

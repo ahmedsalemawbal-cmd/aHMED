@@ -50,7 +50,8 @@ export default function ExportModal({ open, onClose, title, html, page, watermar
         })
         toast('نُزّل ملفّ PDF')
       } else {
-        const blob = buildRichDocx(html, {
+        setStep('نُجهّز الصور…')
+        const blob = await buildRichDocx(html, {
           title,
           header: withHeader ? {
             school: subscriber?.name || '',
