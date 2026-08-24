@@ -1122,3 +1122,53 @@ button, input, select, textarea { font-family: inherit; }
   .mdd-folders { grid-template-columns: minmax(0, 1fr); }
   .mdd-ed-title { max-inline-size: none; font-size: 15px; }
 }
+
+/* ═══════════════ استيراد قالبٍ من ملفّ ═══════════════ */
+.mdd-drop {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 34px 20px; inline-size: 100%;
+  border: 2px dashed var(--mdd-border-strong); border-radius: var(--mdd-r-lg);
+  background: var(--mdd-sunken); color: var(--mdd-text-2); cursor: pointer;
+  transition: border-color var(--mdd-dur) var(--mdd-ease), background var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-drop:hover { border-color: var(--mdd-accent); background: var(--mdd-accent-soft); }
+.mdd-drop b { font-size: 14px; color: var(--mdd-text); }
+.mdd-drop span { font-size: 12px; color: var(--mdd-text-3); }
+
+.mdd-imp-stats {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.mdd-imp-stats > span {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: var(--mdd-r-pill);
+  background: var(--mdd-sunken); font-size: 12px; color: var(--mdd-text-2);
+}
+.mdd-imp-stats b { color: var(--mdd-text); font-weight: 700; }
+.mdd-imp-stats .ok { background: var(--mdd-success-soft); color: var(--mdd-success-fg); }
+.mdd-imp-stats .bad { background: var(--mdd-danger-soft); color: var(--mdd-danger-fg); }
+
+.mdd-imp-prev {
+  border: 1px solid var(--mdd-border); border-radius: var(--mdd-r-md); overflow: hidden;
+}
+.mdd-imp-prev .mdd-imp-lab {
+  display: block; padding: 8px 12px; background: var(--mdd-sunken);
+  font-size: 11px; font-weight: 600; color: var(--mdd-text-3); margin: 0;
+}
+.mdd-imp-prev-body {
+  padding: 16px; max-block-size: 300px; overflow: auto;
+  background: #fff; color: #14131f; color-scheme: light;
+  font-family: "Noto Naskh Arabic", var(--mdd-font), serif;
+  font-size: 12.5px; line-height: 1.9; direction: rtl; text-align: start;
+}
+.mdd-imp-prev-body :is(h1, h2, h3) { font-weight: 700; margin-block: .7em .3em; }
+.mdd-imp-prev-body h1 { font-size: 16px; text-align: center; }
+.mdd-imp-prev-body h2 { font-size: 14px; }
+.mdd-imp-prev-body h3 { font-size: 13px; }
+.mdd-imp-prev-body p { margin-block: .25em; }
+.mdd-imp-prev-body hr { border: 0; border-block-start: 1px dashed #c9c6da; margin-block: 1em; }
+
+.mdd-linkish {
+  border: 0; background: none; padding: 0; font: inherit; font-weight: 600;
+  color: var(--mdd-text); cursor: pointer; text-align: start;
+}
+.mdd-linkish:hover { color: var(--mdd-accent); text-decoration: underline; }
