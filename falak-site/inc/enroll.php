@@ -162,6 +162,81 @@ function falak_handle_enroll( WP_REST_Request $request ) {
 }
 
 /**
+ * معالجة إرسال النموذج عبر POST عادي (بلا جافاسكربت/REST/نونس).
+ *
+ * أضمن طريقة ممكنة: تعمل في كل المتصفحات ومتصفحات التطبيقات الداخلية (سناب/انستغرام/تيك توك)
+ * ومع التخزين المؤقت (الكاش) للصفحة، إذ لا تعتمد على fetch أو REST أو CORS أو نونس الصفحة.
+ * تحفظ الطلب في لوحة التحكم ثم تعيد التوجيه (PRG) لتفادي إعادة الإرسال عند التحديث.
+ */
+add_action( 'template_redirect', 'falak_handle_enroll_post' );
+function falak_handle_enroll_post() {
+	if ( empty( $_POST['falak_enroll_submit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		return;
+	}
+	if ( ! function_exists( 'falak_current_page_key' ) || 'enroll' !== falak_current_page_key() ) {
+		return;
+	}
+
+	$post = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput
+	$back = remove_query_arg( array( 'fk' ) ); // نفس الرابط الحالي (نفس النطاق) بلا معطى النتيجة.
+
+	// honeypot: إن امتلأ الحقل المخفي فهو سبام — نتظاهر بالنجاح.
+	if ( ! empty( $post['fk_website'] ) ) {
+		wp_safe_redirect( add_query_arg( 'fk', 'ok', $back ) );
+		exit;
+	}
+
+	// rate-limit مرتفع مناسب لزيارات الإعلان (عناوين IP مشتركة عبر شبكات الجوّال).
+	$ip   = falak_client_ip();
+	$key  = 'falak_rl_' . md5( $ip );
+	$hits = (int) get_transient( $key );
+	if ( $hits >= 30 ) {
+		wp_safe_redirect( add_query_arg( 'fk', 'rate', $back ) );
+		exit;
+	}
+	set_transient( $key, $hits + 1, 10 * MINUTE_IN_SECONDS );
+
+	// تنقية الحقول.
+	$data = array();
+	foreach ( falak_enroll_fields() as $k => $label ) {
+		$raw = isset( $post[ $k ] ) ? $post[ $k ] : '';
+		if ( 'guardian_email' === $k ) {
+			$data[ $k ] = sanitize_email( $raw );
+		} elseif ( 'notes' === $k ) {
+			$data[ $k ] = sanitize_textarea_field( $raw );
+		} else {
+			$data[ $k ] = sanitize_text_field( $raw );
+		}
+	}
+
+	if ( '' === $data['student_name'] || '' === $data['guardian_phone'] ) {
+		wp_safe_redirect( add_query_arg( 'fk', 'missing', $back ) );
+		exit;
+	}
+
+	$post_id = wp_insert_post( array(
+		'post_type'   => 'falak_enroll',
+		'post_status' => 'private',
+		'post_title'  => $data['student_name'] . ' — ' . $data['guardian_phone'],
+	), true );
+	if ( is_wp_error( $post_id ) ) {
+		wp_safe_redirect( add_query_arg( 'fk', 'err', $back ) );
+		exit;
+	}
+	foreach ( $data as $k => $val ) {
+		update_post_meta( $post_id, '_falak_' . $k, $val );
+	}
+	update_post_meta( $post_id, '_falak_ip', $ip );
+	update_post_meta( $post_id, '_falak_status', 'new' );
+
+	falak_notify_enroll( $post_id, $data );
+	do_action( 'falak_enroll_received', $post_id, $data );
+
+	wp_safe_redirect( add_query_arg( 'fk', 'ok', $back ) );
+	exit;
+}
+
+/**
  * إرسال إشعار بريدي بالطلب الجديد.
  */
 function falak_notify_enroll( $post_id, $data ) {

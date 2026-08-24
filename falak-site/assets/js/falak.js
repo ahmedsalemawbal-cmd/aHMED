@@ -199,78 +199,30 @@
     });
   }
 
-  /* إرسال نموذج التسجيل عبر REST — يُحفظ دائمًا في لوحة التحكم (بلا واتساب) */
+  /* نموذج التسجيل: إرسال POST عادي موثوق (يعمل في كل المتصفحات ومتصفحات التطبيقات) */
   function initEnrollForm() {
     var form = document.getElementById('falak-enroll-form');
     if (!form) return;
-    var msg = form.querySelector('.fk-form-msg');
     var btn = form.querySelector('.fk-form-submit');
-    var data = window.falakData || {};
+    var msg = form.querySelector('.fk-form-msg');
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (msg) { msg.className = 'fk-form-msg'; msg.textContent = ''; }
-
-      // فخّ العناكب (honeypot).
-      var hp = form.querySelector('[name="fk_website"]');
-      if (hp && hp.value) return;
-
-      var fd = new FormData(form);
-      var payload = {};
-      fd.forEach(function (v, k) { payload[k] = v; });
-
-      // تحقّق.
-      if (!payload.section) {
-        showMsg('err', 'الرجاء تحديد نوع الطالب (طالب / طالبة).');
-        return;
+    // إطلاق أحداث التحويل عند العودة بنجاح (?fk=ok) — بعد الحفظ في لوحة التحكم.
+    try {
+      if (/[?&]fk=ok(?:&|$)/.test(location.search)) {
+        if (window.ttq)    { try { ttq.track('CompleteRegistration'); } catch (e) {} }
+        if (window.snaptr) { try { snaptr('track', 'SIGN_UP'); } catch (e) {} }
+        if (msg) { msg.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       }
-      if (!payload.student_name || !payload.grade || !payload.guardian_name || !payload.guardian_phone) {
-        showMsg('err', 'الرجاء تعبئة جميع الحقول المطلوبة (المميّزة بـ *).');
-        return;
-      }
-      if (!data.rest) { showMsg('err', 'حدث خطأ مؤقت، يرجى المحاولة مرة أخرى بعد لحظات.'); return; }
+    } catch (e) {}
 
-      var btnText = btn ? btn.innerHTML : '';
-      if (btn) { btn.disabled = true; btn.innerHTML = 'جارٍ الإرسال…'; }
-      var reset = function () { if (btn) { btn.disabled = false; btn.innerHTML = btnText; } };
-
-      // الإرسال إلى لوحة التحكم مع إعادة محاولة واحدة عند تعثّر الشبكة — بلا أي تحويل لواتساب.
-      var send = function (attempt) {
-        var headers = { 'Content-Type': 'application/json' };
-        if (data.nonce) { headers['X-WP-Nonce'] = data.nonce; }
-        fetch(data.rest, {
-          method: 'POST',
-          headers: headers,
-          credentials: 'same-origin',
-          body: JSON.stringify(payload)
-        }).then(function (r) {
-          if (r.ok) {
-            reset();
-            showMsg('ok', 'تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.');
-            form.reset();
-            // أحداث تحويل للحملات الإعلانية (تيك توك + سناب شات).
-            if (window.ttq) { try { ttq.track('CompleteRegistration'); } catch (e) {} }
-            if (window.snaptr) { try { snaptr('track', 'SIGN_UP'); } catch (e) {} }
-          } else if (attempt < 2) {
-            send(attempt + 1);
-          } else {
-            reset();
-            showMsg('err', 'تعذّر إرسال الطلب حاليًا، يرجى المحاولة مرة أخرى بعد لحظات.');
-          }
-        }).catch(function () {
-          if (attempt < 2) { send(attempt + 1); }
-          else { reset(); showMsg('err', 'تعذّر الاتصال، تحقّق من الإنترنت وحاول مرة أخرى.'); }
-        });
-      };
-      send(1);
+    // نترك المتصفح يُرسل النموذج فعليًا (POST عادي). لا نمنع الإرسال إطلاقًا حتى لا يضيع أي طلب.
+    // يُطلق حدث submit فقط بعد نجاح تحقّق المتصفح من الحقول المطلوبة.
+    // نؤجّل تعطيل الزر عبر setTimeout حتى يبدأ الإرسال فعليًا (كي لا يُلغى الإرسال في أي متصفح).
+    form.addEventListener('submit', function () {
+      setTimeout(function () {
+        if (btn) { btn.disabled = true; btn.innerHTML = 'جارٍ الإرسال…'; }
+      }, 0);
     });
-
-    function showMsg(type, text) {
-      if (!msg) { alert(text); return; }
-      msg.className = 'fk-form-msg ' + type;
-      msg.textContent = text;
-      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
   }
 
   /* ملء قائمة المراحل حسب النوع (ولد/بنت) */

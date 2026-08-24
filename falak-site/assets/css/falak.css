@@ -183,8 +183,12 @@ a{color:inherit}
 .fk-float .top.show{opacity:1;pointer-events:auto}
 .fk-float .top svg{width:22px;height:22px}
 @media(max-width:768px){.fk-float{bottom:18px;left:16px}.fk-float a{width:50px;height:50px}}
-/* صفحة التسجيل قمعٌ مركّز: نخفي زر واتساب العائم لتوجيه العميل للنموذج (تصل بياناته للوحة التحكم) */
-body.falak-page-enroll .fk-float .wa{display:none}
+/* زر واتساب ثانوي أسفل النموذج (استفسار مباشر برسالة جاهزة) */
+.fk-wa-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:14px;padding:14px 20px;border-radius:var(--r-md);background:#25D366;color:#fff;font-weight:800;font-size:15.5px;text-decoration:none;box-shadow:0 6px 18px rgba(37,211,102,.28);transition:transform var(--t-fast),box-shadow var(--t-fast)}
+.fk-wa-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(37,211,102,.36)}
+.fk-wa-btn svg{width:20px;height:20px}
+.fk-form-or{display:flex;align-items:center;gap:12px;margin:18px 0 2px;color:var(--c-muted);font-size:13px}
+.fk-form-or::before,.fk-form-or::after{content:"";flex:1;height:1px;background:var(--c-line)}
 
 /* ─────────────────────────────────────────
    5. الأزرار المشتركة

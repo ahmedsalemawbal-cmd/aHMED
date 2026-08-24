@@ -55,6 +55,7 @@ function home_url( $p = '' ) { return 'https://alfalak-almunir.example/' . ltrim
 function admin_url( $p = '' ) { return '#'; }
 function rest_url( $p = '' ) { return '#'; }
 function add_query_arg( $args, $url = '' ) { return $url . ( strpos( $url, '?' ) === false ? '?' : '&' ) . http_build_query( $args ); }
+function remove_query_arg( $keys, $url = '/enroll/' ) { return $url; }
 function sanitize_key( $k ) { return strtolower( preg_replace( '/[^a-z0-9_]/i', '', (string) $k ) ); }
 function falak_page_id() { return 1; }
 function esc_html( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES, 'UTF-8' ); }
@@ -73,6 +74,7 @@ function sanitize_textarea_field( $s ) { return (string) $s; }
 $GLOBALS['FK_AUTH'] = $AUTH;
 $GLOBALS['FK_PAGE'] = $PAGE;
 if ( getenv( 'FALAK_TAB' ) ) { $_GET['tab'] = getenv( 'FALAK_TAB' ); }
+if ( getenv( 'FALAK_FK' ) ) { $_GET['fk'] = getenv( 'FALAK_FK' ); }
 
 /* ── تحميل ملفات الإضافة الحقيقية ── */
 require FALAK_DIR . 'inc/helpers.php';

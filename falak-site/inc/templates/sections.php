@@ -165,8 +165,21 @@ function falak_tpl_enroll() {
 				</ol>
 			</aside>
 
-			<form id="falak-enroll-form" class="fk-form fk-reveal" novalidate>
-				<div class="fk-form-msg" role="alert"></div>
+			<form id="falak-enroll-form" class="fk-form fk-reveal" method="post" action="<?php echo esc_url( remove_query_arg( 'fk' ) ); ?>">
+				<?php
+				$fk_res = isset( $_GET['fk'] ) ? sanitize_key( $_GET['fk'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+				if ( 'ok' === $fk_res ) : ?>
+					<div class="fk-form-msg ok" role="status">تم استلام طلب التسجيل بنجاح ✅ سنتواصل معكم قريبًا بإذن الله.</div>
+				<?php elseif ( 'missing' === $fk_res ) : ?>
+					<div class="fk-form-msg err" role="alert">الرجاء تعبئة الحقول المطلوبة: اسم الطالب ورقم الجوال.</div>
+				<?php elseif ( 'rate' === $fk_res ) : ?>
+					<div class="fk-form-msg err" role="alert">تم استقبال عدة طلبات، يرجى المحاولة بعد قليل.</div>
+				<?php elseif ( 'err' === $fk_res ) : ?>
+					<div class="fk-form-msg err" role="alert">تعذّر حفظ الطلب، يرجى المحاولة مرة أخرى.</div>
+				<?php else : ?>
+					<div class="fk-form-msg" role="alert"></div>
+				<?php endif; ?>
+				<input type="hidden" name="falak_enroll_submit" value="1">
 
 				<div class="fk-field fk-field-full">
 					<label>نوع الطالب <span class="req">*</span></label>
@@ -223,6 +236,9 @@ function falak_tpl_enroll() {
 				<button type="submit" class="fk-btn fk-btn-p fk-form-submit"><?php falak_icon( 'sparkle', 18 ); ?> إرسال طلب التسجيل</button>
 
 				<p class="fk-form-note"><?php falak_icon( 'shield', 15 ); ?> بياناتك تصل مباشرةً لإدارة المدرسة، وسنتواصل معك في أقرب وقت.</p>
+
+				<div class="fk-form-or">أو</div>
+				<a class="fk-wa-btn" href="<?php echo esc_url( falak_wa_url( 'السلام عليكم، شاهدت إعلانكم وأرغب بالاستفسار عن التسجيل في مدرسة الفلك المنير' ) ); ?>" target="_blank" rel="noopener"><?php falak_icon( 'whatsapp', 20 ); ?> استفسر مباشرةً عبر واتساب</a>
 			</form>
 		</div>
 	</section>

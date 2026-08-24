@@ -89,7 +89,12 @@ if ( ! function_exists( 'falak_render_footer' ) ) {
 <!-- الأزرار العائمة -->
 <div class="fk-float falak-wrap">
 	<a href="#" id="falak-top" class="top" aria-label="العودة للأعلى"><?php falak_icon( 'chevron', 22, 'up' ); ?><span class="screen-reader-text"></span></a>
-	<a href="<?php echo esc_url( falak_wa_url( 'السلام عليكم، أرغب في الاستفسار عن مدرسة الفلك المنير' ) ); ?>" class="wa" target="_blank" rel="noopener" aria-label="تواصل عبر واتساب"><?php falak_icon( 'whatsapp', 30 ); ?></a>
+	<?php
+	$fk_wa_msg = ( function_exists( 'falak_current_page_key' ) && 'enroll' === falak_current_page_key() )
+		? 'السلام عليكم، شاهدت إعلانكم وأرغب بالاستفسار عن التسجيل في مدرسة الفلك المنير'
+		: 'السلام عليكم، أرغب في الاستفسار عن مدرسة الفلك المنير';
+	?>
+	<a href="<?php echo esc_url( falak_wa_url( $fk_wa_msg ) ); ?>" class="wa" target="_blank" rel="noopener" aria-label="تواصل عبر واتساب"><?php falak_icon( 'whatsapp', 30 ); ?></a>
 </div>
 <style>#falak-top svg{transform:rotate(180deg)}</style>
 		<?php
