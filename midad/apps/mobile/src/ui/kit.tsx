@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import {
   ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput,
   TextInputProps, View, ViewStyle,
@@ -293,10 +293,21 @@ export function Section({ title, action, children, gap = SPACE.s3 }: {
 export function HScroll({ children, gap = 10, pad = SPACE.s5 }: {
   children: React.ReactNode; gap?: number; pad?: number
 }) {
+  const ref = useRef<ScrollView>(null)
+  /* `row-reverse` يضع أوّل عنصرٍ في أقصى يمين المحتوى، والمحرّك يفتح
+     الشريط على أقصى يساره — فيرى المستخدم آخر العناصر ويظنّ الترتيب
+     مقلوبًا. فنقفز إلى الطرف الآخر بلا حركةٍ مرئيّة عند كلّ تغيّرٍ في
+     المقاس: أوّل رسمٍ، وتبدّل البيانات، ودوران الجهاز.
+     ولا نفعلها إن كان المحتوى أضيق من الشريط — لا طرفَ يُقفز إليه. */
+  const settle = (w: number, _h: number) => {
+    if (w > 0) ref.current?.scrollToEnd({ animated: false })
+  }
   return (
     <ScrollView
+      ref={ref}
       horizontal
       showsHorizontalScrollIndicator={false}
+      onContentSizeChange={settle}
       style={{ marginHorizontal: -pad }}
       contentContainerStyle={{
         flexDirection: 'row-reverse', gap, paddingHorizontal: pad, alignItems: 'stretch',

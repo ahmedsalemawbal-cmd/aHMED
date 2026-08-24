@@ -242,13 +242,15 @@ export default function Attendance() {
         backgroundColor: c.card, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
         ...elevation(c, 3),
       }}>
-        <Button variant="secondary" icon={<IcCheck size={18} color={c.text} />}
-          onPress={markAll} disabled={!students.length} />
+        {/* الصفّ مقلوب، فأوّلُ ما يُكتب هنا آخرُ ما يُرى يمينًا — وموضع
+            اليمين هو موضع العين الأولى في العربيّة، فيسكنه الفعل الرئيسيّ. */}
+        <Button label="احفظ الرصد" variant="primary" style={{ flex: 1 }}
+          loading={busy} disabled={!students.length || !dirty} onPress={save} />
         <Button variant="soft" icon={<IcDownload size={18} color={c.primarySoftFg} />}
           onPress={() => setPickFormat(true)} disabled={!students.length}
           loading={!!exporting} />
-        <Button label="احفظ الرصد" variant="primary" style={{ flex: 1 }}
-          loading={busy} disabled={!students.length || !dirty} onPress={save} />
+        <Button variant="secondary" icon={<IcCheck size={18} color={c.text} />}
+          onPress={markAll} disabled={!students.length} />
       </View>
 
       <FormatSheet open={pickFormat} onClose={() => setPickFormat(false)} onPick={doExport} />

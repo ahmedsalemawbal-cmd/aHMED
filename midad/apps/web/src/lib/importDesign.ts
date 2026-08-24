@@ -79,7 +79,26 @@ const KILL = 'script,style,link,meta,noscript,iframe,object,embed,form,input,but
  */
 const KEEP_ATTRS = new Set([
   'style', 'colspan', 'rowspan', 'dir', 'align', 'width', 'height', 'data-page-break',
+  /* `src` و`alt` للصور. وبدونهما تبقى الصورة عنصرًا فارغًا بلا مصدر —
+     يُستورد التصميم فيخرج شعار المدرسة مربّعًا أبيض، ولا شيء يُنبّه.
+     والمصادر الخطرة تُصفّى في safeSrc أدناه لا هنا. */
+  'src', 'alt',
 ])
+
+/**
+ * مصدر صورةٍ مأمون: صورةٌ مضمَّنة، أو رابطٌ مشفَّر، أو نسبيّ.
+ *
+ * والممنوع صريحٌ لا مُستنتَج: `javascript:` ينفّذ، و`data:` من غير
+ * الصور قد يحمل SVG فيه شيفرة. فنسمح بما نعرف ونردّ ما سواه.
+ */
+function safeSrc(v: string | null): string | null {
+  const u = (v || '').trim()
+  if (!u) return null
+  if (/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(u)) return u
+  if (/^https:\/\//i.test(u)) return u
+  if (/^\/(?!\/)/.test(u)) return u
+  return null
+}
 
 function clean(root: Element, dropped: Set<string>): void {
   root.querySelectorAll(KILL).forEach((el) => {
@@ -108,7 +127,12 @@ function clean(root: Element, dropped: Set<string>): void {
         if (!/^(https?:|mailto:|tel:|#)/i.test(a.value)) el.removeAttribute('href')
         continue
       }
-      if (!KEEP_ATTRS.has(name)) el.removeAttribute(a.name)
+      if (!KEEP_ATTRS.has(name)) { el.removeAttribute(a.name); continue }
+      if (name === 'src') {
+        const ok = safeSrc(a.value)
+        if (ok) el.setAttribute('src', ok)
+        else { el.removeAttribute('src'); dropped.add('src غير مأمون') }
+      }
     }
   }
   walk(root)

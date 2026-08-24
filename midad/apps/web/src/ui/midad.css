@@ -1219,19 +1219,31 @@ button, input, select, textarea { font-family: inherit; }
 
 /* ═══════════════ القوالب المستوردة من أدوات التصميم ═══════════════ */
 
-/* فاصل الصفحة: خطٌّ متقطّعٌ في التحرير، وقطعٌ فعليٌّ عند الطباعة */
+/* فاصل الصفحة: حدُّ ورقٍ حقيقيّ في التحرير، وقطعٌ فعليٌّ عند الطباعة.
+   كان خطًّا متقطّعًا، فيبدو المستند ورقةً واحدةً طويلة قُسِّمت بخطّ —
+   لا ستّ ورقات. والمحرّر مستندٌ واحدٌ متّصلٌ في ProseMirror ولا يُشطر
+   إلى حاويات، فنصنع الحدّ بصريًّا: شريطٌ بلون سطح العمل يبلغ حافّتي
+   الورقة، وظلٌّ داخليٌّ فوقه وتحته — فتنتهي ورقةٌ وتبدأ أخرى. */
 .mdd-doc-body .mdd-pagebreak {
-  position: relative; block-size: 0; margin-block: 26px;
-  border-block-start: 2px dashed #b9b5cf; user-select: none;
+  position: relative;
+  block-size: 30px; margin-block: 4px;
+  margin-inline: calc(var(--mdd-pad-s, 14mm) * -1) calc(var(--mdd-pad-e, 14mm) * -1);
+  background: #e9e7f0;
+  border-block: 1px solid #d6d3e4;
+  box-shadow:
+    inset 0 8px 9px -9px rgba(16, 12, 45, .40),
+    inset 0 -8px 9px -9px rgba(16, 12, 45, .28);
+  user-select: none;
 }
 .mdd-doc-body .mdd-pagebreak::after {
-  content: 'فاصل صفحة';
-  position: absolute; inset-block-start: -9px; inset-inline-end: 0;
-  padding-inline: 8px; background: #fff;
-  font-family: var(--mdd-font); font-size: 10px; color: #8b88a6;
+  content: 'صفحةٌ جديدة';
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--mdd-font); font-size: 9.5px; font-weight: 600;
+  color: #8b88a6; letter-spacing: 0;
 }
 .mdd-doc-body .mdd-pagebreak.ProseMirror-selectednode {
-  border-block-start-color: var(--mdd-accent);
+  background: var(--mdd-accent-soft);
+  border-block-color: var(--mdd-accent);
 }
 
 /* الجداول المستوردة تحمل حدودها وألوانها في أنماطها السطريّة.
@@ -1418,3 +1430,19 @@ button, input, select, textarea { font-family: inherit; }
   color: var(--mdd-danger);
   letter-spacing: 0;
 }
+
+/* ═══════════════ صور المستند ═══════════════ */
+
+/* الصورة لا تتجاوز عرض الورقة مهما كان أصلها كبيرًا: مَن يرفع شعارًا
+   بعرض ٣٠٠٠px لا يريد شعارًا يخرج عن الصفحة، بل شعارًا في مكانه. */
+.mdd-doc-body img, .mdd-doc-img {
+  max-inline-size: 100%; block-size: auto;
+  display: block; margin-inline: auto;
+}
+/* المحدَّدة تُعرَف: إطارٌ بلون النبرة كي يدري المحرّر ما الذي سيحذفه */
+.mdd-doc-body img.ProseMirror-selectednode {
+  outline: 2px solid var(--mdd-accent); outline-offset: 2px;
+  border-radius: 3px;
+}
+/* داخل خليّة: تملأ عرضها ولا تكسر الجدول */
+.mdd-doc-body :is(td, th) img { margin-inline: 0; }

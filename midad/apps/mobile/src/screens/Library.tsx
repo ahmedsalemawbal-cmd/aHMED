@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { FlatList, Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
@@ -11,6 +11,7 @@ import type { Template } from '../lib/types'
 
 export default function Library() {
   const { c, roles, plan } = useApp()
+  const hsRef = useRef<ScrollView>(null)
   const nav = useNavigation<any>()
   const [all, setAll] = useState<Template[]>([])
   const [q, setQ] = useState('')
@@ -60,7 +61,11 @@ export default function Library() {
             <IcSearch size={17} color={c.text3} />
           </View>
         </View>
+        {/* يبدأ من اليمين: `row-reverse` يضع أوّل عنصرٍ يمينًا والمحرّك
+            يفتح الشريط يسارًا، فيُرى آخرُه أوّلًا. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
+          ref={hsRef}
+          onContentSizeChange={(w) => { if (w > 0) hsRef.current?.scrollToEnd({ animated: false }) }}
           contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8 }}>
           {chips.map((ch) => {
             const on = cat === ch.key

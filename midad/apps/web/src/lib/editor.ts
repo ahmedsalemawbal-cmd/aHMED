@@ -10,6 +10,7 @@
  * node_modules، لا من ذاكرةٍ عن الإصدار الثاني — فالثالث غيّر أشياء.
  */
 import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
 import {
   StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader,
   StyledParagraph, PageBreak,
@@ -101,6 +102,15 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
     StyledTableHeader.configure({ HTMLAttributes: { class: 'mdd-doc-th' } }),
     StyledTableCell.configure({ HTMLAttributes: { class: 'mdd-doc-td' } }),
     PageBreak,
+    /* الصور: شعار المدرسة أوّلًا، وما يُدرجه المعلّم بعده.
+       `inline: false` فالصورة كتلةٌ تقف بنفسها لا حرفٌ في سطر — وهو
+       ما يُتوقَّع في وثيقةٍ مدرسيّة. و`allowBase64` لأنّ المستورَد من
+       كلود ديزاين قد يحمل صورةً مضمَّنةً في متنه، فلا نُسقطها. */
+    Image.configure({
+      inline: false,
+      allowBase64: true,
+      HTMLAttributes: { class: 'mdd-doc-img' },
+    }),
     // العربيّة تبدأ يمينًا، فالافتراضيّ right لا left
     TextAlign.configure({ types: ['heading', 'paragraph'], defaultAlignment: 'right' }),
     Highlight.configure({ multicolor: true }),
@@ -157,6 +167,11 @@ export function pageStyle(p: PageSetup): React.CSSProperties {
     minHeight: portrait ? '297mm' : '210mm',
     paddingBlock: `${p.margins.top}mm ${p.margins.bottom}mm`,
     paddingInline: `${p.margins.right}mm ${p.margins.left}mm`,
+    /* الهامشان الجانبيّان متغيّرين كي يبلغ فاصلُ الصفحة حافّتَي الورقة:
+       المتن محشوٌّ بهما، فما فيه لا يصل الحافّة إلّا بهامشٍ سالبٍ يساويهما.
+       ولا يُكتبان في الـCSS رقمًا ثابتًا — الهوامش تُضبط لكلّ مستند. */
+    ['--mdd-pad-s' as any]: `${p.margins.right}mm`,
+    ['--mdd-pad-e' as any]: `${p.margins.left}mm`,
   }
 }
 

@@ -37,9 +37,14 @@ function Tabs() {
          كلّ شاشةٍ ترسم AppHeader الخاصّ بها، عربيًّا من اليمين. */
       screenOptions={{
         headerShown: false,
+        /* الشريط السفليّ يرسمه المُوجِّه بنفسه، ونحن ثبّتنا المحرّك على
+           LTR، فيصفّ التبويبات من اليسار: «الرئيسية» في أقصى اليسار وهي
+           أوّل ما تقصده العين. فنقلب الصفّ هنا، ويبقى ترتيب التصريح على
+           حاله فلا تتبدّل الوجهات ولا الروابط العميقة. */
         tabBarStyle: {
           backgroundColor: c.card, borderTopWidth: 0, height: 64,
           paddingBottom: 9, paddingTop: 7, elevation: 0,
+          flexDirection: 'row-reverse',
         },
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.text3,

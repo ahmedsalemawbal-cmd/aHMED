@@ -5,10 +5,12 @@ import {
   IcBold, IcItalic, IcUnderline, IcStrike, IcAlignRight, IcAlignCenter, IcAlignLeft,
   IcAlignJustify, IcListBullet, IcListNumber, IcQuote, IcRule, IcUndo, IcRedo,
   IcRowAdd, IcColAdd, IcRowDel, IcColDel, IcMerge, IcSplit, IcMarker, IcInk,
-  IcClear, IcLink, IcTableAdd, IcTable, IcChevronDown, IcSpark,
+  IcClear, IcLink, IcTableAdd, IcTable, IcChevronDown, IcSpark, IcImageAdd, IcSpinner,
   IcCellFill, IcRowFill, IcPageBreak,
 } from '../../ui/icons'
 import { readStyleProp, setStyleProp } from '../../lib/styleSafe'
+import { pickImage, uploadDocImage, imageError } from '../../lib/docImages'
+import { useApp } from '../../lib/store'
 
 /**
  * شريط الأدوات — شبيه الوورد، بالأساسيّات وحدها.
@@ -45,6 +47,8 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
 }) {
   // إعادة الرسم عند كلّ تغيّرٍ في التحديد أو المحتوى، وإلّا بقيت الأزرار
   // تعرض حالةً قديمة — وهذا أشهر عطبٍ في أشرطة أدوات TipTap
+  const { subscriber, toast } = useApp()
+  const [busyImg, setBusyImg] = useState(false)
   const [, bump] = useState(0)
   useEffect(() => {
     if (!editor) return
@@ -53,6 +57,28 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
     editor.on('selectionUpdate', on)
     return () => { editor.off('transaction', on); editor.off('selectionUpdate', on) }
   }, [editor])
+
+  /**
+   * إدراج صورة: يُنتقى الملفّ، يُرفع، ثمّ يُدرج رابطه في موضع المؤشّر.
+   *
+   * والرفع قبل الإدراج عمدًا: لو أدرجنا الصورة بـ`blob:` ثمّ رفعناها،
+   * لبقي في المتن رابطٌ يموت بإغلاق التبويب — فيُحفظ المستند بصورةٍ
+   * مكسورة ولا يُدرى متى انكسرت.
+   */
+  const addImage = async () => {
+    const file = await pickImage()
+    if (!file) return
+    const bad = imageError(file)
+    if (bad) { toast(bad, 'danger'); return }
+    setBusyImg(true)
+    try {
+      const url = await uploadDocImage(file, subscriber?.id || '')
+      editor?.chain().focus().setImage({ src: url, alt: file.name }).run()
+      toast('أُدرجت الصورة')
+    } catch (e: any) {
+      toast(e?.message || 'تعذّر رفع الصورة', 'danger')
+    } finally { setBusyImg(false) }
+  }
 
   if (!editor) return <div className="mdd-tb" aria-hidden="true" style={{ minHeight: 46 }} />
 
@@ -165,6 +191,13 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
           onClick={() => editor.chain().focus().setHorizontalRule().run()} />
         <TB icon={<IcPageBreak />} title="فاصل صفحة"
           onClick={() => editor.chain().focus().insertPageBreak().run()} />
+      </Grp>
+
+      {/* ── الصورة ── */}
+      <Grp>
+        <TB icon={busyImg ? <IcSpinner className="mdd-spin" /> : <IcImageAdd />}
+          title={busyImg ? 'جارٍ الرفع…' : 'أدرج صورة (شعار المدرسة مثلًا)'}
+          disabled={busyImg} onClick={addImage} />
       </Grp>
 
       {/* ── الجدول ── */}
