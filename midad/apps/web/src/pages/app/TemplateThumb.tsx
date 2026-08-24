@@ -1,40 +1,84 @@
-import React from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Template } from '../../lib/types'
 
-/** مصغّرة تُظهر شكل الورقة فعلًا — لا أيقونة عامّة. */
-export default function TemplateThumb({ template, height = 132 }: { template: Template; height?: number }) {
-  const fields = template.fields || []
-  const hasTable = fields.some((f) => f.type === 'table')
-  const lines = Math.min(6, Math.max(3, Math.ceil(fields.length / 2)))
+/** عرض ورقة A4 بالبكسل عند ٩٦ نقطةً في البوصة. */
+const SHEET = 794
+
+/**
+ * مصغّرة القالب — **من متنه الحقيقيّ** لا من رسمٍ وهميّ.
+ *
+ * كانت هذه تُخرِج شكلًا عامًّا: مستطيلاتٌ رماديّة تُحاكي أسطرًا وجدولًا،
+ * وتُبنى من عدد الحقول. فكان المعلّم يرى الرسم نفسه في كلّ قالب، ولا يعرف
+ * ما سيفتح إلّا بعد أن يفتحه. والقوالب الآن مستنداتٌ مصمَّمة، فالوهم لم
+ * يعد يُغني عن الحقيقة.
+ *
+ * نرسم أوّل صفحةٍ من المتن مصغَّرةً بـ`transform: scale`. والمعاينة
+ * `aria-hidden` وبلا مؤشّر: صورةٌ تُرى لا صفحةٌ تُستعمل.
+ */
+export default function TemplateThumb({ template, height = 132 }: {
+  template: Template
+  height?: number
+}) {
+  const html = useMemo(() => firstPage(template.content_html || ''), [template.content_html])
+  const box = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0)
+
+  /* المعامل يُقاس ولا يُخمَّن: البطاقة تتغيّر بتغيّر الشبكة وعرض الشاشة،
+     فمعاملٌ ثابت يترك فراغًا في الواسعة ويقصّ في الضيّقة. نقيس ونقسم. */
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const fit = () => setScale(el.clientWidth / SHEET)
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [html])
+
+  if (!html) return <Placeholder height={height} />
+
+  const m = template.page?.margins
   return (
-    <div style={{
-      height, borderRadius: 'var(--mdd-r-md)', border: '1px solid var(--mdd-border)',
-      background: 'var(--mdd-sunken)', display: 'grid', placeItems: 'center', overflow: 'hidden', flex: 'none',
-    }} aria-hidden="true">
-      <svg width="104" height={height - 18} viewBox="0 0 104 118" style={{ display: 'block' }}>
-        <rect x="0.5" y="0.5" width="103" height="117" rx="4" fill="#fff" stroke="var(--mdd-border-strong)" />
-        <rect x="9" y="9" width="34" height="4.5" rx="2" fill="var(--mdd-accent)" opacity=".85" />
-        <rect x="9" y="17" width="58" height="3" rx="1.5" fill="var(--mdd-border-strong)" opacity=".6" />
-        <rect x="26" y="27" width="52" height="5" rx="2" fill="var(--mdd-text-3)" opacity=".55" />
-        {Array.from({ length: lines }).map((_, i) => (
-          <g key={i}>
-            <rect x="9" y={40 + i * 8} width={i % 3 === 0 ? 86 : 68} height="3" rx="1.5" fill="var(--mdd-border-strong)" opacity=".5" />
-          </g>
-        ))}
-        {hasTable && (
-          <g>
-            <rect x="9" y={44 + lines * 8} width="86" height="9" fill="var(--mdd-accent)" opacity=".18" />
-            {[0, 1, 2].map((r) => (
-              <rect key={r} x="9" y={53 + lines * 8 + r * 8} width="86" height="7.4" fill="none" stroke="var(--mdd-border-strong)" strokeWidth=".7" opacity=".55" />
-            ))}
-            {[31, 53, 75].map((x) => (
-              <line key={x} x1={x} y1={44 + lines * 8} x2={x} y2={53 + lines * 8 + 24} stroke="var(--mdd-border-strong)" strokeWidth=".7" opacity=".45" />
-            ))}
-          </g>
-        )}
-        <rect x="9" y="104" width="26" height="3" rx="1.5" fill="var(--mdd-border-strong)" opacity=".45" />
-        <rect x="69" y="104" width="26" height="3" rx="1.5" fill="var(--mdd-border-strong)" opacity=".45" />
+    <div ref={box} className="mdd-thumb" style={{ height }} aria-hidden="true" title={template.title}>
+      {/* لا نرسم قبل القياس: الرسم بمعاملٍ خاطئٍ ثمّ تصحيحه ارتجافةٌ تُرى */}
+      {scale > 0 && (
+        <div
+          className="mdd-thumb-page"
+          style={{
+            width: SHEET,
+            transform: `scale(${scale})`,
+            padding: `${m?.top ?? 14}mm ${m?.right ?? 14}mm`,
+          }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
+    </div>
+  )
+}
+
+function Placeholder({ height }: { height: number }) {
+  return (
+    <div className="mdd-thumb mdd-thumb--empty" style={{ height }} aria-hidden="true">
+      <svg width="52" height="60" viewBox="0 0 52 60" fill="none">
+        <rect x="1" y="1" width="50" height="58" rx="4"
+          stroke="var(--mdd-border-strong)" strokeDasharray="4 3" />
+        <path d="M14 22h24M14 30h24M14 38h15" stroke="var(--mdd-border-strong)"
+          strokeWidth="2" strokeLinecap="round" opacity=".6" />
       </svg>
     </div>
   )
+}
+
+/**
+ * أوّل صفحةٍ من المتن — ما قبل أوّل فاصل.
+ *
+ * ونحدّ الطول: مصغّرةٌ لا تحتاج ستّ صفحات، ورسمُ كلّ المتن في شبكةٍ من
+ * المصغّرات يُثقل الصفحة بلا فائدة.
+ */
+function firstPage(html: string): string {
+  if (!html.trim()) return ''
+  const i = html.indexOf('data-page-break')
+  let out = i > 0 ? html.slice(0, html.lastIndexOf('<', i)) : html
+  if (out.length > 14000) out = out.slice(0, 14000)
+  return out
 }

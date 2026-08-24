@@ -1,14 +1,22 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert, Button, Modal } from '../../ui/kit'
-import { IcPrint, IcDownload, IcCheck } from '../../ui/icons'
+import { IcPrint, IcDownload, IcCheck, IcSpinner } from '../../ui/icons'
 import { buildRichDocx } from '../../lib/docx'
+import { downloadPdf } from '../../lib/pdf'
 import { download, safeFileName } from '../../lib/export'
 import { useApp } from '../../lib/store'
 import type { PageSetupRow } from '../../lib/types'
 
 type Fmt = 'pdf' | 'docx'
 
+/**
+ * تصدير المستند — **تنزيلٌ مباشر** لا نافذة طباعة.
+ *
+ * كان الـPDF يفتح حوار الطباعة ويطلب من المستخدم اختيار «حفظ كـPDF» بنفسه.
+ * وهذا خلطٌ بين فعلين: «اطبع» يفتح الحوار، و«نزّل» يُنزّل الملفّ في نقرة.
+ * فصلناهما: هذه النافذة تُنزّل، وزرّ «اطبع» في الترويسة يطبع.
+ */
 export default function ExportModal({ open, onClose, title, html, page, watermark }: {
   open: boolean
   onClose: () => void
@@ -20,59 +28,64 @@ export default function ExportModal({ open, onClose, title, html, page, watermar
   const { toast, subscriber, access } = useApp()
   const [fmt, setFmt] = useState<Fmt>('pdf')
   const [busy, setBusy] = useState(false)
+  const [step, setStep] = useState('')
   const [withHeader, setWithHeader] = useState(true)
 
   const mark = watermark ?? (access === 'trial' ? 'نسخةٌ تجريبيّة — مِداد' : null)
 
   const formats: { key: Fmt; name: string; line: string }[] = [
-    { key: 'pdf', name: 'PDF', line: 'للطباعة والإرسال — الأدقّ تنسيقًا' },
-    { key: 'docx', name: 'وورد (DOCX)', line: 'لتعديلٍ إضافيّ على حاسوبك' },
+    { key: 'pdf', name: 'PDF', line: 'يُنزَّل فورًا — بألوانه وصفحاته كما تراه' },
+    { key: 'docx', name: 'وورد (DOCX)', line: 'يُنزَّل فورًا — لتعديلٍ إضافيّ على حاسوبك' },
   ]
 
   const run = async () => {
     setBusy(true)
     try {
+      const name = safeFileName(title)
       if (fmt === 'pdf') {
-        onClose()
-        // ننتظر إغلاق النافذة قبل الطباعة، وإلّا طُبعت فوق الورقة
-        setTimeout(() => window.print(), 140)
-        return
+        setStep('نُجهّز الصفحات…')
+        await downloadPdf(html, `${name}.pdf`, page ?? null, {
+          scale: 2,
+          onProgress: (d, t) => setStep(`الصفحة ${d} من ${t}…`),
+        })
+        toast('نُزّل ملفّ PDF')
+      } else {
+        const blob = buildRichDocx(html, {
+          title,
+          header: withHeader ? {
+            school: subscriber?.name || '',
+            dept: (subscriber as any)?.education_dept || '',
+            year: (subscriber as any)?.academic_year || '',
+            semester: (subscriber as any)?.semester || '',
+          } : null,
+          watermark: mark,
+          page: page ? { orientation: page.orientation, margins: page.margins } : undefined,
+        })
+        download(blob, `${name}.docx`)
+        toast('نُزّل ملفّ وورد')
       }
-      const blob = buildRichDocx(html, {
-        title,
-        header: withHeader ? {
-          school: subscriber?.name || '',
-          dept: (subscriber as any)?.education_dept || '',
-          year: (subscriber as any)?.academic_year || '',
-          semester: (subscriber as any)?.semester || '',
-        } : null,
-        watermark: mark,
-        page: page ? { orientation: page.orientation, margins: page.margins } : undefined,
-      })
-      download(blob, `${safeFileName(title)}.docx`)
-      toast('جهّزنا الملفّ — تحقّق من تنزيلاتك')
       onClose()
     } catch (e: any) {
       toast(e?.message || 'تعذّر التصدير', 'danger')
-    } finally { setBusy(false) }
+    } finally { setBusy(false); setStep('') }
   }
 
   return (
     <Modal
-      open={open} onClose={onClose} title="تصدير المستند" wide
+      open={open} onClose={onClose} title="تنزيل المستند" wide
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} block>إلغاء</Button>
+          <Button variant="secondary" onClick={onClose} block disabled={busy}>إلغاء</Button>
           <Button variant="primary" onClick={run} loading={busy} block
-            icon={fmt === 'pdf' ? <IcPrint size={15} /> : <IcDownload size={15} />}>
-            {fmt === 'pdf' ? 'افتح الطباعة' : 'نزّل الملفّ'}
+            icon={busy ? <IcSpinner size={15} className="mdd-spin" /> : <IcDownload size={15} />}>
+            {busy ? (step || 'جارٍ التجهيز…') : 'نزّل الآن'}
           </Button>
         </>
       }>
       <div className="mdd-col" style={{ gap: 10 }}>
         {formats.map((f) => (
           <button
-            key={f.key} onClick={() => setFmt(f.key)}
+            key={f.key} onClick={() => setFmt(f.key)} disabled={busy}
             className={'mdd-card mdd-card--action mdd-row' + (fmt === f.key ? ' mdd-card--selected' : '')}
             style={{ gap: 12, padding: 14 }}>
             <span style={{
@@ -90,24 +103,33 @@ export default function ExportModal({ open, onClose, title, html, page, watermar
         ))}
       </div>
 
-      <label className="mdd-check">
-        <input type="checkbox" checked={withHeader} onChange={(e) => setWithHeader(e.target.checked)} />
-        <span>أدرج ترويسة المدرسة</span>
-      </label>
+      {fmt === 'docx' && (
+        <label className="mdd-check">
+          <input type="checkbox" checked={withHeader} disabled={busy}
+            onChange={(e) => setWithHeader(e.target.checked)} />
+          <span>أدرج ترويسة المدرسة</span>
+        </label>
+      )}
 
       {fmt === 'pdf' && (
         <Alert tone="info">
-          يفتح مِداد نافذة الطباعة — اختر «حفظ كـ PDF» وجهةً. الورقة مضبوطةٌ على A4
-          بهوامشها الحقيقيّة، وما تراه في المحرّر هو ما يُطبع.
+          الملفّ صورةٌ عالية الدقّة لكلّ صفحة — فالتصميم والألوان والعربيّة تخرج
+          كما تراها تمامًا. والنصّ فيه غير قابلٍ للتحديد؛ فإن أردتَ نصًّا يُحرَّر
+          فنزّل الوورد.
         </Alert>
       )}
 
       {fmt === 'docx' && (
         <Alert tone="info">
-          يخرج الملفّ بتنسيقه كاملًا: العناوين والجداول والقوائم والألوان — قابلًا
-          للتعديل في الوورد.
+          يخرج بتنسيقه: العناوين والجداول وألوان الخلايا والقوائم — قابلًا للتعديل
+          في الوورد. وقد يختلف بعض التباعد عمّا تراه هنا، فالوورد لا يفهم كلّ ما
+          يفهمه المتصفّح.
         </Alert>
       )}
+
+      <p className="mdd-imp-note">
+        وللطباعة على ورقٍ مباشرةً استعمل زرّ <b>«اطبع»</b> في الأعلى.
+      </p>
 
       {mark && (
         <Alert tone="accent">

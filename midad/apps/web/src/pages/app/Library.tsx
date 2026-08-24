@@ -9,6 +9,7 @@ import {
 } from '../../ui/kit'
 import { IcFolderFill, IcChevron, IcPage, IcSpark, IcBack, IcSearch } from '../../ui/icons'
 import { counted, TPL, FLD } from '../../lib/format'
+import TemplateThumb from './TemplateThumb'
 
 /**
  * مكتبة القوالب — مجلّداتٌ أوّلًا، ثمّ قوالب المجلّد.
@@ -225,11 +226,20 @@ function SearchResults({ term, hits, loading, onClear }: {
 
 export function TemplateCard({ t, accent }: { t: Template; accent?: string }) {
   const nav = useNavigate()
+
+  /* البطاقة تُري القالب لا تصفه: أوّل صفحةٍ من متنه مصغّرةً بألوانها. فمن
+     رأى الشكل عرف القالب قبل أن يفتحه، ولا يفتح ستّة ليجد واحدًا. وما لا
+     متن له — قالب تعبئةٍ قديم — يبقى على أيقونته. */
+  const shows = !!(t.content_html || '').trim()
+
   return (
     <Card
-      className="mdd-tplc mdd-card--action" onClick={() => nav(`/app/template/${t.slug}`)}
+      className={'mdd-tplc mdd-card--action' + (shows ? ' mdd-tplc--art' : '')}
+      onClick={() => nav(`/app/template/${t.slug}`)}
       style={{ ['--fc' as any]: accent || 'var(--mdd-accent)', cursor: 'pointer' }}>
-      <span className="mdd-tplc-ic"><IcPage size={20} /></span>
+      {shows
+        ? <TemplateThumb template={t} height={176} />
+        : <span className="mdd-tplc-ic"><IcPage size={20} /></span>}
       <h3 className="mdd-tplc-t">{t.title}</h3>
       {t.description && <p className="mdd-tplc-d">{t.description}</p>}
       <span className="mdd-tplc-foot">

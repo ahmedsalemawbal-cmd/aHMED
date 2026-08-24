@@ -337,6 +337,13 @@ function Pick({ title, value, options, onPick, width }: {
   )
 }
 
+/**
+ * منتقي لون — بألوانٍ جاهزة **ومنتقٍ حرّ**.
+ *
+ * الجاهزة تكفي غالبًا وتُبقي المستند متّسقًا. لكنّ القالب قد يأتي بهويّةٍ
+ * أخرى، فيحتاج المعلّم لونًا ليس في قائمتنا. فنُضيف منتقي النظام: حرّيّةٌ
+ * كاملةٌ لمن أرادها، بلا أن تُثقل الاختيار على من لا يريدها.
+ */
 function Swatches({ icon, title, items, current, onPick }: {
   icon: React.ReactNode; title: string; current: string
   items: { v: string; label: string }[]
@@ -344,6 +351,8 @@ function Swatches({ icon, title, items, current, onPick }: {
 }) {
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLSpanElement>(null)
+  const custom = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     if (!open) return
     const away = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false) }
@@ -352,6 +361,14 @@ function Swatches({ icon, title, items, current, onPick }: {
     document.addEventListener('keydown', esc)
     return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc) }
   }, [open])
+
+  // اللون الحاليّ قد يأتي rgb() من الأنماط المحسوبة — والمنتقي يريد hex
+  const asHex = (v: string): string => {
+    const m = /^rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(v || '')
+    if (m) return '#' + [1, 2, 3].map((i) => Number(m[i]).toString(16).padStart(2, '0')).join('')
+    return /^#[0-9a-f]{6}$/i.test(v || '') ? v : '#5B4BD6'
+  }
+
   return (
     <span className="mdd-tb-sw" ref={box}>
       <button type="button" className={`mdd-tb-b${current ? ' is-on' : ''}`} title={title}
@@ -363,18 +380,33 @@ function Swatches({ icon, title, items, current, onPick }: {
       </button>
       {open && (
         <div className="mdd-tb-sw-pop" role="menu">
-          {items.map((i) => (
-            <button
-              key={i.v || 'none'} type="button" role="menuitem"
-              className={`mdd-tb-sw-i${current === i.v ? ' is-on' : ''}`}
-              title={i.label || i.v}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { onPick(i.v); setOpen(false) }}>
-              {i.v
-                ? <i style={{ background: i.v }} />
-                : <span className="mdd-tb-sw-none">بلا</span>}
-            </button>
-          ))}
+          <span className="mdd-tb-sw-title">{title}</span>
+          <div className="mdd-tb-sw-grid">
+            {items.map((i) => (
+              <button
+                key={i.v || 'none'} type="button" role="menuitem"
+                className={`mdd-tb-sw-i${current === i.v ? ' is-on' : ''}`}
+                title={i.label || i.v}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { onPick(i.v); setOpen(false) }}>
+                {i.v
+                  ? <i style={{ background: i.v }} />
+                  : <span className="mdd-tb-sw-none">بلا</span>}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button" className="mdd-tb-sw-custom"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => custom.current?.click()}>
+            <i style={{ background: current || 'linear-gradient(135deg,#f43f5e,#f59e0b,#22c55e,#3b82f6,#a855f7)' }} />
+            <span>لونٌ آخر…</span>
+          </button>
+          <input
+            ref={custom} type="color" className="mdd-tb-sw-input"
+            defaultValue={asHex(current)}
+            onChange={(e) => { onPick(e.target.value); setOpen(false) }}
+          />
         </div>
       )}
     </span>

@@ -20,6 +20,35 @@ const OUTPUT_LABEL: Record<string, string> = {
   print: 'طباعة مباشرة',
 }
 
+/**
+ * معاينة القالب — من متنه الحقيقيّ.
+ *
+ * كانت هذه تعرض نموذج الحقول القديم: ترويسةٌ عامّة وأسطرٌ رماديّة. فيرى
+ * المعلّم شكلًا واحدًا لكلّ القوالب ولا يعرف ما يفتح. والقوالب الآن
+ * مستنداتٌ مصمَّمة، فنعرضها كما هي.
+ */
+function TemplatePreview({ tpl }: { tpl: Template }) {
+  const html = (tpl.content_html || '').trim()
+  if (!html) {
+    return (
+      <div className="mdd-paper-shell" style={{ display: 'grid', placeItems: 'center', minHeight: 260 }}>
+        <p className="mdd-prose" style={{ fontSize: 13 }}>لا معاينة — القالب فارغ.</p>
+      </div>
+    )
+  }
+  const m = tpl.page?.margins ?? { top: 14, right: 14, bottom: 14, left: 14 }
+  return (
+    <div className="mdd-tplview">
+      <div
+        className="mdd-tplview-sheet mdd-doc-body"
+        dir="rtl"
+        style={{ padding: `${m.top}mm ${m.right}mm ${m.bottom}mm ${m.left}mm` }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </div>
+  )
+}
+
 export default function TemplateDetail() {
   const { slug = '' } = useParams()
   const nav = useNavigate()
@@ -90,6 +119,11 @@ export default function TemplateDetail() {
 
   const fields = tpl.fields || []
   const outputs = tpl.outputs || []
+  // القالب المستند: متنُه هو المحتوى، لا حقولٌ تُملأ
+  const isDoc = !!(tpl.content_html || '').trim()
+  const docStats = {
+    tables: ((tpl.content_html || '').match(/<table/g) || []).length,
+  }
 
   return (
     <>
@@ -133,8 +167,31 @@ export default function TemplateDetail() {
           </Card>
 
           <Card className="mdd-col" style={{ gap: 12 }}>
-            <h2 className="mdd-card__title">ما ستملأ</h2>
-            {fields.length === 0 ? (
+            <h2 className="mdd-card__title">{isDoc ? 'ما فيه' : 'ما ستملأ'}</h2>
+            {isDoc ? (
+              <>
+                <p className="mdd-prose" style={{ fontSize: 13, lineHeight: 1.9 }}>
+                  مستندٌ جاهزٌ تفتحه فتحرّره كما تحرّر الوورد: تكتب في مكانه،
+                  وتضيف صفوفًا إلى جداوله، وتغيّر ألوانه، وتُحسّن نصّه بالذكاء
+                  الاصطناعيّ — ثمّ تُنزّله PDF أو وورد.
+                </p>
+                <div className="mdd-row mdd-row--wrap" style={{ gap: 8 }}>
+                  {tpl.source_pages ? (
+                    <span className="mdd-chipish">
+                      <span className="mdd-num">{tpl.source_pages}</span> صفحة
+                    </span>
+                  ) : null}
+                  {docStats.tables > 0 && (
+                    <span className="mdd-chipish">
+                      <span className="mdd-num">{docStats.tables}</span> جدولًا
+                    </span>
+                  )}
+                  <span className="mdd-chipish">
+                    {tpl.page?.orientation === 'landscape' ? 'أفقيّ' : 'رأسيّ'} · A4
+                  </span>
+                </div>
+              </>
+            ) : fields.length === 0 ? (
               <p className="mdd-prose" style={{ fontSize: 13 }}>هذا القالب جاهزٌ بلا حقول — تفتحه وتطبعه مباشرةً.</p>
             ) : (
               <>
@@ -181,22 +238,12 @@ export default function TemplateDetail() {
           </Card>
         </div>
 
-        {/* العمود الثاني (يسارًا) — معاينة الورقة */}
+        {/* العمود الثاني (يسارًا) — معاينة القالب بتصميمه */}
         <div className="mdd-col" style={{ gap: 10 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--mdd-text-3)' }}>معاينة الورقة قبل الملء</span>
-          <div className="mdd-paper-shell">
-            <Paper
-              template={tpl}
-              data={{}}
-              title={tpl.title}
-              schoolName={subscriber?.name}
-              educationDept={subscriber?.education_dept}
-              academicYear={subscriber?.academic_year}
-              semester={subscriber?.semester}
-              logoUrl={subscriber?.logo_url}
-              zoom={0.52}
-            />
-          </div>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--mdd-text-3)' }}>
+            {tpl.content_html ? 'هكذا سيبدو القالب' : 'معاينة الورقة قبل الملء'}
+          </span>
+          <TemplatePreview tpl={tpl} />
         </div>
       </div>
 
