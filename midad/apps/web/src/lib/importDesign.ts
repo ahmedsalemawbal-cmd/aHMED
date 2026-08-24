@@ -263,11 +263,19 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
   const tables = holder.querySelectorAll('table').length
   const cells = holder.querySelectorAll('td,th').length
 
-  // العنوان: أوّل نصٍّ كبيرٍ في الصفحة الأولى، أو عنوان الملفّ
+  /* العنوان: أكبر نصٍّ خطًّا في الصفحة الأولى.
+     و`textContent` يلصق ما فصله `<br>`: «تحليل نتائج<br>اختبار نافس» تخرج
+     «تحليل نتائجاختبار نافس». فنستبدل الفواصل بمسافةٍ قبل القراءة. */
+  const readable = (el: Element): string => {
+    const c = el.cloneNode(true) as Element
+    c.querySelectorAll('br').forEach((br) => br.replaceWith(doc.createTextNode(' ')))
+    return (c.textContent || '').replace(/\s+/g, ' ').trim()
+  }
+
   let title = ''
   let best = 0
   holder.querySelectorAll('p,h1,h2,h3').forEach((el) => {
-    const t = (el.textContent || '').trim()
+    const t = readable(el)
     if (!t || t.length < 4 || t.length > 90) return
     const st = el.getAttribute('style') || ''
     const m = /font-size:\s*([\d.]+)px/.exec(st)
