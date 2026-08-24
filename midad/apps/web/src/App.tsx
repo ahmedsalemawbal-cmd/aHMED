@@ -119,6 +119,7 @@ export default function App() {
       <Route path="/app" element={<Protected><AppLayout /></Protected>}>
         <Route index element={<Dashboard />} />
         <Route path="library" element={<Library />} />
+        <Route path="library/:slug" element={<Library />} />
         <Route path="template/:slug" element={<TemplateDetail />} />
         <Route path="files" element={<MyFiles />} />
         <Route path="classroom" element={<Classroom />} />

@@ -30,15 +30,47 @@ export interface Profile {
   role_key: string; is_owner: boolean; status: MemberStatus; theme_pref: string
   email_notifications: boolean; last_login_at: string | null; created_at: string
 }
+export type TemplateKind = 'doc' | 'form'
+
+export interface PageSetupRow {
+  size: 'A4'
+  orientation: 'portrait' | 'landscape'
+  margins: { top: number; right: number; bottom: number; left: number }
+}
+
+export interface TemplateFolder {
+  id: string; slug: string; name: string; blurb: string | null
+  accent: string; icon: string; sort: number; is_active: boolean
+  created_at: string; updated_at: string
+  /** يأتي من المنظر template_folder_counts، لا من الجدول */
+  template_count?: number
+}
+
 export interface Template {
   id: string; slug: string; title: string; category_key: string; description: string | null
-  body: string; fields: TemplateField[]; outputs: string[]; estimated_minutes: number
+  outputs: string[]; estimated_minutes: number
   version: number; status: TemplateStatus; usage_count: number; is_new: boolean; sort: number
   created_at: string; updated_at: string
+  /* ← ٠٠٠٧: القالب صار مستندًا يُحرَّر */
+  kind: TemplateKind
+  folder_id: string | null
+  content_html: string
+  page: PageSetupRow
+  source_pdf_path: string | null
+  source_pages: number | null
+  /** مهجورَان — كانا متن {{الحقول}} وتعريفها. لا يُبنى عليهما. */
+  body?: string
+  fields?: TemplateField[]
 }
+
 export interface DocumentRow {
   id: string; subscriber_id: string; owner_id: string; template_id: string | null
-  title: string; data: Record<string, any>; status: DocumentStatus; created_at: string; updated_at: string
+  title: string; status: DocumentStatus; created_at: string; updated_at: string
+  /* ← ٠٠٠٧ */
+  content_html: string
+  page: PageSetupRow | null
+  /** مهجور — كان قيم الحقول */
+  data?: Record<string, any>
 }
 export interface NoorTable {
   id: string; subscriber_id: string; owner_id: string; title: string

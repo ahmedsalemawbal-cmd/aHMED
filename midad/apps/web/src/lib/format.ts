@@ -72,3 +72,25 @@ export function greeting(): string {
   if (h < 17) return 'طاب يومك'
   return 'مساء الخير'
 }
+
+/**
+ * العدد المعدود في العربيّة: الواحد مفرد، والاثنان مثنّى، ومن ثلاثةٍ إلى
+ * عشرةٍ جمع، وما فوقها مفردٌ منصوب. «٧ مجلّدات» لا «٧ مجلّدًا».
+ *
+ * تُمرَّر الصور الأربع صراحةً، فلا اشتقاق آليّ يخطئ في الجمع العربيّ.
+ */
+export function counted(
+  n: number,
+  forms: { one: string; two: string; few: string; many: string },
+): string {
+  const k = Math.abs(Math.trunc(n))
+  if (k === 0) return `لا ${forms.many}`
+  if (k === 1) return forms.one
+  if (k === 2) return forms.two
+  if (k <= 10) return `${k} ${forms.few}`
+  return `${k} ${forms.many}`
+}
+
+export const TPL = { one: 'قالبٌ واحد', two: 'قالبان', few: 'قوالب', many: 'قالبًا' }
+export const FLD = { one: 'مجلّدٌ واحد', two: 'مجلّدان', few: 'مجلّدات', many: 'مجلّدًا' }
+export const FILE = { one: 'ملفٌّ واحد', two: 'ملفّان', few: 'ملفّات', many: 'ملفًّا' }

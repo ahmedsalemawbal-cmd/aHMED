@@ -1,5 +1,28 @@
 import { supabase } from './supabase'
-import type { DocumentRow, Invoice, NoorTable, Plan, Profile, Subscriber, Template } from './types'
+import type {
+  DocumentRow, Invoice, NoorTable, Plan, Profile, Subscriber, Template, TemplateFolder,
+} from './types'
+
+export async function fetchFolders(): Promise<TemplateFolder[]> {
+  /* المجلّدات وعدّاداتها في طلبين متوازيين — والعدّاد من منظرٍ في القاعدة
+     لا بجلب القوالب كلّها لتُعدَّ في المتصفّح. */
+  const [f, c] = await Promise.all([
+    supabase.from('template_folders').select('*').eq('is_active', true).order('sort').order('name'),
+    supabase.from('template_folder_counts').select('folder_id,template_count'),
+  ])
+  if (f.error) throw new Error(f.error.message)
+  const counts = new Map<string, number>(
+    ((c.data || []) as { folder_id: string; template_count: number }[])
+      .map((r) => [r.folder_id, Number(r.template_count) || 0]),
+  )
+  return ((f.data || []) as TemplateFolder[]).map((x) => ({ ...x, template_count: counts.get(x.id) ?? 0 }))
+}
+
+export async function fetchFolderBySlug(slug: string): Promise<TemplateFolder | null> {
+  const { data, error } = await supabase.from('template_folders').select('*').eq('slug', slug).maybeSingle()
+  if (error) throw new Error(error.message)
+  return (data as TemplateFolder) || null
+}
 
 export async function fetchTemplates(): Promise<Template[]> {
   const { data, error } = await supabase.from('templates').select('*').eq('status', 'published').order('sort').order('title')

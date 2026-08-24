@@ -14,7 +14,13 @@ export default defineConfig({
         entryFileNames: 'assets/app.[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash][extname]',
-        manualChunks: undefined,
+        /* محرّك التحرير حزمةٌ مستقلّة: من يفتح اللوح أو المكتبة لا يدفع
+           ثمن ProseMirror، ويُحمَّل عند فتح مستندٍ فقط. */
+        manualChunks(id) {
+          if (id.includes('node_modules/@tiptap') || id.includes('node_modules/prosemirror')) return 'editor'
+          if (id.includes('node_modules/@supabase')) return 'supabase'
+          if (id.includes('node_modules/react-router')) return 'router'
+        },
       },
     },
   },

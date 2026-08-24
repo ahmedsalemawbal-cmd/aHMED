@@ -1,6 +1,7 @@
 /* ============================================================
    مِـداد — نظام التصميم
-   كلّ الرموز والمكوّنات. سابقة الأصناف mdd- ولا !important.
+   كلّ الرموز والمكوّنات. سابقة الأصناف mdd-، ولا !important إلّا حيث
+   يزاحم نمطٌ سطريّ لا يمكن إلغاؤه بالمحدِّدات (التكبير عند الطباعة).
    ============================================================ */
 
 /* ---------- الرموز ---------- */
@@ -781,3 +782,343 @@ button, input, select, textarea { font-family: inherit; }
   .mdd-sidebar__foot .mdd-collapse-btn { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .mdd-sidebar { transition: none; } }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   مِداد للتحرير — محرّر المستندات
+   القاعدة: الورقة بمليمترات لا بكسلات، فما تراه على الشاشة هو ما يُطبع.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.mdd-doc { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
+/* ---------- شريط الأدوات ---------- */
+.mdd-tb {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+  padding: 7px 10px; background: var(--mdd-card);
+  border: 1px solid var(--mdd-border); border-radius: var(--mdd-r-md);
+  position: sticky; inset-block-start: 0; z-index: 30;
+  box-shadow: var(--mdd-shadow-sm);
+}
+.mdd-tb-g {
+  display: flex; align-items: center; gap: 2px;
+  padding-inline-end: 6px; margin-inline-end: 2px;
+  border-inline-end: 1px solid var(--mdd-border);
+}
+.mdd-tb-g:last-of-type { border-inline-end: 0; }
+.mdd-tb-spacer { flex: 1; }
+
+.mdd-tb-b {
+  inline-size: 31px; block-size: 30px; display: grid; place-items: center;
+  border: 0; border-radius: var(--mdd-r-sm); background: transparent;
+  color: var(--mdd-text-2); cursor: pointer; position: relative;
+  transition: background var(--mdd-dur) var(--mdd-ease), color var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-tb-b:hover:not(:disabled) { background: var(--mdd-sunken); color: var(--mdd-text); }
+.mdd-tb-b.is-on { background: var(--mdd-accent-soft); color: var(--mdd-accent-soft-fg); }
+.mdd-tb-b.is-danger:hover:not(:disabled) { background: var(--mdd-danger-soft); color: var(--mdd-danger-fg); }
+.mdd-tb-b:disabled { opacity: .34; cursor: default; }
+
+.mdd-tb-pick { position: relative; display: inline-flex; align-items: center; }
+.mdd-tb-pick select {
+  appearance: none; inline-size: 100%; block-size: 30px;
+  padding-inline: 8px 22px; border: 1px solid var(--mdd-border);
+  border-radius: var(--mdd-r-sm); background: var(--mdd-card);
+  color: var(--mdd-text); font: inherit; font-size: 12.5px; cursor: pointer;
+  text-align: start;
+}
+.mdd-tb-pick select:hover { border-color: var(--mdd-border-strong); }
+.mdd-tb-pick > svg {
+  position: absolute; inset-inline-start: 6px; pointer-events: none; color: var(--mdd-text-3);
+}
+
+.mdd-tb-sw { position: relative; display: inline-flex; }
+.mdd-tb-sw-dot {
+  position: absolute; inset-block-end: 3px; inset-inline: 7px;
+  block-size: 3px; border-radius: 2px;
+}
+.mdd-tb-sw-pop {
+  position: absolute; inset-block-start: calc(100% + 5px); inset-inline-start: 0;
+  z-index: 60; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+  padding: 8px; background: var(--mdd-card); border: 1px solid var(--mdd-border);
+  border-radius: var(--mdd-r-md); box-shadow: var(--mdd-shadow-lg); inline-size: 148px;
+}
+.mdd-tb-sw-i {
+  inline-size: 28px; block-size: 28px; padding: 0; border: 1px solid var(--mdd-border);
+  border-radius: 7px; background: var(--mdd-card); cursor: pointer; display: grid; place-items: center;
+}
+.mdd-tb-sw-i i { inline-size: 100%; block-size: 100%; border-radius: 5px; display: block; }
+.mdd-tb-sw-i.is-on { outline: 2px solid var(--mdd-accent); outline-offset: 1px; }
+.mdd-tb-sw-none { font-size: 9.5px; color: var(--mdd-text-3); }
+
+.mdd-tb-ai {
+  display: inline-flex; align-items: center; gap: 6px; block-size: 30px;
+  padding-inline: 12px; border: 0; border-radius: var(--mdd-r-pill);
+  background: var(--mdd-accent); color: var(--mdd-on-accent);
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: background var(--mdd-dur) var(--mdd-ease), opacity var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-tb-ai:hover:not(:disabled) { background: var(--mdd-accent-hover); }
+.mdd-tb-ai:disabled { opacity: .4; cursor: default; }
+
+/* ---------- المسرح والورقة ---------- */
+.mdd-doc-stage {
+  flex: 1; min-height: 0; overflow: auto;
+  padding: var(--mdd-s-5); background: var(--mdd-sunken);
+  border-inline: 1px solid var(--mdd-border);
+  display: flex; justify-content: center; align-items: flex-start;
+}
+.mdd-doc-sheet {
+  background: #fff; color: #14131f;
+  box-shadow: 0 2px 8px rgba(16, 12, 45, .10), 0 12px 34px -10px rgba(16, 12, 45, .18);
+  transform-origin: top center; flex: none;
+  /* الورقة بيضاء دائمًا — الوثيقة تُطبع على ورقٍ أبيض، لا على سمة الشاشة */
+  color-scheme: light;
+}
+
+/* ---------- متن المستند ---------- */
+.mdd-doc-body {
+  outline: 0; min-height: 100%;
+  font-family: "Noto Naskh Arabic", "Traditional Arabic", var(--mdd-font), serif;
+  font-size: 13.5pt; line-height: 1.95; color: #14131f;
+  text-align: start; direction: rtl;
+}
+.mdd-doc-body > * + * { margin-block-start: 0.62em; }
+.mdd-doc-body h1 { font-size: 19pt; font-weight: 700; text-align: center; margin-block: 0 0.5em; }
+.mdd-doc-body h2 { font-size: 15.5pt; font-weight: 700; margin-block-start: 1em; }
+.mdd-doc-body h3 { font-size: 13.5pt; font-weight: 700; margin-block-start: 0.9em; }
+.mdd-doc-body p { margin: 0; }
+.mdd-doc-body ul, .mdd-doc-body ol { padding-inline-start: 1.5em; margin: 0; }
+.mdd-doc-body li { margin-block: 0.18em; }
+.mdd-doc-body li > p { margin: 0; }
+.mdd-doc-body blockquote {
+  border-inline-start: 3px solid #cfc9ee; padding-inline-start: 0.9em;
+  color: #4a4860; font-style: normal;
+}
+.mdd-doc-body hr { border: 0; border-block-start: 1px solid #c9c6da; margin-block: 1em; }
+.mdd-doc-body a { color: #4436b4; text-decoration: underline; }
+.mdd-doc-body :where(p, h1, h2, h3):last-child { margin-block-end: 0; }
+
+/* الجداول — الحدّ الفاصل ظاهرٌ في التحرير والطباعة معًا */
+.mdd-doc-body table {
+  border-collapse: collapse; inline-size: 100%; margin-block: 0.7em;
+  table-layout: fixed; overflow: hidden;
+}
+.mdd-doc-body :is(td, th) {
+  border: 1px solid #b9b5cf; padding: 5px 8px; vertical-align: top;
+  position: relative; min-inline-size: 2em;
+}
+.mdd-doc-body th { background: #f1eefb; font-weight: 700; text-align: center; }
+.mdd-doc-body .selectedCell::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: rgba(91, 75, 214, .13);
+}
+.mdd-doc-body .column-resize-handle {
+  position: absolute; inset-block: -1px -2px; inset-inline-end: -2px;
+  inline-size: 4px; background: #5b4bd6; pointer-events: none;
+}
+.mdd-doc-body.resize-cursor { cursor: col-resize; }
+
+/* نصّ المكان الفارغ */
+.mdd-doc-body p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder); float: inline-start;
+  color: #8b88a6; pointer-events: none; block-size: 0;
+}
+
+/* ---------- شريط الحالة ---------- */
+.mdd-doc-status {
+  display: flex; align-items: center; gap: 12px;
+  padding: 7px 12px; background: var(--mdd-card);
+  border: 1px solid var(--mdd-border); border-radius: 0 0 var(--mdd-r-md) var(--mdd-r-md);
+  font-size: 11.5px; color: var(--mdd-text-3);
+}
+.mdd-doc-status-l { display: inline-flex; align-items: center; gap: 6px; }
+.mdd-doc-status-sel { color: var(--mdd-accent-soft-fg); font-weight: 600; }
+.mdd-doc-status-spacer { flex: 1; }
+.mdd-doc-zoom { display: inline-flex; align-items: center; gap: 5px; }
+.mdd-doc-zoom button {
+  inline-size: 24px; block-size: 24px; display: grid; place-items: center;
+  border: 1px solid var(--mdd-border); border-radius: 6px;
+  background: var(--mdd-card); color: var(--mdd-text-2); cursor: pointer;
+}
+.mdd-doc-zoom button:hover { background: var(--mdd-sunken); }
+.mdd-doc-zoom b { min-inline-size: 38px; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* ---------- نافذة التحسين ---------- */
+.mdd-imp-lab {
+  display: block; font-size: 11px; font-weight: 600; color: var(--mdd-text-3);
+  margin-block-end: 5px; letter-spacing: .2px;
+}
+.mdd-imp-src, .mdd-imp-out {
+  padding: 12px 14px; border-radius: var(--mdd-r-md); background: var(--mdd-sunken);
+  max-block-size: 168px; overflow: auto;
+}
+.mdd-imp-out { background: var(--mdd-accent-soft); }
+.mdd-imp-src p, .mdd-imp-out p {
+  margin: 0; font-size: 13.5px; line-height: 1.95; white-space: pre-wrap;
+}
+.mdd-imp-out p { color: var(--mdd-accent-soft-fg); }
+.mdd-imp-tones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mdd-imp-tone {
+  text-align: start; padding: 11px 13px; border-radius: var(--mdd-r-md);
+  border: 1px solid var(--mdd-border); background: var(--mdd-card);
+  cursor: pointer; display: flex; flex-direction: column; gap: 3px;
+  transition: border-color var(--mdd-dur) var(--mdd-ease), background var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-imp-tone:hover { border-color: var(--mdd-border-strong); }
+.mdd-imp-tone.is-on { border-color: var(--mdd-accent); background: var(--mdd-accent-soft); }
+.mdd-imp-tone b { font-size: 13px; color: var(--mdd-text); }
+.mdd-imp-tone span { font-size: 11.5px; color: var(--mdd-text-3); line-height: 1.6; }
+.mdd-imp-tone.is-on b, .mdd-imp-tone.is-on span { color: var(--mdd-accent-soft-fg); }
+.mdd-imp-note { font-size: 11.5px; color: var(--mdd-text-3); line-height: 1.75; margin: 0; }
+
+@media (max-width: 720px) {
+  .mdd-doc-stage { padding: var(--mdd-s-3); }
+  .mdd-imp-tones { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- الطباعة: الورقة وحدها ---------- */
+@media print {
+  .mdd-tb, .mdd-doc-status { display: none; }
+  .mdd-doc-stage {
+    padding: 0; background: #fff; border: 0; overflow: visible; display: block;
+  }
+  .mdd-doc-sheet {
+    /* التكبير يُضبط بنمطٍ سطريّ، والنمط السطريّ يسبق أيّ محدِّد —
+       فلا سبيل إلى إلغائه عند الطباعة إلّا بهذا */
+    box-shadow: none; transform: none !important; margin: 0;
+    inline-size: auto; min-block-size: 0;
+  }
+  .mdd-doc { display: block; }
+  /* صفٌّ لا ينقسم بين صفحتين، وعنوانٌ لا يبقى وحيدًا في آخر صفحة */
+  .mdd-doc-body tr, .mdd-doc-body img { break-inside: avoid; }
+  .mdd-doc-body thead { display: table-header-group; }
+  .mdd-doc-body :is(h1, h2, h3) { break-after: avoid; }
+  .mdd-doc-body p { orphans: 2; widows: 2; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   مكتبة القوالب — مجلّداتٌ ثمّ قوالب
+   لكلّ مجلّد لونُه في ‎--fc‎، فتعرفه العين قبل أن تقرأ اسمه.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.mdd-lib-h {
+  font-size: 15px; font-weight: 700; color: var(--mdd-text);
+  margin-block-end: var(--mdd-s-4);
+}
+
+.mdd-folders {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+}
+
+.mdd-folder {
+  --fc: var(--mdd-accent);
+  display: flex; align-items: center; gap: 13px; text-align: start;
+  padding: 16px 16px 16px 14px; border: 1px solid var(--mdd-border);
+  border-radius: var(--mdd-r-lg); background: var(--mdd-card); cursor: pointer;
+  position: relative; overflow: hidden; font: inherit; color: inherit;
+  transition: border-color var(--mdd-dur) var(--mdd-ease),
+              transform var(--mdd-dur) var(--mdd-ease),
+              box-shadow var(--mdd-dur) var(--mdd-ease);
+}
+/* شريطٌ رقيق بلون المجلّد على حرفه الابتدائيّ */
+.mdd-folder::before {
+  content: ''; position: absolute; inset-block: 0; inset-inline-start: 0;
+  inline-size: 3px; background: var(--fc);
+  transform: scaleY(.42); transform-origin: center;
+  transition: transform var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-folder:hover {
+  border-color: var(--fc); transform: translateY(-2px); box-shadow: var(--mdd-shadow-md);
+}
+.mdd-folder:hover::before { transform: scaleY(1); }
+.mdd-folder:active { transform: translateY(0); }
+
+.mdd-folder-ic {
+  inline-size: 48px; block-size: 48px; border-radius: 14px; flex: none;
+  display: grid; place-items: center; color: var(--fc);
+  background: color-mix(in oklab, var(--fc) 13%, transparent);
+}
+.mdd-folder-txt { flex: 1; min-inline-size: 0; display: flex; flex-direction: column; gap: 3px; }
+.mdd-folder-name {
+  font-size: 14px; font-weight: 700; color: var(--mdd-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mdd-folder-meta { font-size: 11.5px; color: var(--mdd-text-3); }
+.mdd-folder-go { color: var(--mdd-text-3); flex: none; transition: color var(--mdd-dur) var(--mdd-ease); }
+.mdd-folder:hover .mdd-folder-go { color: var(--fc); }
+
+/* ---------- مسار التنقّل ---------- */
+.mdd-crumb {
+  display: flex; align-items: center; gap: 7px;
+  margin-block-end: var(--mdd-s-4); font-size: 12.5px;
+}
+.mdd-crumb-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px 5px 8px; border: 1px solid var(--mdd-border);
+  border-radius: var(--mdd-r-pill); background: var(--mdd-card);
+  color: var(--mdd-text-2); cursor: pointer; font: inherit; font-size: 12.5px;
+  transition: border-color var(--mdd-dur) var(--mdd-ease), color var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-crumb-back:hover { border-color: var(--mdd-border-strong); color: var(--mdd-text); }
+.mdd-crumb-back > svg { transform: scaleX(-1); }
+.mdd-crumb-sep { color: var(--mdd-text-3); transform: scaleX(-1); }
+.mdd-crumb-now {
+  --fc: var(--mdd-accent);
+  display: inline-flex; align-items: center; gap: 6px; font-weight: 600;
+  color: var(--fc);
+}
+
+/* ---------- بطاقة قالب ---------- */
+.mdd-tplc {
+  --fc: var(--mdd-accent);
+  display: flex; flex-direction: column; gap: 10px; position: relative;
+}
+.mdd-tplc-ic {
+  inline-size: 38px; block-size: 38px; border-radius: 11px; flex: none;
+  display: grid; place-items: center; color: var(--fc);
+  background: color-mix(in oklab, var(--fc) 12%, transparent);
+}
+.mdd-tplc-t {
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mdd-tplc-d {
+  font-size: 12.5px; line-height: 1.75; color: var(--mdd-text-3); margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mdd-tplc-foot {
+  display: flex; align-items: center; gap: 8px;
+  margin-block-start: auto; padding-block-start: 4px;
+}
+.mdd-tplc-min { font-size: 11.5px; color: var(--mdd-text-3); }
+.mdd-tplc-go { margin-inline-start: auto; color: var(--mdd-text-3); }
+.mdd-tplc:hover .mdd-tplc-go { color: var(--fc); }
+
+/* ---------- ترويسة المحرّر ---------- */
+.mdd-ed { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.mdd-ed-head {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  margin-block-end: 12px;
+}
+.mdd-ed-title {
+  flex: 1; min-inline-size: 160px; max-inline-size: 420px;
+  border: 1px solid transparent; border-radius: var(--mdd-r-sm);
+  background: transparent; color: var(--mdd-text);
+  font: inherit; font-size: 16px; font-weight: 700;
+  padding: 7px 10px; text-align: start;
+  transition: border-color var(--mdd-dur) var(--mdd-ease), background var(--mdd-dur) var(--mdd-ease);
+}
+.mdd-ed-title:hover:not(:disabled) { background: var(--mdd-sunken); }
+.mdd-ed-title:focus { outline: 0; border-color: var(--mdd-accent); background: var(--mdd-card); }
+.mdd-ed-head-spacer { flex: 1; }
+.mdd-ed-save {
+  display: inline-flex; align-items: center; gap: 5px; flex: none;
+  font-size: 11.5px; color: var(--mdd-text-3); white-space: nowrap;
+}
+.mdd-ed-save.is-ok { color: var(--mdd-success-fg); }
+.mdd-ed-save.is-err { color: var(--mdd-danger-fg); }
+
+@media (max-width: 720px) {
+  .mdd-folders { grid-template-columns: minmax(0, 1fr); }
+  .mdd-ed-title { max-inline-size: none; font-size: 15px; }
+}
