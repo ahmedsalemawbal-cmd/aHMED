@@ -6,7 +6,9 @@ import {
   IcAlignJustify, IcListBullet, IcListNumber, IcQuote, IcRule, IcUndo, IcRedo,
   IcRowAdd, IcColAdd, IcRowDel, IcColDel, IcMerge, IcSplit, IcMarker, IcInk,
   IcClear, IcLink, IcTableAdd, IcTable, IcChevronDown, IcSpark,
+  IcCellFill, IcRowFill, IcPageBreak,
 } from '../../ui/icons'
+import { readStyleProp, setStyleProp } from '../../lib/styleSafe'
 
 /**
  * شريط الأدوات — شبيه الوورد، بالأساسيّات وحدها.
@@ -16,6 +18,25 @@ import {
  */
 
 type Grp = { id: string; title: string }
+
+/**
+ * ألوان الخلفيّات: بلا، وأربعة رماديّات فاتحة للترويسات، وألوان الهويّة.
+ * قليلةٌ ومقصودة — منتقي ألوانٍ لا نهائيّ يُنتج مستنداتٍ لا تُطبع.
+ */
+const FILLS = [
+  { v: '', label: 'بلا' },
+  { v: '#f7f8fc', label: 'رماديّ فاتح' },
+  { v: '#eef0f6', label: 'رماديّ' },
+  { v: '#e3e6ef', label: 'رماديّ داكن' },
+  { v: '#443c86', label: 'بنفسجيّ' },
+  { v: '#2f8b9b', label: 'فيروزيّ' },
+  { v: '#dd8a3e', label: 'كهرمانيّ' },
+  { v: '#3d9b6d', label: 'أخضر' },
+  { v: '#b03c53', label: 'أحمر' },
+  { v: '#ECE9FC', label: 'بنفسجيّ فاتح' },
+  { v: '#E2F6EE', label: 'أخضر فاتح' },
+  { v: '#FBF0DC', label: 'كهرمانيّ فاتح' },
+]
 
 export default function DocToolbar({ editor, onImprove, canImprove }: {
   editor: Editor | null
@@ -142,6 +163,8 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
           onClick={() => editor.chain().focus().toggleBlockquote().run()} />
         <TB icon={<IcRule />} title="خطٌّ فاصل"
           onClick={() => editor.chain().focus().setHorizontalRule().run()} />
+        <TB icon={<IcPageBreak />} title="فاصل صفحة"
+          onClick={() => editor.chain().focus().insertPageBreak().run()} />
       </Grp>
 
       {/* ── الجدول ── */}
@@ -168,6 +191,18 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
               onClick={() => editor.chain().focus().splitCell().run()} />
             <TB icon={<IcTable />} title="صفّ العنوان" on={false}
               onClick={() => editor.chain().focus().toggleHeaderRow().run()} />
+            <Swatches
+              icon={<IcCellFill />} title="تعبئة الخليّة"
+              items={FILLS.map((f) => ({ v: f.v, label: f.label }))}
+              current={readStyleProp(cellStyle(editor), 'background')}
+              onPick={(v) => setCellFill(editor, v)}
+            />
+            <Swatches
+              icon={<IcRowFill />} title="تعبئة الصفّ"
+              items={FILLS.map((f) => ({ v: f.v, label: f.label }))}
+              current=""
+              onPick={(v) => setRowFill(editor, v)}
+            />
             <TB icon={<IcClear />} title="احذف الجدول" danger
               onClick={() => editor.chain().focus().deleteTable().run()} />
           </>
@@ -193,6 +228,67 @@ export default function DocToolbar({ editor, onImprove, canImprove }: {
       </button>
     </div>
   )
+}
+
+/* ═════════════ تعبئة الخلايا ═════════════ */
+
+/** نمط الخليّة التي فيها المؤشّر — لعرض اللون الحاليّ في الأداة */
+function cellStyle(editor: Editor): string {
+  const a = editor.getAttributes('tableCell')
+  const h = editor.getAttributes('tableHeader')
+  return (a?.style || h?.style || '') as string
+}
+
+/**
+ * يضبط خلفيّة كلّ خليّةٍ محدَّدة.
+ *
+ * `setCellAttribute` من prosemirror-tables يسري على التحديد كلّه — خليّةً
+ * كانت أو مدًى منها. فنقرأ نمط كلٍّ ونكتب فوقه، لئلّا نمحو حشوها وحدودها
+ * مع تغيير لونها.
+ */
+function setCellFill(editor: Editor, color: string): void {
+  const { state } = editor
+  const { from, to } = state.selection
+  const edits: { pos: number; style: string }[] = []
+  state.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type.name !== 'tableCell' && node.type.name !== 'tableHeader') return
+    edits.push({ pos, style: setStyleProp(node.attrs.style, 'background', color) })
+  })
+  if (!edits.length) return
+  const tr = state.tr
+  for (const e of edits) {
+    const node = tr.doc.nodeAt(e.pos)
+    if (node) tr.setNodeMarkup(e.pos, undefined, { ...node.attrs, style: e.style || null })
+  }
+  editor.view.dispatch(tr)
+  editor.commands.focus()
+}
+
+/** يضبط خلفيّة كلّ خلايا الصفّ الذي فيه المؤشّر */
+function setRowFill(editor: Editor, color: string): void {
+  const { state } = editor
+  const $from = state.selection.$from
+  let rowPos = -1
+  for (let d = $from.depth; d > 0; d--) {
+    if ($from.node(d).type.name === 'tableRow') { rowPos = $from.before(d); break }
+  }
+  if (rowPos < 0) return
+  const row = state.doc.nodeAt(rowPos)
+  if (!row) return
+  const tr = state.tr
+  let off = rowPos + 1
+  row.forEach((cell) => {
+    const node = tr.doc.nodeAt(off)
+    if (node) {
+      tr.setNodeMarkup(off, undefined, {
+        ...node.attrs,
+        style: setStyleProp(node.attrs.style, 'background', color) || null,
+      })
+    }
+    off += cell.nodeSize
+  })
+  editor.view.dispatch(tr)
+  editor.commands.focus()
 }
 
 /* ═════════════ القطع ═════════════ */

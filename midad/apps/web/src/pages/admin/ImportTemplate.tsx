@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useApp } from '../../lib/store'
 import { importPdf, type ImportResult } from '../../lib/importPdf'
+import { importDesignHtml, type DesignImport } from '../../lib/importDesign'
 import type { TemplateFolder } from '../../lib/types'
 import { Alert, Button, Field, Input, Modal, Select } from '../../ui/kit'
 import { IcPage, IcCheck, IcAlert, IcSpinner } from '../../ui/icons'
@@ -38,36 +39,50 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [res, setRes] = useState<ImportResult | null>(null)
+  const [design, setDesign] = useState<DesignImport | null>(null)
   const [title, setTitle] = useState('')
   const [folder, setFolder] = useState(folders[0]?.id ?? '')
   const [reading, setReading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
+  const isHtml = (f: File) => /\.html?$/i.test(f.name) || /html/i.test(f.type)
+
   const pick = async (f: File) => {
-    setErr(null); setRes(null); setFile(f)
+    setErr(null); setRes(null); setDesign(null); setFile(f)
     if (f.size > 25 * 1024 * 1024) { setErr('الملفّ أكبر من ٢٥ ميغابايت'); return }
     setReading(true)
     try {
-      const r = await importPdf(f)
-      setRes(r)
-      setTitle(r.title)
+      if (isHtml(f)) {
+        /* ملفّ تصميم: يحفظ التصميم كاملًا — جداولَ وألوانًا وصفحات.
+           وهذا الطريق هو المفضَّل: لا استنباطَ فيه ولا فقدان. */
+        const r = importDesignHtml(await f.text(), f.name)
+        setDesign(r)
+        setTitle(r.title)
+      } else {
+        const r = await importPdf(f)
+        setRes(r)
+        setTitle(r.title)
+      }
     } catch (e: any) {
-      setErr(e?.message || 'تعذّرت قراءة الملفّ — تأكّد أنّه PDF سليم')
+      setErr(e?.message || 'تعذّرت قراءة الملفّ — تأكّد أنّه PDF أو HTML سليم')
     } finally { setReading(false) }
   }
 
   const save = async () => {
-    if (!res || !file) return
-    const name = title.trim() || res.title
+    const src = design || res
+    if (!src || !file) return
+    const name = title.trim() || src.title
     setSaving(true); setErr(null)
     try {
       const slug = `${slugify(name)}-${Date.now().toString(36).slice(-4)}`
+      const ext = design ? 'html' : 'pdf'
+      const mime = design ? 'text/html' : 'application/pdf'
 
       // الأصل يُحفظ للرجوع — دلوٌ خاصٌّ لا يراه إلّا المشرف
-      const path = `${slug}.pdf`
+      const path = `${slug}.${ext}`
       const up = await supabase.storage.from('template-sources')
-        .upload(path, file, { contentType: 'application/pdf', upsert: true })
+        .upload(path, file, { contentType: mime, upsert: true })
       if (up.error) throw new Error('تعذّر حفظ الأصل: ' + up.error.message)
 
       const { data, error } = await supabase.from('templates').insert({
@@ -77,14 +92,15 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
         description: null,
         kind: 'doc',
         folder_id: folder || null,
-        content_html: res.html,
+        content_html: src.html,
         page: {
           size: 'A4',
-          orientation: res.landscape ? 'landscape' : 'portrait',
-          margins: { top: 16, right: 14, bottom: 16, left: 14 },
+          orientation: src.landscape ? 'landscape' : 'portrait',
+          // هوامش التصميم مقروءةٌ من حشو أقسامه، لا مفروضةٌ عليه
+          margins: design ? design.margins : { top: 16, right: 14, bottom: 16, left: 14 },
         },
         source_pdf_path: path,
-        source_pages: res.pages,
+        source_pages: src.pages,
         status: 'draft',            // مسوّدةٌ دائمًا: تُراجع ثمّ تُنشر
         outputs: ['pdf', 'docx'],
       }).select('id').single()
@@ -104,11 +120,11 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
         <>
           <Button variant="secondary" onClick={onClose} block>إلغاء</Button>
           <Button variant="primary" onClick={save} block loading={saving}
-            disabled={!res || reading}>احفظ مسوّدةً</Button>
+            disabled={(!res && !design) || reading}>احفظ مسوّدةً</Button>
         </>
       }>
       <div className="mdd-col" style={{ gap: 14 }}>
-        {!res && (
+        {!res && !design && (
           <button type="button" className="mdd-drop" onClick={() => fileRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
@@ -117,14 +133,53 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
               if (f) pick(f)
             }}>
             {reading ? <IcSpinner size={30} className="mdd-spin" /> : <IcPage size={30} />}
-            <b>{reading ? 'جارٍ القراءة…' : 'اختر ملفّ PDF أو أسقطه هنا'}</b>
+            <b>{reading ? 'جارٍ القراءة…' : 'اختر ملفّ HTML أو PDF، أو أسقطه هنا'}</b>
+            <span>
+              ملفّ التصميم (HTML) يحفظ التصميم كاملًا — جداولَه وألوانه وصفحاته.
+              وملفّ PDF يُستخرج نصُّه فقط.
+            </span>
             <span>حتّى ٢٥ ميغابايت · تُقرأ في متصفّحك ولا تُرفع لتُقرأ</span>
           </button>
         )}
-        <input ref={fileRef} type="file" accept="application/pdf,.pdf" hidden
+        <input ref={fileRef} type="file" accept=".html,.htm,text/html,application/pdf,.pdf" hidden
           onChange={(e) => { const f = e.target.files?.[0]; if (f) pick(f) }} />
 
         {err && <Alert tone="danger">{err}</Alert>}
+
+        {design && (
+          <>
+            <div className="mdd-imp-stats">
+              <span><b>{design.pages}</b> صفحة</span>
+              <span><b>{design.tables}</b> جدولًا · <b>{design.cells}</b> خليّة</span>
+              <span><b>{design.landscape ? 'أفقيّ' : 'رأسيّ'}</b> الاتّجاه</span>
+              <span className="ok"><IcCheck size={13} />التصميم محفوظ</span>
+            </div>
+
+            {design.warnings.map((w, i) => <Alert key={i} tone="info">{w}</Alert>)}
+
+            <Field label="اسم القالب">
+              <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                placeholder="مثال: تحليل نتيجة اختبار نافس" />
+            </Field>
+
+            <Field label="المجلّد">
+              <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
+                <option value="">بلا مجلّد</option>
+                {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </Select>
+            </Field>
+
+            <div className="mdd-imp-prev">
+              <span className="mdd-imp-lab">معاينة التصميم كما سيراه المعلّم</span>
+              <div className="mdd-imp-prev-body mdd-imp-prev-body--design"
+                dangerouslySetInnerHTML={{ __html: design.html }} />
+            </div>
+
+            <Alert tone="warn">
+              يُحفظ مسوّدةً لا يراها المعلّمون. افتحه في المحرّر وتحقّق، ثمّ انشره.
+            </Alert>
+          </>
+        )}
 
         {res && (
           <>

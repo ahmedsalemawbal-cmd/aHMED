@@ -10,7 +10,10 @@
  * node_modules، لا من ذاكرةٍ عن الإصدار الثاني — فالثالث غيّر أشياء.
  */
 import StarterKit from '@tiptap/starter-kit'
-import { TableKit } from '@tiptap/extension-table'
+import {
+  StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader,
+  StyledParagraph, PageBreak,
+} from './editorStyled'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Highlight } from '@tiptap/extension-highlight'
 import { TextStyleKit } from '@tiptap/extension-text-style'
@@ -83,13 +86,21 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
       // شيفرة البرمجة لا محلّ لها في وثيقةٍ مدرسيّة
       codeBlock: false,
       code: false,
+      // الفقرة تُستبدَل بنسخةٍ تحفظ نمطها السطريّ
+      paragraph: false,
       link: { openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener' } },
     }),
-    TableKit.configure({
-      table: { resizable: true, allowTableNodeSelection: true, HTMLAttributes: { class: 'mdd-doc-table' } },
-      tableHeader: { HTMLAttributes: { class: 'mdd-doc-th' } },
-      tableCell: { HTMLAttributes: { class: 'mdd-doc-td' } },
+    StyledParagraph,
+    /* الجدول بعُقَدٍ موسَّعة تحفظ الأنماط — لا TableKit الافتراضيّ.
+       فتصميم القوالب كلّه في أنماط الخلايا، وإسقاطها يُفرغ المستند. */
+    StyledTable.configure({
+      resizable: true, allowTableNodeSelection: true,
+      HTMLAttributes: { class: 'mdd-doc-table' },
     }),
+    StyledTableRow,
+    StyledTableHeader.configure({ HTMLAttributes: { class: 'mdd-doc-th' } }),
+    StyledTableCell.configure({ HTMLAttributes: { class: 'mdd-doc-td' } }),
+    PageBreak,
     // العربيّة تبدأ يمينًا، فالافتراضيّ right لا left
     TextAlign.configure({ types: ['heading', 'paragraph'], defaultAlignment: 'right' }),
     Highlight.configure({ multicolor: true }),

@@ -1172,3 +1172,51 @@ button, input, select, textarea { font-family: inherit; }
   color: var(--mdd-text); cursor: pointer; text-align: start;
 }
 .mdd-linkish:hover { color: var(--mdd-accent); text-decoration: underline; }
+
+/* ═══════════════ القوالب المستوردة من أدوات التصميم ═══════════════ */
+
+/* فاصل الصفحة: خطٌّ متقطّعٌ في التحرير، وقطعٌ فعليٌّ عند الطباعة */
+.mdd-doc-body .mdd-pagebreak {
+  position: relative; block-size: 0; margin-block: 26px;
+  border-block-start: 2px dashed #b9b5cf; user-select: none;
+}
+.mdd-doc-body .mdd-pagebreak::after {
+  content: 'فاصل صفحة';
+  position: absolute; inset-block-start: -9px; inset-inline-end: 0;
+  padding-inline: 8px; background: #fff;
+  font-family: var(--mdd-font); font-size: 10px; color: #8b88a6;
+}
+.mdd-doc-body .mdd-pagebreak.ProseMirror-selectednode {
+  border-block-start-color: var(--mdd-accent);
+}
+
+/* الجداول المستوردة تحمل حدودها وألوانها في أنماطها السطريّة.
+   قواعدنا العامّة تُزاحمها، فنُخفّفها حيث يوجد نمطٌ سطريّ. */
+.mdd-doc-body table[style] { table-layout: auto; }
+/* جدولٌ بعرض ١٠٠٪ ومعه border-spacing يتجاوز الورقة بمقدار التباعد */
+.mdd-doc-body table { max-inline-size: 100%; }
+.mdd-doc-body :is(td, th)[style*="background"] { background-image: none; }
+.mdd-doc-body th[style*="background"] { background: revert-layer; }
+
+/* الخليّة ذات الارتفاع الصغير عمودُ رسمٍ بيانيّ لا خليّةَ نصّ:
+   حشونا الافتراضيّ يمنعها من بلوغ ارتفاعها. */
+.mdd-doc-body :is(td, th)[style*="height"] { padding: 0; }
+.mdd-doc-body :is(td, th)[style*="padding"] { padding: revert-layer; }
+
+/* الفقرة المستوردة تحمل هوامشها، فلا نضيف فوقها */
+.mdd-doc-body p[style*="margin"] { margin: revert-layer; }
+
+@media print {
+  .mdd-doc-body .mdd-pagebreak {
+    border: 0; margin: 0; block-size: 0;
+    break-after: page; page-break-after: always;
+  }
+  .mdd-doc-body .mdd-pagebreak::after { display: none; }
+}
+
+/* معاينة التصميم في نافذة الاستيراد */
+.mdd-imp-prev-body--design { max-block-size: 420px; }
+.mdd-imp-prev-body--design table { width: 100%; }
+.mdd-imp-prev-body--design [data-page-break] {
+  block-size: 0; border-block-start: 2px dashed #b9b5cf; margin-block: 18px;
+}
