@@ -1,0 +1,103 @@
+name: نشر مِداد على هوستنجر
+
+# يعمل تلقائيًّا عند كلّ دفعةٍ تمسّ تطبيق الويب، ويدويًّا من تبويب Actions.
+#
+# قبل أوّل تشغيل: أضف ثلاثة أسرارٍ في المستودع
+# (Settings ← Secrets and variables ← Actions ← New repository secret):
+#
+#   HOSTINGER_FTP_HOST   عنوان الخادم من hPanel ← Files ← FTP Accounts
+#   HOSTINGER_FTP_USER   اسم المستخدم من الصفحة نفسها
+#   HOSTINGER_FTP_PASS   كلمة المرور التي تضعها أنت هناك
+#
+# وسرٌّ رابعٌ اختياريّ إن لم يكن الموقع في المجلّد الافتراضيّ:
+#   HOSTINGER_FTP_DIR    الافتراضيّ public_html
+
+on:
+  push:
+    branches: [claude/educational-platform-setup-ct0iwr]
+    paths:
+      - 'midad/apps/web/**'
+      - '.github/workflows/deploy-hostinger.yml'
+  workflow_dispatch:
+    inputs:
+      wipe:
+        description: 'امسح ما في المجلّد قبل الرفع (نظّف الأصول المتراكمة)'
+        type: boolean
+        default: false
+
+# دفعتان متتاليتان لا ترفعان معًا: الثانية تنتظر الأولى فلا تختلط الملفّات
+concurrency:
+  group: hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: midad/apps/web/package-lock.json
+
+      - name: تثبيت الاعتماديّات
+        working-directory: midad/apps/web
+        run: npm ci
+
+      # نبني هنا ولا نرفع midad/deploy المُودَع: البناء الطازج هو الحقيقة،
+      # والمُودَع قد يتخلّف عن الشيفرة إن نُسِي تحديثه — وقد نُسِي مرّتين.
+      - name: البناء
+        working-directory: midad/apps/web
+        run: npm run build
+
+      - name: التحقّق من المخرجات
+        working-directory: midad/apps/web
+        run: |
+          test -f dist/index.html || { echo '::error::لا index.html في dist'; exit 1; }
+          test -f dist/.htaccess || echo '::warning::لا .htaccess — سيُخزَّن index.html مؤقّتًا عند الزائر'
+          echo "حجم الحزمة: $(du -sh dist | cut -f1)"
+          ls -la dist
+
+      - name: تثبيت lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: الرفع إلى هوستنجر
+        env:
+          HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          PASS: ${{ secrets.HOSTINGER_FTP_PASS }}
+          DIR: ${{ secrets.HOSTINGER_FTP_DIR || 'public_html' }}
+          WIPE: ${{ inputs.wipe }}
+        working-directory: midad/apps/web
+        run: |
+          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$PASS" ]; then
+            echo '::error::أسرار FTP ناقصة. راجع التعليق في رأس هذا الملفّ.'
+            exit 1
+          fi
+
+          # --delete مطفأ افتراضيًّا عن قصد. الأصول مبصومةٌ بمحتواها، فالقديمة
+          # منها لا يشير إليها index.html الجديد ولا تضرّ — بل تُبقي تبويبًا
+          # مفتوحًا على النسخة القديمة يعمل بدل أن ينكسر في وجه صاحبه.
+          # وإن تراكمت فشغّل السير يدويًّا واختر «امسح».
+          DEL=""
+          [ "$WIPE" = "true" ] && DEL="--delete"
+
+          lftp -c "
+            set ftp:ssl-force true;
+            set ftp:ssl-protect-data true;
+            set ssl:verify-certificate no;
+            set net:max-retries 3;
+            set net:timeout 20;
+            open -u '$USER','$PASS' '$HOST';
+            mirror -R $DEL --parallel=4 --verbose \
+              --exclude-glob .DS_Store \
+              dist/ '$DIR/';
+          "
+
+      - name: خلاصة
+        run: |
+          echo "### نُشِر على هوستنجر ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "الإيداع: \`${GITHUB_SHA::7}\`" >> $GITHUB_STEP_SUMMARY
