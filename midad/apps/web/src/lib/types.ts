@@ -15,6 +15,8 @@ export interface TemplateField {
 export interface Role { id: string; key: string; name_ar: string; blurb_ar: string | null; sort: number; is_system: boolean }
 export interface Plan {
   id: string; key: string; name_ar: string; account_type: AccountType; price_sar: number
+  /** السعر قبل الخصم — يُعرض مشطوبًا. فارغٌ يعني لا عرض. */
+  price_before_sar?: number | null
   period_months: number; seats: number; template_categories: string[]; noor_enabled: boolean
   ai_quota_monthly: number; features_ar: string[]; is_active: boolean; is_default: boolean; sort: number
 }

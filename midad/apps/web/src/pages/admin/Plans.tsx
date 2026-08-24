@@ -11,7 +11,7 @@ import {
 import { IcPlus, IcEdit } from '../../ui/icons'
 
 const BLANK = {
-  key: '', name_ar: '', account_type: 'school', price_sar: 0, period_months: 12, seats: 1,
+  key: '', name_ar: '', account_type: 'school', price_sar: 0, price_before_sar: '', period_months: 12, seats: 1,
   template_categories: [] as string[], noor_enabled: true, ai_quota_monthly: 100,
   features_ar: [] as string[], is_active: true, is_default: false, sort: 10,
 }
@@ -40,7 +40,9 @@ export default function Plans() {
     setBusy(true)
     const payload = {
       key: editing.key.trim(), name_ar: editing.name_ar.trim(), account_type: editing.account_type,
-      price_sar: Number(editing.price_sar) || 0, period_months: Number(editing.period_months) || 12,
+      price_sar: Number(editing.price_sar) || 0,
+      price_before_sar: String(editing.price_before_sar ?? '').trim() === '' ? null : Number(editing.price_before_sar),
+      period_months: Number(editing.period_months) || 12,
       seats: Number(editing.seats) || 1, template_categories: editing.template_categories || [],
       noor_enabled: !!editing.noor_enabled, ai_quota_monthly: Number(editing.ai_quota_monthly) || 0,
       features_ar: (editing.features_text || '').split('\n').map((x: string) => x.trim()).filter(Boolean),
@@ -142,6 +144,10 @@ export default function Plans() {
               </Field>
               <Field label="السعر (ر.س)">
                 <Input ltr type="number" value={editing.price_sar} onChange={(e) => setEditing({ ...editing, price_sar: e.target.value })} />
+              </Field>
+              <Field label="السعر قبل الخصم (ر.س)" help="اتركه فارغًا إن لا عرض. يُعرض مشطوبًا بجانب السعر، ولا بدّ أن يزيد عليه.">
+                <Input ltr type="number" value={editing.price_before_sar ?? ''}
+                  onChange={(e) => setEditing({ ...editing, price_before_sar: e.target.value })} />
               </Field>
               <Field label="المدّة بالأشهر">
                 <Input ltr type="number" value={editing.period_months} onChange={(e) => setEditing({ ...editing, period_months: e.target.value })} />

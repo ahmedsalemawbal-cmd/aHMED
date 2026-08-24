@@ -4,7 +4,7 @@ import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
 import { fetchTemplates } from '../../lib/data'
 import { fmtMoney, fmtNum } from '../../lib/format'
-import { Badge, Button, Card, Skeleton } from '../../ui/kit'
+import { Badge, Button, Card, Skeleton, PriceWas } from '../../ui/kit'
 import ProductShot from './ProductShot'
 import { useReveal } from '../../lib/reveal'
 import { IcLibrary, IcTable, IcCheck, IcChevron, IcUser, IcTeam, IcBook, IcChart, IcClock } from '../../ui/icons'
@@ -209,7 +209,8 @@ export default function Home() {
                     {p!.account_type === 'school' && <Badge tone="accent">الأكثر طلبًا</Badge>}
                   </div>
                   <div className="mdd-row" style={{ gap: 8, alignItems: 'baseline' }}>
-                    <span className="mdd-num" style={{ fontSize: 30, fontWeight: 700 }}>{fmtMoney(p!.price_sar)}</span>
+                    <PriceWas plan={p!} />
+                        <span className="mdd-num" style={{ fontSize: 30, fontWeight: 700 }}>{fmtMoney(p!.price_sar)}</span>
                     <span style={{ fontSize: 12.5, color: 'var(--mdd-text-3)' }}>
                       {p!.period_months === 12 ? 'سنويًّا' : <>لكلّ <span className="mdd-num">{p!.period_months}</span> أشهر</>}
                     </span>

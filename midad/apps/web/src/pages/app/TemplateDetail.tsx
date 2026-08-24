@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
@@ -9,6 +9,7 @@ import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from '../../ui/
 import { IcBack, IcCheck, IcChevron, IcClock, IcLock, IcPrint } from '../../ui/icons'
 import Paper from './Paper'
 import TemplateThumb from './TemplateThumb'
+import { splitPages, A4_PX } from '../../lib/pages'
 
 const OUTPUT_LABEL: Record<string, string> = {
   pdf: 'PDF للطباعة',
@@ -27,24 +28,67 @@ const OUTPUT_LABEL: Record<string, string> = {
  * المعلّم شكلًا واحدًا لكلّ القوالب ولا يعرف ما يفتح. والقوالب الآن
  * مستنداتٌ مصمَّمة، فنعرضها كما هي.
  */
+/**
+ * معاينة القالب — صفحاتٌ منفصلة كالوورد، تُقاس فتُلائم، ولا تنزلق.
+ *
+ * كانت عيبان في واحد. الأوّل أنّ الورقة تُصغَّر بـ`transform: scale` وحده،
+ * و`transform` يُغيّر ما يُرسَم ولا يُغيّر ما يَشغل: تبقى ٧٩٤px في الحساب
+ * وإن رُسمت ٤٩٢. فيحجز لها الإطار ٧٩٤ ولا يجدها، فيفيض ٢٣٤px — شريط
+ * تمريرٍ أفقيّ تُسحب به المعاينة، وفراغٌ حيث ظنّ الحساب ورقة.
+ *
+ * والثاني أنّ الصفحات الستّ كانت تُعرض متنًا واحدًا متّصلًا يفصله خطٌّ
+ * منقّط، فتبدو صفحةً طويلة لا ستّ صفحات — وهي في أصلها ستّ ورقات A4.
+ *
+ * فنشطر المتن عند الفواصل، ونُصيّر كلّ صفحةٍ ورقةً قائمةً بذاتها بمقاس
+ * A4 وظلٍّ وفجوةٍ بينها وبين تاليتها. والمعامل يُقاس من عرض الإطار فتملأه
+ * الورقة تمامًا مهما اتّسع أو ضاق، ولا تتزحزح.
+ */
 function TemplatePreview({ tpl }: { tpl: Template }) {
   const html = (tpl.content_html || '').trim()
-  if (!html) {
+  const box = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0)
+  const pages = useMemo(() => splitPages(html), [html])
+
+  useEffect(() => {
+    const b = box.current
+    if (!b || !pages.length) return
+    const fit = () => setScale(b.clientWidth / A4_PX.w)
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(b)
+    return () => ro.disconnect()
+  }, [pages.length])
+
+  if (!html || !pages.length) {
     return (
       <div className="mdd-paper-shell" style={{ display: 'grid', placeItems: 'center', minHeight: 260 }}>
         <p className="mdd-prose" style={{ fontSize: 13 }}>لا معاينة — القالب فارغ.</p>
       </div>
     )
   }
+
   const m = tpl.page?.margins ?? { top: 14, right: 14, bottom: 14, left: 14 }
   return (
-    <div className="mdd-tplview">
-      <div
-        className="mdd-tplview-sheet mdd-doc-body"
-        dir="rtl"
-        style={{ padding: `${m.top}mm ${m.right}mm ${m.bottom}mm ${m.left}mm` }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+    <div className="mdd-tplview" ref={box}>
+      {pages.map((page, i) => (
+        /* `-slot` يحجز الارتفاع بعد التصغير ويُغلق الفيض، والورقة مُطلَقةٌ
+           داخله فلا تُملي عليه عرضًا. وبغيره يعود الانزلاق. */
+        <div
+          key={i} className="mdd-tplview-slot"
+          style={{ blockSize: scale ? Math.round(A4_PX.h * scale) : undefined }}>
+          <div
+            className="mdd-tplview-sheet mdd-doc-body"
+            dir="rtl"
+            style={{
+              padding: `${m.top}mm ${m.right}mm ${m.bottom}mm ${m.left}mm`,
+              transform: scale ? `scale(${scale})` : undefined,
+              visibility: scale ? undefined : 'hidden',
+            }}
+            dangerouslySetInnerHTML={{ __html: page }}
+          />
+          <span className="mdd-tplview-no mdd-num">{i + 1}</span>
+        </div>
+      ))}
     </div>
   )
 }

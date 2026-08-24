@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import type { Plan } from '../../lib/types'
 import { fmtMoney, fmtNum } from '../../lib/format'
-import { Alert, Badge, Button, Card, EmptyState, PageHead } from '../../ui/kit'
+import { Alert, Badge, Button, Card, EmptyState, PageHead, PriceWas } from '../../ui/kit'
 import { IcCheck, IcClose, IcLibrary } from '../../ui/icons'
 
 function periodLabel(months: number): string {
@@ -84,7 +84,8 @@ export default function ChoosePlan() {
               </div>
 
               <div className="mdd-row" style={{ gap: 8, alignItems: 'baseline' }}>
-                <span className="mdd-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--mdd-accent)' }}>
+                <PriceWas plan={p} />
+                        <span className="mdd-num" style={{ fontSize: 30, fontWeight: 700, color: 'var(--mdd-accent)' }}>
                   {fmtMoney(p.price_sar)}
                 </span>
                 <span style={{ fontSize: 13, color: 'var(--mdd-text-3)' }}>/ {periodLabel(p.period_months)}</span>

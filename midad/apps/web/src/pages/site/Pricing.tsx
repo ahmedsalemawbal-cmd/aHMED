@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import { fmtMoney, fmtNum } from '../../lib/format'
 import type { Plan } from '../../lib/types'
-import { Alert, Badge, Button, Card, EmptyState } from '../../ui/kit'
+import { Alert, Badge, Button, Card, EmptyState, PriceWas } from '../../ui/kit'
 import { IcCheck, IcClose, IcClock } from '../../ui/icons'
 import Accordion from './Accordion'
 
@@ -71,6 +71,7 @@ export default function Pricing() {
 
                     <div className="mdd-col" style={{ gap: 4 }}>
                       <div className="mdd-row" style={{ gap: 10, alignItems: 'baseline' }}>
+                        <PriceWas plan={p} />
                         <span className="mdd-num" style={{ fontSize: 38, fontWeight: 700, lineHeight: 1.1 }}>
                           {fmtMoney(p.price_sar)}
                         </span>

@@ -1,3 +1,4 @@
+import { fmtMoney } from '../lib/format'
 import React, { useEffect, useId, useRef, useState } from 'react'
 import { IcChevronDown, IcSearch, IcSpinner, IcClose, IcAlert, IcCheck } from './icons'
 
@@ -292,5 +293,27 @@ export function CopyButton({ text, label = 'نسخ' }: { text: string; label?: s
       }
       setDone(true); setTimeout(() => setDone(false), 1800)
     }}>{done ? 'نُسخ ✓' : label}</Button>
+  )
+}
+
+/**
+ * السعر قبل الخصم — مشطوبًا فوق السعر الحاليّ.
+ *
+ * مكوّنٌ واحدٌ لأربعة مواضع تعرض السعر (الأسعار، الرئيسيّة، اختيار الباقة،
+ * جدار الاشتراك). ولو كُتب في كلٍّ على حدة لاختلفت أشكالها، ولنُسِي أحدها
+ * حين يتغيّر العرض.
+ *
+ * ولا يُصيّر شيئًا حين لا عرض: الشطب الكاذب يُفقد الثقة لا يبنيها.
+ */
+export function PriceWas({ plan, size = 15 }: { plan: { price_sar: number; price_before_sar?: number | null }; size?: number }) {
+  const before = Number(plan.price_before_sar || 0)
+  const now = Number(plan.price_sar || 0)
+  if (!(before > now)) return null
+  const off = Math.round(((before - now) / before) * 100)
+  return (
+    <span className="mdd-price-was">
+      <s className="mdd-num" style={{ fontSize: size }}>{fmtMoney(before)}</s>
+      <span className="mdd-price-off mdd-num">−{off}%</span>
+    </span>
   )
 }

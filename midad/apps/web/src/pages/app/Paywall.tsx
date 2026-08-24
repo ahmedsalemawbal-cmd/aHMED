@@ -4,7 +4,7 @@ import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
 import { fetchDocuments, fetchNoorTables } from '../../lib/data'
 import { fmtBoth, fmtMoney, fmtNum } from '../../lib/format'
-import { Badge, Button, Card, Skeleton } from '../../ui/kit'
+import { Badge, Button, Card, Skeleton, PriceWas } from '../../ui/kit'
 import { IcCheck, IcClock, IcLogo, IcLogout } from '../../ui/icons'
 
 export default function Paywall() {
@@ -107,7 +107,8 @@ export default function Paywall() {
             </div>
 
             <div className="mdd-row" style={{ gap: 8, alignItems: 'baseline' }}>
-              <span style={{ fontSize: 32, fontWeight: 700, color: 'var(--mdd-accent)' }} className="mdd-num">
+              <PriceWas plan={suggested} />
+                        <span style={{ fontSize: 32, fontWeight: 700, color: 'var(--mdd-accent)' }} className="mdd-num">
                 {fmtMoney(suggested.price_sar)}
               </span>
               <span style={{ fontSize: 13, color: 'var(--mdd-text-3)' }}>/ {monthsLabel}</span>
