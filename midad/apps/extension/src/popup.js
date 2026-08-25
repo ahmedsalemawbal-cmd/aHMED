@@ -7,7 +7,10 @@
  * من نصٍّ خارجيّ أصلًا.
  */
 
-import { API, getKey, setKey, verifyKey, sendTable } from './api.js'
+/* لا `import`: النواة تُحمَّل قبلنا وتضع نفسها على self.Midad. وسبب ذلك
+   أنّ سكربتات المحتوى في MV3 لا تقبل الوحدات، والنواة مشتركةٌ بيننا
+   وبين اللوحة — فلو كانت وحدةً لعملت هنا وسقطت هناك. */
+const { getKey, setKey, verifyKey, sendTable } = self.Midad
 
 const view = document.getElementById('view')
 const ftState = document.getElementById('ftState')
@@ -121,9 +124,13 @@ async function readPage() {
     throw err
   }
 
+  /* حقنٌ ثمّ نداء: النواة لم تعد تُنادي القارئ في آخرها — كانت تفعل حين
+     كانت ملفًّا للحقن وحده، فلمّا صارت مشتركةً مع اللوحة لزم أن تُعرّف
+     ولا تُنفّذ، وإلّا قرأت كلَّ صفحةٍ تُفتح بلا سبب. */
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['src/core.js'] })
   const [res] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ['src/scrape.js'],
+    func: () => self.Midad.readTables(),
   })
   return res?.result || null
 }
