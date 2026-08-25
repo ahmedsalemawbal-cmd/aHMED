@@ -9,7 +9,7 @@ import {
   Badge, Button, Card, ConfirmModal, EmptyState, ErrorState, PageHead,
   SearchInput, Select, SkeletonRows,
 } from '../../ui/kit'
-import { IcChevron, IcDownload } from '../../ui/icons'
+import { IcChevron, IcFileExcel } from '../../ui/icons'
 import { ACCOUNT_AR, STATUS_AR, STATUS_TONE, effectiveStatus } from './adminUtil'
 import { buildXlsx, download } from '../../lib/export'
 
@@ -83,7 +83,7 @@ export default function Subscribers() {
       <PageHead
         title="المشتركون"
         sub={loading ? 'جارٍ التحميل…' : `${fmtNum(filtered.length)} مشتركًا`}
-        actions={<Button auto icon={<IcDownload size={15} />} onClick={exportList} disabled={!filtered.length}>تصدير القائمة</Button>}
+        actions={<Button auto icon={<IcFileExcel size={17} />} onClick={exportList} disabled={!filtered.length}>تصدير القائمة</Button>}
       />
 
       <Card className="mdd-col" style={{ gap: 12, marginBlockEnd: 'var(--mdd-s-4)' }}>

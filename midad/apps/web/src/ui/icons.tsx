@@ -105,3 +105,67 @@ export const IcZoomOut = ({ size, className, style }: P) => <svg {...S(size)} cl
 export const IcCellFill = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><rect x="3.4" y="4.6" width="15.2" height="12.8" rx="1.6" {...st}/><path d="M3.4 10.6h15.2M11 4.6v12.8" {...st} strokeWidth={1.2}/><path d="M3.4 10.6h7.6v6.8H5a1.6 1.6 0 0 1-1.6-1.6Z" fill="currentColor" opacity=".28"/></svg>
 export const IcRowFill = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><rect x="3.4" y="4.6" width="15.2" height="12.8" rx="1.6" {...st}/><path d="M3.4 10.6h15.2" {...st} strokeWidth={1.2}/><path d="M3.4 10.6h15.2v5.2a1.6 1.6 0 0 1-1.6 1.6H5a1.6 1.6 0 0 1-1.6-1.6Z" fill="currentColor" opacity=".28"/></svg>
 export const IcPageBreak = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><path d="M5.4 8.2V4.4A1.4 1.4 0 0 1 6.8 3h8.4a1.4 1.4 0 0 1 1.4 1.4v3.8M5.4 13.8v3.8A1.4 1.4 0 0 0 6.8 19h8.4a1.4 1.4 0 0 0 1.4-1.4v-3.8" {...st}/><path d="M2.6 11h3.2M9.4 11h3.2M16.2 11h3.2" {...st}/></svg>
+
+/* ═══════════════ أيقونات صيغ الملفّات ═══════════════
+ *
+ * ملوّنةٌ لا أحاديّة اللون، خلافًا لما فوقها. والسبب أنّ وظيفتها مختلفة:
+ * أيقونات الواجهة تدلّ على فعل — بحثٌ أو حذفٌ أو تنزيل — فتأخذ لون سياقها.
+ * وهذه تدلّ على **ما سيصير الملفّ في جهازك**، والمعلّم يعرفها بلونها قبل أن
+ * يقرأ اسمها: الأحمر PDF، والأزرق مستند، والأخضر جدول. فاللون هنا معنًى لا
+ * زينة، ولذا لا يرث `currentColor`.
+ *
+ * ورُسمت متّجهةً لا صورًا نقطيّة: تظهر في ١٥px في زرّ وفي ٤٤ في بطاقة،
+ * والنقطيّة تتشوّه في أحدهما. وطيّةُ الورقة في الزاوية مقصودة — هي ما
+ * يجعل الشكل «ورقة» في ستّة عشر بكسلًا.
+ */
+
+/** ورقةٌ بطيّةٍ في زاويتها العليا — الهيكل المشترك للثلاث */
+const Sheet = ({ body, fold, shade }: { body: string; fold: string; shade: string }) => (
+  <>
+    <path d="M4 3.4a1.6 1.6 0 0 1 1.6-1.6h7.2L18 7v11.6a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 18.6Z" fill={body} />
+    <path d="M12.8 1.8 18 7h-5.2Z" fill={fold} />
+    <path d="M12.8 7H18l-5.2 5.2Z" fill={shade} opacity=".55" />
+  </>
+)
+
+/** PDF — أحمر أدوبي، وعلامةُ أكروبات لا حروفٌ مكتوبة.
+ *  والحروف جُرّبت فسقطت: «PDF» في أيقونةٍ ١٥px لطخةٌ لا تُقرأ، وتفيض عن
+ *  إطارها. والعلامة شكلٌ يُعرَف صغيرًا كما يُعرَف كبيرًا. */
+export const IcFilePdf = ({ size, className, style }: P) => (
+  <svg {...S(size)} className={className} style={style}>
+    <Sheet body="#E5252A" fold="#F4787B" shade="#B3181C" />
+    <path d="M11.2 7.4c.75 0 1.05.62 1.05 1.5 0 1.55-.72 3.5-1.5 5.1-.72 1.5-1.55 2.6-2.3 2.6-.42 0-.66-.3-.66-.72 0-.98 1.5-1.9 4.05-2.55 1.6-.4 3.1-.55 3.85-.55.7 0 1.05.2 1.05.6 0 .42-.4.62-1 .62-1.1 0-2.6-.7-3.85-1.95-1.05-1.05-1.7-2.3-1.7-3.35 0-.85.35-1.3 1.01-1.3Z"
+      fill="none" stroke="#FFFFFF" strokeWidth="1.15" strokeLinejoin="round" strokeLinecap="round" />
+  </svg>
+)
+
+/** وورد — أزرق المستندات، وأسطرٌ بيضاء آخرُها أقصر */
+export const IcFileWord = ({ size, className, style }: P) => (
+  <svg {...S(size)} className={className} style={style}>
+    <Sheet body="#4285F4" fold="#A1C2FA" shade="#1B5FC1" />
+    <g fill="#F1F5FE">
+      <rect x="6.6" y="9.4" width="8.8" height="1.15" rx=".5" />
+      <rect x="6.6" y="12" width="8.8" height="1.15" rx=".5" />
+      <rect x="6.6" y="14.6" width="8.8" height="1.15" rx=".5" />
+      <rect x="6.6" y="17.2" width="4.6" height="1.15" rx=".5" />
+    </g>
+  </svg>
+)
+
+/** إكسل — أخضر الجداول، وشبكةٌ بيضاء ثلاثةُ صفوفٍ في عمودين */
+export const IcFileExcel = ({ size, className, style }: P) => (
+  <svg {...S(size)} className={className} style={style}>
+    <Sheet body="#0F9D58" fold="#87CEAC" shade="#0A6E3E" />
+    <g fill="#EDF6F1">
+      <rect x="6.2" y="9.4" width="9.6" height="8.4" rx=".5" />
+    </g>
+    <g fill="#0F9D58">
+      <rect x="7" y="10.2" width="3.9" height="2" />
+      <rect x="11.1" y="10.2" width="3.9" height="2" />
+      <rect x="7" y="12.6" width="3.9" height="2" />
+      <rect x="11.1" y="12.6" width="3.9" height="2" />
+      <rect x="7" y="15" width="3.9" height="2" />
+      <rect x="11.1" y="15" width="3.9" height="2" />
+    </g>
+  </svg>
+)

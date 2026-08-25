@@ -8,7 +8,7 @@ import {
   Badge, Button, Card, EmptyState, ErrorState, PageHead, Select, SkeletonRows,
 } from '../../ui/kit'
 import {
-  IcDownload, IcUser, IcCard, IcInvoice, IcTeam, IcTable, IcKey, IcShield, IcClock,
+  IcUser, IcCard, IcInvoice, IcTeam, IcTable, IcKey, IcShield, IcClock, IcFileExcel,
 } from '../../ui/icons'
 import { buildXlsx, download } from '../../lib/export'
 
@@ -82,7 +82,7 @@ export default function AuditLog() {
     <>
       <PageHead
         title="سجلّ النظام" sub="من فعل ماذا ومتى — وهو ما يُرجَع إليه عند الخلاف."
-        actions={<Button auto icon={<IcDownload size={15} />} onClick={exportLog} disabled={!shown.length}>تصدير</Button>}
+        actions={<Button auto icon={<IcFileExcel size={17} />} onClick={exportLog} disabled={!shown.length}>تصدير</Button>}
       />
 
       <Card className="mdd-grid mdd-grid--3" style={{ gap: 10, marginBlockEnd: 'var(--mdd-s-4)' }}>

@@ -10,7 +10,7 @@ import {
   Button, Card, Checkbox, ConfirmModal, EmptyState, ErrorState, Field,
   Input, Modal, SearchInput, Skeleton,
 } from '../../ui/kit'
-import { IcBack, IcChevronDown, IcDownload, IcEdit, IcTrash } from '../../ui/icons'
+import { IcBack, IcChevronDown, IcDownload, IcEdit, IcTrash, IcFileExcel } from '../../ui/icons'
 
 const PAGE_SIZE = 100
 
@@ -139,7 +139,7 @@ export default function NoorTableView() {
           </p>
         </div>
         <div className="mdd-row mdd-row--wrap" style={{ gap: 10 }}>
-          <Button auto variant="primary" icon={<IcDownload size={15} />} onClick={exportXlsx}>تصدير إكسل</Button>
+          <Button auto variant="primary" icon={<IcFileExcel size={17} />} onClick={exportXlsx}>تصدير إكسل</Button>
           <Button auto variant="secondary" icon={<IcEdit size={15} />}
             onClick={() => { setRenameText(table.title); setRenaming(true) }}>إعادة تسمية</Button>
           <Button auto variant="danger" icon={<IcTrash size={15} />} onClick={() => setDeleting(true)}>حذف</Button>

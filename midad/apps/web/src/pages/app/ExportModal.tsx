@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert, Button, Modal } from '../../ui/kit'
-import { IcPrint, IcDownload, IcCheck, IcSpinner } from '../../ui/icons'
+import { IcPrint, IcDownload, IcCheck, IcSpinner, IcFilePdf, IcFileWord } from '../../ui/icons'
 import { buildRichDocx } from '../../lib/docx'
 import { downloadPdf } from '../../lib/pdf'
 import { download, safeFileName } from '../../lib/export'
@@ -33,9 +33,13 @@ export default function ExportModal({ open, onClose, title, html, page, watermar
 
   const mark = watermark ?? (access === 'trial' ? 'نسخةٌ تجريبيّة — مِداد' : null)
 
-  const formats: { key: Fmt; name: string; line: string }[] = [
-    { key: 'pdf', name: 'PDF', line: 'يُنزَّل فورًا — بألوانه وصفحاته كما تراه' },
-    { key: 'docx', name: 'وورد (DOCX)', line: 'يُنزَّل فورًا — لتعديلٍ إضافيّ على حاسوبك' },
+  /* لكلّ صيغةٍ أيقونتُها بلونها. والمعلّم يعرف الأحمر والأزرق قبل أن يقرأ
+     الاسم — وهو يختار في نافذةٍ صغيرةٍ على جوّاله غالبًا. */
+  const formats: { key: Fmt; name: string; line: string; icon: React.ReactNode }[] = [
+    { key: 'pdf', name: 'PDF', line: 'يُنزَّل فورًا — بألوانه وصفحاته كما تراه',
+      icon: <IcFilePdf size={26} /> },
+    { key: 'docx', name: 'وورد (DOCX)', line: 'يُنزَّل فورًا — لتعديلٍ إضافيّ على حاسوبك',
+      icon: <IcFileWord size={26} /> },
   ]
 
   const run = async () => {
@@ -89,17 +93,24 @@ export default function ExportModal({ open, onClose, title, html, page, watermar
             key={f.key} onClick={() => setFmt(f.key)} disabled={busy}
             className={'mdd-card mdd-card--action mdd-row' + (fmt === f.key ? ' mdd-card--selected' : '')}
             style={{ gap: 12, padding: 14 }}>
+            {/* الأيقونة ثابتةٌ لا تتبدّل بالاختيار — فهي تُعرّف الصيغة لا
+                تدلّ على الحالة. والاختيار تُظهره علامةٌ في الطرف الآخر. */}
             <span style={{
               width: 34, height: 34, borderRadius: 9, display: 'grid', placeItems: 'center', flex: 'none',
-              background: fmt === f.key ? 'var(--mdd-accent)' : 'var(--mdd-sunken)',
-              color: fmt === f.key ? 'var(--mdd-on-accent)' : 'var(--mdd-text-3)',
-            }}>{fmt === f.key ? <IcCheck size={16} /> : null}</span>
+              background: 'var(--mdd-sunken)',
+            }}>{f.icon}</span>
             <span style={{ minWidth: 0 }}>
               <span style={{ display: 'block', fontWeight: 700, fontSize: 14 }}>{f.name}</span>
               <span style={{ display: 'block', fontSize: 12, color: 'var(--mdd-text-3)', marginBlockStart: 2 }}>
                 {f.line}
               </span>
             </span>
+            <span style={{
+              marginInlineStart: 'auto', flex: 'none', width: 22, height: 22, borderRadius: 999,
+              display: 'grid', placeItems: 'center',
+              background: fmt === f.key ? 'var(--mdd-accent)' : 'transparent',
+              color: 'var(--mdd-on-accent)',
+            }}>{fmt === f.key ? <IcCheck size={14} /> : null}</span>
           </button>
         ))}
       </div>

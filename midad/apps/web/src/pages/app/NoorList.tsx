@@ -11,7 +11,7 @@ import {
   Alert, Badge, Button, Card, ConfirmModal, CopyButton, ErrorState, IconButton,
   PageHead, SearchInput, Select, SkeletonRows,
 } from '../../ui/kit'
-import { IcDownload, IcTable, IcTrash } from '../../ui/icons'
+import { IcTable, IcTrash, IcFileExcel } from '../../ui/icons'
 
 type SortKey = 'recent' | 'name' | 'rows'
 type SrcKey = 'all' | 'noor' | 'madrasati'
@@ -202,7 +202,7 @@ export default function NoorList() {
                   <td data-label="أفعال">
                     <div className="mdd-row" style={{ gap: 6 }}>
                       <Button auto size="sm" variant="secondary" onClick={() => nav(`/app/noor/${t.id}`)}>فتح</Button>
-                      <IconButton label="تصدير إكسل" onClick={() => exportXlsx(t)}><IcDownload size={14} /></IconButton>
+                      <IconButton label="تصدير إكسل" onClick={() => exportXlsx(t)}><IcFileExcel size={16} /></IconButton>
                       <IconButton label="حذف" onClick={() => setDeleting(t)}><IcTrash size={14} /></IconButton>
                     </div>
                   </td>
