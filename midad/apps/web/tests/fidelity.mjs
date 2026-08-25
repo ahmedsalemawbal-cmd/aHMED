@@ -91,6 +91,7 @@ try {
     }, { p: PROBE, n })
 
     let a = 0, b = 0, pageWorst = 0, pageLoose = 0
+    const off = []
     while (a < o.length && b < i.length) {
       if (o[a].tx !== i[b].tx) {
         // عنصرٌ زائدٌ في المحرّر: نتخطّاه ولا نُزحزح المقارنة كلَّها
@@ -99,14 +100,30 @@ try {
         a++; continue
       }
       compared++
-      const d = Math.max(Math.abs(i[b].t - o[a].t), Math.abs(i[b].r - o[a].r))
-      if (d > 1.5) { loose++; pageLoose++ }
+      const dt = i[b].t - o[a].t
+      const dr = i[b].r - o[a].r
+      const d = Math.max(Math.abs(dt), Math.abs(dr))
+      if (d > 1.5) { loose++; pageLoose++; off.push({ d, dt, dr, tx: o[a].tx }) }
       if (d > pageWorst) pageWorst = d
       if (d > worst.d) worst = { d: +d.toFixed(1), page: n + 1, tx: o[a].tx, o: o[a], i: i[b] }
       a++; b++
     }
     T(`ص${n + 1} ضمن ${TOLERANCE}px`, pageWorst <= TOLERANCE,
       `أقصى ${pageWorst.toFixed(1)}px · فوق بكسلٍ ونصف: ${pageLoose}`)
+
+    /* يُشخَّص هنا لا عندي: متصفّح السير قد يخالف متصفّحي في تشكيل
+       الحروف، فيلتفّ نصٌّ هناك ولا يلتفّ هنا. ولا سبيل إلى إعادة إنتاجه
+       محلّيًّا، فليقل السجلُّ ما يكفي: أين الفرق، ورأسيٌّ هو أم أفقيّ؟
+       والرأسيّ يعني صفًّا علا — أي التفافًا. والأفقيّ يعني عمودًا أو
+       محاذاة. وهما عطبان مختلفان. */
+    if (pageWorst > TOLERANCE) {
+      off.sort((x, y) => y.d - x.d)
+      for (const e of off.slice(0, 6)) {
+        const kind = Math.abs(e.dt) > Math.abs(e.dr) ? 'رأسيّ' : 'أفقيّ'
+        console.log(`      «${e.tx}» ${kind} — أعلى ${e.dt >= 0 ? '+' : ''}${e.dt.toFixed(1)} · يمين ${e.dr >= 0 ? '+' : ''}${e.dr.toFixed(1)}`)
+      }
+      if (off.length > 6) console.log(`      … و${off.length - 6} غيرها`)
+    }
   }
 
   T('قُورنت عقدُ المستند كلُّها', compared >= 190, `${compared} عقدة`)
