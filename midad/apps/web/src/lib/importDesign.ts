@@ -84,6 +84,7 @@ const KEEP_ATTRS = new Set([
      يُستورد التصميم فيخرج شعار المدرسة مربّعًا أبيض، ولا شيء يُنبّه.
      والمصادر الخطرة تُصفّى في safeSrc أدناه لا هنا. */
   'src', 'alt',
+  'colwidth',
 ])
 
 /**
@@ -282,6 +283,118 @@ function dropEmptyTables(root: Element): number {
 
 /* ═══════════════ الواجهة ═══════════════ */
 
+/**
+ * يقيس أعمدة كلّ جدولٍ مرّةً ويُثبّتها في `colwidth`.
+ *
+ * ولمَ لا نكتفي بما كتبه التصميم؟ لأنّ عارض الجداول في المحرّر
+ * (prosemirror-tables) يمسح `width` من وسم الجدول ويضع مكانه `min-width`
+ * — إلّا أن يكون لكلّ عمودٍ عرضٌ صريح، فيثبّت العرض الكلّيّ:
+ *
+ *     if (fixedWidth) { table.style.width = totalWidth + "px" }
+ *     else            { table.style.width = "" }
+ *
+ * والتصميم يكتب `width: 100%` على ستّةٍ وخمسين جدولًا في قالبٍ واحد،
+ * فتنكمش كلّها إلى عرض محتواها: شريطُ الغلاف الملوّن يصير ١٠٠px بدل ٧٩٤،
+ * ورسومُ الأعمدة تتقلّص إلى ثلث الصفحة. وهذا ما لم يظهر في اختباري لأنّي
+ * قِستُ ناتج المستورد في حاويةٍ عاديّة، والمحرّر يُعيد بناء المستند.
+ *
+ * فنقيس ما يريده التصميم عند الاستيراد — مرّةً واحدةً وفي متصفّحٍ يحمل
+ * أنماطنا — ونُثبّته. ويبقى الجدول قابلًا لتغيير عرض أعمدته بعدها، إذ
+ * السحب يُبدّل `colwidth` نفسها.
+ */
+/**
+ * الخلايا الزخرفيّة: تُصمَّم فارغةً بلونٍ وارتفاع، ويحشوها المحرّر فقرة.
+ *
+ * فمخطّط الجداول يشترط في الخليّة محتوًى من نوع `block+`، والخليّة الفارغة
+ * لا تُوافقه — فيُدرج فيها ProseMirror فقرةً فارغة. وهذا صوابٌ في محرّر
+ * (وإلّا لَما استطاع المعلّم الكتابة فيها)، لكنّ الفقرة تحمل ارتفاع سطر:
+ * فشريطُ الغلاف المصمَّم `height: 10px` يُرسم **١٨px**، وكلّ ما تحته ينزل.
+ *
+ * والعلاج ليس منع الحشو — بل تصفير ارتفاع سطره في هذه الخلايا وحدها:
+ * فتعود الخليّة إلى ارتفاعها المُعلَن، وتبقى قابلةً للكتابة إن أرادها
+ * المعلّم. ويُكتب في نمط الخليّة لا في ورقةٍ عامّة، فيرثه الحشو مهما
+ * أعاد المحرّر بناءه.
+ */
+function collapseDecorCells(root: Element): number {
+  let n = 0
+  root.querySelectorAll('td, th').forEach((cell) => {
+    if ((cell.textContent || '').trim()) return
+    if (cell.querySelector('img')) return
+    const st = cell.getAttribute('style') || ''
+    if (/line-height/i.test(st)) return
+    cell.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? '; ' : ''}line-height: 0`)
+    n++
+  })
+  return n
+}
+
+function measureColumns(holder: HTMLElement): number {
+  if (typeof document === 'undefined') return 0
+
+  /* المسرح يحمل أصنافنا: القياس خارجها يُعطي حشوًا وحدودًا غير التي
+     ستُرسم، فتخرج أعمدةٌ لا تطابق شيئًا. */
+  const stage = document.createElement('div')
+  stage.setAttribute('aria-hidden', 'true')
+  stage.style.cssText =
+    'position: fixed; top: 0; inset-inline-start: -100000px; inline-size: 210mm; pointer-events: none;'
+  const sheet = document.createElement('div')
+  sheet.className = 'mdd-doc-sheet mdd-doc-body'
+  sheet.setAttribute('dir', 'rtl')
+  sheet.style.cssText = 'inline-size: 210mm; padding: 0;'
+  const clone = holder.cloneNode(true) as HTMLElement
+  sheet.append(...Array.from(clone.childNodes))
+  stage.appendChild(sheet)
+  document.body.appendChild(stage)
+
+  let done = 0
+  try {
+    const shot = sheet.querySelectorAll('table')
+    const live = holder.querySelectorAll('table')
+    if (shot.length !== live.length) return 0        // نُسخةٌ لا تُطابق: لا نُخمّن
+    for (let i = 0; i < shot.length; i++) {
+      const srcRow = shot[i].rows[0]
+      const dstRow = live[i].rows[0]
+      if (!srcRow || !dstRow || srcRow.cells.length !== dstRow.cells.length) continue
+
+      /* تُقرَّب الحدود لا الأعرض: أربعة أعمدةٍ عرضُ كلٍّ ١٩٨٫٥ تُعطي
+         ١٩٨×٤ = ٧٩٢ لو قُرّب كلٌّ وحده — فيضيع بكسلان من عرض الورقة،
+         ويظهر بياضٌ في طرف شريطٍ صُمّم ليبلغ الحافّة. أمّا تقريب موضع
+         الحدّ فيجعل المجموع مساويًا لتقريب الكلّ دائمًا. */
+      const exact: number[] = []
+      let ok = true
+      for (const cell of Array.from(srcRow.cells)) {
+        const w = cell.getBoundingClientRect().width
+        if (!(w > 0)) { ok = false; break }
+        const span = Math.max(1, cell.colSpan || 1)
+        for (let j = 0; j < span; j++) exact.push(w / span)
+      }
+      if (!ok) continue
+
+      const cols: number[] = []
+      let run = 0, prev = 0
+      for (const e of exact) {
+        run += e
+        const edge = Math.round(run)
+        cols.push(edge - prev)
+        prev = edge
+      }
+
+      const widths: number[][] = []
+      let at = 0
+      for (const cell of Array.from(srcRow.cells)) {
+        const span = Math.max(1, cell.colSpan || 1)
+        widths.push(cols.slice(at, at + span))
+        at += span
+      }
+      widths.forEach((cols, k) => dstRow.cells[k].setAttribute('colwidth', cols.join(',')))
+      done++
+    }
+  } finally {
+    stage.remove()
+  }
+  return done
+}
+
 export function importDesignHtml(raw: string, fileName = ''): DesignImport {
   const warnings: string[] = []
   const droppedSet = new Set<string>()
@@ -395,6 +508,14 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
   const w = /width:\s*([\d.]+)(px|mm|in)/.exec(st)
   const h = /height:\s*([\d.]+)(px|mm|in)/.exec(st)
   const landscape = !!(w && h && Number(w[1]) > Number(h[1]))
+
+  /* قبل القياس: الحشو الذي يُدرجه المحرّر يُصفَّر أوّلًا، وإلّا قِسنا
+     أعمدةً لا تُشبه ما سيُرسم */
+  collapseDecorCells(holder)
+  const sized = measureColumns(holder)
+  if (tables && !sized) {
+    warnings.push('تعذّر قياس أعمدة الجداول — قد يختلف عرضها عن التصميم.')
+  }
 
   return {
     title,

@@ -96,6 +96,13 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
        فتصميم القوالب كلّه في أنماط الخلايا، وإسقاطها يُفرغ المستند. */
     StyledTable.configure({
       resizable: true, allowTableNodeSelection: true,
+      /* الحدّ الأدنى لعرض العمود ١ لا ٢٥. وعارض الجداول يكتب
+             ["width", `${Math.max(width, minWidth)}px`]
+         فيرفع كلّ عمودٍ أضيق من ٢٥ إلى ٢٥ — وأشرطةُ التصميم الملوّنة
+         خلايا عرضها ٥px، فتتّسع خمسة أضعافها ويتزحزح ما بجانبها ٢٠px.
+         والحدّ إنّما وُضع كي لا يختفي عمودٌ عند السحب؛ و١ يكفي لذلك
+         ولا يُكذّب تصميمًا. */
+      cellMinWidth: 1,
       HTMLAttributes: { class: 'mdd-doc-table' },
     }),
     StyledTableRow,
@@ -114,7 +121,14 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
       HTMLAttributes: { class: 'mdd-doc-img' },
     }),
     // العربيّة تبدأ يمينًا، فالافتراضيّ right لا left
-    TextAlign.configure({ types: ['heading', 'paragraph'], defaultAlignment: 'right' }),
+    /* بلا محاذاةٍ افتراضيّة. و`renderHTML` عندها يكتبها صراحةً متى وُجدت:
+           if (!attributes.textAlign) return {}
+           return { style: `text-align: ${attributes.textAlign}` }
+       فلو جعلناها `right` لحملتها **كلّ** فقرةٍ في المستند — وغلبت ما
+       ورثته من خليّةٍ صُمّمت `center`، فانزاح النصّ إلى الحافّة ٧٤px.
+       والمستند من اليمين إلى اليسار أصلًا، فالفقرة بلا محاذاةٍ تُرسم
+       يمينًا كما يريد المعلّم، وتُرسم وسطًا حيث أراد التصميم. */
+    TextAlign.configure({ types: ['heading', 'paragraph'], defaultAlignment: null }),
     Highlight.configure({ multicolor: true }),
     TextStyleKit.configure({ lineHeight: false }),
     Placeholder.configure({ placeholder }),
