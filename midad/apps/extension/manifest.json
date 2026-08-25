@@ -4,7 +4,6 @@
   "short_name": "مِداد",
   "version": "1.0.0",
   "description": "يقرأ الجدول المعروض أمامك في نور أو مدرستي ويرسله إلى حسابك في مِداد لتنزّله إكسل أو وورد أو PDF.",
-  "default_locale": "ar",
   "permissions": [
     "activeTab",
     "storage",
