@@ -27,6 +27,10 @@ const ALLOWED = new Set([
   'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
   'border-color', 'border-width', 'border-style', 'border-radius',
   'border-collapse', 'border-spacing', 'box-sizing',
+  /* متغيّرٌ واحدٌ مسموح: عرض الجدول الذي أعلنه التصميم.
+     وسببه أنّ عارض الجداول يمسح `width` من وسم الجدول بعد الرسم، ولا
+     يمسّ المتغيّرات. فيُحمَل فيه ويُقرأ من الورقة. */
+  '--mdd-tw',
 ])
 
 /** قيمٌ ترفض دائمًا مهما كانت الخاصّيّة */

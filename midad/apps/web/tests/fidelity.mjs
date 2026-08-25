@@ -63,9 +63,11 @@ try {
   T('استُورد الملفّ', !!imported.html, `${imported.pages} صفحات · ${imported.tables} جدولًا`)
   T('لم يُسقَط شيء', !imported.dropped.includes('script') || true, imported.dropped.join(',') || 'لا شيء')
   T('كلّ صفحةٍ في صندوقها', (imported.html.match(/data-page="true"/g) || []).length === 6)
-  T('أعمدة الجداول مقيسة',
-    (imported.html.match(/colwidth=/g) || []).length > 100,
-    `${(imported.html.match(/colwidth=/g) || []).length} خليّةً`)
+  /* العرض المُعلَن محمولٌ في متغيّر: العارض يمسح `width` من الوسم بعد
+     الرسم، فلولاه انكمش ستّةٌ وخمسون جدولًا إلى عرض محتواها. */
+  T('عرض الجداول محمول',
+    (imported.html.match(/--mdd-tw:/g) || []).length >= 50,
+    `${(imported.html.match(/--mdd-tw:/g) || []).length} جدولًا`)
 
   // ② يُفتح في المحرّر الحيّ بالمتن المستورَد نفسه
   await ctx.close()
