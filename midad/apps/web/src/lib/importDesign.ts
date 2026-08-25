@@ -341,6 +341,16 @@ function measureColumns(holder: HTMLElement): number {
   sheet.className = 'mdd-doc-sheet mdd-doc-body'
   sheet.setAttribute('dir', 'rtl')
   sheet.style.cssText = 'inline-size: 210mm; padding: 0;'
+
+  /* بالتخطيط التلقائيّ يُقاس، وبالثابت يُرسَم بعدها.
+     وأنماطنا تجعل جداول الصفحات `fixed` — وهو صوابٌ **بعد** أن تُثبَّت
+     الأعمدة، فيبنيها المتصفّح كما قِسناها. أمّا أثناء القياس فـ`fixed`
+     بلا أعرضٍ معلومة يقسم الجدول بالتساوي: عمودان عرضُهما ٣٧٨ و٣٢٨
+     يُقاسان ٣٥٣ و٣٥٣، فنُثبّت قسمةً لم يُردها التصميم. والتلقائيّ هو ما
+     بُني عليه الملفّ الأصليّ. */
+  const probeCss = document.createElement('style')
+  probeCss.textContent = 'table { table-layout: auto !important }'
+  sheet.appendChild(probeCss)
   const clone = holder.cloneNode(true) as HTMLElement
   sheet.append(...Array.from(clone.childNodes))
   stage.appendChild(sheet)

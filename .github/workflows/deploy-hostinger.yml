@@ -48,6 +48,19 @@ jobs:
         working-directory: midad/apps/web
         run: npm ci
 
+      # الفحص قبل البناء لا بعده: ما لا يجتاز الفحص لا يُنشَر.
+      #
+      # وهي فحوصٌ في متصفّحٍ حقيقيّ لأنّ ما تحرسه لا يظهر في غيره: قالب
+      # كلود ديزاين يمرّ بالمستورد ثمّ بمخطّط المحرّر ثمّ بعارض الجداول،
+      # وكلٌّ منها يُبدّله. فيُقاس ما يُرسم، لا ما يُكتب.
+      - name: تثبيت متصفّح الفحص
+        working-directory: midad/apps/web
+        run: npx playwright install --with-deps chromium
+
+      - name: الفحوص
+        working-directory: midad/apps/web
+        run: npm test
+
       # نبني هنا ولا نرفع midad/deploy المُودَع: البناء الطازج هو الحقيقة،
       # والمُودَع قد يتخلّف عن الشيفرة إن نُسِي تحديثه — وقد نُسِي مرّتين.
       - name: البناء
