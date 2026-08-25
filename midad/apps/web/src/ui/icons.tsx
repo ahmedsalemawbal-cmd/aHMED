@@ -106,6 +106,8 @@ export const IcCellFill = ({ size, className, style }: P) => <svg {...S(size)} c
 export const IcRowFill = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><rect x="3.4" y="4.6" width="15.2" height="12.8" rx="1.6" {...st}/><path d="M3.4 10.6h15.2" {...st} strokeWidth={1.2}/><path d="M3.4 10.6h15.2v5.2a1.6 1.6 0 0 1-1.6 1.6H5a1.6 1.6 0 0 1-1.6-1.6Z" fill="currentColor" opacity=".28"/></svg>
 export const IcPageBreak = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><path d="M5.4 8.2V4.4A1.4 1.4 0 0 1 6.8 3h8.4a1.4 1.4 0 0 1 1.4 1.4v3.8M5.4 13.8v3.8A1.4 1.4 0 0 0 6.8 19h8.4a1.4 1.4 0 0 0 1.4-1.4v-3.8" {...st}/><path d="M2.6 11h3.2M9.4 11h3.2M16.2 11h3.2" {...st}/></svg>
 
+export const IcBell = ({ size, className, style }: P) => <svg {...S(size)} className={className} style={style}><path d="M11 3.4a4.9 4.9 0 0 0-4.9 4.9c0 3.5-1.2 4.6-1.9 5.3-.3.3-.1.9.3.9h12.9c.5 0 .7-.6.4-.9-.7-.7-1.9-1.8-1.9-5.3A4.9 4.9 0 0 0 11 3.4Z" {...st}/><path d="M9.3 17.2a1.8 1.8 0 0 0 3.4 0" {...st}/></svg>
+
 /* ═══════════════ أيقونات صيغ الملفّات ═══════════════
  *
  * ملوّنةٌ لا أحاديّة اللون، خلافًا لما فوقها. والسبب أنّ وظيفتها مختلفة:

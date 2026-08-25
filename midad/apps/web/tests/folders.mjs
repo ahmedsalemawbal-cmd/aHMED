@@ -1,5 +1,5 @@
 /**
- * المجلّدات تخصّ نوع الحساب، والرفع يسأل لمن قبل أين.
+ * المجلّدات تخصّ نوع الحساب، والرفع يسأل لمن قبل أين — والحقل لا يفقد تركيزه.
  *
  * كانت سبعة مجلّداتٍ يراها كلّ مشترك. وصارت ثلاثة: «ملفّات المدرسة»
  * و«قوالب الشهادات» للمدرسة، و«ملفّاتي» للمعلّم. والشهاداتُ لمالك
@@ -129,6 +129,47 @@ try {
     T('  ولا يبقى مجلّد مدرسةٍ في القائمة',
       JSON.stringify(teacher.options) === JSON.stringify(['بلا مجلّد', 'ملفّاتي']),
       teacher.options.join(' · '))
+  }
+
+  /* ═════ ③ الحقل لا يفقد تركيزه ═════
+   *
+   * كانت النافذة تُعيد تركيز نفسها في كلّ رسمة، لأنّ أثرها يعتمد على
+   * `onClose` — ودالّةٌ سطريّةٌ جديدةٌ في كلّ رسمة. فكلّ حرفٍ يُعيد رسم
+   * الأب فيُسحب التركيز، ويضطرّ المعلّم إلى الضغط بالفأرة بين حرفٍ وحرف.
+   *
+   * وهذا عطبٌ لا يظهر في سجلٍّ ولا في لقطة: الحقل سليمٌ في الصورة،
+   * والقيمة تُحفظ إن أصرّ المستخدم. فلا يُمسَك إلّا بكتابةٍ حقيقيّة. */
+  {
+    const ctx2 = await withAccount(browser, 'school')
+    const p2 = await ctx2.newPage()
+    p2.on('pageerror', (e) => errors.push(e.message))
+    await p2.goto(`${ORIGIN}/#/app/classroom`, { waitUntil: 'load' })
+    await p2.waitForTimeout(1800)
+
+    const add = await p2.$('button:has-text("فصل جديد")')
+    T('حوار «فصل جديد» يُفتح', !!add)
+    if (add) {
+      await add.click()
+      await p2.waitForTimeout(600)
+
+      /* التركيز في أوّل حقلٍ فور الفتح — بلا فأرة */
+      const auto = await p2.evaluate(() => {
+        const a = document.activeElement
+        return a?.tagName === 'INPUT'
+      })
+      T('  التركيز في الحقل فور الفتح', auto)
+
+      await p2.keyboard.type('الثالث/أ')
+      await p2.waitForTimeout(300)
+      const st = await p2.evaluate(() => {
+        const i = document.querySelector('.mdd-modal input')
+        return { v: i?.value || '', kept: document.activeElement === i }
+      })
+      T('  لا يفقد التركيز أثناء الكتابة', st.kept,
+        st.kept ? `«${st.v}»` : `ضاع إلى ${'غير الحقل'}`)
+      T('  والنصّ كامل', st.v === 'الثالث/أ', `«${st.v}»`)
+    }
+    await ctx2.close()
   }
 
   T('بلا خطأ في الطرفيّة', errors.length === 0, errors[0] || 'نظيف')

@@ -157,15 +157,37 @@ export function Modal({ open, onClose, title, children, footer, wide }: {
   open: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
+
+  /* `onClose` ليست في اعتماد الأثر، وتُقرأ من مرجع.
+   *
+   * وكانت فيه، فوقع أسوأ عطبٍ في الواجهة: كلّ نداءٍ يمرّر دالّةً سطريّة
+   *     <Modal onClose={() => setEditing(null)} />
+   * وهي **جديدةٌ في كلّ رسمة**. فكلّ حرفٍ يكتبه المعلّم يُعيد رسم الأب،
+   * فتتبدّل الدالّة، فيُعاد الأثر، فيُنادى `ref.current.focus()` — ويُسحب
+   * التركيز من الحقل إلى صندوق النافذة. فيكتب حرفًا ثمّ يضغط بالفأرة
+   * ليكتب الثاني.
+   *
+   * والمرجع يُحدَّث في كلّ رسمة بلا أثر، فيقرأ المستمع أحدثَ دالّةٍ دائمًا
+   * والأثر يعتمد على `open` وحده. */
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current() }
     document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    ref.current?.focus()
+
+    /* أوّل حقلٍ لا صندوق النافذة: مَن فتح «فصل جديد» يريد أن يكتب اسمه،
+       لا أن يبحث عن الحقل بالفأرة. وإن لم يكن فيها حقلٌ فالصندوق —
+       ليعرف قارئ الشاشة أنّه في حوار. */
+    const first = ref.current?.querySelector<HTMLElement>(
+      'input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled])')
+    ;(first || ref.current)?.focus()
+
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
-  }, [open, onClose])
+  }, [open])
   if (!open) return null
   return (
     <div className="mdd-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>

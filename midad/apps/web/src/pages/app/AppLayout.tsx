@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import { useSidebarCollapsed } from '../../lib/sidebar'
@@ -6,7 +6,7 @@ import { daysLabel } from '../../lib/format'
 import { Avatar, Button } from '../../ui/kit'
 import {
   IcHome, IcLibrary, IcFiles, IcTable, IcTeam, IcUser, IcSettings, IcCard, IcInvoice,
-  IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcShield, IcCollapse,
+  IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcShield, IcCollapse, IcBell,
 } from '../../ui/icons'
 
 const NAV = [
@@ -25,6 +25,54 @@ const NAV_BILLING = [
   { to: '/app/subscription', label: 'الاشتراك', icon: IcCard },
   { to: '/app/invoices', label: 'الفواتير', icon: IcInvoice },
 ]
+
+/**
+ * الإشعارات.
+ *
+ * ولا مصدرَ لها بعد — فلا يُعرَض عددٌ كاذبٌ ولا نقطةٌ حمراء تَعِد بما ليس
+ * موجودًا. تُفتح فتقول إنّها فارغة، وهذا أصدق من زرٍّ لا يستجيب: الزرّ
+ * الصامت يُظنّ عطبًا، والقائمة الفارغة تُفهم.
+ *
+ * وحين يُوصَل مصدرها فالموضع والسلوك جاهزان: قائمةٌ تُملأ، ونقطةٌ تظهر
+ * متى كان فيها ما لم يُقرأ.
+ */
+function Bell() {
+  const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const away = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false)
+    }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', away)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('mousedown', away)
+      document.removeEventListener('keydown', esc)
+    }
+  }, [open])
+
+  return (
+    <div className="mdd-bell-wrap" ref={box}>
+      <button className="mdd-btn mdd-btn--secondary mdd-btn--icon" title="الإشعارات"
+        aria-label="الإشعارات" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <IcBell size={17} />
+      </button>
+      {open && (
+        <div className="mdd-bell-pop" role="dialog" aria-label="الإشعارات">
+          <div className="mdd-bell-head">الإشعارات</div>
+          <div className="mdd-bell-empty">
+            <IcBell size={22} />
+            <span>لا إشعاراتٍ بعد</span>
+            <em>سيصلك هنا ما يخصّ اشتراكك وقوالبك.</em>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function AppLayout() {
   const { profile, subscriber, access, trialDays, theme, setTheme, signOut, isAdmin, roles } = useApp()
@@ -85,6 +133,13 @@ export default function AppLayout() {
               <div style={{ fontSize: 12.5, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.full_name}</div>
               <div style={{ fontSize: 11, color: 'var(--mdd-text-3)' }}>{roleName}</div>
             </div>
+            {/* الخروج عند الاسم لا في الشريط العلويّ: فعلٌ يخصّ الحساب،
+                فموضعه حيث الحساب. وفي الشريط كان بجوار تبديل الوضع —
+                جارَ الزينةَ فعلٌ لا رجعة فيه. */}
+            <button className="mdd-sidebar__out" onClick={async () => { await signOut(); nav('/') }}
+              title="تسجيل الخروج" aria-label="تسجيل الخروج">
+              <IcLogout size={16} />
+            </button>
           </div>
         </div>
       </aside>
@@ -101,10 +156,7 @@ export default function AppLayout() {
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? <IcSun size={17} /> : <IcMoon size={17} />}
           </button>
-          <button className="mdd-btn mdd-btn--secondary mdd-btn--icon" title="خروج" aria-label="خروج"
-            onClick={async () => { await signOut(); nav('/') }}>
-            <IcLogout size={17} />
-          </button>
+          <Bell />
         </header>
 
         {access === 'trial' && (
