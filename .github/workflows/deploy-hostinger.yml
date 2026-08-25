@@ -71,7 +71,7 @@ jobs:
       # فإن عاد إلى الصفر عاد مانعًا.
       - name: الفحوص السلوكيّة — تمنع النشر
         working-directory: midad/apps/web
-        run: npm test roundtrip editor
+        run: npm test roundtrip editor folders
 
       - name: وفاء التصميم — يُبلّغ ولا يمنع
         working-directory: midad/apps/web

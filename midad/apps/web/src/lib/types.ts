@@ -40,10 +40,19 @@ export interface PageSetupRow {
   margins: { top: number; right: number; bottom: number; left: number }
 }
 
+/** لأيّ نوع اشتراكٍ يظهر المجلّد */
+export type FolderAudience = 'school' | 'teacher'
+
 export interface TemplateFolder {
   id: string; slug: string; name: string; blurb: string | null
   accent: string; icon: string; sort: number; is_active: boolean
   created_at: string; updated_at: string
+  /** المدرسة أو المعلّم — والسياسة تحرسه، لا الواجهة وحدها */
+  audience: FolderAudience
+  /** لمالك الحساب ومديره وحدهم — لا لمعلّمي المدرسة */
+  owner_only: boolean
+  /** يظهر ووسمُه «قريبًا»، فيعرف المشترك أنّه آتٍ */
+  coming_soon: boolean
   /** يأتي من المنظر template_folder_counts، لا من الجدول */
   template_count?: number
 }

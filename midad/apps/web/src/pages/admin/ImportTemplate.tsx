@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useApp } from '../../lib/store'
 import { importPdf, type ImportResult } from '../../lib/importPdf'
 import { importDesignHtml, type DesignImport } from '../../lib/importDesign'
-import type { TemplateFolder } from '../../lib/types'
+import type { TemplateFolder, FolderAudience } from '../../lib/types'
 import { Alert, Button, Field, Input, Modal, Select } from '../../ui/kit'
 import { IcPage, IcCheck, IcAlert, IcSpinner } from '../../ui/icons'
 
@@ -30,6 +30,47 @@ function slugify(name: string): string {
   return out.join('').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 56) || 'template'
 }
 
+/**
+ * لمن هذا القالب، وفي أيّ مجلّد.
+ *
+ * سؤالان لا واحد: المجلّدات صارت تخصّ نوع حساب — «ملفّات المدرسة»
+ * و«قوالب الشهادات» للمدرسة، و«ملفّاتي» للمعلّم. فقائمةٌ واحدة تخلطها
+ * تجعل الرافع يختار مجلّدًا لجمهورٍ لم يقصده، ولا شيء يمنعه.
+ *
+ * والثاني يتبع الأوّل: تبديل الجمهور يُبدّل المجلّد، وإلّا حُفظ القالب
+ * حيث لا يراه أحد — وذاك عطبٌ صامت: يُحفظ ويُنشر ولا يظهر.
+ */
+function Where({ audience, onAudience, folder, onFolder, folders }: {
+  audience: FolderAudience
+  onAudience: (a: FolderAudience) => void
+  folder: string
+  onFolder: (id: string) => void
+  folders: TemplateFolder[]
+}) {
+  const list = folders.filter((f) => f.audience === audience)
+  return (
+    <>
+      <Field label="لمن هذا القالب؟">
+        <Select value={audience} onChange={(e) => onAudience(e.target.value as FolderAudience)}>
+          <option value="school">المدرسة — يراه المدير ومعلّموه</option>
+          <option value="teacher">المعلّم — لمشترك المعلّم المستقلّ</option>
+        </Select>
+      </Field>
+
+      <Field label="في أيّ مجلّد؟">
+        <Select value={folder} onChange={(e) => onFolder(e.target.value)}>
+          <option value="">بلا مجلّد</option>
+          {list.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.name}{f.coming_soon ? ' — قريبًا' : ''}
+            </option>
+          ))}
+        </Select>
+      </Field>
+    </>
+  )
+}
+
 export default function ImportTemplate({ folders, onClose, onDone }: {
   folders: TemplateFolder[]
   onClose: () => void
@@ -41,7 +82,18 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
   const [res, setRes] = useState<ImportResult | null>(null)
   const [design, setDesign] = useState<DesignImport | null>(null)
   const [title, setTitle] = useState('')
-  const [folder, setFolder] = useState(folders[0]?.id ?? '')
+  /* الجمهور أوّلًا، والمجلّد تابعٌ له. والمدرسة هي الافتراض: أكثر ما
+     يُرفع قوالبُ مدرسة، وباقتُها هي الأكبر. */
+  const [audience, setAudience] = useState<FolderAudience>('school')
+  const inAudience = folders.filter((f) => f.audience === audience)
+  const [folder, setFolder] = useState(inAudience[0]?.id ?? '')
+
+  /* تبديل الجمهور يُبدّل المجلّد معه: لو بقي مجلّدُ مدرسةٍ مختارًا بعد
+     اختيار «المعلّم» لحُفظ القالب حيث لا يراه أحد. */
+  const pickAudience = (a: FolderAudience) => {
+    setAudience(a)
+    setFolder(folders.find((f) => f.audience === a)?.id ?? '')
+  }
   const [reading, setReading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -162,12 +214,8 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
                 placeholder="مثال: تحليل نتيجة اختبار نافس" />
             </Field>
 
-            <Field label="المجلّد">
-              <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
-                <option value="">بلا مجلّد</option>
-                {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-              </Select>
-            </Field>
+            <Where audience={audience} onAudience={pickAudience}
+              folder={folder} onFolder={setFolder} folders={folders} />
 
             <div className="mdd-imp-prev">
               <span className="mdd-imp-lab">معاينة التصميم كما سيراه المعلّم</span>
@@ -201,12 +249,8 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
                 placeholder="مثال: تحليل نتيجة اختبار نافس" />
             </Field>
 
-            <Field label="المجلّد">
-              <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
-                <option value="">بلا مجلّد</option>
-                {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-              </Select>
-            </Field>
+            <Where audience={audience} onAudience={pickAudience}
+              folder={folder} onFolder={setFolder} folders={folders} />
 
             <div className="mdd-imp-prev">
               <span className="mdd-imp-lab">معاينة المتن المستخرَج</span>

@@ -1072,7 +1072,13 @@ button, input, select, textarea { font-family: inherit; }
   font-size: 14px; font-weight: 700; color: var(--mdd-text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.mdd-folder-meta { font-size: 11.5px; color: var(--mdd-text-3); }
+.mdd-folder-meta { font-size: 11.5px; color: var(--mdd-text-3); display: flex; align-items: center; gap: 7px; }
+/* وسمٌ في السطر الثاني لا بجوار الاسم: الاسم قد يطول فيُقصّ الوسم معه —
+   وقد قُصّ في المعاينة فظهر «قر…». والسطر الثاني فارغٌ دائمًا. */
+.mdd-folder-soon {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--mdd-r-pill);
+  background: var(--mdd-sunken); color: var(--mdd-text-3); flex: none;
+}
 .mdd-folder-go { color: var(--mdd-text-3); flex: none; transition: color var(--mdd-dur) var(--mdd-ease); }
 .mdd-folder:hover .mdd-folder-go { color: var(--fc); }
 

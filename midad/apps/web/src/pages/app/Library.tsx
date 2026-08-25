@@ -109,7 +109,13 @@ function FolderCard({ f, onOpen }: { f: TemplateFolder; onOpen: () => void }) {
       <span className="mdd-folder-ic"><IcFolderFill size={26} /></span>
       <span className="mdd-folder-txt">
         <span className="mdd-folder-name">{f.name}</span>
-        <span className="mdd-folder-meta">{counted(n, TPL)}</span>
+        <span className="mdd-folder-meta">
+          {counted(n, TPL)}
+          {/* «قريبًا» لا يُشتقّ من خلوّ المجلّد: مجلّدٌ فرغ لأنّ قوالبه
+              حُذفت ليس آتيًا، ومجلّدٌ لم يبدأ بعد آتٍ. فالفرق نيّةٌ
+              تُعلَن في الجدول لا حالةٌ تُخمَّن من العدّ. */}
+          {f.coming_soon && <span className="mdd-folder-soon">قريبًا</span>}
+        </span>
       </span>
       <span className="mdd-folder-go"><IcChevron size={15} /></span>
     </button>
