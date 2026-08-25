@@ -52,6 +52,16 @@ const PROBE = `(page) => {
   walk(page); return out
 }`
 
+
+/* بنية الصفحة: ارتفاع كلّ جدولٍ وصفوفه.
+   يُطلب حين تسقط صفحة. فموضع النصّ يقول «انزاح ٤٨px» ولا يقول أين
+   نشأت الـ٤٨ — والجدول الذي علا صفٌّ فيه هو الجواب. */
+const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => ({
+  i, h: Math.round(t.getBoundingClientRect().height),
+  w: Math.round(t.getBoundingClientRect().width),
+  rows: [...t.rows].map((r) => Math.round(r.getBoundingClientRect().height)).join(','),
+}))`
+
 const T = tally('وفاء التصميم')
 const browser = await launch()
 
@@ -125,6 +135,21 @@ try {
         console.log(`      «${e.tx}» ${kind} — أعلى ${e.dt >= 0 ? '+' : ''}${e.dt.toFixed(1)} · يمين ${e.dr >= 0 ? '+' : ''}${e.dr.toFixed(1)}`)
       }
       if (off.length > 6) console.log(`      … و${off.length - 6} غيرها`)
+
+      const so = await origin.evaluate(({ p, n }) => {
+        const s = document.querySelectorAll('section.page, section[data-screen-label]')[n]
+        return eval('(' + p + ')')(s)
+      }, { p: SHAPE, n })
+      const si = await editor.evaluate(({ p, n }) => {
+        const s = document.querySelectorAll('.mdd-doc-body [data-page]')[n]
+        return eval('(' + p + ')')(s)
+      }, { p: SHAPE, n })
+      for (let k = 0; k < Math.min(so.length, si.length); k++) {
+        if (so[k].h === si[k].h && so[k].w === si[k].w) continue
+        console.log(`      ▸ جدول#${k}: ارتفاع ${so[k].h}→${si[k].h} · عرض ${so[k].w}→${si[k].w}`)
+        if (so[k].rows !== si[k].rows) console.log(`        صفوف ${so[k].rows}  →  ${si[k].rows}`)
+      }
+      if (so.length !== si.length) console.log(`      ▸ عدد الجداول ${so.length} → ${si.length}`)
     }
   }
 
