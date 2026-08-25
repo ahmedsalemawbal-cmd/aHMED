@@ -33,15 +33,34 @@ async function alive() {
 let server = null
 if (!(await alive())) {
   console.log(`— يُقام الخادم على ${PORT} —`)
+
+  /* `--host 127.0.0.1` صراحةً: vite يربط `localhost` افتراضًا، وهو يُحلّ
+     إلى ::1 قبل 127.0.0.1 في بيئاتٍ كثيرة — فيقوم الخادم ولا نجده،
+     ونظنّه لم يقم. */
   server = spawn(path.join(APP, 'node_modules/.bin/vite'),
-    ['--port', String(PORT), '--strictPort'],
-    { cwd: APP, stdio: 'ignore', detached: false })
-  for (let i = 0; i < 40; i++) {
+    ['--port', String(PORT), '--strictPort', '--host', '127.0.0.1'],
+    { cwd: APP, stdio: ['ignore', 'pipe', 'pipe'] })
+
+  /* ويُلتقط ما يقوله. وكان يُبتلع، فإذا سقط في السير لم نجد إلّا «تعذّر
+     إقامة الخادم» — وهي جملةٌ تُخبر أنّ شيئًا وقع ولا تقول ما هو. */
+  let log = ''
+  const grab = (d) => { log += d.toString() }
+  server.stdout.on('data', grab)
+  server.stderr.on('data', grab)
+  server.on('error', (e) => { log += `\nتعذّر تشغيل vite: ${e.message}` })
+
+  const DEADLINE = 60_000
+  const t0 = Date.now()
+  while (Date.now() - t0 < DEADLINE) {
     await new Promise((r) => setTimeout(r, 500))
+    if (server.exitCode !== null) break
     if (await alive()) break
   }
+
   if (!(await alive())) {
-    console.error('تعذّر إقامة الخادم')
+    console.error(`\n✗ تعذّر إقامة الخادم على ${ORIGIN} خلال ${DEADLINE / 1000}ث`)
+    if (server.exitCode !== null) console.error(`  خرج vite بالرمز ${server.exitCode}`)
+    console.error(log.trim() ? `\n— ما قاله vite —\n${log.trim()}` : '  ولم يقل شيئًا.')
     server.kill()
     process.exit(2)
   }
