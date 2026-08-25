@@ -330,18 +330,28 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
     while (body.firstChild) holder.appendChild(body.firstChild)
   }
 
-  /* الخطّ يُقرأ قبل التنقية — فهي تحذف `<style>` الذي يحمله */
+  /* الخطّ يُقرأ قبل التنقية — فهي تحذف `<style>` الذي يحمله. ويُحقن في
+     صندوق الصفحة وحده لا في كلّ عنصر: الصندوق عقدةٌ في المخطّط تنجو من
+     التحرير، والخطّ يُورَّث لما فيها. وكنّا نحقنه في ٣٣٤ موضعًا قبل أن
+     يوجد الصندوق — فانتفخ المتن بلا فائدة. */
   const font = designFont(doc)
   clean(holder, droppedSet)
   if (font) {
-    /* على كلّ فقرةٍ وخليّةٍ لا على الجذر وحده: المحرّر يُعيد بناء المستند
-       من مخطّطه، والجذر ليس عقدةً فيه — فنمطُه يضيع عند أوّل تحرير. */
-    holder.querySelectorAll('p, td, th, h1, h2, h3, div, span, li').forEach((el) => {
-      const st = el.getAttribute('style') || ''
+    holder.querySelectorAll(':scope > [data-page]').forEach((box) => {
+      const st = box.getAttribute('style') || ''
       if (!/font-family/i.test(st)) {
-        el.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? ';' : ''}font-family:'${font}',sans-serif`)
+        box.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? ';' : ''}font-family:'${font}',sans-serif`)
       }
     })
+    // متنٌ بلا صناديق (ملفٌّ غير مُصفَّح): الخطّ على الجذر لا يصلح، فعلى أبنائه
+    if (!holder.querySelector(':scope > [data-page]')) {
+      holder.querySelectorAll(':scope > *').forEach((el) => {
+        const st = el.getAttribute('style') || ''
+        if (!/font-family/i.test(st)) {
+          el.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? ';' : ''}font-family:'${font}',sans-serif`)
+        }
+      })
+    }
   }
   divsToParagraphs(holder)
   const emptied = dropEmptyTables(holder)
