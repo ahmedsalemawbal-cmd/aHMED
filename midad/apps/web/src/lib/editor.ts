@@ -13,7 +13,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import {
   StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader,
-  StyledParagraph, PageBreak, PageBox,
+  StyledParagraph, PageBreak, PageBox, StyledBlock,
 } from './editorStyled'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Highlight } from '@tiptap/extension-highlight'
@@ -103,6 +103,7 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
     StyledTableCell.configure({ HTMLAttributes: { class: 'mdd-doc-td' } }),
     PageBreak,
     PageBox,
+    StyledBlock,
     /* الصور: شعار المدرسة أوّلًا، وما يُدرجه المعلّم بعده.
        `inline: false` فالصورة كتلةٌ تقف بنفسها لا حرفٌ في سطر — وهو
        ما يُتوقَّع في وثيقةٍ مدرسيّة. و`allowBase64` لأنّ المستورَد من

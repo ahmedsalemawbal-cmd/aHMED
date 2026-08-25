@@ -239,7 +239,11 @@ function divsToParagraphs(root: Element): void {
   while (guard++ < 60) {
     /* الصندوق يُستثنى كالفاصل: كلاهما عقدةٌ في مخطّط المحرّر لا حاويةُ
        تخطيطٍ عابرة، وتحويلُه فقرةً يُسقط حشوَ صفحته. */
-    const divs = Array.from(root.querySelectorAll('div:not([data-page-break]):not([data-page])'))
+    /* ما يحمل نمطًا يُترك: هو غلافُ تخطيطٍ لا فقرةٌ متنكّرة. وسحقه يُضيّع
+       حشوَه وهوامشه — وهي كلّ ما يبني به التصميم مساحاته.
+       ولا يُسحق إلّا العاري: `<div>` بلا نمطٍ ليس إلّا فقرةً بلا اسم. */
+    const divs = Array.from(root.querySelectorAll(
+      'div:not([data-page-break]):not([data-page]):not([style])'))
     if (!divs.length) break
     let changed = false
     for (const d of divs) {

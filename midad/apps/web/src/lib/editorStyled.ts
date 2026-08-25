@@ -84,6 +84,38 @@ export const StyledParagraph = Paragraph.extend({
  * يُعيد بناء المستند من مخطّطه فيُسقط ما ليس عقدةً فيه. فالحشو يضيع عند
  * أوّل تحرير — وهذا أسوأ من ألّا يُحفظ أصلًا، إذ يبدو صحيحًا ثمّ ينهار.
  */
+/**
+ * كتلةٌ منسَّقة — غلافُ تخطيطٍ يحمل حشوَه وهوامشه.
+ *
+ * تصاميم كلود ديزاين تبني تخطيطها بأغلفة `<div>` متداخلة: غلافٌ بحشو
+ * `48px 52px`، وداخله مباعِدٌ بهامش `118px`، وداخله النصّ. ولا شيء من
+ * ذلك في سمة العنصر النصّيّ نفسه.
+ *
+ * وكان المستورد يسحق هذه الأغلفة فقراتٍ — لأنّ مخطّط المحرّر لم يكن فيه
+ * ما يقبل `<div>`، وما لا يقبله المخطّط يُسقَط بنصّه. فالسحق كان يُنقذ
+ * النصّ ويُضيّع التخطيط: الغلاف يذهب ومعه ٥٢px من الحشو و١١٨px من
+ * الهامش، فيلتصق المتن بحافّة الورقة ويعلو عن موضعه.
+ *
+ * فصارت الكتلة عقدةً في المخطّط: تُقبل، وتحفظ نمطها، وتنجو من التحرير.
+ * وأولويّة تحليلها دنيا كي يفوز عليها `div[data-page]` و`[data-page-break]`
+ * — فهما أخصّ منها وقد يُطابقان `div` أيضًا.
+ */
+export const StyledBlock = Node.create({
+  name: 'styledBlock',
+  group: 'block',
+  content: 'block+',
+  defining: true,
+  addAttributes() {
+    return { ...styleAttr }
+  },
+  parseHTML() {
+    return [{ tag: 'div', priority: 10 }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes), 0]
+  },
+})
+
 export const PageBox = Node.create({
   name: 'pageBox',
   group: 'block',
