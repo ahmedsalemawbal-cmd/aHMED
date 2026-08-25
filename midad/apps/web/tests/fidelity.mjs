@@ -69,6 +69,23 @@ const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => {
       .map((c) => +c.getBoundingClientRect().width.toFixed(1)).join('|')),
     texts: rows.map((r) => [...r.cells]
       .map((c) => (c.textContent || '').trim().slice(0, 12)).join('|')),
+    /* تفصيل الخليّة: العرض المتاح، وعرضُ نصّها لو لم يلتفّ، وما يؤثّر
+       فيهما. فالعمود قد يتساوى والنصّ يحتاج أكثر — أو العكس. */
+    detail: rows.map((r) => [...r.cells].map((c) => {
+      const cs = getComputedStyle(c)
+      const rg = document.createRange(); rg.selectNodeContents(c)
+      const inner = c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+      return [
+        'داخل=' + inner.toFixed(1),
+        'نصّ=' + rg.getBoundingClientRect().width.toFixed(1),
+        'حشو=' + cs.padding.replace(/px/g, ''),
+        'خطّ=' + cs.fontSize + '/' + cs.fontWeight,
+        'وجه=' + cs.fontFamily.split(',')[0].replace(/["']/g, ''),
+        'تباعد=' + cs.letterSpacing + '/' + cs.wordSpacing,
+        'أرقام=' + cs.fontVariantNumeric,
+        'حروف=' + (c.textContent || '').trim().length,
+      ].join(' ')
+    })),
   }
 })`
 
@@ -164,6 +181,11 @@ try {
             if (ro[z] === ri[z]) continue
             console.log(`        صفّ${z} «${so[k].texts[z]}»`)
             console.log(`          أعمدة ${so[k].cells[z]}  →  ${si[k].cells[z]}`)
+            for (let c = 0; c < Math.min(so[k].detail[z].length, si[k].detail[z].length); c++) {
+              if (so[k].detail[z][c] === si[k].detail[z][c]) continue
+              console.log(`          خليّة${c} أصل: ${so[k].detail[z][c]}`)
+              console.log(`          خليّة${c} نحن: ${si[k].detail[z][c]}`)
+            }
           }
         }
       }
