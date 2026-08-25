@@ -28,8 +28,6 @@ const { getKey, verifyKey, sendTable, readTables } = self.Midad
 const HOST_ID = 'midad-host'
 const COLLAPSE_KEY = 'midad_panel_open'
 
-if (!document.getElementById(HOST_ID)) boot()
-
 async function boot() {
   const host = document.createElement('div')
   host.id = HOST_ID
@@ -39,7 +37,7 @@ async function boot() {
   const root = host.attachShadow({ mode: 'open' })
 
   const style = document.createElement('style')
-  style.textContent = CSS
+  style.textContent = PANEL_CSS
   root.appendChild(style)
 
   const wrap = document.createElement('div')
@@ -258,15 +256,22 @@ function row(t, h) {
 /* ═════════════════ التنسيق ═════════════════
    داخل الجذر المظلّل، فلا يتسرّب إلى نور ولا يتسرّب منها إلينا. */
 
-const CSS = `
+const PANEL_CSS = `
 :host, * { box-sizing: border-box; }
 
+/* الحافّة اليسرى، وبخصائص ماديّة لا منطقيّة.
+   وسببان: أنّ نور يضع قائمته الرأسيّة على اليمين — فلوحةٌ هناك تحجب
+   ملاحته؛ وأنّ خلط المنطقيّ بالماديّ في سياقٍ عربيّ فخٌّ وقعتُ فيه من
+   قبل: inset-inline-end يعني اليسار، وtransform-origin: right يعني
+   اليمين، فلا يتّفقان.
+   والحاوية ltr كي يقع المقبض يسارًا والبطاقة يمينه؛ والعربيّة تعود
+   داخل البطاقة نفسها. */
 .wrap {
-  position: fixed; inset-inline-start: 0; inset-block-start: 50%;
+  position: fixed; left: 0; top: 50%;
   transform: translateY(-50%);
   display: flex; align-items: stretch; gap: 0;
+  direction: ltr;
   font-family: "Segoe UI", "Noto Naskh Arabic", Tahoma, system-ui, sans-serif;
-  direction: rtl;
 }
 
 /* ── المقبض: كلّ ما يراه المعلّم حتّى يطلب أكثر ── */
@@ -275,7 +280,7 @@ const CSS = `
   display: flex; align-items: center; gap: 7px;
   padding: 10px 9px; border: 0; cursor: pointer;
   background: #1f7a4d; color: #fff;
-  border-start-end-radius: 12px; border-end-end-radius: 12px;
+  border-radius: 0 12px 12px 0;   /* مستديرةٌ من جهة الصفحة، حادّةٌ عند الحافّة */
   box-shadow: 0 6px 22px -6px rgba(16,12,45,.45);
   font: inherit; font-size: 12px; font-weight: 700;
   writing-mode: vertical-rl;
@@ -284,20 +289,21 @@ const CSS = `
 .tab:hover { background: #17603c; padding-inline: 11px; }
 .tab-mark { font-size: 13px; }
 .tab-lbl { letter-spacing: 1px; }
-.wrap.is-open .tab { writing-mode: horizontal-tb; padding: 9px; border-radius: 0 12px 12px 0; }
+.wrap.is-open .tab { writing-mode: horizontal-tb; padding: 9px; }
 
 /* ── اللوحة ── */
 .card {
   inline-size: 340px; max-block-size: min(74vh, 620px);
   display: flex; flex-direction: column;
+  direction: rtl;   /* العربيّة تعود هنا */
   background: #fff; color: #14131f;
   border: 1px solid #e4e2ee;
-  border-start-end-radius: 16px; border-end-end-radius: 16px;
+  border-radius: 0 16px 16px 0;
   box-shadow: 0 24px 60px -18px rgba(16,12,45,.42), 0 2px 8px rgba(16,12,45,.10);
   overflow: hidden;
   animation: in .18s ease-out;
 }
-@keyframes in { from { opacity: 0; transform: translateX(14px); } }
+@keyframes in { from { opacity: 0; transform: translateX(-14px); } }
 
 .hd {
   display: flex; align-items: center; gap: 10px;
@@ -333,7 +339,7 @@ const CSS = `
   font: inherit; color: inherit; text-align: start;
   transition: border-color .14s, transform .14s, background .14s;
 }
-.rw:hover:not(:disabled) { border-color: #1f7a4d; transform: translateX(-2px); }
+.rw:hover:not(:disabled) { border-color: #1f7a4d; transform: translateX(2px); }
 .rw:disabled { cursor: default; }
 .rw.is-ok { border-color: #1f7a4d; background: #f2f9f5; }
 .rw.is-bad { border-color: #b3261e; }
@@ -377,3 +383,9 @@ const CSS = `
   .sk { background: linear-gradient(90deg, #2c2a3a 25%, #23222e 50%, #2c2a3a 75%); background-size: 300% 100%; }
 }
 `
+
+/* النداء في آخر الملفّ لا أوّله. و`boot` دالّةٌ مرفوعة فتُرى من الأعلى،
+   لكنّ `PANEL_CSS` ثابتٌ لا يُرفع — فندعوها من الأعلى يقع في منطقته
+   الميّتة: «Cannot access before initialization»، فلا تُركَّب اللوحة
+   ولا يبين سبب. */
+if (!document.getElementById(HOST_ID)) boot()
