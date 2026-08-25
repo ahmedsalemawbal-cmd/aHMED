@@ -23,6 +23,12 @@ export function splitPages(html: string): string[] {
   const holder = document.createElement('div')
   holder.innerHTML = src
 
+  /* صناديق الصفحات، إن وُجدت، هي الصفحات — فلا حاجة إلى تتبّع الفواصل.
+     وهي أدقّ: الصندوق يحمل حشو صفحته، والفاصل علامةٌ بينها. */
+  const boxes = Array.from(holder.children).filter(
+    (el) => el.nodeType === 1 && (el as Element).hasAttribute('data-page'))
+  if (boxes.length) return boxes.map((b) => (b as HTMLElement).outerHTML)
+
   const groups: Node[][] = [[]]
   for (const node of Array.from(holder.childNodes)) {
     const el = node as Element

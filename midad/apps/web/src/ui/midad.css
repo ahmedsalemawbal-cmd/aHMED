@@ -1446,3 +1446,23 @@ button, input, select, textarea { font-family: inherit; }
 }
 /* داخل خليّة: تملأ عرضها ولا تكسر الجدول */
 .mdd-doc-body :is(td, th) img { margin-inline: 0; }
+
+/* ═══════════════ صندوق الصفحة ═══════════════ */
+
+/* يحمل حشوَ صفحته في نمطه السطريّ — فلا نفرض عليه شيئًا هنا إلّا ما
+   يمنع تراكم الهوامش: أوّلُ ما فيه لا يُزيح نفسه عن حدّه، وآخرُه كذلك،
+   وإلّا انهار الحشو المصمَّم تحت هامشٍ لم يطلبه أحد. */
+/* الصندوق يملأ ارتفاع الورقة: صفحةٌ صُمّمت لتُطبع على ورقةٍ كاملة تبدو
+   مضغوطةً إن انكمشت على قدر متنها، ويضيع ما بين نهاية النصّ وذيل الورقة
+   من فراغٍ مقصود. */
+.mdd-doc-body [data-page] {
+  display: block;
+  min-block-size: var(--mdd-page-h, 297mm);
+  box-sizing: border-box;
+}
+/* عند الطباعة تتكفّل الفواصل بالقطع، فلا نُلزم ارتفاعًا يُنتج ورقةً فارغة */
+@media print { .mdd-doc-body [data-page] { min-block-size: 0; } }
+.mdd-doc-body [data-page] > :first-child { margin-block-start: 0; }
+.mdd-doc-body [data-page] > :last-child { margin-block-end: 0; }
+/* الصناديق متتالية: لا فراغَ بينها فوق ما يضعه الفاصل */
+.mdd-doc-body [data-page] + [data-page] { margin-block-start: 0; }

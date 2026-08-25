@@ -13,7 +13,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import {
   StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader,
-  StyledParagraph, PageBreak,
+  StyledParagraph, PageBreak, PageBox,
 } from './editorStyled'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Highlight } from '@tiptap/extension-highlight'
@@ -102,6 +102,7 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
     StyledTableHeader.configure({ HTMLAttributes: { class: 'mdd-doc-th' } }),
     StyledTableCell.configure({ HTMLAttributes: { class: 'mdd-doc-td' } }),
     PageBreak,
+    PageBox,
     /* الصور: شعار المدرسة أوّلًا، وما يُدرجه المعلّم بعده.
        `inline: false` فالصورة كتلةٌ تقف بنفسها لا حرفٌ في سطر — وهو
        ما يُتوقَّع في وثيقةٍ مدرسيّة. و`allowBase64` لأنّ المستورَد من
@@ -172,6 +173,9 @@ export function pageStyle(p: PageSetup): React.CSSProperties {
        ولا يُكتبان في الـCSS رقمًا ثابتًا — الهوامش تُضبط لكلّ مستند. */
     ['--mdd-pad-s' as any]: `${p.margins.right}mm`,
     ['--mdd-pad-e' as any]: `${p.margins.left}mm`,
+    /* ارتفاع الورقة: يقرأه صندوقُ الصفحة ليملأها كاملةً، فيبدو المستند
+       صفحاتِ ورقٍ لا متنًا متّصلًا مضغوطًا. */
+    ['--mdd-page-h' as any]: portrait ? '297mm' : '210mm',
   }
 }
 

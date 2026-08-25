@@ -78,7 +78,8 @@ const KILL = 'script,style,link,meta,noscript,iframe,object,embed,form,input,but
  * صفحاتٍ يخرج صفحةً واحدة.
  */
 const KEEP_ATTRS = new Set([
-  'style', 'colspan', 'rowspan', 'dir', 'align', 'width', 'height', 'data-page-break',
+  'style', 'colspan', 'rowspan', 'dir', 'align', 'width', 'height',
+  'data-page-break', 'data-page',
   /* `src` و`alt` للصور. وبدونهما تبقى الصورة عنصرًا فارغًا بلا مصدر —
      يُستورد التصميم فيخرج شعار المدرسة مربّعًا أبيض، ولا شيء يُنبّه.
      والمصادر الخطرة تُصفّى في safeSrc أدناه لا هنا. */
@@ -236,7 +237,9 @@ function divsToParagraphs(root: Element): void {
   const BLOCK = 'div,table,ul,ol,section,h1,h2,h3,h4,h5,h6,blockquote,hr,p'
   let guard = 0
   while (guard++ < 60) {
-    const divs = Array.from(root.querySelectorAll('div:not([data-page-break])'))
+    /* الصندوق يُستثنى كالفاصل: كلاهما عقدةٌ في مخطّط المحرّر لا حاويةُ
+       تخطيطٍ عابرة، وتحويلُه فقرةً يُسقط حشوَ صفحته. */
+    const divs = Array.from(root.querySelectorAll('div:not([data-page-break]):not([data-page])'))
     if (!divs.length) break
     let changed = false
     for (const d of divs) {
@@ -293,7 +296,11 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
      وقع هذا فعلًا في أوّل تشغيل. */
   const sections = Array.from(body.querySelectorAll('section.page, section[data-screen-label]'))
   const pages = sections.length || 1
-  const margins = marginsFrom(sections)
+  /* الحشو صار في صندوق كلّ صفحة، فلا يُرفع إلى الورقة مرّةً ثانية —
+     وإلّا حُسب مرّتين. والورقة بلا هامشٍ من عندنا. */
+  const margins = sections.length
+    ? { top: 0, right: 0, bottom: 0, left: 0 }
+    : marginsFrom(sections)
 
   const holder = doc.createElement('div')
   if (sections.length) {
@@ -303,7 +310,17 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
         br.setAttribute('data-page-break', 'true')
         holder.appendChild(br)
       }
-      while (sec.firstChild) holder.appendChild(sec.firstChild)
+      /* كلّ صفحةٍ في صندوقها بحشوها هي.
+         ولمَ لا نرفع حشوًا واحدًا إلى مستوى الورقة كما كنّا؟ لأنّ الصفحات
+         تختلف: الغلاف بلا حشوٍ إطلاقًا، وصفحات المتن 34px 44px 30px. فرفعُ
+         الأكثر تكرارًا يُلبس الغلافَ حشوًا لم يُصمَّم به. والصندوق يحمل مع
+         الحشو خطَّ الصفحة ولونها واتّجاهها — فينجو التصميم كما وُضع. */
+      const box = doc.createElement('div')
+      box.setAttribute('data-page', 'true')
+      const st = sanitizeStyle(sec.getAttribute('style'))
+      if (st) box.setAttribute('style', st)
+      while (sec.firstChild) box.appendChild(sec.firstChild)
+      holder.appendChild(box)
     })
   } else {
     while (body.firstChild) holder.appendChild(body.firstChild)

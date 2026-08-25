@@ -71,6 +71,38 @@ export const StyledParagraph = Paragraph.extend({
  * فارغة بين الأقسام: تُرى في المحرّر خطًّا متقطّعًا، وتُترجَم عند الطباعة
  * إلى `break-after: page` فتُطبع كلّ صفحةٍ على ورقتها.
  */
+/**
+ * صندوق الصفحة — يحمل حشوَ صفحته وخطَّها ولونها.
+ *
+ * ولمَ عقدةٌ في المخطّط لا مجرّد `<div>`؟ لأنّ كلّ صفحةٍ في تصاميم كلود
+ * ديزاين تُعلن حشوها بنفسها، ويختلف بين صفحةٍ وأخرى: الغلاف بلا حشوٍ
+ * إطلاقًا، وصفحات المتن `34px 44px 30px`. فلو رفعنا حشوًا واحدًا إلى
+ * مستوى الورقة — وهو ما كنّا نفعل — لألبسنا الغلافَ حشوًا لم يُصمَّم به،
+ * فيتزحزح تصميمه ويبدو «متخلبطًا» وكلُّ عنصرٍ في موضعه.
+ *
+ * ولا يكفي `<div>` عاديّ: `divsToParagraphs` يحوّله فقرةً، وProseMirror
+ * يُعيد بناء المستند من مخطّطه فيُسقط ما ليس عقدةً فيه. فالحشو يضيع عند
+ * أوّل تحرير — وهذا أسوأ من ألّا يُحفظ أصلًا، إذ يبدو صحيحًا ثمّ ينهار.
+ */
+export const PageBox = Node.create({
+  name: 'pageBox',
+  group: 'block',
+  content: 'block+',
+  defining: true,
+  addAttributes() {
+    return { ...styleAttr }
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-page]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, {
+      'data-page': 'true',
+      class: 'mdd-pagebox',
+    }), 0]
+  },
+})
+
 export const PageBreak = Node.create({
   name: 'pageBreak',
   group: 'block',
