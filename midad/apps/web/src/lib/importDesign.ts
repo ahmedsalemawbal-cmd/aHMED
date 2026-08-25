@@ -190,6 +190,35 @@ function marginsFrom(sections: Element[]): { top: number; right: number; bottom:
   return { top: mm(t), right: mm(r), bottom: mm(b), left: mm(l) }
 }
 
+/**
+ * خطّ التصميم — يُقرأ من `<style>` قبل أن تحذفه التنقية.
+ *
+ * كلود ديزاين يُضمّن الخطّ في الملفّ بـ`@font-face` ويُعلنه في قاعدةٍ
+ * عامّة، لا في سمة `style` على كلّ عنصر. والتنقية تحذف `<style>` كلّه —
+ * وهو صواب، فقد يحمل ما لا نريد. لكنّها كانت تحذف معه هويّة الخطّ، فيقع
+ * المستند على خطّ مِداد الافتراضيّ (نسخيّ) بينما صُمّم على خطٍّ هندسيّ.
+ * فيبدو المستند «مختلطًا» وإن كان كلّ حرفٍ في موضعه.
+ *
+ * ولا نُضمّن الخطّ نفسه: وجوهه الخمسة نحو ١٧٥ كيلوبايت مُرمَّزة، وحفظها
+ * في متن كلّ قالبٍ يُثقل قاعدة البيانات. بل نأخذ اسمه، فإن كان ممّا
+ * تُحمّله المنصّة أصلًا (القاهرة) عُرض كما صُمّم.
+ */
+const FONTS_WE_HAVE = ['cairo', 'ibm plex mono']
+
+function designFont(doc: Document): string | null {
+  const decl: string[] = []
+  doc.querySelectorAll('style').forEach((st) => {
+    const t = st.textContent || ''
+    // ما يُعلَن على body أو * أو حاوية الصفحة
+    for (const m of t.matchAll(/font-family\s*:\s*([^;}]+)/gi)) decl.push(m[1])
+  })
+  for (const d of decl) {
+    const first = d.split(',')[0].trim().replace(/^["']|["']$/g, '')
+    if (FONTS_WE_HAVE.includes(first.toLowerCase())) return first
+  }
+  return null
+}
+
 /* ═══════════════ الصفحات ═══════════════ */
 
 
@@ -280,7 +309,19 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
     while (body.firstChild) holder.appendChild(body.firstChild)
   }
 
+  /* الخطّ يُقرأ قبل التنقية — فهي تحذف `<style>` الذي يحمله */
+  const font = designFont(doc)
   clean(holder, droppedSet)
+  if (font) {
+    /* على كلّ فقرةٍ وخليّةٍ لا على الجذر وحده: المحرّر يُعيد بناء المستند
+       من مخطّطه، والجذر ليس عقدةً فيه — فنمطُه يضيع عند أوّل تحرير. */
+    holder.querySelectorAll('p, td, th, h1, h2, h3, div, span, li').forEach((el) => {
+      const st = el.getAttribute('style') || ''
+      if (!/font-family/i.test(st)) {
+        el.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? ';' : ''}font-family:'${font}',sans-serif`)
+      }
+    })
+  }
   divsToParagraphs(holder)
   const emptied = dropEmptyTables(holder)
 
