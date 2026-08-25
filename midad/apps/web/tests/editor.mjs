@@ -78,6 +78,15 @@ try {
     const head = fs.readFileSync(out).subarray(0, 5).toString()
     T('نُزّل الملفّ', true, `${dl.suggestedFilename()} · ${Math.round(size / 1024)} ك.ب`)
     T('  ملفّ PDF صالح', head === '%PDF-', head)
+
+    /* عدد الورقات = عدد صفحات التصميم، لا ضعفَها.
+       فبكسلٌ واحدٌ من ٢٢٤٦ كان يُنتج ورقةً بيضاء بعد كلِّ ورقة: ارتفاع
+       الشريحة يُبتَر إلى ٢٢٤٥ والصورة ٢٢٤٦، فيصير الفائض صفحة. والعطب
+       لا يظهر في المحرّر ولا في المعاينة — لا يراه إلّا من فتح الملفّ
+       المنزَّل. فيُعدّ هنا. */
+    const pdf = fs.readFileSync(out, 'latin1')
+    const leaves = (pdf.match(/\/Type\s*\/Page[^s]/g) || []).length
+    T('  ورقاتُه ست لا اثنتا عشرة', leaves === 6, `${leaves} ورقة`)
     fs.rmSync(out, { force: true })
   } else {
     T('نُزّل الملفّ', false, 'لم يقع تنزيل')

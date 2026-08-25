@@ -114,10 +114,22 @@ export async function downloadPdf(
       const img = canvas.toDataURL('image/jpeg', 0.92)
 
       /* الصفحة قد تطول عن ورقةٍ واحدة (المحتوى بعد التحرير يزيد). فنقصّها
-         على ارتفاع الورقة بدل أن نضغطها فتصغر الحروف. */
+         على ارتفاع الورقة بدل أن نضغطها فتصغر الحروف.
+
+         وبكسلٌ واحدٌ كان يُنتج ورقةً بيضاء بعد كلِّ ورقة:
+             ارتفاع الشريحة = floor(297 × 7.5619) = floor(2245.89) = 2245
+             ارتفاع الصورة  = 1123 × 2                            = 2246
+             ceil(2246 / 2245) = 2
+         فيخرج الملفّ بضعف صفحاته، وثانيةُ كلِّ زوجٍ بيضاء إلّا شريطًا لا
+         يُرى. والصفحة مصمّمةٌ على ارتفاع الورقة تمامًا، فالفائض حسابٌ لا
+         محتوى.
+
+         فيُقرَّب لا يُبتَر، ويُترك هامشٌ لا تُنشَأ ورقةٌ لما دونه: ما بقي
+         أقلَّ من مليمترٍ فليس صفحةً، وإنّما كسرُ تقريب. */
       const pxPerMm = canvas.width / mmW
-      const sliceH = Math.floor(mmH * pxPerMm)
-      const slices = Math.max(1, Math.ceil(canvas.height / sliceH))
+      const sliceH = Math.round(mmH * pxPerMm)
+      const crumb = Math.max(2, Math.round(pxPerMm))     // مليمترٌ واحد
+      const slices = Math.max(1, Math.ceil((canvas.height - crumb) / sliceH))
 
       for (let s = 0; s < slices; s++) {
         if (i > 0 || s > 0) doc.addPage()
