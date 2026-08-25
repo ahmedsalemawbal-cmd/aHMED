@@ -74,9 +74,14 @@ export interface DocumentRow {
   /** مهجور — كان قيم الحقول */
   data?: Record<string, any>
 }
+/** بوّابة الوزارة التي سُحب منها الجدول. */
+export type TableSource = 'noor' | 'madrasati'
+
 export interface NoorTable {
   id: string; subscriber_id: string; owner_id: string; title: string
   columns: string[]; rows: string[][]; row_count: number; source_url: string | null; created_at: string
+  /** القديم كلّه من نور — لم تكن مدرستي مدعومةً حين حُفظ. */
+  source?: TableSource
 }
 export interface LinkKey {
   id: string; subscriber_id: string; user_id: string; key: string

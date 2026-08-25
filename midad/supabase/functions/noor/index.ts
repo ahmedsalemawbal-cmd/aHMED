@@ -46,10 +46,15 @@ Deno.serve(handle(async (req) => {
     const rows = rowsRaw.map((r) =>
       Array.isArray(r) ? r.map((c: any) => String(c ?? '').slice(0, 500)) : [])
 
+    /* المصدر يأتي من الإضافة، ولا يُوثَق به كما جاء: أيّ قيمةٍ غير
+       المعروفتين تُردّ إلى نور. والقيد في قاعدة البيانات يحرس الحدّ
+       الأخير، لكنّ ردّه هنا أرحم من رفض الإدراج كلّه. */
+    const source = b.source === 'madrasati' ? 'madrasati' : 'noor'
+
     const { data: table, error } = await db.from('noor_tables').insert({
       subscriber_id: lk.subscriber_id,
       owner_id: lk.user_id,
-      title, columns, rows,
+      title, columns, rows, source,
       row_count: rows.length,
       source_url: b.source_url ? String(b.source_url).slice(0, 500) : null,
     }).select('id, title, row_count').single()
@@ -57,7 +62,7 @@ Deno.serve(handle(async (req) => {
 
     await db.from('noor_ingest_log').insert({
       subscriber_id: lk.subscriber_id, user_id: lk.user_id,
-      table_id: table.id, title, row_count: rows.length,
+      table_id: table.id, title, row_count: rows.length, source,
     })
     await audit(db, {
       subscriber_id: lk.subscriber_id, actor_id: lk.user_id,

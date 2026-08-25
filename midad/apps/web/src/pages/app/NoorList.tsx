@@ -8,12 +8,25 @@ import type { LinkKey, NoorTable, Profile } from '../../lib/types'
 import { fmtNum, fmtRelative, fmtShort } from '../../lib/format'
 import { buildXlsx, download, safeFileName } from '../../lib/export'
 import {
-  Alert, Button, Card, ConfirmModal, CopyButton, ErrorState, IconButton,
+  Alert, Badge, Button, Card, ConfirmModal, CopyButton, ErrorState, IconButton,
   PageHead, SearchInput, Select, SkeletonRows,
 } from '../../ui/kit'
 import { IcDownload, IcTable, IcTrash } from '../../ui/icons'
 
 type SortKey = 'recent' | 'name' | 'rows'
+type SrcKey = 'all' | 'noor' | 'madrasati'
+
+/** أسماء البوّابات وألوانها — في موضعٍ واحد فلا تختلف بين شاشةٍ وأخرى. */
+export const SOURCES: Record<'noor' | 'madrasati', { name: string; tone: 'accent' | 'info' }> = {
+  noor: { name: 'نور', tone: 'accent' },
+  madrasati: { name: 'مدرستي', tone: 'info' },
+}
+
+/** وسمُ البوّابة. والقديم بلا مصدرٍ محفوظ من نور — فذاك ما كان يُدعم. */
+export function SourceTag({ source }: { source?: string }) {
+  const s = SOURCES[(source === 'madrasati' ? 'madrasati' : 'noor')]
+  return <Badge tone={s.tone}>{s.name}</Badge>
+}
 
 /** ملفّ الإضافة يُنزَّل من المنصّة نفسها. */
 export const EXTENSION_FILE = '/downloads/midad-noor.zip'
@@ -32,6 +45,7 @@ export default function NoorList() {
 
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<SortKey>('recent')
+  const [src, setSrc] = useState<SrcKey>('all')
   const [deleting, setDeleting] = useState<NoorTable | null>(null)
   const [busy, setBusy] = useState(false)
   const [making, setMaking] = useState(false)
@@ -64,12 +78,14 @@ export default function NoorList() {
   const filtered = useMemo(() => {
     const term = dq.trim()
     let list = term ? tables.filter((t) => t.title.includes(term)) : tables
+    // القديم بلا مصدرٍ محفوظ يُحسب من نور — فذاك ما كان يُدعم يوم حُفظ
+    if (src !== 'all') list = list.filter((t) => (t.source || 'noor') === src)
     list = [...list].sort((a, b) =>
       sort === 'name' ? a.title.localeCompare(b.title, 'ar')
         : sort === 'rows' ? (b.row_count || 0) - (a.row_count || 0)
           : new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     return list
-  }, [tables, dq, sort])
+  }, [tables, dq, sort, src])
 
   function exportXlsx(t: NoorTable) {
     const blob = buildXlsx(t.title, t.columns || [], (t.rows || []) as string[][])
@@ -106,7 +122,7 @@ export default function NoorList() {
   return (
     <>
       <PageHead
-        title="جداول نور"
+        title="جداول نور ومدرستي"
         sub={loading ? 'جارٍ التحميل…' : `${fmtNum(tables.length)} جدولًا · ${fmtNum(tables.reduce((a, t) => a + (t.row_count || 0), 0))} صفًّا`}
         actions={<Button auto variant="secondary" onClick={() => nav('/app/noor/key')}>كيف أنزّل جدولًا؟</Button>}
       />
@@ -129,6 +145,11 @@ export default function NoorList() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <SearchInput value={q} onChange={setQ} placeholder="ابحث باسم الجدول" />
           </div>
+          <Select value={src} onChange={(e) => setSrc(e.target.value as SrcKey)} aria-label="البوّابة">
+            <option value="all">البوّابتان</option>
+            <option value="noor">نور</option>
+            <option value="madrasati">مدرستي</option>
+          </Select>
           <Select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} aria-label="الترتيب">
             <option value="recent">الأحدث تنزيلًا</option>
             <option value="name">حسب الاسم</option>
@@ -157,6 +178,7 @@ export default function NoorList() {
             <thead>
               <tr>
                 <th>الجدول</th>
+                <th>البوّابة</th>
                 <th>الصفوف</th>
                 <th>الأعمدة</th>
                 <th>تاريخ التنزيل</th>
@@ -172,6 +194,7 @@ export default function NoorList() {
                       <IcTable size={16} />{t.title}
                     </Link>
                   </td>
+                  <td data-label="البوّابة"><SourceTag source={t.source} /></td>
                   <td data-label="الصفوف"><span className="mdd-num">{fmtNum(t.row_count || 0)}</span></td>
                   <td data-label="الأعمدة"><span className="mdd-num">{fmtNum((t.columns || []).length)}</span></td>
                   <td data-label="تاريخ التنزيل"><span title={fmtShort(t.created_at)}>{fmtRelative(t.created_at)}</span></td>

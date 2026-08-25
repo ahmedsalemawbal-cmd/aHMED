@@ -24,6 +24,12 @@ export default function Dashboard() {
   const isSolo = subscriber?.account_type === 'teacher'
   const docs = data?.docs || []
   const noor = data?.noor || []
+  /* البوّابتان تُعرضان منفصلتين: المعلّم يعرف من أين جاء الجدول، والفرق
+     بينهما ليس تفصيلًا — لكلٍّ كشوفُها ودورتُها. والقديم بلا مصدرٍ
+     محفوظ من نور، فذاك ما كان يُدعم يوم حُفظ. */
+  const fromNoor = noor.filter((t) => (t.source || 'noor') === 'noor')
+  const fromMadrasati = noor.filter((t) => t.source === 'madrasati')
+  const rowsOf = (list: typeof noor) => list.reduce((a, t) => a + (t.row_count || 0), 0)
   const team = data?.team || []
 
   const suggestions = useMemo(() => {
@@ -53,11 +59,14 @@ export default function Dashboard() {
 
       <div className="mdd-grid mdd-grid--4" style={{ marginBlockEnd: 'var(--mdd-s-5)' }}>
         {loading ? (
-          Array.from({ length: isSolo ? 3 : 4 }).map((_, i) => <Card key={i}><Skeleton h={62} /></Card>)
+          Array.from({ length: isSolo ? 4 : 5 }).map((_, i) => <Card key={i}><Skeleton h={62} /></Card>)
         ) : (
           <>
             <Stat label="ملفّاتي" value={fmtNum(docs.length)} hint={docs.length ? `${docs.filter((d) => d.status === 'complete').length} مكتمل` : 'لم تبدأ بعد'} />
-            <Stat label="جداول نور" value={fmtNum(noor.length)} hint={noor.length ? `${fmtNum(noor.reduce((a, t) => a + (t.row_count || 0), 0))} صفًّا` : 'لم تُنزّل جدولًا'} />
+            <Stat label="جداول نور" value={fmtNum(fromNoor.length)}
+              hint={fromNoor.length ? `${fmtNum(rowsOf(fromNoor))} صفًّا` : 'لم تُنزّل جدولًا'} />
+            <Stat label="جداول مدرستي" value={fmtNum(fromMadrasati.length)}
+              hint={fromMadrasati.length ? `${fmtNum(rowsOf(fromMadrasati))} صفًّا` : 'لم تُنزّل جدولًا'} />
             {!isSolo && <Stat label="أعضاء الفريق" value={`${team.filter((t) => t.status === 'active').length} / ${plan?.seats ?? '—'}`} hint="مقعدًا مستعملًا" />}
             <Stat
               label={access === 'trial' ? 'أيّام التجربة' : 'حالة الاشتراك'}
