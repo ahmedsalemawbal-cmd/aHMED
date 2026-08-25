@@ -56,11 +56,21 @@ const PROBE = `(page) => {
 /* بنية الصفحة: ارتفاع كلّ جدولٍ وصفوفه.
    يُطلب حين تسقط صفحة. فموضع النصّ يقول «انزاح ٤٨px» ولا يقول أين
    نشأت الـ٤٨ — والجدول الذي علا صفٌّ فيه هو الجواب. */
-const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => ({
-  i, h: Math.round(t.getBoundingClientRect().height),
-  w: Math.round(t.getBoundingClientRect().width),
-  rows: [...t.rows].map((r) => Math.round(r.getBoundingClientRect().height)).join(','),
-}))`
+const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => {
+  const rows = [...t.rows]
+  const heights = rows.map((r) => Math.round(r.getBoundingClientRect().height))
+  /* الصفّ الذي علا هو موضع الالتفاف، فتُعرض أعرض خلاياه — لأنّ الجدول
+     قد يتساوى عرضًا كلّيًّا وتختلف قسمتُه على الأعمدة. */
+  return {
+    i, h: Math.round(t.getBoundingClientRect().height),
+    w: +t.getBoundingClientRect().width.toFixed(1),
+    rows: heights.join(','),
+    cells: rows.map((r) => [...r.cells]
+      .map((c) => +c.getBoundingClientRect().width.toFixed(1)).join('|')),
+    texts: rows.map((r) => [...r.cells]
+      .map((c) => (c.textContent || '').trim().slice(0, 12)).join('|')),
+  }
+})`
 
 const T = tally('وفاء التصميم')
 const browser = await launch()
@@ -147,7 +157,15 @@ try {
       for (let k = 0; k < Math.min(so.length, si.length); k++) {
         if (so[k].h === si[k].h && so[k].w === si[k].w) continue
         console.log(`      ▸ جدول#${k}: ارتفاع ${so[k].h}→${si[k].h} · عرض ${so[k].w}→${si[k].w}`)
-        if (so[k].rows !== si[k].rows) console.log(`        صفوف ${so[k].rows}  →  ${si[k].rows}`)
+        if (so[k].rows !== si[k].rows) {
+          console.log(`        صفوف ${so[k].rows}  →  ${si[k].rows}`)
+          const ro = so[k].rows.split(','), ri = si[k].rows.split(',')
+          for (let z = 0; z < Math.min(ro.length, ri.length); z++) {
+            if (ro[z] === ri[z]) continue
+            console.log(`        صفّ${z} «${so[k].texts[z]}»`)
+            console.log(`          أعمدة ${so[k].cells[z]}  →  ${si[k].cells[z]}`)
+          }
+        }
       }
       if (so.length !== si.length) console.log(`      ▸ عدد الجداول ${so.length} → ${si.length}`)
     }
