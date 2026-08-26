@@ -35,17 +35,49 @@ function scriptBlock(doc: Document, type: string): string | null {
   return el ? (el.textContent || '').trim() : null
 }
 
+/**
+ * أصول الحزمة: صورٌ تُخزَّن بمعرّفاتها في `__bundler/manifest`.
+ *
+ *     <img src="d95cea72-9ef0-…">
+ *     "d95cea72-9ef0-…": { "mime": "image/png", "data": "iVBORw0KG…" }
+ *
+ * وكلود ديزاين يحلّها وقت التشغيل بشيفرةٍ في الملفّ — وشيفرتُه تُحذف في
+ * التنقية (ولا تُشغَّل في قالبٍ يفتحه آلاف المعلّمين). فلولا هذا لبقي
+ * `src` معرّفًا لا يدلّ على شيء، فيردّه `safeSrc` ويختفي الشعار.
+ *
+ * وقد اختفى فعلًا: رفع المالك عرضًا فيه شعاران، فخرجا فارغين وظهر في
+ * التنبيهات «src غير مأمون» — وهو صادقٌ ومُضلّل معًا: المصدر ليس خطرًا،
+ * بل غير مفهوم.
+ */
+function bundleAssets(doc: Document): Map<string, string> {
+  const out = new Map<string, string>()
+  const raw = scriptBlock(doc, 'manifest')
+  if (!raw) return out
+  try {
+    const man = JSON.parse(raw) as Record<string, { mime?: string; data?: string; compressed?: boolean }>
+    for (const [id, a] of Object.entries(man)) {
+      /* المضغوطة تُترك: فكُّها يقتضي DecompressionStream وانتظارًا، والمستورد
+         متزامن. ولم نرَ مضغوطةً بعد — فإن ظهرت فالصورة تُسقط ويُنبَّه. */
+      if (!a?.data || !a.mime || a.compressed) continue
+      if (!/^image\/(png|jpe?g|gif|webp)$/i.test(a.mime)) continue
+      out.set(id, `data:${a.mime};base64,${a.data}`)
+    }
+  } catch { /* بيانٌ لا يُقرأ: نمضي بلا صور */ }
+  return out
+}
+
 /** يُخرج قالب HTML الحقيقيّ من الحزمة، أو يعيد الملفّ كما هو إن لم يكن محزومًا */
-function unwrap(raw: string): { html: string; bundled: boolean } {
+function unwrap(raw: string): { html: string; bundled: boolean; assets: Map<string, string> } {
   const doc = new DOMParser().parseFromString(raw, 'text/html')
+  const assets = bundleAssets(doc)
   const tpl = scriptBlock(doc, 'template')
   if (tpl) {
     try {
       const inner = JSON.parse(tpl)
-      if (typeof inner === 'string' && inner.length > 40) return { html: inner, bundled: true }
+      if (typeof inner === 'string' && inner.length > 40) return { html: inner, bundled: true, assets }
     } catch { /* ليست حزمةً بهذا الشكل */ }
   }
-  return { html: raw, bundled: false }
+  return { html: raw, bundled: false, assets }
 }
 
 /* ═══════════════ إعادة الوسوم إلى القياس ═══════════════ */
@@ -101,7 +133,7 @@ function safeSrc(v: string | null): string | null {
   return null
 }
 
-function clean(root: Element, dropped: Set<string>): void {
+function clean(root: Element, dropped: Set<string>, assets: Map<string, string>): void {
   root.querySelectorAll(KILL).forEach((el) => {
     dropped.add(el.tagName.toLowerCase())
     el.remove()
@@ -130,9 +162,13 @@ function clean(root: Element, dropped: Set<string>): void {
       }
       if (!KEEP_ATTRS.has(name)) { el.removeAttribute(a.name); continue }
       if (name === 'src') {
-        const ok = safeSrc(a.value)
+        /* معرّفُ أصلٍ يُحلّ من خزانة الحزمة قبل الحكم عليه: هو ليس رابطًا
+           خطرًا بل مفتاحًا في بيانٍ مرافق. وردُّه بلا حلٍّ يُضيّع الشعار
+           ويقول «غير مأمون» — وهو صادقٌ ومُضلّلٌ معًا. */
+        const resolved = assets.get(a.value.trim()) ?? a.value
+        const ok = safeSrc(resolved)
         if (ok) el.setAttribute('src', ok)
-        else { el.removeAttribute('src'); dropped.add('src غير مأمون') }
+        else { el.removeAttribute('src'); dropped.add('صورةٌ لم يُعرَف مصدرها') }
       }
     }
   }
@@ -348,7 +384,7 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
   const warnings: string[] = []
   const droppedSet = new Set<string>()
 
-  const { html: inner, bundled } = unwrap(raw)
+  const { html: inner, bundled, assets } = unwrap(raw)
   if (bundled) warnings.push('الملفّ كان محزومًا — فُكَّ واستُخرج منه المتن.')
 
   const doc = new DOMParser().parseFromString(inner, 'text/html')
@@ -397,7 +433,7 @@ export function importDesignHtml(raw: string, fileName = ''): DesignImport {
      التحرير، والخطّ يُورَّث لما فيها. وكنّا نحقنه في ٣٣٤ موضعًا قبل أن
      يوجد الصندوق — فانتفخ المتن بلا فائدة. */
   const font = designFont(doc)
-  clean(holder, droppedSet)
+  clean(holder, droppedSet, assets)
   if (font) {
     holder.querySelectorAll(':scope > [data-page]').forEach((box) => {
       const st = box.getAttribute('style') || ''

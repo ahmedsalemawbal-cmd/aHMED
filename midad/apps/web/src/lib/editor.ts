@@ -10,9 +10,9 @@
  * node_modules، لا من ذاكرةٍ عن الإصدار الثاني — فالثالث غيّر أشياء.
  */
 import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
+
 import {
-  StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader,
+  StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, StyledImage,
   StyledParagraph, PageBreak, PageBox, StyledBlock,
 } from './editorStyled'
 import { TextAlign } from '@tiptap/extension-text-align'
@@ -115,7 +115,7 @@ export function extensions(placeholder = 'ابدأ الكتابة…') {
        `inline: false` فالصورة كتلةٌ تقف بنفسها لا حرفٌ في سطر — وهو
        ما يُتوقَّع في وثيقةٍ مدرسيّة. و`allowBase64` لأنّ المستورَد من
        كلود ديزاين قد يحمل صورةً مضمَّنةً في متنه، فلا نُسقطها. */
-    Image.configure({
+    StyledImage.configure({
       inline: false,
       allowBase64: true,
       HTMLAttributes: { class: 'mdd-doc-img' },

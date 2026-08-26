@@ -27,6 +27,38 @@ const ALLOWED = new Set([
   'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
   'border-color', 'border-width', 'border-style', 'border-radius',
   'border-collapse', 'border-spacing', 'box-sizing',
+  'max-height', 'overflow', 'overflow-x', 'overflow-y',
+
+  /* ── التخطيط ──
+   *
+   * وهذه لم تكن في القائمة، وكان غيابها أخطر ما فيها.
+   *
+   * بُنيت القائمة من قالب نافس: جداولُ وحشوٌ وألوان. فلمّا رفع المالك
+   * عرضًا يبني صفحته بالمرونة —
+   *     display: flex; flex-direction: column;
+   *     height: 1122.5px; overflow: hidden
+   * — شُطبت كلُّها. فصارت الصفحة كتلةً عاديّة، وتراصّت أقسامها بأطوالها
+   * الطبيعيّة بدل أن تتوزّع في الورقة: ٧٩٤×**١٧٧٠** حيث الأصل ٧٩٤×١١٢٣.
+   * والفرق ٦٤٧px هو أقصى انحرافٍ قِيس بالضبط.
+   *
+   * والمنقّي لا يُحذّر ممّا يشطب — يمرّ الملفّ ويُحفظ ويُنشر ويبدو
+   * «مُلخبطًا» بلا سبب. فالقائمة التي تُبنى من ملفٍّ واحدٍ تحرس ذلك
+   * الملفّ وحده.
+   *
+   * والمفردات هنا كلّها **وصفُ تخطيطٍ لا سلوك**: لا تُنفّذ شيئًا ولا
+   * تُحمّل موردًا ولا تخرج من صندوق المستند. */
+  'display',
+  'flex', 'flex-direction', 'flex-wrap', 'flex-grow', 'flex-shrink', 'flex-basis',
+  'justify-content', 'align-items', 'align-self', 'align-content', 'order', 'gap',
+  'row-gap', 'column-gap',
+  'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row',
+  'grid-area', 'place-items', 'place-content',
+  'position', 'inset', 'top', 'right', 'bottom', 'left', 'z-index',
+  'float', 'clear', 'object-fit', 'aspect-ratio',
+  'opacity', 'box-shadow', 'text-transform', 'text-overflow', 'word-break',
+  'overflow-wrap', 'list-style', 'list-style-type', 'transform', 'transform-origin',
+  'text-wrap', 'table-layout', 'font-variant-numeric', 'text-indent',
+  'writing-mode', 'unicode-bidi', 'visibility', 'background-clip', 'text-shadow',
   /* متغيّرٌ واحدٌ مسموح: عرض الجدول الذي أعلنه التصميم.
      وسببه أنّ عارض الجداول يمسح `width` من وسم الجدول بعد الرسم، ولا
      يمسّ المتغيّرات. فيُحمَل فيه ويُقرأ من الورقة. */
@@ -35,6 +67,22 @@ const ALLOWED = new Set([
 
 /** قيمٌ ترفض دائمًا مهما كانت الخاصّيّة */
 const DANGEROUS = /(url\s*\(|expression\s*\(|javascript:|@import|behavior\s*:|-moz-binding)/i
+
+/**
+ * قيودٌ على قيم خاصّيّاتٍ بعينها — لا على وجودها.
+ *
+ * `position` مسموحةٌ لأنّ التصاميم تحتاجها (شريطٌ فوق آخر، رقمُ صفحةٍ
+ * في زاوية). لكنّ `fixed` و`sticky` تخرجان من المستند إلى إطار العرض:
+ * فشريطٌ في قالبٍ يعلو على شريط أدوات المنصّة ولا يزول بالتمرير. وذاك
+ * ليس تصميمًا بل استيلاءٌ على الواجهة.
+ *
+ * والقالب يرفعه المشرف لا الغريب، لكنّ ملفّ التصميم يُولَّد آليًّا وقد
+ * يحمل ما لم يقصده أحد. فالحدّ هنا يحمي من الغلط لا من الخصم.
+ */
+const VALUE_OK = (prop: string, value: string): boolean => {
+  if (prop === 'position') return /^(static|relative|absolute)$/i.test(value.trim())
+  return true
+}
 
 /** الأطوال المقبولة: أرقامٌ بوحداتٍ معروفة، ونسبٌ مئويّة، وكلماتٌ مفتاحيّة */
 const SAFE_VALUE = /^[#a-zA-Z0-9\s.,%()'"\/_-]+$/
@@ -49,6 +97,7 @@ export function sanitizeStyle(raw: string | null | undefined): string {
     const value = decl.slice(i + 1).trim()
     if (!prop || !value) continue
     if (!ALLOWED.has(prop)) continue
+    if (!VALUE_OK(prop, value)) continue
     if (DANGEROUS.test(value)) continue
     if (!SAFE_VALUE.test(value)) continue
     if (value.length > 120) continue          // قيمةٌ بهذا الطول ليست لونًا ولا حشوًا

@@ -12,6 +12,7 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import Paragraph from '@tiptap/extension-paragraph'
+import Image from '@tiptap/extension-image'
 import { sanitizeStyle } from './styleSafe'
 
 /** سمةُ نمطٍ مُنقّاة تُقرأ من DOM وتُكتب إليه */
@@ -43,6 +44,24 @@ export const StyledTableCell = TableCell.extend({
 })
 
 export const StyledTableHeader = TableHeader.extend({
+  addAttributes() {
+    return { ...this.parent?.(), ...styleAttr }
+  },
+})
+
+/**
+ * الصورة تحفظ نمطها أيضًا.
+ *
+ * وامتداد الصورة الافتراضيّ يحفظ `src` و`alt` و`title` لا غير. والتصميم
+ * يكتب مقاسها في سمتها:
+ *     <img style="display:block; width:64px; height:64px">
+ * فتُسقَط، وتُرسم الصورة بحجمها الطبيعيّ. ورفع المالك عرضًا فيه شعاران
+ * صغيران فخرجا يملآن نصف الصفحة — وطالت الورقة من ١١٢٣ إلى ١٤٥٦.
+ *
+ * وهو صنف العطب نفسه الذي أصاب الجداول والفقرات: ما لا يعرفه المخطّط
+ * يُسقَط صامتًا، ولا شيء يُنبّه.
+ */
+export const StyledImage = Image.extend({
   addAttributes() {
     return { ...this.parent?.(), ...styleAttr }
   },

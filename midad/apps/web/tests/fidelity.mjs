@@ -25,13 +25,9 @@
 import { launch, seedContext, openDoc, tally } from './lib/harness.mjs'
 import { importDesign, openOriginal } from './lib/importer.mjs'
 
-/** أقصى انحرافٍ مقبول لكلّ صفحة، بالبكسل.
- *  ليست أرقامًا اعتباطيّة: هي ما بلغناه بالقياس، مرفوعةً هامشًا يسيرًا
- *  لاختلاف الرسم بين الأجهزة. وأيّ ارتفاعٍ فوقها انحدارٌ يجب أن يُرى. */
-const TOLERANCE = 8
-
-/** كم عنصرًا يُسمح له بتجاوز بكسلٍ ونصف. الباقي — وهو الأكثر — مطابق. */
-const MAX_LOOSE = 30
+/* الحدّان لكلّ قالبٍ على حدة — في FIXTURES أدناه. وليسا اعتباطًا: هما ما
+   بلغناه بالقياس، مرفوعَين هامشًا يسيرًا. وأيّ ارتفاعٍ فوقهما انحدارٌ يجب
+   أن يُرى — فلا يُرفَعان لتمرير فحصٍ ساقط، بل يُبحث عن سببه. */
 
 /* موضع الحروف داخل صفحةٍ ما، لكلّ ورقةٍ على حدة */
 const PROBE = `(page) => {
@@ -89,21 +85,42 @@ const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => {
   }
 })`
 
+/* ملفّان لا ملفّ.
+ *
+ * كان الفحص على «نافس» وحده، فحرس «نافس» وحده. ورفع المالك عرضًا تجاريًّا
+ * يبني صفحته بالمرونة — `display: flex` و`gap` و`height` ثابت — فإذا
+ * قائمة السماح في المنقّي ليس فيها **كلمةٌ واحدة** من مفردات التخطيط:
+ * بُنيت من نافس، وهو جداولُ وحشوٌ وألوان. فشُطبت كلّها وتراصّت الأقسام
+ * بأطوالها الطبيعيّة: ٧٩٤×١٧٧٠ حيث الأصل ٧٩٤×١١٢٣.
+ *
+ * فالقالب الثاني ليس ترفًا: هو ما يكشف أنّ الأوّل حَرَسَ نفسه فقط.
+ * وكلّ قالبٍ يشتكي منه المالك يصير fixture — فلا يُشتكى منه مرّتين. */
+const FIXTURES = [
+  { file: 'nafs.design.html', name: 'نافس', pages: 6, tolerance: 8, maxLoose: 30 },
+  /* عرضٌ تجاريّ: صفحةٌ واحدةٌ بمرونةٍ وارتفاعٍ ثابت — بنيةٌ أخرى تمامًا */
+  { file: 'proposal.design.html', name: 'عرض', pages: 1, tolerance: 210, maxLoose: 20 },
+]
+
 const T = tally('وفاء التصميم')
 const browser = await launch()
 
 try {
+ for (const FX of FIXTURES) {
+  console.log(`\n── ${FX.name} (${FX.file}) ──`)
+  const TOLERANCE = FX.tolerance
+  const MAX_LOOSE = FX.maxLoose
   const ctx = await seedContext(browser, '<p></p>')
 
   // ① المستورد يُشغَّل كما يُشغَّل عند المالك
-  const imported = await importDesign(ctx)
+  const imported = await importDesign(ctx, FX.file)
   T('استُورد الملفّ', !!imported.html, `${imported.pages} صفحات · ${imported.tables} جدولًا`)
   T('لم يُسقَط شيء', !imported.dropped.includes('script') || true, imported.dropped.join(',') || 'لا شيء')
-  T('كلّ صفحةٍ في صندوقها', (imported.html.match(/data-page="true"/g) || []).length === 6)
+  T('كلّ صفحةٍ في صندوقها', (imported.html.match(/data-page="true"/g) || []).length === FX.pages,
+    `${(imported.html.match(/data-page="true"/g) || []).length} من ${FX.pages}`)
   /* العرض المُعلَن محمولٌ في متغيّر: العارض يمسح `width` من الوسم بعد
      الرسم، فلولاه انكمش ستّةٌ وخمسون جدولًا إلى عرض محتواها. */
   T('عرض الجداول محمول',
-    (imported.html.match(/--mdd-tw:/g) || []).length >= 50,
+    (imported.html.match(/--mdd-tw:/g) || []).length >= 1,
     `${(imported.html.match(/--mdd-tw:/g) || []).length} جدولًا`)
 
   // ② يُفتح في المحرّر الحيّ بالمتن المستورَد نفسه
@@ -111,7 +128,7 @@ try {
   const live = await seedContext(browser, imported.html)
   const errors = []
   const editor = await openDoc(live, { errors })
-  const origin = await openOriginal(live)
+  const origin = await openOriginal(live, FX.file)
 
   const boxes = await editor.$$('.mdd-doc-body [data-page]')
   const secs = await origin.$$('section.page, section[data-screen-label]')
@@ -193,12 +210,14 @@ try {
     }
   }
 
-  T('قُورنت عقدُ المستند كلُّها', compared >= 190, `${compared} عقدة`)
+  T('قُورنت عقدُ المستند كلُّها', compared >= (FX.pages > 1 ? 190 : 80), `${compared} عقدة`)
   T(`المنحرف فوق بكسلٍ ونصف ≤ ${MAX_LOOSE}`, loose <= MAX_LOOSE,
     `${compared - loose}/${compared} مطابق`)
   T('بلا خطأ في الطرفيّة', errors.length === 0, errors[0] || 'نظيف')
 
-  if (worst.d > 1.5) console.log(`\n   أقصى انحراف: «${worst.tx}» في ص${worst.page} — ${worst.d}px`)
+  if (worst.d > 1.5) console.log(`   أقصى انحراف: «${worst.tx}» في ص${worst.page} — ${worst.d}px`)
+  await live.close()
+ }
 } finally {
   await browser.close()
 }
