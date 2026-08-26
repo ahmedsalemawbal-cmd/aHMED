@@ -1,91 +1,58 @@
 /**
  * تنقية الأنماط السطريّة الآتية من خارج المنصّة.
  *
- * القالب يراه كلّ المعلّمين، فما يدخله من ملفٍّ مرفوع يجب أن يكون محصورًا
- * في ما نفهمه. القاعدة: **قائمةُ سماحٍ لا قائمةَ منع** — فالمنع يُنسى منه
- * شيءٌ دائمًا، والسماح لا يمرّ منه إلّا ما عُدّ.
+ * ══ لماذا قُلبت القاعدة ══
  *
- * ما يُمنع صراحةً وإن بدا بريئًا:
- * - `position` و`z-index` و`transform`: تُخرج العنصر من مجراه فيغطّي
- *   شريط الأدوات أو يخرج عن الورقة.
- * - `url(...)`: بابٌ لتحميل موردٍ خارجيّ من مستندٍ يفتحه آلاف المعلّمين.
- * - `expression(` و`javascript:`: تنفيذ شيفرة في متصفّحاتٍ قديمة.
+ * كانت **قائمة سماح**: لا يمرّ إلّا ما عُدّ. وهي الأسلم نظريًّا، لكنّها
+ * في هذا الموضع كانت خطأً — لأنّها تُبنى ممّا رأيناه لا ممّا يُنتَج.
+ *
+ * بُنيت من قالب «نافس»: جداولُ وحشوٌ وألوان. فلمّا رُفع عرضٌ يبني صفحته
+ * بالمرونة شُطبت مفرداته كلّها — ولا كلمةَ واحدةً منها كانت في القائمة.
+ * فأضفتُ المرونة. ثمّ جاء `text-wrap` فأضفتُه. ثمّ `table-layout`.
+ * وقال المالك — وهو محقّ —: «كلّ ما أضيف ملفًّا لازم أقول لك إنّه ملخبط».
+ *
+ * وذاك ليس عطبًا يُصلَح بإضافةٍ أخرى: هو **شكل الحلّ نفسه**. قائمةٌ
+ * تُبنى بالاستقراء تلاحق ولا تلحق.
+ *
+ * ══ وما الذي يُخشى فعلًا ══
+ *
+ * أنماط ملفّ التصميم **وصفُ تخطيطٍ لا سلوك**: لا تُنفّذ شيفرةً ولا
+ * تفتح اتّصالًا. والضرر منها محصورٌ في ثلاثة أبواب، وكلُّها يُغلق بالقيمة
+ * لا بالاسم:
+ *
+ *   ① مورد خارجيّ — `url(...)`: يُحمّل من مستندٍ يفتحه آلاف المعلّمين،
+ *      فيُفشي أنّهم فتحوه ومتى. يُمنع أيًّا كانت الخاصّيّة.
+ *   ② خروجٌ من المستند — `position: fixed | sticky`: شريطٌ في قالبٍ يعلو
+ *      على شريط أدوات المنصّة ولا يزول بالتمرير. فتُقيَّد القيم لا تُمنع
+ *      الخاصّيّة: التصاميم تحتاج `absolute` و`relative`.
+ *   ③ تنفيذٌ في متصفّحاتٍ قديمة — `expression(` و`javascript:`
+ *      و`-moz-binding` و`behavior:`.
+ *
+ * وما عدا ذلك يمرّ. فالقالب لا يُرفع إلّا من لوحة الإدارة، والخطر ليس
+ * خصمًا يتسلّل بل ملفًّا يحمل ما لم نتوقّعه.
  */
 
-/** الخصائص المسموحة — كلّها مقيسةٌ على ما تُنتجه أدوات التصميم فعلًا */
-const ALLOWED = new Set([
-  // اللون والخلفيّة
-  'color', 'background', 'background-color',
-  // النصّ
-  'font-size', 'font-weight', 'font-style', 'font-family',
-  'line-height', 'letter-spacing', 'text-align', 'text-decoration',
-  'white-space', 'direction', 'vertical-align',
-  // الصندوق
-  'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-  'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-  'width', 'min-width', 'max-width', 'height', 'min-height',
-  'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
-  'border-color', 'border-width', 'border-style', 'border-radius',
-  'border-collapse', 'border-spacing', 'box-sizing',
-  'max-height', 'overflow', 'overflow-x', 'overflow-y',
+/** يُرفض أيًّا كانت الخاصّيّة: مواردُ خارجيّة، وتنفيذٌ، واستيراد */
+const DANGEROUS = /(url\s*\(|expression\s*\(|javascript:|@import|behavior\s*:|-moz-binding|<|>)/i
 
-  /* ── التخطيط ──
-   *
-   * وهذه لم تكن في القائمة، وكان غيابها أخطر ما فيها.
-   *
-   * بُنيت القائمة من قالب نافس: جداولُ وحشوٌ وألوان. فلمّا رفع المالك
-   * عرضًا يبني صفحته بالمرونة —
-   *     display: flex; flex-direction: column;
-   *     height: 1122.5px; overflow: hidden
-   * — شُطبت كلُّها. فصارت الصفحة كتلةً عاديّة، وتراصّت أقسامها بأطوالها
-   * الطبيعيّة بدل أن تتوزّع في الورقة: ٧٩٤×**١٧٧٠** حيث الأصل ٧٩٤×١١٢٣.
-   * والفرق ٦٤٧px هو أقصى انحرافٍ قِيس بالضبط.
-   *
-   * والمنقّي لا يُحذّر ممّا يشطب — يمرّ الملفّ ويُحفظ ويُنشر ويبدو
-   * «مُلخبطًا» بلا سبب. فالقائمة التي تُبنى من ملفٍّ واحدٍ تحرس ذلك
-   * الملفّ وحده.
-   *
-   * والمفردات هنا كلّها **وصفُ تخطيطٍ لا سلوك**: لا تُنفّذ شيئًا ولا
-   * تُحمّل موردًا ولا تخرج من صندوق المستند. */
-  'display',
-  'flex', 'flex-direction', 'flex-wrap', 'flex-grow', 'flex-shrink', 'flex-basis',
-  'justify-content', 'align-items', 'align-self', 'align-content', 'order', 'gap',
-  'row-gap', 'column-gap',
-  'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row',
-  'grid-area', 'place-items', 'place-content',
-  'position', 'inset', 'top', 'right', 'bottom', 'left', 'z-index',
-  'float', 'clear', 'object-fit', 'aspect-ratio',
-  'opacity', 'box-shadow', 'text-transform', 'text-overflow', 'word-break',
-  'overflow-wrap', 'list-style', 'list-style-type', 'transform', 'transform-origin',
-  'text-wrap', 'table-layout', 'font-variant-numeric', 'text-indent',
-  'writing-mode', 'unicode-bidi', 'visibility', 'background-clip', 'text-shadow',
-  /* متغيّرٌ واحدٌ مسموح: عرض الجدول الذي أعلنه التصميم.
-     وسببه أنّ عارض الجداول يمسح `width` من وسم الجدول بعد الرسم، ولا
-     يمسّ المتغيّرات. فيُحمَل فيه ويُقرأ من الورقة. */
-  '--mdd-tw',
+/** أسماءٌ لا معنى لها في نمطٍ سطريّ، ووجودُها ريبة */
+const DENIED = new Set([
+  'behavior', '-moz-binding', 'content', 'src',
 ])
-
-/** قيمٌ ترفض دائمًا مهما كانت الخاصّيّة */
-const DANGEROUS = /(url\s*\(|expression\s*\(|javascript:|@import|behavior\s*:|-moz-binding)/i
 
 /**
  * قيودٌ على قيم خاصّيّاتٍ بعينها — لا على وجودها.
  *
- * `position` مسموحةٌ لأنّ التصاميم تحتاجها (شريطٌ فوق آخر، رقمُ صفحةٍ
- * في زاوية). لكنّ `fixed` و`sticky` تخرجان من المستند إلى إطار العرض:
- * فشريطٌ في قالبٍ يعلو على شريط أدوات المنصّة ولا يزول بالتمرير. وذاك
- * ليس تصميمًا بل استيلاءٌ على الواجهة.
- *
- * والقالب يرفعه المشرف لا الغريب، لكنّ ملفّ التصميم يُولَّد آليًّا وقد
- * يحمل ما لم يقصده أحد. فالحدّ هنا يحمي من الغلط لا من الخصم.
+ * `position` مسموحةٌ لأنّ التصاميم تحتاجها (شريطٌ فوق آخر، رقمُ صفحةٍ في
+ * زاوية). لكنّ `fixed` و`sticky` تخرجان من المستند إلى إطار العرض.
  */
 const VALUE_OK = (prop: string, value: string): boolean => {
   if (prop === 'position') return /^(static|relative|absolute)$/i.test(value.trim())
   return true
 }
 
-/** الأطوال المقبولة: أرقامٌ بوحداتٍ معروفة، ونسبٌ مئويّة، وكلماتٌ مفتاحيّة */
-const SAFE_VALUE = /^[#a-zA-Z0-9\s.,%()'"\/_-]+$/
+/** القيم المقبولة شكلًا: أرقامٌ ووحداتٌ ونسبٌ وألوانٌ وكلماتٌ مفتاحيّة */
+const SAFE_VALUE = /^[#a-zA-Z0-9\s.,%()'"\/_+*-]+$/
 
 export function sanitizeStyle(raw: string | null | undefined): string {
   if (!raw) return ''
@@ -96,11 +63,19 @@ export function sanitizeStyle(raw: string | null | undefined): string {
     const prop = decl.slice(0, i).trim().toLowerCase()
     const value = decl.slice(i + 1).trim()
     if (!prop || !value) continue
-    if (!ALLOWED.has(prop)) continue
+
+    /* اسمٌ لا معنى له في نمطٍ سطريّ، أو خاصّيّةٌ مخصّصة غير التي نحملها */
+    if (DENIED.has(prop)) continue
+    if (prop.startsWith('--') && prop !== '--mdd-tw') continue
+
     if (!VALUE_OK(prop, value)) continue
-    if (DANGEROUS.test(value)) continue
+    if (DANGEROUS.test(prop) || DANGEROUS.test(value)) continue
     if (!SAFE_VALUE.test(value)) continue
-    if (value.length > 120) continue          // قيمةٌ بهذا الطول ليست لونًا ولا حشوًا
+
+    /* قيمةٌ بهذا الطول ليست تخطيطًا — والحدّ يمنع الانتفاخ لا الخطر.
+       ورُفع من ١٢٠ إلى ٢٤٠: `grid-template-columns` و`box-shadow`
+       المتعدّد يتجاوزان ١٢٠ في تصاميم حقيقيّة. */
+    if (value.length > 240) continue
     out.push(`${prop}: ${value}`)
   }
   return out.join('; ')

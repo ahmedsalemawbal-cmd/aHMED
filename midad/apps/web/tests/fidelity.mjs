@@ -98,7 +98,7 @@ const SHAPE = `(page) => [...page.querySelectorAll('table')].map((t, i) => {
 const FIXTURES = [
   { file: 'nafs.design.html', name: 'نافس', pages: 6, tolerance: 8, maxLoose: 30 },
   /* عرضٌ تجاريّ: صفحةٌ واحدةٌ بمرونةٍ وارتفاعٍ ثابت — بنيةٌ أخرى تمامًا */
-  { file: 'proposal.design.html', name: 'عرض', pages: 1, tolerance: 210, maxLoose: 20 },
+  { file: 'proposal.design.html', name: 'عرض', pages: 1, tolerance: 12, maxLoose: 4 },
 ]
 
 const T = tally('وفاء التصميم')
