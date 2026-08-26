@@ -1445,8 +1445,15 @@ button, input, select, textarea { font-family: inherit; }
   max-inline-size: 100%; block-size: auto;
   display: block; margin-inline: auto;
 }
-/* المحدَّدة تُعرَف: إطارٌ بلون النبرة كي يدري المحرّر ما الذي سيحذفه */
-.mdd-doc-body img.ProseMirror-selectednode {
+/* المحدَّدة تُعرَف — **في وضع التحرير وحده**.
+ *
+ * وكانت تُعرَف في كلّ حال، فرأى المالك إطارًا أخضر حول شعار قالبه وسأل:
+ * «ليش أضفت الإطار؟». وسؤاله في محلّه: ما يظهر في مستنده يُقرأ جزءًا من
+ * تصميمه، لا علامةً في أداة. والفرق أنّ الأولى تبقى في الطباعة والمعاينة
+ * والمصغّرة، والثانية تزول بزوال السياق.
+ *
+ * فالقاعدة: **ما كان من الواجهة لا يُرسم إلّا حيث الواجهة**. */
+.mdd-doc-body[contenteditable="true"] img.ProseMirror-selectednode {
   outline: 2px solid var(--mdd-accent); outline-offset: 2px;
   border-radius: 3px;
 }
