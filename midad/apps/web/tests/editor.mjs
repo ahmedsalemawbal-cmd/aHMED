@@ -163,8 +163,10 @@ try {
       }).length,
     }
   })
-  T('مصغّرة البطاقة من المتن', thumb.found,
-    thumb.found ? `${thumb.tables} جدولًا · ${thumb.colored} ملوّنة` : '')
+  /* ولا يكفي `found`: الصندوق كان موجودًا وبيضاء، فمرّ العطب.
+     وقياس الحبر في `tests/thumb.mjs` على عيّنتين. */
+  T('مصغّرة البطاقة من المتن', thumb.found && (thumb.tables || 0) >= 3,
+    thumb.found ? `${thumb.tables} جدولًا · ${thumb.colored} ملوّنة` : 'لا صندوق')
 
   T('بلا خطأ في الطرفيّة', errors.length === 0, errors.slice(0, 2).join(' · ') || 'نظيف')
 } finally {

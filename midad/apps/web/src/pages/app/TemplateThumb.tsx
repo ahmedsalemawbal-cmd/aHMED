@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Template } from '../../lib/types'
+import { splitPages } from '../../lib/pages'
 
 /** عرض ورقة A4 بالبكسل عند ٩٦ نقطةً في البوصة. */
 const SHEET = 794
@@ -70,15 +71,27 @@ function Placeholder({ height }: { height: number }) {
 }
 
 /**
- * أوّل صفحةٍ من المتن — ما قبل أوّل فاصل.
+ * أوّل صفحةٍ من المتن.
  *
- * ونحدّ الطول: مصغّرةٌ لا تحتاج ستّ صفحات، ورسمُ كلّ المتن في شبكةٍ من
- * المصغّرات يُثقل الصفحة بلا فائدة.
+ * ويُشطر بـ`splitPages` — وهو نفسه الذي تستعمله المعاينة وتوليد الـPDF.
+ * فالثلاثة ترى الصفحة نفسها، ولو تفرّقت لاختلفت.
+ *
+ * وكان يُشطر بقصّ النصّ:
+ *     const i = html.indexOf('data-page-break')
+ *     if (out.length > 14000) out = out.slice(0, 14000)
+ *
+ * والقصّ الأعمى يقع في منتصف وسمٍ أو في منتصف صورةٍ مضمَّنة، فيخرج ترميزٌ
+ * مكسورٌ لا يُرسم. ونجا منه قالبٌ أوّلُ صفحةٍ فيه ستّة آلاف حرف؛ وسقط
+ * قالبٌ فيه صورٌ مضمَّنة — فخرجت بطاقته **بيضاء**، والمتن سليمٌ كلّه.
+ *
+ * ولا حدَّ للطول بعدها: الصورة المضمَّنة هي المصغّرة نفسها، وقصّها قصفٌ
+ * لما جئنا نعرضه.
  */
 function firstPage(html: string): string {
   if (!html.trim()) return ''
-  const i = html.indexOf('data-page-break')
-  let out = i > 0 ? html.slice(0, html.lastIndexOf('<', i)) : html
-  if (out.length > 14000) out = out.slice(0, 14000)
-  return out
+  try {
+    return splitPages(html)[0] || ''
+  } catch {
+    return ''
+  }
 }
