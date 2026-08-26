@@ -48,11 +48,17 @@ const writes = []
 
 try {
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 1000 } })
-  await ctx.addInitScript(() => localStorage.setItem('midad.auth', JSON.stringify({
+  /* في الإطار الأعلى وحده: المستورد يُشغّل التصميم في إطارٍ معزولٍ بلا
+     `allow-same-origin`، ولا تخزين فيه — وبلايرايت يحقن في كلّ إطار.
+     فيرمي الحقنُ خطأً يُحسب على المنتج وهو من أداة الفحص. */
+  await ctx.addInitScript(() => {
+    if (window.top !== window) return
+    localStorage.setItem('midad.auth', JSON.stringify({
     access_token: 'x', token_type: 'bearer', expires_in: 7200,
     expires_at: Math.floor(Date.now() / 1000) + 7200, refresh_token: 'y',
-    user: { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'a@b.c', app_metadata: {}, user_metadata: {}, created_at: '2026-08-01T00:00:00Z' },
-  })))
+      user: { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'a@b.c', app_metadata: {}, user_metadata: {}, created_at: '2026-08-01T00:00:00Z' },
+    }))
+  })
   await ctx.route('**/auth/v1/**', (r) =>
     r.fulfill({ status: 200, contentType: 'application/json', body: '{}' }))
 

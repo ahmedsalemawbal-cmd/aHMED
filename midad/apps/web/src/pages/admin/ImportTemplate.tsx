@@ -96,7 +96,7 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
       if (isHtml(f)) {
         /* ملفّ تصميم: يحفظ التصميم كاملًا — جداولَ وألوانًا وصفحات.
            وهذا الطريق هو المفضَّل: لا استنباطَ فيه ولا فقدان. */
-        const r = importDesignHtml(await f.text(), f.name)
+        const r = await importDesignHtml(await f.text(), f.name)
         setDesign(r)
         setTitle(r.title)
       } else {

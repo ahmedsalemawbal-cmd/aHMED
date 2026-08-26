@@ -13,6 +13,7 @@
  * يعمل في متصفّحاتهم. نُسقطها كلّها.
  */
 import { sanitizeStyle } from './styleSafe'
+import { renderDesign } from './renderDesign'
 
 export interface DesignImport {
   title: string
@@ -348,14 +349,32 @@ function dropEmptyTables(root: Element): number {
  * المعلّم. ويُكتب في نمط الخليّة لا في ورقةٍ عامّة، فيرثه الحشو مهما
  * أعاد المحرّر بناءه.
  */
+/**
+ * الفارغُ يبقى فارغًا.
+ *
+ * المحرّر يبني المستند من مخطّطه، فيحشو كلّ عقدةٍ فارغةٍ فقرةً لها سطر.
+ * وخليّةٌ زخرفيّةٌ ارتفاعها بكسلٌ ونصفٌ في التصميم تصير ثلاثين — ويعلو
+ * الصفُّ، وينزل ما تحته في الصفحة كلّها.
+ *
+ * وكان هذا مقصورًا على `td` و`th`، لأنّ أوّل ما كشفه كان جدولًا. ثمّ
+ * جاء ملفٌّ فيه فواصلُ وصناديقُ فارغةٌ خارج الجداول، فتراكم في كلّ بندٍ
+ * ثلاثةٌ وثلاثون بكسلًا — وانزاح آخرُ الصفحة مئةً وأربعين.
+ *
+ *     ما كان علاجًا لموضعٍ بعينه يعود عطبًا في الموضع الذي يليه.
+ *
+ * فصار لكلّ عنصرٍ لا نصَّ فيه ولا صورة: ارتفاع سطره صفر. وما له ارتفاعٌ
+ * مُعلَنٌ يحتفظ به — الصندوق المرسوم للتوقيع يبقى بمقاسه.
+ */
+const VOIDABLE = 'td,th,p,div,span,li,section,article,header,footer,figcaption'
+
 function collapseDecorCells(root: Element): number {
   let n = 0
-  root.querySelectorAll('td, th').forEach((cell) => {
-    if ((cell.textContent || '').trim()) return
-    if (cell.querySelector('img')) return
-    const st = cell.getAttribute('style') || ''
+  root.querySelectorAll(VOIDABLE).forEach((el) => {
+    if ((el.textContent || '').trim()) return
+    if (el.querySelector('img, svg, table, hr, input, canvas')) return
+    const st = el.getAttribute('style') || ''
     if (/line-height/i.test(st)) return
-    cell.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? '; ' : ''}line-height: 0`)
+    el.setAttribute('style', `${st}${st && !st.trim().endsWith(';') ? '; ' : ''}line-height: 0`)
     n++
   })
   return n
@@ -397,11 +416,39 @@ function carryTableWidth(root: Element): number {
   return n
 }
 
-export function importDesignHtml(raw: string, fileName = ''): DesignImport {
-  const warnings: string[] = []
+/**
+ * يستورد ملفّ تصميمٍ **بعد أن يرسم نفسه**.
+ *
+ * وهذا هو الطريق لكلّ الملفّات، لا لبعضها: ملفٌّ متنُه ثابتٌ يُلتقط كما
+ * هو (تشغيلُه لا يغيّره)، وملفٌّ قالبٌ يُلتقط مرسومًا. ولو فرّقنا بينهما
+ * لصار لكلّ ملفٍّ طريقُه — وذاك ما يجعل كلّ إضافةٍ مغامرة.
+ *
+ * والقراءة الثابتة تبقى احتياطًا: إن تعذّر التشغيل — مهلةٌ انقضت أو
+ * سكربتٌ تعثّر — قرأنا المصدر كما كنّا نفعل، وأخبرنا الرافع بذلك.
+ */
+export async function importDesignHtml(raw: string, fileName = ''): Promise<DesignImport> {
+  const live = await renderDesign(raw)
+  if (live.html) return build(live.html, raw, fileName, [])
+  return build(raw, raw, fileName, [
+    `تعذّر تشغيل التصميم لالتقاطه${live.note ? ` (${live.note})` : ''} — قُرئ متنُه المكتوب.`
+    + ' فإن كان قالبًا يرسم نفسه فقد تظهر فيه علامات مثل {{ … }}.',
+  ])
+}
+
+/**
+ * @param source المتن الذي يُقرأ — الملتقَط بعد الرسم، أو المصدر احتياطًا
+ * @param raw    الملفّ الأصليّ — منه تُقرأ الصور المحزومة
+ */
+function build(source: string, raw: string, fileName: string, warn: string[]): DesignImport {
+  const warnings: string[] = [...warn]
   const droppedSet = new Set<string>()
 
-  const { html: inner, bundled, assets } = unwrap(raw)
+  /* الملتقَط بعد الرسم لا يُفكّ: هو المستند نفسه لا حزمته. ولو فُكّ
+     لعُدنا إلى قالبه المكتوب — فالحزمة باقيةٌ في رأسه بعد الرسم. */
+  const rendered = source !== raw
+  const { html: inner, bundled, assets } =
+    rendered ? { html: source, bundled: false, assets: bundleAssets(new DOMParser().parseFromString(raw, 'text/html')) }
+             : unwrap(raw)
   if (bundled) warnings.push('الملفّ كان محزومًا — فُكَّ واستُخرج منه المتن.')
 
   const doc = new DOMParser().parseFromString(inner, 'text/html')
