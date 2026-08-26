@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { inFolder } from '../../lib/template'
 import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
 import { supabase } from '../../lib/supabase'
@@ -106,8 +107,9 @@ export default function TemplateDetail() {
     const similar = all.filter((t) => t.category_key === tpl.category_key && t.id !== tpl.id).slice(0, 4)
     /* المجلّد هو اسم القالب عند المعلّم: «المتابعة والتقييم» لا مفتاحُ
        فئةٍ داخليّ. ونُحمّله هنا لا في مكوّنٍ آخر كي لا تُطلب الشبكة مرّتين. */
-    const folders = tpl.folder_id ? await fetchFolders() : []
-    const folder = folders.find((f) => f.id === tpl.folder_id) || null
+    /* وقالب «الكلّ» بلا مجلّدٍ في الجدول — ومجلّدُه العامّ يُشتقّ. */
+    const folders = (tpl.folder_id || tpl.audience === 'all') ? await fetchFolders() : []
+    const folder = folders.find((f) => inFolder(tpl, f)) || null
     return { tpl, similar, folder }
   }, [slug])
 

@@ -16,6 +16,11 @@
 -- ولا يكتب شيئًا: يقرأ حسابين قائمين — مدرسةً ومعلّمًا — وينتحلهما.
 -- فحصٌ يكتب في قاعدةٍ حيّة يترك أثرًا إن تعثّر، وأثرٌ في auth.users
 -- ليس هيّنًا. فيقرأ ولا يكتب.
+--
+-- ولا يُسمّي قالبًا بعينه. كان يقول «المعلّم لا يرى نافس» — فلمّا نقل
+-- المالك نافس إلى المعلّمين سقط الفحص، والسياسة سليمة. فصار يقارن ما
+-- يراه المنتحَل بما **تقتضيه صلاحيّات القوالب نفسها**: فحصٌ يصفُ قاعدةً
+-- لا حالةً، فلا يشيخ مع البيانات.
 
 \set ON_ERROR_STOP on
 
@@ -39,6 +44,21 @@ begin
   perform set_config('request.jwt.claims', '', true);
   return out;
 end $$;
+
+/** ما ينبغي أن يراه حسابٌ من نوعٍ ما: المنشورُ الذي صلاحيّتُه له أو للكلّ.
+    والمُعامل `who` لا `kind`: لـ`templates` عمودٌ اسمه `kind`، وداخل جسم
+    الدالّة يغلب العمودُ المعاملَ فيُقارَن `text` بـ`template_kind`
+    ويسقط الاستعلام. اسمٌ يظلّله عمودٌ ليس اسمًا. */
+create or replace function pg_temp.due(who text)
+returns text language sql stable as $$
+  select coalesce(string_agg(t.title, ' · ' order by t.title), '—')
+    from public.templates t
+   where t.status = 'published'
+     and t.audience in (who, 'all')
+     and (t.folder_id is null or exists (
+           select 1 from public.template_folders f
+            where f.id = t.folder_id and f.is_active and not f.owner_only));
+$$;
 
 do $$
 declare
@@ -78,9 +98,12 @@ begin
   if t_f like '%المدرسة%' or t_f like '%الشهادات%' then
     raise exception 'المعلّم يرى مجلّدًا ليس له: %', t_f; end if;
 
-  -- ③ والقالب يرثُ جمهور مجلّده — وهذا هو ما فات
-  if t_t like '%نافس%' then
-    raise exception 'المعلّم يرى قالب مدرسة: %', t_t; end if;
+  -- ③ والقالب يُرى بصلاحيّته — لا أكثر ولا أقلّ.
+  --    الزيادة تسرّبٌ، والنقصان قالبٌ اشترى المشترك رؤيته فحُجب عنه.
+  if s_t is distinct from pg_temp.due('school') then
+    raise exception 'المدرسة ترى «%» والمُستحقّ «%»', s_t, pg_temp.due('school'); end if;
+  if t_t is distinct from pg_temp.due('teacher') then
+    raise exception 'المعلّم يرى «%» والمُستحقّ «%»', t_t, pg_temp.due('teacher'); end if;
 
   raise notice '✅ كلٌّ يرى ما له، ولا يرى ما لغيره';
 end $$;

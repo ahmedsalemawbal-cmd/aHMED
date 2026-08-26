@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../../lib/store'
+import { inFolder, isLoose, byOrder } from '../../lib/template'
 import { useAsync, useDebounced } from '../../lib/hooks'
 import { fetchFolders, fetchTemplates } from '../../lib/data'
 import type { Template, TemplateFolder } from '../../lib/types'
@@ -43,7 +44,7 @@ function FoldersHome() {
   }, [templates, dq])
 
   const loose = useMemo(
-    () => (templates || []).filter((t) => !t.folder_id),
+    () => (templates || []).filter(isLoose),
     [templates],
   )
 
@@ -126,6 +127,7 @@ function FolderCard({ f, onOpen }: { f: TemplateFolder; onOpen: () => void }) {
 
 function FolderView({ slug }: { slug: string }) {
   const nav = useNavigate()
+  const { subscriber } = useApp()
   const [q, setQ] = useState('')
   const dq = useDebounced(q)
 
@@ -135,11 +137,13 @@ function FolderView({ slug }: { slug: string }) {
   const folder = useMemo(() => (folders || []).find((f) => f.slug === slug) || null, [folders, slug])
 
   const list = useMemo(() => {
-    let out = (templates || []).filter((t) => t.folder_id && folder && t.folder_id === folder.id)
+    if (!folder) return []
+    let out = (templates || []).filter((t) => inFolder(t, folder))
     const term = dq.trim()
     if (term) out = out.filter((t) => t.title.includes(term) || (t.description || '').includes(term))
-    return out
-  }, [templates, folder, dq])
+    /* الترتيب الذي رتّبه المالك لهذا الجمهور — لا ترتيب الإدراج. */
+    return out.sort(byOrder(subscriber?.account_type))
+  }, [templates, folder, dq, subscriber?.account_type])
 
   if (ef || et) return <ErrorState onRetry={() => { rf(); rt() }} message={ef || et || ''} />
 
@@ -176,7 +180,7 @@ function FolderView({ slug }: { slug: string }) {
         sub={folder?.blurb || (lt ? 'جارٍ التحميل…' : counted(list.length, TPL))}
       />
 
-      {(templates?.filter((t) => folder && t.folder_id === folder.id).length ?? 0) > 8 && (
+      {(templates?.filter((t) => folder && inFolder(t, folder)).length ?? 0) > 8 && (
         <div style={{ marginBlockEnd: 'var(--mdd-s-5)' }}>
           <SearchInput value={q} onChange={setQ} placeholder={`ابحث في ${folder?.name || 'المجلّد'}`} />
         </div>

@@ -18,17 +18,15 @@
  */
 
 import { launch, seedContext, ORIGIN, tally } from './lib/harness.mjs'
-import path from 'node:path'
-import { TESTS } from './lib/harness.mjs'
 
 const F = (o) => ({
-  blurb: null, icon: 'folder', is_active: true, owner_only: false, coming_soon: false,
+  blurb: null, icon: 'folder', is_active: true, owner_only: false, coming_soon: false, is_general: false,
   created_at: '2026-08-01', updated_at: '2026-08-01', ...o,
 })
 const FOLDERS = [
-  F({ id: 'f1', slug: 'school-files', name: 'ملفّات المدرسة', accent: '#4285F4', sort: 10, audience: 'school' }),
+  F({ id: 'f1', slug: 'school-files', name: 'ملفّات المدرسة', accent: '#4285F4', sort: 10, audience: 'school', is_general: true }),
   F({ id: 'f2', slug: 'certificates', name: 'قوالب الشهادات', accent: '#a855f7', sort: 20, audience: 'school', owner_only: true, coming_soon: true }),
-  F({ id: 'f3', slug: 'my-files', name: 'ملفّاتي', accent: '#0F9D58', sort: 30, audience: 'teacher' }),
+  F({ id: 'f3', slug: 'my-files', name: 'ملفّاتي', accent: '#0F9D58', sort: 30, audience: 'teacher', is_general: true }),
 ]
 
 /** يُهيّئ سياقًا يرى مجلّدات نوع حسابه — كما تفعل السياسة في الخادم. */
@@ -83,53 +81,11 @@ try {
     await ctx.close()
   }
 
-  /* ═════ ② الرفع: لمن، ثمّ أين ═════ */
-  const ctx = await withAccount(browser, 'school', { admin: true })
-  const p = await ctx.newPage()
-  p.on('pageerror', (e) => errors.push(e.message))
-  await p.goto(`${ORIGIN}/#/admin/templates`, { waitUntil: 'load' })
-  await p.waitForTimeout(2000)
-
-  const open = await p.$('button:has-text("استورد")')
-  T('زرّ الاستيراد في اللوحة', !!open)
-  if (open) {
-    await open.click()
-    await p.waitForTimeout(600)
-    const input = await p.$('input[type=file]')
-    await input.setInputFiles(path.join(TESTS, 'fixtures/nafs.design.html'))
-    await p.waitForSelector('select', { timeout: 40000 })
-    await p.waitForTimeout(1600)
-
-    const read = () => p.evaluate(() => {
-      const s = [...document.querySelectorAll('select')]
-      const f = s[s.length - 1], a = s[s.length - 2]
-      return {
-        audience: a.value,
-        folder: f.value,
-        folderText: f.options[f.selectedIndex]?.textContent.trim() || '',
-        options: [...f.options].map((o) => o.textContent.trim()),
-      }
-    })
-
-    const school = await read()
-    T('يسأل لمن أوّلًا — والمدرسة الافتراض', school.audience === 'school', school.audience)
-    T('  مجلّدات المدرسة وحدها',
-      JSON.stringify(school.options) === JSON.stringify(['بلا مجلّد', 'ملفّات المدرسة', 'قوالب الشهادات — قريبًا']),
-      school.options.join(' · '))
-
-    /* الحاسم: لو بقي مجلّدُ مدرسةٍ مختارًا بعد اختيار «المعلّم» لحُفظ
-       القالب حيث لا يراه أحد — ويُنشر ولا يشتكي أحد. */
-    const sels = await p.$$('select')
-    await sels[sels.length - 2].selectOption('teacher')
-    await p.waitForTimeout(500)
-    const teacher = await read()
-    T('تبديل الجمهور يُبدّل المجلّد معه',
-      teacher.folder === 'f3' && teacher.folderText === 'ملفّاتي',
-      `${school.folderText} → ${teacher.folderText}`)
-    T('  ولا يبقى مجلّد مدرسةٍ في القائمة',
-      JSON.stringify(teacher.options) === JSON.stringify(['بلا مجلّد', 'ملفّاتي']),
-      teacher.options.join(' · '))
-  }
+  /* ═════ ② الرفع ═════
+   *
+   * انتقل فحصُ حوار الرفع إلى `tests/admin.mjs`: الجمهور صار على الملفّ
+   * لا على المجلّد، فسقط سؤال «في أيّ مجلّد؟» — يُشتقّ من الصلاحيّة.
+   * ويبقى هنا ما يخصّ المجلّدات وحدها. */
 
   /* ═════ ③ الحقل لا يفقد تركيزه ═════
    *

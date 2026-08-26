@@ -1,4 +1,39 @@
-import type { Template, TemplateField, TemplateColumn } from './types'
+import type {
+  Template, TemplateField, TemplateColumn, TemplateFolder, TemplateAudience,
+} from './types'
+
+/**
+ * أينتمي هذا القالب إلى هذا المجلّد؟
+ *
+ * وكان الجواب `t.folder_id === f.id` وحده. ثمّ صار للقالب صلاحيّةُ
+ * «الكلّ» — وهي لا تسع مجلّدًا واحدًا: القالب يُعرَض في المجلّد العامّ عند
+ * المدرسة وعند المعلّم معًا، وهو ملفٌّ واحدٌ لا نسختان. فيُخزَّن بلا
+ * مجلّدٍ ويُشتقّ مجلّدُه عند العرض.
+ *
+ * ويُكتب هنا مرّةً واحدة: تستعمله صفحة المجلّد، وجذرُ المكتبة، وصفحة
+ * القالب. ولو تفرّق لاختلف — يُصلَح في موضعٍ ويبقى العطب في اثنين.
+ */
+export function inFolder(t: Template, f: TemplateFolder): boolean {
+  return t.audience === 'all' ? f.is_general : t.folder_id === f.id
+}
+
+/** القوالب التي لا مجلّد لها — و«الكلّ» ليس منها: مجلّدُه العامّ. */
+export function isLoose(t: Template): boolean {
+  return !t.folder_id && t.audience !== 'all'
+}
+
+/**
+ * ترتيب القوالب كما رتّبها المالك **لهذا الجمهور**.
+ *
+ * ولكلّ جمهورٍ عموده: أوّليّةُ المدير غير أوّليّة المعلّم، وقالبُ «الكلّ»
+ * يظهر في القائمتين بترتيبين مختلفين.
+ */
+export function byOrder(audience: TemplateAudience | string | null | undefined) {
+  const col = audience === 'teacher' ? 'sort_teacher' : 'sort_school'
+  return (a: Template, b: Template) =>
+    ((a as any)[col] ?? 0) - ((b as any)[col] ?? 0) ||
+    a.title.localeCompare(b.title, 'ar')
+}
 
 export function esc(s: any): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) =>

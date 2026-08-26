@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useApp } from '../../lib/store'
 import { importPdf, type ImportResult } from '../../lib/importPdf'
 import { importDesignHtml, type DesignImport } from '../../lib/importDesign'
-import type { TemplateFolder, FolderAudience } from '../../lib/types'
+import type { TemplateFolder, TemplateAudience } from '../../lib/types'
 import { Alert, Button, Field, Input, Modal, Select } from '../../ui/kit'
 import { IcPage, IcCheck, IcAlert, IcSpinner } from '../../ui/icons'
 
@@ -31,43 +31,36 @@ function slugify(name: string): string {
 }
 
 /**
- * لمن هذا القالب، وفي أيّ مجلّد.
+ * لمن هذا القالب — سؤالٌ واحدٌ لا سؤالان.
  *
- * سؤالان لا واحد: المجلّدات صارت تخصّ نوع حساب — «ملفّات المدرسة»
- * و«قوالب الشهادات» للمدرسة، و«ملفّاتي» للمعلّم. فقائمةٌ واحدة تخلطها
- * تجعل الرافع يختار مجلّدًا لجمهورٍ لم يقصده، ولا شيء يمنعه.
+ * كانا سؤالين: الجمهور، ثمّ المجلّد. والثاني كان يتبع الأوّل ويُبدَّل معه،
+ * لأنّ ترك مجلّد مدرسةٍ مختارًا بعد اختيار «المعلّم» يحفظ القالب حيث لا
+ * يراه أحد — عطبٌ صامتٌ يُحفظ ويُنشر ولا يظهر.
  *
- * والثاني يتبع الأوّل: تبديل الجمهور يُبدّل المجلّد، وإلّا حُفظ القالب
- * حيث لا يراه أحد — وذاك عطبٌ صامت: يُحفظ ويُنشر ولا يظهر.
+ * ثمّ صار الجمهور على القالب نفسه، فصار المجلّد **مشتقًّا منه**: قالب
+ * المدرسة إلى «ملفّات المدرسة»، وقالب المعلّم إلى «ملفّاتي»، وقالب
+ * «الكلّ» بلا مجلّدٍ في الجدول ويظهر في العامّ عند كلّ جمهور.
+ *
+ *     وسؤالٌ جوابُه معلومٌ من سؤالٍ قبله ليس سؤالًا.
  */
-function Where({ audience, onAudience, folder, onFolder, folders }: {
-  audience: FolderAudience
-  onAudience: (a: FolderAudience) => void
-  folder: string
-  onFolder: (id: string) => void
+function Audience({ value, onChange, folders }: {
+  value: TemplateAudience
+  onChange: (a: TemplateAudience) => void
   folders: TemplateFolder[]
 }) {
-  const list = folders.filter((f) => f.audience === audience)
+  const where = (a: TemplateAudience) => {
+    const g = (aud: string) => folders.find((f) => f.is_general && f.audience === aud)?.name
+    if (a === 'all') return `يظهر في «${g('school') || 'ملفّات المدرسة'}» عند المدارس، وفي «${g('teacher') || 'ملفّاتي'}» عند المعلّمين.`
+    return `يظهر في «${g(a) || '—'}» — ولا يراه غيرهم.`
+  }
   return (
-    <>
-      <Field label="لمن هذا القالب؟">
-        <Select value={audience} onChange={(e) => onAudience(e.target.value as FolderAudience)}>
-          <option value="school">المدرسة — يراه المدير ومعلّموه</option>
-          <option value="teacher">المعلّم — لمشترك المعلّم المستقلّ</option>
-        </Select>
-      </Field>
-
-      <Field label="في أيّ مجلّد؟">
-        <Select value={folder} onChange={(e) => onFolder(e.target.value)}>
-          <option value="">بلا مجلّد</option>
-          {list.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}{f.coming_soon ? ' — قريبًا' : ''}
-            </option>
-          ))}
-        </Select>
-      </Field>
-    </>
+    <Field label="لمن هذا القالب؟" help={where(value)}>
+      <Select value={value} onChange={(e) => onChange(e.target.value as TemplateAudience)}>
+        <option value="all">الكلّ — المدارس والمعلّمون معًا</option>
+        <option value="school">المدرسة — يراه المدير ومعلّموه</option>
+        <option value="teacher">المعلّم — لمشترك المعلّم المستقلّ</option>
+      </Select>
+    </Field>
   )
 }
 
@@ -82,18 +75,13 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
   const [res, setRes] = useState<ImportResult | null>(null)
   const [design, setDesign] = useState<DesignImport | null>(null)
   const [title, setTitle] = useState('')
-  /* الجمهور أوّلًا، والمجلّد تابعٌ له. والمدرسة هي الافتراض: أكثر ما
-     يُرفع قوالبُ مدرسة، وباقتُها هي الأكبر. */
-  const [audience, setAudience] = useState<FolderAudience>('school')
-  const inAudience = folders.filter((f) => f.audience === audience)
-  const [folder, setFolder] = useState(inAudience[0]?.id ?? '')
+  /* المدرسة هي الافتراض: أكثر ما يُرفع قوالبُ مدرسة، وباقتُها هي الأكبر. */
+  const [audience, setAudience] = useState<TemplateAudience>('school')
 
-  /* تبديل الجمهور يُبدّل المجلّد معه: لو بقي مجلّدُ مدرسةٍ مختارًا بعد
-     اختيار «المعلّم» لحُفظ القالب حيث لا يراه أحد. */
-  const pickAudience = (a: FolderAudience) => {
-    setAudience(a)
-    setFolder(folders.find((f) => f.audience === a)?.id ?? '')
-  }
+  /* والمجلّد يُشتقّ ولا يُسأل عنه: العامُّ من جمهوره، و«الكلّ» بلا مجلّد
+     — إذ ليس له مجلّدٌ واحدٌ يسعه، ويُعرَض في العامّ عند كلّ جمهور. */
+  const folderFor = (a: TemplateAudience) =>
+    a === 'all' ? null : (folders.find((f) => f.is_general && f.audience === a)?.id ?? null)
   const [reading, setReading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -143,7 +131,8 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
         category_key: 'general',
         description: null,
         kind: 'doc',
-        folder_id: folder || null,
+        folder_id: folderFor(audience),
+        audience,
         content_html: src.html,
         page: {
           size: 'A4',
@@ -214,8 +203,7 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
                 placeholder="مثال: تحليل نتيجة اختبار نافس" />
             </Field>
 
-            <Where audience={audience} onAudience={pickAudience}
-              folder={folder} onFolder={setFolder} folders={folders} />
+            <Audience value={audience} onChange={setAudience} folders={folders} />
 
             <div className="mdd-imp-prev">
               <span className="mdd-imp-lab">معاينة التصميم كما سيراه المعلّم</span>
@@ -249,8 +237,7 @@ export default function ImportTemplate({ folders, onClose, onDone }: {
                 placeholder="مثال: تحليل نتيجة اختبار نافس" />
             </Field>
 
-            <Where audience={audience} onAudience={pickAudience}
-              folder={folder} onFolder={setFolder} folders={folders} />
+            <Audience value={audience} onChange={setAudience} folders={folders} />
 
             <div className="mdd-imp-prev">
               <span className="mdd-imp-lab">معاينة المتن المستخرَج</span>

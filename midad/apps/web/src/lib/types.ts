@@ -43,6 +43,15 @@ export interface PageSetupRow {
 /** لأيّ نوع اشتراكٍ يظهر المجلّد */
 export type FolderAudience = 'school' | 'teacher'
 
+/**
+ * ولأيّ نوعٍ يظهر القالب — وله ثالثٌ ليس للمجلّد: «الكلّ».
+ *
+ * وكان الجمهور على المجلّد وحده، فيرثه كلّ ما فيه. فلم يكن للمالك سبيلٌ
+ * إلى ملفٍّ واحدٍ يخالف مجلّده، ولا إلى ملفٍّ يراه الجميع. فانتقل إلى
+ * الملفّ نفسه، وصار المجلّد للتنظيم لا للصلاحيّة.
+ */
+export type TemplateAudience = FolderAudience | 'all'
+
 export interface TemplateFolder {
   id: string; slug: string; name: string; blurb: string | null
   accent: string; icon: string; sort: number; is_active: boolean
@@ -53,6 +62,9 @@ export interface TemplateFolder {
   owner_only: boolean
   /** يظهر ووسمُه «قريبًا»، فيعرف المشترك أنّه آتٍ */
   coming_soon: boolean
+  /** المجلّد الذي يستقبل قوالب جمهوره تلقائيًّا — وفيه تظهر قوالب «الكلّ».
+      ويُصرَّح به ولا يُستنتَج من نفي `owner_only`: يصحّ اليوم ويكذب غدًا. */
+  is_general: boolean
   /** يأتي من المنظر template_folder_counts، لا من الجدول */
   template_count?: number
 }
@@ -65,6 +77,12 @@ export interface Template {
   /* ← ٠٠٠٧: القالب صار مستندًا يُحرَّر */
   kind: TemplateKind
   folder_id: string | null
+  /** مدرسةٌ، أو معلّمٌ، أو الكلّ — وهذا وحده يقرّر مَن يرى */
+  audience: TemplateAudience
+  /** ترتيبان لا ترتيب: قالب «الكلّ» يظهر في القائمتين، وأولويّة المدير
+      غير أولويّة المعلّم — فسحبُه في إحداهما لا يحرّكه في الأخرى. */
+  sort_school: number
+  sort_teacher: number
   content_html: string
   page: PageSetupRow
   source_pdf_path: string | null
