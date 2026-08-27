@@ -140,6 +140,24 @@ T('وكلُّ نصفِ قطرٍ من الرموز', strayR.length === 0,
     !!loc && loc[1]?.forcesRTL === true && loc[1]?.supportsRTL === true,
     loc ? JSON.stringify(loc[1]) : 'غائب')
 
+  /* ونسخةُ الحزمة تتبع نسخةَ الـSDK.
+   *
+   * ثبّتُّها بـ`npm install` فجاءت الأحدثَ — ستَّ نسخاتٍ كبرى أمام
+   * SDK المشروع. ولم يُخطئ شيءٌ عندي: الأنواعُ سليمة، والحزمُ يمرّ،
+   * والفحوصُ كلُّها خضراء. ثمّ سقط البناءُ في إعداد Gradle بعد تسع
+   * دقائقَ من نجاحٍ متكرّر — لأنّ وحدةَ أندرويد فيها تطلب نواةً أحدث.
+   *
+   *     ما يُثبَّت بلا نظرٍ إلى SDK يسقط في المشروع الأصليّ وحده.
+   */
+  {
+    const pkg = JSON.parse(fs.readFileSync(path.join(APPDIR, '../package.json'), 'utf8'))
+    const sdk = Number((pkg.dependencies.expo || '').replace(/[^\d.]/g, '').split('.')[0])
+    const loc = Number((pkg.dependencies['expo-localization'] || '').replace(/[^\d.]/g, '').split('.')[0])
+    /* في SDK 51 نسختُها 15. والقاعدةُ العمليّة: لا تُجاوز الـSDK أبدًا. */
+    T('  ونسخةُ حزمة الاتّجاه توافق الـSDK', loc > 0 && loc < sdk,
+      `expo ${sdk} · expo-localization ${loc}`)
+  }
+
   /* وما وُضع لعلاج LTR يُرفع برفعه: القفزُ إلى طرف الشريط كان يعالج
      أنّ المحرّك يفتحه يسارًا — ومع RTL صار يقفز إلى الطرف الخطأ. */
   const jumpy = files.filter((f) => /scrollToEnd/.test(fs.readFileSync(f, 'utf8')))
