@@ -79,6 +79,26 @@ for (const d of dirs) {
   T('  ولا يُطبع مفتاحٌ في سجلّ', leaks.length === 0, leaks.length ? 'يُطبع!' : 'نظيف')
 }
 
+/* ═══ وما يُبنى منه حقلٌ يجب أن يُجلب ═══
+ *
+ * مُركِّبُ ملفّ الإنجاز يبني الصورَ من `file_path`، والاستعلامُ لم يكن
+ * يجلبه — فكلُّ شاهدٍ يُعدّ نصًّا ويخرج الملفّ بلا صورةٍ واحدة. ولا
+ * يُخطئ شيءٌ ولا يُرمى خطأ: يخرج ملفٌّ صحيحُ البنية فارغُ الشواهد.
+ *
+ *     الحقلُ الذي يُبنى منه ولا يُجلب يُقرأ `undefined` صامتًا.
+ */
+{
+  const src = fs.readFileSync(path.join(FN, 'portfolio-compose/index.ts'), 'utf8')
+  const sel = (src.match(/portfolio_items'\)[\s\S]{0,300}?\.select\('([^']+)'\)/) || [])[1] || ''
+  const cols = new Set(sel.split(',').map((s) => s.trim()))
+  const needed = [...src.matchAll(/\bi\.(\w+)|\bit\.(\w+)/g)]
+    .map((m) => m[1] || m[2])
+    .filter((f) => !['id', 'map', 'filter', 'length', 'slice', 'join'].includes(f))
+  const missing = [...new Set(needed)].filter((f) => !cols.has(f))
+  T('كلُّ حقلٍ يُقرأ من الشاهد مجلوبٌ في الاستعلام',
+    missing.length === 0, missing.join(' · ') || `${cols.size} حقلًا`)
+}
+
 /* والوحدةُ المشتركة نفسها تحجب المفاتيح قبل الطباعة. */
 {
   const ai = fs.readFileSync(path.join(FN, '_shared/ai.ts'), 'utf8')

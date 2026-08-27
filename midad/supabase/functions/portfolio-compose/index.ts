@@ -113,7 +113,9 @@ Deno.serve(handle(async (req) => {
 
   /* ═══ الشواهد — سجلُّ صاحبه وحده ═══ */
   const { data: rows } = await db.from('portfolio_items')
-    .select('id,axis,title,note,kind,happened_on,file_mime')
+        /* و`file_path` منها: المُركِّبُ يبني الصورَ به، وبدونه يُعدّ
+       كلُّ شاهدٍ نصًّا فيخرج الملفّ بلا صورةٍ واحدة. */
+    .select('id,axis,title,note,kind,happened_on,file_mime,file_path')
     .eq('owner_id', caller.userId).eq('academic_year', year)
     .order('happened_on', { ascending: true }).limit(MAX_ITEMS)
 

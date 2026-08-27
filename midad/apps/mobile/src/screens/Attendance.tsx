@@ -331,8 +331,13 @@ function FormatSheet({ open, onClose, onPick }: {
         {opts.map(({ f, Icon, tint }) => (
           <Pressable
             key={f} onPress={() => onPick(f)}
+            /* ولا خلفيّةَ بطاقةٍ تحت الصفّ: ثلاثةُ صفوفٍ في ورقةٍ واحدة
+               لا تحتاج ثلاثَ بطاقاتٍ تفصلها — الفراغُ يفصل. والبطاقةُ
+               تحت البطاقة سطحٌ فوق سطح.
+
+                   ما يُميّزه الفراغُ لا يحتاج حدًّا. */
             style={({ pressed }) => ({
-              backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
+              backgroundColor: pressed ? c.sunken : 'transparent', borderRadius: RADIUS.md,
               padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12,
             })}>
             {/* الأيقونةُ عاريةٌ بلا مربّعٍ ملوّنٍ خلفها.
