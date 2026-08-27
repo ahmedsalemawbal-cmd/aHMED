@@ -33,6 +33,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      /* عاملُ الخدمة يجعل مِداد تطبيقًا يُثبَّت ويفتح فورًا.
+         ويُسجَّل بعد التحميل لا قبله: تسجيلُه أثناء الإقلاع يزاحم
+         أوّل رسمةٍ على الشبكة نفسها. */
+      if ('serviceWorker' in navigator) {
+        addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js').catch(function () {})
+        })
+      }
+    </script>
     <noscript>مِداد يحتاج جافاسكربت لتشغيل المحرّر والمعاينة الحيّة.</noscript>
   </body>
 </html>
