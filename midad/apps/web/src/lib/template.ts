@@ -17,6 +17,18 @@ export function inFolder(t: Template, f: TemplateFolder): boolean {
   return t.audience === 'all' ? f.is_general : t.folder_id === f.id
 }
 
+/**
+ * أيرى صاحبُ هذا الدور هذا القالب؟
+ *
+ * والسياسةُ في القاعدة هي الحارس — هذا ترشيحُ عرضٍ يتبعها، لا يُغني
+ * عنها. والفارغ لكلّ الأدوار: فما رُفع قبل أن تُسنَد الأدوار يبقى
+ * ظاهرًا لمن كان يراه.
+ */
+export function forRole(t: Template, roleKey: string | null | undefined): boolean {
+  const keys = t.role_keys || []
+  return keys.length === 0 || (!!roleKey && keys.includes(roleKey))
+}
+
 /** القوالب التي لا مجلّد لها — و«الكلّ» ليس منها: مجلّدُه العامّ. */
 export function isLoose(t: Template): boolean {
   return !t.folder_id && t.audience !== 'all'

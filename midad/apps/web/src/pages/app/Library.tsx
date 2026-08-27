@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../../lib/store'
-import { inFolder, isLoose, byOrder } from '../../lib/template'
+import { inFolder, isLoose, byOrder, forRole } from '../../lib/template'
 import { useAsync, useDebounced } from '../../lib/hooks'
 import { fetchFolders, fetchTemplates } from '../../lib/data'
 import type { Template, TemplateFolder } from '../../lib/types'
@@ -127,7 +127,7 @@ function FolderCard({ f, onOpen }: { f: TemplateFolder; onOpen: () => void }) {
 
 function FolderView({ slug }: { slug: string }) {
   const nav = useNavigate()
-  const { subscriber } = useApp()
+  const { subscriber, profile } = useApp()
   const [q, setQ] = useState('')
   const dq = useDebounced(q)
 
@@ -138,12 +138,13 @@ function FolderView({ slug }: { slug: string }) {
 
   const list = useMemo(() => {
     if (!folder) return []
-    let out = (templates || []).filter((t) => inFolder(t, folder))
+    let out = (templates || [])
+      .filter((t) => inFolder(t, folder) && forRole(t, profile?.role_key))
     const term = dq.trim()
     if (term) out = out.filter((t) => t.title.includes(term) || (t.description || '').includes(term))
     /* الترتيب الذي رتّبه المالك لهذا الجمهور — لا ترتيب الإدراج. */
     return out.sort(byOrder(subscriber?.account_type))
-  }, [templates, folder, dq, subscriber?.account_type])
+  }, [templates, folder, dq, subscriber?.account_type, profile?.role_key])
 
   if (ef || et) return <ErrorState onRetry={() => { rf(); rt() }} message={ef || et || ''} />
 

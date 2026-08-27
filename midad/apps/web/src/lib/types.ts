@@ -83,6 +83,10 @@ export interface Template {
       غير أولويّة المعلّم — فسحبُه في إحداهما لا يحرّكه في الأخرى. */
   sort_school: number
   sort_teacher: number
+  /** لأيّ أدوارٍ يظهر — والفارغُ لكلّ أدوار جمهوره.
+      وهذا بُعدٌ ثانٍ فوق `audience`: «للمدرسة» يقول أيَّ حسابٍ، و«لرائد
+      النشاط» يقول أيَّ موظّفٍ داخله. فملفّ إنجاز الوكيل لا يظهر للمعلّم. */
+  role_keys?: string[]
   /** أوّلُ صفحةٍ وحدها — تشتقّها القاعدة، وعليها تُرسم مصغّرة البطاقة.
       و`content_html` لا يُجلب في القوائم: ثلاثةَ عشرَ ميغابايتًا لا
       يُعرض منها واحدٌ بالمئة. */
@@ -164,4 +168,36 @@ export interface Period {
 export interface AttendanceRow {
   id: string; subscriber_id: string; period_id: string; student_id: string
   taken_by: string | null; on_date: string; status: AttendanceStatus; note: string | null
+}
+
+/**
+ * شاهدٌ في سجلّ الإنجاز.
+ *
+ * الموظّف يلتقطه لحظةَ وقوعه — صورةً من الكاميرا أو مرفقًا أو نصًّا —
+ * فلا يبحث عنه في يونيو بين ثلاثة آلاف صورةٍ في جوّاله.
+ *
+ *     مِدادٌ لا يكتب الملفّ؛ يمنع الضياع.
+ *
+ * والمحور اختياريّ: الإلزام يُبطئ الالتقاط فيموت السجلّ من أصله،
+ * وتركُه بلا سؤالٍ يجعل التوزيع تخمينًا. فيُسأل ويجوز تخطّيه.
+ */
+export type PortfolioKind = 'photo' | 'file' | 'text' | 'certificate'
+
+export interface PortfolioItem {
+  id: string
+  subscriber_id: string
+  owner_id: string
+  academic_year: string
+  /** من عناوين قالب الدور — أو فراغٌ إن تخطّاه صاحبُه */
+  axis: string
+  title: string
+  note: string
+  kind: PortfolioKind
+  file_path: string | null
+  file_mime: string | null
+  file_size: number | null
+  /** يومُ وقوع الحدث لا يومُ رفعه — والملفّ يُرتَّب به */
+  happened_on: string
+  created_at: string
+  updated_at: string
 }

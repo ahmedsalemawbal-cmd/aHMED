@@ -46,7 +46,7 @@ export default function Templates() {
   const dq = useDebounced(q)
 
   const { data, loading, error, reload } = useAsync(async () => {
-    const [t, f] = await Promise.all([
+    const [t, f, r] = await Promise.all([
       /* بلا `content_html`: جدولُ العناوين لا يعرض متنًا، و`select('*')`
          كان يجلب ثلاثةَ عشرَ ميغابايتًا لصفٍّ فيه عنوانٌ وتاريخ.
          و`body_len` يشتقّه المُحفِّز، ويكفي لمعرفة أفارغٌ هو أم لا. */
@@ -56,13 +56,16 @@ export default function Templates() {
         'kind,folder_id,audience,page,source_pdf_path,source_pages,body_len',
       ).order('title'),
       supabase.from('template_folders').select('*').order('sort').order('name'),
+      supabase.from('roles').select('key,name_ar,sort').order('sort').order('name_ar'),
     ])
     if (t.error) throw new Error(t.error.message)
     if (f.error) throw new Error(f.error.message)
-    return { list: (t.data || []) as unknown as Template[], folders: (f.data || []) as TemplateFolder[] }
+    if (r.error) throw new Error(r.error.message)
+    return { roles: (r.data || []) as { key: string; name_ar: string }[], list: (t.data || []) as unknown as Template[], folders: (f.data || []) as TemplateFolder[] }
   }, [])
 
   const folders = data?.folders || []
+  const roles = data?.roles || []
 
   /* نسخةٌ محلّيّةٌ تُحرَّك بالسحب فورًا ثمّ تُحفظ. ولو انتظرنا ردّ الخادم
      لرأى المالك الصفّ يقفز إلى مكانه القديم ثمّ يعود — وارتجافةٌ تُرى
@@ -113,6 +116,20 @@ export default function Templates() {
     const next = rows.slice()
     next.splice(to, 0, next.splice(from, 1)[0])
     persist(next, col)
+  }
+
+  /**
+   * لأيّ دورٍ يظهر هذا القالب.
+   *
+   * والفارغ «لكلّ الأدوار» — وهو حالُ كلّ ما رُفع قبل اليوم، فلا يتغيّر
+   * عند أحدٍ شيءٌ حتّى تُسنِد أنت.
+   */
+  const setRole = async (t: Template, key: string) => {
+    const role_keys = key ? [key] : []
+    setList((p) => p.map((x) => (x.id === t.id ? { ...x, role_keys } : x)))
+    const { error: e } = await supabase.from('templates').update({ role_keys }).eq('id', t.id)
+    if (e) { toast(e.message, 'danger'); reload(); return }
+    toast(key ? `صار «${t.title}» لهذا الدور وحده` : `صار «${t.title}» لكلّ الأدوار`)
   }
 
   const setAudience = async (t: Template, next: TemplateAudience) => {
@@ -249,6 +266,8 @@ export default function Templates() {
             visible={match}
             onMove={(from, to) => move(a.key, a.col, from, to)}
             onAudience={setAudience}
+            onRole={setRole}
+            roles={roles}
             onOpen={(t) => nav(`/admin/template/${t.id}`)}
             onDuplicate={duplicate}
             onPublish={togglePublish}
@@ -287,12 +306,14 @@ export default function Templates() {
  * لا يراه المالك، ويقع القالب حيث لم يقصد. فيُعطَّل الترتيب حتّى يُمسح
  * الفلتر، ويُقال له لماذا.
  */
-function Section({ audience, rows, visible, onMove, onAudience, onOpen, onDuplicate, onPublish, onDelete }: {
+function Section({ audience, rows, visible, onMove, onAudience, onRole, roles, onOpen, onDuplicate, onPublish, onDelete }: {
   audience: { key: FolderAudience; name: string; dot: string }
   rows: Template[]
   visible: (t: Template) => boolean
   onMove: (from: number, to: number) => void
   onAudience: (t: Template, a: TemplateAudience) => void
+  onRole: (t: Template, key: string) => void
+  roles: { key: string; name_ar: string }[]
   onOpen: (t: Template) => void
   onDuplicate: (t: Template) => void
   onPublish: (t: Template) => void
@@ -322,6 +343,7 @@ function Section({ audience, rows, visible, onMove, onAudience, onOpen, onDuplic
               <th aria-label="ترتيب" style={{ inlineSize: 78 }} />
               <th>القالب</th>
               <th>الصلاحيّة</th>
+              <th>الدور</th>
               <th>الحالة</th>
               <th>آخر تحديث</th>
               <th aria-label="إجراءات" />
@@ -375,6 +397,14 @@ function Section({ audience, rows, visible, onMove, onAudience, onOpen, onDuplic
                       <option value="all">الكلّ</option>
                       <option value="school">المدرسة</option>
                       <option value="teacher">المعلّم</option>
+                    </Select>
+                  </td>
+
+                  <td data-label="الدور">
+                    <Select value={(t.role_keys || [])[0] || ''} aria-label={`دور ${t.title}`}
+                      onChange={(e) => onRole(t, e.target.value)}>
+                      <option value="">كلّ الأدوار</option>
+                      {roles.map((r) => <option key={r.key} value={r.key}>{r.name_ar}</option>)}
                     </Select>
                   </td>
 

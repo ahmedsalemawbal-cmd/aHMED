@@ -34,6 +34,7 @@ const Library = React.lazy(() => import('./pages/app/Library'))
 const TemplateDetail = React.lazy(() => import('./pages/app/TemplateDetail'))
 const Editor = React.lazy(() => import('./pages/app/Editor'))
 const MyFiles = React.lazy(() => import('./pages/app/MyFiles'))
+const Portfolio = React.lazy(() => import('./pages/app/Portfolio'))
 const Classroom = React.lazy(() => import('./pages/app/Classroom'))
 const NoorList = React.lazy(() => import('./pages/app/NoorList'))
 const NoorKey = React.lazy(() => import('./pages/app/NoorKey'))
@@ -131,6 +132,7 @@ export default function App() {
         <Route path="library/:slug" element={<Library />} />
         <Route path="template/:slug" element={<TemplateDetail />} />
         <Route path="files" element={<MyFiles />} />
+        <Route path="portfolio" element={<Portfolio />} />
         <Route path="classroom" element={<Classroom />} />
         <Route path="noor" element={<NoorList />} />
         <Route path="noor/key" element={<NoorKey />} />

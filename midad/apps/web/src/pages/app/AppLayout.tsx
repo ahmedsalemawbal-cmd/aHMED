@@ -6,13 +6,16 @@ import { daysLabel } from '../../lib/format'
 import { Avatar, Button } from '../../ui/kit'
 import {
   IcHome, IcLibrary, IcFiles, IcTable, IcTeam, IcUser, IcSettings, IcCard, IcInvoice,
-  IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcShield, IcCollapse, IcBell,
+  IcMenu, IcSun, IcMoon, IcLogo, IcLogout, IcShield, IcCollapse, IcBell, IcBook,
 } from '../../ui/icons'
 
 const NAV = [
   { to: '/app', end: true, label: 'الرئيسية', icon: IcHome },
   { to: '/app/library', label: 'مكتبة القوالب', icon: IcLibrary },
   { to: '/app/files', label: 'ملفّاتي', icon: IcFiles },
+  /* ملفّ الإنجاز سنويٌّ يُجمع على مدار العام، فموضعه في القائمة الدائمة
+     لا في ركنٍ يُبحث عنه — والالتقاط لا يُؤجَّل. */
+  { to: '/app/portfolio', label: 'ملفّ إنجازي', icon: IcBook },
   { to: '/app/noor', label: 'جداول نور', icon: IcTable },
   { to: '/app/classroom', label: 'الفصول والطلاب', icon: IcTeam },
 ]

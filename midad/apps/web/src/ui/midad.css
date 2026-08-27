@@ -1735,3 +1735,75 @@ button, input, select, textarea { font-family: inherit; }
   border-block-end-width: 2px; border-radius: 6px;
   padding: 1px 7px; font-family: var(--mdd-mono); font-size: 11.5px; font-weight: 700;
 }
+
+
+/* ═══════════════ ملفّ الإنجاز ═══════════════ */
+
+/* الاكتمال أوّلَ الصفحة: «٦ من ٩» هو ما يجعل الموظّف يعود شهريًّا،
+   وقائمةٌ لا تقول أين النقص لا تُعيد أحدًا. */
+.mdd-pf-cov { display: flex; flex-direction: column; gap: 12px; margin-block-end: var(--mdd-s-4); }
+.mdd-pf-cov__top { display: flex; align-items: baseline; gap: 12px; }
+.mdd-pf-cov__top > div { display: flex; flex-direction: column; gap: 2px; }
+.mdd-pf-cov__top b { font-size: 16px; font-weight: 800; }
+.mdd-pf-cov__top span { font-size: 12.5px; color: var(--mdd-text-3); }
+.mdd-pf-cov__pct {
+  margin-inline-start: auto; font-size: 26px; font-weight: 800;
+  color: var(--mdd-accent); font-variant-numeric: tabular-nums; line-height: 1;
+}
+.mdd-pf-bar {
+  block-size: 8px; border-radius: 999px; background: var(--mdd-sunken); overflow: hidden;
+}
+.mdd-pf-bar > span {
+  display: block; block-size: 100%; background: var(--mdd-accent);
+  border-radius: 999px; transition: inline-size .35s ease;
+}
+.mdd-pf-axes { display: flex; flex-wrap: wrap; gap: 7px; }
+.mdd-pf-axes > span {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--mdd-border); color: var(--mdd-text-3);
+  background: var(--mdd-card);
+}
+.mdd-pf-axes > span.on {
+  border-color: var(--mdd-accent); color: var(--mdd-accent-soft-fg);
+  background: var(--mdd-accent-soft); font-weight: 600;
+}
+.mdd-pf-axes > span b {
+  font-size: 10.5px; background: var(--mdd-accent); color: var(--mdd-on-accent);
+  border-radius: 999px; min-inline-size: 16px; text-align: center; padding: 0 4px;
+}
+
+/* ── الشواهد ── */
+.mdd-pf-list { display: flex; flex-direction: column; gap: 10px; }
+.mdd-pf-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px; }
+.mdd-pf-thumb {
+  inline-size: 76px; block-size: 76px; flex: none; border-radius: var(--mdd-r-md);
+  overflow: hidden; background: var(--mdd-sunken);
+  display: grid; place-items: center; color: var(--mdd-text-3);
+}
+.mdd-pf-thumb img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+.mdd-pf-body { flex: 1; min-inline-size: 0; display: flex; flex-direction: column; gap: 6px; }
+.mdd-pf-head { display: flex; align-items: baseline; gap: 10px; }
+.mdd-pf-head b { font-size: 14.5px; font-weight: 700; }
+.mdd-pf-head span { margin-inline-start: auto; font-size: 11.5px; direction: ltr; }
+.mdd-pf-note {
+  font-size: 13px; color: var(--mdd-text-2); margin: 0; line-height: 1.75;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mdd-pf-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── نوعُ الشاهد: أربعةٌ بلمسةٍ واحدة، لا قائمةٌ تُفتح ── */
+.mdd-pf-kinds {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  background: var(--mdd-sunken); padding: 5px; border-radius: var(--mdd-r-md);
+}
+.mdd-pf-kinds button {
+  padding: 9px 4px; border: 0; border-radius: calc(var(--mdd-r-md) - 4px);
+  background: transparent; font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--mdd-text-2); cursor: pointer;
+  transition: background .14s ease, color .14s ease;
+}
+.mdd-pf-kinds button.on {
+  background: var(--mdd-card); color: var(--mdd-text);
+  box-shadow: var(--mdd-shadow-sm);
+}
