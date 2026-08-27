@@ -12,6 +12,7 @@ import {
   PageHead, SearchInput, Select, SkeletonRows,
 } from '../../ui/kit'
 import { IcTable, IcTrash, IcFileExcel } from '../../ui/icons'
+import PasteTable from './PasteTable'
 
 type SortKey = 'recent' | 'name' | 'rows'
 type SrcKey = 'all' | 'noor' | 'madrasati'
@@ -46,6 +47,7 @@ export default function NoorList() {
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<SortKey>('recent')
   const [src, setSrc] = useState<SrcKey>('all')
+  const [pasting, setPasting] = useState(false)
   const [deleting, setDeleting] = useState<NoorTable | null>(null)
   const [busy, setBusy] = useState(false)
   const [making, setMaking] = useState(false)
@@ -124,7 +126,13 @@ export default function NoorList() {
       <PageHead
         title="جداول نور ومدرستي"
         sub={loading ? 'جارٍ التحميل…' : `${fmtNum(tables.length)} جدولًا · ${fmtNum(tables.reduce((a, t) => a + (t.row_count || 0), 0))} صفًّا`}
-        actions={<Button auto variant="secondary" onClick={() => nav('/app/noor/key')}>كيف أنزّل جدولًا؟</Button>}
+        actions={
+          <div className="mdd-row" style={{ gap: 8 }}>
+            <Button auto variant="secondary" onClick={() => nav('/app/noor/key')}>كيف أنزّل جدولًا؟</Button>
+            {/* بابٌ لا يحتاج تثبيتًا: يُظلَّل الجدول في نور ويُنسخ ويُلصق هنا. */}
+            <Button auto variant="primary" onClick={() => setPasting(true)}>الصق جدولًا</Button>
+          </div>
+        }
       />
 
       {browser !== 'ok' && (
@@ -218,6 +226,10 @@ export default function NoorList() {
         title="حذف الجدول" confirmLabel="احذف"
         body={`سيُحذف «${deleting?.title || ''}» من مِداد. لا يتأثّر شيءٌ في نظام نور، ويمكنك تنزيله مرّة أخرى متى شئت.`}
       />
+    {pasting && (
+        <PasteTable onClose={() => setPasting(false)}
+          onSaved={() => { setPasting(false); reload() }} />
+      )}
     </>
   )
 }

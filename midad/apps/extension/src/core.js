@@ -246,7 +246,13 @@
   /** يقرأ جداول الصفحة كلّها ويردّ ما يصلح منها. */
   function readTables() {
     const out = []
-    const tables = Array.from(document.querySelectorAll('table'))
+    /* الجدول المتداخل يُترك لأبيه: نور يلفّ جداوله أحيانًا في جدولٍ
+       للتخطيط، فلو قُرئ الاثنان لخرج الجدول مرّتين — مرّةً وحده ومرّةً
+       داخل ما يحويه، ويحتار المعلّم أيَّهما جدولُه. فيُؤخذ الأعمق: هو
+       الذي فيه البيانات. */
+    const all = Array.from(document.querySelectorAll('table'))
+    const deepest = all.filter((t) => !t.querySelector('table'))
+    const tables = deepest.length ? deepest : all
 
     tables.forEach((table, i) => {
       try {

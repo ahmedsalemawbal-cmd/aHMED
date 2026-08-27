@@ -1718,3 +1718,20 @@ button, input, select, textarea { font-family: inherit; }
   box-shadow: inset 0 2px 0 0 var(--mdd-accent);
   background: var(--mdd-accent-soft);
 }
+
+
+/* ═══════ منطقة اللصق ═══════
+   وهي `.mdd-drop` نفسها بزيادتين: تقبل التركيز (`tabindex`) ليصل إليها
+   `Ctrl+V`، وتُبيّن أنّها مُركَّزة — فالمعلّم لا يلصق في شيءٍ لا يعرف
+   أنّه ينتظره. */
+.mdd-paste { cursor: text; }
+.mdd-paste:focus-visible {
+  outline: none;
+  border-color: var(--mdd-accent);
+  background: var(--mdd-accent-soft);
+}
+.mdd-paste kbd {
+  background: var(--mdd-card); border: 1px solid var(--mdd-border-strong);
+  border-block-end-width: 2px; border-radius: 6px;
+  padding: 1px 7px; font-family: var(--mdd-mono); font-size: 11.5px; font-weight: 700;
+}

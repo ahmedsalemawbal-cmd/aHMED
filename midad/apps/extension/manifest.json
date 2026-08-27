@@ -10,9 +10,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://noor.moe.gov.sa/*",
     "https://*.moe.gov.sa/*",
-    "https://schools.madrasati.sa/*",
     "https://*.madrasati.sa/*"
   ],
   "action": {
