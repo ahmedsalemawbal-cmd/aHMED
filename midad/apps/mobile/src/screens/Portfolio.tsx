@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { Image, Modal, Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import * as Print from 'expo-print'
-import * as Sharing from 'expo-sharing'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import {
@@ -10,7 +8,7 @@ import {
 } from '../ui/kit'
 import { AppHeader } from '../ui/AppHeader'
 import { RADIUS, SPACE, TYPE } from '../lib/theme'
-import { IcCamera, IcImage, IcPlus, IcTrash, IcSpark, IcDownload, IcClose } from '../ui/icons'
+import { IcCamera, IcImage, IcPlus, IcTrash, IcSpark, IcClose } from '../ui/icons'
 import {
   KIND_AR, addItem, assemble, compose, fetchItems, pick, removeItem,
   saveDocument, signedUrls,

@@ -268,4 +268,42 @@ if (T.done() !== 0) process.exitCode = 1
   if (ROUND.done() !== 0) process.exitCode = 1
 }
 
+/* ═══════════ مسارُ الرفع يطابق سياسةَ الدلو ═══════════
+ *
+ * سياسةُ `portfolio` تشترط `<المشترك>/<المالك>/<ملفّ>` بهذا الترتيب.
+ * وكتبتُ في التطبيق `<المالك>/<العام>/…` وعلّقتُ بأنّ ذلك ما تشترطه —
+ * ولم أقرأها. فكان كلُّ رفعٍ سيُرفض عند أوّل صورةٍ يلتقطها معلّم.
+ *
+ *     السياسةُ تُقرأ، لا تُتذكَّر.
+ *
+ * والفحصُ يقارن **المصدرين معًا** بالترتيب الذي تفرضه السياسة: فما دام
+ * الموقعُ والتطبيقُ يكتبان في دلوٍ واحدٍ فيجب أن يتّفقا، وأيُّهما شذّ
+ * فشل صامتًا عند المستعمل لا عند المطوّر.
+ */
+{
+  const P = tally('مسار دلو الإنجاز')
+  const web = fs.readFileSync(new URL('../src/lib/portfolio.ts', import.meta.url), 'utf8')
+  const app = fs.readFileSync(
+    new URL('../../mobile/src/lib/portfolio.ts', import.meta.url), 'utf8')
+
+  /* الجزءان الأوّلان بالترتيب: المشترك ثمّ المالك. */
+  const ORDER = /`\$\{subscriberId\}\/\$\{ownerId\}\//
+
+  P('الموقع يبني المسار: مشترك ← مالك', ORDER.test(web),
+    (web.match(/return `[^`]*`/g) || []).filter((x) => /subscriberId/.test(x))[0] || '—')
+  P('والتطبيق مثله', ORDER.test(app),
+    (app.match(/path = `[^`]*`/g) || [])[0] || '—')
+
+  /* ولا مسافةَ ولا عربيّةَ في المفتاح: العام «1447 هـ» فيهما معًا. */
+  P('ولا عامَ دراسيًّا في مفتاح التخزين',
+    !/path = `[^`]*\$\{year/.test(app),
+    /path = `[^`]*\$\{year/.test(app) ? 'العام في المسار!' : 'نظيف')
+
+  /* والحذفُ يستعمل المسار المحفوظ لا يعيد بناءه — وإلّا حُذف ملفٌّ آخر. */
+  P('الحذف يستعمل file_path المحفوظ',
+    /remove\(\[it\.file_path\]\)/.test(app) || /remove\(\[it\.file_path/.test(app))
+
+  if (P.done() !== 0) process.exitCode = 1
+}
+
 process.exit(process.exitCode || 0)
