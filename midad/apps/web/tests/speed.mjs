@@ -53,6 +53,40 @@ T('الخطّ مستضافٌ عندنا',
   fs.existsSync(path.join(dist, 'fonts/cairo-arabic.woff2')),
   'fonts/cairo-arabic.woff2')
 
+/* ═════ ①ب قابليّةُ التثبيت ═════
+ *
+ * مِداد يُثبَّت على الجوّال، وعليه يقوم غلافُ أندرويد. وأربعةٌ تُفحص
+ * لأنّ نقصَها **لا يكسر شيئًا يُرى**: يعمل الموقع، ولا يعرض أندرويد
+ * «تثبيت» بل «اختصارًا» أضعف، ولا يُفهم السبب.
+ */
+{
+  const man = JSON.parse(fs.readFileSync(path.join(dist, 'manifest.webmanifest'), 'utf8'))
+  const icons = man.icons || []
+  T('عاملُ الخدمة في المخرجات', fs.existsSync(path.join(dist, 'sw.js')))
+  T('  ومُسجَّلٌ في الصفحة', /serviceWorker/.test(html))
+  /* SVG وحدها لا تكفي: أندرويد يضع مربّعًا فارغًا مكانها في الشاشة. */
+  T('أيقونتا ١٩٢ و٥١٢ بصيغة PNG',
+    icons.some((i) => i.sizes === '192x192' && i.type === 'image/png')
+    && icons.some((i) => i.sizes === '512x512' && i.type === 'image/png'),
+    icons.map((i) => `${i.sizes}/${(i.type || '').split('/')[1]}`).join(' · '))
+  T('  ومقنَّعةٌ لأندرويد', icons.some((i) => (i.purpose || '').includes('maskable')))
+  T('  وموجودةٌ فعلًا لا في البيان وحده',
+    ['icon-192.png', 'icon-512.png', 'icon-maskable.png']
+      .every((f) => fs.existsSync(path.join(dist, f))))
+
+  /* ربطُ النطاق: بصمةُ المفتاح في الموقع يجب أن تطابق ما يوقّع به
+     التطبيق، وإلّا عمل التطبيق وظهر فوقه شريطُ عنوان. */
+  const linkPath = path.join(dist, '.well-known/assetlinks.json')
+  T('ربطُ النطاق منشورٌ مع البناء', fs.existsSync(linkPath))
+  if (fs.existsSync(linkPath)) {
+    const link = JSON.parse(fs.readFileSync(linkPath, 'utf8'))
+    const fp = link?.[0]?.target?.sha256_cert_fingerprints?.[0] || ''
+    T('  ببصمةٍ كاملة', /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/i.test(fp), fp.slice(0, 26) + '…')
+    T('  وباسم حزمة التطبيق', link?.[0]?.target?.package_name === 'sa.midad.app',
+      link?.[0]?.target?.package_name || '—')
+  }
+}
+
 /* ═════ ② حجمُ أوّل فتحة ═════ */
 const eager = [...html.matchAll(/(?:src|href)="\.\/(assets\/[^"]+\.js)"/g)].map((m) => m[1])
 const kb = eager.reduce((n, f) => n + fs.statSync(path.join(dist, f)).size, 0) / 1024

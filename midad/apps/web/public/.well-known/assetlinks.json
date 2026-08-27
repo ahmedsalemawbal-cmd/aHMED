@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "sa.midad.app",
+    "sha256_cert_fingerprints": ["C8:93:3E:6B:0C:88:11:7F:11:58:D8:C6:6F:42:95:8F:4D:64:F7:2B:6D:30:20:E5:94:55:91:2F:9F:AF:A9:B2"]
+  }
+}]
