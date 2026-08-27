@@ -14,6 +14,19 @@
 name: تطبيق أندرويد
 
 on:
+  # يُشغَّل حين تتغيّر شيفرةُ التطبيق نفسه — لا مع كلّ دفعةٍ للموقع.
+  # فالتطبيق غلافٌ لا يتغيّر بتغيّر ما يفتحه: إنّما يتغيّر إن بدّلنا
+  # اسمه أو أيقونته أو نطاقه.
+  #
+  # ولمَ لا `workflow_dispatch` وحده؟ لأنّ الزرّ اليدويّ لا يظهر إلّا
+  # لسيرٍ موجودٍ في الفرع الافتراضيّ، وهذا الفرع ليس هو. فالدفعُ هو
+  # ما يُشغّله، ويبقى الزرّ لمن يصل إليه.
+  push:
+    branches: ['**']
+    paths:
+      - 'midad/apps/android/**'
+      - 'midad/apps/web/public/.well-known/**'
+      - '.github/workflows/android.yml'
   workflow_dispatch:
     inputs:
       version_name:
@@ -66,9 +79,15 @@ jobs:
           [ "$FP" = "$WEB" ] || { echo '::error::البصمتان مختلفتان — سيظهر شريط العنوان فوق التطبيق'; exit 1; }
           echo '✅ متطابقتان'
 
+      - name: تثبيتُ نسخة غرادل
+        working-directory: midad/apps/android
+        run: |
+          gradle wrapper --gradle-version 8.7 --no-daemon
+          ./gradlew --version
+
       - name: البناء
         working-directory: midad/apps/android
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: التحقّق من المخرجات
         working-directory: midad/apps/android
