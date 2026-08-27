@@ -43,7 +43,7 @@ export async function fetchFolderBySlug(slug: string): Promise<TemplateFolder | 
 const LIST_COLS =
   'id,slug,title,category_key,description,outputs,estimated_minutes,version,' +
   'status,usage_count,is_new,sort,sort_school,sort_teacher,created_at,updated_at,' +
-  'kind,folder_id,audience,role_keys,page,source_pdf_path,source_pages,thumb_html,body_len'
+  'kind,folder_id,audience,role_keys,is_portfolio,page,source_pdf_path,source_pages,thumb_html,body_len'
 
 export async function fetchTemplates(): Promise<Template[]> {
   const { data, error } = await supabase.from('templates').select(LIST_COLS)

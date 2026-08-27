@@ -61,9 +61,30 @@ export const StyledTableHeader = TableHeader.extend({
  * وهو صنف العطب نفسه الذي أصاب الجداول والفقرات: ما لا يعرفه المخطّط
  * يُسقَط صامتًا، ولا شيء يُنبّه.
  */
+/**
+ * وصورةُ ملفّ الإنجاز تحمل مسارَها الدائم في سمتها.
+ *
+ * دلوُ الإنجاز خاصّ، ورابطُه الموقّع ينتهي بعد ساعة. فيُحفظ في المستند
+ * `src="portfolio:المسار"` ويُعاد توقيعُه عند كلّ فتحة. وهذه السمةُ هي
+ * ما يدلّ على المسار بعد أن يصير `src` رابطًا موقّتًا.
+ *
+ * ولولا تسجيلُها هنا لأسقطها المخطّطُ صامتًا — كما أسقط النمطَ من قبل —
+ * فحُفظ الرابطُ المنتهي في القاعدة، وظهرت الصورُ اليومَ وانكسرت غدًا.
+ *
+ *     ما لا يعرفه المخطّط يُسقَط صامتًا.
+ */
+const portfolioAttr = {
+  'data-mdd-portfolio': {
+    default: null as string | null,
+    parseHTML: (el: HTMLElement) => el.getAttribute('data-mdd-portfolio') || null,
+    renderHTML: (attrs: Record<string, any>) =>
+      (attrs['data-mdd-portfolio'] ? { 'data-mdd-portfolio': attrs['data-mdd-portfolio'] } : {}),
+  },
+}
+
 export const StyledImage = Image.extend({
   addAttributes() {
-    return { ...this.parent?.(), ...styleAttr }
+    return { ...this.parent?.(), ...styleAttr, ...portfolioAttr }
   },
 })
 

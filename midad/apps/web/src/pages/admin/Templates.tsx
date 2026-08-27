@@ -132,6 +132,24 @@ export default function Templates() {
     toast(key ? `صار «${t.title}» لهذا الدور وحده` : `صار «${t.title}» لكلّ الأدوار`)
   }
 
+  /**
+   * أهذا قالبُ ملفّ الإنجاز لهذه الفئة؟
+   *
+   * وهو الذي يُركّبه الذكاءُ من شواهد الموظّف آخرَ العام. ولكلّ دورٍ
+   * قالبُه: ملفُّ الوكيل غيرُ ملفّ المعلّم غيرُ ملفّ المشرف الطلابيّ.
+   */
+  const setPortfolio = async (t: Template, on: boolean) => {
+    setList((p) => p.map((x) => (x.id === t.id ? { ...x, is_portfolio: on } : x)))
+    const { error: e } = await supabase.from('templates').update({ is_portfolio: on }).eq('id', t.id)
+    if (e) { toast(e.message, 'danger'); reload(); return }
+    if (!on) { toast(`لم يعد «${t.title}» قالبَ إنجاز`); return }
+    /* وقالبٌ بلا دورٍ يصير ملفَّ إنجاز الجميع — وذلك نادرًا ما يُقصد.
+       فيُقال الآن، لا حين يفتح معلّمٌ ملفَّ وكيل. */
+    toast((t.role_keys || []).length
+      ? `صار «${t.title}» قالبَ الإنجاز لهذا الدور`
+      : `صار «${t.title}» قالبَ الإنجاز — وهو بلا دور، فسيصل كلَّ الموظّفين. أسنِد له دورًا.`)
+  }
+
   const setAudience = async (t: Template, next: TemplateAudience) => {
     if (next === t.audience) return
     /* المجلّد يتبع الصلاحيّة: العامُّ من جمهوره، و«الكلّ» بلا مجلّد. */
@@ -267,6 +285,7 @@ export default function Templates() {
             onMove={(from, to) => move(a.key, a.col, from, to)}
             onAudience={setAudience}
             onRole={setRole}
+            onPortfolio={setPortfolio}
             roles={roles}
             onOpen={(t) => nav(`/admin/template/${t.id}`)}
             onDuplicate={duplicate}
@@ -306,13 +325,14 @@ export default function Templates() {
  * لا يراه المالك، ويقع القالب حيث لم يقصد. فيُعطَّل الترتيب حتّى يُمسح
  * الفلتر، ويُقال له لماذا.
  */
-function Section({ audience, rows, visible, onMove, onAudience, onRole, roles, onOpen, onDuplicate, onPublish, onDelete }: {
+function Section({ audience, rows, visible, onMove, onAudience, onRole, onPortfolio, roles, onOpen, onDuplicate, onPublish, onDelete }: {
   audience: { key: FolderAudience; name: string; dot: string }
   rows: Template[]
   visible: (t: Template) => boolean
   onMove: (from: number, to: number) => void
   onAudience: (t: Template, a: TemplateAudience) => void
   onRole: (t: Template, key: string) => void
+  onPortfolio: (t: Template, on: boolean) => void
   roles: { key: string; name_ar: string }[]
   onOpen: (t: Template) => void
   onDuplicate: (t: Template) => void
@@ -406,6 +426,11 @@ function Section({ audience, rows, visible, onMove, onAudience, onRole, roles, o
                       <option value="">كلّ الأدوار</option>
                       {roles.map((r) => <option key={r.key} value={r.key}>{r.name_ar}</option>)}
                     </Select>
+                    <label className="mdd-row" style={{ gap: 5, marginBlockStart: 6, fontSize: 12, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={!!t.is_portfolio}
+                        onChange={(e) => onPortfolio(t, e.target.checked)} />
+                      <span className="mdd-dim">ملفّ إنجاز</span>
+                    </label>
                   </td>
 
                   <td data-label="الحالة">

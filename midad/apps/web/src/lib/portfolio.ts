@@ -258,3 +258,41 @@ export function coverage(axes: string[], items: PortfolioItem[]): Coverage {
     items: items.length,
   }
 }
+
+/* ═══════════════ صورُ الإنجاز في المستندات ═══════════════ */
+
+/**
+ * الصورُ في ملفّ الإنجاز تُحفظ بمسارها الدائم لا برابطها الموقّع.
+ *
+ * ودلوُ الإنجاز خاصّ: لا رابطَ عامَّ له، والموقّعُ ينتهي بعد ساعة. فلو
+ * حُفظ الموقّعُ في متن المستند لظهرت الصورُ يومَ التركيب، وانكسرت في
+ * اليوم التالي — والموظّف لا يعرف لمَ، ويظنّ الملفَّ تلف.
+ *
+ *     ما ينتهي لا يُحفظ في متن.
+ *
+ * فيُحفظ `src="portfolio:المسار"`، ويُعاد توقيعُه عند كلّ فتحة. وهي
+ * الصيغةُ نفسها التي يكتبها التطبيق (`saveDocument` في تطبيق الجوّال)،
+ * فما رُكّب في الجوّال يُفتح في المتصفّح بصورٍ سليمة.
+ */
+export async function resignPortfolioImages(html: string): Promise<string> {
+  const paths = [...html.matchAll(/src="portfolio:([^"]*)"/g)].map((m) => m[1])
+  if (!paths.length) return html
+  const { data } = await supabase.storage.from('portfolio')
+    .createSignedUrls([...new Set(paths)], 3600)
+  const urls: Record<string, string> = {}
+  for (const r of data || []) if (r.path && r.signedUrl) urls[r.path] = r.signedUrl
+  return html.replace(/src="portfolio:([^"]*)"/g, (m, p) => (urls[p] ? `src="${urls[p]}"` : m))
+}
+
+/**
+ * والعكسُ قبل الحفظ: الروابطُ الموقّعة تعود مساراتٍ دائمة.
+ *
+ * وإلّا لأعاد المحرّرُ كتابةَ ما وقّعناه للعرض في القاعدة، فعاد العطبُ
+ * من حيث أُغلق — وهذه المرّةَ من فعل الحفظ لا من فعل التركيب.
+ */
+export function unsignPortfolioImages(html: string): string {
+  return html.replace(
+    /src="[^"]*"(\s+data-mdd-portfolio="([^"]*)")/g,
+    (_m, tail, path) => `src="portfolio:${path}"${tail}`,
+  )
+}

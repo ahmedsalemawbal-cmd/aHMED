@@ -6,6 +6,14 @@ export const SUPABASE_URL = extra.supabaseUrl || 'https://ehimyixcqnmnwgbqrdmr.s
 export const SUPABASE_KEY = extra.supabaseKey || 'sb_publishable_R5HC6lAC5-VVaQTmzRQdmA_g5S9NFDr'
 export const WEB_APP_URL = `${SUPABASE_URL}/functions/v1/app`
 
+/**
+ * موقعُ مِداد على المتصفّح — حيث المحرّرُ الكامل.
+ *
+ * والتطبيق يحيل إليه فيما يعجز عنه: الألوانُ والجداولُ وتنسيقُ الخطّ.
+ * فيُكتب النطاقُ في مكانٍ واحدٍ لا يُنسخ في كلّ شاشةٍ تحيل إليه.
+ */
+export const SITE_URL = extra.siteUrl || 'https://ahmedawbal.com'
+
 export function normalizePhone(raw: string): string {
   const d = (raw || '').replace(/[^\d]/g, '')
   if (d.startsWith('966')) return '0' + d.slice(3)

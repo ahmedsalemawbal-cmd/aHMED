@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../../lib/store'
 import { supabase } from '../../lib/supabase'
+import { resignPortfolioImages, unsignPortfolioImages } from '../../lib/portfolio'
 import type { DocumentRow, Template } from '../../lib/types'
 import { fmtRelative } from '../../lib/format'
 import { normalizePage } from '../../lib/editor'
@@ -48,7 +49,8 @@ export default function Editor() {
       if (error || !d) { setLoadError(error?.message || 'لم نجد هذا الملفّ'); setLoading(false); return }
 
       const row = d as any
-      let starting: string = row.content_html || ''
+      /* صورُ الإنجاز تُوقَّع عند الفتح: المحفوظُ مسارٌ دائمٌ لا رابطٌ ينتهي. */
+      let starting: string = await resignPortfolioImages(row.content_html || '')
       let t: Template | null = null
 
       if (row.template_id) {
@@ -76,7 +78,7 @@ export default function Editor() {
     if (!id || !dirty.current || readOnly) return
     setSave('saving')
     const { error } = await supabase.from('documents')
-      .update({ content_html: latest.current.html, title: latest.current.title })
+      .update({ content_html: unsignPortfolioImages(latest.current.html), title: latest.current.title })
       .eq('id', id)
     if (error) { setSave('error'); return }
     dirty.current = false
@@ -119,7 +121,7 @@ export default function Editor() {
       owner_id: (doc as any).owner_id,
       template_id: (doc as any).template_id,
       title: `نسخة من ${title}`,
-      content_html: latest.current.html,
+      content_html: unsignPortfolioImages(latest.current.html),
       page: (doc as any).page ?? null,
     }).select('id').single()
     if (error || !data) { toast('تعذّرت المضاعفة', 'danger'); return }

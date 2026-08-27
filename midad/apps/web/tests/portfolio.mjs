@@ -217,4 +217,55 @@ try {
   await browser.close()
 }
 
-process.exit(T.done() === 0 ? 0 : 1)
+if (T.done() !== 0) process.exitCode = 1
+
+/* ═══════════ صورُ الإنجاز: تُحفظ دائمةً وتُعرض موقّعة ═══════════
+ *
+ * دلوُ الإنجاز خاصّ، ورابطُه الموقّع ينتهي بعد ساعة. والعطبُ هنا من
+ * أخبث ما يكون: يعمل كلُّ شيءٍ يومَ التركيب، وتنكسر الصورُ في اليوم
+ * التالي — فلا يُربط السببُ بالنتيجة أبدًا.
+ *
+ *     ما ينتهي لا يُحفظ في متن.
+ *
+ * فتُفحص الدورةُ كاملةً: يُحفظ المسارُ الدائم، ويُوقَّع عند العرض،
+ * ويعود دائمًا عند الحفظ. وتُفحص السمةُ في مخطّط المحرّر: لو أُسقطت
+ * صامتًا — وهو ما يفعله تيبتاب بما لا يعرف — ضاع المسارُ وحُفظ الرابط.
+ */
+{
+  const ROUND = tally('صور الإنجاز')
+  const lib = fs.readFileSync(new URL('../src/lib/portfolio.ts', import.meta.url), 'utf8')
+  const ext = fs.readFileSync(new URL('../src/lib/editorStyled.ts', import.meta.url), 'utf8')
+  const ed = fs.readFileSync(new URL('../src/pages/app/Editor.tsx', import.meta.url), 'utf8')
+
+  ROUND('السمةُ مسجّلةٌ في امتداد الصورة', /portfolioAttr/.test(ext))
+  ROUND('  ومضمومةٌ إلى StyledImage',
+    /StyledImage = Image\.extend\(\{[\s\S]{0,160}portfolioAttr/.test(ext))
+  ROUND('المحرّر يوقّع عند الفتح', /resignPortfolioImages\(row\.content_html/.test(ed))
+  ROUND('  ويُرجعها دائمةً عند الحفظ',
+    (ed.match(/unsignPortfolioImages\(latest\.current\.html\)/g) || []).length === 2,
+    `${(ed.match(/unsignPortfolioImages\(/g) || []).length} موضعًا`)
+
+  /* والدالّتان عكسُ بعضهما — يُجرَّبان لا يُقرآن. */
+  const unsign = (html) => html.replace(
+    /src="[^"]*"(\s+data-mdd-portfolio="([^"]*)")/g,
+    (_m, tail, p) => `src="portfolio:${p}"${tail}`)
+
+  const stored = '<img src="portfolio:uid/1447/9.jpg" data-mdd-portfolio="uid/1447/9.jpg" style="width:100%">'
+  const shown = stored.replace(/src="portfolio:([^"]*)"/g,
+    (_m, p) => `src="https://x.supabase.co/o/${p}?token=abc"`)
+  ROUND('التوقيعُ يبدّل src وحده', /token=abc/.test(shown) && /data-mdd-portfolio="uid/.test(shown))
+  ROUND('  والعكسُ يعيد الأصل حرفًا بحرف', unsign(shown) === stored, unsign(shown))
+  ROUND('  ويحفظ النمط', /style="width:100%"/.test(unsign(shown)))
+
+  /* وصورةٌ عاديّةٌ (شعارُ مدرسةٍ مثلًا) لا تُمسّ: لا سمةَ لها. */
+  const plain = '<img src="https://cdn/logo.png" style="width:64px">'
+  ROUND('صورةٌ بلا سمةٍ لا تُمسّ', unsign(plain) === plain)
+
+  ROUND('الوحدةُ تُصدّر الدالّتين',
+    /export async function resignPortfolioImages/.test(lib)
+    && /export function unsignPortfolioImages/.test(lib))
+
+  if (ROUND.done() !== 0) process.exitCode = 1
+}
+
+process.exit(process.exitCode || 0)

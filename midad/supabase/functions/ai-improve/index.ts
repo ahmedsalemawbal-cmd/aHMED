@@ -1,4 +1,5 @@
 import { admin, handle, json, readBody, requireUser, subscriberState, HttpError } from '../_shared/util.ts'
+import { callAi, loadAi } from '../_shared/ai.ts'
 
 const TONE_AR: Record<string, string> = {
   formal:  'أعد صياغته بلغةٍ تربويةٍ إداريةٍ رسميّة كما تُكتب في وثائق وزارة التعليم السعودية.',
@@ -38,22 +39,13 @@ Deno.serve(handle(async (req) => {
     throw new HttpError(`استهلكتَ حصّة التحسين لهذا الشهر (${limit}) — ارفع باقتك أو انتظر الشهر القادم`, 429)
   }
 
-  const { data: aiCfg } = await db.from('platform_settings').select('value').eq('key', 'ai').maybeSingle()
-  const cfg = (aiCfg?.value as any) || {}
-  if (cfg.enabled === false) throw new HttpError('التحسين بالذكاء الاصطناعيّ موقوفٌ مؤقّتًا')
+  const ai = await loadAi(db)
 
   const { count: globalCalls } = await db.from('ai_usage').select('id', { count: 'exact', head: true })
     .gte('created_at', monthStart.toISOString())
-  const cap = Number(cfg.monthly_cap_calls ?? 20000)
+  const cap = Number(ai.cfg.monthly_cap_calls ?? 20000)
   if ((globalCalls ?? 0) >= cap) throw new HttpError('بلغت المنصّة سقفها الشهريّ للتحسين — تواصل معنا')
 
-  const { data: secret } = await db.from('platform_settings').select('value').eq('key', 'ai_secret').maybeSingle()
-  const apiKey = String((secret?.value as any)?.api_key || Deno.env.get('ANTHROPIC_API_KEY') || '').trim()
-  if (!apiKey) {
-    throw new HttpError('لم يُضبط مفتاح الذكاء الاصطناعيّ بعد — يضيفه مالك المنصّة من: إعدادات المنصّة ← الذكاء', 503)
-  }
-
-  const model = String(cfg.model || 'claude-sonnet-4-5')
   const fieldLabel = String(b.field_label || 'حقل').slice(0, 120)
 
   const system = [
@@ -65,32 +57,10 @@ Deno.serve(handle(async (req) => {
 
   const prompt = `الحقل: ${fieldLabel}\nالمطلوب: ${TONE_AR[tone]}\n\nالنصّ:\n${text}`
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1400,
-      system,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  })
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '')
-    console.error('anthropic error', res.status, detail.slice(0, 400))
-    if (res.status === 401) throw new HttpError('مفتاح الذكاء الاصطناعيّ غير صالح — راجعه في إعدادات المنصّة', 503)
-    if (res.status === 429) throw new HttpError('الخدمة مزدحمة الآن — حاول بعد قليل', 429)
-    throw new HttpError('تعذّر التوليد — نصّك سليم كما هو، حاول مرّة أخرى', 502)
-  }
-
-  const out = await res.json()
-  const improved = (out?.content || []).filter((c: any) => c.type === 'text').map((c: any) => c.text).join('\n').trim()
-  if (!improved) throw new HttpError('لم يصل نصٌّ من الخدمة — حاول مرّة أخرى', 502)
+  /* والمزوّدُ يُختار من الإعدادات لا يُثبَّت هنا: تثبيتُه يعني أنّ مالكًا
+     اختار ChatGPT يُرسَل مفتاحُه إلى Anthropic فيُردّ بخطأٍ لا يدلّ عليه. */
+  const reply = await callAi(ai, { system, prompt, maxTokens: 1400 })
+  const improved = reply.text
 
   await db.from('ai_usage').insert({
     subscriber_id: subscriberId,
@@ -98,8 +68,8 @@ Deno.serve(handle(async (req) => {
     document_id: b.document_id || null,
     field_key: b.field_key || null,
     tone,
-    tokens_in: Number(out?.usage?.input_tokens ?? 0),
-    tokens_out: Number(out?.usage?.output_tokens ?? 0),
+    tokens_in: reply.tokensIn,
+    tokens_out: reply.tokensOut,
   })
 
   return json({ text: improved, used: (used ?? 0) + 1, limit })

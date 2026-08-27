@@ -9,7 +9,13 @@ import {
 import { IcEye, IcEyeOff } from '../../ui/icons'
 
 type Tab = 'general' | 'payment' | 'tax' | 'ai' | 'trial'
-const KEYS = ['general', 'payment_public', 'payment_secret', 'ai', 'ai_secret', 'trial'] as const
+const KEYS = ['general', 'payment_public', 'payment_secret', 'ai', 'trial'] as const
+
+/* والنماذج تتبع المزوّد: نموذجُ أحدهما لا يُنادى عند الآخر. */
+const MODELS: Record<string, string[]> = {
+  anthropic: ['claude-sonnet-4-5', 'claude-opus-4-5', 'claude-haiku-4-5-20251001'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini'],
+}
 
 export default function Settings() {
   const { toast, refresh } = useApp()
@@ -17,6 +23,8 @@ export default function Settings() {
   const [v, setV] = useState<Record<string, any>>({})
   const [busy, setBusy] = useState<string | null>(null)
   const [showKey, setShowKey] = useState<Record<string, boolean>>({})
+  /* المفتاح الجديد يعيش في هذه الحالة وحدها ولا يُحمَّل من القاعدة أبدًا. */
+  const [aiKey, setAiKey] = useState('')
 
   const { data, loading, error, reload } = useAsync(async () => {
     const { data: rows, error: e } = await supabase.from('platform_settings').select('key,value').in('key', KEYS as any)
@@ -39,6 +47,49 @@ export default function Settings() {
       if (e) { setBusy(null); toast(e.message, 'danger'); return }
     }
     setBusy(null); toast('حُفظت الإعدادات'); reload(); refresh()
+  }
+
+  /**
+   * حفظُ إعدادات الذكاء — والمفتاح يمرّ بـ `set_ai_key` لا بكتابةٍ مباشرة،
+   * لأنّ السرّ وحالتَه يجب أن يتحرّكا معًا: «مضبوط» بلا مفتاحٍ عطبٌ صامت.
+   */
+  const saveAi = async () => {
+    const provider = v.ai?.provider ?? 'anthropic'
+    const model = v.ai?.model ?? MODELS[provider][0]
+
+    /* تبديلُ المزوّد بلا مفتاحٍ جديد يترك مفتاح الأوّل يُنادى عند الثاني —
+       فيفشل النداء برسالةٍ لا تدلّ على السبب. يُمنع هنا لا هناك. */
+    if (data?.ai?.configured && data?.ai?.provider !== provider && !aiKey.trim()) {
+      toast('بدّلت المزوّد — اكتب مفتاح المزوّد الجديد، فمفتاح السابق لا يعمل عنده.', 'danger')
+      return
+    }
+
+    setBusy('ai')
+    const { error: e1 } = await supabase.from('platform_settings')
+      .upsert({ key: 'ai', value: v.ai || {}, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    if (e1) { setBusy(null); toast(e1.message, 'danger'); return }
+
+    if (aiKey.trim()) {
+      const { error: e2 } = await supabase.rpc('set_ai_key', {
+        p_provider: provider, p_model: model, p_key: aiKey.trim(),
+      })
+      if (e2) { setBusy(null); toast(e2.message, 'danger'); return }
+      setAiKey('')
+    }
+    setBusy(null); toast('حُفظت إعدادات الذكاء'); reload(); refresh()
+  }
+
+  const clearAi = async () => {
+    if (!window.confirm('يُمسح المفتاح ويتوقّف الذكاء حتى تضع غيره. أأمضي؟')) return
+    setBusy('ai-clear')
+    const { error: e } = await supabase.rpc('set_ai_key', {
+      p_provider: v.ai?.provider ?? 'anthropic',
+      p_model: v.ai?.model ?? MODELS[v.ai?.provider ?? 'anthropic'][0],
+      p_key: '',
+    })
+    setBusy(null)
+    if (e) { toast(e.message, 'danger'); return }
+    setAiKey(''); toast('مُسح المفتاح'); reload(); refresh()
   }
 
   const secretField = (key: string, field: string, label: string, help?: string) => (
@@ -159,29 +210,60 @@ export default function Settings() {
 
       {tab === 'ai' && (
         <Card className="mdd-col" style={{ gap: 14 }}>
-          <Alert tone={v.ai_secret?.api_key ? 'success' : 'warn'}>
-            {v.ai_secret?.api_key
-              ? 'المفتاح مضبوط — زرّ «حسّن» يعمل للمشتركين.'
-              : 'لا مفتاح بعد — زرّ «حسّن» يعرض للمشترك رسالةً واضحة ولا يُخصم من حصّته شيء.'}
+          <Alert tone={v.ai?.configured ? 'success' : 'warn'}>
+            {v.ai?.configured
+              ? `المفتاح مضبوط (ينتهي بـ ${v.ai?.hint || '؟؟؟؟'}) — الذكاء يعمل.`
+              : 'لا مفتاح بعد — ما يحتاج الذكاء يعرض رسالةً واضحة ولا يُخصم من حصّة أحد شيء.'}
           </Alert>
           <Switch checked={v.ai?.enabled !== false} onChange={(x) => set('ai', 'enabled', x)}
-            label="التحسين بالذكاء الاصطناعيّ مفعّل" />
-          {secretField('ai_secret', 'api_key', 'مفتاح Anthropic', 'يُستعمل في الخادم وحده ولا يصل إلى المتصفّح.')}
+            label="التحسين وتركيب ملفّ الإنجاز بالذكاء الاصطناعيّ مفعّلان" />
+
           <div className="mdd-grid mdd-grid--2" style={{ gap: 12 }}>
-            <Field label="النموذج">
-              <Select value={v.ai?.model ?? 'claude-sonnet-4-5'} onChange={(e) => set('ai', 'model', e.target.value)}>
-                <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
-                <option value="claude-opus-4-5">claude-opus-4-5</option>
-                <option value="claude-haiku-4-5-20251001">claude-haiku-4-5</option>
+            <Field label="المزوّد">
+              <Select value={v.ai?.provider ?? 'anthropic'} onChange={(e) => {
+                const pr = e.target.value
+                setV((st) => ({ ...st, ai: { ...(st.ai || {}), provider: pr, model: MODELS[pr][0] } }))
+              }}>
+                <option value="anthropic">Claude — Anthropic</option>
+                <option value="openai">ChatGPT — OpenAI</option>
               </Select>
             </Field>
-            <Field label="السقف الشهريّ (نداءات)" help="حين يُبلَغ يتوقّف التحسين للجميع حتى الشهر القادم.">
-              <Input ltr type="number" value={v.ai?.monthly_cap_calls ?? 20000}
-                onChange={(e) => set('ai', 'monthly_cap_calls', Number(e.target.value) || 0)} />
+            <Field label="النموذج">
+              <Select value={v.ai?.model ?? MODELS[v.ai?.provider ?? 'anthropic'][0]}
+                onChange={(e) => set('ai', 'model', e.target.value)}>
+                {MODELS[v.ai?.provider ?? 'anthropic'].map((m) => <option key={m} value={m}>{m}</option>)}
+              </Select>
             </Field>
           </div>
-          <Button auto variant="primary" loading={busy === 'ai'}
-            onClick={() => save(['ai', 'ai_secret'])} style={{ alignSelf: 'flex-start' }}>احفظ</Button>
+
+          {/* حقلٌ يُكتب ولا يُقرأ.
+              ولمَ لا يُقرأ ولو للمالك؟ لأنّ المفتاح إن بلغ المتصفّح مرّةً صار
+              عرضةً لكلّ ما يبلغه. والذي ينادي المزوّد هو الخادم لا المتصفّح،
+              فلا حاجة به هنا أصلًا. ويكفي المالكَ آخرُ أربعةِ أحرفٍ ليعرف
+              أيَّ مفتاحٍ وضع.
+
+                  ما لا يُقرأ لا يُسرَق. */}
+          <Field label={v.ai?.configured ? 'استبدال المفتاح' : 'مفتاح المزوّد'}
+            help={v.ai?.configured
+              ? 'اتركه فارغًا ليبقى المفتاح الحاليّ. وما يُكتب هنا يُرسل إلى القاعدة ولا يُقرأ منها ثانيةً.'
+              : (v.ai?.provider === 'openai'
+                ? 'من platform.openai.com ← API keys. يبدأ بـ sk-'
+                : 'من console.anthropic.com ← API keys. يبدأ بـ sk-ant-')}>
+            <Input ltr type="password" value={aiKey} onChange={(e) => setAiKey(e.target.value)}
+              placeholder={v.ai?.configured ? '•••• محفوظ — اكتب مفتاحًا جديدًا لتستبدله' : 'sk-…'} />
+          </Field>
+
+          <Field label="السقف الشهريّ (نداءات)" help="حين يُبلَغ يتوقّف الذكاء للجميع حتى الشهر القادم.">
+            <Input ltr type="number" value={v.ai?.monthly_cap_calls ?? 20000}
+              onChange={(e) => set('ai', 'monthly_cap_calls', Number(e.target.value) || 0)} />
+          </Field>
+
+          <div className="mdd-row" style={{ gap: 8, alignSelf: 'flex-start' }}>
+            <Button auto variant="primary" loading={busy === 'ai'} onClick={saveAi}>احفظ</Button>
+            {v.ai?.configured && (
+              <Button auto variant="ghost" loading={busy === 'ai-clear'} onClick={clearAi}>امسح المفتاح</Button>
+            )}
+          </div>
         </Card>
       )}
 

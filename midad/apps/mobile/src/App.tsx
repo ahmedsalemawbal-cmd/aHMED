@@ -21,7 +21,9 @@ import Account from './screens/Account'
 import Blocked from './screens/Blocked'
 import Attendance from './screens/Attendance'
 import Timetable from './screens/Timetable'
-import { IcHome, IcLibrary, IcFiles, IcUser, IcCheck } from './ui/icons'
+import Portfolio from './screens/Portfolio'
+import PortfolioResult from './screens/PortfolioResult'
+import { IcHome, IcLibrary, IcFiles, IcUser, IcCheck, IcSpark } from './ui/icons'
 import { fontFor, TYPE, RADIUS } from './lib/theme'
 
 const Tab = createBottomTabNavigator()
@@ -57,6 +59,10 @@ function Tabs() {
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcLibrary size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="الرصد" component={Attendance}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcCheck size={21} color={color} /></TabIcon> }} />
+      {/* إنجازي — أيقونةٌ في الشريط لا شاشةٌ تُبحث عنها.
+          الالتقاطُ يقع لحظةَ الفعاليّة، ومَن يفتش عن الشاشة لا يلتقط. */}
+      <Tab.Screen name="إنجازي" component={Portfolio}
+        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcSpark size={21} color={color} /></TabIcon> }} />
       <Tab.Screen name="ملفّاتي" component={MyFiles}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcFiles size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="حسابي" component={Account}
@@ -120,6 +126,7 @@ function Root() {
             <Stack.Screen name="Timetable" component={Timetable} />
             <Stack.Screen name="Noor" component={Noor} />
             <Stack.Screen name="NoorTable" component={NoorTable} />
+            <Stack.Screen name="PortfolioResult" component={PortfolioResult} options={{ headerShown: false }} />
           </>
         )}
       </Stack.Navigator>
