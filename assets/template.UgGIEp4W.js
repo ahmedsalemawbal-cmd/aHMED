@@ -1,1 +1,0 @@
-function l(e,r){return e.audience==="all"?r.is_general:e.folder_id===r.id}function n(e){return!e.folder_id&&e.audience!=="all"}function t(e){const r=e==="teacher"?"sort_teacher":"sort_school";return(o,i)=>(o[r]??0)-(i[r]??0)||o.title.localeCompare(i.title,"ar")}export{n as a,t as b,l as i};

@@ -1,0 +1,1 @@
+function t(e,r){return e.audience==="all"?r.is_general:e.folder_id===r.id}function l(e,r){const o=e.role_keys||[];return o.length===0||!!r&&o.includes(r)}function i(e){return!e.folder_id&&e.audience!=="all"}function s(e){const r=e==="teacher"?"sort_teacher":"sort_school";return(o,n)=>(o[r]??0)-(n[r]??0)||o.title.localeCompare(n.title,"ar")}export{i as a,s as b,l as f,t as i};
