@@ -2,5 +2,8 @@
 <resources>
   <string name="app_name">مِداد</string>
   <string name="host">ahmedawbal.com</string>
-  <string name="launch_url">https://ahmedawbal.com/</string>
+  <!-- التطبيق يفتح شاشة العمل لا صفحة الإعلان.
+       فمن ثبّت التطبيق لا يحتاج أن يُقنَع به: أراد الدخول لا القراءة
+       عنه. والحارس في المسار يحوّله إلى الدخول إن لم يكن داخلًا. -->
+  <string name="launch_url">https://ahmedawbal.com/#/app</string>
 </resources>
