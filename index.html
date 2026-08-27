@@ -6,19 +6,19 @@
     <meta name="theme-color" content="#f4f6f2" />
     <meta name="description" content="مِداد — منصّة الملفّات المدرسية وجداول نور. ملفّاتك تُملأ في الشاشة وتخرج جاهزةً للطباعة." />
     <title>مِداد — منصّة الملفّات المدرسية والجداول</title>
+    <!-- الخطّ العربيّ يُطلَب مع الصفحة لا بعد أنماطها: هو ما تُرسم به،
+         وانتظارُ اكتشافه في ورقة الأنماط رحلةٌ زائدة. -->
+    <link rel="preload" href="./fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon.svg" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="مِداد" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- مدًى لا قائمة: القاهرة خطٌّ متغيّر، فالمدى ملفٌّ واحدٌ يغطّي كلّ
          وزن. وكنّا نطلب 400;600;700 فقط، وقوالبُ كلود ديزاين تستعمل 800
          و900 — فيصطنعها المتصفّح من 700 بمقاييس أعرض، فينزاح كلّ ما تحتها.
          والقائمة تُغفل ما لم نتوقّعه؛ والمدى لا يُغفل شيئًا. -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
     <script>
       // طبّق الوضع قبل الرسم فلا تومض الشاشة بالأبيض ثمّ تسودّ
       try {
@@ -26,11 +26,10 @@
         if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
       } catch (e) {}
     </script>
-    <script type="module" crossorigin src="./assets/app.BLnEW7xW.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/router.DzLmClKN.js">
-    <link rel="modulepreload" crossorigin href="./assets/editor.Bb3akfyV.js">
+    <script type="module" crossorigin src="./assets/app.BvopvDrM.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/router.BlsZkRLJ.js">
     <link rel="modulepreload" crossorigin href="./assets/supabase.DGyy41YE.js">
-    <link rel="stylesheet" crossorigin href="./assets/index.C9IShYXH.css">
+    <link rel="stylesheet" crossorigin href="./assets/index.CUKl-ei4.css">
   </head>
   <body>
     <div id="root"></div>
