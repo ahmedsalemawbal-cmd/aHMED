@@ -84,6 +84,14 @@ jobs:
         working-directory: midad/apps/web
         run: npm run build
 
+      # بعد البناء لا قبله: حارس السرعة يقيس ما ينزل عند المشترك، وذاك
+      # في `dist` لا في خادم التطوير الذي يقدّم الوحدات مفرّقةً بلا ضغط.
+      # وهو يتخطّى نفسه صامتًا إن لم يجد بناءً — فلو تُرك مع الفحوص قبله
+      # لصار حارسًا لا يحرس، ولا يُعلم أنّه لم يعمل.
+      - name: السرعة — تمنع النشر
+        working-directory: midad/apps/web
+        run: npm test speed
+
       - name: التحقّق من المخرجات
         working-directory: midad/apps/web
         run: |

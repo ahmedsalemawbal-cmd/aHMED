@@ -240,7 +240,7 @@ export function TemplateCard({ t, accent }: { t: Template; accent?: string }) {
   /* البطاقة تُري القالب لا تصفه: أوّل صفحةٍ من متنه مصغّرةً بألوانها. فمن
      رأى الشكل عرف القالب قبل أن يفتحه، ولا يفتح ستّة ليجد واحدًا. وما لا
      متن له — قالب تعبئةٍ قديم — يبقى على أيقونته. */
-  const shows = !!(t.content_html || '').trim()
+  const shows = (t.body_len ?? (t.content_html || '').trim().length) > 0
 
   return (
     <Card

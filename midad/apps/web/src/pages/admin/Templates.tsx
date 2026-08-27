@@ -47,12 +47,19 @@ export default function Templates() {
 
   const { data, loading, error, reload } = useAsync(async () => {
     const [t, f] = await Promise.all([
-      supabase.from('templates').select('*').order('title'),
+      /* بلا `content_html`: جدولُ العناوين لا يعرض متنًا، و`select('*')`
+         كان يجلب ثلاثةَ عشرَ ميغابايتًا لصفٍّ فيه عنوانٌ وتاريخ.
+         و`body_len` يشتقّه المُحفِّز، ويكفي لمعرفة أفارغٌ هو أم لا. */
+      supabase.from('templates').select(
+        'id,slug,title,category_key,description,outputs,estimated_minutes,version,' +
+        'status,usage_count,is_new,sort,sort_school,sort_teacher,created_at,updated_at,' +
+        'kind,folder_id,audience,page,source_pdf_path,source_pages,body_len',
+      ).order('title'),
       supabase.from('template_folders').select('*').order('sort').order('name'),
     ])
     if (t.error) throw new Error(t.error.message)
     if (f.error) throw new Error(f.error.message)
-    return { list: (t.data || []) as Template[], folders: (f.data || []) as TemplateFolder[] }
+    return { list: (t.data || []) as unknown as Template[], folders: (f.data || []) as TemplateFolder[] }
   }, [])
 
   const folders = data?.folders || []
@@ -142,6 +149,11 @@ export default function Templates() {
   }
 
   const duplicate = async (t: Template) => {
+    /* المتن يُجلب هنا لا في القائمة: تُضاعَف واحدةٌ في المرّة، ولا يُحمَّل
+       متنُ خمسةَ عشرَ قالبًا لأنّ واحدًا منها قد يُضاعَف. */
+    const { data: full, error: fe } = await supabase.from('templates')
+      .select('content_html').eq('id', t.id).maybeSingle()
+    if (fe) { toast(fe.message, 'danger'); return }
     const { data: row, error: e } = await supabase.from('templates').insert({
       slug: `${t.slug}-copy-${Date.now().toString(36)}`,
       title: `نسخة من ${t.title}`,
@@ -150,7 +162,7 @@ export default function Templates() {
       kind: t.kind ?? 'doc',
       audience: t.audience,
       folder_id: t.folder_id,
-      content_html: t.content_html ?? '',
+      content_html: (full as any)?.content_html ?? '',
       page: t.page,
       outputs: t.outputs,
       estimated_minutes: t.estimated_minutes,
@@ -318,7 +330,7 @@ function Section({ audience, rows, visible, onMove, onAudience, onOpen, onDuplic
           <tbody>
             {shown.map((t) => {
               const i = rows.indexOf(t)
-              const empty = !(t.content_html || '').replace(/<[^>]*>/g, '').trim()
+              const empty = (t.body_len ?? 0) === 0
               return (
                 <tr
                   key={t.id}

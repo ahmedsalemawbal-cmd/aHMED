@@ -83,7 +83,13 @@ export interface Template {
       غير أولويّة المعلّم — فسحبُه في إحداهما لا يحرّكه في الأخرى. */
   sort_school: number
   sort_teacher: number
-  content_html: string
+  /** أوّلُ صفحةٍ وحدها — تشتقّها القاعدة، وعليها تُرسم مصغّرة البطاقة.
+      و`content_html` لا يُجلب في القوائم: ثلاثةَ عشرَ ميغابايتًا لا
+      يُعرض منها واحدٌ بالمئة. */
+  thumb_html?: string
+  /** طولُ المتن — يُغني عن جلبه لمعرفة أفارغٌ هو أم لا */
+  body_len?: number
+  content_html?: string
   page: PageSetupRow
   source_pdf_path: string | null
   source_pages: number | null
@@ -96,7 +102,7 @@ export interface DocumentRow {
   id: string; subscriber_id: string; owner_id: string; template_id: string | null
   title: string; status: DocumentStatus; created_at: string; updated_at: string
   /* ← ٠٠٠٧ */
-  content_html: string
+  content_html?: string
   page: PageSetupRow | null
   /** مهجور — كان قيم الحقول */
   data?: Record<string, any>

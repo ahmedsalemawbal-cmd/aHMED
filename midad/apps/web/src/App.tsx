@@ -3,57 +3,63 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useApp } from './lib/store'
 import { IcSpinner } from './ui/icons'
 
+/* ═══════════ الصفحات تُحمَّل عند طلبها ═══════════
+   كانت كلُّها مستوردةً استيرادًا ثابتًا، فتدخل حزمةً واحدة: يفتح المشترك
+   المكتبة فيُنزّل معها المحرّرَ ولوحةَ الإدارة وشاشةَ الدفع — ٤٥٢ كيلوبايتًا
+   من TipTap وحده في صفحةٍ لا محرّر فيها.
+
+   فما يُرى أوّلًا يبقى ثابتًا (الهيكل وصفحة الهبوط والدخول)، وما سواه
+   يُجلب حين يُطلب. والانتظار الذي يوفّره أضعافُ الذي يُحدثه: الشبكة تجلب
+   ثلاثين كيلوبايتًا في لمحة، والمتصفّح يُفسّر ميغابايتًا في ثانية. */
+
 import SiteLayout from './pages/site/SiteLayout'
 import Home from './pages/site/Home'
-import ServiceTemplates from './pages/site/ServiceTemplates'
-import ServiceNoor from './pages/site/ServiceNoor'
-import Pricing from './pages/site/Pricing'
-import Faq from './pages/site/Faq'
-import Contact from './pages/site/Contact'
-import Legal from './pages/site/Legal'
-
 import ChooseType from './pages/auth/ChooseType'
 import Signup from './pages/auth/Signup'
 import Login from './pages/auth/Login'
-import Forgot from './pages/auth/Forgot'
-import Welcome from './pages/auth/Welcome'
-
 import AppLayout from './pages/app/AppLayout'
-import Dashboard from './pages/app/Dashboard'
-import Library from './pages/app/Library'
-import TemplateDetail from './pages/app/TemplateDetail'
-import Editor from './pages/app/Editor'
-import MyFiles from './pages/app/MyFiles'
-import Classroom from './pages/app/Classroom'
-import NoorList from './pages/app/NoorList'
-import NoorKey from './pages/app/NoorKey'
-import NoorTableView from './pages/app/NoorTableView'
-import Team from './pages/app/Team'
-import Account from './pages/app/Account'
-import SubscriberSettings from './pages/app/SubscriberSettings'
-import Subscription from './pages/app/Subscription'
-import ChoosePlan from './pages/app/ChoosePlan'
-import Checkout from './pages/app/Checkout'
-import Invoices from './pages/app/Invoices'
-import InvoiceView from './pages/app/InvoiceView'
-import Paywall from './pages/app/Paywall'
-import Suspended from './pages/app/Suspended'
-
 import AdminLayout from './pages/admin/AdminLayout'
-import AdminOverview from './pages/admin/Overview'
-import AdminSubscribers from './pages/admin/Subscribers'
-import AdminSubscriberDetail from './pages/admin/SubscriberDetail'
-import AdminSubscriptions from './pages/admin/Subscriptions'
-import AdminInvoices from './pages/admin/AdminInvoices'
-import AdminPlans from './pages/admin/Plans'
-import AdminRoles from './pages/admin/Roles'
-import AdminTemplates from './pages/admin/Templates'
-import AdminTemplateEditor from './pages/admin/TemplateEditor'
-import AdminAi from './pages/admin/AiUsage'
-import AdminSettings from './pages/admin/Settings'
-import AdminLog from './pages/admin/AuditLog'
-
 import NotFound from './pages/site/NotFound'
+
+const ServiceTemplates = React.lazy(() => import('./pages/site/ServiceTemplates'))
+const ServiceNoor = React.lazy(() => import('./pages/site/ServiceNoor'))
+const Pricing = React.lazy(() => import('./pages/site/Pricing'))
+const Faq = React.lazy(() => import('./pages/site/Faq'))
+const Contact = React.lazy(() => import('./pages/site/Contact'))
+const Legal = React.lazy(() => import('./pages/site/Legal'))
+const Forgot = React.lazy(() => import('./pages/auth/Forgot'))
+const Welcome = React.lazy(() => import('./pages/auth/Welcome'))
+const Dashboard = React.lazy(() => import('./pages/app/Dashboard'))
+const Library = React.lazy(() => import('./pages/app/Library'))
+const TemplateDetail = React.lazy(() => import('./pages/app/TemplateDetail'))
+const Editor = React.lazy(() => import('./pages/app/Editor'))
+const MyFiles = React.lazy(() => import('./pages/app/MyFiles'))
+const Classroom = React.lazy(() => import('./pages/app/Classroom'))
+const NoorList = React.lazy(() => import('./pages/app/NoorList'))
+const NoorKey = React.lazy(() => import('./pages/app/NoorKey'))
+const NoorTableView = React.lazy(() => import('./pages/app/NoorTableView'))
+const Team = React.lazy(() => import('./pages/app/Team'))
+const Account = React.lazy(() => import('./pages/app/Account'))
+const SubscriberSettings = React.lazy(() => import('./pages/app/SubscriberSettings'))
+const Subscription = React.lazy(() => import('./pages/app/Subscription'))
+const ChoosePlan = React.lazy(() => import('./pages/app/ChoosePlan'))
+const Checkout = React.lazy(() => import('./pages/app/Checkout'))
+const Invoices = React.lazy(() => import('./pages/app/Invoices'))
+const InvoiceView = React.lazy(() => import('./pages/app/InvoiceView'))
+const Paywall = React.lazy(() => import('./pages/app/Paywall'))
+const Suspended = React.lazy(() => import('./pages/app/Suspended'))
+const AdminOverview = React.lazy(() => import('./pages/admin/Overview'))
+const AdminSubscribers = React.lazy(() => import('./pages/admin/Subscribers'))
+const AdminSubscriberDetail = React.lazy(() => import('./pages/admin/SubscriberDetail'))
+const AdminSubscriptions = React.lazy(() => import('./pages/admin/Subscriptions'))
+const AdminInvoices = React.lazy(() => import('./pages/admin/AdminInvoices'))
+const AdminPlans = React.lazy(() => import('./pages/admin/Plans'))
+const AdminRoles = React.lazy(() => import('./pages/admin/Roles'))
+const AdminTemplates = React.lazy(() => import('./pages/admin/Templates'))
+const AdminTemplateEditor = React.lazy(() => import('./pages/admin/TemplateEditor'))
+const AdminAi = React.lazy(() => import('./pages/admin/AiUsage'))
+const AdminSettings = React.lazy(() => import('./pages/admin/Settings'))
+const AdminLog = React.lazy(() => import('./pages/admin/AuditLog'))
 
 function FullLoader() {
   return (
@@ -91,7 +97,10 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  /* والصفحة المؤجَّلة تحتاج حدًّا ينتظرها. و`FullLoader` هو نفسه الذي
+     ينتظر جلسة المستخدم، فلا يرى المشترك شكلين لانتظارٍ واحد. */
   return (
+    <React.Suspense fallback={<FullLoader />}>
     <Routes>
       <Route element={<SiteLayout />}>
         <Route path="/" element={<Home />} />
@@ -154,5 +163,6 @@ export default function App() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </React.Suspense>
   )
 }

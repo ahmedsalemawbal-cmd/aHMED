@@ -17,7 +17,10 @@ export default defineConfig({
         /* محرّك التحرير حزمةٌ مستقلّة: من يفتح اللوح أو المكتبة لا يدفع
            ثمن ProseMirror، ويُحمَّل عند فتح مستندٍ فقط. */
         manualChunks(id) {
-          if (id.includes('node_modules/@tiptap') || id.includes('node_modules/prosemirror')) return 'editor'
+          /* لا قطعةَ يدويّةً للمحرّر: كانت تجمع تيبتاب وبروزميرور في قطعةٍ
+             واحدة، فيدخل منها رمزٌ واحدٌ في مسار البدء فتُسحب القطعةُ كلُّها
+             (٤٥٢ك) في أوّل فتحة — وفي صفحةٍ لا محرّر فيها.
+             والمُجمّع يقسم على حدود الاستيراد المؤجَّل وحده أدقَّ منّا. */
           if (id.includes('node_modules/@supabase')) return 'supabase'
           if (id.includes('node_modules/react-router')) return 'router'
         },

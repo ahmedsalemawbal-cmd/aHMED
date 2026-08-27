@@ -20,7 +20,11 @@ export default function TemplateThumb({ template, height = 132 }: {
   template: Template
   height?: number
 }) {
-  const html = useMemo(() => firstPage(template.content_html || ''), [template.content_html])
+  /* `thumb_html` تشتقّه القاعدة: أوّلُ صفحةٍ وحدها. و`content_html`
+     لا يُجلب في القوائم — ثلاثةَ عشرَ ميغابايتًا لبطاقاتٍ صغيرة.
+     ويُقبل المتنُ الكامل إن وُجد: صفحةُ القالب تجلبه فتمرّ به. */
+  const src = template.thumb_html || template.content_html || ''
+  const html = useMemo(() => firstPage(src), [src])
   const box = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(0)
 
