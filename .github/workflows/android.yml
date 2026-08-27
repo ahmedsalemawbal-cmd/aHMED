@@ -105,3 +105,21 @@ jobs:
           name: midad-android
           path: midad/apps/android/midad-*.apk
           retention-days: 30
+
+      # ورابطٌ مباشر: أثرُ السير يأتي مضغوطًا ويحتاج تسجيلَ دخولٍ وفكًّا،
+      # وذاك متعبٌ على جوّالٍ يُراد تثبيتُ الملفّ عليه. والإصدار يُنزَّل
+      # ملفًّا واحدًا بضغطةٍ من أيّ متصفّح.
+      - name: إصدارٌ برابطٍ مباشر
+        working-directory: midad/apps/android
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="android-v${{ github.event.inputs.version_name || '1.0.0' }}-${{ github.run_number }}"
+          gh release create "$TAG" midad-*.apk \
+            --title "تطبيق مِداد $TAG" \
+            --notes "غلافٌ يفتح ahmedawbal.com. للتجربة — مُوقَّعٌ بمفتاح اختبار.
+
+          **التثبيت:** نزّل الملفّ، وفعّل «تثبيت من مصادر غير معروفة» حين يسألك أندرويد." \
+            --target "${{ github.sha }}"
+          echo "### الرابط المباشر" >> "$GITHUB_STEP_SUMMARY"
+          gh release view "$TAG" --json assets --jq '.assets[].url' >> "$GITHUB_STEP_SUMMARY"
