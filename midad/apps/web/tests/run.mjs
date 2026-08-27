@@ -13,7 +13,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { APP, PORT, ORIGIN } from './lib/harness.mjs'
 
-const ALL = ['fidelity', 'roundtrip', 'editor', 'folders', 'thumb', 'admin', 'paste', 'portfolio', 'blocks', 'functions', 'speed']
+const ALL = ['fidelity', 'roundtrip', 'editor', 'folders', 'thumb', 'admin', 'paste', 'portfolio', 'blocks', 'functions', 'exportgrid', 'rhythm', 'speed']
 const want = process.argv.slice(2).filter((a) => !a.startsWith('-'))
 const suites = want.length ? want : ALL
 

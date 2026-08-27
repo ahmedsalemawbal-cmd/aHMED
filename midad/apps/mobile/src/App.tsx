@@ -11,10 +11,6 @@ import { StatusBar } from 'expo-status-bar'
 import { AppProvider, useApp } from './lib/store'
 import Login from './screens/Login'
 import Dashboard from './screens/Dashboard'
-import Library from './screens/Library'
-import TemplateDetail from './screens/TemplateDetail'
-import Editor from './screens/Editor'
-import MyFiles from './screens/MyFiles'
 import Noor from './screens/Noor'
 import NoorTable from './screens/NoorTable'
 import Account from './screens/Account'
@@ -23,7 +19,7 @@ import Attendance from './screens/Attendance'
 import Timetable from './screens/Timetable'
 import Portfolio from './screens/Portfolio'
 import PortfolioResult from './screens/PortfolioResult'
-import { IcHome, IcLibrary, IcFiles, IcUser, IcCheck, IcSpark } from './ui/icons'
+import { IcHome, IcUser, IcCheck, IcSpark } from './ui/icons'
 import { fontFor, TYPE, RADIUS } from './lib/theme'
 
 const Tab = createBottomTabNavigator()
@@ -55,16 +51,12 @@ function Tabs() {
       }}>
       <Tab.Screen name="الرئيسية" component={Dashboard}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcHome size={21} color={color} filled={focused} /></TabIcon> }} />
-      <Tab.Screen name="القوالب" component={Library}
-        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcLibrary size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="الرصد" component={Attendance}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcCheck size={21} color={color} /></TabIcon> }} />
       {/* إنجازي — أيقونةٌ في الشريط لا شاشةٌ تُبحث عنها.
           الالتقاطُ يقع لحظةَ الفعاليّة، ومَن يفتش عن الشاشة لا يلتقط. */}
       <Tab.Screen name="إنجازي" component={Portfolio}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcSpark size={21} color={color} /></TabIcon> }} />
-      <Tab.Screen name="ملفّاتي" component={MyFiles}
-        options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcFiles size={21} color={color} filled={focused} /></TabIcon> }} />
       <Tab.Screen name="حسابي" component={Account}
         options={{ tabBarIcon: ({ color, focused }) => <TabIcon focused={focused}><IcUser size={21} color={color} filled={focused} /></TabIcon> }} />
     </Tab.Navigator>
@@ -121,8 +113,6 @@ function Root() {
         ) : (
           <>
             <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
-            <Stack.Screen name="TemplateDetail" component={TemplateDetail} />
-            <Stack.Screen name="Editor" component={Editor} />
             <Stack.Screen name="Timetable" component={Timetable} />
             <Stack.Screen name="Noor" component={Noor} />
             <Stack.Screen name="NoorTable" component={NoorTable} />

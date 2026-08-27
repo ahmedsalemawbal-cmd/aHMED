@@ -158,7 +158,7 @@ export default function Attendance() {
                 key={p.id} onPress={() => setActiveId(p.id)}
                 style={({ pressed }) => ({
                   backgroundColor: on ? c.primary : c.card,
-                  borderRadius: RADIUS.md, paddingHorizontal: 15, paddingVertical: 10,
+                  borderRadius: RADIUS.md, paddingHorizontal: 16, paddingVertical: 12,
                   minWidth: 108, opacity: pressed ? 0.8 : 1,
                   ...elevation(c, on ? 2 : 1),
                 })}>
@@ -176,7 +176,7 @@ export default function Attendance() {
 
       {/* شريط الحصيلة */}
       {active && (
-        <View style={{ paddingHorizontal: SPACE.s5, paddingBottom: SPACE.s3, gap: 9 }}>
+        <View style={{ paddingHorizontal: SPACE.s5, paddingBottom: SPACE.s3, gap: 8 }}>
           <Row style={{ justifyContent: 'space-between' }}>
             <T size={TYPE.body} color={c.text2} numberOfLines={1} style={{ flex: 1 }}>
               {active.subject}{active.room ? ` · ${active.room}` : ''}
@@ -199,7 +199,7 @@ export default function Attendance() {
               return (
                 <View key={s} style={{
                   flex: 1, backgroundColor: n > 0 ? bg : c.sunken, borderRadius: RADIUS.sm,
-                  paddingVertical: 7, alignItems: 'center', gap: 1,
+                  paddingVertical: 8, alignItems: 'center', gap: 1,
                 }}>
                   <T size={TYPE.h3} weight="700" color={n > 0 ? fg : c.text3}>{n}</T>
                   <T size={TYPE.micro} weight="600" color={n > 0 ? fg : c.text3}>{STATUS_AR[s]}</T>
@@ -216,7 +216,7 @@ export default function Attendance() {
         data={students}
         keyExtractor={(s) => s.id}
         contentContainerStyle={{
-          paddingHorizontal: SPACE.s5, gap: 8, paddingBottom: 130 + insets.bottom,
+          paddingHorizontal: SPACE.s5, gap: 8, paddingBottom: 40 + insets.bottom,
         }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -236,7 +236,7 @@ export default function Attendance() {
       {/* شريط الإجراءات */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        flexDirection: 'row-reverse', gap: 9,
+        flexDirection: 'row-reverse', gap: 8,
         paddingHorizontal: SPACE.s5, paddingTop: SPACE.s4,
         paddingBottom: insets.bottom + SPACE.s4,
         backgroundColor: c.card, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
@@ -266,11 +266,11 @@ const StudentRow = React.memo(function StudentRow({ index, name, value, onChange
   const { c } = useApp()
   return (
     <View style={{
-      backgroundColor: c.card, borderRadius: RADIUS.lg, padding: 11, gap: 9, ...elevation(c, 1),
+      backgroundColor: c.card, borderRadius: RADIUS.lg, padding: 12, gap: 8, ...elevation(c, 1),
     }}>
       <Row gap={9}>
         <View style={{
-          width: 25, height: 25, borderRadius: 8, backgroundColor: c.sunken,
+          width: 25, height: 25, borderRadius: 10, backgroundColor: c.sunken,
           alignItems: 'center', justifyContent: 'center',
         }}>
           <T size={TYPE.micro} weight="700" color={c.text3}>{index + 1}</T>
@@ -290,7 +290,7 @@ const StudentRow = React.memo(function StudentRow({ index, name, value, onChange
                 flex: 1, paddingVertical: 8, borderRadius: RADIUS.sm,
                 backgroundColor: on ? bg : c.sunken,
                 alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'row-reverse', gap: 5,
+                flexDirection: 'row-reverse', gap: 4,
                 opacity: pressed ? 0.7 : 1,
               })}>
               <Icon size={14} color={on ? fg : c.text3} />
@@ -324,7 +324,7 @@ function FormatSheet({ open, onClose, onPick }: {
         position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: c.card,
         borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl,
         paddingTop: SPACE.s4, paddingBottom: insets.bottom + SPACE.s5,
-        paddingHorizontal: SPACE.s5, gap: 9,
+        paddingHorizontal: SPACE.s5, gap: 8,
       }}>
         <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, alignSelf: 'center' }} />
         <T size={TYPE.h3} weight="700" style={{ paddingVertical: SPACE.s3 }}>صيغة الكشف</T>
@@ -333,7 +333,7 @@ function FormatSheet({ open, onClose, onPick }: {
             key={f} onPress={() => onPick(f)}
             style={({ pressed }) => ({
               backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-              padding: 13, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+              padding: 12, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
             })}>
             <View style={{
               width: 40, height: 40, borderRadius: RADIUS.sm, backgroundColor: tint + '1A',

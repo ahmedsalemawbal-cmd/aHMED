@@ -44,7 +44,7 @@ export function AppHeader({ title, back, subtitle }: {
       <View style={{
         paddingTop: insets.top + 6, paddingBottom: 12,
         paddingHorizontal: SPACE.s5, backgroundColor: c.bg,
-        flexDirection: 'row-reverse', alignItems: 'center', gap: 10,
+        flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
       }}>
         {back ? (
           <Pressable
@@ -120,7 +120,7 @@ function HeaderBtn({ children, onPress, badge }: {
       {badge ? (
         <View style={{
           position: 'absolute', top: 5, left: 5, minWidth: 17, height: 17,
-          borderRadius: 9, backgroundColor: c.danger, alignItems: 'center',
+          borderRadius: 10, backgroundColor: c.danger, alignItems: 'center',
           justifyContent: 'center', paddingHorizontal: 4,
           borderWidth: 2, borderColor: c.card,
         }}>
@@ -199,7 +199,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
         {/* ترويسة الدُّرج */}
         <View style={{
           paddingHorizontal: SPACE.s5, paddingBottom: SPACE.s4,
-          flexDirection: 'row-reverse', alignItems: 'center', gap: 11,
+          flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
         }}>
           <Avatar name={profile?.full_name || 'م'} size={48} uri={profile?.avatar_url} ring />
           <View style={{ flex: 1 }}>
@@ -225,7 +225,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
               <Text style={{
                 color: c.text3, fontFamily: fontFor('600'), fontSize: TYPE.caption,
                 textAlign: 'right', writingDirection: 'rtl',
-                paddingHorizontal: SPACE.s5, marginBottom: 6, letterSpacing: 0.2,
+                paddingHorizontal: SPACE.s5, marginBottom: 8, letterSpacing: 0.2,
               }}>{g.title}</Text>
               {g.items.map((it) => (
                 <Pressable
@@ -233,7 +233,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                   onPress={it.onPress ? () => { onClose(); it.onPress!() } : () => goto(it.go)}
                   style={({ pressed }) => ({
                     flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
-                    paddingHorizontal: SPACE.s5, paddingVertical: 11,
+                    paddingHorizontal: SPACE.s5, paddingVertical: 12,
                     backgroundColor: pressed ? c.sunken : 'transparent',
                   })}>
                   <View style={{
@@ -255,7 +255,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         {/* المظهر والخروج */}
         <View style={{
-          flexDirection: 'row-reverse', alignItems: 'center', gap: 10,
+          flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
           paddingHorizontal: SPACE.s5, paddingTop: SPACE.s4,
         }}>
           <Pressable
@@ -263,7 +263,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
             style={({ pressed }) => ({
               flexDirection: 'row-reverse', alignItems: 'center', gap: 8, flex: 1,
               backgroundColor: pressed ? c.sunken : c.cardAlt,
-              borderRadius: RADIUS.sm, paddingVertical: 11, paddingHorizontal: 12,
+              borderRadius: RADIUS.sm, paddingVertical: 12, paddingHorizontal: 12,
             })}>
             {isDark ? <IcSun size={18} color={c.text2} /> : <IcMoon size={18} color={c.text2} />}
             <Text style={{
@@ -276,7 +276,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
             style={({ pressed }) => ({
               flexDirection: 'row-reverse', alignItems: 'center', gap: 8,
               backgroundColor: pressed ? c.dangerSoft : c.cardAlt,
-              borderRadius: RADIUS.sm, paddingVertical: 11, paddingHorizontal: 12,
+              borderRadius: RADIUS.sm, paddingVertical: 12, paddingHorizontal: 12,
             })}>
             <IcLogout size={18} color={c.danger} />
             <Text style={{
@@ -286,7 +286,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           </Pressable>
         </View>
 
-        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 6, justifyContent: 'center', paddingTop: SPACE.s4 }}>
+        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8, justifyContent: 'center', paddingTop: SPACE.s4 }}>
           <IcLogo size={16} color={c.text3} />
           <Text style={{ color: c.text3, fontSize: TYPE.caption, fontFamily: fontFor('500') }}>مِداد</Text>
         </View>
@@ -326,11 +326,11 @@ function NotesSheet({ open, onClose, notes }: { open: boolean; onClose: () => vo
             <IcBell size={34} color={c.text3} />
             <Text style={{
               color: c.text3, fontFamily: fontFor('500'), fontSize: TYPE.body,
-              marginTop: 10, textAlign: 'center', writingDirection: 'rtl',
+              marginTop: 12, textAlign: 'center', writingDirection: 'rtl',
             }}>لا شيء يحتاج انتباهك الآن.</Text>
           </View>
         ) : (
-          <ScrollView contentContainerStyle={{ paddingHorizontal: SPACE.s5, gap: 9 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingHorizontal: SPACE.s5, gap: 8 }} showsVerticalScrollIndicator={false}>
             {notes.map((n) => {
               const t = tones[n.tone]
               return (
@@ -339,10 +339,10 @@ function NotesSheet({ open, onClose, notes }: { open: boolean; onClose: () => vo
                   onPress={() => { onClose(); if (n.go) setTimeout(() => { try { nav.navigate(n.go!) } catch {} }, 180) }}
                   style={({ pressed }) => ({
                     backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-                    padding: 13, flexDirection: 'row-reverse', gap: 11, alignItems: 'flex-start',
+                    padding: 12, flexDirection: 'row-reverse', gap: 12, alignItems: 'flex-start',
                   })}>
                   <View style={{
-                    width: 8, height: 8, borderRadius: 4, backgroundColor: t.fg, marginTop: 6,
+                    width: 8, height: 8, borderRadius: 4, backgroundColor: t.fg, marginTop: 8,
                   }} />
                   <View style={{ flex: 1 }}>
                     <Text style={{
@@ -351,7 +351,7 @@ function NotesSheet({ open, onClose, notes }: { open: boolean; onClose: () => vo
                     }}>{n.title}</Text>
                     <Text style={{
                       color: c.text2, fontFamily: fontFor('400'), fontSize: TYPE.small, lineHeight: 21,
-                      textAlign: 'right', writingDirection: 'rtl', marginTop: 3,
+                      textAlign: 'right', writingDirection: 'rtl', marginTop: 4,
                     }}>{n.body}</Text>
                   </View>
                 </Pressable>

@@ -4,13 +4,11 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { AppHeader } from '../ui/AppHeader'
-import { Badge, Button, Card, Empty, HScroll, Loading, Row, Screen, Section, T } from '../ui/kit'
-import {
-  IcLibrary, IcFiles, IcChevron, IcTable, IcClock, IcCheck, IcCalendar, IcPlus,
-} from '../ui/icons'
+import { Badge, Button, Card, HScroll, Loading, Row, Screen, Section, T } from '../ui/kit'
+import { IcChevron, IcTable, IcClock, IcCheck, IcCalendar, IcSpark } from '../ui/icons'
 import { SPACE, RADIUS, TYPE, elevation } from '../lib/theme'
 import { daysLabel, fmtNum, fmtRelative } from '../lib/format'
-import type { DocumentRow, Period } from '../lib/types'
+import type { Period } from '../lib/types'
 import {
   fetchMyPeriods, fetchTakenToday, isoDate, periodState, todayWeekday,
 } from '../lib/classroom'
@@ -18,9 +16,8 @@ import {
 export default function Dashboard() {
   const { profile, subscriber, access, trialDays, c, plan } = useApp()
   const nav = useNavigation<any>()
-  const [docs, setDocs] = useState<DocumentRow[]>([])
   const [noor, setNoor] = useState(0)
-  const [team, setTeam] = useState(0)
+  const [shots, setShots] = useState(0)
   const [periods, setPeriods] = useState<Period[]>([])
   const [taken, setTaken] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -28,16 +25,16 @@ export default function Dashboard() {
 
   const load = useCallback(async () => {
     if (!subscriber?.id) { setLoading(false); return }
-    const [d, n, t] = await Promise.all([
-      supabase.from('documents').select('*').eq('subscriber_id', subscriber.id)
-        .order('updated_at', { ascending: false }).limit(20),
-      supabase.from('noor_tables').select('id', { count: 'exact', head: true }).eq('subscriber_id', subscriber.id),
-      supabase.from('profiles').select('id', { count: 'exact', head: true })
-        .eq('subscriber_id', subscriber.id).eq('status', 'active'),
+    /* أعدادٌ لا متون: البلاطة تعرض رقمًا، وجلبُ الصفوف كلِّها لعدّها
+       يُنزل ميغاباياتٍ لتُرسم منها خانتان. */
+    const [n, sh] = await Promise.all([
+      supabase.from('noor_tables').select('id', { count: 'exact', head: true })
+        .eq('subscriber_id', subscriber.id),
+      supabase.from('portfolio_items').select('id', { count: 'exact', head: true })
+        .eq('owner_id', profile?.id || ''),
     ])
-    setDocs((d.data || []) as DocumentRow[])
     setNoor(n.count || 0)
-    setTeam(t.count || 0)
+    setShots(sh.count || 0)
     if (profile?.id) {
       try {
         const [ps, tk] = await Promise.all([
@@ -68,8 +65,8 @@ export default function Dashboard() {
         <Pressable onPress={() => nav.navigate('حسابي')}>
           <View style={{
             backgroundColor: trialDays <= 2 ? c.warnSoft : c.primarySoft,
-            borderRadius: RADIUS.lg, padding: 13,
-            flexDirection: 'row-reverse', alignItems: 'center', gap: 10,
+            borderRadius: RADIUS.lg, padding: 12,
+            flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
           }}>
             <IcClock size={18} color={trialDays <= 2 ? c.warn : c.primarySoftFg} />
             <T size={TYPE.body} weight="600" color={trialDays <= 2 ? c.warn : c.primarySoftFg} style={{ flex: 1 }}>
@@ -85,28 +82,32 @@ export default function Dashboard() {
           {/* ───── حصّة الآن ───── */}
           {live ? <LivePeriod live={live} isNow={periodState(live, taken) === 'now'} /> : null}
 
-          {/* ───── وصولٌ سريع: أيقوناتٌ لا جُمل ───── */}
-          <HScroll>
-            <Quick icon={<IcPlus size={21} color={c.tint.violet} />} label="ملفّ جديد"
-              tint={c.tint.violet} onPress={() => nav.navigate('القوالب')} />
-            <Quick icon={<IcCheck size={21} color={c.tint.teal} />} label="رصد الحضور"
-              tint={c.tint.teal} badge={today.length ? `${doneToday}/${today.length}` : undefined}
+          {/* ───── ما يُفعل الآن — شبكةٌ لا شريطٌ يُقطع ─────
+              كان صفًّا أفقيًّا يعرض بلاطةً ونصفَ بلاطتين على الطرفين،
+              فيبدو مكسورًا لا ممتدًّا. والعين تقرأ نصفَ الشيء عطبًا.
+
+                  ما يُرى نصفُه يُقرأ خطأً.
+
+              وأربعٌ لا ستّ: «الفريق» انتقل إلى حسابي وهو موضعه، فصارت
+              الشبكةُ ٢×٢ مكتملةً بلا بلاطةٍ يتيمةٍ في صفٍّ أخير. */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACE.s3 }}>
+            <Quick icon={<IcCheck size={22} color={c.tint.teal} />} label="رصد الحضور"
+              tint={c.tint.teal}
+              stat={today.length ? `${fmtNum(doneToday)} من ${fmtNum(today.length)} حصص` : 'لا حصص اليوم'}
               onPress={() => nav.navigate('الرصد')} />
-            <Quick icon={<IcCalendar size={21} color={c.tint.blue} />} label="جدولي"
-              tint={c.tint.blue} badge={periods.length ? fmtNum(periods.length) : undefined}
+            <Quick icon={<IcCalendar size={22} color={c.tint.blue} />} label="جدولي"
+              tint={c.tint.blue}
+              stat={periods.length ? `${fmtNum(periods.length)} حصّة أسبوعيًّا` : 'لم يُضبط بعد'}
               onPress={() => nav.navigate('Timetable')} />
-            <Quick icon={<IcTable size={21} color={c.tint.amber} />} label="جداول نور"
-              tint={c.tint.amber} badge={noor ? fmtNum(noor) : undefined}
+            <Quick icon={<IcTable size={22} color={c.tint.amber} />} label="جداول نور"
+              tint={c.tint.amber}
+              stat={noor ? `${fmtNum(noor)} جدولًا` : 'لا جداول بعد'}
               onPress={() => nav.navigate('Noor')} />
-            <Quick icon={<IcFiles size={21} color={c.tint.rose} />} label="ملفّاتي"
-              tint={c.tint.rose} badge={docs.length ? fmtNum(docs.length) : undefined}
-              onPress={() => nav.navigate('ملفّاتي')} />
-            {!isSolo && (
-              <Quick icon={<IcLibrary size={21} color={c.tint.lime} />} label="الفريق"
-                tint={c.tint.lime} badge={`${team}/${plan?.seats ?? '—'}`}
-                onPress={() => nav.navigate('حسابي')} />
-            )}
-          </HScroll>
+            <Quick icon={<IcSpark size={22} color={c.tint.violet} />} label="ملفّ الإنجاز"
+              tint={c.tint.violet}
+              stat={shots ? `${fmtNum(shots)} شاهدًا` : 'ابدأ بالتقاط شاهد'}
+              onPress={() => nav.navigate('إنجازي')} />
+          </View>
 
           {/* ───── يوم الأحد … الخميس ───── */}
           {today.length > 0 && (
@@ -122,47 +123,6 @@ export default function Dashboard() {
             </Section>
           )}
 
-          {/* ───── آخر الملفّات ───── */}
-          <Section title="آخر ملفّاتي" action={
-            docs.length > 0
-              ? <Button label="الكلّ" variant="ghost" small onPress={() => nav.navigate('ملفّاتي')} />
-              : undefined
-          }>
-            {docs.length === 0 ? (
-              <Card>
-                <Empty
-                  title="لم تُنشئ ملفًّا بعد"
-                  line="اختر قالبًا، املأه في جوّالك، وصدّره جاهزًا للطباعة."
-                  art={<IcFiles size={30} color={c.text3} />}
-                  action={<Button label="تصفّح القوالب" variant="primary" onPress={() => nav.navigate('القوالب')} />}
-                />
-              </Card>
-            ) : (
-              <View style={{ gap: 9 }}>
-                {docs.slice(0, 5).map((d) => (
-                  <Card key={d.id} onPress={() => nav.navigate('Editor', { id: d.id })} style={{ padding: 13 }}>
-                    <Row style={{ justifyContent: 'space-between' }} gap={11}>
-                      <View style={{
-                        width: 38, height: 38, borderRadius: RADIUS.sm,
-                        backgroundColor: d.status === 'complete' ? c.successSoft : c.sunken,
-                        alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <IcFiles size={18} color={d.status === 'complete' ? c.success : c.text3} />
-                      </View>
-                      <View style={{ flex: 1, gap: 3 }}>
-                        <T size={TYPE.base} weight="600" numberOfLines={1}>{d.title}</T>
-                        <T size={TYPE.small} color={c.text3}>{fmtRelative(d.updated_at)}</T>
-                      </View>
-                      {d.status === 'complete'
-                        ? <Badge label="مكتمل" tone="success" />
-                        : <Badge label="مسوّدة" tone="neutral" />}
-                      <IcChevron size={15} color={c.text3} />
-                    </Row>
-                  </Card>
-                ))}
-              </View>
-            )}
-          </Section>
         </>
       )}
     </Screen>
@@ -177,7 +137,7 @@ function LivePeriod({ live, isNow }: { live: Period; isNow: boolean }) {
   return (
     <View style={{
       backgroundColor: isNow ? c.primary : c.card,
-      borderRadius: RADIUS.xl, padding: SPACE.s5, gap: 13,
+      borderRadius: RADIUS.xl, padding: SPACE.s5, gap: 12,
       ...elevation(c, isNow ? 2 : 1),
     }}>
       <Row style={{ justifyContent: 'space-between' }}>
@@ -195,7 +155,7 @@ function LivePeriod({ live, isNow }: { live: Period; isNow: boolean }) {
         </T>
       </Row>
 
-      <View style={{ gap: 3 }}>
+      <View style={{ gap: 4 }}>
         <T size={TYPE.h2} weight="700" color={isNow ? c.onPrimary : c.text} numberOfLines={1}>
           {live.subject}
         </T>
@@ -221,32 +181,40 @@ function LivePeriod({ live, isNow }: { live: Period; isNow: boolean }) {
 
 /* ───────── مربّع وصولٍ سريع ───────── */
 
-function Quick({ icon, label, tint, badge, onPress }: {
-  icon: React.ReactNode; label: string; tint: string; badge?: string; onPress: () => void
+/**
+ * بلاطةُ عمل — نصفُ العرض، وارتفاعٌ واحدٌ للأربع.
+ *
+ * وكانت شارةُ العدد تطفو في زاويةٍ فوق البلاطة، فتبدو ملصقةً لا جزءًا
+ * منها — وهي أحدُ ما يجعل الشاشة تبدو مبعثرة. فصار العددُ **سطرًا
+ * تحت الاسم**: يُقرأ مع ما يصفه، ويشغل موضعًا ثابتًا في كلّ بلاطة.
+ *
+ *     ما يطفو فوق الشيء ليس منه.
+ *
+ * والسطرُ لا يغيب: يقول «لا جداول بعد» بدل أن يختفي فتتفاوت ارتفاعات
+ * البلاطات وتنكسر الشبكة.
+ */
+function Quick({ icon, label, tint, stat, onPress }: {
+  icon: React.ReactNode; label: string; tint: string; stat: string; onPress: () => void
 }) {
   const { c } = useApp()
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        width: 96, backgroundColor: c.card, borderRadius: RADIUS.lg,
-        paddingVertical: 14, paddingHorizontal: 9, gap: 8, alignItems: 'center',
+        /* نصفُ العرض ناقصًا نصفَ الفجوة — فيستوي عمودان بلا حسابِ شاشة */
+        flexBasis: '48%', flexGrow: 1,
+        backgroundColor: c.card, borderRadius: RADIUS.lg,
+        padding: SPACE.s4, gap: 12,
         opacity: pressed ? 0.75 : 1, ...elevation(c, 1),
       })}>
       <View style={{
-        width: 44, height: 44, borderRadius: RADIUS.md, backgroundColor: tint + '1A',
+        width: 42, height: 42, borderRadius: RADIUS.md, backgroundColor: tint + '1F',
         alignItems: 'center', justifyContent: 'center',
       }}>{icon}</View>
-      <T size={TYPE.small} weight="600" numberOfLines={1} style={{ textAlign: 'center' }}>{label}</T>
-      {badge ? (
-        <View style={{
-          position: 'absolute', top: 9, left: 9,
-          backgroundColor: tint, borderRadius: RADIUS.pill,
-          paddingHorizontal: 6, paddingVertical: 1.5,
-        }}>
-          <T size={TYPE.micro} weight="700" color="#fff">{badge}</T>
-        </View>
-      ) : null}
+      <View style={{ gap: 2 }}>
+        <T size={TYPE.bodyLg} weight="700" numberOfLines={1}>{label}</T>
+        <T size={TYPE.small} color={c.text3} numberOfLines={1}>{stat}</T>
+      </View>
     </Pressable>
   )
 }
@@ -269,7 +237,7 @@ function PeriodChip({ p, state, onPress }: {
       onPress={onPress}
       style={({ pressed }) => ({
         width: 132, backgroundColor: look.bg, borderRadius: RADIUS.lg,
-        padding: 13, gap: 5, opacity: pressed ? 0.8 : 1,
+        padding: 12, gap: 4, opacity: pressed ? 0.8 : 1,
       })}>
       <Row style={{ justifyContent: 'space-between' }}>
         <T size={TYPE.micro} weight="700" color={look.fg}>الحصّة {p.slot}</T>

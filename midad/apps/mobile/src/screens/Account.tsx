@@ -59,7 +59,7 @@ export default function Account() {
 
   return (
     <Screen header={<AppHeader title="حسابي" />}>
-      <Card style={{ gap: 14 }}>
+      <Card style={{ gap: 16 }}>
         <Row gap={14}>
           <Pressable onPress={() => setPhotoSheet(true)} disabled={uploading}>
             <Avatar name={profile?.full_name || ''} size={64} uri={profile?.avatar_url} ring />
@@ -125,7 +125,7 @@ export default function Account() {
                 key={o.k} onPress={() => setThemeMode(o.k)}
                 style={({ pressed }) => ({
                   flex: 1, backgroundColor: on ? c.primarySoft : c.sunken,
-                  borderRadius: RADIUS.sm, paddingVertical: 11, gap: 5,
+                  borderRadius: RADIUS.sm, paddingVertical: 12, gap: 4,
                   alignItems: 'center', opacity: pressed ? 0.75 : 1,
                 })}>
                 {React.cloneElement(o.icon, { color: on ? c.primarySoftFg : c.text3 })}
@@ -177,7 +177,7 @@ function PhotoSheet({ open, onClose, onPick, hasPhoto }: {
         position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: c.card,
         borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl,
         paddingTop: SPACE.s4, paddingBottom: insets.bottom + SPACE.s5,
-        paddingHorizontal: SPACE.s5, gap: 9,
+        paddingHorizontal: SPACE.s5, gap: 8,
       }}>
         <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, alignSelf: 'center' }} />
         <T size={TYPE.h3} weight="700" style={{ paddingVertical: SPACE.s3 }}>صورتك الشخصيّة</T>
@@ -186,7 +186,7 @@ function PhotoSheet({ open, onClose, onPick, hasPhoto }: {
             key={o.m} onPress={() => onPick(o.m)}
             style={({ pressed }) => ({
               backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-              padding: 13, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+              padding: 12, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
             })}>
             <View style={{
               width: 40, height: 40, borderRadius: RADIUS.sm,

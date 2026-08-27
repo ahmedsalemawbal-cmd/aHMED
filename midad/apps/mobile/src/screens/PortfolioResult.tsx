@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, TextInput, View } from 'react-native'
 import { useRoute } from '@react-navigation/native'
 import * as Print from 'expo-print'
@@ -12,6 +12,7 @@ import { IcTrash, IcDownload, IcCheck, IcExternal } from '../ui/icons'
 import {
   editable, fromBlocks, moveBlock, removeBlock, setText, toBlocks, type Block,
 } from '../lib/docBlocks'
+import { resign } from '../lib/portfolio'
 import { SITE_URL } from '../lib/config'
 
 /**
@@ -32,12 +33,37 @@ export default function PortfolioResult() {
   const id: string = route.params?.id
   const title: string = route.params?.title || 'ملفّ الإنجاز'
 
+  /**
+   * المتنُ يأتي في المعاملات عند التركيب، ويُجلب عند الفتح من القائمة.
+   *
+   * وكان يُقرأ من المعاملات وحدها — فمن فتح ملفَّه بعد إغلاق التطبيق
+   * رأى شاشةً فارغةً لا خطأ فيها ولا محتوى، وظنّ ملفَّه ضاع.
+   *
+   *     الشاشةُ التي تنتظر ما لم يُعطَ تُري فراغًا لا عُذر.
+   */
   const [blocks, setBlocks] = useState<Block[]>(() => toBlocks(route.params?.html || ''))
+  const [fetching, setFetching] = useState(!route.params?.html)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [note, setNote] = useState<string | null>(null)
   const [editing, setEditing] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (route.params?.html || !id) return
+    let alive = true
+    ;(async () => {
+      const { data } = await supabase.from('documents')
+        .select('content_html').eq('id', id).maybeSingle()
+      if (!alive) return
+      /* والصورُ تُوقَّع من جديد: المحفوظ مسارٌ دائمٌ لا رابطٌ يُعرض. */
+      const html = await resign(((data as any)?.content_html) || '')
+      if (!alive) return
+      setBlocks(toBlocks(html))
+      setFetching(false)
+    })()
+    return () => { alive = false }
+  }, [id, route.params?.html])
 
   const pages = useMemo(() => {
     let n = 1
@@ -83,13 +109,13 @@ img{max-width:100%}table{width:100%;border-collapse:collapse}
     }
   }
 
-  if (!id) return <><AppHeader title={title} back /><Loading /></>
+  if (!id || fetching) return <><AppHeader title={title} back /><Loading label="يفتح ملفّك…" /></>
 
   return (
     <>
       <AppHeader title={title} back subtitle={`${blocks.length} كتلة · ${pages[pages.length - 1] || 1} صفحة`} />
 
-      <ScrollView contentContainerStyle={{ padding: SPACE.s5, paddingBottom: 120, gap: SPACE.s3 }}>
+      <ScrollView contentContainerStyle={{ padding: SPACE.s5, paddingBottom: 40, gap: SPACE.s3 }}>
         {!!note && <Note tone={note === 'حُفظ' ? 'success' : 'danger'}>{note}</Note>}
 
         <Note tone="info">
@@ -120,7 +146,7 @@ img{max-width:100%}table{width:100%;border-collapse:collapse}
               <Row gap={6}>
                 {srcOf(b.html).slice(0, 4).map((u, k) => (
                   <Image key={k} source={{ uri: u }}
-                    style={{ width: 58, height: 58, borderRadius: 6, backgroundColor: c.sunken }} />
+                    style={{ width: 58, height: 58, borderRadius: 10, backgroundColor: c.sunken }} />
                 ))}
                 <T size={TYPE.micro} color={c.text3}>{b.images} صورة</T>
               </Row>
@@ -190,7 +216,7 @@ function Ctl({ label, icon, onPress, dim }: {
   return (
     <Pressable onPress={onPress} disabled={dim} hitSlop={6}
       style={{
-        width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
+        width: 32, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
         backgroundColor: c.sunken, opacity: dim ? 0.35 : 1,
       }}>
       {icon || <T size={16} weight="700" color={c.text2}>{label}</T>}

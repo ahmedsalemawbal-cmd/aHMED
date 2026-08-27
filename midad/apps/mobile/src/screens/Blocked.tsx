@@ -17,9 +17,9 @@ export default function Blocked() {
 
   return (
     <Screen header={<AppHeader title="مِداد" back />}>
-      <View style={{ alignItems: 'center', gap: 14, paddingTop: SPACE.s7 }}>
+      <View style={{ alignItems: 'center', gap: 16, paddingTop: SPACE.s7 }}>
         <View style={{
-          width: 76, height: 76, borderRadius: 24,
+          width: 76, height: 76, borderRadius: 22,
           backgroundColor: suspended ? c.dangerSoft : c.warnSoft,
           alignItems: 'center', justifyContent: 'center',
         }}>

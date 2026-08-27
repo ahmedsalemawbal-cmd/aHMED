@@ -68,7 +68,7 @@ export default function Timetable() {
                 style={{
                   backgroundColor: on ? c.primary : c.sunken,
                   borderColor: on ? c.primary : c.border, borderWidth: 1,
-                  borderRadius: RADIUS.pill, paddingHorizontal: 16, paddingVertical: 9, minHeight: 42,
+                  borderRadius: RADIUS.pill, paddingHorizontal: 16, paddingVertical: 8, minHeight: 42,
                   justifyContent: 'center',
                 }}>
                 <T size={TYPE.body} weight={on ? '700' : '500'} color={on ? c.onPrimary : c.text2}>
@@ -104,7 +104,7 @@ export default function Timetable() {
             <Card key={p.id}
               onPress={() => nav.navigate('الرصد', { periodId: p.id })}
               style={{
-                gap: 10, borderColor: meta.border,
+                gap: 12, borderColor: meta.border,
                 borderWidth: st === 'now' ? 2 : 1,
               }}>
               <Row style={{ justifyContent: 'space-between' }}>

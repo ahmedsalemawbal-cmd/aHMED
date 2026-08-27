@@ -94,14 +94,14 @@ export function Input({ label, help, error, style, ...rest }: TextInputProps & {
 }) {
   const { c } = useApp()
   return (
-    <View style={{ gap: 7 }}>
+    <View style={{ gap: 8 }}>
       {label ? <T size={12} weight="600" color={c.text2}>{label}</T> : null}
       <TextInput
         placeholderTextColor={c.text3}
         {...rest}
         style={[{
           borderWidth: 1, borderColor: error ? c.danger : c.border, borderRadius: RADIUS.sm,
-          backgroundColor: c.cardAlt, color: c.text, paddingHorizontal: 14, paddingVertical: 12,
+          backgroundColor: c.cardAlt, color: c.text, paddingHorizontal: 16, paddingVertical: 12,
           fontSize: TYPE.lead, minHeight: 48, textAlign: 'right', writingDirection: 'rtl',
           fontFamily: fontFor('500'),
         }, style]}
@@ -131,7 +131,7 @@ export function Badge({ label, tone = 'neutral', color }: {
   return (
     <View style={{
       backgroundColor: bg, borderRadius: RADIUS.pill,
-      paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start',
+      paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'flex-start',
     }}>
       <Text numberOfLines={1} style={{
         color: fg, fontSize: TYPE.small, fontFamily: fontFor('600'), writingDirection: 'rtl',
@@ -226,7 +226,7 @@ export function Alert({ children, tone = 'info', icon }: {
   }[tone]
   return (
     <View style={{
-      backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 13,
+      backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 12,
       flexDirection: 'row-reverse', alignItems: 'flex-start', gap: icon ? 9 : 0,
       borderRightWidth: 3, borderRightColor: map.fg,
     }}>

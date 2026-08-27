@@ -28,7 +28,7 @@ export default function Login() {
         keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: 'center', gap: 12, marginBottom: SPACE.s4 }}>
           <View style={{
-            width: 78, height: 78, borderRadius: 24, backgroundColor: c.primary,
+            width: 78, height: 78, borderRadius: 22, backgroundColor: c.primary,
             alignItems: 'center', justifyContent: 'center',
             shadowColor: c.primaryDeep, shadowOpacity: 0.28, shadowRadius: 18,
             shadowOffset: { width: 0, height: 8 }, elevation: 6,

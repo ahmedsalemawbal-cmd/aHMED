@@ -37,6 +37,7 @@ export default function Portfolio() {
   const [note, setNote] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [viewing, setViewing] = useState<PortfolioItem | null>(null)
+  const [made, setMade] = useState<{ id: string; title: string; updated_at: string }[]>([])
 
   const load = useCallback(async () => {
     if (!profile) return
@@ -55,7 +56,22 @@ export default function Portfolio() {
       const mine = (tpls || []) as any[]
       const exact = mine.find((t) => (t.role_keys || []).includes(profile.role_key))
       const generic = mine.find((t) => !(t.role_keys || []).length)
-      setTpl((exact || generic || null) as Template | null)
+      const chosen = (exact || generic || null) as Template | null
+      setTpl(chosen)
+
+      /* الملفّاتُ المركَّبة — تُقرأ هنا لأنّها لا تُقرأ في مكانٍ آخر.
+         حُذف تبويب «ملفّاتي» من التطبيق (الملفّات في الموقع)، ولو تُرك
+         ملفُّ الإنجاز بلا موضعٍ في التطبيق لضاع بعد إغلاقه: يُركَّب
+         مرّةً، ويُفتح مرّةً، ثمّ لا سبيل إليه.
+
+             ما يُنشئه التطبيق يبقى في التطبيق. */
+      if (chosen) {
+        const { data: docs } = await supabase.from('documents')
+          .select('id,title,updated_at')
+          .eq('owner_id', profile.id).eq('template_id', chosen.id)
+          .order('updated_at', { ascending: false }).limit(6)
+        setMade((docs || []) as any[])
+      }
     } catch (e: any) {
       setErr(e?.message || 'تعذّر تحميل سجلّ الإنجاز')
     } finally {
@@ -244,7 +260,27 @@ export default function Portfolio() {
                 يقرأ الذكاءُ شواهدك الـ{items.length}، ويوزّعها على محاور «{tpl.title}»،
                 ويكتب لكلّ محورٍ فقرته. ثمّ تُعدّله كما تشاء.
               </T>
-              <Button label="ركّب الملفّ" variant="primary" loading={busy} onPress={build} />
+              <Button label={made.length ? 'ركّب ملفًّا جديدًا' : 'ركّب الملفّ'}
+                variant="primary" loading={busy} onPress={build} />
+            </>
+          )}
+
+          {made.length > 0 && (
+            <>
+              <Divider />
+              <T size={TYPE.small} weight="700" color={c.text2}>ما ركّبتَه</T>
+              {made.map((d) => (
+                <Pressable key={d.id}
+                  onPress={() => nav.navigate('PortfolioResult', { id: d.id, title: d.title })}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+                    paddingVertical: 12, opacity: pressed ? 0.6 : 1,
+                  })}>
+                  <IcSpark size={16} color={c.primary} />
+                  <T size={TYPE.body} numberOfLines={1} style={{ flex: 1 }}>{d.title}</T>
+                  <T size={TYPE.micro} color={c.text3}>{d.updated_at.slice(0, 10)}</T>
+                </Pressable>
+              ))}
             </>
           )}
         </Card>
@@ -297,7 +333,7 @@ function Stat({ n, label, tone }: { n: number; label: string; tone?: string }) {
   return (
     <View style={{
       flex: 1, backgroundColor: c.card, borderRadius: RADIUS.md,
-      paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderColor: c.border,
+      paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: c.border,
     }}>
       <T size={TYPE.h3} weight="700" color={tone || c.text}>{String(n)}</T>
       <T size={TYPE.micro} color={c.text3}>{label}</T>
