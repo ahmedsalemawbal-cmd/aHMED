@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useRef } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
@@ -13,7 +13,6 @@ import { RADIUS, SPACE, TYPE } from '../lib/theme'
 
 export default function Timetable() {
   const { c, subscriber, profile } = useApp()
-  const hsRef = useRef<ScrollView>(null)
   const nav = useNavigation<any>()
   const [day, setDay] = useState(todayWeekday())
   const [periods, setPeriods] = useState<Period[]>([])
@@ -55,12 +54,9 @@ export default function Timetable() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <AppHeader title="جدولي" back />
       <View style={{ backgroundColor: c.card, borderBottomWidth: 1, borderBottomColor: c.border, paddingVertical: SPACE.s3 }}>
-        {/* يبدأ من اليمين: `row-reverse` يضع أوّل عنصرٍ يمينًا والمحرّك
-            يفتح الشريط يسارًا، فيُرى آخرُه أوّلًا. */}
+        {/* والمحرّكُ يفتحه يمينًا من نفسه بعد أن صار RTL — فلا قفزَ */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}
-          ref={hsRef}
-          onContentSizeChange={(w) => { if (w > 0) hsRef.current?.scrollToEnd({ animated: false }) }}
-          contentContainerStyle={{ flexDirection: 'row-reverse', gap: 8, paddingHorizontal: SPACE.s4 }}>
+          contentContainerStyle={{ gap: 8, paddingHorizontal: SPACE.s4 }}>
           {WEEKDAYS.map((w, i) => {
             const on = i === day
             return (

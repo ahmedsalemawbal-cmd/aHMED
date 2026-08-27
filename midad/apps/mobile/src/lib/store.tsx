@@ -49,11 +49,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [systemDark, setSystemDark] = useState(Appearance.getColorScheme() === 'dark')
 
   useEffect(() => {
-    // العربيّة من اليمين — صراحةً في كلّ عنصر، لا بقلب المحرّك.
-    // forceRTL لا يسري إلّا بعد إعادة تشغيلٍ كاملة، فيختلف أوّل تشغيلٍ عمّا بعده
-    // ويُقلَب ما قُلِب أصلًا. فنُثبّت المحرّك على LTR ونكتب الاتّجاه بأيدينا.
-    I18nManager.allowRTL(false)
-    if (I18nManager.isRTL) I18nManager.forceRTL(false)
+    /* العربيّة من اليمين — بالمحرّك، لا بأيدينا.
+     *
+     * كان الاتّجاه يُكتب في كلّ عنصرٍ بـ`row-reverse`: خمسةٌ وعشرون قلبًا
+     * يدويًّا. وما يُكتب في خمسةٍ وعشرين موضعًا يُنسى في السادس والعشرين —
+     * فتخرج شاشةٌ جديدةٌ من اليسار ولا شيء يُنبّه. وهو سببُ ما رآه المالك
+     * «عشوائيّة»: اتّجاهٌ يصحّ حيث تُذكّرتُ ويشذّ حيث نسيت.
+     *
+     *     ما يُكتب في كلّ موضعٍ يُنسى في موضع.
+     *
+     * وكان المنعُ لأنّ `forceRTL` لا يسري إلّا بعد إعادة تشغيل، فيختلف
+     * أوّلُ تشغيلٍ عمّا بعده. وحُلَّ ذلك خارج جافاسكربت: مُلحقُ
+     * `expo-localization` يكتب `forcesRTL` في المشروع الأصليّ نفسه، فيبدأ
+     * التطبيق عربيًّا من أوّل فتحةٍ بلا إعادة تشغيل.
+     *
+     * ويبقى السطران هنا احتياطًا لو فُتح في «إكسبو جو» حيث لا مُلحق. */
+    I18nManager.allowRTL(true)
+    if (!I18nManager.isRTL) I18nManager.forceRTL(true)
     const sub = Appearance.addChangeListener(({ colorScheme }) => setSystemDark(colorScheme === 'dark'))
     AsyncStorage.getItem(THEME_KEY).then((v) => {
       if (v === 'light' || v === 'dark' || v === 'auto') setThemeModeState(v)

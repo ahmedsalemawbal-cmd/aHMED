@@ -67,7 +67,7 @@ export function Button({ label, onPress, variant = 'secondary', loading, disable
         paddingVertical: small ? 9 : 12,
         paddingHorizontal: iconOnly ? 0 : (small ? 12 : 16),
         width: iconOnly ? (small ? 36 : 44) : undefined,
-        minHeight: small ? 36 : 46, flexDirection: 'row-reverse',
+        minHeight: small ? 36 : 46, flexDirection: 'row',
         alignItems: 'center', justifyContent: 'center', gap: label && icon ? 7 : 0,
         opacity: off ? 0.5 : pressed ? 0.82 : 1,
       }, variant === 'primary' && !off ? elevation(c, 1) : null, style]}>
@@ -227,7 +227,7 @@ export function Alert({ children, tone = 'info', icon }: {
   return (
     <View style={{
       backgroundColor: map.bg, borderRadius: RADIUS.md, padding: 12,
-      flexDirection: 'row-reverse', alignItems: 'flex-start', gap: icon ? 9 : 0,
+      flexDirection: 'row', alignItems: 'flex-start', gap: icon ? 9 : 0,
       borderRightWidth: 3, borderRightColor: map.fg,
     }}>
       {icon}
@@ -274,7 +274,7 @@ export function Section({ title, action, children, gap = SPACE.s3 }: {
   const { c } = useApp()
   return (
     <View style={{ gap }}>
-      <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{
           color: c.text, fontFamily: fontFor('700'), fontSize: TYPE.h3,
           textAlign: 'right', writingDirection: 'rtl',
@@ -293,32 +293,28 @@ export function Section({ title, action, children, gap = SPACE.s3 }: {
 export function HScroll({ children, gap = 10, pad = SPACE.s5 }: {
   children: React.ReactNode; gap?: number; pad?: number
 }) {
-  const ref = useRef<ScrollView>(null)
-  /* `row-reverse` يضع أوّل عنصرٍ في أقصى يمين المحتوى، والمحرّك يفتح
-     الشريط على أقصى يساره — فيرى المستخدم آخر العناصر ويظنّ الترتيب
-     مقلوبًا. فنقفز إلى الطرف الآخر بلا حركةٍ مرئيّة عند كلّ تغيّرٍ في
-     المقاس: أوّل رسمٍ، وتبدّل البيانات، ودوران الجهاز.
-     ولا نفعلها إن كان المحتوى أضيق من الشريط — لا طرفَ يُقفز إليه. */
-  const settle = (w: number, _h: number) => {
-    if (w > 0) ref.current?.scrollToEnd({ animated: false })
-  }
+  /* كان هنا قفزٌ إلى الطرف عند كلّ تغيّرِ مقاس، لأنّ المحرّك كان LTR
+     يفتح الشريطَ على أقصى يساره بينما `row-reverse` يضع أوّلَ عنصرٍ
+     يمينًا — فيُرى آخرُها أوّلًا.
+
+     ومع RTL الحقيقيّ يفتح المحرّك الشريطَ يمينًا من نفسه. ولو بقي
+     القفزُ لصار يقفز إلى **الطرف الخطأ** — أي إلى العطب الذي وُضع
+     ليمنعه، مقلوبًا.
+
+         ما وُضع لعلاجِ سببٍ يُرفع برفعه. */
   return (
     <ScrollView
-      ref={ref}
       horizontal
       showsHorizontalScrollIndicator={false}
-      onContentSizeChange={settle}
       style={{ marginHorizontal: -pad }}
-      contentContainerStyle={{
-        flexDirection: 'row-reverse', gap, paddingHorizontal: pad, alignItems: 'stretch',
-      }}>
+      contentContainerStyle={{ gap, paddingHorizontal: pad, alignItems: 'stretch' }}>
       {children}
     </ScrollView>
   )
 }
 
 export function Row({ children, gap = 10, style }: { children: React.ReactNode; gap?: number; style?: ViewStyle }) {
-  return <View style={[{ flexDirection: 'row-reverse', alignItems: 'center', gap }, style]}>{children}</View>
+  return <View style={[{ flexDirection: 'row', alignItems: 'center', gap }, style]}>{children}</View>
 }
 
 export function Divider() {

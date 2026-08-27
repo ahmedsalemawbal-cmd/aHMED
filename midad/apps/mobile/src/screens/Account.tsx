@@ -14,7 +14,7 @@ import {
 } from '../ui/icons'
 import { SPACE, RADIUS, TYPE, elevation } from '../lib/theme'
 import { daysLabel, fmtBoth, fmtMoney } from '../lib/format'
-import { WEB_APP_URL } from '../lib/config'
+import { SITE_URL } from '../lib/config'
 
 export default function Account() {
   const { c, profile, subscriber, plan, roles, access, trialDays, themeMode, setThemeMode, signOut, refresh } = useApp()
@@ -100,12 +100,29 @@ export default function Account() {
             <T size={TYPE.body} color={c.text2}>بقي {daysLabel(trialDays)} — والملفّات تخرج بعلامة مائية حتى تشترك.</T>
           </>
         ) : null}
+        {/* الدفعُ يفتح صفحةَ مِداد في متصفّح الجوّال لا شاشةً في التطبيق.
+            وثلاثةُ أسبابٍ لا واحد:
+              ① منطقُ الدفع يُصان في موضعٍ واحد، والثاني يتفارق عنه.
+              ② بوّابةُ الدفع تفتح صفحةَ تحقّقٍ بنكيّة (3-D Secure) لا
+                 تعمل إلّا في متصفّحٍ كامل.
+              ③ وسياسةُ متجر جوجل توجب دفعَها هي — وعمولتَها — على ما
+                 يُشترى **داخل** التطبيق، وما يُشترى في المتصفّح خارجُها.
+
+                فتحُ المتصفّح ليس تنازلًا؛ هو الطريق. */}
+        {(access === 'trial' || access === 'expired') && (
+          <Button label={access === 'expired' ? 'جدّد اشتراكك وادفع' : 'اشترك الآن'}
+            variant="primary"
+            icon={<IcCard size={16} color={c.onPrimary} />}
+            onPress={() => Linking.openURL(`${SITE_URL}/#/app/checkout`)} />
+        )}
+
         {access === 'expired' && (
           <Alert tone="danger">انتهى اشتراكك. ملفّاتك محفوظة كلّها وتعود إليك فور التجديد.</Alert>
         )}
-        <Button label="افتح الاشتراك والفواتير" variant="primary"
-          icon={<IcExternal size={16} color={c.onPrimary} />}
-          onPress={() => Linking.openURL(WEB_APP_URL + '/#/app/subscription')} />
+
+        <Button label="الاشتراك والفواتير" variant="secondary"
+          icon={<IcExternal size={16} color={c.text} />}
+          onPress={() => Linking.openURL(`${SITE_URL}/#/app/subscription`)} />
         <T size={TYPE.small} color={c.text3}>
           الدفع والفواتير من الموقع — يفتح في متصفّح جوّالك بحسابك نفسه.
         </T>
@@ -186,7 +203,7 @@ function PhotoSheet({ open, onClose, onPick, hasPhoto }: {
             key={o.m} onPress={() => onPick(o.m)}
             style={({ pressed }) => ({
               backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-              padding: 12, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+              padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12,
             })}>
             <View style={{
               width: 40, height: 40, borderRadius: RADIUS.sm,

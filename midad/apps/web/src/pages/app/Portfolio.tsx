@@ -1,4 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { callFunction, supabase } from '../../lib/supabase'
 import { useApp } from '../../lib/store'
 import { useAsync } from '../../lib/hooks'
 import { fetchTemplates } from '../../lib/data'
@@ -38,7 +40,10 @@ export default function Portfolio() {
   const { subscriber, profile, toast } = useApp()
   const [adding, setAdding] = useState(false)
   const [del, setDel] = useState<PortfolioItem | null>(null)
+  const nav = useNavigate()
   const [busy, setBusy] = useState(false)
+  const [making, setMaking] = useState(false)
+  const [makeErr, setMakeErr] = useState<string | null>(null)
 
   const year = subscriber?.academic_year || ''
 
@@ -56,6 +61,40 @@ export default function Portfolio() {
   const items = data?.items || []
   const axes = data?.axes || []
   const cov = useMemo(() => coverage(axes, items), [axes, items])
+
+  /**
+   * إصدارُ ملفّ الإنجاز — نداءٌ واحدٌ يردّ المستند مُركَّبًا.
+   *
+   * والتركيبُ في الخادم لا هنا: لو بُني في المتصفّح وفي الجوّال معًا
+   * لتفارقا عند أوّل إصلاحٍ يقع في أحدهما — فيخرج ملفُّ المعلّم من
+   * حاسبه غيرَ ملفّه من جوّاله.
+   *
+   *     ما يُبنى مرّتين يتفارق مرّةً.
+   *
+   * والناتجُ مستندٌ عاديّ، فيُفتح في محرّر مِداد الكامل: ألوانٌ وجداولُ
+   * وخطوطٌ ورفعُ سطرٍ وإنزاله — وهو ما لا يقدر عليه الجوّال.
+   */
+  const compose = async () => {
+    if (!data?.tpl || !subscriber || !profile) return
+    setMaking(true); setMakeErr(null)
+    try {
+      const plan = await callFunction<{ html: string; counted: number }>(
+        'portfolio-compose', { template_id: data.tpl.id, year })
+      const { data: doc, error: e } = await supabase.from('documents').insert({
+        subscriber_id: subscriber.id,
+        owner_id: profile.id,
+        template_id: data.tpl.id,
+        title: `${data.tpl.title} — ${year}`,
+        content_html: plan.html,
+        status: 'draft',
+      }).select('id').single()
+      if (e || !doc) throw new Error(e?.message || 'تعذّر حفظ الملفّ')
+      nav(`/app/doc/${(doc as any).id}`)
+    } catch (err: any) {
+      setMakeErr(err?.message || 'تعذّر إصدار الملفّ')
+      setMaking(false)
+    }
+  }
 
   const save = async (item: NewItem) => {
     if (!subscriber || !profile) return
@@ -86,10 +125,19 @@ export default function Portfolio() {
         sub={loading ? 'جارٍ التحميل…'
           : `${cov.items} شاهدًا${year ? ` · العام ${year}` : ''}`}
         actions={
-          <Button auto variant="primary" icon={<IcPlus size={15} />}
-            onClick={() => setAdding(true)}>أضف شاهدًا</Button>
+          <div className="mdd-row" style={{ gap: 8 }}>
+            {data?.tpl && items.length > 0 && (
+              <Button auto variant="soft" loading={making} onClick={compose}>
+                أصدِر إنجازي
+              </Button>
+            )}
+            <Button auto variant="primary" icon={<IcPlus size={15} />}
+              onClick={() => setAdding(true)}>أضف شاهدًا</Button>
+          </div>
         }
       />
+
+      {makeErr ? <Alert tone="danger">{makeErr}</Alert> : null}
 
       {loading ? <SkeletonRows n={5} /> : (
         <>

@@ -13,10 +13,18 @@
  *
  *     الذكاءُ يكتب النثر ويوزّع الشواهد. والتصميمُ ليس رأيًا.
  *
- * فيردّ هذه الدالّةُ **خطّةً** لا صفحات: لكلّ محورٍ فقرةٌ مكتوبة وقائمةُ
- * معرّفاتِ الشواهد التي تخصّه. والتركيبُ بعدها حسابيٌّ لا احتماليّ:
- * يضع الشيفرةُ الفقرةَ تحت عنوان المحور والصورَ في شبكتها، بأنماط
- * القالب نفسها. فالنتيجة تُعاد بحذافيرها لو أُعيد التركيب.
+ * فيسأل هذه الدالّةُ النموذجَ **خطّةً** لا صفحات: لكلّ محورٍ فقرةٌ مكتوبة
+ * وقائمةُ معرّفاتِ الشواهد التي تخصّه. ثمّ تُركّب هي الصفحاتِ منها
+ * حسابيًّا: الفقرةُ تحت عنوان المحور، والصورُ في شبكتها. فالنتيجة تُعاد
+ * بحذافيرها لو أُعيد التركيب.
+ *
+ * ═══ والتركيبُ هنا لا في العميلين ═══
+ *
+ * كان في الجوّال، ثمّ طُلب الزرُّ في الموقع أيضًا. ولو نُسخ لصار بناءُ
+ * الصفحة في موضعين: يُصلَح تباعدُ سطرٍ في أحدهما ولا يُصلَح في الآخر،
+ * فيخرج ملفُّ المعلّم من جوّاله غيرَ ملفّه من حاسبه.
+ *
+ *     ما يُبنى مرّتين يتفارق مرّةً.
  *
  * ولا يخترع شاهدًا: القائمةُ تُصفّى بعد الردّ على المعرّفات الحقيقيّة،
  * فما لم يكن في سجلّه لا يدخل ملفَّه.
@@ -214,7 +222,19 @@ ${ledger}
 
   if (!sections.length) throw new HttpError('تعذّر تنظيم الشواهد — أعد المحاولة', 502)
 
+  /* ═══ ثمّ تُركَّب الصفحات ═══ */
+  const byId = new Map(items.map((i) => [i.id, i]))
+  const html = assemble(sections, byId, {
+    title: (tpl as any).title,
+    owner: caller.profile.full_name,
+    role: caller.profile.role_key,
+    year,
+    intro: String(parsed.intro || '').trim(),
+    conclusion: String(parsed.conclusion || '').trim(),
+  })
+
   return json({
+    html,
     intro: String(parsed.intro || '').trim(),
     conclusion: String(parsed.conclusion || '').trim(),
     sections,
@@ -225,3 +245,108 @@ ${ledger}
     limit,
   })
 }))
+
+/* ═════════════════════ التركيب ═════════════════════ */
+
+const esc = (s: any) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const arDate = (iso: string) => {
+  try {
+    return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn',
+      { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
+  } catch { return iso }
+}
+
+/**
+ * الصورةُ تُكتب بمسارها الدائم لا برابطٍ موقّع.
+ *
+ * الدلوُ خاصّ والموقّعُ ينتهي بعد ساعة. فلو كُتب الموقّعُ في متن المستند
+ * لظهرت الصورُ يومَ التركيب وانكسرت في اليوم التالي — والموظّف لا يعرف
+ * لمَ، ويظنّ ملفَّه تلف. والعميلُ يُعيد التوقيع عند كلّ عرض.
+ *
+ *     ما ينتهي لا يُحفظ في متن.
+ */
+const IMG_ATTR = 'data-mdd-portfolio'
+
+interface Sec { axis: string; summary: string; item_ids: string[] }
+
+function assemble(
+  sections: Sec[],
+  byId: Map<string, any>,
+  meta: { title: string; owner: string; role: string; year: string; intro: string; conclusion: string },
+): string {
+  const page = (inner: string) =>
+    `<div data-page="true" style="padding:56px 48px">${inner}</div>`
+  const pages: string[] = []
+
+  pages.push(page([
+    `<h1 style="text-align:center;font-size:26pt;margin:120px 0 8px">${esc(meta.title)}</h1>`,
+    `<p style="text-align:center;font-size:14pt;color:#555;margin:0 0 64px">العام الدراسيّ ${esc(meta.year)}</p>`,
+    `<p style="text-align:center;font-size:13pt;margin:0"><strong>${esc(meta.owner)}</strong></p>`,
+  ].join('')))
+
+  if (meta.intro) {
+    pages.push(page(
+      '<h2 style="font-size:16pt;margin:0 0 16px">مقدّمة</h2>'
+      + `<p style="font-size:12pt;line-height:2;text-align:justify">${esc(meta.intro)}</p>`))
+  }
+
+  const KIND_AR: Record<string, string> = {
+    photo: 'صورة', certificate: 'شهادة', file: 'مرفق', text: 'ملاحظة',
+  }
+
+  for (const sec of sections) {
+    const its = sec.item_ids.map((id) => byId.get(id)).filter(Boolean)
+    const photos = its.filter((i: any) => i.file_path)
+    const texts = its.filter((i: any) => !i.file_path)
+
+    const head = `<h2 style="font-size:16pt;margin:0 0 14px">${esc(sec.axis)}</h2>`
+      + (sec.summary
+        ? `<p style="font-size:12pt;line-height:2;text-align:justify;margin:0 0 18px">${esc(sec.summary)}</p>`
+        : '')
+
+    const list = texts.length
+      ? `<ul style="font-size:11.5pt;line-height:1.9;padding-inline-start:22px;margin:0 0 18px">${
+        texts.map((i: any) => `<li>${esc(i.title || i.note)}${
+          i.title && i.note ? ` — ${esc(i.note)}` : ''
+        } <span style="color:#777">(${esc(arDate(i.happened_on))})</span></li>`).join('')
+      }</ul>`
+      : ''
+
+    /* الصورُ شبكةً من عمودين، وخليّةٌ فارغةٌ تُكمل الصفّ الفرد — وإلّا
+       تمدّدت الصورةُ الوحيدة على عرض الصفحة كلِّه. */
+    const grid = photos.length
+      ? `<table style="width:100%;border-collapse:separate;border-spacing:10px 14px;border:0"><tbody>${
+        Array.from({ length: Math.ceil(photos.length / 2) }, (_, r) => {
+          const pair = photos.slice(r * 2, r * 2 + 2)
+          const cells = pair.map((i: any) => [
+            '<td style="width:50%;vertical-align:top;border:0;padding:0">',
+            `<img src="portfolio:${esc(i.file_path)}" ${IMG_ATTR}="${esc(i.file_path)}"`,
+            ' style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px">',
+            `<div style="font-size:10pt;color:#444;margin-top:5px;text-align:center">${
+              esc(i.title || KIND_AR[i.kind] || '')
+            } <span style="color:#888">— ${esc(arDate(i.happened_on))}</span></div>`,
+            '</td>',
+          ].join(''))
+          if (pair.length === 1) cells.push('<td style="width:50%;border:0"></td>')
+          return `<tr>${cells.join('')}</tr>`
+        }).join('')
+      }</tbody></table>`
+      : ''
+
+    pages.push(page(head + list + grid))
+  }
+
+  if (meta.conclusion) {
+    pages.push(page([
+      '<h2 style="font-size:16pt;margin:0 0 16px">خاتمة</h2>',
+      `<p style="font-size:12pt;line-height:2;text-align:justify">${esc(meta.conclusion)}</p>`,
+      '<div class="mdd-sign-row" style="margin-top:70px">',
+      `<div>${esc(meta.owner)}</div><div>مدير المدرسة</div>`,
+      '</div>',
+    ].join('')))
+  }
+
+  return pages.join('')
+}

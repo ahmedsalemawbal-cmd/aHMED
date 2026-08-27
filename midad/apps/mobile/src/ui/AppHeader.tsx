@@ -13,7 +13,7 @@ import {
 
 /* ═══════════ الهيدر ═══════════
    يمينًا: الصورة والتحيّة · يسارًا: الجرس وثلاث الشرطات.
-   الصفّ row-reverse لأنّ المحرّك مثبَّتٌ على LTR والعربيّة تُكتب بأيدينا. */
+   والصفُّ عاديٌّ: المحرّك RTL فيصفّ من اليمين من نفسه. */
 
 function greeting(): string {
   const h = new Date().getHours()
@@ -44,7 +44,7 @@ export function AppHeader({ title, back, subtitle }: {
       <View style={{
         paddingTop: insets.top + 6, paddingBottom: 12,
         paddingHorizontal: SPACE.s5, backgroundColor: c.bg,
-        flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+        flexDirection: 'row', alignItems: 'center', gap: 12,
       }}>
         {back ? (
           <Pressable
@@ -199,7 +199,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
         {/* ترويسة الدُّرج */}
         <View style={{
           paddingHorizontal: SPACE.s5, paddingBottom: SPACE.s4,
-          flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+          flexDirection: 'row', alignItems: 'center', gap: 12,
         }}>
           <Avatar name={profile?.full_name || 'م'} size={48} uri={profile?.avatar_url} ring />
           <View style={{ flex: 1 }}>
@@ -232,7 +232,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                   key={it.label}
                   onPress={it.onPress ? () => { onClose(); it.onPress!() } : () => goto(it.go)}
                   style={({ pressed }) => ({
-                    flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+                    flexDirection: 'row', alignItems: 'center', gap: 12,
                     paddingHorizontal: SPACE.s5, paddingVertical: 12,
                     backgroundColor: pressed ? c.sunken : 'transparent',
                   })}>
@@ -255,13 +255,13 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         {/* المظهر والخروج */}
         <View style={{
-          flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+          flexDirection: 'row', alignItems: 'center', gap: 12,
           paddingHorizontal: SPACE.s5, paddingTop: SPACE.s4,
         }}>
           <Pressable
             onPress={() => setThemeMode(isDark ? 'light' : 'dark')}
             style={({ pressed }) => ({
-              flexDirection: 'row-reverse', alignItems: 'center', gap: 8, flex: 1,
+              flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1,
               backgroundColor: pressed ? c.sunken : c.cardAlt,
               borderRadius: RADIUS.sm, paddingVertical: 12, paddingHorizontal: 12,
             })}>
@@ -274,7 +274,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           <Pressable
             onPress={() => { onClose(); setTimeout(() => signOut(), 200) }}
             style={({ pressed }) => ({
-              flexDirection: 'row-reverse', alignItems: 'center', gap: 8,
+              flexDirection: 'row', alignItems: 'center', gap: 8,
               backgroundColor: pressed ? c.dangerSoft : c.cardAlt,
               borderRadius: RADIUS.sm, paddingVertical: 12, paddingHorizontal: 12,
             })}>
@@ -286,7 +286,7 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           </Pressable>
         </View>
 
-        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8, justifyContent: 'center', paddingTop: SPACE.s4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', paddingTop: SPACE.s4 }}>
           <IcLogo size={16} color={c.text3} />
           <Text style={{ color: c.text3, fontSize: TYPE.caption, fontFamily: fontFor('500') }}>مِداد</Text>
         </View>
@@ -339,7 +339,7 @@ function NotesSheet({ open, onClose, notes }: { open: boolean; onClose: () => vo
                   onPress={() => { onClose(); if (n.go) setTimeout(() => { try { nav.navigate(n.go!) } catch {} }, 180) }}
                   style={({ pressed }) => ({
                     backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-                    padding: 12, flexDirection: 'row-reverse', gap: 12, alignItems: 'flex-start',
+                    padding: 12, flexDirection: 'row', gap: 12, alignItems: 'flex-start',
                   })}>
                   <View style={{
                     width: 8, height: 8, borderRadius: 4, backgroundColor: t.fg, marginTop: 8,

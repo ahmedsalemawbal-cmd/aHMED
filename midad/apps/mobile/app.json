@@ -46,6 +46,13 @@
           "photosPermission": "يحتاج مِداد إذن الصور لتختار صورتك الشخصيّة.",
           "cameraPermission": "يحتاج مِداد إذن الكاميرا لتلتقط صورتك الشخصيّة."
         }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportsRTL": true,
+          "forcesRTL": true
+        }
       ]
     ]
   }

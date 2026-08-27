@@ -236,7 +236,7 @@ export default function Attendance() {
       {/* شريط الإجراءات */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        flexDirection: 'row-reverse', gap: 8,
+        flexDirection: 'row', gap: 8,
         paddingHorizontal: SPACE.s5, paddingTop: SPACE.s4,
         paddingBottom: insets.bottom + SPACE.s4,
         backgroundColor: c.card, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl,
@@ -290,7 +290,7 @@ const StudentRow = React.memo(function StudentRow({ index, name, value, onChange
                 flex: 1, paddingVertical: 8, borderRadius: RADIUS.sm,
                 backgroundColor: on ? bg : c.sunken,
                 alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'row-reverse', gap: 4,
+                flexDirection: 'row', gap: 4,
                 opacity: pressed ? 0.7 : 1,
               })}>
               <Icon size={14} color={on ? fg : c.text3} />
@@ -333,14 +333,13 @@ function FormatSheet({ open, onClose, onPick }: {
             key={f} onPress={() => onPick(f)}
             style={({ pressed }) => ({
               backgroundColor: pressed ? c.sunken : c.cardAlt, borderRadius: RADIUS.md,
-              padding: 12, flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+              padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12,
             })}>
-            <View style={{
-              width: 40, height: 40, borderRadius: RADIUS.sm, backgroundColor: tint + '1A',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Icon size={21} color={tint} />
-            </View>
+            {/* الأيقونةُ عاريةٌ بلا مربّعٍ ملوّنٍ خلفها.
+                والمربّعُ كان يُضاعف الشكلَ لا يوضّحه: أيقونةُ PDF حمراءُ
+                بذاتها، فمربّعٌ أحمرُ خلفها لونٌ فوق لون. ولونُ الأيقونة
+                وحده يكفي للتمييز في صفٍّ من ثلاث. */}
+            <Icon size={26} color={tint} />
             <T size={TYPE.base} weight="600" style={{ flex: 1 }}>{FORMAT_AR[f]}</T>
             <T size={TYPE.small} weight="700" color={c.text3}>{f.toUpperCase()}</T>
           </Pressable>

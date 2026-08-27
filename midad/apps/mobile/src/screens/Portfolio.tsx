@@ -10,8 +10,8 @@ import { AppHeader } from '../ui/AppHeader'
 import { RADIUS, SPACE, TYPE } from '../lib/theme'
 import { IcCamera, IcImage, IcPlus, IcTrash, IcSpark, IcClose } from '../ui/icons'
 import {
-  KIND_AR, addItem, assemble, compose, fetchItems, pick, removeItem,
-  saveDocument, signedUrls,
+  KIND_AR, addItem, compose, fetchItems, pick, removeItem,
+  resign, saveDocument, signedUrls,
   type PortfolioItem, type PortfolioKind, type Picked,
 } from '../lib/portfolio'
 import type { Template } from '../lib/types'
@@ -145,20 +145,13 @@ export default function Portfolio() {
     setBusy(true)
     setNote('يقرأ الذكاءُ شواهدَك ويرتّبها…')
     try {
+      /* المتنُ يأتي مُركَّبًا من الخادم بمساراتٍ دائمةٍ للصور — يُحفظ
+         كما هو، ويُعاد توقيعُه للعرض وحده. */
       const plan = await compose(tpl.id, year)
-      /* الروابطُ تُطلب من جديدٍ لا تُؤخذ من الحالة: قد مضت ساعةٌ على
-         فتح الشاشة، والموقّعُ المنتهي يُخرج ملفًّا بصورٍ مكسورة. */
-      const fresh = await signedUrls(items.map((i) => i.file_path || ''))
-      const html = assemble(plan, items, fresh, {
-        title: tpl.title,
-        owner: profile.full_name,
-        role: (profile as any).role_name_ar || '',
-        school: (subscriber as any).school_name || (subscriber as any).name || '',
-        year,
-      })
-      const id = await saveDocument(subscriber.id, profile.id, tpl.id, `${tpl.title} — ${year}`, html)
+      const id = await saveDocument(
+        subscriber.id, profile.id, tpl.id, `${tpl.title} — ${year}`, plan.html)
       setNote(null)
-      nav.navigate('PortfolioResult', { id, html, title: tpl.title })
+      nav.navigate('PortfolioResult', { id, html: await resign(plan.html), title: tpl.title })
     } catch (e: any) {
       setNote(e?.message || 'تعذّر التركيب')
     } finally {
@@ -273,7 +266,7 @@ export default function Portfolio() {
                 <Pressable key={d.id}
                   onPress={() => nav.navigate('PortfolioResult', { id: d.id, title: d.title })}
                   style={({ pressed }) => ({
-                    flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+                    flexDirection: 'row', alignItems: 'center', gap: 12,
                     paddingVertical: 12, opacity: pressed ? 0.6 : 1,
                   })}>
                   <IcSpark size={16} color={c.primary} />

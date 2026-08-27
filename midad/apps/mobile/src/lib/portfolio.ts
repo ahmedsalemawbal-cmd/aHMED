@@ -187,6 +187,8 @@ export async function removeItem(it: PortfolioItem): Promise<void> {
 /* ═════════════════════════ التركيب ═════════════════════════ */
 
 export interface Plan {
+  /** المتنُ مُركَّبًا — من الخادم، لا من هنا. */
+  html: string
   intro: string
   conclusion: string
   sections: { axis: string; summary: string; item_ids: string[] }[]
@@ -201,122 +203,18 @@ export async function compose(templateId: string, year: string): Promise<Plan> {
   return callFunction<Plan>('portfolio-compose', { template_id: templateId, year })
 }
 
-const esc = (s: string) => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-
-const AR_DATE = (iso: string) => {
-  try {
-    return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn',
-      { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
-  } catch { return iso }
-}
-
 /**
- * التركيب — حسابيٌّ لا احتماليّ.
+ * ولا تركيبَ هنا.
  *
- * الذكاء ردّ خطّةً: لكلّ محورٍ فقرةٌ ومعرّفاتُ شواهده. وهنا تُبنى الصفحات
- * منها بلا اجتهاد: نفس الترتيب، نفس الأنماط، نفس الصناديق. فلو رُكّبت
- * الخطّةُ نفسها مرّتين خرجت الصفحتان متطابقتين حرفًا بحرف.
+ * كان في هذا الملفّ نسخةٌ تبني الصفحات من الخطّة. ثمّ طُلب الزرُّ في
+ * الموقع أيضًا، فكان أمامي أن أنسخها ثانيةً — ونسختان تُصلَح إحداهما
+ * ولا تُصلَح الأخرى، فيخرج ملفُّ المعلّم من جوّاله غيرَ ملفّه من حاسبه.
  *
- * ولمَ صناديقُ `data-page`؟ لأنّها ما يفهمه محرّرُ مِداد ومُصدِّرُ الـPDF
- * على السواء: صندوقٌ = صفحةٌ. فالملفّ يخرج مُصفّحًا لا كتلةً واحدة.
+ *     ما يُبنى مرّتين يتفارق مرّةً.
  *
- * والصورةُ برابطٍ موقّت — ولذلك تُستبدل عند الحفظ بمسارٍ دائم (انظر
- * `PORTFOLIO_IMG_ATTR`): الرابطُ الموقّع ينتهي بعد ساعة، ولو حُفظ في متن
- * المستند لظهرت الصور اليوم وانكسرت غدًا.
+ * فانتقل التركيبُ إلى `portfolio-compose`: تردّ الدالّةُ المتنَ جاهزًا
+ * بمساراتٍ دائمةٍ للصور، ويُعيد كلُّ عميلٍ توقيعَها عند العرض وحسب.
  */
-export const PORTFOLIO_IMG_ATTR = 'data-mdd-portfolio'
-
-export function assemble(
-  plan: Plan,
-  items: PortfolioItem[],
-  urls: Record<string, string>,
-  meta: { title: string; owner: string; role: string; school: string; year: string },
-): string {
-  const byId = new Map(items.map((i) => [i.id, i]))
-  const pages: string[] = []
-
-  const page = (inner: string) =>
-    `<div data-page="true" style="padding:56px 48px">${inner}</div>`
-
-  /* الغلاف */
-  pages.push(page([
-    `<h1 style="text-align:center;font-size:26pt;margin:120px 0 8px">${esc(meta.title)}</h1>`,
-    `<p style="text-align:center;font-size:14pt;color:#555;margin:0 0 64px">العام الدراسيّ ${esc(meta.year)}</p>`,
-    `<p style="text-align:center;font-size:13pt;margin:0 0 4px"><strong>${esc(meta.owner)}</strong></p>`,
-    meta.role ? `<p style="text-align:center;font-size:12pt;color:#555;margin:0 0 4px">${esc(meta.role)}</p>` : '',
-    meta.school ? `<p style="text-align:center;font-size:12pt;color:#555;margin:0">${esc(meta.school)}</p>` : '',
-  ].join('')))
-
-  /* المقدّمة */
-  if (plan.intro) {
-    pages.push(page([
-      '<h2 style="font-size:16pt;margin:0 0 16px">مقدّمة</h2>',
-      `<p style="font-size:12pt;line-height:2;text-align:justify">${esc(plan.intro)}</p>`,
-    ].join('')))
-  }
-
-  /* المحاور — كلُّ محورٍ صفحةٌ فأكثر */
-  for (const sec of plan.sections) {
-    const its = sec.item_ids.map((id) => byId.get(id)).filter(Boolean) as PortfolioItem[]
-    const photos = its.filter((i) => i.file_path && urls[i.file_path!])
-    const texts = its.filter((i) => !i.file_path)
-
-    const head = [
-      `<h2 style="font-size:16pt;margin:0 0 14px">${esc(sec.axis)}</h2>`,
-      sec.summary
-        ? `<p style="font-size:12pt;line-height:2;text-align:justify;margin:0 0 18px">${esc(sec.summary)}</p>`
-        : '',
-    ].join('')
-
-    /* الملاحظاتُ قائمةً — ولكلٍّ تاريخُه، فهو ما يُثبت أنّه شاهدُ عام. */
-    const list = texts.length
-      ? `<ul style="font-size:11.5pt;line-height:1.9;padding-inline-start:22px;margin:0 0 18px">${
-        texts.map((i) => `<li>${esc(i.title || i.note)}${
-          i.title && i.note ? ` — ${esc(i.note)}` : ''
-        } <span style="color:#777">(${esc(AR_DATE(i.happened_on))})</span></li>`).join('')
-      }</ul>`
-      : ''
-
-    /* الصورُ شبكةً من عمودين — والتعليقُ تحت كلٍّ لا بجانبها. */
-    const grid = photos.length
-      ? `<table style="width:100%;border-collapse:separate;border-spacing:10px 14px;border:0"><tbody>${
-        Array.from({ length: Math.ceil(photos.length / 2) }, (_, r) => {
-          const pair = photos.slice(r * 2, r * 2 + 2)
-          const cells = pair.map((i) => [
-            '<td style="width:50%;vertical-align:top;border:0;padding:0">',
-            `<img src="${esc(urls[i.file_path!])}" ${PORTFOLIO_IMG_ATTR}="${esc(i.file_path!)}"`,
-            ' style="width:100%;height:auto;border:1px solid #ddd;border-radius:6px">',
-            `<div style="font-size:10pt;color:#444;margin-top:5px;text-align:center">${
-              esc(i.title || KIND_AR[i.kind])
-            } <span style="color:#888">— ${esc(AR_DATE(i.happened_on))}</span></div>`,
-            '</td>',
-          ].join(''))
-          /* خليّةٌ فارغةٌ تُكمل الصفّ الفرد، وإلّا تمدّدت الصورةُ الوحيدة
-             على عرض الصفحة كلِّه. */
-          if (pair.length === 1) cells.push('<td style="width:50%;border:0"></td>')
-          return `<tr>${cells.join('')}</tr>`
-        }).join('')
-      }</tbody></table>`
-      : ''
-
-    pages.push(page(head + list + grid))
-  }
-
-  /* الخاتمة */
-  if (plan.conclusion) {
-    pages.push(page([
-      '<h2 style="font-size:16pt;margin:0 0 16px">خاتمة</h2>',
-      `<p style="font-size:12pt;line-height:2;text-align:justify">${esc(plan.conclusion)}</p>`,
-      '<div class="mdd-sign-row" style="margin-top:70px">',
-      `<div>${esc(meta.owner)}</div><div>مدير المدرسة</div>`,
-      '</div>',
-    ].join('')))
-  }
-
-  return pages.join('')
-}
 
 /**
  * ينشئ المستند ويردّ معرّفه — ليُفتح في المحرّر.
@@ -329,16 +227,12 @@ export function assemble(
 export async function saveDocument(
   subscriberId: string, ownerId: string, templateId: string, title: string, html: string,
 ): Promise<string> {
-  const stored = html.replace(
-    new RegExp(`src="[^"]*"(\\s+${PORTFOLIO_IMG_ATTR}="([^"]*)")`, 'g'),
-    (_m, tail, path) => `src="portfolio:${path}"${tail}`,
-  )
   const { data, error } = await supabase.from('documents').insert({
     subscriber_id: subscriberId,
     owner_id: ownerId,
     template_id: templateId,
     title,
-    content_html: stored,
+    content_html: html,
     status: 'draft',
   }).select('id').single()
   if (error || !data) throw new Error(error?.message || 'تعذّر حفظ الملفّ')

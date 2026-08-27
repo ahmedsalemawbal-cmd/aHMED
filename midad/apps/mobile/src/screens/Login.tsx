@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, View, Linking } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import { useApp } from '../lib/store'
 import { Alert, Button, Input, Row, T } from '../ui/kit'
 import { IcLogo, IcEye, IcEyeOff, IcExternal } from '../ui/icons'
@@ -7,6 +8,7 @@ import { SPACE, RADIUS, TYPE } from '../lib/theme'
 import { WEB_APP_URL } from '../lib/config'
 
 export default function Login() {
+  const nav = useNavigation<any>()
   const { signIn, c } = useApp()
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -60,16 +62,18 @@ export default function Login() {
 
         <Button label="دخول" variant="primary" onPress={submit} loading={busy} />
 
+        {/* التسجيلُ هنا لا في المتصفّح.
+            كان يُحال إلى الموقع: من ثبّت التطبيق ثمّ أُخرج منه ليُسجّل في
+            متصفّحٍ ثمّ يعود — يعود منهم قليل. */}
         <View style={{
           backgroundColor: c.sunken, borderRadius: RADIUS.md, padding: SPACE.s4, gap: 8,
         }}>
           <T size={TYPE.bodyLg} weight="700">ليس لديك حساب؟</T>
           <T size={TYPE.body} color={c.text2}>
-            التسجيل والاشتراك يتمّان من موقع مِداد — سبعة أيّام تجربة بلا بطاقة، ثمّ تدخل هنا بجوّالك.
+            افتح حسابَ معلّمٍ الآن — سبعةُ أيّامٍ تجربةً بلا بطاقة. والمدارسُ تشترك من الموقع.
           </T>
-          <Button label="افتح موقع مِداد" variant="soft" small
-            icon={<IcExternal size={14} color={c.primarySoftFg} />}
-            onPress={() => Linking.openURL(WEB_APP_URL + '/#/join')} />
+          <Button label="أنشئ حسابًا" variant="soft" small
+            onPress={() => nav.navigate('Signup')} />
         </View>
 
         <T size={TYPE.small} color={c.text3} align="center">

@@ -73,7 +73,9 @@ T('وكلُّ نصفِ قطرٍ من الرموز', strayR.length === 0,
 {
   const missing = files
     .filter((f) => f.includes('/screens/'))
-    .filter((f) => !/Login|Blocked/.test(f))
+    /* شاشاتُ ما قبل الدخول تُستثنى: `AppHeader` يرسم صورةَ المستخدم
+       والجرسَ ودُرجَ الحساب، ولا حسابَ بعد. فترسم كلٌّ منها رجوعَها. */
+    .filter((f) => !/Login|Signup|Blocked/.test(f))
     .filter((f) => {
       const src = fs.readFileSync(f, 'utf8')
       return !/AppHeader/.test(src) && !/<Screen\b/.test(src)
@@ -103,6 +105,46 @@ T('وكلُّ نصفِ قطرٍ من الرموز', strayR.length === 0,
   const dead = ['Library.tsx', 'MyFiles.tsx', 'TemplateDetail.tsx', 'Editor.tsx']
     .filter((f) => fs.existsSync(path.join(APPDIR, 'screens', f)))
   T('  ولا ملفَّ شاشةٍ ميّت', dead.length === 0, dead.join(' · ') || 'نظيف')
+}
+
+/* ═══ الاتّجاه: بالمحرّك لا بأيدينا ═══
+ *
+ * كان الاتّجاه يُكتب في كلّ عنصرٍ بـ`row-reverse`: خمسةٌ وعشرون قلبًا
+ * يدويًّا. وما يُكتب في خمسةٍ وعشرين موضعًا يُنسى في السادس والعشرين —
+ * فتخرج شاشةٌ جديدةٌ من اليسار ولا شيء يُنبّه.
+ *
+ *     ما يُكتب في كلّ موضعٍ يُنسى في موضع.
+ *
+ * وأخطرُ ما في التحويل أنّ قلبًا يدويًّا واحدًا بقي يعني **انقلابًا
+ * مزدوجًا**: المحرّك يقلب والصفُّ يقلب، فيعود إلى اليسار في موضعٍ واحدٍ
+ * وسط شاشةٍ عربيّة. وهو أسوأ من ألّا يُقلب شيء.
+ */
+{
+  const bad = []
+  for (const f of files) {
+    const src = fs.readFileSync(f, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ')
+    if (/row-reverse/.test(src)) bad.push(path.basename(f))
+  }
+  T('لا قلبَ يدويًّا للاتّجاه', bad.length === 0, bad.join(' · ') || 'نظيف')
+
+  const store = fs.readFileSync(path.join(APPDIR, 'lib/store.tsx'), 'utf8')
+  T('  والمحرّك يُشغَّل RTL',
+    /allowRTL\(true\)/.test(store) && /forceRTL\(true\)/.test(store))
+
+  /* والمُلحقُ هو الذي يجعله عربيًّا من **أوّل فتحة**: بدونه لا يسري
+     الاتّجاه إلّا بعد إعادة تشغيل، فيرى المستعمل شاشةً مقلوبةً أوّل مرّة. */
+  const app = JSON.parse(fs.readFileSync(path.join(APPDIR, '../app.json'), 'utf8'))
+  const loc = (app.expo.plugins || []).find((p) => Array.isArray(p) && p[0] === 'expo-localization')
+  T('  ومُلحقُ الاتّجاه مضبوطٌ في المشروع الأصليّ',
+    !!loc && loc[1]?.forcesRTL === true && loc[1]?.supportsRTL === true,
+    loc ? JSON.stringify(loc[1]) : 'غائب')
+
+  /* وما وُضع لعلاج LTR يُرفع برفعه: القفزُ إلى طرف الشريط كان يعالج
+     أنّ المحرّك يفتحه يسارًا — ومع RTL صار يقفز إلى الطرف الخطأ. */
+  const jumpy = files.filter((f) => /scrollToEnd/.test(fs.readFileSync(f, 'utf8')))
+    .map((f) => path.basename(f))
+  T('  ولا قفزَ إلى طرف شريطٍ أفقيّ', jumpy.length === 0, jumpy.join(' · ') || 'نظيف')
 }
 
 process.exit(T.done() === 0 ? 0 : 1)

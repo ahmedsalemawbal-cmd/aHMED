@@ -66,7 +66,7 @@ export default function Dashboard() {
           <View style={{
             backgroundColor: trialDays <= 2 ? c.warnSoft : c.primarySoft,
             borderRadius: RADIUS.lg, padding: 12,
-            flexDirection: 'row-reverse', alignItems: 'center', gap: 12,
+            flexDirection: 'row', alignItems: 'center', gap: 12,
           }}>
             <IcClock size={18} color={trialDays <= 2 ? c.warn : c.primarySoftFg} />
             <T size={TYPE.body} weight="600" color={trialDays <= 2 ? c.warn : c.primarySoftFg} style={{ flex: 1 }}>
@@ -169,7 +169,7 @@ function LivePeriod({ live, isNow }: { live: Period; isNow: boolean }) {
         style={({ pressed }) => ({
           backgroundColor: isNow ? c.onPrimary : c.primary,
           borderRadius: RADIUS.md, paddingVertical: 12,
-          flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8,
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
           opacity: pressed ? 0.85 : 1,
         })}>
         <IcCheck size={17} color={isNow ? c.primary : c.onPrimary} />

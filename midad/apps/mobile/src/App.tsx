@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar'
 
 import { AppProvider, useApp } from './lib/store'
 import Login from './screens/Login'
+import Signup from './screens/Signup'
 import Dashboard from './screens/Dashboard'
 import Noor from './screens/Noor'
 import NoorTable from './screens/NoorTable'
@@ -35,14 +36,11 @@ function Tabs() {
          كلّ شاشةٍ ترسم AppHeader الخاصّ بها، عربيًّا من اليمين. */
       screenOptions={{
         headerShown: false,
-        /* الشريط السفليّ يرسمه المُوجِّه بنفسه، ونحن ثبّتنا المحرّك على
-           LTR، فيصفّ التبويبات من اليسار: «الرئيسية» في أقصى اليسار وهي
-           أوّل ما تقصده العين. فنقلب الصفّ هنا، ويبقى ترتيب التصريح على
-           حاله فلا تتبدّل الوجهات ولا الروابط العميقة. */
+        /* والشريطُ السفليّ يصفّ من اليمين بالمحرّك، لا بقلبٍ يدويّ. */
         tabBarStyle: {
           backgroundColor: c.card, borderTopWidth: 0, height: 64,
           paddingBottom: 9, paddingTop: 7, elevation: 0,
-          flexDirection: 'row-reverse',
+          flexDirection: 'row',
         },
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.text3,
@@ -103,11 +101,15 @@ function Root() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: c.bg },
-          /* الدفع من اليمين — فالرجوع في العربيّة إلى اليمين */
-          animation: 'slide_from_left',
+          /* ولا يُقلب الانتقالُ بأيدينا: المُوجِّه يقرأ RTL من المحرّك
+             فيدفع الشاشةَ من اليمين. وكان هنا `slide_from_left` تعويضًا
+             عن LTR — ومع RTL يصير تعويضًا معكوسًا. */
         }}>
         {access === 'anon' ? (
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+            <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }} />
+          </>
         ) : access === 'expired' || access === 'suspended' || access === 'member_suspended' ? (
           <Stack.Screen name="Blocked" component={Blocked} />
         ) : (
