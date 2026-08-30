@@ -23,8 +23,9 @@
 
 /* لا `import`: سكربتات المحتوى في MV3 لا تقبل الوحدات. والنواة تُحمَّل
    قبلنا في البيان، فتضع نفسها على self.Midad. */
-const { getKey, verifyKey, sendTable, readTables } = self.Midad
+const { getKey, sendTable, readTables, panelInfo } = self.Midad
 
+const SITE = 'https://ahmedawbal.com'
 const HOST_ID = 'midad-host'
 const COLLAPSE_KEY = 'midad_panel_open'
 
@@ -48,9 +49,12 @@ async function boot() {
 
   const state = {
     open: false,
-    linked: null,      // اسم المشترك، أو null إن لم يُربط
+    /* ما يردّه الخادم: الاسمُ والمدرسةُ والمتبقّي والأدوات. و`null`
+       يعني «لم يُسأل بعد»، و`false` يعني «سُئل ولم يُربط». */
+    info: null,
     tables: null,
     busy: false,
+    err: null,
   }
 
   /* الطيّ يُحفظ: مَن أغلق اللوحة لا يريدها تعود مفتوحةً في كلّ صفحة. */
@@ -100,20 +104,35 @@ function handlersRest(wrap, state) {
   }
 }
 
+/**
+ * نداءٌ واحدٌ عند الفتح — لا ثلاثة.
+ *
+ * كان التحقّقُ من المفتاح نداءً، وقراءةُ الجدول نداءً. والمعلّم يفتح
+ * اللوحةَ فينتظر رحلتين. فصار `panel` يردّ الاسمَ والمدرسةَ والمتبقّي
+ * والأدواتِ في ردٍّ واحد، وقراءةُ الجدول محلّيّةٌ لا تحتاج شبكة.
+ *
+ *     الرحلةُ التي تُدمج لا تُنتظر.
+ */
 async function load(wrap, state) {
   state.busy = true
+  state.err = null
   render(wrap, state, handlers(wrap, state))
   try {
     const key = await getKey()
-    if (!key) { state.linked = null; state.tables = [] }
-    else {
-      const who = await verifyKey(key).catch(() => null)
-      state.linked = who?.subscriber || null
-      state.tables = state.linked ? (readTables().tables || []) : []
+    if (!key) {
+      state.info = false
+    } else {
+      state.info = await panelInfo()
+      /* والجدولُ يُقرأ بعد التحقّق: قراءةُ صفحةٍ لمن لا حساب له عبثٌ
+         يُبطئ الفتح ولا يُستعمل. */
+      state.tables = readTables().tables || []
     }
-  } catch {
-    state.linked = null
-    state.tables = []
+  } catch (e) {
+    /* والسببُ يُقال: «انتهت صلاحية المفتاح» أفضلُ من لوحةٍ فارغة.
+       ومنافسانا يُخفيان كلَّ شيءٍ حين يُغلق الخادمُ الباب، فيظنّ
+       المشترك أنّ الإضافة تعطّلت لا أنّ اشتراكه انتهى. */
+    state.info = false
+    state.err = e?.message || 'تعذّر الاتّصال بمِداد'
   }
   state.busy = false
   render(wrap, state, handlers(wrap, state))
@@ -150,6 +169,11 @@ const I = {
   refresh: ['M16.4 10a6.4 6.4 0 1 1-1.9-4.5', 'M16.6 3v3.6H13'],
   link: ['M8.4 11.6a3.4 3.4 0 0 0 5 .3l2-2a3.4 3.4 0 0 0-4.8-4.8l-1.1 1.1',
          'M11.6 8.4a3.4 3.4 0 0 0-5-.3l-2 2a3.4 3.4 0 0 0 4.8 4.8l1.1-1.1'],
+  files: ['M4 3.6h7l4 4v9H4z', 'M11 3.6v4h4'],
+  doc: ['M4 3.6h12v12.8H4z', 'M7 7.4h6M7 10.4h6M7 13.4h3.5'],
+  down: ['M10 3.4v9.4', 'M6.4 9.4 10 13l3.6-3.6', 'M4 16.4h12'],
+  chat: ['M10 3.4a6.6 6.6 0 0 0-5.6 10.1L3.4 16.6l3.2-1a6.6 6.6 0 1 0 3.4-12.2z'],
+  chart: ['M4 16.4V9.6M8.6 16.4V4.6M13.2 16.4v-8M17 16.4h-14'],
 }
 
 function render(wrap, state, h) {
@@ -167,52 +191,151 @@ function render(wrap, state, h) {
 
   if (!state.open) return
 
-  // ── اللوحة ──
+  const info = state.info || null
   const card = el('div', 'card')
 
+  /* ═════ الشريط: الاسمُ والمتبقّي ═════
+     المتبقّي أمام عينه دائمًا — تذكيرٌ بالتجديد في الموضع الذي يعمل فيه.
+     وهو رقمٌ من الخادم لا سمةٌ في صورة كما عند غيرنا. */
   const hd = el('div', 'hd')
+  hd.appendChild(el('span', 'hd-mk', 'مِ'))
   const hdTx = el('div', 'hd-tx')
   hdTx.appendChild(el('strong', null, 'مِداد'))
-  hdTx.appendChild(el('span', null, state.linked || 'غير مربوط'))
+  hdTx.appendChild(el('span', null, info ? (info.school || '') : 'غير مربوط'))
   hd.appendChild(hdTx)
+
+  if (info && info.days_left != null) {
+    /* وثلاثةُ أيّامٍ أو أقلّ تُلوَّن: الرقمُ وحده لا يُنبّه. */
+    const soon = info.days_left <= 7
+    hd.appendChild(el('span', 'days' + (soon ? ' is-soon' : ''),
+      info.days_left === 0 ? 'انتهى' : `متبقٍّ ${ar(info.days_left)} يومًا`))
+  }
+
   const rf = el('button', 'ghost')
-  rf.title = 'أعِد قراءة الصفحة'
-  rf.appendChild(svg(I.refresh, 15))
+  rf.title = 'أعِد القراءة'
+  rf.appendChild(svg(I.refresh, 14))
   rf.addEventListener('click', h.refresh)
   hd.appendChild(rf)
   card.appendChild(hd)
 
-  const bd = el('div', 'bd')
-  card.appendChild(bd)
-
+  /* ═════ ما في الصفحة الآن ═════
+     وهو ما لا يفعله منافسانا: نافذتُهما تُفتح فتعرض شاشةً عامّةً لا
+     تعرف أين أنت. */
   if (state.busy) {
-    bd.appendChild(el('div', 'sk'))
-    bd.appendChild(el('div', 'sk'))
-  } else if (!state.linked) {
-    bd.appendChild(emptyState({
+    const b = el('div', 'bd'); b.appendChild(el('div', 'sk')); b.appendChild(el('div', 'sk'))
+    card.appendChild(b)
+  } else if (!info) {
+    const b = el('div', 'bd')
+    b.appendChild(emptyState({
       ic: I.link,
-      tt: 'اربط حسابك أوّلًا',
-      ln: 'افتح مِداد ← جداول نور ← انسخ مفتاح الربط، ثمّ الصقه في أيقونة الإضافة بالأعلى.',
+      tt: state.err || 'اربط حسابك أوّلًا',
+      ln: state.err
+        ? 'افتح مِداد ← جداول نور، وأنشئ مفتاحًا جديدًا ثمّ الصقه في أيقونة الإضافة.'
+        : 'افتح مِداد ← جداول نور ← انسخ مفتاح الربط، ثمّ الصقه في أيقونة الإضافة بالأعلى.',
     }))
-  } else if (!state.tables?.length) {
-    bd.appendChild(emptyState({
-      ic: I.table,
-      tt: 'لا جدولَ في هذه الصفحة',
-      ln: 'افتح الكشف أو التقرير حتّى يظهر الجدول، ثمّ أعِد القراءة.',
-    }))
+    card.appendChild(b)
   } else {
-    for (const t of state.tables) bd.appendChild(row(t, h))
+    const first = state.tables && state.tables[0]
+    const hero = el('div', 'hero' + (first ? '' : ' is-empty'))
+    const hl = el('div', 'hero-l')
+    if (first) {
+      const tag = el('div', 'hero-tag')
+      tag.appendChild(el('span', 'pulse'))
+      tag.appendChild(el('span', null, 'في هذه الصفحة'))
+      hl.appendChild(tag)
+      hl.appendChild(el('div', 'hero-t', first.title))
+      hl.appendChild(el('div', 'hero-m',
+        `${ar(first.rowCount)} صفًّا · ${ar(first.colCount)} أعمدة`))
+    } else {
+      hl.appendChild(el('div', 'hero-t', 'لا جدولَ في هذه الصفحة'))
+      hl.appendChild(el('div', 'hero-m', 'افتح كشفًا أو تقريرًا ثمّ أعِد القراءة.'))
+    }
+    hero.appendChild(hl)
+
+    if (first) {
+      const go = el('button', 'go', 'اسحبه')
+      go.addEventListener('click', () => {
+        if (go.disabled) return
+        go.disabled = true
+        go.textContent = 'جارٍ الإرسال…'
+        h.send(first, (err) => {
+          go.textContent = err ? 'تعذّر' : 'تمّ ✓'
+          go.className = 'go' + (err ? ' is-bad' : ' is-ok')
+          if (err) {
+            hero.appendChild(el('div', 'hero-err', err.message || 'تعذّر الإرسال'))
+            setTimeout(() => { go.disabled = false; go.textContent = 'أعِد' ; go.className = 'go' }, 2400)
+          }
+        })
+      })
+      hero.appendChild(go)
+    }
+    card.appendChild(hero)
+
+    /* وجداولُ الصفحة الأخرى — إن كان فيها أكثرُ من واحد. */
+    if (state.tables && state.tables.length > 1) {
+      const more = el('div', 'more')
+      more.appendChild(el('div', 'more-h', `وفي الصفحة ${ar(state.tables.length - 1)} جدولًا آخر`))
+      for (const t of state.tables.slice(1)) more.appendChild(row(t, h))
+      card.appendChild(more)
+    }
+
+    /* ═════ الأدوات — من الخادم، لا من هنا ═════ */
+    const tools = Array.isArray(info.tools) ? info.tools.filter(fits) : []
+    if (tools.length) {
+      const g = el('div', 'tools')
+      for (const t of tools) g.appendChild(tile(t))
+      card.appendChild(g)
+    }
   }
 
+  /* ═════ التذييل ═════ */
   const ft = el('div', 'ft')
+  if (info && info.whats_new) {
+    ft.appendChild(el('span', 'new', `الجديد · ${info.whats_new}`))
+  }
   const a = el('a', 'ft-a', 'افتح مِداد')
-  a.href = 'https://ahmedawbal.com/#/app/noor'
+  a.href = SITE + '/#/app/noor'
   a.target = '_blank'; a.rel = 'noopener'
   ft.appendChild(a)
-  ft.appendChild(el('span', 'ft-note', 'نقرأ ولا نكتب في نور'))
   card.appendChild(ft)
 
   wrap.appendChild(card)
+}
+
+/** الأرقامُ عربيّةٌ شرقيّة — الصفحةُ عربيّة، والرقمُ اللاتينيّ يقطعها. */
+function ar(n) {
+  return String(n ?? '').replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d])
+}
+
+/**
+ * أتعمل الأداةُ في هذه الصفحة؟
+ *
+ * وزرٌّ ظاهرٌ لا يعمل أسوأ من زرٍّ غائب: يضغطه المعلّم فلا يحدث شيء،
+ * فيظنّ الإضافةَ معطّلة. فما لم تُذكر صفحتُه لا يظهر.
+ */
+function fits(t) {
+  if (!t || !t.name) return false
+  const on = Array.isArray(t.on) ? t.on : null
+  if (!on || !on.length) return true
+  const host = location.hostname
+  return on.some((w) => (w === 'noor' && /moe\.gov\.sa$/i.test(host))
+    || (w === 'madrasati' && /madrasati\.sa$/i.test(host)))
+}
+
+function tile(t) {
+  const isOpen = t.kind === 'open' && t.open
+  const b = el(isOpen ? 'a' : 'button', 'tl')
+  if (isOpen) {
+    b.href = /^https?:/i.test(t.open) ? t.open : SITE + t.open
+    b.target = '_blank'; b.rel = 'noopener'
+  }
+  const ic = el('span', 'tl-i')
+  ic.appendChild(svg(I[t.icon] || I.table, 14))
+  b.appendChild(ic)
+  b.appendChild(el('span', 'tl-n', t.name))
+  b.appendChild(el('span', 'tl-c', t.count != null ? ar(t.count) : (t.hint || '')))
+  if (t.badge) b.appendChild(el('span', 'tl-b', t.badge))
+  return b
 }
 
 function emptyState({ ic, tt, ln }) {
@@ -259,6 +382,39 @@ function row(t, h) {
 const PANEL_CSS = `
 :host, * { box-sizing: border-box; }
 
+/* ═══════════ نظامُ التصميم ═══════════
+ *
+ * لوحاتُ منافسينا فيها خمسةُ ألوانٍ لا نظامَ بينها، وأزرارٌ بأنصاف
+ * أقطارٍ مختلفة. وهذا سببُ ما يُقرأ «عشوائيّة»: لا يُرى الفرقُ بين ٩
+ * و١٠ في موضعٍ واحد، ويُرى في اللوحة كلِّها — حافّةٌ لا تحاذي حافّة.
+ *
+ *     ما لا يصطفّ يُقرأ عشوائيًّا، ولو كان كلُّ جزءٍ منه صحيحًا.
+ *
+ * فأربعُ قواعد: لونٌ واحدٌ للهويّة، وثلاثةٌ للحالة لا تُستعمل للتزيين،
+ * وسلّمُ فراغٍ من ستّة لا رقمَ بينها، وثلاثةُ أنصاف أقطار.
+ */
+:host {
+  --brand: #1B7A4F;
+  --brand-hi: #15633F;
+  --brand-soft: #E0F0E6;
+  --brand-fg: #0D5334;
+
+  --ok: #1B7A4F;
+  --warn: #96660F;  --warn-soft: #F8EFD6;
+  --bad: #AE3327;   --bad-soft: #F8E6E3;
+
+  --card: #FFFFFF;
+  --sunk: #F1F5F2;
+  --deep: #0C2419;
+  --ink: #12211A;
+  --ink2: #46574D;
+  --ink3: #76867C;
+  --line: #DEE7E1;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px;
+  --r1: 8px; --r2: 10px; --r3: 14px;
+}
+
 /* الحافّة اليسرى، وبخصائص ماديّة لا منطقيّة.
    وسببان: أنّ نور يضع قائمته الرأسيّة على اليمين — فلوحةٌ هناك تحجب
    ملاحته؛ وأنّ خلط المنطقيّ بالماديّ في سياقٍ عربيّ فخٌّ وقعتُ فيه من
@@ -267,121 +423,193 @@ const PANEL_CSS = `
    والحاوية ltr كي يقع المقبض يسارًا والبطاقة يمينه؛ والعربيّة تعود
    داخل البطاقة نفسها. */
 .wrap {
-  position: fixed; left: 0; top: 50%;
-  transform: translateY(-50%);
-  display: flex; align-items: stretch; gap: 0;
+  position: fixed; left: 0; bottom: var(--s5);
+  display: flex; align-items: flex-end; gap: 0;
   direction: ltr;
   font-family: "Segoe UI", "Noto Naskh Arabic", Tahoma, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── المقبض: كلّ ما يراه المعلّم حتّى يطلب أكثر ── */
 .tab {
-  align-self: center;
-  display: flex; align-items: center; gap: 7px;
-  padding: 10px 9px; border: 0; cursor: pointer;
-  background: #1f7a4d; color: #fff;
-  border-radius: 0 12px 12px 0;   /* مستديرةٌ من جهة الصفحة، حادّةٌ عند الحافّة */
-  box-shadow: 0 6px 22px -6px rgba(16,12,45,.45);
-  font: inherit; font-size: 12px; font-weight: 700;
-  writing-mode: vertical-rl;
-  transition: background .16s, padding .16s;
+  align-self: flex-end;
+  display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s3) var(--s2) var(--s2);
+  border: 0; cursor: pointer;
+  background: var(--deep); color: #E8F4EC;
+  border-radius: 0 999px 999px 0;
+  font: 600 12.5px/1 inherit;
+  box-shadow: 0 8px 22px -8px rgba(12,36,25,.5);
 }
-.tab:hover { background: #17603c; padding-inline: 11px; }
-.tab-mark { font-size: 13px; }
-.tab-lbl { letter-spacing: 1px; }
-.wrap.is-open .tab { writing-mode: horizontal-tb; padding: 9px; }
+.tab:hover { background: #123326; }
+.tab:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.tab-mark {
+  width: 22px; height: 22px; border-radius: var(--r1); flex: none;
+  background: var(--brand); color: #fff;
+  display: grid; place-items: center; font: 900 12px/1 inherit;
+}
+.tab-lbl { white-space: nowrap; }
 
-/* ── اللوحة ── */
+/* ── البطاقة ── */
 .card {
-  inline-size: 340px; max-block-size: min(74vh, 620px);
-  display: flex; flex-direction: column;
-  direction: rtl;   /* العربيّة تعود هنا */
-  background: #fff; color: #14131f;
-  border: 1px solid #e4e2ee;
-  border-radius: 0 16px 16px 0;
-  box-shadow: 0 24px 60px -18px rgba(16,12,45,.42), 0 2px 8px rgba(16,12,45,.10);
-  overflow: hidden;
-  animation: in .18s ease-out;
+  width: 420px; max-width: calc(100vw - 60px);
+  margin-left: var(--s2);
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r3);
+  box-shadow: 0 22px 48px -14px rgba(12,36,25,.35);
+  overflow: hidden; direction: rtl; text-align: right;
 }
-@keyframes in { from { opacity: 0; transform: translateX(-14px); } }
 
+/* الشريط */
 .hd {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; border-block-end: 1px solid #eeecf5;
-  background: linear-gradient(180deg, #f6faf7, #fff);
+  display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--deep); color: #E8F4EC;
 }
-.hd-tx { display: flex; flex-direction: column; line-height: 1.35; flex: 1; min-inline-size: 0; }
-.hd-tx strong { font-size: 13.5px; }
+.hd-mk {
+  width: 24px; height: 24px; border-radius: var(--r1); flex: none;
+  background: var(--brand); color: #fff;
+  display: grid; place-items: center; font: 900 12px/1 inherit;
+}
+.hd-tx { display: flex; flex-direction: column; line-height: 1.3; min-width: 0; }
+.hd-tx strong { font: 700 13px/1.3 inherit; }
 .hd-tx span {
-  font-size: 11px; color: #7c7a92;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 400 10.5px/1.3 inherit; opacity: .72;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.days {
+  margin-right: auto; flex: none;
+  font: 600 10px/1 inherit; padding: var(--s1) var(--s2);
+  border-radius: 999px; background: rgba(255,255,255,.14); white-space: nowrap;
+}
+/* والحالةُ لونٌ دالٌّ لا زينة: تظهر حين يقترب الانتهاء وحده. */
+.days.is-soon { background: var(--warn); color: #fff; }
 .ghost {
-  inline-size: 28px; block-size: 28px; flex: none;
-  border: 1px solid #e4e2ee; background: transparent; color: #4a4860;
-  border-radius: 8px; cursor: pointer; display: grid; place-items: center;
+  flex: none; width: 24px; height: 24px; border: 0; cursor: pointer;
+  border-radius: var(--r1); background: rgba(255,255,255,.1); color: #E8F4EC;
+  display: grid; place-items: center;
 }
-.ghost:hover { border-color: #1f7a4d; color: #1f7a4d; }
+.ghost:hover { background: rgba(255,255,255,.2); }
+.ghost:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
-.bd { padding: 11px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; }
+/* ما في الصفحة الآن */
+.hero {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s3); background: var(--brand-soft);
+  border-bottom: 1px solid var(--line); flex-wrap: wrap;
+}
+.hero.is-empty { background: var(--sunk); }
+.hero-l { flex: 1; min-width: 150px; }
+.hero-tag {
+  display: flex; align-items: center; gap: var(--s1) var(--s2);
+  font: 700 9.5px/1 inherit; color: var(--brand-fg); letter-spacing: .06em;
+}
+.pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--brand);
+  flex: none; display: block;
+}
+.hero-t { font: 700 13.5px/1.4 inherit; margin-top: 3px; }
+.hero-m { font: 400 11px/1.5 inherit; color: var(--ink2); }
+.hero-err { flex-basis: 100%; font: 400 11px/1.5 inherit; color: var(--bad); }
+.go {
+  flex: none; border: 0; cursor: pointer;
+  padding: var(--s2) var(--s5); border-radius: var(--r2);
+  background: var(--brand); color: #fff; font: 700 13px/1 inherit;
+}
+.go:hover { background: var(--brand-hi); }
+.go:disabled { opacity: .7; cursor: default; }
+.go:focus-visible { outline: 2px solid var(--deep); outline-offset: 2px; }
+.go.is-ok { background: var(--ok); }
+.go.is-bad { background: var(--bad); }
 
+/* جداولُ أخرى في الصفحة */
+.more { padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line); }
+.more-h { font: 600 10px/1.6 inherit; color: var(--ink3); margin-bottom: var(--s1); }
+
+/* الأدوات — من الخادم */
+.tools {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2); padding: var(--s3);
+}
+.tl {
+  position: relative; border: 1px solid var(--line); border-radius: var(--r2);
+  padding: var(--s2) var(--s1); background: var(--card); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: var(--s1);
+  text-align: center; text-decoration: none; color: var(--ink);
+  font-family: inherit;
+}
+.tl:hover { border-color: var(--brand); background: var(--brand-soft); }
+.tl:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.tl-i {
+  width: 26px; height: 26px; border-radius: var(--r1); flex: none;
+  background: var(--sunk); color: var(--ink2);
+  display: grid; place-items: center;
+}
+.tl:hover .tl-i { background: #fff; color: var(--brand); }
+.tl-n { font: 600 10.5px/1.3 inherit; }
+.tl-c { font: 400 9px/1.3 inherit; color: var(--ink3); }
+.tl-b {
+  position: absolute; top: -6px; inset-inline-start: -4px;
+  font: 700 8px/1 inherit; background: var(--bad); color: #fff;
+  padding: 2px var(--s1); border-radius: 999px;
+}
+
+/* الحالات الفارغة */
+.bd { padding: var(--s3); }
+.st { text-align: center; padding: var(--s5) var(--s3); }
+.st-i {
+  width: 48px; height: 48px; margin: 0 auto var(--s3);
+  border-radius: var(--r3); background: var(--sunk); color: var(--ink3);
+  display: grid; place-items: center;
+}
+.st-t { font: 700 13px/1.5 inherit; }
+.st-l { font: 400 11.5px/1.7 inherit; color: var(--ink2); margin-top: var(--s1); }
 .sk {
-  block-size: 52px; border-radius: 11px;
-  background: linear-gradient(90deg, #eeecf5 25%, #f8f7fc 50%, #eeecf5 75%);
-  background-size: 300% 100%; animation: sh 1.3s ease-in-out infinite;
+  height: 44px; border-radius: var(--r2); background: var(--sunk);
+  margin-bottom: var(--s2);
 }
-@keyframes sh { to { background-position: -300% 0; } }
 
+/* صفُّ جدول */
 .rw {
-  display: flex; align-items: center; gap: 10px; inline-size: 100%;
-  padding: 10px 11px; border-radius: 11px; cursor: pointer;
-  background: #fff; border: 1px solid #e4e2ee;
-  font: inherit; color: inherit; text-align: start;
-  transition: border-color .14s, transform .14s, background .14s;
+  width: 100%; display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s2); border: 1px solid var(--line); border-radius: var(--r2);
+  background: var(--card); cursor: pointer; text-align: right;
+  font-family: inherit; margin-bottom: var(--s1);
 }
-.rw:hover:not(:disabled) { border-color: #1f7a4d; transform: translateX(2px); }
-.rw:disabled { cursor: default; }
-.rw.is-ok { border-color: #1f7a4d; background: #f2f9f5; }
-.rw.is-bad { border-color: #b3261e; }
+.rw:hover { border-color: var(--brand); background: var(--brand-soft); }
+.rw:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.rw:disabled { opacity: .6; cursor: default; }
 .rw-i {
-  inline-size: 32px; block-size: 32px; border-radius: 9px; flex: none;
-  display: grid; place-items: center; background: #e7f3ec; color: #1f7a4d;
+  width: 26px; height: 26px; border-radius: var(--r1); flex: none;
+  background: var(--sunk); color: var(--ink2); display: grid; place-items: center;
 }
-.rw-x { flex: 1; min-inline-size: 0; display: flex; flex-direction: column; }
+.rw-x { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .rw-t {
-  display: block; font-size: 12.5px; font-weight: 600; line-height: 1.45;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 600 11.5px/1.4 inherit;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.rw-m { display: block; font-size: 10.5px; color: #7c7a92; margin-block-start: 2px; }
-.rw.is-bad .rw-m { color: #b3261e; }
-.rw-g { color: #b9b5cf; flex: none; }
-.rw:hover:not(:disabled) .rw-g { color: #1f7a4d; }
+.rw-m { font: 400 10px/1.4 inherit; color: var(--ink3); }
+.rw-g { flex: none; color: var(--brand); }
 
-.st { text-align: center; padding: 20px 12px; }
-.st-i { color: #b9b5cf; margin-block-end: 9px; }
-.st-t { font-size: 13px; font-weight: 600; margin-block-end: 5px; }
-.st-l { font-size: 11.5px; color: #7c7a92; line-height: 1.8; }
-
+/* التذييل */
 .ft {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 14px; border-block-start: 1px solid #eeecf5; background: #fbfbfd;
-  font-size: 10.5px;
+  display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--sunk); border-top: 1px solid var(--line);
+  font: 400 10px/1.4 inherit; color: var(--ink3);
 }
-.ft-a { color: #1f7a4d; font-weight: 700; text-decoration: none; }
+.new {
+  background: var(--brand-soft); color: var(--brand-fg);
+  padding: 2px var(--s2); border-radius: 999px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ft-a {
+  margin-right: auto; color: var(--brand); text-decoration: none;
+  font-weight: 600; white-space: nowrap;
+}
 .ft-a:hover { text-decoration: underline; }
-.ft-note { color: #9a97ae; margin-inline-start: auto; }
 
-@media (prefers-color-scheme: dark) {
-  .card { background: #1e1d27; color: #eeedf5; border-color: #2c2a3a; }
-  .hd { background: linear-gradient(180deg, #1a2620, #1e1d27); border-block-end-color: #2c2a3a; }
-  .hd-tx span, .rw-m, .st-l, .ft-note { color: #8b88a6; }
-  .ghost { border-color: #2c2a3a; color: #b9b6cb; }
-  .rw { background: #23222e; border-color: #2c2a3a; }
-  .rw.is-ok { background: #16301f; }
-  .rw-i { background: #16301f; }
-  .ft { background: #1a1922; border-block-start-color: #2c2a3a; }
-  .sk { background: linear-gradient(90deg, #2c2a3a 25%, #23222e 50%, #2c2a3a 75%); background-size: 300% 100%; }
-}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `
 
 /* النداء في آخر الملفّ لا أوّله. و`boot` دالّةٌ مرفوعة فتُرى من الأعلى،

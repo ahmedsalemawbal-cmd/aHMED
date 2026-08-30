@@ -104,5 +104,51 @@ const allowed = new Set(['activeTab', 'storage', 'scripting'])
 const extra = (m.permissions || []).filter((p) => !allowed.has(p))
 ok(extra.length === 0, 'أذونٌ دنيا', extra.length ? `زائد: ${extra}` : (m.permissions || []).join(' · '))
 
+/* ── نظامُ اللوحة ──
+ *
+ * لوحاتُ منافسينا فيها خمسةُ ألوانٍ لا نظامَ بينها وأنصافُ أقطارٍ
+ * مختلفة. ولا يُرى الفرقُ بين ٩ و١٠ في موضعٍ واحد؛ يُرى في اللوحة
+ * كلِّها — حافّةٌ لا تحاذي حافّة.
+ *
+ *     ما لا يصطفّ يُقرأ عشوائيًّا، ولو كان كلُّ جزءٍ منه صحيحًا.
+ *
+ * ويعود بلا حارس: كلُّ إضافةٍ لاحقةٍ تُكتب فيها `gap: 10px` بلا قصد.
+ */
+console.log('\n═══ نظام اللوحة ═══')
+{
+  const src = fs.readFileSync(R('src/panel.js'), 'utf8')
+  const css = src.slice(src.indexOf('const PANEL_CSS'), src.lastIndexOf('`'))
+
+  const SCALE = new Set([0, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24, 999])
+  const nums = [...css.matchAll(/(?:padding|margin|gap|border-radius):[^;]*?(\d+)px/g)]
+    .map((m) => Number(m[1]))
+  const stray = [...new Set(nums.filter((n) => !SCALE.has(n)))]
+  ok(stray.length === 0, 'كلُّ فراغٍ ونصفِ قطرٍ على السلّم',
+    stray.length ? stray.join(' · ') : `${nums.length} قيمةً`)
+
+  /* والاتّجاه: الحاويةُ ltr ليقع المقبضُ يسارًا، والبطاقةُ rtl لأنّ
+     متنَها عربيّ. وخلطُ المنطقيّ بالماديّ في سياقٍ عربيّ فخٌّ وقعنا
+     فيه من قبل. */
+  ok(/\.wrap\s*\{[^}]*direction:\s*ltr/.test(css), 'الحاوية ltr — المقبض يسارًا')
+  ok(/\.card\s*\{[^}]*direction:\s*rtl/.test(css), 'والبطاقة rtl — المتن عربيّ')
+
+  /* وكلُّ ما يُنقر له حالةُ تركيزٍ ظاهرة: من يتنقّل بالمفاتيح لا يرى
+     مؤشّرًا، فيضيع في لوحةٍ لا تقول أين هو. */
+  const clickable = (css.match(/^\.(tab|go|ghost|tl|rw)\b/gm) || []).length
+  const focused = (css.match(/:focus-visible/g) || []).length
+  ok(focused >= 5, 'حالةُ تركيزٍ لكلّ ما يُنقر', `${focused} من ${clickable} صنفًا`)
+
+  /* واللوحةُ ترسم ما يصل، ولا تعرف الأدواتِ مسبقًا: أسماءٌ مثبَّتةٌ
+     فيها تعني أنّ إضافةَ أداةٍ تحتاج نسخةً جديدةً للمتجر. */
+  const body = src.slice(0, src.indexOf('const PANEL_CSS'))
+  ok(/info\.tools/.test(body) && /panelInfo\(\)/.test(body),
+    'الأدواتُ تأتي من الخادم لا من الشيفرة')
+  ok(!/تقارير الثانوية|شهادات الطلاب|لجان الاختبارات/.test(body),
+    'ولا اسمَ أداةٍ مثبَّتٌ في اللوحة')
+
+  /* وزرٌّ ظاهرٌ لا يعمل أسوأ من زرٍّ غائب. */
+  ok(/function fits\(/.test(body), 'وأداةٌ لا تعمل هنا لا تظهر هنا')
+}
+
 console.log(`\n═══ ${bad === 0 ? 'سليمة ✅' : `${bad} عطبًا ✗`} ═══`)
 process.exit(bad === 0 ? 0 : 1)
