@@ -244,8 +244,18 @@ function render(wrap, state, h) {
       tag.appendChild(el('span', null, 'في هذه الصفحة'))
       hl.appendChild(tag)
       hl.appendChild(el('div', 'hero-t', first.title))
-      hl.appendChild(el('div', 'hero-m',
-        `${ar(first.rowCount)} صفًّا · ${ar(first.colCount)} أعمدة`))
+      /* رقمان بينهما فاصلةٌ محايدة (`·`) يلتصقان في العربيّة: تُدمج
+         `١٠` و`٧` فتُقرآن «١٠٧». والمحرّك يقرأ الفاصلةَ محايدةً فيُلحقها
+         بأقرب رقم.
+
+             ما يُفصَل بنصٍّ محايدٍ يُوصَل في العربيّة.
+
+         فيُفصلان بعنصرين، والفاصلةُ حدٌّ مرسومٌ لا حرفٌ يُقرأ. */
+      const m = el('div', 'hero-m')
+      m.appendChild(el('span', null, `${ar(first.rowCount)} صفًّا`))
+      m.appendChild(el('span', 'sep'))
+      m.appendChild(el('span', null, `${ar(first.colCount)} أعمدة`))
+      hl.appendChild(m)
     } else {
       hl.appendChild(el('div', 'hero-t', 'لا جدولَ في هذه الصفحة'))
       hl.appendChild(el('div', 'hero-m', 'افتح كشفًا أو تقريرًا ثمّ أعِد القراءة.'))
@@ -351,7 +361,7 @@ function row(t, h) {
   const ic = el('span', 'rw-i'); ic.appendChild(svg(I.table, 16)); b.appendChild(ic)
   const tx = el('span', 'rw-x')
   tx.appendChild(el('span', 'rw-t', t.title))
-  const meta = el('span', 'rw-m', `${t.rowCount} صفًّا · ${t.colCount} أعمدة`)
+  const meta = el('span', 'rw-m', `${ar(t.rowCount)} صفًّا — ${ar(t.colCount)} أعمدة`)
   tx.appendChild(meta)
   b.appendChild(tx)
   const go = el('span', 'rw-g'); go.appendChild(svg(I.send, 15)); b.appendChild(go)
@@ -432,7 +442,7 @@ const PANEL_CSS = `
 
 /* ── المقبض: كلّ ما يراه المعلّم حتّى يطلب أكثر ── */
 .tab {
-  align-self: flex-end;
+  align-self: flex-end; margin-bottom: 0;
   display: flex; align-items: center; gap: var(--s2);
   padding: var(--s2) var(--s3) var(--s2) var(--s2);
   border: 0; cursor: pointer;
@@ -453,6 +463,7 @@ const PANEL_CSS = `
 /* ── البطاقة ── */
 .card {
   width: 420px; max-width: calc(100vw - 60px);
+  max-height: calc(100vh - 40px); display: flex; flex-direction: column;
   margin-left: var(--s2);
   background: var(--card); color: var(--ink);
   border: 1px solid var(--line); border-radius: var(--r3);
@@ -478,7 +489,7 @@ const PANEL_CSS = `
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .days {
-  margin-right: auto; flex: none;
+  margin-right: auto; flex: none; unicode-bidi: plaintext;
   font: 600 10px/1 inherit; padding: var(--s1) var(--s2);
   border-radius: 999px; background: rgba(255,255,255,.14); white-space: nowrap;
 }
@@ -493,13 +504,16 @@ const PANEL_CSS = `
 .ghost:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
 /* ما في الصفحة الآن */
+/* الزرُّ تحت نصّه لا في الطرف المقابل.
+   كان الصفُّ يدفعه إلى أقصى اليسار، فيبقى بينه وبين العنوان فراغٌ
+   يقطع الصلة — يُقرأ زرًّا لشيءٍ آخر. */
 .hero {
-  display: flex; align-items: center; gap: var(--s3);
+  display: flex; flex-direction: column; gap: var(--s2);
   padding: var(--s3); background: var(--brand-soft);
-  border-bottom: 1px solid var(--line); flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
 }
 .hero.is-empty { background: var(--sunk); }
-.hero-l { flex: 1; min-width: 150px; }
+.hero-l { min-width: 0; }
 .hero-tag {
   display: flex; align-items: center; gap: var(--s1) var(--s2);
   font: 700 9.5px/1 inherit; color: var(--brand-fg); letter-spacing: .06em;
@@ -508,11 +522,25 @@ const PANEL_CSS = `
   width: 6px; height: 6px; border-radius: 50%; background: var(--brand);
   flex: none; display: block;
 }
-.hero-t { font: 700 13.5px/1.4 inherit; margin-top: 3px; }
-.hero-m { font: 400 11px/1.5 inherit; color: var(--ink2); }
+.hero-t {
+  font: 700 13.5px/1.4 inherit; margin-top: 3px;
+  /* عنوانُ نور قد يبلغ سطرين ونصفًا فيلتهم اللوحة ويدفع الزرَّ خارج
+     النظر. ويُحدّ بسطرين: ما بعدهما لا يزيد المعلّمَ علمًا. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hero-m {
+  font: 400 11px/1.5 inherit; color: var(--ink2);
+  display: flex; align-items: center; gap: var(--s2);
+}
+/* حدٌّ يُرسم لا حرفٌ يُقرأ — فلا يُدمج بالأرقام حوله. */
+.hero-m .sep {
+  width: 1px; height: 10px; background: currentColor; opacity: .3; flex: none;
+}
 .hero-err { flex-basis: 100%; font: 400 11px/1.5 inherit; color: var(--bad); }
+/* وبعرض اللوحة: هدفٌ أكبر للإصبع، وموضعٌ لا يُبحث عنه. */
 .go {
-  flex: none; border: 0; cursor: pointer;
+  width: 100%; border: 0; cursor: pointer;
   padding: var(--s2) var(--s5); border-radius: var(--r2);
   background: var(--brand); color: #fff; font: 700 13px/1 inherit;
 }
@@ -530,6 +558,8 @@ const PANEL_CSS = `
 .tools {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: var(--s2); padding: var(--s3);
+  /* وما زاد يُمرَّر: لوحةٌ تتجاوز الشاشة تُخفي تذييلها ولا يُعرف. */
+  overflow-y: auto; min-height: 0;
 }
 .tl {
   position: relative; border: 1px solid var(--line); border-radius: var(--r2);
@@ -547,7 +577,15 @@ const PANEL_CSS = `
 }
 .tl:hover .tl-i { background: #fff; color: var(--brand); }
 .tl-n { font: 600 10.5px/1.3 inherit; }
-.tl-c { font: 400 9px/1.3 inherit; color: var(--ink3); }
+/* «٣ / ٥» تنقلب إلى «٥ / ٣»: الشرطةُ محايدةٌ فيقرؤها المحرّك بالسياق
+   العربيّ. و«plaintext» تجعل اتّجاه العنصر يتبع أوّلَ حرفٍ قويٍّ فيه —
+   فما كان أرقامًا بقي كما كُتب.
+
+       ما لا حرفَ قويًّا فيه يتبع ما حوله، لا ما يعنيه. */
+.tl-c {
+  font: 400 9px/1.3 inherit; color: var(--ink3);
+  unicode-bidi: plaintext;
+}
 .tl-b {
   position: absolute; top: -6px; inset-inline-start: -4px;
   font: 700 8px/1 inherit; background: var(--bad); color: #fff;
@@ -588,7 +626,7 @@ const PANEL_CSS = `
   font: 600 11.5px/1.4 inherit;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.rw-m { font: 400 10px/1.4 inherit; color: var(--ink3); }
+.rw-m { font: 400 10px/1.4 inherit; color: var(--ink3); unicode-bidi: plaintext; }
 .rw-g { flex: none; color: var(--brand); }
 
 /* التذييل */

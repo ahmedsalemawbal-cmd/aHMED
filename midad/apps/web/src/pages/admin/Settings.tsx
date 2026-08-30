@@ -399,7 +399,8 @@ function ExtTools({ tools, onChange }: {
             <Field label="شارة (اختياريّة)" help="مثال: جديد">
               <Input value={t.badge ?? ''} onChange={(e) => patch(i, 'badge', e.target.value)} />
             </Field>
-            <Field label="سطرٌ تحت الاسم" help="اتركه فارغًا فلا يظهر شيء.">
+            <Field label="سطرٌ تحت الاسم"
+              help="اكتب «٣ من ٥» لا «٣ / ٥» — الشرطةُ تنقلب في العربيّة.">
               <Input value={t.hint ?? ''} onChange={(e) => patch(i, 'hint', e.target.value)} />
             </Field>
           </div>
