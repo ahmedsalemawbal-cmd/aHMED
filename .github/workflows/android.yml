@@ -1,0 +1,125 @@
+# بناءُ تطبيق مِداد لأندرويد
+#
+# ولمَ هنا لا في الحاسب؟ لأنّ البناء يحتاج سِدك أندرويد ومكتباتِ جوجل،
+# وهي محجوبةٌ في بيئة التطوير. وعدّاءُ جيتهب يحملها أصلًا.
+#
+# والتطبيق **غلافٌ لا نسخة**: يفتح `ahmedawbal.com` بمحرّك كروم بلا
+# شريط عنوان. فتُصلح عطبًا في الموقع فيُصلَح في التطبيق في اللحظة
+# نفسها — بلا بناءٍ جديدٍ ولا مراجعةِ متجرٍ ولا انتظارِ أحد.
+#
+# ولا يعمل تلقائيًّا مع كلّ دفعة: يُشغَّل بيدك حين تريد ملفًّا جديدًا.
+# فالتطبيق لا يتغيّر بتغيّر الموقع — إنّما يتغيّر إن بدّلنا اسمه أو
+# أيقونته أو نطاقه.
+
+name: تطبيق أندرويد
+
+on:
+  # يُشغَّل حين تتغيّر شيفرةُ التطبيق نفسه — لا مع كلّ دفعةٍ للموقع.
+  # فالتطبيق غلافٌ لا يتغيّر بتغيّر ما يفتحه: إنّما يتغيّر إن بدّلنا
+  # اسمه أو أيقونته أو نطاقه.
+  #
+  # ولمَ لا `workflow_dispatch` وحده؟ لأنّ الزرّ اليدويّ لا يظهر إلّا
+  # لسيرٍ موجودٍ في الفرع الافتراضيّ، وهذا الفرع ليس هو. فالدفعُ هو
+  # ما يُشغّله، ويبقى الزرّ لمن يصل إليه.
+  push:
+    branches: ['**']
+    paths:
+      - 'midad/apps/android/**'
+      - 'midad/apps/web/public/.well-known/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'اسم الإصدار (مثال 1.0.1)'
+        required: false
+        default: '1.0.0'
+      version_code:
+        description: 'رقم الإصدار — يجب أن يزيد في كلّ رفعٍ للمتجر'
+        required: false
+        default: '1'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: جافا ١٧
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: سِدك أندرويد
+        uses: android-actions/setup-android@v3
+
+      - name: ترقيم الإصدار
+        working-directory: midad/apps/android
+        run: |
+          NAME='${{ github.event.inputs.version_name }}'
+          CODE='${{ github.event.inputs.version_code }}'
+          sed -i "s/versionName '.*'/versionName '${NAME:-1.0.0}'/" app/build.gradle
+          sed -i "s/versionCode .*/versionCode ${CODE:-1}/"        app/build.gradle
+          grep -E "versionName|versionCode" app/build.gradle
+
+      # التحقّق قبل البناء: بصمةُ المفتاح يجب أن تطابق ما في الموقع،
+      # وإلّا عمل التطبيق وظهر فوقه شريطُ عنوانٍ لا يُفهم سببه — وهو
+      # عطبٌ يُكتشف بعد التثبيت على الجوّال لا قبله.
+      - name: تطابقُ بصمة التوقيع مع ربط النطاق
+        run: |
+          FP=$(keytool -list -v -keystore midad/apps/android/midad-test.keystore \
+                 -alias midad -storepass midad-test 2>/dev/null \
+               | grep -i 'SHA256:' | head -1 | sed 's/.*SHA256: //' | tr -d ' \t\r')
+          WEB=$(python3 -c "import json;print(json.load(open('midad/apps/web/public/.well-known/assetlinks.json'))[0]['target']['sha256_cert_fingerprints'][0])")
+          echo "المفتاح: $FP"
+          echo "الموقع:  $WEB"
+          [ "$FP" = "$WEB" ] || { echo '::error::البصمتان مختلفتان — سيظهر شريط العنوان فوق التطبيق'; exit 1; }
+          echo '✅ متطابقتان'
+
+      - name: تثبيتُ نسخة غرادل
+        working-directory: midad/apps/android
+        run: |
+          gradle wrapper --gradle-version 8.7 --no-daemon
+          ./gradlew --version
+
+      - name: البناء
+        working-directory: midad/apps/android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: التحقّق من المخرجات
+        working-directory: midad/apps/android
+        run: |
+          APK=$(find . -name '*.apk' -path '*release*' | head -1)
+          [ -n "$APK" ] || { echo '::error::لا ملفّ APK'; exit 1; }
+          cp "$APK" midad-${{ github.event.inputs.version_name || '1.0.0' }}.apk
+          ls -lh midad-*.apk
+          echo "### تطبيق مِداد جاهز 📱" >> "$GITHUB_STEP_SUMMARY"
+          echo "الحجم: $(du -h midad-*.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: رفعُ الملفّ
+        uses: actions/upload-artifact@v4
+        with:
+          name: midad-android
+          path: midad/apps/android/midad-*.apk
+          retention-days: 30
+
+      # ورابطٌ مباشر: أثرُ السير يأتي مضغوطًا ويحتاج تسجيلَ دخولٍ وفكًّا،
+      # وذاك متعبٌ على جوّالٍ يُراد تثبيتُ الملفّ عليه. والإصدار يُنزَّل
+      # ملفًّا واحدًا بضغطةٍ من أيّ متصفّح.
+      - name: إصدارٌ برابطٍ مباشر
+        working-directory: midad/apps/android
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="android-v${{ github.event.inputs.version_name || '1.0.0' }}-${{ github.run_number }}"
+          gh release create "$TAG" midad-*.apk \
+            --title "تطبيق مِداد $TAG" \
+            --notes "غلافٌ يفتح ahmedawbal.com. للتجربة — مُوقَّعٌ بمفتاح اختبار.
+
+          **التثبيت:** نزّل الملفّ، وفعّل «تثبيت من مصادر غير معروفة» حين يسألك أندرويد." \
+            --target "${{ github.sha }}"
+          echo "### الرابط المباشر" >> "$GITHUB_STEP_SUMMARY"
+          gh release view "$TAG" --json assets --jq '.assets[].url' >> "$GITHUB_STEP_SUMMARY"

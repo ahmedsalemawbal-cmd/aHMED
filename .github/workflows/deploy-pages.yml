@@ -1,0 +1,45 @@
+name: نشر مِداد على GitHub Pages
+
+# يدويّ فقط: GitHub Pages يحتاج تفعيلًا لمرّةٍ واحدة من صاحب المستودع
+# (Settings ← Pages ← Source: GitHub Actions)، ثمّ شغّل هذا السير من تبويب Actions.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تجهيز GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # SPA على Pages: 404 يعيد نفس الواجهة، و.nojekyll يمنع تجاهل مجلّدات _
+      - name: تهيئة مجلّد النشر
+        run: |
+          cp midad/deploy/index.html midad/deploy/404.html
+          touch midad/deploy/.nojekyll
+          ls -la midad/deploy
+
+      - name: رفع الملفّات
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: midad/deploy
+
+      - name: النشر
+        id: deployment
+        uses: actions/deploy-pages@v4
