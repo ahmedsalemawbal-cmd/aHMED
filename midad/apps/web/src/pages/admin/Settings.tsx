@@ -8,8 +8,8 @@ import {
 } from '../../ui/kit'
 import { IcEye, IcEyeOff } from '../../ui/icons'
 
-type Tab = 'general' | 'payment' | 'tax' | 'ai' | 'trial'
-const KEYS = ['general', 'payment_public', 'payment_secret', 'ai', 'trial'] as const
+type Tab = 'general' | 'payment' | 'tax' | 'ai' | 'ext' | 'trial'
+const KEYS = ['general', 'payment_public', 'payment_secret', 'ai', 'ext_tools', 'trial'] as const
 
 /* والنماذج تتبع المزوّد: نموذجُ أحدهما لا يُنادى عند الآخر. */
 const MODELS: Record<string, string[]> = {
@@ -125,6 +125,7 @@ export default function Settings() {
           { key: 'payment', label: 'الدفع' },
           { key: 'tax', label: 'الضريبة' },
           { key: 'ai', label: 'الذكاء' },
+          { key: 'ext', label: 'الإضافة' },
           { key: 'trial', label: 'التجربة' },
         ]} />
       </div>
@@ -267,6 +268,29 @@ export default function Settings() {
         </Card>
       )}
 
+      {tab === 'ext' && (
+        <Card className="mdd-col" style={{ gap: 14 }}>
+          <Alert tone="info">
+            هذه الأزرارُ هي ما يراه المعلّم في لوحة مِداد داخل نور ومدرستي.
+            تُعدّلها هنا فتصل الجميعَ في اللحظة — بلا نسخةٍ جديدةٍ من الإضافة
+            ولا مراجعةِ متجر.
+          </Alert>
+
+          <Field label="سطر «الجديد»" help="يظهر في أسفل اللوحة. اتركه فارغًا فلا يظهر.">
+            <Input value={v.ext_tools?.whats_new ?? ''}
+              placeholder="مثال: إشعار الأولياء"
+              onChange={(e) => set('ext_tools', 'whats_new', e.target.value)} />
+          </Field>
+
+          <ExtTools
+            tools={Array.isArray(v.ext_tools?.tools) ? v.ext_tools.tools : []}
+            onChange={(tools) => set('ext_tools', 'tools', tools)} />
+
+          <Button auto variant="primary" loading={busy === 'ext_tools'}
+            onClick={() => save(['ext_tools'])} style={{ alignSelf: 'flex-start' }}>احفظ</Button>
+        </Card>
+      )}
+
       {tab === 'trial' && (
         <Card className="mdd-col" style={{ gap: 14 }}>
           <div className="mdd-grid mdd-grid--2" style={{ gap: 12 }}>
@@ -284,4 +308,112 @@ export default function Settings() {
       )}
     </>
   )
+}
+
+/**
+ * أزرارُ لوحة الإضافة — وصفٌ يُحرَّر، لا شيفرةٌ تُكتب.
+ *
+ * منافسانا يُنزّلان شيفرتَهما من خادمهما ليُضيفا أداةً بلا مراجعة متجر.
+ * والمكسبُ نفسه يُنال بالوصف: اللوحةُ تعرف كيف ترسم زرًّا ولا تعرف ما
+ * الأزرار — تسألنا في كلّ فتحة.
+ *
+ *     ما يتبدّل يُوصَف. وما يُنفَّذ يُشحن ويُراجَع.
+ *
+ * والترتيبُ يهمّ: الأداةُ الأولى أوّلُ ما تقع عليه العين. فيُرفع الزرُّ
+ * ويُنزَّل بسهمين — لا يُعاد كتابةُ القائمة لتبديل اثنين.
+ */
+function ExtTools({ tools, onChange }: {
+  tools: any[]
+  onChange: (t: any[]) => void
+}) {
+  const ICONS = ['table', 'files', 'doc', 'down', 'chat', 'chart']
+  const patch = (i: number, k: string, val: any) =>
+    onChange(tools.map((t, n) => (n === i ? { ...t, [k]: val } : t)))
+
+  return (
+    <div className="mdd-col" style={{ gap: 10 }}>
+      <div className="mdd-row" style={{ justifyContent: 'space-between' }}>
+        <strong style={{ fontSize: 14 }}>الأزرار ({tools.length})</strong>
+        <Button auto size="sm" variant="soft" onClick={() => onChange([...tools, {
+          key: `t${Date.now().toString(36)}`, name: '', icon: 'doc',
+          kind: 'open', open: '/#/app/library',
+        }])}>أضِف زرًّا</Button>
+      </div>
+
+      {tools.length === 0 && (
+        <Alert tone="warn">لا أزرار — ستظهر اللوحةُ بزرّ السحب وحده.</Alert>
+      )}
+
+      {tools.map((t, i) => (
+        <div key={t.key || i} className="mdd-col"
+          style={{
+            gap: 10, padding: 12, borderRadius: 'var(--mdd-r-md)',
+            border: '1px solid var(--mdd-line)', background: 'var(--mdd-surface)',
+          }}>
+          <div className="mdd-row" style={{ gap: 8 }}>
+            <span className="mdd-dim" style={{ fontSize: 12, minWidth: 18 }}>{i + 1}</span>
+            <Input value={t.name ?? ''} placeholder="اسم الزرّ — مثال: شهادات الطلاب"
+              onChange={(e) => patch(i, 'name', e.target.value)} style={{ flex: 1 }} />
+            <Button auto size="sm" variant="ghost" disabled={i === 0}
+              onClick={() => onChange(moveAt(tools, i, -1))} aria-label="ارفع">↑</Button>
+            <Button auto size="sm" variant="ghost" disabled={i === tools.length - 1}
+              onClick={() => onChange(moveAt(tools, i, 1))} aria-label="أنزِل">↓</Button>
+            <Button auto size="sm" variant="danger"
+              onClick={() => onChange(tools.filter((_, n) => n !== i))} aria-label="احذف">✕</Button>
+          </div>
+
+          <div className="mdd-grid mdd-grid--3" style={{ gap: 10 }}>
+            <Field label="الأيقونة">
+              <Select value={t.icon ?? 'doc'} onChange={(e) => patch(i, 'icon', e.target.value)}>
+                {ICONS.map((ic) => <option key={ic} value={ic}>{ic}</option>)}
+              </Select>
+            </Field>
+            <Field label="النوع">
+              <Select value={t.kind ?? 'open'} onChange={(e) => patch(i, 'kind', e.target.value)}>
+                <option value="open">يفتح صفحةً في مِداد</option>
+                <option value="pull">يسحب الجدول المعروض</option>
+              </Select>
+            </Field>
+            <Field label="يظهر في"
+              help="اتركه «كلّ الصفحات» ما لم تكن الأداةُ خاصّةً بمنصّة.">
+              <Select
+                value={(t.on || []).join(',') || ''}
+                onChange={(e) => patch(i, 'on', e.target.value ? e.target.value.split(',') : [])}>
+                <option value="">كلّ الصفحات</option>
+                <option value="noor">نور فقط</option>
+                <option value="madrasati">مدرستي فقط</option>
+                <option value="noor,madrasati">نور ومدرستي</option>
+              </Select>
+            </Field>
+          </div>
+
+          {t.kind !== 'pull' && (
+            <Field label="الصفحة التي يفتحها"
+              help="مسارٌ في مِداد يبدأ بـ /# — أو رابطٌ كامل.">
+              <Input ltr value={t.open ?? ''} placeholder="/#/app/library"
+                onChange={(e) => patch(i, 'open', e.target.value)} />
+            </Field>
+          )}
+
+          <div className="mdd-grid mdd-grid--2" style={{ gap: 10 }}>
+            <Field label="شارة (اختياريّة)" help="مثال: جديد">
+              <Input value={t.badge ?? ''} onChange={(e) => patch(i, 'badge', e.target.value)} />
+            </Field>
+            <Field label="سطرٌ تحت الاسم" help="اتركه فارغًا فلا يظهر شيء.">
+              <Input value={t.hint ?? ''} onChange={(e) => patch(i, 'hint', e.target.value)} />
+            </Field>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** تبديلُ عنصرين — ولا تُمسّ المصفوفةُ الأصليّة، فيرى React تغيّرًا. */
+function moveAt(arr: any[], i: number, d: -1 | 1): any[] {
+  const j = i + d
+  if (j < 0 || j >= arr.length) return arr
+  const out = arr.slice()
+  const tmp = out[i]; out[i] = out[j]; out[j] = tmp
+  return out
 }
