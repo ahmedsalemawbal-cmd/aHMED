@@ -44,7 +44,8 @@ function osoul_webmail_render_app() {
 <script>/* apply saved light/dark before first paint (no flash) */(function(){try{var t=localStorage.getItem('osoul_theme');if(t!=='dark'&&t!=='light'){t=(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <title><?php echo esc_html( 'ar' === $lang ? 'بريد الموظف — أصول البناء' : 'Employee Mail — Osoul Albinaa' ); ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block" rel="stylesheet">
 	<?php
 	$css = OSOUL_DIR . 'assets/css/webmail.css';
 	$ver = is_readable( $css ) ? filemtime( $css ) : OSOUL_VERSION;
@@ -64,6 +65,7 @@ function osoul_webmail_render_app() {
 		lang:      <?php echo wp_json_encode( $lang ); ?>,
 		home:      <?php echo wp_json_encode( home_url( '/' ) ); ?>,
 		logo:      <?php echo wp_json_encode( esc_url_raw( $osoul_logo ) ); ?>,
+		mark:      <?php echo wp_json_encode( esc_url_raw( OSOUL_URL . 'assets/img/osoul-mark.png' ) ); ?>,
 		logout:    <?php echo wp_json_encode( add_query_arg( 'logout', 1, home_url( '/dashboard/' ) ) ); ?>,
 		poll:      20000
 	};

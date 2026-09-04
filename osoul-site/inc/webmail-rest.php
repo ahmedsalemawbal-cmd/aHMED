@@ -190,7 +190,12 @@ function osoul_rest_mail_messages( WP_REST_Request $req ) {
 	$folder = (string) ( $req->get_param( 'folder' ) ?: 'INBOX' );
 	$page   = max( 0, (int) $req->get_param( 'page' ) );
 	$search = (string) $req->get_param( 'search' );
-	$filter = sanitize_key( (string) $req->get_param( 'filter' ) ); // '' | unread | read | starred
+	$filter_raw = (string) $req->get_param( 'filter' ); // '' | unread | read | starred | attach | needsreply | label:<slug>
+	if ( 0 === strpos( $filter_raw, 'label:' ) ) {
+		$filter = 'label:' . preg_replace( '/[^a-z0-9_]/', '', strtolower( substr( $filter_raw, 6 ) ) );
+	} else {
+		$filter = sanitize_key( $filter_raw );
+	}
 	$sort   = ( 'oldest' === $req->get_param( 'sort' ) ) ? 'oldest' : 'newest';
 	$per    = (int) apply_filters( 'osoul_mail_page_size', 25 );
 
@@ -312,6 +317,16 @@ function osoul_rest_mail_move( WP_REST_Request $req ) {
 			if ( $f['special'] === $special ) { $dest = $f['raw']; break; }
 		}
 	}
+	// Create Archive / Snoozed on demand so those actions always work.
+	if ( '' === $dest && in_array( $special, array( 'archive', 'snoozed' ), true ) ) {
+		$name = ( 'snoozed' === $special ) ? 'Snoozed' : 'Archive';
+		if ( $imap->create_folder( 'INBOX.' . $name ) || $imap->create_folder( $name ) ) {
+			foreach ( $imap->folders() as $f ) {
+				if ( $f['raw'] === 'INBOX.' . $name || $f['raw'] === $name ) { $dest = $f['raw']; break; }
+			}
+			if ( '' === $dest ) { $dest = 'INBOX.' . $name; }
+		}
+	}
 	if ( '' === $dest ) { $imap->logout(); return new WP_Error( 'osoul_bad', 'وجهة غير صالحة.', array( 'status' => 422 ) ); }
 	$ok = $imap->move( $folder, $uid, $dest );
 	$imap->logout();
@@ -430,7 +445,21 @@ function osoul_rest_mail_send( WP_REST_Request $req ) {
 		'attachments' => $attachments,
 		'in_reply_to' => sanitize_text_field( (string) $req->get_param( 'in_reply_to' ) ),
 		'references'  => sanitize_text_field( (string) $req->get_param( 'references' ) ),
+		'priority'    => (int) $req->get_param( 'priority' ) ? 1 : 0,
 	);
+
+	// Reply-with-image: when the compose was opened as a reply, the client passes
+	// the original message coordinates so the backend can re-embed the images the
+	// customer sent (inline data: URIs → CID parts, plus original image
+	// attachments) directly inside the quoted block of this reply.
+	$quote_uid = sanitize_text_field( (string) $req->get_param( 'quote_uid' ) );
+	if ( '' !== $quote_uid && ! $draft ) {
+		$args['quote'] = array(
+			'uid'    => $quote_uid,
+			'folder' => sanitize_text_field( (string) $req->get_param( 'quote_folder' ) ),
+			'mode'   => sanitize_key( (string) $req->get_param( 'quote_mode' ) ), // reply | reply_all | forward
+		);
+	}
 
 	if ( $draft ) {
 		$res = osoul_mail_save_draft( $uid, $args );
@@ -573,16 +602,24 @@ function osoul_rest_mail_contacts() {
 	$uid  = get_current_user_id();
 	$list = get_user_meta( $uid, '_osoul_mail_contacts', true );
 	if ( ! is_array( $list ) ) { $list = array(); }
+	$roles = get_user_meta( $uid, '_osoul_mail_contact_roles', true );
+	if ( ! is_array( $roles ) ) { $roles = array(); }
 	$dirty = false;
 	$out   = array();
 	foreach ( $list as $email => $name ) {
 		$name = (string) $name;
+		// A manual entry with no address is keyed "name:<slug>" — hide that handle.
+		$addr = ( 0 === strpos( (string) $email, 'name:' ) ) ? '' : (string) $email;
 		// Back-fill a real name for contacts stored as a bare address.
-		if ( '' === $name || 0 === strcasecmp( $name, (string) $email ) ) {
-			$look = osoul_mail_lookup_name( $email );
+		if ( '' !== $addr && ( '' === $name || 0 === strcasecmp( $name, $addr ) ) ) {
+			$look = osoul_mail_lookup_name( $addr );
 			if ( '' !== $look ) { $name = $look; $list[ $email ] = $look; $dirty = true; }
 		}
-		$out[] = array( 'email' => $email, 'name' => $name );
+		$out[] = array(
+			'email' => $addr,
+			'name'  => $name,
+			'role'  => isset( $roles[ $email ] ) ? (string) $roles[ $email ] : '',
+		);
 	}
 	if ( $dirty ) { update_user_meta( $uid, '_osoul_mail_contacts', $list ); }
 	return rest_ensure_response( array( 'contacts' => $out ) );

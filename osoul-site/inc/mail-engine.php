@@ -236,6 +236,12 @@ class Osoul_IMAP {
 		if ( 'unread' === $filter )  { $crit = 'UNSEEN'; }
 		elseif ( 'read' === $filter )    { $crit = 'SEEN'; }
 		elseif ( 'starred' === $filter ) { $crit = 'FLAGGED'; }
+		elseif ( 'attach' === $filter ) { $crit = 'HEADER Content-Type "multipart/mixed"'; }
+		elseif ( 'needsreply' === $filter ) { $crit = 'UNANSWERED'; }
+		elseif ( 0 === strpos( (string) $filter, 'label:' ) ) {
+			$slug = preg_replace( '/[^a-z0-9_]/', '', strtolower( substr( $filter, 6 ) ) );
+			if ( '' !== $slug ) { $crit = 'KEYWORD ' . osoul_mail_label_keyword( $slug ); }
+		}
 		$oldest = ( 'oldest' === $sort );
 
 		if ( '' !== $search || '' !== $crit ) {
@@ -359,6 +365,7 @@ class Osoul_IMAP {
 				'ts'          => $item['date'] ? strtotime( $item['date'] ) : 0,
 				'size'        => $item['size'],
 				'has_attach'  => ( false !== strpos( $ctype, 'multipart/mixed' ) ),
+				'label'       => osoul_mail_label_from_flags( $flags ),
 			);
 		}
 		return $rows;
@@ -809,6 +816,35 @@ class Osoul_MIME {
 		return null;
 	}
 
+	/**
+	 * Collect every image part (inline or attachment) with its binary content, so
+	 * a reply can re-embed the pictures the sender included. Each entry:
+	 *   { cid, name, mime, content, inline(bool) }
+	 * `cid` is the original Content-ID (without <>) or '' for a plain attachment.
+	 */
+	public static function image_parts( $raw ) {
+		$parts = array();
+		list( $head, $body ) = self::split( (string) $raw );
+		self::walk( self::parse_headers( $head ), $body, $parts );
+		$out = array();
+		foreach ( $parts as $p ) {
+			$ctype = strtolower( $p['type'] );
+			if ( 0 !== strpos( $ctype, 'image/' ) ) { continue; }
+			$content = (string) $p['content'];
+			$len     = strlen( $content );
+			if ( 0 === $len || $len > 5000000 ) { continue; } // skip empty / >5MB images
+			$cid = trim( (string) $p['cid'], '<>' );
+			$out[] = array(
+				'cid'     => $cid,
+				'name'    => self::ensure_name( $p['filename'], $ctype, 'صورة' ),
+				'mime'    => '' !== $ctype ? $ctype : 'image/png',
+				'content' => $content,
+				'inline'  => ( 'inline' === $p['disposition'] || '' !== $cid ),
+			);
+		}
+		return $out;
+	}
+
 	/** An inline image that we embed into the HTML preview (not shown as a file). */
 	private static function is_embedded_inline( $p ) {
 		$ctype = strtolower( $p['type'] );
@@ -1129,6 +1165,27 @@ function osoul_mail_smtp_verify( $email, $pass, $smtp_host, $smtp_port ) {
  * @param array $args { to, cc, bcc, subject, body_html, attachments[], in_reply_to, references, is_draft }
  * @return array|WP_Error { ok, message_id }
  */
+/**
+ * IMAP keyword used to store a category label. ASCII-only atom (Dovecot stores
+ * keywords lowercased), namespaced so it never collides with system flags.
+ */
+function osoul_mail_label_keyword( $slug ) {
+	$slug = preg_replace( '/[^a-z0-9_]/', '', strtolower( (string) $slug ) );
+	return 'osoul_' . $slug;
+}
+
+/** Reverse of osoul_mail_label_keyword(): first category slug found in a flag list, or ''. */
+function osoul_mail_label_from_flags( $flags ) {
+	foreach ( (array) $flags as $f ) {
+		$f = strtolower( (string) $f );
+		if ( 0 === strpos( $f, 'osoul_' ) ) {
+			$slug = substr( $f, 6 );
+			if ( '' !== $slug ) { return $slug; }
+		}
+	}
+	return '';
+}
+
 function osoul_mail_send( $user_id, $args ) {
 	$cfg = osoul_mail_config( $user_id, true );
 	if ( '' === $cfg['email'] || '' === ( $cfg['password'] ?? '' ) ) {
@@ -1158,6 +1215,33 @@ function osoul_mail_send( $user_id, $args ) {
 			$mail->addCustomHeader( 'References', (string) $args['references'] );
 		}
 
+		// High-priority flag (X-Priority + Importance) when the composer asked.
+		if ( ! empty( $args['priority'] ) ) {
+			$mail->Priority = 1;
+			$mail->addCustomHeader( 'X-Priority', '1 (Highest)' );
+			$mail->addCustomHeader( 'X-MSMail-Priority', 'High' );
+			$mail->addCustomHeader( 'Importance', 'High' );
+		}
+
+		// Reply-with-image: re-embed the pictures the original sender included so
+		// they render inside the quoted block of this reply/forward.
+		if ( ! empty( $args['quote']['uid'] ) ) {
+			$qz = osoul_mail_collect_quote(
+				$user_id,
+				(string) ( $args['quote']['folder'] ?? '' ),
+				(string) $args['quote']['uid'],
+				(string) ( $args['quote']['mode'] ?? 'reply' )
+			);
+			if ( $qz && '' !== $qz['html'] ) {
+				$mail->Body   = ( '' !== trim( wp_strip_all_tags( $mail->Body ) ) ? $mail->Body : '' ) . $qz['html'];
+				$plain        = trim( wp_strip_all_tags( $mail->Body ) );
+				$mail->AltBody = ( '' !== $plain ) ? $plain : ' ';
+				foreach ( $qz['images'] as $img ) {
+					$mail->addStringEmbeddedImage( $img['content'], $img['cid'], $img['name'], 'base64', $img['mime'] );
+				}
+			}
+		}
+
 		foreach ( (array) ( $args['attachments'] ?? array() ) as $att ) {
 			$path = isset( $att['path'] ) ? $att['path'] : '';
 			if ( $path && file_exists( $path ) ) {
@@ -1180,6 +1264,108 @@ function osoul_mail_send( $user_id, $args ) {
 		$imap->logout();
 	}
 	return array( 'ok' => true, 'message_id' => $mid, 'filed' => $filed );
+}
+
+/**
+ * Build the quoted reply/forward block for an original message, re-embedding the
+ * images the sender included so they render inside the quote of the outgoing
+ * reply (the core "reply shows the picture the customer sent" behaviour).
+ *
+ * @param int    $user_id
+ * @param string $folder  raw IMAP folder of the original message
+ * @param int    $uid     original message UID
+ * @param string $mode    'reply' | 'reply_all' | 'forward'
+ * @return array|null  { html:<string>, images:[ {cid,name,mime,content} ] } or null
+ */
+function osoul_mail_collect_quote( $user_id, $folder, $uid, $mode = 'reply' ) {
+	$folder = trim( (string) $folder );
+	$uid    = (int) $uid;
+	if ( '' === $folder || $uid <= 0 ) { return null; }
+
+	$imap = osoul_mail_open( $user_id );
+	if ( is_wp_error( $imap ) ) { return null; }
+	$raw = null;
+	if ( $imap->select( $folder ) ) { $raw = $imap->fetch_raw( $uid ); }
+	$imap->logout();
+	if ( null === $raw ) { return null; }
+
+	$msg    = Osoul_MIME::parse( $raw );
+	$images = Osoul_MIME::image_parts( $raw );
+
+	// Give every image a fresh CID and remember old→new for HTML rewriting.
+	$lang   = function_exists( 'osoul_portal_lang' ) ? osoul_portal_lang() : 'ar';
+	$en     = ( 'en' === $lang );
+	$embed  = array();
+	$cidmap = array();
+	foreach ( $images as $img ) {
+		$newcid = 'osoulq' . substr( md5( $img['cid'] . '|' . $img['name'] . '|' . $uid . '|' . wp_rand() ), 0, 22 ) . '@osoul';
+		$embed[] = array(
+			'cid'     => $newcid,
+			'name'    => $img['name'],
+			'mime'    => $img['mime'],
+			'content' => $img['content'],
+			'refcid'  => $img['cid'],
+		);
+		if ( '' !== $img['cid'] ) { $cidmap[ $img['cid'] ] = $newcid; }
+	}
+
+	// Original body → HTML (prefer real HTML, else escaped text). Cap huge HTML.
+	$orig = (string) $msg['html'];
+	if ( '' !== $orig && strlen( $orig ) <= 700000 ) {
+		// Strip scripts/handlers before re-sending; keep layout + images.
+		$orig = preg_replace( '#<script\b[^>]*>.*?</script>#is', '', $orig );
+		$orig = preg_replace( '#\son[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $orig );
+		foreach ( $cidmap as $old => $new ) {
+			$orig = str_replace(
+				array( 'cid:' . $old, 'cid:<' . $old . '>', 'cid:%3C' . $old . '%3E' ),
+				'cid:' . $new,
+				$orig
+			);
+		}
+	} else {
+		$orig = '<div style="white-space:pre-wrap;font-family:inherit">' . esc_html( $msg['text'] ) . '</div>';
+	}
+
+	// Append any image that is NOT already referenced by a cid in the body, so a
+	// picture the customer attached is visibly shown inside the reply.
+	$appended = '';
+	foreach ( $embed as $e ) {
+		if ( false === strpos( $orig, 'cid:' . $e['cid'] ) ) {
+			$appended .= '<div style="margin:10px 0"><img src="cid:' . esc_attr( $e['cid'] )
+				. '" alt="' . esc_attr( $e['name'] ) . '" style="max-width:100%;height:auto;border-radius:8px"></div>';
+		}
+	}
+
+	$who  = $msg['from']['name'] ? $msg['from']['name'] : ( $msg['from']['email'] ? $msg['from']['email'] : '' );
+	$mail_addr = $msg['from']['email'] ? $msg['from']['email'] : '';
+	$when = (string) $msg['date'];
+
+	if ( 'forward' === $mode ) {
+		$hdr = $en ? '---------- Forwarded message ----------' : '---------- رسالة مُعاد توجيهها ----------';
+		$rows = array();
+		$rows[] = ( $en ? 'From: ' : 'من: ' ) . esc_html( trim( $who . ( $mail_addr && $mail_addr !== $who ? ' <' . $mail_addr . '>' : '' ) ) );
+		if ( '' !== $when )                 { $rows[] = ( $en ? 'Date: ' : 'التاريخ: ' ) . esc_html( $when ); }
+		if ( '' !== (string) $msg['subject'] ) { $rows[] = ( $en ? 'Subject: ' : 'الموضوع: ' ) . esc_html( (string) $msg['subject'] ); }
+		if ( '' !== (string) $msg['to'] && is_array( $msg['to'] ) ) { /* to is a list */ }
+		$intro = '<div style="color:#5a6b74;font-size:13px;margin:0 0 6px">' . esc_html( $hdr )
+			. '<br>' . implode( '<br>', $rows ) . '</div>';
+		$quote_html = $intro . '<div>' . $orig . $appended . '</div>';
+	} else {
+		$intro = $en
+			? 'On ' . esc_html( $when ) . ', ' . esc_html( $who ) . ' wrote:'
+			: 'في ' . esc_html( $when ) . '، كتب ' . esc_html( $who ) . ':';
+		$quote_html = '<div style="color:#5a6b74;font-size:13px;margin:0 0 4px">' . $intro . '</div>'
+			. '<blockquote style="margin:0;padding-inline-start:14px;border-inline-start:3px solid rgba(22,131,189,.42)">'
+			. $orig . $appended . '</blockquote>';
+	}
+
+	$html = '<br><br><div class="osoul-quote" style="margin-top:14px">' . $quote_html . '</div>';
+
+	$out_images = array();
+	foreach ( $embed as $e ) {
+		$out_images[] = array( 'cid' => $e['cid'], 'name' => $e['name'], 'mime' => $e['mime'], 'content' => $e['content'] );
+	}
+	return array( 'html' => $html, 'images' => $out_images );
 }
 
 /**
