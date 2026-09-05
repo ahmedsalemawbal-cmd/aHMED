@@ -488,7 +488,13 @@
         '<span class="om-num">' + counter + '</span>' +
         '<button class="nb" id="om-prev">' + mi('chevron_right') + '</button><button class="nb" id="om-next">' + mi('chevron_left') + '</button></div>' +
     '</div>';
-    if (!m) return '<section class="om-reader" id="om-reader">' + bar + '<div class="om-reader-empty"><span class="om-spin"></span></div></section>';
+    if (!m) {
+      var inner = (S.readerErr === S.currentUid)
+        ? '<div class="om-reader-empty">' + mi('error') + '<div>' + esc(LANG === 'en' ? 'Could not load this message.' : 'تعذّر تحميل هذه الرسالة.') + '</div>' +
+            '<button class="om-btn primary" id="om-retry-msg" style="margin-top:12px">' + esc(LANG === 'en' ? 'Retry' : 'إعادة المحاولة') + '</button></div>'
+        : '<div class="om-reader-empty"><span class="om-spin"></span></div>';
+      return '<section class="om-reader" id="om-reader">' + bar + inner + '</section>';
+    }
     var sender = m.from ? (m.from.name || m.from.email) : '';
     var toChips = (m.to || []).slice(0, 4).map(function (a) { return '<span class="chip">' + esc(a.email) + '</span>'; }).join('');
     var ccChips = (m.cc || []).slice(0, 4).map(function (a) { return '<span class="chip">' + esc(a.email) + '</span>'; }).join('');
@@ -575,7 +581,7 @@
       S.sel = {}; if (!all) S.messages.forEach(function (m) { S.sel[m.uid] = true; }); paintMain();
     });
     on(q('#om-group'), 'click', function () { S.group = !S.group; paintMain(); });
-    on(q('#om-refresh'), 'click', function () { loadMessages(); refreshFolders(); });
+    on(q('#om-refresh'), 'click', function () { loadMessages(); setTimeout(refreshFolders, 300); setTimeout(loadLabels, 900); setTimeout(loadQuota, 1400); });
     on(q('#om-density'), 'click', function () { setDensity(S.density === 'medium' ? 'compact' : (S.density === 'compact' ? 'cozy' : 'medium')); });
     on(q('#om-sort'), 'click', function () { S.sort = S.sort === 'newest' ? 'oldest' : 'newest'; loadMessages(); });
     qa('.om-chip[data-fi]').forEach(function (b) { on(b, 'click', function () { S.filter = +b.getAttribute('data-fi'); loadMessages(); }); });
@@ -590,7 +596,8 @@
     qa('[data-arch]').forEach(function (b) { on(b, 'click', function (e) { e.stopPropagation(); archiveMsg(+b.getAttribute('data-arch')); }); });
     qa('[data-bulk]').forEach(function (b) { on(b, 'click', function () { bulkAction(b.getAttribute('data-bulk')); }); });
     // reader
-    on(q('#om-back'), 'click', function () { S.currentUid = 0; S.currentMsg = null; ROOT.classList.remove('reading'); paintMain(); });
+    on(q('#om-retry-msg'), 'click', function () { if (S.currentUid) openMessage(S.currentUid); });
+    on(q('#om-back'), 'click', function () { S.currentUid = 0; S.currentMsg = null; S.readerErr = 0; ROOT.classList.remove('reading'); paintMain(); });
     on(q('#om-reply'), 'click', function () { if (S.currentMsg) openCompose('reply', S.currentMsg); });
     on(q('#om-reply-box'), 'click', function () { if (S.currentMsg) openCompose('reply', S.currentMsg); });
     qa('[data-ract]').forEach(function (b) { on(b, 'click', function () { readerAction(b.getAttribute('data-ract')); }); });
@@ -1085,8 +1092,14 @@
     if (S.currentMsg && S.currentMsg.uid === uid) S.currentMsg.flagged = on_;
     var row = q('.om-star[data-star="' + uid + '"]'); if (row) { row.classList.toggle('on', on_); row.innerHTML = mi(on_ ? 'star' : 'star_outline'); }
     var so = q('#om-star-open'); if (so && S.currentUid === uid) so.innerHTML = mi(on_ ? 'star' : 'star_outline');
-    api('flag', { body: { folder: S.folder, uid: uid, flag: 'flagged', on: on_ } }).catch(function () {});
     toast(on_ ? t('starredOn') : t('starredOff'));
+    // If the server rejects the change, revert so the star never lies about state
+    // (a silent failure is what made "starred" look empty after the fact).
+    api('flag', { body: { folder: S.folder, uid: uid, flag: 'flagged', on: on_ } }).catch(function (e) {
+      if (m) m.flagged = !on_;
+      if (S.currentMsg && S.currentMsg.uid === uid) S.currentMsg.flagged = !on_;
+      paintMain(); toast(e.message || (LANG === 'en' ? 'Could not update' : 'تعذّر التحديث'), 'err');
+    });
   }
   // Debounced folder/label/quota refresh — the counts settle after a burst of
   // actions instead of firing a heavy IMAP sweep on every single click.
@@ -1152,9 +1165,14 @@
         m.label = slug; var lm = S.messages.filter(function (x) { return x.uid === m.uid; })[0]; if (lm) lm.label = slug;
         paintMain();
         api('label', { body: { folder: S.folder, uid: m.uid, label: slug } }).then(function () {
-          scheduleFolderRefresh();
-          var L = LABEL_DEFS.filter(function (x) { return x.slug === slug; })[0];
-          toast(L ? ((LANG === 'en' ? 'Labelled: ' : 'التصنيف: ') + labelName(L)) : (LANG === 'en' ? 'Label removed' : 'أُزيل التصنيف'));
+          // Labelling doesn't move messages, so just nudge the label counts locally.
+          S.labels.forEach(function (L) {
+            if (L.slug === prev) { L.count = (Math.max(0, (parseInt(L.count, 10) || 0) - 1)) || ''; }
+            if (L.slug === slug) { L.count = (parseInt(L.count, 10) || 0) + 1; }
+          });
+          repaintSidebar();
+          var LD = LABEL_DEFS.filter(function (x) { return x.slug === slug; })[0];
+          toast(LD ? ((LANG === 'en' ? 'Labelled: ' : 'التصنيف: ') + labelName(LD)) : (LANG === 'en' ? 'Label removed' : 'أُزيل التصنيف'));
         }).catch(function (e) { m.label = prev; if (lm) lm.label = prev; paintMain(); toast(e.message, 'err'); });
       });
     });
@@ -1260,18 +1278,25 @@
     if (S.screen === 'inbox') paintMain();
   }
   function openMessage(uid) {
-    S.currentUid = uid;
+    S.currentUid = uid; S.readerErr = 0;
     var lm = S.messages.filter(function (x) { return x.uid === uid; })[0];
     var wasUnread = lm && !lm.seen;
-    if (lm) lm.seen = true;
     S.currentMsg = null; ROOT.classList.toggle('reading', window.innerWidth < 1000); paintMain();
     api('message', { query: { folder: S.folder, uid: uid } }).then(function (m) {
       if (S.currentUid !== uid) return;
+      if (lm) lm.seen = true;
       if (lm && lm.label && !m.label) m.label = lm.label; S.currentMsg = m; paintMain();
       if (wasUnread) bumpUnread(-1);
-    }).catch(function (e) { toast(e.message, 'err'); });
+    }).catch(function (e) {
+      if (S.currentUid !== uid) return;
+      // Don't spin forever — show a clear error with a one-tap retry.
+      S.readerErr = uid; paintMain(); toast(e.message, 'err');
+    });
   }
-  function refreshFolders() { api('folders').then(function (r) { S.folders = r.folders || S.folders; buildSideFolders(S.folders); loadLabels(); var side = q('#om-side'); if (side) side.outerHTML = sidebarHTML(); wireSidebar(); loadQuota(); }).catch(function () {}); }
+  // Lean refresh: recompute folder counts on a SINGLE connection. Labels/quota
+  // are refreshed on their own (screen open, manual refresh) to avoid opening
+  // several IMAP connections at once after every action.
+  function refreshFolders() { api('folders').then(function (r) { S.folders = r.folders || S.folders; buildSideFolders(S.folders); var side = q('#om-side'); if (side) { side.outerHTML = sidebarHTML(); wireSidebar(); } }).catch(function () {}); }
   function loadLabels() {
     api('labels').then(function (r) {
       var counts = r.counts || {};
@@ -1386,8 +1411,16 @@
       S.folders = b.folders || []; buildSideFolders(S.folders);
       S.labels = LABEL_DEFS.map(function (l) { return { slug: l.slug, color: l.color, ar: l.ar, en: l.en, count: '' }; });
       var inbox = S.sideFolders[0]; if (inbox) { S.folder = inbox.raw; S.special = 'inbox'; S.display = t('folders').inbox; }
+      // Seed the first inbox page + quota straight from the bootstrap connection
+      // so opening the app costs ONE IMAP connection, not six at once (which the
+      // mail host may refuse). The rest are staggered to avoid connection spikes.
+      if (b.inbox && b.inbox.messages) { if (b.inbox.folder) S.folder = b.inbox.folder; onMessages({ total: b.inbox.total, messages: b.inbox.messages }); }
+      if (b.quota) S.quota = b.quota;
       paintShell();
-      loadMessages(); loadLabels(); loadContacts(); loadClients(); loadQuota();
+      if (!(b.inbox && b.inbox.messages)) loadMessages();
+      setTimeout(loadClients, 400);
+      setTimeout(loadLabels, 1200);
+      if (!b.quota) setTimeout(loadQuota, 1900);
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(pollNew, CFG.poll || 20000);
     }).catch(function (e) {

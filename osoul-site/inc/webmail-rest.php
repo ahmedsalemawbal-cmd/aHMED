@@ -104,7 +104,26 @@ function osoul_rest_mail_bootstrap() {
 			$out['connected']    = false;
 			$out['conn_error']   = $imap->get_error_message();
 		} else {
-			$out['folders'] = osoul_mail_folder_payload( $imap->folders() );
+			// Reuse this ONE connection for folders + the first inbox page + quota,
+			// so opening the app costs a single IMAP connection instead of five in
+			// parallel — critical on hosts (Hostinger) that cap concurrent IMAP
+			// connections and would otherwise refuse the extra sockets. Defensive:
+			// a hiccup fetching the inbox/quota must not break app load.
+			try {
+				$folders        = $imap->folders();
+				$out['folders'] = osoul_mail_folder_payload( $folders );
+				$inbox_raw = 'INBOX';
+				foreach ( $folders as $f ) { if ( 'inbox' === $f['special'] ) { $inbox_raw = $f['raw']; break; } }
+				$list = $imap->list_messages( $inbox_raw, 0, 25, '', '', 'newest' );
+				$out['inbox'] = array(
+					'folder'   => $inbox_raw,
+					'total'    => (int) $list['total'],
+					'messages' => $list['messages'],
+				);
+				$out['quota'] = $imap->quota();
+			} catch ( Exception $e ) {
+				// Keep whatever we gathered; the client falls back to its own loaders.
+			}
 			$imap->logout();
 		}
 	}
@@ -226,7 +245,20 @@ function osoul_rest_mail_message( WP_REST_Request $req ) {
 	}
 	$imap = osoul_mail_open( get_current_user_id() );
 	if ( is_wp_error( $imap ) ) { return $imap; }
-	$msg = $imap->get_message( $folder, $uid );
+	$msg = null;
+	try {
+		$msg = $imap->get_message( $folder, $uid );
+	} catch ( Exception $e ) {
+		$msg = null;
+	}
+	// One clean retry on a fresh connection — covers a transient read glitch or
+	// a server that briefly refused the larger body fetch.
+	if ( null === $msg ) {
+		$imap->logout();
+		$imap = osoul_mail_open( get_current_user_id() );
+		if ( is_wp_error( $imap ) ) { return $imap; }
+		try { $msg = $imap->get_message( $folder, $uid ); } catch ( Exception $e ) { $msg = null; }
+	}
 	if ( null === $msg ) {
 		$imap->logout();
 		return new WP_Error( 'osoul_notfound', 'تعذّر جلب الرسالة.', array( 'status' => 404 ) );

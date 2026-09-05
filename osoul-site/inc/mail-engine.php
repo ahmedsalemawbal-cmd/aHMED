@@ -390,16 +390,46 @@ class Osoul_IMAP {
 		return $msg;
 	}
 
-	/** Raw RFC822 source of a message (returns null on failure). */
+	/**
+	 * Raw RFC822 source of a message (returns null on failure).
+	 *
+	 * Full-body fetches can be large and slow, and a few servers/proxies are
+	 * fussy about the empty-section form `BODY[]`, so we (a) give the socket a
+	 * more generous read window for this one command, (b) try a couple of
+	 * equivalent fetch spellings, and (c) scan every response part for whichever
+	 * key actually carries the message — never leaving the reader stuck.
+	 */
 	public function fetch_raw( $uid ) {
-		$r = $this->run( array( ' UID FETCH ' . (int) $uid . ' (BODY.PEEK[])' ) );
-		foreach ( $r['untagged'] as $line ) {
-			if ( isset( $line[2] ) && 'FETCH' === strtoupper( (string) $line[2] ) && is_array( $line[3] ) ) {
-				$kv = $line[3];
-				for ( $i = 0; $i + 1 < count( $kv ); $i += 2 ) {
-					if ( 0 === strpos( strtoupper( (string) $kv[ $i ] ), 'BODY[' ) ) {
-						return (string) $kv[ $i + 1 ];
-					}
+		$uid = (int) $uid;
+		// Large bodies need longer than the default per-read window.
+		if ( $this->sock ) { @stream_set_timeout( $this->sock, max( 45, $this->timeout ) ); }
+		$variants = array( ' (BODY.PEEK[])', ' (RFC822.PEEK)', ' (BODY[])' );
+		$raw = null;
+		foreach ( $variants as $spec ) {
+			try {
+				$r = $this->run( array( ' UID FETCH ' . $uid . $spec ) );
+			} catch ( Exception $e ) {
+				continue; // try the next spelling rather than failing the open
+			}
+			$raw = $this->extract_body( $r['untagged'] );
+			if ( null !== $raw && '' !== $raw ) { break; }
+		}
+		if ( $this->sock ) { @stream_set_timeout( $this->sock, $this->timeout ); }
+		return $raw;
+	}
+
+	/** Pull the message source out of a FETCH response (BODY[...] or RFC822). */
+	private function extract_body( $untagged ) {
+		foreach ( (array) $untagged as $line ) {
+			if ( ! isset( $line[2] ) || 'FETCH' !== strtoupper( (string) $line[2] ) || ! is_array( $line[3] ) ) { continue; }
+			$kv = $line[3];
+			for ( $i = 0; $i + 1 < count( $kv ); $i += 2 ) {
+				$k = strtoupper( (string) $kv[ $i ] );
+				// Accept BODY[], BODY[]<...>, or RFC822 — but not the metadata keys
+				// RFC822.SIZE / RFC822.HEADER.
+				if ( 0 === strpos( $k, 'BODY[' ) || 'RFC822' === $k ) {
+					$v = $kv[ $i + 1 ];
+					if ( is_string( $v ) && '' !== $v ) { return $v; }
 				}
 			}
 		}
