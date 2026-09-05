@@ -1,0 +1,698 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * أصول البناء — الورقةُ الجامعة
+ *
+ * ملفٌّ واحدٌ بلا معالجٍ ولا أدوات، كما في `midad/apps/web/src/ui/midad.css`.
+ *
+ * ولماذا وُحِّدت الرموزُ أوّلَ شيء؟ لأنّ الإضافةَ التي نُهاجر منها كانت تحمل
+ * **ثلاثَ مفرداتٍ متنافسةً لعلامةٍ واحدة**:
+ *
+ *   assets/css/osoul.css   →  --c-deep · --c-primary · --c-accent
+ *   assets/css/portal.css  →  --n · --o · --ink · --bg · --card
+ *   assets/css/webmail.css →  --brand · --panel · --text
+ *
+ * وأسوأُ من تعدّدها أنّ أسماءها كذبت: في الأولى `--c-red: var(--c-accent)`
+ * والقيمةُ زرقاء، وفي الثانية تعليقٌ يقول «red only on primary actions»
+ * و`--o` هو `#0074A4` — أزرق. بقايا إعادةِ علامةٍ من الأحمر إلى الأزرق
+ * لم تُنظَّف، فبقي الاسمُ يدلّ على لونٍ لم يعد موجودًا.
+ *
+ *     الاسمُ الذي يناقض قيمتَه أسوأُ من غياب الاسم.
+ *
+ * فمفرداتٌ واحدةٌ بسابقة `--osl-`، وقيمُها ألوانُ العلامة الرسميّة المشتقّةُ
+ * من الشعار كما نصّ عليها الملفُّ الأصليّ: Deep ‎#005784 و Bright ‎#0074A4.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────
+   ① العلامة — ثابتةٌ لا تتبدّل بالسمة
+──────────────────────────────────────────── */
+:root {
+  --osl-deep:      #00344F;  /* الأغمق — الرأس والتذييل والأسطح الداكنة */
+  --osl-deep-2:    #00263B;  /* أغمقُ منه — الشريط العلويّ وقائمة الجوّال */
+  --osl-primary:   #005784;  /* أزرقُ العلامة العميق — الأسطحُ الوسطى والضغط */
+  --osl-accent:    #0074A4;  /* أزرقُ العلامة الساطع — الأزرارُ والروابط */
+  --osl-accent-2:  #0089BE;  /* تحويمُ الساطع */
+  --osl-steel:     #7CB6D6;  /* أزرقُ زخرفةٍ هادئ فوق الداكن */
+  --osl-mist:      #E9F2F8;  /* خلفيّةٌ باردةٌ فاتحة */
+  --osl-mist-2:    #DCE7F0;
+
+  /* ─── المقاييس — سُلَّمٌ واحدٌ لا قيمًا متفرّقة ─── */
+  --osl-s-1: 4px;  --osl-s-2: 8px;  --osl-s-3: 12px; --osl-s-4: 16px;
+  --osl-s-5: 20px; --osl-s-6: 24px; --osl-s-7: 32px; --osl-s-8: 40px;
+  --osl-s-9: 56px; --osl-s-10: 72px;
+
+  --osl-r-sm: 8px; --osl-r-md: 12px; --osl-r-lg: 16px; --osl-r-xl: 22px;
+  --osl-r-pill: 999px;
+
+  --osl-dur: 180ms;
+  --osl-dur-slow: 320ms;
+  --osl-ease: cubic-bezier(.4, 0, .2, 1);
+
+  --osl-font: 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --osl-header-h: 68px;
+  --osl-sidebar-w: 252px;
+  --osl-page-max: 1200px;
+
+  /* ─── مراحلُ عرض السعر — دلالةٌ لا زخرفة ───
+     الستُّ مأخوذةٌ من `osoul_quote_stages()` بقيمها نفسِها، كي لا يتبدّل
+     ما يعرفه الموظّفون بالنظر. */
+  --osl-stage-new:         #2563eb;
+  --osl-stage-pricing:     #d97706;
+  --osl-stage-sent:        #7c3aed;
+  --osl-stage-negotiation: #0891b2;
+  --osl-stage-won:         #16a34a;
+  --osl-stage-lost:        #dc2626;
+}
+
+/* ─────────────────────────────────────────
+   ② الأسطحُ والنصُّ والدلالة — الوضعُ الفاتح
+──────────────────────────────────────────── */
+:root {
+  --osl-bg:         #EDF1F7;
+  --osl-surface:    #FFFFFF;
+  --osl-surface-2:  #F6F9FC;
+  --osl-surface-3:  #EFF4F9;
+  --osl-hover:      #F2F6FB;
+  --osl-field:      #FFFFFF;
+  --osl-line:       #E3E9F1;
+  --osl-line-2:     #EEF2F7;
+
+  --osl-text:       #14243C;
+  --osl-text-2:     #5A6980;
+  --osl-text-3:     #93A0B4;
+  --osl-on-brand:   #FFFFFF;
+
+  --osl-ok:      #16A34A; --osl-ok-bg:     #E7F7EE; --osl-ok-fg:     #15803D; --osl-ok-line:     #BBE7CD;
+  --osl-warn:    #D97706; --osl-warn-bg:   #FFF5E6; --osl-warn-fg:   #B45309; --osl-warn-line:   #FAE0B5;
+  --osl-danger:  #DC2626; --osl-danger-bg: #FDECEC; --osl-danger-fg: #B91C1C; --osl-danger-line: #F3C2C2;
+  --osl-info:    #0074A4; --osl-info-bg:   #E6F2F8; --osl-info-fg:   #005784; --osl-info-line:   #C2DEEC;
+
+  --osl-sh-1: 0 1px 2px rgba(0,52,79,.05), 0 3px 10px rgba(0,52,79,.05);
+  --osl-sh-2: 0 4px 14px rgba(0,52,79,.09), 0 2px 5px rgba(0,52,79,.05);
+  --osl-sh-3: 0 14px 38px rgba(0,52,79,.16);
+
+  color-scheme: light;
+}
+
+/* ─────────────────────────────────────────
+   ③ الوضعُ الداكن — مرّتين، وهذا مقصود
+
+   مرّةً لتفضيل النظام حين لا يختار المستخدمُ شيئًا، ومرّةً للاختيار الصريح.
+   ولو اكتُفي بالأولى لَما استطاع من يعمل على نظامٍ فاتحٍ أن يُظلم الشاشة.
+   ولو اكتُفي بالثانية لَبدأ الموقعُ أبيضَ ناصعًا في وجه من نظامُه داكن.
+──────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --osl-bg:         #0B1620;
+    --osl-surface:    #12202C;
+    --osl-surface-2:  #162836;
+    --osl-surface-3:  #1B3141;
+    --osl-hover:      rgba(255,255,255,.045);
+    --osl-field:      #162836;
+    --osl-line:       rgba(255,255,255,.08);
+    --osl-line-2:     rgba(255,255,255,.05);
+
+    --osl-text:       #E9F0F6;
+    --osl-text-2:     #9DB2C4;
+    --osl-text-3:     #6E859B;
+
+    --osl-steel:      #8FBEDA;
+    --osl-mist:       #162836;
+    --osl-mist-2:     #1B3141;
+
+    --osl-ok-bg:     rgba(22,163,74,.14);  --osl-ok-fg:     #5BD48F; --osl-ok-line:     rgba(22,163,74,.36);
+    --osl-warn-bg:   rgba(217,119,6,.14);  --osl-warn-fg:   #E8B45C; --osl-warn-line:   rgba(217,119,6,.36);
+    --osl-danger-bg: rgba(220,38,38,.14);  --osl-danger-fg: #F08A8A; --osl-danger-line: rgba(220,38,38,.36);
+    --osl-info-bg:   rgba(0,116,164,.16);  --osl-info-fg:   #5CB8DE; --osl-info-line:   rgba(0,116,164,.4);
+
+    --osl-sh-1: 0 1px 2px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3);
+    --osl-sh-2: 0 4px 14px rgba(0,0,0,.45);
+    --osl-sh-3: 0 18px 46px rgba(0,0,0,.55);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --osl-bg:         #0B1620;
+  --osl-surface:    #12202C;
+  --osl-surface-2:  #162836;
+  --osl-surface-3:  #1B3141;
+  --osl-hover:      rgba(255,255,255,.045);
+  --osl-field:      #162836;
+  --osl-line:       rgba(255,255,255,.08);
+  --osl-line-2:     rgba(255,255,255,.05);
+
+  --osl-text:       #E9F0F6;
+  --osl-text-2:     #9DB2C4;
+  --osl-text-3:     #6E859B;
+
+  --osl-steel:      #8FBEDA;
+  --osl-mist:       #162836;
+  --osl-mist-2:     #1B3141;
+
+  --osl-ok-bg:     rgba(22,163,74,.14);  --osl-ok-fg:     #5BD48F; --osl-ok-line:     rgba(22,163,74,.36);
+  --osl-warn-bg:   rgba(217,119,6,.14);  --osl-warn-fg:   #E8B45C; --osl-warn-line:   rgba(217,119,6,.36);
+  --osl-danger-bg: rgba(220,38,38,.14);  --osl-danger-fg: #F08A8A; --osl-danger-line: rgba(220,38,38,.36);
+  --osl-info-bg:   rgba(0,116,164,.16);  --osl-info-fg:   #5CB8DE; --osl-info-line:   rgba(0,116,164,.4);
+
+  --osl-sh-1: 0 1px 2px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.3);
+  --osl-sh-2: 0 4px 14px rgba(0,0,0,.45);
+  --osl-sh-3: 0 18px 46px rgba(0,0,0,.55);
+
+  color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────
+   ④ الخطّ — مستضافٌ محلّيًّا لا من جوجل
+
+   والإضافةُ اليومَ تحمّل خطّين من جوجل: الموقعُ التعريفيُّ IBM Plex Sans Arabic
+   والبوّابتان Cairo. فخطٌّ واحدٌ يكفي، ومن هنا لا من هناك.
+
+   والقياسُ في مِداد كان صريحًا: ١٢٫٥ ثانيةً حين يُجلَب الخطُّ من جوجل، و٤٠٨
+   جزءًا من الألف حين يُستضاف معه. والسببُ أنّ جوجل ثلاثُ رحلاتٍ متتابعة —
+   نطاقٌ للورقة ونطاقٌ آخرُ للملفّ، ولا يبدأ الثاني حتّى تصل الأولى.
+
+       ما يُنتظَر من الخارج يُؤخّر أوّلَ رسمة.
+
+   وثلاثةُ أوزانٍ لا أربعة: عاديٌّ ونصفُ عريضٍ وعريض. والوزنُ الرابع (٥٠٠)
+   حُذف لأنّه يزيد أربعةً وستّين كيلوبايتًا ولا تكاد العينُ تفرّقه عن ٦٠٠.
+──────────────────────────────────────────── */
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ipsa-arabic-400.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ipsa-latin-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ipsa-arabic-600.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ipsa-latin-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/ipsa-arabic-700.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/ipsa-latin-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ─────────────────────────────────────────
+   ⑤ الأساس
+
+   ولا يُكتب هنا `left` ولا `right` — بل `inline-start` و`inline-end`.
+   فالعربيّةُ من اليمين **بنيةً لا انعكاسًا**: الخاصّيّةُ المنطقيّة تنقلب
+   وحدَها حين تنقلب اللغة، فتصلح الصفحةُ عربيّةً وإنجليزيّةً بقاعدةٍ واحدة.
+   وهذا ما يجعل الموقعَ ثلاثيَّ اللغة بلا ورقةٍ ثانيةٍ مقلوبة.
+──────────────────────────────────────────── */
+* { box-sizing: border-box; }
+* { -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--osl-bg);
+  color: var(--osl-text);
+  font-family: var(--osl-font);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: 700; line-height: 1.35; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-inline-start: var(--osl-s-5); }
+
+a { color: var(--osl-accent); text-decoration: none; transition: color var(--osl-dur) var(--osl-ease); }
+a:hover { color: var(--osl-accent-2); }
+
+img, svg, video { max-width: 100%; }
+img { height: auto; }
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; }
+
+:focus-visible {
+  outline: 2.5px solid var(--osl-accent);
+  outline-offset: 3px;
+  border-radius: var(--osl-r-sm);
+}
+
+::selection { background: rgba(0, 116, 164, .18); color: inherit; }
+
+/* شريطُ التمرير — رقيقٌ لا يزاحم المحتوى */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: var(--osl-line); border-radius: var(--osl-r-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--osl-text-3); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* الأرقامُ الغربيّةُ في نصٍّ عربيّ تنقلب إن تُركت للاتّجاه.
+   و`--osl-num` يثبّتها بأرقامٍ جدوليّةٍ متساويةِ العرض، فتصطفّ
+   المبالغُ في عمودٍ واحدٍ ولا ترقص بتبدّل الرقم. */
+.osl-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ما يُخفى عن العين ويبقى للقارئ الصوتيّ */
+.osl-sr {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* لمن اختار تقليلَ الحركة — تُطفأ الحركةُ ولا يُكسر شيء */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─────────────────────────────────────────
+   ⑥ اللبنات
+──────────────────────────────────────────── */
+.osl-container {
+  width: 100%;
+  max-width: var(--osl-page-max);
+  margin-inline: auto;
+  padding-inline: var(--osl-s-4);
+}
+.osl-container--wide { max-width: 1440px; }
+
+/* ─── الأزرار ─── */
+.osl-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--osl-s-2);
+  padding: 11px var(--osl-s-5);
+  border: 1px solid transparent;
+  border-radius: var(--osl-r-md);
+  font-size: 15px; font-weight: 600; line-height: 1;
+  background: transparent; color: inherit;
+  transition: background var(--osl-dur) var(--osl-ease),
+              border-color var(--osl-dur) var(--osl-ease),
+              color var(--osl-dur) var(--osl-ease),
+              transform var(--osl-dur) var(--osl-ease);
+}
+.osl-btn:active:not(:disabled) { transform: translateY(1px); }
+.osl-btn:disabled { opacity: .55; cursor: not-allowed; }
+.osl-btn--sm { padding: 7px var(--osl-s-3); font-size: 13.5px; border-radius: var(--osl-r-sm); }
+.osl-btn--lg { padding: 15px var(--osl-s-7); font-size: 16.5px; }
+.osl-btn--block { display: flex; width: 100%; }
+
+.osl-btn--primary { background: var(--osl-accent); color: #fff; }
+.osl-btn--primary:hover:not(:disabled) { background: var(--osl-accent-2); }
+
+.osl-btn--secondary {
+  background: var(--osl-surface); color: var(--osl-text); border-color: var(--osl-line);
+}
+.osl-btn--secondary:hover:not(:disabled) { background: var(--osl-hover); border-color: var(--osl-steel); }
+
+.osl-btn--soft { background: var(--osl-info-bg); color: var(--osl-info-fg); }
+.osl-btn--soft:hover:not(:disabled) { background: var(--osl-mist-2); }
+
+.osl-btn--ghost { color: var(--osl-text-2); }
+.osl-btn--ghost:hover:not(:disabled) { background: var(--osl-hover); color: var(--osl-text); }
+
+.osl-btn--danger { background: var(--osl-danger); color: #fff; }
+.osl-btn--danger:hover:not(:disabled) { filter: brightness(1.08); }
+
+.osl-spin { animation: osl-spin 720ms linear infinite; flex: none; }
+@keyframes osl-spin { to { transform: rotate(360deg); } }
+
+.osl-fullloader {
+  min-height: 60vh;
+  display: grid; place-items: center;
+  color: var(--osl-accent);
+}
+
+/* ─── الحقول ─── */
+.osl-field { display: block; }
+.osl-field__label {
+  display: block; margin-block-end: var(--osl-s-2);
+  font-size: 14px; font-weight: 600; color: var(--osl-text);
+}
+.osl-field__req { color: var(--osl-danger); }
+.osl-field__help { display: block; margin-block-start: 6px; font-size: 13px; color: var(--osl-text-3); }
+.osl-field__err  { display: block; margin-block-start: 6px; font-size: 13px; color: var(--osl-danger-fg); }
+
+.osl-input {
+  display: block; width: 100%;
+  padding: 11px var(--osl-s-3);
+  background: var(--osl-field); color: var(--osl-text);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-md);
+  font-size: 15px;
+  transition: border-color var(--osl-dur) var(--osl-ease), box-shadow var(--osl-dur) var(--osl-ease);
+}
+.osl-input::placeholder { color: var(--osl-text-3); }
+.osl-input:focus {
+  outline: none;
+  border-color: var(--osl-accent);
+  box-shadow: 0 0 0 3px var(--osl-info-bg);
+}
+.osl-input.is-error { border-color: var(--osl-danger); }
+.osl-textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
+.osl-select { appearance: none; padding-inline-end: var(--osl-s-7); }
+/* السهمُ مرسومٌ في الجهة النهائيّة — تنقلب وحدَها بانقلاب الاتّجاه */
+.osl-select {
+  background-image: linear-gradient(45deg, transparent 49%, var(--osl-text-3) 51%),
+                    linear-gradient(-45deg, transparent 49%, var(--osl-text-3) 51%);
+  background-size: 6px 6px, 6px 6px;
+  background-position: calc(var(--osl-s-4) - 3px) calc(50% + 2px), var(--osl-s-4) calc(50% + 2px);
+  background-repeat: no-repeat;
+}
+/* اللاتينيّ في حقلٍ عربيّ — البريدُ ورقمُ الآيبان يُكتبان من اليسار */
+.osl-ltr { direction: ltr; text-align: left; }
+
+/* ─── البطاقات ─── */
+.osl-card {
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line);
+  border-radius: var(--osl-r-lg);
+  box-shadow: var(--osl-sh-1);
+}
+.osl-card--pad { padding: var(--osl-s-5); }
+
+/* ─── الشارات والتنبيهات ─── */
+.osl-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid transparent; border-radius: var(--osl-r-pill);
+  font-size: 12.5px; font-weight: 600; white-space: nowrap;
+}
+.osl-badge--neutral { background: var(--osl-surface-3); color: var(--osl-text-2); border-color: var(--osl-line); }
+.osl-badge--success { background: var(--osl-ok-bg);     color: var(--osl-ok-fg);     border-color: var(--osl-ok-line); }
+.osl-badge--warn    { background: var(--osl-warn-bg);   color: var(--osl-warn-fg);   border-color: var(--osl-warn-line); }
+.osl-badge--danger  { background: var(--osl-danger-bg); color: var(--osl-danger-fg); border-color: var(--osl-danger-line); }
+.osl-badge--info    { background: var(--osl-info-bg);   color: var(--osl-info-fg);   border-color: var(--osl-info-line); }
+.osl-badge--accent  { background: var(--osl-accent);    color: #fff; }
+
+.osl-alert {
+  padding: var(--osl-s-3) var(--osl-s-4);
+  border: 1px solid transparent; border-radius: var(--osl-r-md);
+  font-size: 14.5px;
+}
+.osl-alert--neutral { background: var(--osl-surface-2); color: var(--osl-text-2); border-color: var(--osl-line); }
+.osl-alert--success { background: var(--osl-ok-bg);     color: var(--osl-ok-fg);     border-color: var(--osl-ok-line); }
+.osl-alert--warn    { background: var(--osl-warn-bg);   color: var(--osl-warn-fg);   border-color: var(--osl-warn-line); }
+.osl-alert--danger  { background: var(--osl-danger-bg); color: var(--osl-danger-fg); border-color: var(--osl-danger-line); }
+.osl-alert--info    { background: var(--osl-info-bg);   color: var(--osl-info-fg);   border-color: var(--osl-info-line); }
+.osl-alert--accent  { background: var(--osl-info-bg);   color: var(--osl-info-fg);   border-color: var(--osl-info-line); }
+
+/* ─── الحالاتُ الفارغة ─── */
+.osl-empty {
+  display: grid; gap: var(--osl-s-3); justify-items: center;
+  padding: var(--osl-s-8) var(--osl-s-4);
+  text-align: center;
+}
+.osl-empty__title { font-size: 17px; font-weight: 700; color: var(--osl-text); }
+.osl-empty__line  { font-size: 14.5px; color: var(--osl-text-2); max-width: 46ch; }
+
+/* ─── الهيكلُ العظميّ ─── */
+.osl-skel {
+  display: block;
+  background: linear-gradient(90deg, var(--osl-surface-3) 25%, var(--osl-hover) 37%, var(--osl-surface-3) 63%);
+  background-size: 400% 100%;
+  border-radius: var(--osl-r-sm);
+  animation: osl-shimmer 1.4s ease infinite;
+}
+@keyframes osl-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+/* ─────────────────────────────────────────
+   ⑦ هيكلُ الموقع
+──────────────────────────────────────────── */
+.osl-site { display: flex; flex-direction: column; min-height: 100vh; }
+.osl-main { flex: 1; }
+
+/* رابطُ التخطّي — لا يُرى حتّى يُركَّز عليه بالمفتاح.
+   ولمن يتنقّل بلوحة المفاتيح وحدها، هو الفرقُ بين أن يعبر
+   ثمانيةَ روابطَ في كلّ صفحة وأن يبلغ المحتوى بضغطتين. */
+.osl-skip {
+  position: absolute; inset-inline-start: var(--osl-s-4); top: -100px;
+  z-index: 60; padding: 10px var(--osl-s-4);
+  background: var(--osl-accent); color: #fff;
+  border-radius: var(--osl-r-md); font-weight: 600;
+  transition: top var(--osl-dur) var(--osl-ease);
+}
+.osl-skip:focus { top: var(--osl-s-3); color: #fff; }
+
+/* ─── الرأس ─── */
+.osl-hdr {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--osl-deep); color: #fff;
+  box-shadow: var(--osl-sh-2);
+}
+.osl-hdr__row {
+  display: flex; align-items: center; gap: var(--osl-s-4);
+  min-height: var(--osl-header-h);
+}
+
+.osl-brand { display: inline-flex; align-items: center; gap: var(--osl-s-3); color: inherit; }
+.osl-brand:hover { color: inherit; }
+.osl-brand__mark {
+  display: grid; place-items: center;
+  width: 38px; height: 38px; flex: none;
+  background: var(--osl-accent); color: #fff;
+  border-radius: var(--osl-r-md);
+  font-size: 20px; font-weight: 700;
+}
+.osl-brand__text { display: grid; line-height: 1.2; }
+.osl-brand__text b { font-size: 16px; font-weight: 700; }
+.osl-brand__text i {
+  font-style: normal; font-size: 10.5px; letter-spacing: .14em;
+  color: var(--osl-steel); direction: ltr;
+}
+
+.osl-nav { display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
+.osl-nav__a {
+  padding: 9px var(--osl-s-3);
+  border-radius: var(--osl-r-sm);
+  color: rgba(255,255,255,.82); font-size: 14.5px; font-weight: 500;
+  transition: background var(--osl-dur) var(--osl-ease), color var(--osl-dur) var(--osl-ease);
+}
+.osl-nav__a:hover { background: rgba(255,255,255,.09); color: #fff; }
+.osl-nav__a.is-on { background: rgba(255,255,255,.14); color: #fff; font-weight: 600; }
+
+.osl-hdr__acts { display: flex; align-items: center; gap: var(--osl-s-2); margin-inline-start: auto; }
+.osl-nav + .osl-hdr__acts { margin-inline-start: var(--osl-s-3); }
+
+.osl-iconbtn {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,.08); color: #fff;
+  border: 0; border-radius: var(--osl-r-md);
+  transition: background var(--osl-dur) var(--osl-ease);
+}
+.osl-iconbtn:hover { background: rgba(255,255,255,.16); }
+
+.osl-langsel {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 38px; padding-inline: 10px;
+  background: rgba(255,255,255,.08); color: #fff;
+  border-radius: var(--osl-r-md);
+}
+.osl-langsel select {
+  background: transparent; color: #fff; border: 0;
+  font-size: 13.5px; font-weight: 600; padding-inline-end: 2px;
+}
+/* الخيارُ يُرسم بألوان النظام لا بألوان الرأس الداكن —
+   ولولا هذا لَظهر نصٌّ أبيضُ على قائمةٍ بيضاء عند بعض المتصفّحات. */
+.osl-langsel option { color: var(--osl-text); background: var(--osl-surface); }
+
+.osl-hdr__burger { display: none; }
+
+.osl-mobnav {
+  display: none;
+  padding-block: var(--osl-s-3) var(--osl-s-5);
+  background: var(--osl-deep-2);
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.osl-mobnav__a {
+  display: block; padding: 13px var(--osl-s-2);
+  color: rgba(255,255,255,.86); font-size: 16px; font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.osl-mobnav__a.is-on { color: #fff; font-weight: 700; }
+.osl-mobnav .osl-btn { margin-block-start: var(--osl-s-4); }
+
+/* ─── الواجهة ─── */
+.osl-hero {
+  background:
+    radial-gradient(1200px 460px at 85% -10%, rgba(0,116,164,.30), transparent 62%),
+    linear-gradient(160deg, var(--osl-deep) 0%, var(--osl-deep-2) 100%);
+  color: #fff;
+  padding-block: var(--osl-s-10) var(--osl-s-9);
+}
+.osl-hero__in { max-width: 62ch; }
+.osl-hero__eyebrow {
+  font-size: 13.5px; font-weight: 600; letter-spacing: .04em;
+  color: var(--osl-steel);
+  margin-block-end: var(--osl-s-3);
+}
+.osl-hero__h {
+  font-size: clamp(30px, 5.2vw, 52px);
+  line-height: 1.22; letter-spacing: -.01em;
+  margin-block-end: var(--osl-s-4);
+}
+.osl-hero__p {
+  font-size: clamp(16px, 2vw, 19px);
+  color: rgba(255,255,255,.8);
+  margin-block-end: var(--osl-s-6);
+}
+.osl-hero__acts { display: flex; flex-wrap: wrap; gap: var(--osl-s-3); }
+.osl-hero .osl-btn--secondary {
+  background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.24);
+}
+.osl-hero .osl-btn--secondary:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4); }
+
+/* ─── الأقسام ─── */
+.osl-sec { padding-block: var(--osl-s-9); }
+.osl-sec--alt { background: var(--osl-surface-2); }
+.osl-sec__h {
+  font-size: clamp(22px, 3vw, 30px);
+  margin-block-end: var(--osl-s-6);
+}
+
+.osl-grid { display: grid; gap: var(--osl-s-4); }
+.osl-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.osl-grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+.osl-gcard {
+  display: grid; gap: var(--osl-s-2); align-content: start;
+  padding: var(--osl-s-5);
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-lg);
+  color: inherit; box-shadow: var(--osl-sh-1);
+  transition: transform var(--osl-dur) var(--osl-ease),
+              box-shadow var(--osl-dur) var(--osl-ease),
+              border-color var(--osl-dur) var(--osl-ease);
+}
+.osl-gcard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--osl-sh-2);
+  border-color: var(--osl-steel);
+  color: inherit;
+}
+.osl-gcard__icon {
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  background: var(--osl-info-bg); color: var(--osl-accent);
+  border-radius: var(--osl-r-md);
+  margin-block-end: var(--osl-s-1);
+}
+.osl-gcard__h { font-size: 18px; }
+.osl-gcard__p { font-size: 14.5px; color: var(--osl-text-2); }
+.osl-gcard__n { font-size: 13px; font-weight: 600; color: var(--osl-accent); }
+
+.osl-why { display: grid; gap: var(--osl-s-2); align-content: start; }
+.osl-why__tick {
+  display: grid; place-items: center;
+  width: 30px; height: 30px;
+  background: var(--osl-ok-bg); color: var(--osl-ok-fg);
+  border-radius: var(--osl-r-pill);
+}
+.osl-why__h { font-size: 16px; }
+.osl-why__p { font-size: 14px; color: var(--osl-text-2); }
+
+/* ─── نداءُ الفعل ─── */
+.osl-cta {
+  padding-block: var(--osl-s-9);
+  background: linear-gradient(140deg, var(--osl-primary), var(--osl-accent));
+  color: #fff; text-align: center;
+}
+.osl-cta__h { font-size: clamp(22px, 3.2vw, 32px); margin-block-end: var(--osl-s-3); }
+.osl-cta__p { font-size: 16.5px; color: rgba(255,255,255,.86); margin-block-end: var(--osl-s-5); }
+.osl-cta__btn { background: #fff; color: var(--osl-primary); }
+.osl-cta__btn:hover { background: var(--osl-mist); color: var(--osl-primary); }
+
+/* ─── التذييل ─── */
+.osl-ftr { background: var(--osl-deep-2); color: rgba(255,255,255,.76); padding-block: var(--osl-s-8) var(--osl-s-5); }
+.osl-ftr__grid {
+  display: grid; gap: var(--osl-s-7);
+  grid-template-columns: 1.6fr 1fr 1fr;
+}
+.osl-brand--ftr { margin-block-end: var(--osl-s-3); }
+.osl-ftr__line { font-size: 14.5px; max-width: 46ch; }
+.osl-ftr__h { font-size: 15px; color: #fff; margin-block-end: var(--osl-s-3); }
+.osl-ftr__a { display: block; padding-block: 5px; color: rgba(255,255,255,.72); font-size: 14px; }
+.osl-ftr__a:hover { color: #fff; }
+.osl-ftr__bot {
+  display: flex; flex-wrap: wrap; gap: var(--osl-s-3);
+  align-items: center; justify-content: space-between;
+  margin-block-start: var(--osl-s-7); padding-block-start: var(--osl-s-4);
+  border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 13.5px;
+}
+.osl-ftr__bot .osl-ftr__a { padding: 0; }
+
+/* ─── واتساب الطائر ─── */
+.osl-wa {
+  position: fixed; inset-inline-end: var(--osl-s-4); inset-block-end: var(--osl-s-4);
+  z-index: 40;
+  display: grid; place-items: center;
+  width: 54px; height: 54px;
+  background: #25D366; color: #fff;
+  border-radius: var(--osl-r-pill);
+  box-shadow: var(--osl-sh-3);
+  transition: transform var(--osl-dur) var(--osl-ease);
+}
+.osl-wa:hover { transform: scale(1.06); color: #fff; }
+
+/* ─────────────────────────────────────────
+   ⑧ الجوّال
+
+   والنقطةُ ٩٦٠ لا ٧٦٨: القائمةُ ثمانيةُ روابطَ عربيّة، وهي تزدحم
+   قبل اللوح بكثير. فالنقطةُ تُختار حيث ينكسر التصميمُ فعلًا لا
+   حيث اعتاد الناسُ أن يكتبوها.
+──────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .osl-nav { display: none; }
+  .osl-hdr__burger { display: grid; }
+  .osl-hdr__cta { display: none; }
+  .osl-mobnav { display: block; }
+  .osl-grid--3, .osl-grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .osl-ftr__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 620px) {
+  .osl-grid--3, .osl-grid--4 { grid-template-columns: 1fr; }
+  .osl-ftr__grid { grid-template-columns: 1fr; gap: var(--osl-s-5); }
+  .osl-hero { padding-block: var(--osl-s-8) var(--osl-s-7); }
+  .osl-hero__acts .osl-btn { flex: 1; }
+  .osl-brand__text i { display: none; }
+}
