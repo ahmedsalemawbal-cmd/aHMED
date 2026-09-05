@@ -260,8 +260,9 @@ function osoul_rest_mail_message( WP_REST_Request $req ) {
 		try { $msg = $imap->get_message( $folder, $uid ); } catch ( Exception $e ) { $msg = null; }
 	}
 	if ( null === $msg ) {
+		$dbg = is_object( $imap ) && isset( $imap->debug ) ? (string) $imap->debug : '';
 		$imap->logout();
-		return new WP_Error( 'osoul_notfound', 'تعذّر جلب الرسالة.', array( 'status' => 404 ) );
+		return new WP_Error( 'osoul_notfound', 'تعذّر جلب الرسالة.' . ( '' !== $dbg ? ' [' . $dbg . ']' : '' ), array( 'status' => 404 ) );
 	}
 	// Mark as read.
 	if ( empty( $msg['seen'] ) ) {

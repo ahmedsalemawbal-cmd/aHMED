@@ -34,6 +34,7 @@ class Osoul_IMAP {
 	private $eof  = false;
 	private $caps = array();
 	public  $error = '';
+	public  $debug = '';   // last fetch diagnostic (surfaced on failure)
 	private $timeout;
 
 	public function __construct( $timeout = 20 ) {
@@ -367,7 +368,7 @@ class Osoul_IMAP {
 
 	/** Fetch + parse a single full message by UID. */
 	public function get_message( $folder, $uid ) {
-		if ( ! $this->select( $folder ) ) { return null; }
+		if ( ! $this->select( $folder ) ) { $this->debug = 'select-failed:' . $folder; return null; }
 		$raw = $this->fetch_raw( $uid );
 		if ( null === $raw ) { return null; }
 		$msg = Osoul_MIME::parse( $raw );
@@ -402,38 +403,61 @@ class Osoul_IMAP {
 	public function fetch_raw( $uid ) {
 		$uid = (int) $uid;
 		// Large bodies need longer than the default per-read window.
-		if ( $this->sock ) { @stream_set_timeout( $this->sock, max( 45, $this->timeout ) ); }
-		$variants = array( ' (BODY.PEEK[])', ' (RFC822.PEEK)', ' (BODY[])' );
-		$raw = null;
+		if ( $this->sock ) { @stream_set_timeout( $this->sock, max( 60, $this->timeout ) ); }
+		$variants = array( ' (BODY.PEEK[])', ' (RFC822.PEEK)', ' (BODY[])', ' (RFC822)' );
+		$raw   = null;
+		$notes = array();
 		foreach ( $variants as $spec ) {
 			try {
 				$r = $this->run( array( ' UID FETCH ' . $uid . $spec ) );
 			} catch ( Exception $e ) {
+				$notes[] = trim( $spec ) . '=ex:' . $e->getMessage();
 				continue; // try the next spelling rather than failing the open
 			}
-			$raw = $this->extract_body( $r['untagged'] );
-			if ( null !== $raw && '' !== $raw ) { break; }
+			$found = $this->extract_body( $r['untagged'] );
+			$notes[] = trim( $spec ) . '=' . strtoupper( (string) $r['status'] ) . '/u' . count( $r['untagged'] ) . '/' . ( null === $found ? 'nokey:' . $this->fetch_keys( $r['untagged'] ) : 'len' . strlen( $found ) );
+			if ( null !== $found && '' !== $found ) { $raw = $found; break; }
 		}
 		if ( $this->sock ) { @stream_set_timeout( $this->sock, $this->timeout ); }
+		$this->debug = 'uid' . $uid . ' ' . implode( ' | ', $notes );
 		return $raw;
 	}
 
-	/** Pull the message source out of a FETCH response (BODY[...] or RFC822). */
+	/**
+	 * Pull the message source out of a FETCH response (BODY[...] or RFC822).
+	 * Scans every position (not strict key/value pairs) so an unexpected token
+	 * order can never hide the body.
+	 */
 	private function extract_body( $untagged ) {
 		foreach ( (array) $untagged as $line ) {
 			if ( ! isset( $line[2] ) || 'FETCH' !== strtoupper( (string) $line[2] ) || ! is_array( $line[3] ) ) { continue; }
 			$kv = $line[3];
-			for ( $i = 0; $i + 1 < count( $kv ); $i += 2 ) {
+			$n  = count( $kv );
+			for ( $i = 0; $i < $n; $i++ ) {
+				if ( is_array( $kv[ $i ] ) ) { continue; }
 				$k = strtoupper( (string) $kv[ $i ] );
-				// Accept BODY[], BODY[]<...>, or RFC822 — but not the metadata keys
-				// RFC822.SIZE / RFC822.HEADER.
-				if ( 0 === strpos( $k, 'BODY[' ) || 'RFC822' === $k ) {
-					$v = $kv[ $i + 1 ];
-					if ( is_string( $v ) && '' !== $v ) { return $v; }
+				// Accept BODY[], BODY[]<...>, or RFC822 — never the metadata keys
+				// RFC822.SIZE / RFC822.HEADER (those are not the message source).
+				$is_body = ( 0 === strpos( $k, 'BODY[' ) || 'RFC822' === $k );
+				if ( $is_body && isset( $kv[ $i + 1 ] ) && is_string( $kv[ $i + 1 ] ) && '' !== $kv[ $i + 1 ] ) {
+					return $kv[ $i + 1 ];
 				}
 			}
 		}
 		return null;
+	}
+
+	/** Diagnostic: list the item keys seen in a FETCH response. */
+	private function fetch_keys( $untagged ) {
+		foreach ( (array) $untagged as $line ) {
+			if ( isset( $line[2] ) && 'FETCH' === strtoupper( (string) $line[2] ) && is_array( $line[3] ) ) {
+				$keys = array();
+				$kv   = $line[3];
+				for ( $i = 0; $i < count( $kv ); $i += 2 ) { $keys[] = is_array( $kv[ $i ] ) ? 'list' : (string) $kv[ $i ]; }
+				return implode( ',', $keys );
+			}
+		}
+		return 'no-fetch-line';
 	}
 
 	public function set_flag( $folder, $uid, $flag, $on = true ) {
