@@ -40,6 +40,7 @@ add_action( 'rest_api_init', function () {
 		array( '/mail/client-save',   $post, 'osoul_rest_mail_client_save' ),
 		array( '/mail/client-remove', $post, 'osoul_rest_mail_client_remove' ),
 		array( '/mail/contact-add',   $post, 'osoul_rest_mail_contact_add' ),
+		array( '/mail/contact-remove', $post, 'osoul_rest_mail_contact_remove' ),
 		array( '/mail/stats',         $get,  'osoul_rest_mail_stats' ),
 		array( '/mail/labels',        $get,  'osoul_rest_mail_labels' ),
 		array( '/mail/label',         $post, 'osoul_rest_mail_label' ),
@@ -169,6 +170,28 @@ function osoul_rest_mail_contact_add( WP_REST_Request $req ) {
 	return rest_ensure_response( array( 'ok' => true ) );
 }
 
+/** POST /mail/contact-remove { email, name } → drop an employee contact. */
+function osoul_rest_mail_contact_remove( WP_REST_Request $req ) {
+	$uid   = get_current_user_id();
+	$email = sanitize_email( (string) $req->get_param( 'email' ) );
+	$name  = sanitize_text_field( (string) $req->get_param( 'name' ) );
+	$key   = is_email( $email ) ? $email : ( 'name:' . strtolower( $name ) );
+
+	$list = get_user_meta( $uid, '_osoul_mail_contacts', true );
+	if ( is_array( $list ) ) {
+		// Remove the exact key, plus any stray entry that matches this address.
+		unset( $list[ $key ] );
+		if ( is_email( $email ) ) { unset( $list[ $email ], $list[ strtolower( $email ) ] ); }
+		update_user_meta( $uid, '_osoul_mail_contacts', $list );
+	}
+	$roles = get_user_meta( $uid, '_osoul_mail_contact_roles', true );
+	if ( is_array( $roles ) && isset( $roles[ $key ] ) ) {
+		unset( $roles[ $key ] );
+		update_user_meta( $uid, '_osoul_mail_contact_roles', $roles );
+	}
+	return rest_ensure_response( array( 'ok' => true ) );
+}
+
 /* -------------------------------------------------------------------------
  *  Mailbox insights (stats screen)
  * ---------------------------------------------------------------------- */
@@ -287,12 +310,12 @@ function osoul_rest_mail_snooze( WP_REST_Request $req ) {
 
 	// Resolve (or create) a Snoozed folder.
 	$dest = '';
-	foreach ( $imap->folders() as $f ) {
+	foreach ( $imap->folders( false ) as $f ) {
 		if ( 'snoozed' === $f['special'] || preg_match( '/snooz/i', $f['raw'] ) ) { $dest = $f['raw']; break; }
 	}
 	if ( '' === $dest ) {
 		if ( $imap->create_folder( 'INBOX.Snoozed' ) || $imap->create_folder( 'Snoozed' ) ) {
-			foreach ( $imap->folders() as $f ) {
+			foreach ( $imap->folders( false ) as $f ) {
 				if ( 'INBOX.Snoozed' === $f['raw'] || 'Snoozed' === $f['raw'] ) { $dest = $f['raw']; break; }
 			}
 			if ( '' === $dest ) { $dest = 'INBOX.Snoozed'; }
@@ -311,7 +334,7 @@ function osoul_rest_mail_snooze( WP_REST_Request $req ) {
 
 /** Resolve the raw INBOX folder name (special 'inbox', else the literal INBOX). */
 function osoul_mail_inbox_folder( $imap ) {
-	foreach ( $imap->folders() as $f ) {
+	foreach ( $imap->folders( false ) as $f ) {
 		if ( 'inbox' === $f['special'] ) { return $f['raw']; }
 	}
 	return 'INBOX';

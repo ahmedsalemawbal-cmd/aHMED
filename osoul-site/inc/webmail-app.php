@@ -52,7 +52,7 @@ function osoul_webmail_render_app() {
 	echo '<link rel="stylesheet" href="' . esc_url( OSOUL_URL . 'assets/css/webmail.css?v=' . $ver ) . '">' . "\n";
 	?>
 </head>
-<body class="om-body<?php echo 'en' === $lang ? ' lang-en' : ''; ?>">
+<body class="om-page-body<?php echo 'en' === $lang ? ' lang-en' : ''; ?>">
 	<div id="osoul-mail" class="om-app">
 		<div class="om-boot"><span class="om-spin"></span></div>
 	</div>
@@ -67,7 +67,7 @@ function osoul_webmail_render_app() {
 		logo:      <?php echo wp_json_encode( esc_url_raw( $osoul_logo ) ); ?>,
 		mark:      <?php echo wp_json_encode( esc_url_raw( OSOUL_URL . 'assets/img/osoul-mark.png' ) ); ?>,
 		logout:    <?php echo wp_json_encode( add_query_arg( 'logout', 1, home_url( '/dashboard/' ) ) ); ?>,
-		poll:      20000
+		poll:      12000
 	};
 	</script>
 	<?php

@@ -126,7 +126,7 @@ class Osoul_IMAP {
 	 *
 	 * @return array[] each { name, raw, display, special, unseen, total }
 	 */
-	public function folders() {
+	public function folders( $with_counts = true ) {
 		$r   = $this->run( array( ' LIST "" "*"' ) );
 		$out = array();
 		foreach ( $r['untagged'] as $line ) {
@@ -141,15 +141,20 @@ class Osoul_IMAP {
 				'name'    => $raw,
 				'display' => $this->mutf7_decode( $raw ),
 				'special' => $special,
+				'unseen'  => 0,
+				'total'   => 0,
 			);
 		}
-		// Fetch unread + total per folder.
-		foreach ( $out as &$f ) {
-			$st           = $this->status( $f['raw'] );
-			$f['unseen']  = $st['unseen'];
-			$f['total']   = $st['messages'];
+		// Fetch unread + total per folder — the slow part. Callers that only need
+		// folder names/special-use (move/delete destinations) pass false to skip it.
+		if ( $with_counts ) {
+			foreach ( $out as &$f ) {
+				$st          = $this->status( $f['raw'] );
+				$f['unseen'] = $st['unseen'];
+				$f['total']  = $st['messages'];
+			}
+			unset( $f );
 		}
-		unset( $f );
 		return $this->sort_folders( $out );
 	}
 
@@ -244,28 +249,17 @@ class Osoul_IMAP {
 		}
 		$oldest = ( 'oldest' === $sort );
 
-		if ( '' !== $search || '' !== $crit ) {
-			$uids  = $this->search_uids( $search, $crit );
-			$total = count( $uids );
-			if ( $oldest ) { sort( $uids, SORT_NUMERIC ); } else { rsort( $uids, SORT_NUMERIC ); }
-			$slice = array_slice( $uids, $page * $per, $per );
-			if ( ! $slice ) { return array( 'total' => $total, 'messages' => array() ); }
-			$rows = $this->fetch_overview( implode( ',', $slice ), true );
-		} else {
-			$total = $this->exists;
-			if ( $total <= 0 ) { return array( 'total' => 0, 'messages' => array() ); }
-			if ( $oldest ) {
-				$start = $page * $per + 1;
-				if ( $start > $total ) { return array( 'total' => $total, 'messages' => array() ); }
-				$end   = min( $total, $start + $per - 1 );
-			} else {
-				$end   = $total - ( $page * $per );
-				$start = $end - $per + 1;
-				if ( $end < 1 ) { return array( 'total' => $total, 'messages' => array() ); }
-				if ( $start < 1 ) { $start = 1; }
-			}
-			$rows = $this->fetch_overview( $start . ':' . $end, false );
-		}
+		// Always list via UID SEARCH (ALL when there is no filter/search). This is
+		// the one path that works consistently across servers — the older
+		// sequence-number path depended on the SELECT "EXISTS" count, which some
+		// IMAP servers report in a way that left the default "All" view empty even
+		// though the very same mailbox returned messages under every filter.
+		$uids  = $this->search_uids( $search, $crit );
+		$total = count( $uids );
+		if ( $oldest ) { sort( $uids, SORT_NUMERIC ); } else { rsort( $uids, SORT_NUMERIC ); }
+		$slice = array_slice( $uids, $page * $per, $per );
+		if ( ! $slice ) { return array( 'total' => $total, 'messages' => array() ); }
+		$rows = $this->fetch_overview( implode( ',', $slice ), true );
 		usort( $rows, function ( $a, $b ) use ( $oldest ) { return $oldest ? ( $a['uid'] <=> $b['uid'] ) : ( $b['uid'] <=> $a['uid'] ); } );
 		return array( 'total' => $total, 'messages' => array_values( $rows ) );
 	}

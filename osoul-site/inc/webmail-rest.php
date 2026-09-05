@@ -285,7 +285,7 @@ function osoul_rest_mail_delete( WP_REST_Request $req ) {
 	$imap = osoul_mail_open( get_current_user_id() );
 	if ( is_wp_error( $imap ) ) { return $imap; }
 
-	$folders = $imap->folders();
+	$folders = $imap->folders( false ); // names only — no per-folder STATUS sweep
 	$trash   = '';
 	$is_trash = false;
 	foreach ( $folders as $f ) {
@@ -313,7 +313,7 @@ function osoul_rest_mail_move( WP_REST_Request $req ) {
 	if ( is_wp_error( $imap ) ) { return $imap; }
 	$dest = $dest_raw;
 	if ( '' === $dest && '' !== $special ) {
-		foreach ( $imap->folders() as $f ) {
+		foreach ( $imap->folders( false ) as $f ) {
 			if ( $f['special'] === $special ) { $dest = $f['raw']; break; }
 		}
 	}
@@ -321,7 +321,7 @@ function osoul_rest_mail_move( WP_REST_Request $req ) {
 	if ( '' === $dest && in_array( $special, array( 'archive', 'snoozed' ), true ) ) {
 		$name = ( 'snoozed' === $special ) ? 'Snoozed' : 'Archive';
 		if ( $imap->create_folder( 'INBOX.' . $name ) || $imap->create_folder( $name ) ) {
-			foreach ( $imap->folders() as $f ) {
+			foreach ( $imap->folders( false ) as $f ) {
 				if ( $f['raw'] === 'INBOX.' . $name || $f['raw'] === $name ) { $dest = $f['raw']; break; }
 			}
 			if ( '' === $dest ) { $dest = 'INBOX.' . $name; }
@@ -356,7 +356,7 @@ function osoul_rest_mail_batch( WP_REST_Request $req ) {
 		$special = ( 'delete' === $action ) ? 'trash' : sanitize_key( (string) $req->get_param( 'dest' ) );
 		$dest    = '';
 		$is_trash_src = false;
-		foreach ( $imap->folders() as $f ) {
+		foreach ( $imap->folders( false ) as $f ) {
 			if ( $f['special'] === $special ) { $dest = $f['raw']; }
 			if ( $f['raw'] === $folder && 'trash' === $f['special'] ) { $is_trash_src = true; }
 		}

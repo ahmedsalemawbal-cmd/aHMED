@@ -141,6 +141,36 @@
     clearTimeout(toast._t); toast._t = setTimeout(function () { el.remove(); }, 3000);
   }
 
+  /* ---- notification sound (Web Audio, no external asset — CSP safe) ---- */
+  var _actx = null, _audioReady = false;
+  function unlockAudio() {
+    try {
+      if (!_actx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) _actx = new AC(); }
+      if (_actx && _actx.state === 'suspended') _actx.resume();
+      _audioReady = !!_actx;
+    } catch (e) {}
+  }
+  function playPing() {
+    if (!_audioReady) return;
+    try {
+      var now = _actx.currentTime;
+      // Two soft blips — a gentle "new mail" chime.
+      [[880, 0], [1174, 0.12]].forEach(function (p) {
+        var o = _actx.createOscillator(), g = _actx.createGain();
+        o.type = 'sine'; o.frequency.value = p[0];
+        o.connect(g); g.connect(_actx.destination);
+        var s = now + p[1];
+        g.gain.setValueAtTime(0.0001, s);
+        g.gain.exponentialRampToValueAtTime(0.16, s + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, s + 0.20);
+        o.start(s); o.stop(s + 0.22);
+      });
+    } catch (e) {}
+  }
+  // Browsers require a user gesture before audio — arm it on the first interaction.
+  on(window, 'pointerdown', unlockAudio, { once: true });
+  on(window, 'keydown', unlockAudio, { once: true });
+
   /* -------------------------------- api ------------------------------- */
   function api(path, opts) {
     opts = opts || {};
@@ -624,7 +654,8 @@
         '<div style="min-width:0"><div class="nm">' + esc(nm) + '</div>' + (c.role ? '<div class="role">' + esc(c.role) + '</div>' : '') + '</div></div>' +
         '<div class="em">' + esc(c.email) + '</div>' +
         '<div class="om-card-actions"><button class="msg" data-mail="' + esc(c.email) + '">' + esc(t('message')) + '</button>' +
-        '<button class="ic" data-call="' + esc(c.name) + '">' + mi('call') + '</button></div></div>';
+        (c.email ? '<button class="ic" data-call="' + esc(c.name) + '">' + mi('call') + '</button>' : '') +
+        '<button class="ic danger" data-cdel="1" data-ce="' + esc(c.email || '') + '" data-cn="' + esc(c.name || '') + '" title="' + esc(t('remove')) + '">' + mi('person_remove') + '</button></div></div>';
     }).join('');
     return '<div class="om-page"><div class="om-page-w">' +
       '<div class="om-page-h"><h2>' + esc(t('contactsTitle')) + '</h2><span class="meta">' + S.contacts.length + ' ' + esc(LANG === 'en' ? 'contacts' : 'جهة') + '</span>' +
@@ -638,6 +669,13 @@
     qa('[data-back]').forEach(function (b) { on(b, 'click', function () { go('inbox'); }); });
     qa('[data-mail]').forEach(function (b) { on(b, 'click', function () { openCompose('new', null, null, b.getAttribute('data-mail')); }); });
     qa('[data-call]').forEach(function (b) { on(b, 'click', function () { toast((LANG === 'en' ? 'Call ' : 'اتصال بـ ') + b.getAttribute('data-call')); }); });
+    qa('[data-cdel]').forEach(function (b) { on(b, 'click', function () {
+      var email = b.getAttribute('data-ce') || '', name = b.getAttribute('data-cn') || '';
+      S.contacts = S.contacts.filter(function (c) { return !((email && c.email === email) || (!email && c.name === name)); });
+      paintMain();
+      api('contact-remove', { body: { email: email, name: name } }).then(function () { toast(LANG === 'en' ? 'Contact removed' : 'تم حذف الجهة'); })
+        .catch(function (e) { toast(e.message, 'err'); loadContacts(true); });
+    }); });
     on(q('#om-add-contact'), 'click', function () {
       var host = q('#om-add-contact-form');
       if (host.innerHTML) { host.innerHTML = ''; return; }
@@ -1009,7 +1047,7 @@
     api('send', { body: body }).then(function () {
       toast(args.draft ? t('draft_ok') : t('sent_ok'));
       if (done) done();
-      refreshFolders();
+      scheduleFolderRefresh();
       if (S.special === 'sent' || S.special === 'drafts') loadMessages();
     }).catch(function (e) {
       if (dock) { var btn = q('#om-c-send', dock); if (btn) { btn.disabled = false; btn.innerHTML = mi('send') + esc(t('send')); } }
@@ -1050,19 +1088,40 @@
     api('flag', { body: { folder: S.folder, uid: uid, flag: 'flagged', on: on_ } }).catch(function () {});
     toast(on_ ? t('starredOn') : t('starredOff'));
   }
-  function archiveMsg(uid) {
-    api('move', { body: { folder: S.folder, uid: uid, dest: 'archive' } }).then(function () {
-      removeFromList(uid); toast(t('archived')); refreshFolders();
-    }).catch(function (e) { toast(e.message, 'err'); });
+  // Debounced folder/label/quota refresh — the counts settle after a burst of
+  // actions instead of firing a heavy IMAP sweep on every single click.
+  var _frTimer = null;
+  function scheduleFolderRefresh() { clearTimeout(_frTimer); _frTimer = setTimeout(refreshFolders, 650); }
+  function repaintSidebar() { var side = q('#om-side'); if (side) { side.outerHTML = sidebarHTML(); wireSidebar(); } }
+  function adjustCount(special, delta) {
+    var f = S.sideFolders.filter(function (x) { return x.special === special; })[0];
+    if (!f) return; var n = (parseInt(f.count, 10) || 0) + delta; f.count = n > 0 ? n : '';
   }
-  function deleteMsg(uid) {
-    api('delete', { body: { folder: S.folder, uid: uid } }).then(function (r) {
-      removeFromList(uid); toast(r.mode === 'purged' ? (LANG === 'en' ? 'Deleted' : 'تم الحذف') : t('deleted')); refreshFolders();
-    }).catch(function (e) { toast(e.message, 'err'); });
+  // Remove a row instantly and sync in the background; roll back if the server
+  // rejects. This is what makes every action feel instant ("زي البرق").
+  function optimisticRemove(uid, endpoint, body, okMsg, destSpecial) {
+    var snap = S.messages.slice(), cu = S.currentUid, cm = S.currentMsg;
+    var gone = S.messages.filter(function (x) { return x.uid === uid; })[0];
+    S.messages = S.messages.filter(function (x) { return x.uid !== uid; });
+    if (S.currentUid === uid) { S.currentUid = 0; S.currentMsg = null; ROOT.classList.remove('reading'); }
+    // Local count nudges so the sidebar reflects the move at once.
+    var wasUnread = gone && !gone.seen;
+    if (S.special === 'inbox' || S.special === 'starred') { if (wasUnread) adjustCount('inbox', -1); }
+    else adjustCount(S.special, -1);
+    if (destSpecial) adjustCount(destSpecial, +1);
+    paintMain(); repaintSidebar();
+    if (okMsg) toast(okMsg);
+    api(endpoint, { body: body }).then(function () {
+      scheduleFolderRefresh();
+      if (!S.messages.length) loadMessages();
+    }).catch(function (e) {
+      S.messages = snap; S.currentUid = cu; S.currentMsg = cm;
+      paintMain(); repaintSidebar(); toast(e.message || (LANG === 'en' ? 'Action failed' : 'تعذّر تنفيذ الإجراء'), 'err');
+    });
   }
-  function moveToSpecial(uid, special, msg) {
-    api('move', { body: { folder: S.folder, uid: uid, dest: special } }).then(function () { removeFromList(uid); toast(msg); refreshFolders(); }).catch(function (e) { toast(e.message, 'err'); });
-  }
+  function archiveMsg(uid) { optimisticRemove(uid, 'move', { folder: S.folder, uid: uid, dest: 'archive' }, t('archived'), 'archive'); }
+  function deleteMsg(uid) { optimisticRemove(uid, 'delete', { folder: S.folder, uid: uid }, t('deleted'), 'trash'); }
+  function moveToSpecial(uid, special, msg) { optimisticRemove(uid, 'move', { folder: S.folder, uid: uid, dest: special }, msg, special); }
   function readerAction(a) {
     var m = S.currentMsg; if (!m) return;
     if (a === 'replyall') openCompose('replyall', m);
@@ -1074,7 +1133,7 @@
     else if (a === 'unread') { api('flag', { body: { folder: S.folder, uid: m.uid, flag: 'seen', on: false } }).then(function () { m.seen = false; var lm = S.messages.filter(function (x) { return x.uid === m.uid; })[0]; if (lm) lm.seen = false; S.currentUid = 0; S.currentMsg = null; bumpUnread(1); paintMain(); toast(t('markedUnread')); }).catch(function (e) { toast(e.message, 'err'); }); }
   }
   function snoozeMsg(uid) {
-    api('snooze', { body: { folder: S.folder, uid: uid } }).then(function () { removeFromList(uid); toast(LANG === 'en' ? 'Snoozed to tomorrow 08:00' : 'تم تأجيل الرسالة إلى غدًا 08:00'); refreshFolders(); }).catch(function () { moveToSpecial(uid, 'archive', LANG === 'en' ? 'Snoozed' : 'تم التأجيل'); });
+    optimisticRemove(uid, 'snooze', { folder: S.folder, uid: uid }, LANG === 'en' ? 'Snoozed to tomorrow 08:00' : 'تم تأجيل الرسالة إلى غدًا 08:00', 'snoozed');
   }
   function openLabelMenu() {
     var m = S.currentMsg; if (!m) return;
@@ -1089,12 +1148,14 @@
     qa('[data-setl]', host).forEach(function (b) {
       on(b, 'click', function () {
         var slug = b.getAttribute('data-setl'); host.remove();
+        var prev = m.label;
+        m.label = slug; var lm = S.messages.filter(function (x) { return x.uid === m.uid; })[0]; if (lm) lm.label = slug;
+        paintMain();
         api('label', { body: { folder: S.folder, uid: m.uid, label: slug } }).then(function () {
-          m.label = slug; var lm = S.messages.filter(function (x) { return x.uid === m.uid; })[0]; if (lm) lm.label = slug;
-          paintMain(); refreshFolders();
+          scheduleFolderRefresh();
           var L = LABEL_DEFS.filter(function (x) { return x.slug === slug; })[0];
           toast(L ? ((LANG === 'en' ? 'Labelled: ' : 'التصنيف: ') + labelName(L)) : (LANG === 'en' ? 'Label removed' : 'أُزيل التصنيف'));
-        }).catch(function (e) { toast(e.message, 'err'); });
+        }).catch(function (e) { m.label = prev; if (lm) lm.label = prev; paintMain(); toast(e.message, 'err'); });
       });
     });
   }
@@ -1104,14 +1165,16 @@
     var map = { read: 'read', star: 'star', archive: 'move', delete: 'delete' };
     var body = { folder: S.folder, action: map[action], uids: uids };
     if (action === 'archive') body.dest = 'archive';
+    var snap = S.messages.slice();
+    // Optimistic: apply the change to the list at once, sync in the background.
+    if (action === 'read') { uids.forEach(function (u) { var m = S.messages.filter(function (x) { return x.uid === u; })[0]; if (m) m.seen = true; }); }
+    else if (action === 'star') { uids.forEach(function (u) { var m = S.messages.filter(function (x) { return x.uid === u; })[0]; if (m) m.flagged = true; }); }
+    else { uids.forEach(function (u) { S.messages = S.messages.filter(function (x) { return x.uid !== u; }); }); }
+    S.sel = {}; paintMain(); toast(LANG === 'en' ? 'Done' : 'تم التنفيذ');
     api('batch', { body: body }).then(function () {
-      if (action === 'read') { uids.forEach(function (u) { var m = S.messages.filter(function (x) { return x.uid === u; })[0]; if (m) m.seen = true; }); }
-      else if (action === 'star') { uids.forEach(function (u) { var m = S.messages.filter(function (x) { return x.uid === u; })[0]; if (m) m.flagged = true; }); }
-      else { uids.forEach(function (u) { S.messages = S.messages.filter(function (x) { return x.uid !== u; }); }); }
-      S.sel = {}; paintMain(); refreshFolders();
-      toast(LANG === 'en' ? 'Done' : 'تم التنفيذ');
+      scheduleFolderRefresh();
       if (!S.messages.length) loadMessages();
-    }).catch(function (e) { toast(e.message, 'err'); });
+    }).catch(function (e) { S.messages = snap; paintMain(); toast(e.message, 'err'); });
   }
   function removeFromList(uid) {
     S.messages = S.messages.filter(function (x) { return x.uid !== uid; });
@@ -1120,9 +1183,10 @@
     if (!S.messages.length) loadMessages();
   }
   function bumpUnread(d) {
-    var f = S.sideFolders.filter(function (x) { return x.special === S.special; })[0];
-    if (f) { f.count = Math.max(0, (parseInt(f.count) || 0) + d) || ''; if (typeof f.count === 'number' && f.count === 0) f.count = ''; }
-    var side = q('#om-side'); if (side) { /* light refresh */ }
+    // Reading/marking changes the unread badge of the folder in view — keep it
+    // live locally (the 'starred' pseudo-folder is really the inbox).
+    adjustCount(S.special === 'starred' ? 'inbox' : S.special, d);
+    repaintSidebar();
   }
   function downloadAtt(index, name) {
     toast(t('downloading'));
@@ -1233,6 +1297,7 @@
         });
         S.notifs = S.notifs.slice(0, 15);
         showIncoming(fresh[fresh.length - 1] || top);
+        playPing();
         if (S.screen === 'inbox' && S.special === 'inbox' && S.filter === 0) { S.messages = msgs; }
         paintShell();
       }
@@ -1332,5 +1397,7 @@
   var pollTimer = null;
   on(window, 'keydown', keyHandler);
   on(window, 'resize', function () { if (S.screen === 'inbox') paintMain(); });
+  // Check for new mail the moment the tab is focused again (no waiting a full cycle).
+  on(document, 'visibilitychange', function () { if (!document.hidden && S.bootstrap && S.bootstrap.connected) { unlockAudio(); pollNew(true); } });
   start();
 })();
