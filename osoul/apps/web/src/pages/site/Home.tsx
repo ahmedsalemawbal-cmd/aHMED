@@ -5,11 +5,11 @@ import { IcCheck, IcDoor, IcPanel, IcStrut } from '../../ui/icons'
 
 const GROUPS = [
   { to: '/doors',  icon: IcDoor,  title: 'الأبواب بأنواعها',
-    line: 'أبواب مقاومة للحريق ومعدنية مجوفة وتكسوية وخشبية MDF و WPC ومخصّصة.', n: 7 },
+    line: 'أبواب مقاومة للحريق ومعدنية مجوفة وتكسوية وخشبية MDF و WPC ومخصّصة.', n: 6 },
   { to: '/gypsum', icon: IcPanel, title: 'بروفايلات الجبسوم بورد',
-    line: 'C-Stud و U-Track و L-Angle و Hat Channel وقنوات الأسقف وإكسسواراتها.', n: 14 },
+    line: 'C-Stud و U-Track و L-Angle و Hat Channel وقنوات الأسقف وإكسسواراتها.', n: 13 },
   { to: '/strut',  icon: IcStrut, title: 'أنظمة Strut للتثبيت',
-    line: 'أطواق وقنوات وأذرع كونسول ودعامات ومشابك تعليق ووصلات نظام.', n: 10 },
+    line: 'أطواق وقنوات وأذرع كونسول ودعامات ومشابك تعليق ووصلات نظام.', n: 9 },
 ]
 
 const WHY = [
