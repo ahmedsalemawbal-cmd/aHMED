@@ -1,8 +1,20 @@
 name: معاينة أصول البناء على GitHub Pages
 
-# يدويّ: يُشغَّل من تبويب Actions عند الحاجة إلى رابطٍ يُرى به الموقع.
+# يُشغَّل بالدفع إلى فرع العمل، وبطلبٍ يدويٍّ من تبويب Actions.
+#
+# ولمَ الدفعُ لا اليدُ وحدها؟ لأنّ `workflow_dispatch` يشترط وجودَ الملفّ
+# على **الفرع الافتراضيّ**، وهذا العملُ على فرعٍ آخر. فلو اكتُفي باليد
+# لَما ظهر السيرُ أصلًا، ولَلزم المساسُ بالفرع الافتراضيّ من أجل معاينة.
+#
+#     ما يُبنى على فرعٍ يُنشَر من فرعِه.
+#
 # و`enablement: true` في خطوة التجهيز يُفعّل Pages لأوّل مرّة بلا ضبطٍ يدويّ.
 on:
+  push:
+    branches: [claude/educational-platform-setup-ct0iwr]
+    paths:
+      - 'osoul/apps/web/**'
+      - '.github/workflows/preview-osoul.yml'
   workflow_dispatch:
 
 permissions:
