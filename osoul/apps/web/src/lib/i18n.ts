@@ -99,3 +99,17 @@ export function pick(row: Record<string, any>, base: string): string {
   if (current === 'ur' && row[`${base}_en`]) return row[`${base}_en`]
   return ar
 }
+
+/**
+ * نصٌّ ثنائيُّ اللغة من ملفّات المحتوى (`{ ar, en }`).
+ *
+ * وهذه ثالثةُ ثلاث: `t()` تترجم نصًّا **في الشيفرة**، و`pick()` تختار
+ * عمودًا **من صفّ**، وهذه تختار من **نصٍّ منقولٍ عن الأصل**. وفصلُها
+ * مقصود: ما نُقل عن صاحب العمل لا يدخل قاموسَ الترجمة، فلا يُبدَّل
+ * بترجمةٍ آليّةٍ يومًا.
+ */
+export function bt(v: { ar: string; en: string } | undefined): string {
+  if (!v) return ''
+  if (current === 'ar') return v.ar
+  return v.en || v.ar
+}

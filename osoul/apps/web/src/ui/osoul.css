@@ -908,3 +908,148 @@ button { cursor: pointer; }
     font-size: 13px; font-weight: 600; color: var(--osl-text-3);
   }
 }
+
+/* ─────────────────────────────────────────
+   ⑩ أقسامُ الرئيسة و«من نحن»
+
+   والعناوينُ في الأصل كلمتان مُبرَزتان بين كلماتٍ عاديّة
+   («نصنع **الجودة** ونبني **الثقة**»). فـ`<em>` تحمل الإبراز،
+   ولا تُكتب الكلمةُ في وسمٍ مستقلٍّ يكسر الجملة على القارئ الصوتيّ.
+──────────────────────────────────────────── */
+.osl-hero__h em, .osl-cta__h em {
+  font-style: normal;
+  color: var(--osl-steel);
+}
+.osl-cta__h em { color: rgba(255, 255, 255, .72); }
+
+.osl-hero__chips {
+  list-style: none; padding: 0;
+  display: flex; flex-wrap: wrap; gap: var(--osl-s-2);
+  margin-block-start: var(--osl-s-6);
+}
+.osl-hero__chips li {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: var(--osl-r-pill);
+  font-size: 13px; font-weight: 600;
+}
+
+.osl-kicker {
+  font-size: 13.5px; font-weight: 700; letter-spacing: .02em;
+  color: var(--osl-accent);
+  margin-block-end: var(--osl-s-2);
+}
+.osl-kicker--on-dark { color: var(--osl-steel); }
+
+.osl-lead {
+  font-size: 16px; line-height: 1.9; color: var(--osl-text-2);
+  max-width: 62ch; margin-block-end: var(--osl-s-4);
+}
+.osl-lead--wide { max-width: 76ch; margin-block-end: var(--osl-s-6); }
+
+.osl-sub-h { font-size: 17px; margin-block-end: var(--osl-s-2); }
+
+.osl-split {
+  display: grid; gap: var(--osl-s-7);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.osl-checks { list-style: none; padding: 0; display: grid; gap: var(--osl-s-3); }
+.osl-checks li { display: flex; gap: var(--osl-s-3); align-items: flex-start; font-size: 15px; }
+.osl-checks__tick {
+  display: grid; place-items: center; flex: none;
+  width: 26px; height: 26px;
+  background: var(--osl-ok-bg); color: var(--osl-ok-fg);
+  border-radius: var(--osl-r-pill);
+}
+
+.osl-gcard__kicker {
+  font-size: 12.5px; font-weight: 700;
+  color: var(--osl-accent);
+}
+.osl-gcard__h br { content: ''; }
+
+/* ─── المشروعُ المُبرَز ─── */
+.osl-feat {
+  display: grid; gap: var(--osl-s-6);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+}
+.osl-feat__media {
+  aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: var(--osl-r-lg);
+  background: var(--osl-surface-3);
+  box-shadow: var(--osl-sh-2);
+}
+.osl-feat__media img { width: 100%; height: 100%; object-fit: cover; }
+.osl-feat__body { display: grid; gap: var(--osl-s-3); align-content: start; justify-items: start; }
+.osl-feat__h { font-size: clamp(21px, 3vw, 28px); line-height: 1.3; }
+.osl-feat__p { font-size: 15px; color: var(--osl-text-2); }
+.osl-feat__meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--osl-s-2);
+  font-size: 14px; color: var(--osl-text-2);
+}
+.osl-feat__meta b { font-size: 24px; color: var(--osl-accent); }
+.osl-feat__others { list-style: none; padding: 0; display: grid; gap: 6px; }
+.osl-feat__others li {
+  font-size: 14px; color: var(--osl-text-2);
+  padding-inline-start: var(--osl-s-4); position: relative;
+}
+.osl-feat__others li::before {
+  content: ''; position: absolute;
+  inset-inline-start: 0; inset-block-start: .62em;
+  width: 5px; height: 5px; border-radius: var(--osl-r-pill);
+  background: var(--osl-steel);
+}
+
+/* ─── الأرقام ─── */
+.osl-stats { background: var(--osl-surface-2); padding-block: var(--osl-s-7); }
+.osl-stat { display: grid; gap: 2px; justify-items: center; text-align: center; }
+.osl-stat b { font-size: clamp(28px, 4vw, 40px); color: var(--osl-accent); line-height: 1.1; }
+.osl-stat span { font-size: 14px; color: var(--osl-text-2); }
+
+/* ─── كلمةُ المدير ─── */
+.osl-ceo {
+  max-width: 78ch; margin-inline: auto;
+  padding: var(--osl-s-6);
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line);
+  border-radius: var(--osl-r-lg);
+  box-shadow: var(--osl-sh-1);
+}
+/* الشريطُ في جهة البداية — ينقلب وحدَه مع اللغة */
+.osl-ceo { border-inline-start: 4px solid var(--osl-accent); }
+.osl-ceo__q { margin: var(--osl-s-3) 0; display: grid; gap: var(--osl-s-3); }
+.osl-ceo__q p { font-size: 16px; line-height: 1.95; color: var(--osl-text-2); }
+.osl-ceo__by { display: grid; gap: 2px; padding-block-start: var(--osl-s-3); border-top: 1px solid var(--osl-line-2); }
+.osl-ceo__by b { font-size: 15.5px; }
+.osl-ceo__by span { font-size: 13.5px; color: var(--osl-text-3); }
+
+/* ─── خطواتُ العمل ─── */
+.osl-steps {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; gap: var(--osl-s-4);
+  grid-template-columns: repeat(4, 1fr);
+}
+.osl-steps li { display: grid; gap: var(--osl-s-2); justify-items: start; }
+.osl-steps__n {
+  display: grid; place-items: center;
+  width: 36px; height: 36px;
+  background: var(--osl-accent); color: #fff;
+  border-radius: var(--osl-r-pill);
+  font-size: 16px; font-weight: 700;
+}
+
+.osl-cta__acts { display: flex; flex-wrap: wrap; gap: var(--osl-s-3); justify-content: center; }
+.osl-cta__wa { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.osl-cta__wa:hover { background: rgba(255,255,255,.24); color: #fff; }
+
+@media (max-width: 960px) {
+  .osl-split, .osl-feat { grid-template-columns: 1fr; }
+  .osl-steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
+  .osl-steps { grid-template-columns: 1fr; }
+}
