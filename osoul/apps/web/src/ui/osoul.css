@@ -696,3 +696,215 @@ button { cursor: pointer; }
   .osl-hero__acts .osl-btn { flex: 1; }
   .osl-brand__text i { display: none; }
 }
+
+/* ─────────────────────────────────────────
+   ⑨ صفحاتُ الموقع
+──────────────────────────────────────────── */
+
+/* ─── ترويسةُ الصفحة ─── */
+.osl-phead {
+  background: linear-gradient(160deg, var(--osl-deep) 0%, var(--osl-primary) 140%);
+  color: #fff;
+  padding-block: var(--osl-s-8) var(--osl-s-7);
+}
+.osl-phead--flat {
+  background: none; color: inherit;
+  padding-block: var(--osl-s-7) var(--osl-s-5);
+}
+.osl-phead__h { font-size: clamp(25px, 4vw, 38px); margin-block-end: var(--osl-s-2); }
+.osl-phead__p { font-size: 16px; max-width: 68ch; opacity: .86; }
+.osl-phead--flat .osl-phead__p { color: var(--osl-text-2); opacity: 1; }
+
+.osl-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.osl-sec__cta { display: flex; justify-content: center; margin-block-start: var(--osl-s-7); }
+
+/* ─── بطاقةُ منتجٍ أو مشروع ─── */
+.osl-pcard {
+  display: flex; flex-direction: column;
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line);
+  border-radius: var(--osl-r-lg);
+  overflow: hidden;
+  box-shadow: var(--osl-sh-1);
+  transition: transform var(--osl-dur) var(--osl-ease),
+              box-shadow var(--osl-dur) var(--osl-ease),
+              border-color var(--osl-dur) var(--osl-ease);
+}
+.osl-pcard:hover { transform: translateY(-3px); box-shadow: var(--osl-sh-2); border-color: var(--osl-steel); }
+
+.osl-pcard__img {
+  position: relative; display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--osl-surface-3);
+}
+.osl-pcard__img img { width: 100%; height: 100%; object-fit: contain; padding: var(--osl-s-3); }
+/* المشاريعُ صورٌ فوتوغرافيّةٌ تملأ الإطار، والمنتجاتُ مقصوصةٌ على أبيضَ
+   فتُحتوى ولا تُقصّ. والفرقُ يُقرأ من نسبة الصورة لا من صنفٍ ثانٍ. */
+.osl-pcard__img img[alt*="—"] { object-fit: cover; padding: 0; }
+.osl-pcard__noimg {
+  display: block; width: 100%; height: 100%;
+  background: repeating-linear-gradient(45deg,
+    var(--osl-surface-3) 0 10px, var(--osl-surface-2) 10px 20px);
+}
+.osl-pcard__badge {
+  position: absolute; inset-block-start: var(--osl-s-3); inset-inline-start: var(--osl-s-3);
+  padding: 3px 10px; border-radius: var(--osl-r-pill);
+  background: var(--osl-accent); color: #fff;
+  font-size: 12px; font-weight: 700;
+}
+.osl-pcard__body { flex: 1; padding: var(--osl-s-4); display: grid; gap: 6px; align-content: start; }
+.osl-pcard__h { font-size: 16.5px; }
+.osl-pcard__h a { color: var(--osl-text); }
+.osl-pcard__h a:hover { color: var(--osl-accent); }
+.osl-pcard__sub { font-size: 14px; color: var(--osl-text-2); }
+.osl-pcard__add {
+  margin: 0 var(--osl-s-4) var(--osl-s-4);
+  background: var(--osl-info-bg); color: var(--osl-info-fg);
+}
+.osl-pcard__add:hover { background: var(--osl-mist-2); }
+.osl-pcard__add.is-in { background: var(--osl-ok-bg); color: var(--osl-ok-fg); }
+
+.osl-pmeta { display: flex; align-items: center; gap: var(--osl-s-2); font-size: 13px; color: var(--osl-text-3); }
+/* الفاصلُ **عنصرٌ مرسوم** لا حرفٌ محايد. والحرفُ المحايد بين رقمين في
+   نصٍّ عربيٍّ يُلحقه المحرّكُ بأقربهما فيندمجان — عطبٌ رأيتُه في لوحة
+   الإضافة حين كُتب «١٠ صفًّا · ٧ أعمدة» فرُسم «١٠ صفًّا ٧٠ أعمدة».
+       ما يُفصَل بنصٍّ محايدٍ يُوصَل في العربيّة. */
+.osl-pmeta__sep {
+  width: 4px; height: 4px; flex: none;
+  border-radius: var(--osl-r-pill);
+  background: var(--osl-text-3);
+}
+
+/* ─── فتاتُ المسار ─── */
+.osl-crumbs {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--osl-s-2);
+  padding-block: var(--osl-s-5) 0;
+  font-size: 13.5px; color: var(--osl-text-3);
+}
+.osl-crumbs a { color: var(--osl-text-2); }
+.osl-crumbs a:hover { color: var(--osl-accent); }
+
+/* ─── صفحةُ المنتج ─── */
+.osl-pdetail {
+  display: grid; gap: var(--osl-s-7);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: start;
+  padding-block: var(--osl-s-5) var(--osl-s-9);
+}
+.osl-pdetail__media {
+  aspect-ratio: 1 / 1;
+  background: var(--osl-surface); border: 1px solid var(--osl-line);
+  border-radius: var(--osl-r-lg); overflow: hidden;
+}
+.osl-pdetail__media img { width: 100%; height: 100%; object-fit: contain; padding: var(--osl-s-5); }
+.osl-pdetail__body { display: grid; gap: var(--osl-s-3); align-content: start; }
+.osl-pdetail__h { font-size: clamp(23px, 3.4vw, 32px); }
+.osl-pdetail__sub { font-size: 16.5px; color: var(--osl-text-2); }
+.osl-pdetail__desc { font-size: 15px; color: var(--osl-text-2); }
+.osl-pdetail__h2 { font-size: 17px; margin-block-start: var(--osl-s-2); }
+.osl-pdetail__acts { display: flex; flex-wrap: wrap; gap: var(--osl-s-3); margin-block-start: var(--osl-s-3); }
+.osl-pdetail__acts .osl-btn.is-in { background: var(--osl-ok); }
+
+.osl-specs { list-style: none; padding: 0; display: grid; gap: var(--osl-s-2); }
+.osl-specs li { display: flex; gap: var(--osl-s-2); align-items: flex-start; font-size: 14.5px; }
+.osl-specs li svg { flex: none; margin-block-start: 3px; color: var(--osl-ok-fg); }
+
+/* ─── الجداول ─── */
+.osl-table-wrap { overflow-x: auto; border: 1px solid var(--osl-line); border-radius: var(--osl-r-lg); }
+.osl-table { width: 100%; border-collapse: collapse; background: var(--osl-surface); }
+.osl-table th, .osl-table td {
+  padding: var(--osl-s-3) var(--osl-s-4);
+  text-align: start;
+  border-block-end: 1px solid var(--osl-line-2);
+}
+.osl-table th { font-size: 13.5px; font-weight: 700; color: var(--osl-text-2); background: var(--osl-surface-2); }
+.osl-table tr:last-child td { border-block-end: 0; }
+.osl-qty { width: 100px; padding-block: 7px; text-align: center; }
+
+/* ─── طلبُ التسعير ─── */
+.osl-quote {
+  display: grid; gap: var(--osl-s-6);
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  padding-block-end: var(--osl-s-9);
+}
+.osl-quote__form {
+  display: grid; gap: var(--osl-s-4);
+  padding: var(--osl-s-5);
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-lg);
+  box-shadow: var(--osl-sh-1);
+}
+.osl-iconbtn--ghost { background: transparent; color: var(--osl-text-3); width: 32px; height: 32px; }
+.osl-iconbtn--ghost:hover { background: var(--osl-danger-bg); color: var(--osl-danger-fg); }
+
+/* ─── التواصل ─── */
+.osl-contact {
+  display: grid; gap: var(--osl-s-6);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  padding-block-end: var(--osl-s-9);
+}
+.osl-contact__info { display: grid; gap: var(--osl-s-3); align-content: start; }
+.osl-contact__form {
+  display: grid; gap: var(--osl-s-4);
+  padding: var(--osl-s-5);
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-lg);
+  box-shadow: var(--osl-sh-1);
+}
+.osl-cline {
+  display: flex; align-items: center; gap: var(--osl-s-3);
+  padding: var(--osl-s-3);
+  background: var(--osl-surface); color: var(--osl-text);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-md);
+  transition: border-color var(--osl-dur) var(--osl-ease), background var(--osl-dur) var(--osl-ease);
+}
+.osl-cline:hover { border-color: var(--osl-steel); background: var(--osl-hover); color: var(--osl-text); }
+.osl-cline__ic {
+  display: grid; place-items: center; flex: none;
+  width: 38px; height: 38px;
+  background: var(--osl-info-bg); color: var(--osl-accent);
+  border-radius: var(--osl-r-md);
+}
+.osl-cline b { display: block; font-size: 13px; color: var(--osl-text-3); font-weight: 600; }
+.osl-cline i { font-style: normal; font-size: 15px; font-weight: 600; }
+.osl-caddr { font-size: 14.5px; color: var(--osl-text-2); line-height: 1.9; }
+.osl-caddr b { color: var(--osl-text); }
+.osl-map {
+  width: 100%; height: 260px; border: 1px solid var(--osl-line);
+  border-radius: var(--osl-r-lg); margin-block-start: var(--osl-s-2);
+}
+
+/* ─── بياناتُ المنشأة ─── */
+.osl-facts { display: grid; gap: var(--osl-s-3); grid-template-columns: repeat(2, 1fr); margin: 0; }
+.osl-facts > div {
+  padding: var(--osl-s-4);
+  background: var(--osl-surface);
+  border: 1px solid var(--osl-line); border-radius: var(--osl-r-md);
+}
+.osl-facts dt { font-size: 13px; color: var(--osl-text-3); font-weight: 600; margin-block-end: 4px; }
+.osl-facts dd { margin: 0; font-size: 15.5px; font-weight: 600; }
+
+/* ─── نصٌّ طويل ─── */
+.osl-prose { max-width: 72ch; padding-block-end: var(--osl-s-9); display: grid; gap: var(--osl-s-5); }
+.osl-prose h2 { font-size: 18px; margin-block-end: var(--osl-s-2); }
+.osl-prose p { font-size: 15px; color: var(--osl-text-2); }
+
+@media (max-width: 960px) {
+  .osl-pdetail, .osl-quote, .osl-contact, .osl-grid--2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .osl-facts { grid-template-columns: 1fr; }
+  /* الجدولُ يصير بطاقاتٍ على الجوّال — و`data-label` في كلّ خليّةٍ هو
+     ما يجعل ذلك ممكنًا بلا جدولٍ ثانٍ. (البند ⑦ في CONTRACT.md) */
+  .osl-table thead { display: none; }
+  .osl-table, .osl-table tbody, .osl-table tr, .osl-table td { display: block; width: 100%; }
+  .osl-table tr { border-block-end: 1px solid var(--osl-line); padding: var(--osl-s-2) 0; }
+  .osl-table tr:last-child { border-block-end: 0; }
+  .osl-table td { border: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--osl-s-3); }
+  .osl-table td::before {
+    content: attr(data-label);
+    font-size: 13px; font-weight: 600; color: var(--osl-text-3);
+  }
+}

@@ -61,6 +61,7 @@ const browser = await launchBrowser()
 const page = await browser.newPage()
 
 let done = 0
+const failures = []
 for (const r of routes) {
   await page.goto(`http://127.0.0.1:${PORT}${r.path}`, { waitUntil: 'networkidle' })
 
@@ -87,6 +88,30 @@ for (const r of routes) {
 
   const html = '<!doctype html>\n' + await page.evaluate(() => document.documentElement.outerHTML)
 
+
+  /*
+   * ══ حارسُ الصفحات التي تعتمد على القاعدة ══
+   *
+   * الرسمُ المسبَقُ يفتح الصفحةَ في متصفّحٍ ويحفظ ما رُسم. فلو تعذّر
+   * الوصولُ إلى القاعدة — شبكةٌ محجوبة، أو مفتاحٌ خطأ، أو سياسةٌ تمنع
+   * القراءةَ لغير المسجّل — رُسمت الحالةُ الفارغةُ **وحُفظت بنجاح**،
+   * فيُنشر كتالوجٌ بلا منتجٍ واحد ولا يُبلّغ أحدٌ بشيء.
+   *
+   *     البناءُ الذي ينجح بصفحةٍ فارغةٍ أسوأُ من بناءٍ يسقط.
+   *
+   * فكلُّ مسارٍ يُعلن `min` يُعدّ فيه ما رُسم، ويسقط البناءُ إن نقص.
+   */
+  if (r.min) {
+    // عنوانٌ **فيه نصّ** لا وسمٌ فارغ: البطاقةُ تُرسم بعددها الصحيح
+    // وهي خاوية، فالعدُّ وحده يشهد زورًا.
+    const cards = (html.match(/class="osl-pcard__h"[^>]*>\s*<a[^>]*>[^<\s][^<]*</g) || []).length
+    if (cards < r.min) {
+      console.error(`\n✗ ${r.path}: رُسمت ${cards} بطاقةً والمنتظَرُ ${r.min} على الأقلّ.`)
+      console.error('  الصفحةُ تعتمد على القاعدة — تحقّق من الوصول إليها ومن سياسة القراءة لغير المسجّل.')
+      failures.push(r.path)
+    }
+  }
+
   const dir = r.path === '/' ? DIST : join(DIST, r.path)
   await mkdir(dir, { recursive: true })
   await writeFile(join(dir, 'index.html'), html, 'utf8')
@@ -96,4 +121,9 @@ for (const r of routes) {
 
 await browser.close()
 server.close()
+
+if (failures.length) {
+  console.error(`\n✗ ${failures.length} صفحةً رُسمت فارغةً: ${failures.join(' · ')}`)
+  process.exit(1)
+}
 console.log(`✅ رُسمت ${done} صفحةً مسبقًا`)

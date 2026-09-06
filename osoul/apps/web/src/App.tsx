@@ -7,13 +7,24 @@ import { FullLoader } from './ui/kit'
 /**
  * ══ المسارات ══
  *
- * الصفحةُ الأولى مستوردةٌ ثابتًا، وما بعدها مؤجَّل. والسببُ أنّ الزائرَ
- * يصل إلى الرئيسة أوّلًا في الغالب، فلا يُحمَّل ما لن يراه.
+ * الرئيسةُ والهيكلُ مستوردان ثابتًا، وما بعدهما مؤجَّل — فالزائرُ يصل
+ * إلى الرئيسة أوّلًا في الغالب، فلا يُحمَّل ما لن يراه.
  *
- * والمساراتُ **حقيقيّةٌ لا مجزّأةٌ بعلامة#** — لأنّ هذا موقعٌ يُؤرشَف:
- * `/fire-resistant-doors/` يُفهرسها جوجل، و`/#/fire-resistant-doors` لا.
+ * والمساراتُ **حقيقيّةٌ لا مجزّأةٌ بعلامة#** لأنّ هذا موقعٌ يُؤرشَف:
+ * `/fire-resistant-doors/` يفهرسها جوجل، و`/#/…` لا.
+ *
+ * وكلُّ مسارٍ عامٍّ يُضاف هنا **يُضاف في `routes.json` أيضًا** — وإلّا
+ * عمل للزائر ولم يوجد لجوجل. (البندُ الأخير في CONTRACT.md.)
  */
-const NotFound = lazy(() => import('./pages/site/NotFound'))
+const About          = lazy(() => import('./pages/site/About'))
+const Services       = lazy(() => import('./pages/site/Services'))
+const Projects       = lazy(() => import('./pages/site/Projects'))
+const Contact        = lazy(() => import('./pages/site/Contact'))
+const Privacy        = lazy(() => import('./pages/site/Privacy'))
+const ProductArchive = lazy(() => import('./pages/site/ProductArchive'))
+const ProductDetail  = lazy(() => import('./pages/site/ProductDetail'))
+const Quote          = lazy(() => import('./pages/site/Quote'))
+const NotFound       = lazy(() => import('./pages/site/NotFound'))
 
 export default function App() {
   return (
@@ -21,6 +32,23 @@ export default function App() {
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<Home />} />
+          <Route path="about"    element={<About />} />
+          <Route path="services" element={<Services />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="contact"  element={<Contact />} />
+          <Route path="privacy"  element={<Privacy />} />
+
+          {/* العائلاتُ الثلاثُ مساراتٌ صريحةٌ لا معاملٌ واحد: العنوانُ
+              `/doors` يُكتب في الروابط وفي `routes.json` وفي خريطة
+              الموقع، ومعاملٌ حرٌّ يقبل `/anything` فيُرسَل إلى جوجل
+              عددٌ لا نهائيٌّ من الصفحات الفارغة. */}
+          <Route path="doors"  element={<ProductArchive group="doors" />} />
+          <Route path="gypsum" element={<ProductArchive group="gypsum" />} />
+          <Route path="strut"  element={<ProductArchive group="strut" />} />
+
+          <Route path="product/:slug" element={<ProductDetail />} />
+          <Route path="quote"         element={<Quote />} />
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

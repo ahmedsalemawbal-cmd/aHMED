@@ -84,11 +84,18 @@ export function t(ar: string): string {
  * الصفّ**. والمنتجاتُ لا تُترجَم في الشيفرة لأنّ أسماءها بيانٌ يحرّره أهلُه.
  */
 export function pick(row: Record<string, any>, base: string): string {
-  const lang = current
-  if (lang === 'ar') return row[base] ?? ''
-  const v = row[`${base}_${lang}`]
+  // والعربيّةُ عمودٌ باسمه أيضًا (`name_ar`) لا العمودَ المجرّد (`name`).
+  // وكانت تُقرأ `row[base]` فترجع فارغةً دائمًا — والبطاقاتُ تُرسم بعددها
+  // الصحيح وهي **خالية**. كشفتها الصورةُ لا العدّ:
+  //
+  //     العدُّ يشهد بالوجود، والصورةُ تشهد بالمحتوى.
+  //
+  // و`?? row[base]` تبقى لصفٍّ أحاديِّ اللغة يأتي من مصدرٍ آخر.
+  const ar = row[`${base}_ar`] ?? row[base] ?? ''
+  if (current === 'ar') return ar
+  const v = row[`${base}_${current}`]
   if (v) return v
   // الأردو ترجع إلى الإنجليزيّة ثمّ العربيّة، كسلسلة `t()` نفسِها
-  if (lang === 'ur' && row[`${base}_en`]) return row[`${base}_en`]
-  return row[base] ?? ''
+  if (current === 'ur' && row[`${base}_en`]) return row[`${base}_en`]
+  return ar
 }
