@@ -41,8 +41,17 @@ const MIME = {
 /* خادمٌ ساكنٌ يردّ index.html لكلّ ما ليس ملفًّا — كما سيفعل
    .htaccess على الاستضافة. ولولا هذا لَردّ 404 على كلّ مسارٍ عميق
    فرُسمت صفحةُ «غير موجودة» في كلّ ملفّ. */
+/*
+ * الخادمُ المصغَّرُ يخدم من الجذر، والبناءُ قد يكون تحت أساسٍ
+ * (`/aHMED/`). فتُقشَّر البادئةُ قبل البحث عن الملفّ — وإلّا طُلب
+ * `dist/aHMED/assets/app.js` ولا شيءَ هناك، فتُرسم الصفحةُ بلا أنماطٍ
+ * ولا شيفرة، وتُحفظ **بنجاح**.
+ */
+const BASE = (process.env.OSOUL_BASE || '/').replace(/\/*$/, '/')
+const strip = (u) => (BASE !== '/' && u.startsWith(BASE)) ? '/' + u.slice(BASE.length) : u
+
 const server = createServer(async (req, res) => {
-  const url = decodeURIComponent((req.url || '/').split('?')[0])
+  const url = strip(decodeURIComponent((req.url || '/').split('?')[0]))
   let file = join(DIST, url)
   if (!extname(url) || !existsSync(file)) file = join(DIST, 'index.html')
   try {
@@ -71,7 +80,7 @@ const page = await browser.newPage()
 let done = 0
 const failures = []
 for (const r of routes) {
-  await page.goto(`http://127.0.0.1:${PORT}${r.path}`, { waitUntil: 'networkidle' })
+  await page.goto(`http://127.0.0.1:${PORT}${BASE}${r.path.replace(/^\//, '')}`, { waitUntil: 'networkidle' })
 
   /* العنوانُ والوصفُ يُكتبان في الورقة نفسِها لا في وسمٍ يضيفه React
      بعد الرسم — الزاحفُ الذي لا يشغّل جافاسكربت يقرأ هذين وحدهما. */

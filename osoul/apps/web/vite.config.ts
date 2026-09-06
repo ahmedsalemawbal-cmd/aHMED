@@ -13,9 +13,15 @@ import react from '@vitejs/plugin-react'
  *
  *     ما يُوجَّه بمسارٍ حقيقيٍّ يُحمَّل بمسارٍ مطلق.
  */
+/*
+ * والأساسُ من البيئة لا مكتوبًا: الموقعُ الحيُّ على جذر نطاقه (`/`)،
+ * والمعاينةُ على GitHub Pages تحت مسارِ المستودع (`/aHMED/`). وأساسٌ
+ * واحدٌ مكتوبٌ يجعل إحداهما تعمل والأخرى تطلب أصولَها من موضعٍ لا شيءَ
+ * فيه.
+ */
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: process.env.OSOUL_BASE || '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

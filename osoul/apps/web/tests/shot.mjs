@@ -13,8 +13,17 @@ const DIST = resolve('dist'); const PORT = 4198
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css',
   '.woff2':'font/woff2', '.svg':'image/svg+xml', '.png':'image/png', '.json':'application/json' }
 
+/*
+ * الخادمُ المصغَّرُ يخدم من الجذر، والبناءُ قد يكون تحت أساسٍ
+ * (`/aHMED/`). فتُقشَّر البادئةُ قبل البحث عن الملفّ — وإلّا طُلب
+ * `dist/aHMED/assets/app.js` ولا شيءَ هناك، فتُرسم الصفحةُ بلا أنماطٍ
+ * ولا شيفرة، وتُحفظ **بنجاح**.
+ */
+const BASE = (process.env.OSOUL_BASE || '/').replace(/\/*$/, '/')
+const strip = (u) => (BASE !== '/' && u.startsWith(BASE)) ? '/' + u.slice(BASE.length) : u
+
 const server = createServer(async (req, res) => {
-  const url = decodeURIComponent((req.url || '/').split('?')[0])
+  const url = strip(decodeURIComponent((req.url || '/').split('?')[0]))
   let f = join(DIST, url)
   if (!extname(url) || !existsSync(f)) f = join(DIST, 'index.html')
   try { res.writeHead(200, { 'Content-Type': MIME[extname(f)] || 'application/octet-stream' }); res.end(await readFile(f)) }
@@ -113,7 +122,7 @@ for (const theme of ['light', 'dark']) {
   if (AUTH) await seedSession(page, AUTH)
   await stubRest(page)
   for (const r of routes) {
-    await page.goto(`http://127.0.0.1:${PORT}${r}`, { waitUntil: 'networkidle' })
+    await page.goto(`http://127.0.0.1:${PORT}${BASE}${r.replace(/^\//, '')}`, { waitUntil: 'networkidle' })
     // الخطُّ يُنتظَر صراحةً: بدونه تُقاس أبعادٌ ليست هي، وتخرج الصورةُ بخطٍّ آخر
     await page.evaluate(() => document.fonts.ready)
     const name = 'shot' + (r === '/' ? '-home' : r.replace(/\//g, '-')) + '-' + theme + '.png'

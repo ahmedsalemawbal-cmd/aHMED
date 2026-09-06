@@ -12,14 +12,14 @@
  *     ما يحرسه الخفاءُ وحده ليس محروسًا.
  */
 export const SUPABASE_URL =
-  (import.meta as any).env?.VITE_SUPABASE_URL || 'https://bnixzzhcnfjdfmtiwjvr.supabase.co'
+  import.meta.env.VITE_SUPABASE_URL || 'https://bnixzzhcnfjdfmtiwjvr.supabase.co'
 
 export const SUPABASE_KEY =
-  (import.meta as any).env?.VITE_SUPABASE_KEY || 'sb_publishable_PT-cwZQ_mzdDebJAvdMe8w_MSNHMYfV'
+  import.meta.env.VITE_SUPABASE_KEY || 'sb_publishable_PT-cwZQ_mzdDebJAvdMe8w_MSNHMYfV'
 
 /** عنوانُ الموقع — يُستعمل في الروابط المطلقة وschema.org وhreflang. */
 export const SITE_URL =
-  (import.meta as any).env?.VITE_SITE_URL || 'https://osoulalbinaa.com'
+  import.meta.env.VITE_SITE_URL || 'https://osoulalbinaa.com'
 
 /** الضريبةُ المضافة في السعوديّة — تُحسب فوق (المجموع − الخصم). */
 export const VAT_RATE = 15
