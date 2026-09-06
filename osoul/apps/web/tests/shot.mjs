@@ -40,11 +40,46 @@ const browser = await launchBrowser()
  */
 const DOORS = JSON.parse(await rf(new URL('./fixtures/products-doors.json', import.meta.url), 'utf8'))
 
+/*
+ * ══ جلسةٌ مزروعة ══
+ *
+ * اللوحةُ خلف تسجيل دخول، ولا خادمَ مصادقةٍ تصله هذه البيئة. فتُزرع
+ * جلسةٌ في التخزين المحلّيّ **قبل أوّل سكربت** (`addInitScript`) —
+ * ولو زُرعت بعد التحميل لَقرأ العميلُ تخزينًا فارغًا فحسِبها زيارةَ
+ * زائر، ولا يعيد القراءةَ بعدها.
+ *
+ *     ما يُقرأ مرّةً يُزرَع قبلها.
+ *
+ * وهذه للصورة وحدَها: لا تُثبت أنّ الصلاحيّةَ تعمل — تلك يُثبتها
+ * `supabase/tests/wall.sql` في القاعدة نفسِها.
+ */
+const FAKE_UID = '11111111-2222-3333-4444-555555555555'
+
+async function seedSession(page, role = 'admin', name = 'مدير أصول') {
+  await page.addInitScript(([uid, r, n]) => {
+    const far = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365
+    localStorage.setItem('osoul.auth', JSON.stringify({
+      access_token: 'shot.' + r, token_type: 'bearer',
+      expires_in: 31536000, expires_at: far, refresh_token: 'shot-refresh',
+      user: { id: uid, aud: 'authenticated', role: 'authenticated',
+              email: 'shot@osoulalbinaa.com', app_metadata: {}, user_metadata: { full_name: n },
+              created_at: new Date().toISOString() },
+    }))
+  }, [FAKE_UID, role, name])
+  page.__role = role
+  page.__name = name
+}
+
 async function stubRest(page) {
   await page.route('**/rest/v1/**', async (route) => {
     const u = route.request().url()
     let body = '[]'
-    if (u.includes('/products')) {
+    if (u.includes('/profiles')) {
+      body = JSON.stringify({ id: FAKE_UID, full_name: page.__name || 'مدير أصول',
+                              role: page.__role || 'admin', phone: null, active: true })
+    } else if (u.includes('/quotes') && u.includes('head=true')) {
+      body = '[]'
+    } else if (u.includes('/products')) {
       body = u.includes('group_key=eq.doors') || !u.includes('group_key=') ? JSON.stringify(DOORS) : '[]'
     } else if (u.includes('/settings')) {
       body = JSON.stringify([
@@ -62,7 +97,12 @@ async function stubRest(page) {
   })
 }
 
-const routes = process.argv.slice(2).length ? process.argv.slice(2) : ['/']
+const argv = process.argv.slice(2)
+// `--as=admin` يزرع جلسةَ دورٍ قبل الفتح
+const asArg = argv.find((a) => a.startsWith('--as='))
+const AUTH = asArg ? asArg.slice(5) : ''
+const routes = argv.filter((a) => !a.startsWith('--')).length
+  ? argv.filter((a) => !a.startsWith('--')) : ['/']
 
 for (const theme of ['light', 'dark']) {
   const ctx = await browser.newContext({
@@ -70,6 +110,7 @@ for (const theme of ['light', 'dark']) {
     colorScheme: theme,
   })
   const page = await ctx.newPage()
+  if (AUTH) await seedSession(page, AUTH)
   await stubRest(page)
   for (const r of routes) {
     await page.goto(`http://127.0.0.1:${PORT}${r}`, { waitUntil: 'networkidle' })

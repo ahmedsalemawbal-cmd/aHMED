@@ -56,7 +56,15 @@ const server = createServer(async (req, res) => {
 
 await new Promise((r) => server.listen(PORT, '127.0.0.1', r))
 
-const routes = JSON.parse(await readFile('routes.json', 'utf8'))
+/*
+ * السجلُّ يحصي **كلَّ** مسارٍ عامّ، ويُعلن ما لا يُؤرشَف بـ`index:false`.
+ * والفرقُ بين الغياب والإعلان هو الفرقُ بين السهو والقرار: صفحةٌ ناقصةٌ
+ * من السجلّ عطبٌ، وصفحةٌ فيه مُعلَنةٌ بلا أرشفة اختيار.
+ *
+ *     ما يُستثنى يُكتب استثناؤه.
+ */
+const registry = JSON.parse(await readFile('routes.json', 'utf8'))
+const routes = registry.filter((r) => r.index !== false)
 const browser = await launchBrowser()
 const page = await browser.newPage()
 
