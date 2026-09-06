@@ -1,0 +1,17 @@
+{
+  "name": "مِداد — منصّة الملفّات المدرسية",
+  "short_name": "مِداد",
+  "description": "ملفّاتك المدرسية تُملأ في الشاشة وتخرج جاهزةً للطباعة، وجداول نور في حسابك.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f6f2",
+  "theme_color": "#1f7a4d",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

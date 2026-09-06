@@ -1,0 +1,85 @@
+import React, { useState } from 'react'
+import { KeyboardAvoidingView, Platform, ScrollView, View, Linking } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useApp } from '../lib/store'
+import { Alert, Button, Input, Row, T } from '../ui/kit'
+import { IcLogo, IcEye, IcEyeOff, IcExternal } from '../ui/icons'
+import { SPACE, RADIUS, TYPE } from '../lib/theme'
+import { WEB_APP_URL } from '../lib/config'
+
+export default function Login() {
+  const nav = useNavigation<any>()
+  const { signIn, c } = useApp()
+  const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [show, setShow] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const submit = async () => {
+    setErr(null); setBusy(true)
+    try { await signIn(phone, password) }
+    catch (e: any) { setErr(e?.message || 'بيانات الدخول غير صحيحة') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: SPACE.s5, gap: SPACE.s5 }}
+        keyboardShouldPersistTaps="handled">
+        <View style={{ alignItems: 'center', gap: 12, marginBottom: SPACE.s4 }}>
+          <View style={{
+            width: 78, height: 78, borderRadius: 22, backgroundColor: c.primary,
+            alignItems: 'center', justifyContent: 'center',
+            shadowColor: c.primaryDeep, shadowOpacity: 0.28, shadowRadius: 18,
+            shadowOffset: { width: 0, height: 8 }, elevation: 6,
+          }}>
+            <IcLogo size={46} color={c.onPrimary} />
+          </View>
+          <T size={TYPE.display} weight="700" align="center">مِـداد</T>
+          <T size={TYPE.base} color={c.text2} align="center">
+            ملفّاتك المدرسية وجداول نور — في جوّالك.
+          </T>
+        </View>
+
+        {err ? <Alert tone="danger">{err}</Alert> : null}
+
+        <Input
+          label="الجوّال" value={phone} onChangeText={setPhone}
+          placeholder="05xxxxxxxx" keyboardType="phone-pad" autoCapitalize="none"
+          autoComplete="tel" textContentType="telephoneNumber"
+          style={{ textAlign: 'left', writingDirection: 'ltr' }}
+        />
+        <Input
+          label="كلمة المرور" value={password} onChangeText={setPassword}
+          secureTextEntry={!show} autoCapitalize="none" autoComplete="password"
+          textContentType="password" onSubmitEditing={submit} returnKeyType="go"
+        />
+        <Button label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} variant="ghost" small
+          icon={show ? <IcEyeOff size={15} color={c.primary} /> : <IcEye size={15} color={c.primary} />}
+          onPress={() => setShow((v) => !v)} style={{ alignSelf: 'flex-start' }} />
+
+        <Button label="دخول" variant="primary" onPress={submit} loading={busy} />
+
+        {/* التسجيلُ هنا لا في المتصفّح.
+            كان يُحال إلى الموقع: من ثبّت التطبيق ثمّ أُخرج منه ليُسجّل في
+            متصفّحٍ ثمّ يعود — يعود منهم قليل. */}
+        <View style={{
+          backgroundColor: c.sunken, borderRadius: RADIUS.md, padding: SPACE.s4, gap: 8,
+        }}>
+          <T size={TYPE.bodyLg} weight="700">ليس لديك حساب؟</T>
+          <T size={TYPE.body} color={c.text2}>
+            افتح حسابَ معلّمٍ الآن — سبعةُ أيّامٍ تجربةً بلا بطاقة. والمدارسُ تشترك من الموقع.
+          </T>
+          <Button label="أنشئ حسابًا" variant="soft" small
+            onPress={() => nav.navigate('Signup')} />
+        </View>
+
+        <T size={TYPE.small} color={c.text3} align="center">
+          الجوّال هو اسم الدخول. ولاستعادة كلمة المرور تواصل مع إدارة حسابك.
+        </T>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
+}

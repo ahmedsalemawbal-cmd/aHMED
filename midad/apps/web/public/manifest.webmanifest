@@ -1,0 +1,63 @@
+{
+  "name": "مِداد — منصّة الملفّات المدرسية",
+  "short_name": "مِداد",
+  "description": "ملفّاتك المدرسية تُملأ في الشاشة وتخرج جاهزةً للطباعة، وجداول نور في حسابك.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./#/app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f6f2",
+  "theme_color": "#1f7a4d",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "أضف شاهدًا",
+      "short_name": "شاهد",
+      "url": "./#/app/portfolio",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "مكتبة القوالب",
+      "short_name": "القوالب",
+      "url": "./#/app/library",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

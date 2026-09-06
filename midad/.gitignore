@@ -1,0 +1,14 @@
+node_modules/
+apps/web/dist/
+.expo/
+*.log
+.DS_Store
+apps/web/node_modules/
+apps/mobile/node_modules/
+supabase/functions/*/index.deploy.ts
+supabase/functions/*/util.ts
+!supabase/functions/_shared/util.ts
+
+# معاينة المحرّر تستعمل node_modules تطبيق الويب برابطٍ رمزيّ
+tools/editor-demo/node_modules
+tools/editor-demo/dist

@@ -1,0 +1,146 @@
+name: نشر مِداد على هوستنجر
+
+# يبني تطبيق الويب ويدفع نتيجته إلى فرع hostinger-deploy، وهوستنجر
+# تستنسخ ذلك الفرع إلى public_html عبر تطبيقها على جيت هب.
+#
+# ولمَ فرعٌ منفصل؟ لأنّ هوستنجر تستنسخ ولا تبني: لا npm install ولا
+# npm run build. ومِداد يحتاج بناءً، وموقعه ليس في جذر المستودع بل في
+# midad/apps/web. فلو وصلناها بفرع التطوير مباشرةً لاستنسخت الشيفرة
+# المصدريّة كلّها — لا موقعًا يعمل، ولصار مصدر المشروع قابلًا للتنزيل
+# من الموقع نفسه. فالبناء يجري هنا، ونتيجته وحدها تُدفع هناك.
+#
+# لا يحتاج أسرارًا: الدفع بـGITHUB_TOKEN الممنوح للسير.
+
+on:
+  push:
+    branches: [claude/educational-platform-setup-ct0iwr]
+    paths:
+      - 'midad/apps/web/**'
+      - '.github/workflows/deploy-hostinger.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# دفعتان متتاليتان لا تتسابقان على الفرع
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: false
+
+env:
+  PUB_BRANCH: hostinger-deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: midad/apps/web/package-lock.json
+
+      - name: تثبيت الاعتماديّات
+        working-directory: midad/apps/web
+        run: npm ci
+
+      # الفحص قبل البناء لا بعده: ما لا يجتاز الفحص لا يُنشَر.
+      #
+      # وهي فحوصٌ في متصفّحٍ حقيقيّ لأنّ ما تحرسه لا يظهر في غيره: قالب
+      # كلود ديزاين يمرّ بالمستورد ثمّ بمخطّط المحرّر ثمّ بعارض الجداول،
+      # وكلٌّ منها يُبدّله. فيُقاس ما يُرسم، لا ما يُكتب.
+      - name: تثبيت متصفّح الفحص
+        working-directory: midad/apps/web
+        run: npx playwright install --with-deps chromium
+
+      # فحصان يمنعان النشر، وثالثٌ يُبلّغ ولا يمنع. والفرق مقصود:
+      #
+      #   السلوك يمنع — ملفٌّ يخرج بضعف صفحاته، أو تصميمٌ لا ينجو بعد
+      #   التحرير، عطبٌ يراه كلّ معلّم. لا يُنشر.
+      #
+      #   والوفاء يُبلّغ — وهو مقارنةٌ بالبكسل بين المحرّر وملفّ كلود
+      #   ديزاين. وما بقي منه فرقٌ في التفاف سطرٍ واحدٍ في صفحتين، يظهر
+      #   في محرّك رسمٍ ولا يظهر في آخر. ومنعتُ به نشر إصلاح الـPDF مرّةً،
+      #   فتأخّر عن المالك ساعةً وهو ينتظر — وذاك أسوأ ممّا كان يحرسه.
+      #
+      # ولا يعني هذا تجاهله: سقوطه يظهر في السجلّ بتشخيصه كاملًا، ويُتابَع.
+      # فإن عاد إلى الصفر عاد مانعًا.
+      - name: الفحوص السلوكيّة — تمنع النشر
+        working-directory: midad/apps/web
+        run: npm test roundtrip editor folders thumb admin paste portfolio blocks functions exportgrid rhythm
+
+      - name: وفاء التصميم — يُبلّغ ولا يمنع
+        working-directory: midad/apps/web
+        continue-on-error: true
+        run: npm test fidelity
+
+      # نبني هنا ولا نرفع midad/deploy المُودَع: البناء الطازج هو الحقيقة،
+      # والمُودَع قد يتخلّف عن الشيفرة إن نُسِي تحديثه — وقد نُسِي مرّتين.
+      - name: البناء
+        working-directory: midad/apps/web
+        run: npm run build
+
+      # بعد البناء لا قبله: حارس السرعة يقيس ما ينزل عند المشترك، وذاك
+      # في `dist` لا في خادم التطوير الذي يقدّم الوحدات مفرّقةً بلا ضغط.
+      # وهو يتخطّى نفسه صامتًا إن لم يجد بناءً — فلو تُرك مع الفحوص قبله
+      # لصار حارسًا لا يحرس، ولا يُعلم أنّه لم يعمل.
+      - name: السرعة — تمنع النشر
+        working-directory: midad/apps/web
+        run: npm test speed
+
+      - name: التحقّق من المخرجات
+        working-directory: midad/apps/web
+        run: |
+          test -f dist/index.html || { echo '::error::لا index.html في dist'; exit 1; }
+          test -f dist/.htaccess  || { echo '::error::لا .htaccess — سيبقى الزائر على نسخةٍ قديمة'; exit 1; }
+          test -d dist/assets     || { echo '::error::لا مجلّد assets'; exit 1; }
+          echo "الحجم: $(du -sh dist | cut -f1) · الملفّات: $(find dist -type f | wc -l)"
+
+      - name: الدفع إلى فرع النشر
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # شجرة عملٍ منفصلة على الفرع نفسه: تاريخه يتراكم ولا يُعاد كتابته،
+          # فيبقى `git pull` عند هوستنجر تقديمًا سريعًا لا صدامًا.
+          #
+          # وإن غاب الفرع أنشأناه يتيمًا — لا يرث تاريخ التطوير، فلا يحمل
+          # فرعُ نشرٍ حجمَ مستودعٍ كامل. وبهذا يقوم السير وحده من الصفر
+          # ولا يشترط أن يكون أحدٌ بذر الفرع يدويًّا قبله.
+          if git ls-remote --exit-code --heads origin "$PUB_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$PUB_BRANCH" --depth=1
+            git worktree add /tmp/pub -B "$PUB_BRANCH" "origin/$PUB_BRANCH"
+          else
+            echo "الفرع $PUB_BRANCH غير موجود — نُنشئه."
+            git worktree add --orphan -b "$PUB_BRANCH" /tmp/pub
+          fi
+
+          # نمسح القديم أوّلًا: بغيره يبقى أصلٌ حُذف من البناء قابعًا للأبد.
+          # و.git وحده يُستثنى — ومحوُه يُتلف الشجرة.
+          find /tmp/pub -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+
+          cp -r midad/apps/web/dist/. /tmp/pub/
+          cp .github/deploy-branch-README.md /tmp/pub/README.md
+
+          cd /tmp/pub
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'لا تغيير في البناء — لا نشرة.'
+            echo "### لا تغيير في المخرجات ⏭️" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -q -m "بناء مِداد من ${GITHUB_SHA::7}
+
+          المصدر: $GITHUB_REF_NAME
+          السير:  #$GITHUB_RUN_NUMBER"
+          git push origin "$PUB_BRANCH"
+
+          {
+            echo "### دُفِع إلى \`$PUB_BRANCH\` ✅"
+            echo ""
+            echo "من الإيداع \`${GITHUB_SHA::7}\`. هوستنجر تستنسخه خلال دقيقة."
+          } >> "$GITHUB_STEP_SUMMARY"

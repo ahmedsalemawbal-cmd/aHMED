@@ -1,0 +1,42 @@
+plugins { id 'com.android.application' version '8.5.2' }
+
+android {
+  namespace 'sa.midad.app'
+  compileSdk 34
+
+  defaultConfig {
+    applicationId 'sa.midad.app'
+    minSdk 23              // أندرويد ٦ فما فوق — يغطّي ما يحمله المعلّمون
+    targetSdk 34
+    versionCode 1
+    versionName '1.0.0'
+  }
+
+  signingConfigs {
+    // مفتاحُ تجربةٍ لا مفتاحُ متجر. ومَن فقد مفتاح متجره لم يعد يستطيع
+    // تحديث تطبيقه أبدًا — فذاك يُولَّد مرّةً ويُحفظ سرًّا خارج المستودع.
+    debugKey {
+      storeFile file('../midad-test.keystore')
+      storePassword 'midad-test'
+      keyAlias 'midad'
+      keyPassword 'midad-test'
+    }
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+      signingConfig signingConfigs.debugKey
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}
+
+dependencies {
+  // غلافُ المتصفّح الموثوق: يفتح الموقع بمحرّك كروم بلا شريط عنوان.
+  implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

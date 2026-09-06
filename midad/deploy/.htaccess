@@ -1,0 +1,50 @@
+# إعدادات خادم أباتشي/لايت‑سبيد — وهو ما يشغّل هوستنجر.
+# هذا الملفّ في public/ فيَنسخه vite إلى dist تلقائيًّا مع كلّ بناء.
+
+# ═══════════════ التخزين المؤقّت ═══════════════
+#
+# هذه أهمّ فقرةٍ في الملفّ. بدونها يبقى المستخدم يرى النسخة القديمة
+# ساعاتٍ بعد كلّ نشر، فيظنّ أنّ التعديل لم يصل.
+#
+# والحيلة أنّ لكلّ ملفٍّ حكمًا مختلفًا:
+#
+# • الأصول (js/css) يبصمها vite ببصمةٍ من محتواها: app.Bv2qBKjv.js.
+#   فإن تغيّر حرفٌ واحدٌ في الشيفرة تغيّر الاسم. إذن الاسم نفسه لا يحمل
+#   محتوًى مختلفًا أبدًا، ويجوز تخزينه سنةً كاملة بلا مراجعة.
+#
+# • index.html هو الوحيد الذي يدلّ على أسماء الأصول الجديدة. فلو خُزِّن
+#   بقي يدلّ على القديمة، ولم ينفع بصمُها شيئًا. فهذا لا يُخزَّن أبدًا.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|mjs|css|woff2?|ttf|svg|png|jpe?g|webp|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "^(index\.html|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # ترويسات أمانٍ أساسيّة
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ═══════════════ الضغط ═══════════════
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain \
+    application/javascript application/json application/manifest+json \
+    image/svg+xml
+</IfModule>
+
+# ═══════════════ أنواع الملفّات ═══════════════
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType text/javascript .mjs
+</IfModule>
+
+# ═══════════════ لماذا لا توجد قواعد توجيه؟ ═══════════════
+#
+# مِداد يستعمل HashRouter، فكلّ مساراته بعد علامة #:
+#   midad.sa/#/app/library
+# وما بعد # لا يصل الخادم أصلًا — يراه المتصفّح وحده. فالخادم لا يُطلب
+# منه إلّا «/» دائمًا، ولا يحتاج قاعدة إعادة كتابةٍ ولا صفحة 404 بديلة.
+# ولو انتقلنا يومًا إلى BrowserRouter فهنا موضع القاعدة.

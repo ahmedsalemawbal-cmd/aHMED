@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>أصول البناء — أبواب وبروفايلات جبسوم وأنظمة تثبيت</title>
+    <meta name="description" content="شركة أصول البناء الصناعية: أبواب مقاومة للحريق وأبواب معدنية وخشبية، بروفايلات جبسوم بورد، وأنظمة Strut للتثبيت — توريد وتركيب وضمان." />
+    <meta name="theme-color" content="#00344F" />
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- الخطُّ العربيُّ العاديّ يُسبَق تحميلُه: هو أوّلُ ما تقرؤه العين،
+         وانتظارُه حتّى تُحلَّل الورقةُ يُؤخّر أوّلَ نصٍّ مقروء. -->
+    <link rel="preload" href="/fonts/ipsa-arabic-400.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script>
+      /*
+       * يُقرأ الاختيارُ ويُطبَّق **قبل أوّل رسمة**.
+       *
+       * ولولا هذا لَومض الموقعُ أبيضَ ثمّ اسودّ عند من يختار الداكن، ولَبدأ
+       * إنجليزيًّا من اليسار ثمّ انقلب عربيًّا عند من يختار العربيّة. والوميضُ
+       * لا يُصلَح في React لأنّ React لا يعمل إلّا بعد أن تُرسم الورقة.
+       *
+       *     ما يُرى قبل الشيفرة يُضبَط قبل الشيفرة.
+       *
+       * ويُلَفّ بـtry لأنّ التخزين المحلّيّ يرمي في التصفّح الخاصّ عند بعض
+       * المتصفّحات — فلا يسقط الموقعُ كلُّه من أجل تفضيلٍ لم يُقرأ.
+       */
+      (function () {
+        try {
+          var t = localStorage.getItem('osoul.theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+          var l = localStorage.getItem('osoul.lang');
+          if (l === 'ar' || l === 'en' || l === 'ur') {
+            document.documentElement.lang = l;
+            document.documentElement.dir = (l === 'en') ? 'ltr' : 'rtl';
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

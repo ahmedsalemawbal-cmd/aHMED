@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f2" />
+    <meta name="description" content="مِداد — منصّة الملفّات المدرسية وجداول نور. ملفّاتك تُملأ في الشاشة وتخرج جاهزةً للطباعة." />
+    <title>مِداد — منصّة الملفّات المدرسية والجداول</title>
+    <!-- الخطّ العربيّ يُطلَب مع الصفحة لا بعد أنماطها: هو ما تُرسم به،
+         وانتظارُ اكتشافه في ورقة الأنماط رحلةٌ زائدة. -->
+    <link rel="preload" href="./fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="مِداد" />
+    <!-- مدًى لا قائمة: القاهرة خطٌّ متغيّر، فالمدى ملفٌّ واحدٌ يغطّي كلّ
+         وزن. وكنّا نطلب 400;600;700 فقط، وقوالبُ كلود ديزاين تستعمل 800
+         و900 — فيصطنعها المتصفّح من 700 بمقاييس أعرض، فينزاح كلّ ما تحتها.
+         والقائمة تُغفل ما لم نتوقّعه؛ والمدى لا يُغفل شيئًا. -->
+    <script>
+      // طبّق الوضع قبل الرسم فلا تومض الشاشة بالأبيض ثمّ تسودّ
+      try {
+        var t = localStorage.getItem('midad.theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      /* عاملُ الخدمة يجعل مِداد تطبيقًا يُثبَّت ويفتح فورًا.
+         ويُسجَّل بعد التحميل لا قبله: تسجيلُه أثناء الإقلاع يزاحم
+         أوّل رسمةٍ على الشبكة نفسها. */
+      if ('serviceWorker' in navigator) {
+        addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js').catch(function () {})
+        })
+      }
+    </script>
+    <noscript>مِداد يحتاج جافاسكربت لتشغيل المحرّر والمعاينة الحيّة.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

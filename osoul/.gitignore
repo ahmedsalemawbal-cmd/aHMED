@@ -1,0 +1,7 @@
+node_modules/
+apps/web/dist/
+apps/web/shot-*.png
+*.tsbuildinfo
+supabase/functions/*/index.deploy.ts
+supabase/functions/*/util.ts
+!supabase/functions/_shared/util.ts

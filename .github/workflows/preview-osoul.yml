@@ -1,0 +1,99 @@
+name: معاينة أصول البناء على GitHub Pages
+
+# يُشغَّل بالدفع إلى فرع العمل، وبطلبٍ يدويٍّ من تبويب Actions.
+#
+# ولمَ الدفعُ لا اليدُ وحدها؟ لأنّ `workflow_dispatch` يشترط وجودَ الملفّ
+# على **الفرع الافتراضيّ**، وهذا العملُ على فرعٍ آخر. فلو اكتُفي باليد
+# لَما ظهر السيرُ أصلًا، ولَلزم المساسُ بالفرع الافتراضيّ من أجل معاينة.
+#
+#     ما يُبنى على فرعٍ يُنشَر من فرعِه.
+#
+# و`enablement: true` في خطوة التجهيز يُفعّل Pages لأوّل مرّة بلا ضبطٍ يدويّ.
+on:
+  push:
+    branches: [claude/educational-platform-setup-ct0iwr]
+    paths:
+      - 'osoul/apps/web/**'
+      - '.github/workflows/preview-osoul.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: osoul/apps/web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: osoul/apps/web/package-lock.json
+
+      - name: تثبيت الاعتماديّات
+        run: npm ci
+
+      # الرسمُ المسبَق يفتح كلَّ صفحةٍ في متصفّحٍ حقيقيّ، فيلزمه متصفّح
+      - name: تثبيت المتصفّح
+        run: npx playwright install --with-deps chromium
+
+      - name: الفحوص — تمنع النشر
+        run: npm test
+
+      # ══ الأساسُ مسارُ المستودع، لا الجذر ══
+      # Pages تخدم مشروعَ مستودعٍ تحت اسمه: /aHMED/. فبلا هذا تطلب
+      # الصفحةُ أصولَها من الجذر ولا شيءَ هناك.
+      #
+      # ولا `OSOUL_ALLOW_EMPTY` هنا: عدّاءُ جيت‑هَب يصل إلى القاعدة،
+      # فإن خرجت صفحةُ منتجاتٍ فارغةً **سقط النشر**. وهذا هو المقصود —
+      # معاينةٌ بكتالوجٍ فارغٍ أسوأُ من لا معاينة.
+      - name: البناء والرسمُ المسبَق
+        env:
+          OSOUL_BASE: /aHMED/
+        run: npm run build
+
+      - name: التحقّق من المخرجات
+        run: |
+          test -f dist/index.html
+          test -f dist/doors/index.html
+          test -d dist/assets
+          # المنتجاتُ وصلت من القاعدة فعلًا — لا إطارٌ فارغ
+          grep -q "الأبواب المعدنية المقاومة للحريق" dist/doors/index.html
+          echo "✅ الكتالوجُ في الملفّ قبل جافاسكربت"
+
+      # SPA على Pages: 404 يعيد الواجهةَ نفسَها فتعمل المساراتُ غيرُ
+      # المرسومة، و.nojekyll يمنع تجاهلَ مجلّدات _
+      - name: تهيئة مجلّد النشر
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+          ls -la dist
+
+      - name: تجهيز GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: رفع الملفّات
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: osoul/apps/web/dist
+
+      - name: النشر
+        id: deployment
+        uses: actions/deploy-pages@v4
