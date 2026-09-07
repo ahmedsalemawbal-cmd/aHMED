@@ -1,0 +1,14 @@
+{
+  "_": "انسخ هذا الملف باسم policy.json بجانب ملفات التطبيق المثبّتة (مجلد resources) لتغيير السياسة دون إعادة بناء التطبيق.",
+
+  "allowedDomains": ["osoulalbinaa.com"],
+  "rosterUrl": "",
+  "allowAdvancedServers": true,
+  "refreshSeconds": 120,
+  "pageSize": 50,
+
+  "imapHost": "imap.hostinger.com",
+  "imapPort": 993,
+  "smtpHost": "smtp.hostinger.com",
+  "smtpPort": 465
+}

@@ -1,0 +1,84 @@
+{
+  "name": "osoul-mail-desktop",
+  "productName": "Osoul Mail",
+  "version": "1.0.0",
+  "description": "بريد أصول البناء — تطبيق البريد الإلكتروني للموظفين على ويندوز",
+  "author": {
+    "name": "Osoul Albinaa Industrial Co.",
+    "email": "info@osoulalbinaa.com"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "dist": "electron-builder --win --x64",
+    "dist:both": "electron-builder --win --x64 --ia32",
+    "pack": "electron-builder --win --x64 --dir",
+    "test:imap": "node test/imap-test.js",
+    "test:smtp": "node test/smtp-test.js",
+    "test:vault": "electron test/vault-test.js",
+    "test:e2e": "electron test/e2e.js",
+    "test": "npm run test:imap && npm run test:smtp && npm run test:vault && npm run test:e2e"
+  },
+  "dependencies": {
+    "imapflow": "1.7.8",
+    "nodemailer": "10.0.0"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.osoulalbinaa.mail",
+    "productName": "Osoul Mail",
+    "copyright": "Osoul Albinaa Industrial Co.",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!**/*.map",
+      "!**/{.git,.github,.vscode,test,tests,__tests__,docs,example,examples}/**",
+      "!**/*.{md,markdown,ts,tsx}"
+    ],
+    "extraResources": [
+      {
+        "from": "policy.example.json",
+        "to": "policy.example.json"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "OsoulMail-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "بريد أصول البناء",
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerLanguages": [
+        "ar_SA",
+        "en_US"
+      ],
+      "language": "1025"
+    }
+  }
+}
