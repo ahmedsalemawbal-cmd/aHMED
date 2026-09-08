@@ -22,7 +22,8 @@
     "test:e2e": "electron test/e2e.js",
     "test": "npm run test:imap && npm run test:smtp && npm run test:vault && npm run test:e2e",
     "dist:mac": "electron-builder --mac",
-    "dist:all": "electron-builder --win --x64 --mac"
+    "dist:all": "electron-builder --win --x64 --mac",
+    "dist:mac:zip": "electron-builder --mac zip --x64 --arm64"
   },
   "dependencies": {
     "imapflow": "1.7.8",
@@ -85,10 +86,9 @@
     "mac": {
       "target": [
         {
-          "target": "zip",
+          "target": "dmg",
           "arch": [
-            "x64",
-            "arm64"
+            "universal"
           ]
         }
       ],
@@ -96,8 +96,25 @@
       "category": "public.app-category.productivity",
       "darkModeSupport": true,
       "identity": null,
-      "artifactName": "OsoulMail-Mac-${arch}-${version}.${ext}"
+      "artifactName": "OsoulMail-Mac-${version}.${ext}"
     },
-    "publish": null
+    "publish": null,
+    "dmg": {
+      "title": "بريد أصول البناء",
+      "artifactName": "OsoulMail-Mac-${version}.${ext}",
+      "contents": [
+        {
+          "x": 140,
+          "y": 200,
+          "type": "file"
+        },
+        {
+          "x": 400,
+          "y": 200,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
   }
 }

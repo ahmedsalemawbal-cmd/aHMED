@@ -1,0 +1,104 @@
+name: بناء ونشر تطبيق البريد
+
+# يعمل تلقائيًا عند دفع وسم يبدأ بـ v (مثل v1.0.1)، أو يدويًا من تبويب Actions.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: osoul-mail-desktop
+
+jobs:
+  build:
+    name: بناء ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # مثبّت ويندوز — يُبنى على ويندوز فلا يحتاج Wine
+          - os: windows-latest
+            label: Windows
+            command: npm run dist
+            artifacts: osoul-mail-desktop/dist/*.exe
+          # ملف ماك واحد (universal) يعمل على Intel و Apple Silicon معًا،
+          # ودمج المعماريتين يحتاج أدوات macOS فيُبنى على macOS
+          - os: macos-latest
+            label: macOS
+            command: npm run dist:mac
+            artifacts: osoul-mail-desktop/dist/*.dmg
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: osoul-mail-desktop/package-lock.json
+
+      - name: تثبيت الاعتماديات
+        run: npm ci
+
+      - name: الاختبارات (لينكس/ماك فقط — تحتاج شاشة وهمية على ويندوز)
+        if: matrix.os == 'macos-latest'
+        run: npm run test:imap && npm run test:smtp
+
+      - name: البناء
+        run: ${{ matrix.command }}
+        env:
+          # لا شهادة توقيع: نتخطى البحث التلقائي عنها بدل أن يفشل البناء
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.label }}
+          path: ${{ matrix.artifacts }}
+          if-no-files-found: error
+
+  release:
+    name: نشر الإصدار
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: عرض ما سيُنشر
+        working-directory: .
+        run: ls -lh artifacts
+
+      - name: إنشاء الإصدار ورفع الملفات
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_type == 'tag' && github.ref_name || format('v-build-{0}', github.run_number) }}
+        run: |
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "بريد أصول البناء $TAG" \
+            --notes "$(cat <<'EOF'
+          تطبيق بريد الموظفين — نزّل الملف المناسب لجهازك وشغّله.
+
+          ### ويندوز
+          `OsoulMail-Setup-*.exe` — شغّله ويثبّت نفسه ويفتح مباشرة.
+
+          ### ماك
+          `OsoulMail-Mac-*.dmg` — ملف واحد يعمل على أجهزة Intel و Apple Silicon.
+          افتحه واسحب التطبيق إلى Applications.
+
+          **أول تشغيل على الماك:** كليك يمين على التطبيق ← Open ← Open.
+          هذه الخطوة لمرة واحدة فقط، لأن التطبيق غير موقّع بشهادة Apple.
+
+          يتطلب macOS 13 (Ventura) فأحدث.
+          EOF
+          )" \
+            artifacts/*
