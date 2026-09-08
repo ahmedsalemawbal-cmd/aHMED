@@ -1,9 +1,12 @@
 name: بناء ونشر تطبيق البريد
 
-# يعمل تلقائيًا عند دفع وسم يبدأ بـ v (مثل v1.0.1)، أو يدويًا من تبويب Actions.
+# يعمل تلقائيًا مع كل دفعة إلى فرع التطبيق، أو يدويًا من تبويب Actions.
 on:
   push:
-    tags: ['v*']
+    branches: ['claude/windows-email-app-0r6kaj']
+    paths:
+      - 'osoul-mail-desktop/**'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 permissions:
