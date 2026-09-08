@@ -1,7 +1,7 @@
 {
   "name": "osoul-mail-desktop",
   "productName": "Osoul Mail",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "بريد أصول البناء — تطبيق البريد الإلكتروني للموظفين على ويندوز",
   "author": {
     "name": "Osoul Albinaa Industrial Co.",
@@ -30,7 +30,7 @@
     "nodemailer": "10.0.0"
   },
   "devDependencies": {
-    "electron": "44.2.0",
+    "electron": "32.3.3",
     "electron-builder": "26.15.3"
   },
   "build": {

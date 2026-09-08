@@ -69,6 +69,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -82,8 +84,14 @@ jobs:
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_type == 'tag' && github.ref_name || format('v-build-{0}', github.run_number) }}
         run: |
+          # الوسم من رقم نسخة التطبيق، فيبقى رابط التنزيل مقروءًا ومتوقعًا.
+          TAG="v$(node -p "require('./osoul-mail-desktop/package.json').version")"
+          # إعادة تشغيل البناء لنفس النسخة تستبدل الملفات بدل أن تفشل.
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$TAG" --repo "${{ github.repository }}" --clobber artifacts/*
+            exit 0
+          fi
           gh release create "$TAG" \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
@@ -101,7 +109,7 @@ jobs:
           **أول تشغيل على الماك:** كليك يمين على التطبيق ← Open ← Open.
           هذه الخطوة لمرة واحدة فقط، لأن التطبيق غير موقّع بشهادة Apple.
 
-          يتطلب macOS 13 (Ventura) فأحدث.
+          يتطلب macOS 10.15 (Catalina) فأحدث.
           EOF
           )" \
             artifacts/*

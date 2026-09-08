@@ -43,14 +43,12 @@
 
 ### macOS
 
-1. نزّل الملف المناسب لجهازك:
-   - `OsoulMail-Mac-AppleSilicon-*.zip` لأجهزة M1/M2/M3/M4
-   - `OsoulMail-Mac-Intel-*.zip` لأجهزة Intel
-   - (شعار Apple ← About This Mac يوضّح أيّهما)
-2. فُك الضغط واسحب **Osoul Mail** إلى مجلد Applications.
+1. نزّل `OsoulMail-Mac-*.dmg` — ملف واحد (universal) يعمل على أجهزة Intel
+   و Apple Silicon معًا، فلا حاجة لمعرفة نوع المعالج.
+2. افتح الملف واسحب **Osoul Mail** إلى مجلد Applications.
 3. **أول مرة فقط:** كليك يمين على التطبيق ← **Open** ← **Open**.
 
-> يتطلب **macOS 13 (Ventura)** فأحدث.
+> يتطلب **macOS 10.15 (Catalina)** فأحدث.
 >
 > خطوة الكليك اليمين لازمة لأن التطبيق غير موقّع بشهادة Apple؛ التوقيع يحتاج
 > اشتراك Apple Developer. بدونها يمنع Gatekeeper الفتح بالنقر المزدوج في أول
@@ -68,21 +66,25 @@
 ```bash
 npm install
 npm run dist          # ويندوز → dist/OsoulMail-Setup-<version>.exe
-npm run dist:mac      # ماك    → dist/OsoulMail-Mac-{x64,arm64}-<version>.zip
+npm run dist:mac      # ماك    → dist/OsoulMail-Mac-<version>.dmg (universal)
 npm run dist:all      # الاثنان معًا
 ```
 
 مُثبِّت ويندوز بنقرة واحدة، لكل مستخدم (بلا UAC)، ويشغّل التطبيق بعد التثبيت.
 
-**البناء من لينكس:** ممكن للاثنين. ويندوز يحتاج Wine بمعماريتَي 64 و32 بت
-(`wine wine64 wine32:i386`) — بدون طبقة الـ32 بت يفشل توليد أداة إزالة
-التثبيت. وماك يحتاج أيقونة `.icns` جاهزة في `build/` لأن مُحوِّل الأيقونات
-لا يعمل خارج macOS. أما `.dmg` والتوقيع الرقمي فيحتاجان جهاز macOS فعليًا،
-ولهذا هدف الماك هنا هو `zip`.
+**أين تُبنى:** يتكفّل `.github/workflows/release.yml` بالأمر — ويندوز على
+`windows-latest` وماك على `macos-latest` — ثم يرفع الناتج إلى إصدار GitHub.
+البناء محليًا من لينكس ممكن جزئيًا: ويندوز يحتاج Wine بمعماريتَي 64 و32 بت
+(`wine wine64 wine32:i386`؛ بدون طبقة الـ32 بت يفشل توليد أداة إزالة التثبيت)،
+وماك يحتاج أيقونة `.icns` جاهزة في `build/` لأن مُحوِّل الأيقونات لا يعمل خارج
+macOS — ويقتصر على `npm run dist:mac:zip` لكل معمارية على حدة، لأن دمج النسخة
+الـuniversal و`.dmg` والتوقيع الرقمي تحتاج جهاز macOS فعليًا.
 
-**دعم إصدارات macOS أقدم:** الحد الأدنى الحالي macOS 13 لأنه حدّ Electron 44.
-لدعم macOS 10.15 فأحدث يلزم التراجع إلى Electron 26 تقريبًا (أقدم إصدار يوفّر
-`protocol.handle` الذي تعتمد عليه الواجهة) مع إعادة تشغيل الاختبارات.
+**لماذا Electron 32:** يرفع Chromium حدّه الأدنى من macOS دوريًا، وElectron 44
+يطلب macOS 13. Electron 32 يقف عند macOS 10.15 فيغطي الأجهزة الأقدم، ويظل
+يوفّر `protocol.handle` (المضاف في 25) الذي تعتمد عليه الواجهة. عند الترقية
+لاحقًا تحقّق من `LSMinimumSystemVersion` داخل `Electron.app/Contents/Info.plist`
+في حزمة الإصدار المستهدف قبل التبديل.
 
 ### الضبط بلا إعادة بناء — `policy.json`
 

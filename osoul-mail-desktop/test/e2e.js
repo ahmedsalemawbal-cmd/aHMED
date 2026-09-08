@@ -43,7 +43,15 @@ function check(name, cond, detail) {
 
   const w = BrowserWindow.getAllWindows()[0];
   if (!w) { console.log('FAIL: no window'); return app.exit(1); }
-  w.webContents.on('console-message', (e) => { if (e.level >= 2) rendererErrors.push(e.message); });
+      // Electron ≥36 يمرّر كائنًا واحدًا فيه level/message، والأقدم يمرّر
+      // (event, level, message) مع level رقمي. نقبل الشكلين.
+      w.webContents.on('console-message', (...a) => {
+        const o = a[0] && typeof a[0] === 'object' && 'message' in a[0] ? a[0] : null;
+        const level = o ? o.level : a[1];
+        const message = o ? o.message : a[2];
+        const bad = level === 'error' || level === 'warning' || Number(level) >= 2;
+        if (bad) rendererErrors.push(String(message));
+      });
   const run = (js) => w.webContents.executeJavaScript(js);
 
   try {
