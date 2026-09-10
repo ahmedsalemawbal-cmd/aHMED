@@ -10,7 +10,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { collectTargets } = require('../build/after-pack.js');
+const { collectTargets, isBundleMainExecutable } = require('../build/after-pack.js');
 
 const out = {};
 let failures = 0;
@@ -73,16 +73,44 @@ check('dylibBeforeFramework',
   at('Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libEGL.dylib')
   < at('Contents/Frameworks/Electron Framework.framework'));
 
-check('helperBinaryBeforeHelperApp',
-  at('Contents/Frameworks/Osoul Mail Helper (GPU).app/Contents/MacOS/Osoul Mail Helper (GPU)')
-  < at('Contents/Frameworks/Osoul Mail Helper (GPU).app'));
-
 check('shipItBeforeSquirrel',
   at('Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt')
   < at('Contents/Frameworks/Squirrel.framework'));
 
 /* --- 3) ما يجب أن يُوقَّع وما لا يجب --- */
-check('mainBinaryIncluded', at('Contents/MacOS/Osoul Mail') > -1);
+/* الملفات التنفيذية الرئيسية للحزم تُوقَّع ضمن حزمها لا منفردة: توقيعها
+   منفردة يجعل codesign يوقّع الحزمة قبل محتوياتها فيفشل البناء. */
+check('frameworkMainBinaryExcluded',
+  at('Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework') === -1,
+  targets.filter((p) => p.endsWith('/Electron Framework')));
+
+check('helperAppMainBinaryExcluded',
+  at('Contents/Frameworks/Osoul Mail Helper (GPU).app/Contents/MacOS/Osoul Mail Helper (GPU)') === -1,
+  targets.filter((p) => p.includes('.app/Contents/MacOS/')));
+
+check('outerAppMainBinaryExcluded', at('Contents/MacOS/Osoul Mail') === -1);
+
+check('squirrelMainBinaryExcluded',
+  at('Contents/Frameworks/Squirrel.framework/Versions/A/Squirrel') === -1);
+
+/* لكن ما ليس ملفًا رئيسيًا يجب أن يُوقَّع منفردًا */
+check('crashpadIncluded',
+  at('Contents/Frameworks/Electron Framework.framework/Versions/A/Helpers/chrome_crashpad_handler') > -1);
+check('dylibIncluded',
+  at('Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libEGL.dylib') > -1);
+check('shipItIncluded',
+  at('Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt') > -1);
+check('everyBundleIncluded',
+  ['Contents/Frameworks/Electron Framework.framework',
+   'Contents/Frameworks/Osoul Mail Helper (GPU).app',
+   'Contents/Frameworks/Squirrel.framework'].every((b) => at(b) > -1));
+
+/* الدالة نفسها */
+check('detectsFrameworkMain', isBundleMainExecutable('/x/Electron Framework.framework/Versions/A/Electron Framework'));
+check('detectsAppMain', isBundleMainExecutable('/x/Helper (GPU).app/Contents/MacOS/Helper (GPU)'));
+check('doesNotFlagHelperTool', !isBundleMainExecutable('/x/E.framework/Versions/A/Helpers/chrome_crashpad_handler'));
+check('doesNotFlagResource', !isBundleMainExecutable('/x/Squirrel.framework/Versions/A/Resources/ShipIt'));
+check('doesNotFlagDylib', !isBundleMainExecutable('/x/E.framework/Versions/A/Libraries/libEGL.dylib'));
 check('plistExcluded', !targets.some((p) => p.endsWith('.plist')), targets.filter((p) => p.endsWith('.plist')));
 check('resourcesExcluded', !targets.some((p) => p.endsWith('.icns')));
 check('symlinkExcluded', !targets.some((p) => p.endsWith('Versions/Current')),

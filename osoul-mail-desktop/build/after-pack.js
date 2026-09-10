@@ -22,6 +22,21 @@ const { execFileSync } = require('child_process');
 /** حزم macOS التي تُوقَّع ككيان واحد بعد توقيع ما بداخلها. */
 const BUNDLE_EXT = /\.(framework|app|bundle|xpc|appex)$/;
 
+/**
+ * هل هذا الملف هو الملف التنفيذي الرئيسي لحزمة؟
+ *
+ * codesign يحوّل مسار الملف الرئيسي إلى الحزمة الحاوية له، فتوقيعه منفردًا
+ * يعني توقيع الحزمة قبل أوانها ويفشل بـ "code object is not signed at all".
+ * هذه الملفات تُوقَّع ضمن حزمها لا قبلها.
+ */
+function isBundleMainExecutable(file) {
+  // ‎…/Name.app/Contents/MacOS/<تنفيذي>
+  if (/\.app\/Contents\/MacOS\/[^/]+$/.test(file)) return true;
+  // ‎…/Name.framework/Versions/<إصدار>/Name
+  const m = /([^/]+)\.framework\/Versions\/[^/]+\/([^/]+)$/.exec(file);
+  return !!m && m[1] === m[2];
+}
+
 /** هل الملف ثنائي Mach-O (تنفيذي أو مكتبة)؟ نقرأ الرقم السحري بدل التخمين. */
 function isMachO(file) {
   let fd;
@@ -64,7 +79,7 @@ function collectTargets(root) {
       if (entry.isDirectory()) {
         walk(full);
         if (BUNDLE_EXT.test(entry.name)) targets.push(full);
-      } else if (entry.isFile() && isMachO(full)) {
+      } else if (entry.isFile() && isMachO(full) && !isBundleMainExecutable(full)) {
         targets.push(full);
       }
     }
@@ -103,3 +118,4 @@ exports.default = async function afterPack(context) {
 
 // يُستخدم في الاختبار للتحقق من ترتيب التوقيع دون الحاجة إلى macOS.
 exports.collectTargets = collectTargets;
+exports.isBundleMainExecutable = isBundleMainExecutable;
