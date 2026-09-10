@@ -71,7 +71,8 @@ function attachSessionEvents(session) {
       const n = new Notification({
         title: top.from.name || top.from.email || 'رسالة جديدة',
         body: top.subject || '(بدون موضوع)',
-        silent: false,
+        // الصوت من جرس التطبيق (خمس ثوانٍ)، فلا نضيف نغمة النظام فوقه.
+        silent: true,
       });
       n.on('click', () => {
         if (mainWindow && !mainWindow.isDestroyed()) {
@@ -253,6 +254,20 @@ function registerIPC(ctx) {
       references: p.references,
       priority: p.priority,
     });
+  }));
+
+  ipcMain.handle('mail:saveDraft', wrap(async (p) => {
+    const s = requireSession();
+    const settings = store.getSettings();
+    const res = await s.saveDraft({
+      fromName: settings.fromName || s.account.fromName,
+      to: p.to, cc: p.cc, bcc: p.bcc,
+      subject: p.subject, html: p.html, text: p.text,
+      attachments: p.attachments,
+      inReplyTo: p.inReplyTo, references: p.references, priority: p.priority,
+    });
+    s.mail.folders(true).catch(() => {});
+    return res;
   }));
 
   ipcMain.handle('compose:pickFiles', wrap(async () => {

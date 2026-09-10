@@ -108,6 +108,22 @@ class EmployeeSession {
     return { messageId: result.messageId, accepted: result.accepted, rejected: result.rejected, filed };
   }
 
+  /**
+   * حفظ مسودة في مجلد المسودات. نبني نفس البايتات التي كانت ستُرسل ثم
+   * نضيفها بعلم \\Draft، فتفتح المسودة في أي عميل بريد آخر كما تركها الموظف.
+   */
+  async saveDraft(msg) {
+    const raw = await smtp.build(this.account, msg);
+    const drafts = await this.mail.specialPath('drafts');
+    if (!drafts) {
+      const err = new Error('NO_DRAFTS');
+      err.osoul = { code: 'NO_DRAFTS', ar: 'لا يوجد مجلد مسودات في صندوق بريدك.', en: 'No Drafts folder on this mailbox.' };
+      throw err;
+    }
+    await this.mail.append(drafts, raw, ['\\Draft', '\\Seen']);
+    return { saved: true, folder: drafts };
+  }
+
   async close() {
     if (this.transport) {
       try { this.transport.close(); } catch (_) { /* مغلق أصلًا */ }

@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('osoul', {
 
   /* الإرسال والمرفقات */
   send: (payload) => invoke('mail:send', payload),
+  saveDraft: (payload) => invoke('mail:saveDraft', payload),
   pickFiles: () => invoke('compose:pickFiles'),
   saveAttachment: (payload) => invoke('mail:attachmentSave', payload),
   openAttachment: (payload) => invoke('mail:attachmentOpen', payload),

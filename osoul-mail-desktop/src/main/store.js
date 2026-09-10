@@ -49,6 +49,8 @@ const SETTINGS_DEFAULTS = {
   fromName: '',
   showRemoteImages: false,
   notifications: true,
+  sound: true,
+  soundSeconds: 5,
   lastFolder: 'INBOX',
   windowBounds: null,
 };

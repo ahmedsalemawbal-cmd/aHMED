@@ -47,7 +47,8 @@ async function verify(account) {
  * @param {object} msg       { to, cc, bcc, subject, html, text, attachments, inReplyTo, references, priority }
  * @returns {Promise<{messageId:string, raw:Buffer, accepted:string[]}>}
  */
-async function send(transport, account, msg) {
+/** تحويل حقول الواجهة إلى خيارات MailComposer — يشترك فيها الإرسال والمسودة. */
+function composeOptions(account, msg) {
   const from = msg.fromName
     ? { name: msg.fromName, address: account.email }
     : account.email;
@@ -74,7 +75,19 @@ async function send(transport, account, msg) {
   if (msg.references) options.references = msg.references;
   if (msg.priority === 'high') options.priority = 'high';
 
-  const compiled = new MailComposer(options).compile();
+  return options;
+}
+
+/**
+ * بناء الرسالة كبايتات خام دون إرسالها — تُستخدم لحفظ مسودة في مجلد
+ * المسودات، فتكون المسودة بنفس بنية الرسالة التي ستُرسل لاحقًا.
+ */
+async function build(account, msg) {
+  return new MailComposer(composeOptions(account, msg)).compile().build();
+}
+
+async function send(transport, account, msg) {
+  const compiled = new MailComposer(composeOptions(account, msg)).compile();
   const envelope = compiled.getEnvelope();
   const raw = await compiled.build();
 
@@ -122,4 +135,4 @@ function htmlToText(html) {
     .trim();
 }
 
-module.exports = { createTransport, verify, send, normalizeAddresses, htmlToText };
+module.exports = { createTransport, verify, send, build, normalizeAddresses, htmlToText };

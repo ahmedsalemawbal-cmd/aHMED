@@ -7,6 +7,7 @@
 
 import { icon } from './icons.js';
 import { $, on, delegate, esc, call, errText, toast } from './util.js';
+import { ringBell, stopBell } from './sound.js';
 
 /**
  * @param {object} state
@@ -71,9 +72,26 @@ export function openSettings(state, handlers) {
           <div class="opt">
             <div class="lab">
               <div>إشعارات الرسائل الجديدة</div>
-              <div class="d">إشعار ويندوز عند وصول رسالة.</div>
+              <div class="d">إشعار من النظام عند وصول رسالة.</div>
             </div>
             <button class="switch ${s.notifications !== false ? 'on' : ''}" id="st-notif"><i></i></button>
+          </div>
+          <div class="opt">
+            <div class="lab">
+              <div>جرس التنبيه</div>
+              <div class="d">رنين عند وصول رسالة جديدة. اضغط للتجربة.</div>
+            </div>
+            <button class="btn" id="st-sound-test" title="تجربة الجرس">${icon('bell', 'sm')}</button>
+            <button class="switch ${s.sound !== false ? 'on' : ''}" id="st-sound"><i></i></button>
+          </div>
+          <div class="opt">
+            <div class="lab">
+              <div>مدة الرنين</div>
+              <div class="d">كم ثانية يستمر الجرس.</div>
+            </div>
+            <div class="seg" id="st-secs">
+              ${[3, 5, 10].map((n) => `<button data-secs="${n}" class="${(s.soundSeconds || 5) === n ? 'on' : ''}">${n} ث</button>`).join('')}
+            </div>
           </div>
           <div class="opt">
             <div class="lab">
@@ -128,6 +146,22 @@ export function openSettings(state, handlers) {
     el.classList.toggle('on');
     save({ notifications: el.classList.contains('on') });
   });
+  on($('#st-sound', back), 'click', (e) => {
+    const el = e.currentTarget;
+    el.classList.toggle('on');
+    const enabled = el.classList.contains('on');
+    save({ sound: enabled });
+    if (enabled) ringBell(1.2); else stopBell();
+  });
+  on($('#st-sound-test', back), 'click', () => ringBell(state.settings.soundSeconds || 5));
+  delegate($('#st-secs', back), 'click', 'button[data-secs]', (_e, btn) => {
+    const secs = Number(btn.dataset.secs);
+    $('#st-secs .on', back).classList.remove('on');
+    btn.classList.add('on');
+    save({ soundSeconds: secs });
+    ringBell(secs);
+  });
+
   on($('#st-images', back), 'click', (e) => {
     const el = e.currentTarget;
     el.classList.toggle('on');

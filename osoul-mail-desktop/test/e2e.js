@@ -187,6 +187,56 @@ function check(name, cond, detail) {
         'reply text missing');
     }
 
+    /* 6.5) أدوات نافذة الكتابة + حفظ المسودة */
+    const composeTools = await run(`(async () => {
+      const c = await import('./js/compose.js');
+      const m = await import('./js/mail.js');
+      c.openCompose({ mode: 'new' }, m.S);
+      await new Promise(r => setTimeout(r, 300));
+      const dock = document.querySelector('.compose');
+      const tools = Array.from(dock.querySelectorAll('.toolbar button'))
+        .map(b => b.dataset.cmd || b.id).filter(Boolean);
+      return {
+        tools,
+        zoom: !!dock.querySelector('#c-zoom-in') && !!dock.querySelector('#c-zoom-out'),
+        zoomLabel: (dock.querySelector('#c-zoom-val') || {}).textContent,
+        important: !!dock.querySelector('#c-important'),
+        draftButton: !!dock.querySelector('#c-draft'),
+      };
+    })()`);
+    const wanted = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList',
+      'c-quote', 'justifyRight', 'justifyCenter', 'justifyLeft', 'c-link'];
+    check('compose.toolbar', wanted.every((t) => composeTools.tools.includes(t)),
+      { missing: wanted.filter((t) => !composeTools.tools.includes(t)), got: composeTools.tools });
+    check('compose.fontZoom', composeTools.zoom && composeTools.zoomLabel === '100%', composeTools);
+    check('compose.importantFlag', composeTools.important);
+    check('compose.draftButton', composeTools.draftButton);
+
+    const zoomWorks = await run(`(async () => {
+      document.getElementById('c-zoom-in').click();
+      document.getElementById('c-zoom-in').click();
+      const after = document.getElementById('c-zoom-val').textContent;
+      const size = document.getElementById('c-body').style.fontSize;
+      return { after, size };
+    })()`);
+    check('compose.zoomChanges', zoomWorks.after === '120%' && zoomWorks.size !== '', zoomWorks);
+
+    const draft = await run(`(async () => {
+      document.getElementById('toasts').innerHTML = '';  // إشعارات خطوة سابقة قد تكون ظاهرة
+      document.getElementById('c-to').value = 'someone@example.com';
+      document.getElementById('c-subject').value = 'مسودة اختبار';
+      document.getElementById('c-body').innerHTML = '<p>نص المسودة</p>';
+      document.getElementById('c-important').click();
+      document.getElementById('c-draft').click();
+      for (let i = 0; i < 60 && document.querySelector('.compose'); i++) {
+        await new Promise(r => setTimeout(r, 200));
+      }
+      const toasts = Array.from(document.querySelectorAll('.toast')).map(t => t.textContent);
+      return { closed: !document.querySelector('.compose'), toasts };
+    })()`);
+    check('compose.savesDraft',
+      draft.closed && draft.toasts.some((t) => /المسودات/.test(t)), draft);
+
     /* 7) البحث */
     const search = await run(`(async () => {
       const mail = await import('./js/mail.js');

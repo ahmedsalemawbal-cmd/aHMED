@@ -576,3 +576,19 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
 .ask input:focus { border-color: var(--brandLine); }
 .ask .row { display: flex; gap: 8px; margin-top: 16px; }
 .ask .row .btn { flex: 1; }
+
+/* شريط أدوات المحرّر: تكبير/تصغير الخط */
+.toolbar .zoom { display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
+.toolbar .zoom .icon-btn { width: 28px; height: 28px; font-size: 12px; font-weight: 700; }
+.toolbar .zoom span { font-size: 11px; color: var(--text3); min-width: 36px; text-align: center; }
+
+/* علامة الأهمية في صف الموضوع */
+.crow #c-important { width: 30px; height: 30px; flex: 0 0 auto; }
+.crow #c-important.on { color: var(--err); background: rgba(208,72,63,.12); }
+
+/* اقتباس داخل المحرّر */
+.editor blockquote {
+  margin: 10px 0; padding-inline-start: 12px;
+  border-inline-start: 3px solid var(--brandLine); color: var(--text2);
+}
+.editor ol, .editor ul { padding-inline-start: 22px; margin: 8px 0; }

@@ -12,6 +12,7 @@ import {
 } from './util.js';
 import { openCompose } from './compose.js';
 import { openSettings } from './settings.js';
+import { ringBell, stopBell, unlock as unlockSound } from './sound.js';
 
 /** حالة التطبيق. مصدر واحد للحقيقة، وكل رسم يقرأ منه. */
 export const S = {
@@ -64,6 +65,7 @@ export function startMail(data, boot) {
   updateBadge();
   bindEvents();
   scheduleRefresh();
+  unlockSound();
 
   $('#login').hidden = true;
   $('#boot').hidden = true;
@@ -451,6 +453,7 @@ function fillFrame(m) {
 
 /** فتح رسالة. */
 export async function openMessage(uid, folder) {
+  stopBell();
   const f = folder || S.folder;
   S.openUid = uid;
   S.msgBusy = true;
@@ -639,6 +642,12 @@ function replyPayload(mode) {
   };
 }
 
+/** بعد حفظ مسودة: نحدّث العدادات، والقائمة إن كنّا واقفين في المسودات. */
+function afterDraftSaved() {
+  refreshFolders();
+  if (currentFolder().special === 'drafts') loadList();
+}
+
 function startReply(mode) {
   const payload = replyPayload(mode);
   if (!payload) return;
@@ -649,7 +658,7 @@ function startReply(mode) {
       const row = S.messages.find((x) => x.uid === S.message.uid);
       if (row) { row.answered = true; paintList(); }
     }
-  });
+  }, afterDraftSaved);
 }
 
 /* ===================================================================
@@ -704,7 +713,7 @@ function bindEvents() {
     const s = $('#t-search');
     if (s) { s.value = ''; $('#t-clear').hidden = true; $('#t-kbd').hidden = false; }
   });
-  delegate($('#side'), 'click', '#s-compose', () => openCompose({ mode: 'new' }, S));
+  delegate($('#side'), 'click', '#s-compose', () => openCompose({ mode: 'new' }, S, null, afterDraftSaved));
   delegate($('#side'), 'click', '#s-newfolder', createFolder);
 
   /* --- القائمة --- */
@@ -721,6 +730,8 @@ function bindEvents() {
 
   /* --- أحداث العملية الرئيسية --- */
   window.osoul.on('mail:new', async () => {
+    // الجرس أولًا: التحديث قد يستغرق ثانية على اتصال بطيء، والتنبيه لا ينتظر.
+    if (S.settings.sound !== false) ringBell(S.settings.soundSeconds || 5);
     await refreshFolders();
     // نحدّث القائمة فقط إن كنّا في الوارد على الصفحة الأولى بلا بحث.
     if (S.page === 0 && !S.search && currentFolder().special === 'inbox') loadList();
@@ -820,7 +831,7 @@ function bindKeys() {
         break;
       case 'c':
         e.preventDefault();
-        openCompose({ mode: 'new' }, S);
+        openCompose({ mode: 'new' }, S, null, afterDraftSaved);
         break;
       case 'r':
         if (S.message) { e.preventDefault(); startReply('reply'); }

@@ -19,8 +19,9 @@ let open = false;
  * @param {{mode:string, to?:string, cc?:string, subject?:string, body?:string, inReplyTo?:string, references?:string}} draft
  * @param {object} state حالة التطبيق (للتوقيع واسم المرسل)
  * @param {Function} [onSent] يُستدعى بعد إرسال ناجح
+ * @param {Function} [onSaved] يُستدعى بعد حفظ مسودة
  */
-export function openCompose(draft, state, onSent) {
+export function openCompose(draft, state, onSent, onSaved) {
   if (open) return;
   open = true;
 
@@ -59,6 +60,8 @@ export function openCompose(draft, state, onSent) {
         <div class="crow">
           <label for="c-subject">الموضوع</label>
           <input id="c-subject" type="text" value="${esc(d.subject || '')}" autocomplete="off">
+          <button type="button" class="icon-btn" id="c-important"
+                  title="تعليم كرسالة مهمة">${icon('important', 'sm')}</button>
         </div>
       </div>
 
@@ -68,22 +71,36 @@ export function openCompose(draft, state, onSent) {
       <div class="chips" id="c-files"></div>
 
       <div class="toolbar">
-        <button class="icon-btn" data-cmd="bold" title="عريض">${icon('bold')}</button>
-        <button class="icon-btn" data-cmd="italic" title="مائل">${icon('italic')}</button>
-        <button class="icon-btn" data-cmd="underline" title="تسطير">${icon('underline')}</button>
+        <button class="icon-btn" data-cmd="bold" title="عريض (Ctrl+B)">${icon('bold')}</button>
+        <button class="icon-btn" data-cmd="italic" title="مائل (Ctrl+I)">${icon('italic')}</button>
+        <button class="icon-btn" data-cmd="underline" title="تسطير (Ctrl+U)">${icon('underline')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" data-cmd="insertUnorderedList" title="قائمة">${icon('listUl')}</button>
+        <button class="icon-btn" data-cmd="insertUnorderedList" title="قائمة نقطية">${icon('listUl')}</button>
+        <button class="icon-btn" data-cmd="insertOrderedList" title="قائمة مرقّمة">${icon('listOl')}</button>
+        <button class="icon-btn" id="c-quote" title="اقتباس">${icon('quote')}</button>
+        <div class="sep"></div>
+        <button class="icon-btn" data-cmd="justifyRight" title="محاذاة يمين">${icon('alignRight')}</button>
+        <button class="icon-btn" data-cmd="justifyCenter" title="توسيط">${icon('alignCenter')}</button>
+        <button class="icon-btn" data-cmd="justifyLeft" title="محاذاة يسار">${icon('alignLeft')}</button>
+        <div class="sep"></div>
         <button class="icon-btn" id="c-link" title="رابط">${icon('link')}</button>
+        <button class="icon-btn" id="c-attach-2" title="إرفاق ملف">${icon('clip')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" id="c-dir" title="اتجاه النص">${icon('quote')}</button>
+        <button class="icon-btn" id="c-dir" title="اتجاه النص (عربي/إنجليزي)">${icon('textSize')}</button>
+        <div class="zoom">
+          <button class="icon-btn" id="c-zoom-out" title="تصغير الخط">A−</button>
+          <span id="c-zoom-val" class="num">100%</span>
+          <button class="icon-btn" id="c-zoom-in" title="تكبير الخط">A+</button>
+        </div>
       </div>
 
       <div class="foot">
         <button class="btn primary" id="c-send">${icon('send', 'sm')}<span>إرسال</span></button>
         <button class="btn" id="c-attach">${icon('clip', 'sm')}<span>إرفاق</span></button>
+        <button class="btn" id="c-draft">${icon('draft', 'sm')}<span>حفظ كمسودة</span></button>
         <div class="grow"></div>
         <span class="num" id="c-size" style="font-size:11px;color:var(--text3)"></span>
-        <button class="btn" id="c-discard">تجاهل</button>
+        <button class="btn" id="c-discard">${icon('trash', 'sm')}<span>تجاهل</span></button>
       </div>
     </div>
   `;
@@ -143,7 +160,45 @@ export function openCompose(draft, state, onSent) {
   on($('#c-dir', back), 'click', () => {
     body.dir = body.dir === 'ltr' ? 'rtl' : 'ltr';
     body.style.textAlign = body.dir === 'ltr' ? 'left' : 'right';
+    body.focus();
   });
+
+  /* اقتباس: execCommand('formatBlock') لا يزيل الاقتباس، فنبدّله يدويًا. */
+  on($('#c-quote', back), 'click', () => {
+    body.focus();
+    const sel = window.getSelection();
+    const node = sel.anchorNode;
+    const inside = node && (node.nodeType === 1 ? node : node.parentElement)?.closest('blockquote');
+    if (inside && body.contains(inside)) {
+      const frag = document.createDocumentFragment();
+      while (inside.firstChild) frag.appendChild(inside.firstChild);
+      inside.replaceWith(frag);
+    } else {
+      document.execCommand('formatBlock', false, 'blockquote');
+    }
+    dirty = true;
+  });
+
+  /* حجم الخط داخل المحرّر فقط — لا يُرسل مع الرسالة، راحة للكاتب. */
+  let zoom = 100;
+  const applyZoom = () => {
+    zoom = Math.max(70, Math.min(180, zoom));
+    body.style.fontSize = `${(13.5 * zoom) / 100}px`;
+    $('#c-zoom-val', back).textContent = `${zoom}%`;
+  };
+  on($('#c-zoom-in', back), 'click', () => { zoom += 10; applyZoom(); });
+  on($('#c-zoom-out', back), 'click', () => { zoom -= 10; applyZoom(); });
+
+  /* علامة الأهمية — ترويسة X-Priority في الرسالة المرسلة. */
+  let important = false;
+  on($('#c-important', back), 'click', (e) => {
+    important = !important;
+    e.currentTarget.classList.toggle('on', important);
+    e.currentTarget.title = important ? 'مهمة — اضغط للإلغاء' : 'تعليم كرسالة مهمة';
+    dirty = true;
+  });
+
+  on($('#c-attach-2', back), 'click', () => $('#c-attach', back).click());
   on(body, 'input', () => { dirty = true; });
   // اللصق نصًا عاديًا: يمنع تسرّب تنسيقات غريبة من صفحات الويب.
   on(body, 'paste', (e) => {
@@ -222,6 +277,7 @@ export function openCompose(draft, state, onSent) {
         attachments: files.map((f) => ({ path: f.path, filename: f.filename })),
         inReplyTo: d.inReplyTo || '',
         references: d.references || '',
+        priority: important ? 'high' : 'normal',
       });
       close();
       toast(res.filed ? 'أُرسلت الرسالة وحُفظت نسخة في المرسل' : 'أُرسلت الرسالة', 'ok');
@@ -236,6 +292,35 @@ export function openCompose(draft, state, onSent) {
       btn.innerHTML = `${icon('send', 'sm')}<span>إرسال</span>`;
     }
   }
+
+  /* ---- حفظ كمسودة ---- */
+  on($('#c-draft', back), 'click', async () => {
+    if (sending) return;
+    const btn = $('#c-draft', back);
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner sm"></span><span>جارٍ الحفظ…</span>`;
+    try {
+      await call(window.osoul.saveDraft, {
+        to: $('#c-to', back).value.trim(),
+        cc: $('#c-cc', back).value.trim(),
+        bcc: $('#c-bcc', back).value.trim(),
+        subject: $('#c-subject', back).value.trim(),
+        html: body.innerHTML,
+        attachments: files.map((f) => ({ path: f.path, filename: f.filename })),
+        inReplyTo: d.inReplyTo || '',
+        references: d.references || '',
+        priority: important ? 'high' : 'normal',
+      });
+      dirty = false;
+      close();
+      toast('حُفظت في المسودات', 'ok');
+      if (onSaved) onSaved();
+    } catch (err) {
+      toast(errText(err), 'err');
+      btn.disabled = false;
+      btn.innerHTML = `${icon('draft', 'sm')}<span>حفظ كمسودة</span>`;
+    }
+  });
 
   /* ---- التركيز الأول ---- */
   setTimeout(() => {
