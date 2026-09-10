@@ -10,7 +10,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { collectTargets, isBundleMainExecutable } = require('../build/after-pack.js');
+const { collectTargets, isBundleMainExecutable, isIntermediateArchBuild } = require('../build/after-pack.js');
 
 const out = {};
 let failures = 0;
@@ -119,6 +119,15 @@ check('noDuplicates', new Set(targets).size === targets.length);
 
 /* --- 4) الحزمة الأم ليست ضمن القائمة (تُوقَّع أخيرًا على حدة) --- */
 check('rootNotInTargets', !targets.includes(''), targets[0]);
+
+/* --- 5) النسخ المؤقتة لبناء universal لا تُوقَّع --- *
+ * توقيعها يجعل _CodeSignature/CodeResources مختلفًا بين المعماريتين،
+ * فيرفض الدمج بـ "Expected all non-binary files to have identical SHAs". */
+check('skipsX64Temp', isIntermediateArchBuild('/w/dist/mac-universal-x64-temp'));
+check('skipsArm64Temp', isIntermediateArchBuild('/w/dist/mac-universal-arm64-temp'));
+check('signsMergedUniversal', !isIntermediateArchBuild('/w/dist/mac-universal'));
+check('signsPlainMacBuild', !isIntermediateArchBuild('/w/dist/mac'));
+check('signsArm64OnlyBuild', !isIntermediateArchBuild('/w/dist/mac-arm64'));
 
 fs.rmSync(root, { recursive: true, force: true });
 

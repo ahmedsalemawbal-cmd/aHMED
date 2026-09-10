@@ -98,8 +98,25 @@ function sign(target) {
   ], { stdio: 'inherit' });
 }
 
+/**
+ * النسخ المؤقتة لكل معمارية في بناء universal.
+ *
+ * electron-builder يبني x64 و arm64 في مجلدين ينتهيان بـ "-temp" ثم يدمجهما.
+ * والدمج يشترط تطابق بايتات كل ملف غير ثنائي بين النسختين، بينما التوقيع
+ * ينتج _CodeSignature/CodeResources مختلفًا لكل منهما — فيفشل بـ
+ * "Expected all non-binary files to have identical SHAs". لذلك نوقّع النسخة
+ * المدموجة وحدها؛ و electron-builder يستدعي الخطاف عليها أيضًا بعد الدمج.
+ */
+function isIntermediateArchBuild(appOutDir) {
+  return /-temp$/.test(appOutDir);
+}
+
 exports.default = async function afterPack(context) {
   if (context.electronPlatformName !== 'darwin') return;
+  if (isIntermediateArchBuild(context.appOutDir)) {
+    console.log(`  • تخطّي التوقيع للنسخة المؤقتة ${context.appOutDir}`);
+    return;
+  }
 
   const name = context.packager.appInfo.productFilename;
   const appPath = path.join(context.appOutDir, `${name}.app`);
@@ -119,3 +136,4 @@ exports.default = async function afterPack(context) {
 // يُستخدم في الاختبار للتحقق من ترتيب التوقيع دون الحاجة إلى macOS.
 exports.collectTargets = collectTargets;
 exports.isBundleMainExecutable = isBundleMainExecutable;
+exports.isIntermediateArchBuild = isIntermediateArchBuild;
