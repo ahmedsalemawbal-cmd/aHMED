@@ -50,7 +50,7 @@ jobs:
 
       - name: الاختبارات (لينكس/ماك فقط — تحتاج شاشة وهمية على ويندوز)
         if: matrix.os == 'macos-latest'
-        run: npm run test:imap && npm run test:smtp
+        run: npm run test:sign && npm run test:imap && npm run test:smtp
 
       - name: البناء
         run: ${{ matrix.command }}
