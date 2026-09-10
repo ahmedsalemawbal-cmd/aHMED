@@ -55,8 +55,22 @@ jobs:
       - name: البناء
         run: ${{ matrix.command }}
         env:
-          # لا شهادة توقيع: نتخطى البحث التلقائي عنها بدل أن يفشل البناء
+          # لا شهادة Apple Developer: نمنع البحث عنها، والتوقيع المحلي
+          # (ad-hoc) يتم في build/after-pack.js لأن أجهزة Apple Silicon
+          # ترفض تشغيل ثنائي arm64 بلا أي توقيع.
           CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # نسخة ماك بلا توقيع لا تعمل على Apple Silicon إطلاقًا، وهذا العطل
+      # لا يظهر إلا على جهاز المستخدم — فنفشل هنا بدل أن ننشره.
+      - name: التحقق من توقيع حزمة ماك
+        if: matrix.os == 'macos-latest'
+        run: |
+          APP=$(find dist -maxdepth 2 -name "*.app" | head -1)
+          test -n "$APP" || { echo "لم أجد حزمة .app"; exit 1; }
+          codesign --verify --strict --verbose=2 "$APP"
+          codesign -dv "$APP" 2>&1 | grep -q "Signature=adhoc" \
+            || { echo "الحزمة غير موقّعة — إيقاف النشر"; exit 1; }
+          echo "التوقيع المحلي سليم: $APP"
 
       - uses: actions/upload-artifact@v4
         with:

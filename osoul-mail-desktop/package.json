@@ -1,7 +1,7 @@
 {
   "name": "osoul-mail-desktop",
   "productName": "Osoul Mail",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "بريد أصول البناء — تطبيق البريد الإلكتروني للموظفين على ويندوز",
   "author": {
     "name": "Osoul Albinaa Industrial Co.",
@@ -47,7 +47,8 @@
       "package.json",
       "!**/*.map",
       "!**/{.git,.github,.vscode,test,tests,__tests__,docs,example,examples}/**",
-      "!**/*.{md,markdown,ts,tsx}"
+      "!**/*.{md,markdown,ts,tsx}",
+      "!build/**"
     ],
     "extraResources": [
       {
@@ -95,7 +96,6 @@
       "icon": "build/icon.icns",
       "category": "public.app-category.productivity",
       "darkModeSupport": true,
-      "identity": null,
       "artifactName": "OsoulMail-Mac-${version}.${ext}"
     },
     "publish": null,
@@ -115,6 +115,7 @@
           "path": "/Applications"
         }
       ]
-    }
+    },
+    "afterPack": "build/after-pack.js"
   }
 }
