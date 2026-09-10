@@ -592,3 +592,96 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
   border-inline-start: 3px solid var(--brandLine); color: var(--text2);
 }
 .editor ol, .editor ul { padding-inline-start: 22px; margin: 8px 0; }
+
+/* زر تبديل اللغة */
+.lang-toggle {
+  position: absolute; top: 14px; inset-inline-end: 14px;
+  height: 28px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel2);
+  color: var(--text2); font-size: 11.5px; font-weight: 700; cursor: pointer;
+  transition: .14s; font-family: inherit;
+}
+.lang-toggle:hover { color: var(--text); border-color: var(--brandLine); background: var(--panel3); }
+.gate { position: relative; }
+.titlebar .lang-toggle { position: static; height: 30px; }
+
+/* ==================================================================
+ *  التصنيفات
+ * ================================================================ */
+
+.folder.label .dot {
+  width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto;
+  margin-inline-start: 4px; margin-inline-end: 5px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset;
+}
+.folder.label.on .dot { box-shadow: 0 0 0 2px var(--panel), 0 0 0 3px currentColor; }
+
+.lbl-chip {
+  font-size: 10px; font-weight: 700; line-height: 1; padding: 3px 7px;
+  border-radius: 999px; color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ==================================================================
+ *  جهات الاتصال
+ * ================================================================ */
+
+.list .filters .c-find {
+  flex: 1; height: 27px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--panel2); color: var(--text); padding-inline: 12px;
+  font-size: 12px; font-family: inherit; outline: none; min-width: 0;
+}
+.list .filters .c-find:focus { border-color: var(--brandLine); }
+.list .filters .c-find::placeholder { color: var(--text3); }
+
+.row.contact .subject { direction: ltr; text-align: start; }
+.row.contact .meta .num { font-size: 10.5px; }
+.row.contact .icon-btn { width: 28px; height: 28px; align-self: center; opacity: 0; transition: opacity .12s; }
+.row.contact:hover .icon-btn, .row.contact.on .icon-btn { opacity: 1; }
+
+.pager .hint { font-size: 11px; color: var(--text3); }
+
+.contact-card { text-align: center; padding: 26px 0 10px; animation: fade .18s both; }
+.contact-card .avatar.big {
+  width: 82px; height: 82px; font-size: 28px; margin: 0 auto 16px;
+}
+.contact-card h2 { margin: 0; font-size: 19px; font-weight: 700; }
+.contact-card .e { direction: ltr; font-size: 13px; color: var(--text2); margin-top: 5px; user-select: text; }
+.contact-card .sub { font-size: 11.5px; color: var(--text3); margin-top: 8px; }
+.contact-card .acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 22px; }
+
+/* ==================================================================
+ *  مساعد الكتابة
+ * ================================================================ */
+
+.toolbar .btn.ai {
+  height: 30px; padding: 0 11px; gap: 6px; font-size: 12px; font-weight: 700;
+  color: var(--brand3); border-color: var(--brandLine); background: var(--brandSoft);
+}
+.toolbar .btn.ai:hover:not([disabled]) { color: #fff; background: var(--brand); border-color: var(--brand); }
+.toolbar .btn.ai .ic { width: 15px; height: 15px; }
+
+/* التوقيع والاقتباس داخل المحرّر — يستثنيهما المساعد */
+.editor .sig { color: var(--text2); }
+
+/* ==================================================================
+ *  تغيير كلمة المرور
+ * ================================================================ */
+
+.pw-form { display: flex; flex-direction: column; gap: 8px; }
+.pw-form input {
+  width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--panel2); color: var(--text); padding-inline: 12px;
+  font-size: 13px; font-family: inherit; outline: none;
+}
+.pw-form input:focus { border-color: var(--brandLine); }
+.pw-form input::placeholder { color: var(--text3); }
+.pw-form .btn { align-self: flex-start; margin-top: 2px; }
+
+/* شارة حالة صغيرة في الإعدادات */
+.sheet .pill {
+  font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  background: var(--panel3); color: var(--text2); border: 1px solid var(--line);
+}
+.sheet .pill.ok { color: var(--ok); background: rgba(47,125,92,.13); border-color: rgba(47,125,92,.32); }

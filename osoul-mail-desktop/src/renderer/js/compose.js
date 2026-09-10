@@ -6,7 +6,8 @@
  */
 
 import { icon } from './icons.js';
-import { $, on, delegate, esc, call, errText, toast, fmtBytes, ask } from './util.js';
+import { $, on, delegate, esc, call, errText, toast, menu, fmtBytes, ask } from './util.js';
+import { t, getLang } from './i18n.js';
 
 /** الحد الذي تقبله معظم الخوادم للرسالة الواحدة بمرفقاتها. */
 const MAX_TOTAL = 24 * 1024 * 1024;
@@ -27,8 +28,10 @@ export function openCompose(draft, state, onSent, onSaved) {
 
   const d = draft || {};
   const signature = (state.settings && state.settings.signature) || '';
-  const sigHTML = signature ? `<br><br>--<br>${esc(signature).replace(/\n/g, '<br>')}` : '';
-  const title = { reply: 'رد', replyAll: 'رد على الجميع', forward: 'تمرير' }[d.mode] || 'رسالة جديدة';
+  const sigHTML = signature
+    ? `<div class="sig"><br><br>--<br>${esc(signature).replace(/\n/g, '<br>')}</div>`
+    : '';
+  const title = { reply: t('reply'), replyAll: t('replyAll'), forward: t('forward') }[d.mode] || t('newMessage');
 
   const back = document.createElement('div');
   back.className = 'compose-back';
@@ -36,71 +39,73 @@ export function openCompose(draft, state, onSent, onSaved) {
     <div class="compose" role="dialog" aria-label="${esc(title)}">
       <div class="head">
         <div class="t">${esc(title)}</div>
-        <button class="icon-btn" id="c-close" title="إغلاق (Esc)">${icon('x', 'sm')}</button>
+        <button class="icon-btn" id="c-close" title="${esc(t('close'))} (Esc)">${icon('x', 'sm')}</button>
       </div>
 
       <div class="fields">
         <div class="crow">
-          <label for="c-to">إلى</label>
+          <label for="c-to">${esc(t('to'))}</label>
           <input id="c-to" type="text" dir="ltr" spellcheck="false" value="${esc(d.to || '')}"
                  placeholder="name@example.com" autocomplete="off">
           <div class="toggles">
-            <button type="button" id="c-cc-btn" class="${d.cc ? 'on' : ''}">نسخة</button>
-            <button type="button" id="c-bcc-btn">مخفية</button>
+            <button type="button" id="c-cc-btn" class="${d.cc ? 'on' : ''}">${esc(t('cc'))}</button>
+            <button type="button" id="c-bcc-btn">${esc(t('bcc'))}</button>
           </div>
         </div>
         <div class="crow" id="c-cc-row" ${d.cc ? '' : 'hidden'}>
-          <label for="c-cc">نسخة</label>
+          <label for="c-cc">${esc(t('cc'))}</label>
           <input id="c-cc" type="text" dir="ltr" spellcheck="false" value="${esc(d.cc || '')}" autocomplete="off">
         </div>
         <div class="crow" id="c-bcc-row" hidden>
-          <label for="c-bcc">مخفية</label>
+          <label for="c-bcc">${esc(t('bcc'))}</label>
           <input id="c-bcc" type="text" dir="ltr" spellcheck="false" autocomplete="off">
         </div>
         <div class="crow">
-          <label for="c-subject">الموضوع</label>
+          <label for="c-subject">${esc(t('subject'))}</label>
           <input id="c-subject" type="text" value="${esc(d.subject || '')}" autocomplete="off">
           <button type="button" class="icon-btn" id="c-important"
-                  title="تعليم كرسالة مهمة">${icon('important', 'sm')}</button>
+                  title="${esc(t('markImportant'))}">${icon('important', 'sm')}</button>
         </div>
       </div>
 
       <div class="editor" id="c-body" contenteditable="true" dir="auto"
-           data-placeholder="اكتب رسالتك…">${(d.body || '') + sigHTML}</div>
+           data-placeholder="${esc(t('bodyPlaceholder'))}">${(d.body || '') + sigHTML}</div>
 
       <div class="chips" id="c-files"></div>
 
       <div class="toolbar">
-        <button class="icon-btn" data-cmd="bold" title="عريض (Ctrl+B)">${icon('bold')}</button>
-        <button class="icon-btn" data-cmd="italic" title="مائل (Ctrl+I)">${icon('italic')}</button>
-        <button class="icon-btn" data-cmd="underline" title="تسطير (Ctrl+U)">${icon('underline')}</button>
+        <button class="icon-btn" data-cmd="bold" title="${esc(t('bold'))} (Ctrl+B)">${icon('bold')}</button>
+        <button class="icon-btn" data-cmd="italic" title="${esc(t('italic'))} (Ctrl+I)">${icon('italic')}</button>
+        <button class="icon-btn" data-cmd="underline" title="${esc(t('underline'))} (Ctrl+U)">${icon('underline')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" data-cmd="insertUnorderedList" title="قائمة نقطية">${icon('listUl')}</button>
-        <button class="icon-btn" data-cmd="insertOrderedList" title="قائمة مرقّمة">${icon('listOl')}</button>
-        <button class="icon-btn" id="c-quote" title="اقتباس">${icon('quote')}</button>
+        <button class="icon-btn" data-cmd="insertUnorderedList" title="${esc(t('bulletList'))}">${icon('listUl')}</button>
+        <button class="icon-btn" data-cmd="insertOrderedList" title="${esc(t('numberList'))}">${icon('listOl')}</button>
+        <button class="icon-btn" id="c-quote" title="${esc(t('quote'))}">${icon('quote')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" data-cmd="justifyRight" title="محاذاة يمين">${icon('alignRight')}</button>
-        <button class="icon-btn" data-cmd="justifyCenter" title="توسيط">${icon('alignCenter')}</button>
-        <button class="icon-btn" data-cmd="justifyLeft" title="محاذاة يسار">${icon('alignLeft')}</button>
+        <button class="icon-btn" data-cmd="justifyRight" title="${esc(t('alignRight'))}">${icon('alignRight')}</button>
+        <button class="icon-btn" data-cmd="justifyCenter" title="${esc(t('alignCenter'))}">${icon('alignCenter')}</button>
+        <button class="icon-btn" data-cmd="justifyLeft" title="${esc(t('alignLeft'))}">${icon('alignLeft')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" id="c-link" title="رابط">${icon('link')}</button>
-        <button class="icon-btn" id="c-attach-2" title="إرفاق ملف">${icon('clip')}</button>
+        <button class="icon-btn" id="c-link" title="${esc(t('link'))}">${icon('link')}</button>
+        <button class="icon-btn" id="c-attach-2" title="${esc(t('attach'))}">${icon('clip')}</button>
         <div class="sep"></div>
-        <button class="icon-btn" id="c-dir" title="اتجاه النص (عربي/إنجليزي)">${icon('textSize')}</button>
+        <button class="btn ai" id="c-ai" title="${esc(t('ai'))}">${icon('sparkle', 'sm')}<span>${esc(t('ai'))}</span></button>
+        <div class="sep"></div>
+        <button class="icon-btn" id="c-dir" title="${esc(t('textDirection'))}">${icon('textSize')}</button>
         <div class="zoom">
-          <button class="icon-btn" id="c-zoom-out" title="تصغير الخط">A−</button>
+          <button class="icon-btn" id="c-zoom-out" title="${esc(t('zoomOut'))}">A−</button>
           <span id="c-zoom-val" class="num">100%</span>
-          <button class="icon-btn" id="c-zoom-in" title="تكبير الخط">A+</button>
+          <button class="icon-btn" id="c-zoom-in" title="${esc(t('zoomIn'))}">A+</button>
         </div>
       </div>
 
       <div class="foot">
-        <button class="btn primary" id="c-send">${icon('send', 'sm')}<span>إرسال</span></button>
-        <button class="btn" id="c-attach">${icon('clip', 'sm')}<span>إرفاق</span></button>
-        <button class="btn" id="c-draft">${icon('draft', 'sm')}<span>حفظ كمسودة</span></button>
+        <button class="btn primary" id="c-send">${icon('send', 'sm')}<span>${esc(t('send'))}</span></button>
+        <button class="btn" id="c-attach">${icon('clip', 'sm')}<span>${esc(t('attach'))}</span></button>
+        <button class="btn" id="c-draft">${icon('draft', 'sm')}<span>${esc(t('saveDraft'))}</span></button>
         <div class="grow"></div>
         <span class="num" id="c-size" style="font-size:11px;color:var(--text3)"></span>
-        <button class="btn" id="c-discard">${icon('trash', 'sm')}<span>تجاهل</span></button>
+        <button class="btn" id="c-discard">${icon('trash', 'sm')}<span>${esc(t('discard'))}</span></button>
       </div>
     </div>
   `;
@@ -120,7 +125,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   }
   function tryClose() {
     if (sending) return;
-    if (dirty && !window.confirm('إغلاق الرسالة دون إرسالها؟')) return;
+    if (dirty && !window.confirm(t('confirmDiscard'))) return;
     close();
   }
   function keys(e) {
@@ -151,7 +156,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   on($('#c-link', back), 'click', async () => {
     const sel = window.getSelection();
     const range = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
-    const url = await ask('عنوان الرابط:', { value: 'https://', dir: 'ltr' });
+    const url = await ask(t('linkPrompt'), { value: 'https://', dir: 'ltr' });
     if (!url) return;
     body.focus();
     if (range) { sel.removeAllRanges(); sel.addRange(range); }
@@ -194,7 +199,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   on($('#c-important', back), 'click', (e) => {
     important = !important;
     e.currentTarget.classList.toggle('on', important);
-    e.currentTarget.title = important ? 'مهمة — اضغط للإلغاء' : 'تعليم كرسالة مهمة';
+    e.currentTarget.title = important ? t('importantOn') : t('markImportant');
     dirty = true;
   });
 
@@ -207,6 +212,83 @@ export function openCompose(draft, state, onSent, onSaved) {
     e.preventDefault();
     document.execCommand('insertText', false, text);
   });
+
+  /* ---- مساعد الكتابة ----
+   *
+   * يعمل على ما كتبه الموظف وحده: الاقتباس والتوقيع مُعلَّمان بصنفين فنستثنيهما
+   * قراءةً وكتابةً، فلا يُعاد كتابة رسالة الطرف الآخر ولا يُمحى توقيع الشركة.
+   */
+
+  /** نص الموظف فقط. نُخفي المستثنى لحظةً لأن innerText يحترم الإخفاء. */
+  function ownText() {
+    const skip = [...body.querySelectorAll('.quoted, .sig')];
+    skip.forEach((el) => { el.style.display = 'none'; });
+    const text = String(body.innerText || '').replace(/\u00a0/g, ' ').trim();
+    skip.forEach((el) => { el.style.display = ''; });
+    return text;
+  }
+
+  /** استبدال نص الموظف وحده، مع إبقاء الاقتباس والتوقيع في مكانهما. */
+  function setOwnHTML(html) {
+    const kids = [...body.childNodes];
+    const at = kids.findIndex((n) => n.nodeType === 1 && n.classList
+      && (n.classList.contains('quoted') || n.classList.contains('sig')));
+    const tail = at === -1 ? null : kids[at];
+
+    (at === -1 ? kids : kids.slice(0, at)).forEach((n) => n.remove());
+
+    const holder = document.createElement('div');
+    holder.innerHTML = html;
+    const frag = document.createDocumentFragment();
+    while (holder.firstChild) frag.appendChild(holder.firstChild);
+    body.insertBefore(frag, tail);
+  }
+
+  let aiBusy = false;
+
+  on($('#c-ai', back), 'click', (e) => {
+    if (aiBusy) return;
+    menu(e.currentTarget, [
+      { cap: t('ai') },
+      { label: t('aiDraft'), icon: 'sparkle', onClick: () => runAI('draft') },
+      { label: t('aiImprove'), icon: 'sparkle', onClick: () => runAI('improve') },
+    ]);
+  });
+
+  async function runAI(mode) {
+    const text = ownText();
+    if (!text) {
+      toast(mode === 'improve' ? t('aiNeedText') : t('aiNeedIdea'), 'err');
+      body.focus();
+      return;
+    }
+
+    const btn = $('#c-ai', back);
+    aiBusy = true;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner sm"></span><span>${esc(t('aiWorking'))}</span>`;
+
+    try {
+      const res = await call(window.osoul.aiGenerate, {
+        mode,
+        text,
+        subject: $('#c-subject', back).value.trim(),
+        lang: getLang(),
+      });
+      setOwnHTML(res.html);
+      const subj = $('#c-subject', back);
+      // الموضوع الذي كتبه الموظف أولى؛ لا نستبدله بموضوع مقترح.
+      if (res.subject && !subj.value.trim()) subj.value = res.subject;
+      dirty = true;
+      toast(t('aiDone'), 'ok');
+    } catch (err) {
+      toast(errText(err), 'err');
+    } finally {
+      aiBusy = false;
+      btn.disabled = false;
+      btn.innerHTML = `${icon('sparkle', 'sm')}<span>${esc(t('ai'))}</span>`;
+    }
+  }
 
   /* ---- المرفقات ---- */
   on($('#c-attach', back), 'click', async () => {
@@ -233,12 +315,12 @@ export function openCompose(draft, state, onSent, onSaved) {
         ${icon('file', 'sm')}
         <span class="n">${esc(f.filename)}</span>
         <span class="s num">${fmtBytes(f.size)}</span>
-        <button data-rm="${i}" title="إزالة">${icon('x', 'sm')}</button>
+        <button data-rm="${i}" title="${esc(t('removeFile'))}">${icon('x', 'sm')}</button>
       </span>`).join('');
 
     const total = files.reduce((s, f) => s + (f.size || 0), 0);
     const sizeEl = $('#c-size', back);
-    sizeEl.textContent = total ? `${fmtBytes(total)} من المرفقات` : '';
+    sizeEl.textContent = total ? t('attachmentsSize', { size: fmtBytes(total) }) : '';
     sizeEl.style.color = total > MAX_TOTAL ? 'var(--err)' : 'var(--text3)';
   }
 
@@ -254,21 +336,21 @@ export function openCompose(draft, state, onSent, onSaved) {
     const subject = $('#c-subject', back).value.trim();
 
     if (!to && !cc && !bcc) {
-      toast('اكتب مستلمًا واحدًا على الأقل', 'err');
+      toast(t('needRecipient'), 'err');
       $('#c-to', back).focus();
       return;
     }
     const total = files.reduce((s, f) => s + (f.size || 0), 0);
     if (total > MAX_TOTAL) {
-      toast(`حجم المرفقات ${fmtBytes(total)} يتجاوز الحد المسموح (${fmtBytes(MAX_TOTAL)})`, 'err');
+      toast(t('attachTooBig', { size: fmtBytes(total), max: fmtBytes(MAX_TOTAL) }), 'err');
       return;
     }
-    if (!subject && !window.confirm('إرسال الرسالة بدون موضوع؟')) return;
+    if (!subject && !window.confirm(t('confirmNoSubject'))) return;
 
     sending = true;
     const btn = $('#c-send', back);
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner sm"></span><span>جارٍ الإرسال…</span>`;
+    btn.innerHTML = `<span class="spinner sm"></span><span>${esc(t('sending'))}</span>`;
 
     try {
       const res = await call(window.osoul.send, {
@@ -280,16 +362,16 @@ export function openCompose(draft, state, onSent, onSaved) {
         priority: important ? 'high' : 'normal',
       });
       close();
-      toast(res.filed ? 'أُرسلت الرسالة وحُفظت نسخة في المرسل' : 'أُرسلت الرسالة', 'ok');
+      toast(res.filed ? t('sentFiled') : t('sentOk'), 'ok');
       if (res.rejected && res.rejected.length) {
-        toast(`رُفض ${res.rejected.length} مستلم: ${res.rejected.join('، ')}`, 'err');
+        toast(t('rejected', { n: res.rejected.length, list: res.rejected.join(t('listSep')) }), 'err');
       }
       if (onSent) onSent(res);
     } catch (err) {
       toast(errText(err), 'err');
       sending = false;
       btn.disabled = false;
-      btn.innerHTML = `${icon('send', 'sm')}<span>إرسال</span>`;
+      btn.innerHTML = `${icon('send', 'sm')}<span>${esc(t('send'))}</span>`;
     }
   }
 
@@ -298,7 +380,7 @@ export function openCompose(draft, state, onSent, onSaved) {
     if (sending) return;
     const btn = $('#c-draft', back);
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner sm"></span><span>جارٍ الحفظ…</span>`;
+    btn.innerHTML = `<span class="spinner sm"></span><span>${esc(t('saving'))}</span>`;
     try {
       await call(window.osoul.saveDraft, {
         to: $('#c-to', back).value.trim(),
@@ -313,12 +395,12 @@ export function openCompose(draft, state, onSent, onSaved) {
       });
       dirty = false;
       close();
-      toast('حُفظت في المسودات', 'ok');
+      toast(t('draftSaved'), 'ok');
       if (onSaved) onSaved();
     } catch (err) {
       toast(errText(err), 'err');
       btn.disabled = false;
-      btn.innerHTML = `${icon('draft', 'sm')}<span>حفظ كمسودة</span>`;
+      btn.innerHTML = `${icon('draft', 'sm')}<span>${esc(t('saveDraft'))}</span>`;
     }
   });
 

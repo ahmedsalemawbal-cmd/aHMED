@@ -16,6 +16,7 @@ const store = require('./store');
 const { loadPolicy } = require('./config');
 const { registerIPC, teardownSession } = require('./ipc');
 const { WINDOW_BG } = require('./theme');
+const { s: T, setLang: setMainLang } = require('./strings');
 
 const RENDERER_DIR = path.join(__dirname, '..', 'renderer');
 const SCHEME = 'osoul';
@@ -46,9 +47,10 @@ function bootstrap() {
     app.setAppUserModelId('com.osoulalbinaa.mail');
 
     registerProtocol();
-    Menu.setApplicationMenu(buildMenu());
 
     const policy = loadPolicy(app.getPath('userData'));
+    setMainLang(store.getSettings().lang);
+    Menu.setApplicationMenu(buildMenu());
     const win = createWindow();
     registerIPC({ win, policy });
 
@@ -105,7 +107,7 @@ function createWindow() {
     show: false,
     backgroundColor: dark ? WINDOW_BG.dark : WINDOW_BG.light,
     autoHideMenuBar: true,
-    title: 'بريد أصول البناء',
+    title: T('windowTitle'),
     icon: path.join(__dirname, '..', '..', 'build', 'icon.png'),
     // إطار النظام القياسي: أزرار النافذة تبقى حيث يتوقعها المستخدم مهما كان
     // اتجاه الواجهة أو لغة ويندوز — شريط عنوان مخصص يتصادم مع تخطيط RTL.
@@ -172,37 +174,39 @@ function openExternal(url) {
 function buildMenu() {
   return Menu.buildFromTemplate([
     {
-      label: 'ملف',
+      label: T('menuFile'),
       submenu: [
-        { role: 'reload', label: 'تحديث' },
+        { role: 'reload', label: T('menuReload') },
         { type: 'separator' },
-        { role: 'quit', label: 'خروج' },
+        { role: 'quit', label: T('menuQuit') },
       ],
     },
     {
-      label: 'تحرير',
+      label: T('menuEdit'),
       submenu: [
-        { role: 'undo', label: 'تراجع' },
-        { role: 'redo', label: 'إعادة' },
+        { role: 'undo', label: T('menuUndo') },
+        { role: 'redo', label: T('menuRedo') },
         { type: 'separator' },
-        { role: 'cut', label: 'قص' },
-        { role: 'copy', label: 'نسخ' },
-        { role: 'paste', label: 'لصق' },
-        { role: 'selectAll', label: 'تحديد الكل' },
+        { role: 'cut', label: T('menuCut') },
+        { role: 'copy', label: T('menuCopy') },
+        { role: 'paste', label: T('menuPaste') },
+        { role: 'selectAll', label: T('menuSelectAll') },
       ],
     },
     {
-      label: 'عرض',
+      label: T('menuView'),
       submenu: [
-        { role: 'resetZoom', label: 'حجم افتراضي' },
-        { role: 'zoomIn', label: 'تكبير' },
-        { role: 'zoomOut', label: 'تصغير' },
+        { role: 'resetZoom', label: T('menuResetZoom') },
+        { role: 'zoomIn', label: T('menuZoomIn') },
+        { role: 'zoomOut', label: T('menuZoomOut') },
         { type: 'separator' },
-        { role: 'togglefullscreen', label: 'ملء الشاشة' },
+        { role: 'togglefullscreen', label: T('menuFullScreen') },
       ],
     },
   ]);
 }
+
+module.exports = { buildMenu };
 
 function debounce(fn, ms) {
   let t = null;

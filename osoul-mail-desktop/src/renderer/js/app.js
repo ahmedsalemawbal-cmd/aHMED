@@ -8,19 +8,21 @@
 import { $, toast } from './util.js';
 import { renderLogin } from './login.js';
 import { startMail, S } from './mail.js';
+import { t, setLang } from './i18n.js';
 
 let boot = null;
 
 async function main() {
   const res = await window.osoul.boot();
   if (!res.ok) {
-    showFatal('تعذّر تشغيل التطبيق. أعد فتحه من جديد.');
+    showFatal(t('appBootFailed'));
     return;
   }
   boot = res.data;
 
   // السمة تُطبَّق قبل أي رسم حتى لا تومض الشاشة.
   document.documentElement.dataset.theme = boot.settings.theme === 'light' ? 'light' : 'dark';
+  setLang(boot.settings.lang);
 
   if (boot.saved) {
     const resumed = await window.osoul.resume();
@@ -63,7 +65,7 @@ function showFatal(text) {
 // أخطاء غير متوقعة يجب أن تظهر للموظف لا أن تختفي في السجلات.
 window.addEventListener('unhandledrejection', (e) => {
   console.error('unhandled', e.reason);
-  toast('حدث خطأ غير متوقع.', 'err');
+  toast(t('unexpected'), 'err');
 });
 
 main();

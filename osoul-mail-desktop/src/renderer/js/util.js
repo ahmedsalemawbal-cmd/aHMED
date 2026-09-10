@@ -3,6 +3,7 @@
  */
 
 import { icon } from './icons.js';
+import { t, pick, locale } from './i18n.js';
 
 /* ------------------------------------------------------------- الاختصارات */
 
@@ -32,17 +33,30 @@ export function esc(s) {
 
 export function fmtBytes(n) {
   const v = Number(n) || 0;
-  if (v < 1024) return `${v} بايت`;
-  if (v < 1024 * 1024) return `${(v / 1024).toFixed(0)} ك.ب`;
-  if (v < 1024 * 1024 * 1024) return `${(v / 1048576).toFixed(1)} م.ب`;
-  return `${(v / 1073741824).toFixed(2)} ج.ب`;
+  if (v < 1024) return `${v} ${t('unitB')}`;
+  if (v < 1024 * 1024) return `${(v / 1024).toFixed(0)} ${t('unitKB')}`;
+  if (v < 1024 * 1024 * 1024) return `${(v / 1048576).toFixed(1)} ${t('unitMB')}`;
+  return `${(v / 1073741824).toFixed(2)} ${t('unitGB')}`;
 }
 
-const TIME_FMT = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit', hour12: true });
-const DAY_FMT = new Intl.DateTimeFormat('ar-SA-u-nu-latn-ca-gregory', { day: 'numeric', month: 'short' });
-const FULL_FMT = new Intl.DateTimeFormat('ar-SA-u-nu-latn-ca-gregory', {
-  weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
-});
+/* المنسّقات تُبنى مرة لكل لغة: إنشاء Intl.DateTimeFormat لكل صف في القائمة
+   مكلف، وتبديل اللغة نادر. */
+const FMT_CACHE = new Map();
+
+function fmt(kind) {
+  const key = `${locale()}:${kind}`;
+  let f = FMT_CACHE.get(key);
+  if (f) return f;
+  const opts = {
+    time: { hour: '2-digit', minute: '2-digit', hour12: true },
+    day: { day: 'numeric', month: 'short' },
+    full: { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true },
+  }[kind];
+  f = new Intl.DateTimeFormat(locale(), opts);
+  FMT_CACHE.set(key, f);
+  return f;
+}
 
 /** وقت مختصر لقائمة الرسائل: اليوم = الساعة، هذه السنة = يوم/شهر، غير ذلك = السنة. */
 export function fmtWhen(ts) {
@@ -50,29 +64,29 @@ export function fmtWhen(ts) {
   const d = new Date(ts);
   const now = new Date();
   const sameDay = d.toDateString() === now.toDateString();
-  if (sameDay) return TIME_FMT.format(d);
+  if (sameDay) return fmt('time').format(d);
   const yesterday = new Date(now.getTime() - 86400000);
-  if (d.toDateString() === yesterday.toDateString()) return 'أمس';
-  if (d.getFullYear() === now.getFullYear()) return DAY_FMT.format(d);
-  return `${DAY_FMT.format(d)} ${d.getFullYear()}`;
+  if (d.toDateString() === yesterday.toDateString()) return t('yesterday');
+  if (d.getFullYear() === now.getFullYear()) return fmt('day').format(d);
+  return `${fmt('day').format(d)} ${d.getFullYear()}`;
 }
 
 export function fmtFull(ts) {
-  return ts ? FULL_FMT.format(new Date(ts)) : '';
+  return ts ? fmt('full').format(new Date(ts)) : '';
 }
 
 /** عنوان مجموعة زمنية في القائمة. */
 export function groupOf(ts) {
-  if (!ts) return 'أقدم';
+  if (!ts) return 'older';
   const d = new Date(ts);
   const now = new Date();
-  if (d.toDateString() === now.toDateString()) return 'اليوم';
+  if (d.toDateString() === now.toDateString()) return 'today';
   const yesterday = new Date(now.getTime() - 86400000);
-  if (d.toDateString() === yesterday.toDateString()) return 'أمس';
+  if (d.toDateString() === yesterday.toDateString()) return 'yesterday';
   const week = new Date(now.getTime() - 7 * 86400000);
-  if (d > week) return 'هذا الأسبوع';
-  if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) return 'هذا الشهر';
-  return 'أقدم';
+  if (d > week) return 'thisWeek';
+  if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) return 'thisMonth';
+  return 'older';
 }
 
 /* ------------------------------------------------------------- الصورة الرمزية */
@@ -87,7 +101,7 @@ export function avColor(seed) {
 }
 
 export function initials(name, email) {
-  const src = String(name || '').trim() || String(email || '').split('@')[0] || '؟';
+  const src = String(name || '').trim() || String(email || '').split('@')[0] || '?';
   const parts = src.split(/[\s._-]+/).filter(Boolean);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return src.slice(0, 2).toUpperCase();
@@ -130,12 +144,12 @@ export async function call(fn, ...args) {
   const res = await fn(...args);
   if (res && res.ok) return res.data;
   const err = new Error((res && res.error && res.error.code) || 'UNKNOWN');
-  err.info = (res && res.error) || { ar: 'حدث خطأ غير متوقع.' };
+  err.info = (res && res.error) || null;
   throw err;
 }
 
 export function errText(err) {
-  return (err && err.info && err.info.ar) || 'حدث خطأ غير متوقع.';
+  return pick(err && err.info);
 }
 
 /* ------------------------------------------------------------- قائمة منسدلة */
@@ -240,8 +254,8 @@ export function ask(title, opts) {
           <input type="text" id="ask-in" dir="${o.dir || 'auto'}" spellcheck="false"
                  value="${esc(o.value || '')}" placeholder="${esc(o.placeholder || '')}">
           <div class="row">
-            <button class="btn primary" id="ask-ok">${esc(o.okLabel || 'موافق')}</button>
-            <button class="btn" id="ask-no">إلغاء</button>
+            <button class="btn primary" id="ask-ok">${esc(o.okLabel || t('ok'))}</button>
+            <button class="btn" id="ask-no">${esc(t('cancel'))}</button>
           </div>
         </div>
       </div>`;

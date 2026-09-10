@@ -1,7 +1,7 @@
 {
   "name": "osoul-mail-desktop",
   "productName": "Osoul Mail",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "بريد أصول البناء — تطبيق البريد الإلكتروني للموظفين على ويندوز",
   "author": {
     "name": "Osoul Albinaa Industrial Co.",
@@ -20,11 +20,12 @@
     "test:smtp": "node test/smtp-test.js",
     "test:vault": "electron test/vault-test.js",
     "test:e2e": "electron test/e2e.js",
-    "test": "npm run test:sign && npm run test:imap && npm run test:smtp && npm run test:vault && npm run test:e2e",
+    "test": "npm run test:sign && npm run test:i18n && npm run test:imap && npm run test:smtp && npm run test:vault && npm run test:e2e",
     "dist:mac": "electron-builder --mac",
     "dist:all": "electron-builder --win --x64 --mac",
     "dist:mac:zip": "electron-builder --mac zip --x64 --arm64",
-    "test:sign": "node test/sign-order-test.js"
+    "test:sign": "node test/sign-order-test.js",
+    "test:i18n": "node test/i18n-test.js"
   },
   "dependencies": {
     "imapflow": "1.7.8",

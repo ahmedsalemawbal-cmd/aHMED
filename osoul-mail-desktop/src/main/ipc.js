@@ -11,17 +11,23 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { ipcMain, dialog, shell, app, Notification, nativeImage, nativeTheme } = require('electron');
+const { ipcMain, dialog, shell, app, Notification, nativeImage, nativeTheme, Menu } = require('electron');
 
 const store = require('./store');
 const { login } = require('./session');
 const { sanitizeHTML, textToHTML, htmlToSnippet } = require('./sanitize');
 const { WINDOW_BG } = require('./theme');
+const { s: T, setLang: setMainLang } = require('./strings');
+const ai = require('./ai');
+const labelDefs = require('./labels');
+const contacts = require('./contacts');
 
 /** الجلسة الحالية (موظف واحد لكل نافذة). */
 let current = null;
 let mainWindow = null;
 let policy = null;
+/** دفتر العناوين يُبنى مرة لكل جلسة: مسح الصندوق مكلف ولا يتغيّر كل دقيقة. */
+let contactsCache = null;
 
 /** رد موحد: لا نرمي استثناءات عبر IPC، بل نعيد { ok, error }. */
 function wrap(handler) {
@@ -69,8 +75,8 @@ function attachSessionEvents(session) {
       const top = page.messages[0];
       if (!top || top.seen) return;
       const n = new Notification({
-        title: top.from.name || top.from.email || 'رسالة جديدة',
-        body: top.subject || '(بدون موضوع)',
+        title: top.from.name || top.from.email || T('newMessageFallback'),
+        body: top.subject || T('noSubject'),
         // الصوت من جرس التطبيق (خمس ثوانٍ)، فلا نضيف نغمة النظام فوقه.
         silent: true,
       });
@@ -95,8 +101,15 @@ function registerIPC(ctx) {
   /* ---- الإقلاع ---- */
   ipcMain.handle('app:boot', wrap(async () => {
     const saved = store.loadAccount();
+    const settings = store.getSettings();
+    setMainLang(settings.lang);
+    const aiKey = store.loadAiKey(policy.aiKey);
     return {
-      settings: store.getSettings(),
+      settings,
+      labels: labelDefs.LABELS,
+      aiReady: !!aiKey,
+      aiKeyMask: policy.aiKey ? '' : ai.mask(aiKey),
+      aiManaged: !!policy.aiKey,
       canRemember: store.canEncrypt(),
       version: app.getVersion(),
       policy: {
@@ -108,6 +121,7 @@ function registerIPC(ctx) {
         imapPort: policy.imapPort,
         smtpHost: policy.smtpHost,
         smtpPort: policy.smtpPort,
+        passwordChangeUrl: policy.passwordChangeUrl || '',
       },
       saved: saved ? { email: saved.email, fromName: saved.fromName || '' } : null,
     };
@@ -116,6 +130,7 @@ function registerIPC(ctx) {
   /* ---- بوابة الدخول ---- */
   ipcMain.handle('auth:login', wrap(async (p) => {
     if (current) { await current.close().catch(() => {}); current = null; }
+    contactsCache = null;
 
     const session = await login(p, policy);
     current = session;
@@ -149,6 +164,84 @@ function registerIPC(ctx) {
     current = session;
     attachSessionEvents(session);
     return { resumed: true, ...(await buildBootPayload(session)) };
+  }));
+
+  /**
+   * تحديث كلمة المرور.
+   *
+   * بروتوكول IMAP لا يملك أمرًا لتغيير كلمة المرور؛ التغيير الحقيقي يتم عند
+   * مزوّد البريد. ما يفعله هذا المعالج: يتأكد أن الكلمة الجديدة تعمل فعلًا
+   * على الخادم، ثم يبني جلسة جديدة بها ويحدّث الخزنة المشفّرة — فيواصل
+   * الموظف عمله بلا تسجيل خروج وبلا إعادة إدخال بيانات.
+   */
+  ipcMain.handle('auth:changePassword', wrap(async (p) => {
+    const session = requireSession();
+    const now = String(p.current || '');
+    const next = String(p.next || '');
+
+    const bad = (code, ar, en) => {
+      const err = new Error(code);
+      err.osoul = { code, ar, en };
+      return err;
+    };
+
+    if (now !== session.account.password) {
+      throw bad('PW_WRONG', 'كلمة المرور الحالية غير صحيحة.', 'The current password is not correct.');
+    }
+    if (next === now) {
+      throw bad('PW_SAME',
+        'كلمة المرور الجديدة مطابقة للحالية.',
+        'The new password is the same as the current one.');
+    }
+    if (next.length < 8) {
+      throw bad('PW_SHORT',
+        'كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل.',
+        'The new password must be at least 8 characters.');
+    }
+
+    const acc = session.account;
+    let fresh;
+    try {
+      fresh = await login({
+        email: acc.email,
+        password: next,
+        imapHost: acc.imapHost,
+        imapPort: acc.imapPort,
+        smtpHost: acc.smtpHost,
+        smtpPort: acc.smtpPort,
+        fromName: acc.fromName,
+      }, policy);
+    } catch (err) {
+      // الخادم رفض الكلمة الجديدة: لم تُغيَّر هناك بعد.
+      if (err && err.osoul && err.osoul.code === 'AUTH') {
+        throw bad('PW_NOT_ON_SERVER',
+          'خادم البريد لا يعرف كلمة المرور الجديدة. غيّرها أولًا عند مزوّد البريد ثم حدّثها هنا.',
+          'The mail server does not know this new password yet. Change it at your mail provider first, then update it here.');
+      }
+      throw err;
+    }
+
+    // بيانات محفوظة؟ نُبقيها محفوظة بالكلمة الجديدة.
+    const remembered = !!store.loadAccount();
+
+    await current.close().catch(() => {});
+    current = fresh;
+    contactsCache = null;
+    attachSessionEvents(fresh);
+
+    if (remembered) {
+      store.saveAccount({
+        email: fresh.account.email,
+        password: fresh.account.password,
+        imapHost: fresh.account.imapHost,
+        imapPort: fresh.account.imapPort,
+        smtpHost: fresh.account.smtpHost,
+        smtpPort: fresh.account.smtpPort,
+        fromName: fresh.account.fromName,
+      });
+    }
+
+    return { ok: true, remembered };
   }));
 
   ipcMain.handle('auth:logout', wrap(async (p) => {
@@ -272,7 +365,7 @@ function registerIPC(ctx) {
 
   ipcMain.handle('compose:pickFiles', wrap(async () => {
     const res = await dialog.showOpenDialog(mainWindow, {
-      title: 'إرفاق ملفات',
+      title: T('attachDialog'),
       properties: ['openFile', 'multiSelections'],
     });
     if (res.canceled) return { files: [] };
@@ -288,7 +381,7 @@ function registerIPC(ctx) {
   ipcMain.handle('mail:attachmentSave', wrap(async (p) => {
     const s = requireSession();
     const res = await dialog.showSaveDialog(mainWindow, {
-      title: 'حفظ المرفق',
+      title: T('saveAttachment'),
       defaultPath: path.join(app.getPath('downloads'), safeName(p.filename)),
     });
     if (res.canceled || !res.filePath) return { saved: false };
@@ -307,12 +400,71 @@ function registerIPC(ctx) {
     return { opened: !err, error: err || '' };
   }));
 
+  /* ---- التصنيفات ---- */
+  ipcMain.handle('mail:setLabel', wrap(async (p) => {
+    const s = requireSession();
+    return s.mail.setLabel(p.folder, p.uids, p.slug || '');
+  }));
+
+  ipcMain.handle('mail:labelCounts', wrap(async (p) => {
+    const s = requireSession();
+    return { counts: await s.mail.labelCounts(p.folder) };
+  }));
+
+  ipcMain.handle('mail:labelsSupported', wrap(async (p) => {
+    const s = requireSession();
+    return { supported: await s.mail.supportsKeywords(p.folder) };
+  }));
+
+  /* ---- جهات الاتصال ---- */
+  ipcMain.handle('mail:contacts', wrap(async (p) => {
+    const s = requireSession();
+    if (!contactsCache || p.force) {
+      contactsCache = await contacts.build(s.mail, s.account.email);
+    }
+    return { contacts: contactsCache };
+  }));
+
+  /* ---- مساعد الكتابة ---- */
+  ipcMain.handle('ai:generate', wrap(async (p) => {
+    const key = store.loadAiKey(policy.aiKey);
+    return ai.generate(
+      { key, model: policy.aiModel },
+      { mode: p.mode, text: p.text, subject: p.subject, lang: store.getSettings().lang },
+    );
+  }));
+
+  ipcMain.handle('ai:setKey', wrap(async (p) => {
+    if (policy.aiKey) {
+      // المفتاح مضبوط مركزيًا في policy.json — لا يعبث به الموظف.
+      return { ready: true, mask: '', managed: true };
+    }
+    const okSave = store.saveAiKey(p.key);
+    if (!okSave && p.key) {
+      const err = new Error('NO_ENCRYPTION');
+      err.osoul = {
+        code: 'NO_ENCRYPTION',
+        ar: 'تعذّر حفظ المفتاح: التشفير غير متاح على هذا الجهاز.',
+        en: 'Could not store the key: encryption is unavailable on this computer.',
+      };
+      throw err;
+    }
+    const key = store.loadAiKey('');
+    return { ready: !!key, mask: ai.mask(key), managed: false };
+  }));
+
   /* ---- الإعدادات والواجهة ---- */
   ipcMain.handle('settings:get', wrap(async () => store.getSettings()));
 
   ipcMain.handle('settings:save', wrap(async (p) => {
     const next = store.saveSettings(p);
     if (p.theme) applyTheme(p.theme);
+    if (p.lang) {
+      setMainLang(p.lang);
+      // القائمة تُبنى مرة واحدة عند الإقلاع، فنعيد بناءها بلغتها الجديدة.
+      const { buildMenu } = require('./main');
+      Menu.setApplicationMenu(buildMenu());
+    }
     return next;
   }));
 
@@ -333,7 +485,7 @@ function registerIPC(ctx) {
       return { ok: true };
     }
     const img = nativeImage.createFromDataURL(p.dataUrl);
-    mainWindow.setOverlayIcon(img, `${p.count} رسالة غير مقروءة`);
+    mainWindow.setOverlayIcon(img, T('unreadBadge', { n: p.count }));
     app.setBadgeCount(Number(p.count) || 0);
     return { ok: true };
   }));
@@ -375,6 +527,7 @@ function safeName(name) {
 }
 
 async function teardownSession() {
+  contactsCache = null;
   if (current) {
     await current.close().catch(() => {});
     current = null;

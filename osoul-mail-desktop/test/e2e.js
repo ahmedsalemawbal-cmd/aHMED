@@ -259,7 +259,202 @@ function check(name, cond, detail) {
     })()`);
     check('theme.toggled', theme.theme === 'light' && theme.bg === 'rgb(238, 241, 243)', theme);
 
-    /* 9) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
+    /* 9) التصنيفات */
+    const labels = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 500));
+      const rows = Array.from(document.querySelectorAll('#side [data-label]'));
+      const counts = await window.osoul.labelCounts('INBOX');
+      const sup = await window.osoul.labelsSupported('INBOX');
+      const set = await window.osoul.setLabel({ folder: 'INBOX', uids: [101], slug: 'projects' });
+      if (rows[0]) rows[0].click();
+      await new Promise(r => setTimeout(r, 500));
+      return {
+        slugs: rows.map(b => b.dataset.label),
+        names: rows.map(b => (b.querySelector('.name') || {}).textContent),
+        dots: rows.filter(b => b.querySelector('.dot')).length,
+        counts: sup.ok && counts.ok ? Object.keys(counts.data.counts) : [],
+        supported: sup.ok && sup.data.supported,
+        setOk: set.ok,
+        filter: mail.S.filter,
+        activeRow: !!document.querySelector('#side [data-label].on'),
+      };
+    })()`);
+    check('labels.sidebarRows', labels.slugs.join() === 'projects,procurement,quality,hr,finance', labels.slugs);
+    check('labels.names', labels.names[0] === 'مشاريع', labels.names);
+    check('labels.colourDots', labels.dots === 5, labels.dots);
+    check('labels.supported', labels.supported === true, labels.supported);
+    check('labels.counts', labels.counts.join() === 'projects,procurement,quality,hr,finance', labels.counts);
+    check('labels.assign', labels.setOk === true, labels);
+    check('labels.filters', labels.filter === 'label:projects', labels.filter);
+    check('labels.rowHighlighted', labels.activeRow === true, labels);
+
+    /* 10) جهات الاتصال */
+    const contacts = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 400));
+      document.getElementById('s-contacts').click();
+      await new Promise(r => setTimeout(r, 1800));
+      const rows = Array.from(document.querySelectorAll('#list .row.contact'));
+      const emails = rows.map(r => r.dataset.contact);
+      // بحث داخل الدفتر
+      const find = document.getElementById('k-find');
+      find.value = 'alfahd';
+      find.dispatchEvent(new Event('input'));
+      await new Promise(r => setTimeout(r, 120));
+      const filtered = document.querySelectorAll('#list .row.contact').length;
+      find.value = '';
+      find.dispatchEvent(new Event('input'));
+      await new Promise(r => setTimeout(r, 120));
+      // فتح بطاقة أول جهة
+      document.querySelector('#list .row.contact').click();
+      await new Promise(r => setTimeout(r, 250));
+      return {
+        screen: mail.S.screen,
+        count: rows.length,
+        emails,
+        noSelf: !emails.includes('ahmed@osoulalbinaa.com'),
+        noRobots: !emails.includes('noreply@system.local'),
+        filtered,
+        card: !!document.querySelector('.contact-card'),
+        cardEmail: (document.querySelector('.contact-card .e') || {}).textContent,
+        writeBtn: !!document.getElementById('k-write'),
+      };
+    })()`);
+    check('contacts.screen', contacts.screen === 'contacts', contacts.screen);
+    check('contacts.built', contacts.count >= 3, contacts);
+    check('contacts.excludesSelf', contacts.noSelf, contacts.emails);
+    check('contacts.excludesNoReply', contacts.noRobots, contacts.emails);
+    check('contacts.search', contacts.filtered === 1, contacts.filtered);
+    check('contacts.card', contacts.card && /@/.test(contacts.cardEmail || ''), contacts);
+    check('contacts.writeButton', contacts.writeBtn, contacts);
+
+    const cwrite = await run(`(async () => {
+      document.getElementById('k-write').click();
+      await new Promise(r => setTimeout(r, 350));
+      const to = (document.getElementById('c-to') || {}).value;
+      const btn = document.getElementById('c-close');
+      if (btn) btn.click();
+      await new Promise(r => setTimeout(r, 200));
+      return { to, closed: !document.querySelector('.compose-back') };
+    })()`);
+    check('contacts.composeTo', /@/.test(cwrite.to || ''), cwrite);
+
+    /* 11) مساعد الكتابة */
+    const aiUI = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 400));
+      const compose = await import('./js/compose.js');
+      compose.openCompose({ mode: 'new' }, mail.S, null, null);
+      await new Promise(r => setTimeout(r, 250));
+      const btn = document.getElementById('c-ai');
+      btn.click();
+      await new Promise(r => setTimeout(r, 150));
+      const items = Array.from(document.querySelectorAll('.menu button')).map(b => b.textContent.trim());
+      // بلا فكرة مكتوبة: يجب أن يعتذر لا أن يتصل بالشبكة
+      document.getElementById('toasts').innerHTML = '';
+      document.getElementById('c-body').innerHTML = '';
+      btn.click();
+      await new Promise(r => setTimeout(r, 120));
+      document.querySelector('.menu button').click();
+      await new Promise(r => setTimeout(r, 250));
+      const toasts = Array.from(document.querySelectorAll('.toast')).map(t => t.textContent);
+      const noKey = await window.osoul.aiGenerate({ mode: 'draft', text: 'اجتماع غدًا' });
+      const close = document.getElementById('c-close');
+      if (close) close.click();
+      await new Promise(r => setTimeout(r, 200));
+      return { items, toasts, noKeyCode: noKey.ok ? '' : noKey.error.code };
+    })()`);
+    check('ai.button', aiUI.items.length >= 2, aiUI.items);
+    check('ai.menuItems', aiUI.items.some(i => /اكتب لي/.test(i)) && aiUI.items.some(i => /حسّن/.test(i)), aiUI.items);
+    check('ai.needsIdeaFirst', aiUI.toasts.some(t => /فكرة أو طلب/.test(t)), aiUI.toasts);
+    check('ai.noKeyReported', aiUI.noKeyCode === 'AI_NO_KEY', aiUI.noKeyCode);
+
+    /* 12) تغيير كلمة المرور */
+    const pw = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const settings = await import('./js/settings.js');
+      settings.openSettings(mail.S, { onChange: mail.applySettings, onLogout: () => {} });
+      await new Promise(r => setTimeout(r, 250));
+      const fields = ['st-pw-now', 'st-pw-new', 'st-pw-new2'].map(id => !!document.getElementById(id));
+      const types = ['st-pw-now', 'st-pw-new'].map(id => document.getElementById(id).type);
+
+      // الواجهة تمسك عدم التطابق قبل أي نداء للخادم
+      document.getElementById('toasts').innerHTML = '';
+      document.getElementById('st-pw-now').value = 'secret';
+      document.getElementById('st-pw-new').value = 'abc12345';
+      document.getElementById('st-pw-new2').value = 'zzz99999';
+      document.getElementById('st-pw-save').click();
+      await new Promise(r => setTimeout(r, 300));
+      const mismatch = Array.from(document.querySelectorAll('.toast')).map(t => t.textContent);
+
+      const wrong = await window.osoul.changePassword({ current: 'nope', next: 'abc12345' });
+      const short = await window.osoul.changePassword({ current: 'secret', next: 'abc' });
+      const same = await window.osoul.changePassword({ current: 'secret', next: 'secret' });
+      // 'wrongpass' هي الكلمة الوحيدة التي يرفضها الخادم الوهمي
+      const notOnServer = await window.osoul.changePassword({ current: 'secret', next: 'wrongpass' });
+      const done = await window.osoul.changePassword({ current: 'secret', next: 'newsecret123' });
+      // بعد التغيير لم تعد القديمة مقبولة
+      const stale = await window.osoul.changePassword({ current: 'secret', next: 'another12345' });
+      // والجلسة ما زالت تعمل بلا تسجيل خروج
+      const stillWorks = await window.osoul.folders(true);
+
+      const close = document.getElementById('st-close');
+      if (close) close.click();
+      return {
+        fields, types, mismatch,
+        wrong: wrong.ok ? '' : wrong.error.code,
+        short: short.ok ? '' : short.error.code,
+        same: same.ok ? '' : same.error.code,
+        notOnServer: notOnServer.ok ? '' : notOnServer.error.code,
+        done: done.ok,
+        stale: stale.ok ? '' : stale.error.code,
+        folders: stillWorks.ok ? stillWorks.data.folders.length : 0,
+      };
+    })()`);
+    check('password.formPresent', pw.fields.every(Boolean), pw.fields);
+    check('password.masked', pw.types.join() === 'password,password', pw.types);
+    check('password.mismatchCaught', pw.mismatch.some(t => /غير متطابقتين/.test(t)), pw.mismatch);
+    check('password.wrongCurrent', pw.wrong === 'PW_WRONG', pw.wrong);
+    check('password.tooShort', pw.short === 'PW_SHORT', pw.short);
+    check('password.rejectsSame', pw.same === 'PW_SAME', pw.same);
+    check('password.notChangedOnServer', pw.notOnServer === 'PW_NOT_ON_SERVER', pw.notOnServer);
+    check('password.changed', pw.done === true, pw);
+    check('password.oldRejectedAfter', pw.stale === 'PW_WRONG', pw.stale);
+    check('password.sessionSurvives', pw.folders === 6, pw.folders);
+
+    /* 13) تبديل اللغة — عربي ⇄ إنجليزي */
+    const lang = await run(`(async () => {
+      document.getElementById('t-lang').click();
+      await new Promise(r => setTimeout(r, 700));
+      const en = {
+        lang: document.documentElement.lang,
+        dir: document.documentElement.dir,
+        inbox: (document.querySelector('#side [data-folder] .name') || {}).textContent,
+        compose: (document.querySelector('#s-compose span') || {}).textContent,
+        label: (document.querySelector('#side [data-label] .name') || {}).textContent,
+        arabicLeft: /[؀-ۿ]/.test(document.getElementById('side').textContent),
+      };
+      document.getElementById('t-lang').click();
+      await new Promise(r => setTimeout(r, 700));
+      const ar = {
+        lang: document.documentElement.lang,
+        dir: document.documentElement.dir,
+        inbox: (document.querySelector('#side [data-folder] .name') || {}).textContent,
+      };
+      return { en, ar };
+    })()`);
+    check('lang.switchesToEnglish', lang.en.lang === 'en' && lang.en.dir === 'ltr', lang.en);
+    check('lang.foldersTranslated', lang.en.inbox === 'Inbox', lang.en.inbox);
+    check('lang.buttonsTranslated', /Compose|New/i.test(lang.en.compose || ''), lang.en.compose);
+    check('lang.labelsTranslated', lang.en.label === 'Projects', lang.en.label);
+    check('lang.noArabicLeftBehind', lang.en.arabicLeft === false, lang.en);
+    check('lang.switchesBack', lang.ar.lang === 'ar' && lang.ar.dir === 'rtl' && lang.ar.inbox === 'البريد الوارد', lang.ar);
+
+    /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح
     // سطح المكتب في لينكس. بلا حلقة مفاتيح لا يحفظ التطبيق كلمة المرور
     // إطلاقًا — وهو السلوك الصحيح — فنتخطى هذه الفحوص بدل تسجيل فشل كاذب.
@@ -280,7 +475,7 @@ function check(name, cond, detail) {
       check('credentials.notStoredWithoutEncryption', !fs.existsSync(path.join(userData, 'credentials.dat')));
     }
 
-    /* 10) الخروج يمسح البيانات */
+    /* 15) الخروج يمسح البيانات */
     await run(`window.osoul.logout({ forget: true })`);
     await new Promise((r) => setTimeout(r, 400));
     check('logout.clearsCredentials', !fs.existsSync(path.join(userData, 'credentials.dat')));

@@ -36,6 +36,13 @@ const POLICY_DEFAULTS = Object.freeze({
   refreshSeconds: 120,
   // عدد الرسائل في الصفحة الواحدة.
   pageSize: 50,
+  // صفحة تغيير كلمة المرور عند مزوّد البريد. IMAP لا يملك أمرًا لتغيير
+  // كلمة المرور، فالتغيير الحقيقي يتم هناك ثم يُحدَّث في التطبيق.
+  passwordChangeUrl: 'https://mail.hostinger.com/',
+  // مفتاح OpenAI على مستوى الشركة. إن ضُبط هنا استُخدم للجميع ولم يُطلب
+  // من الموظف إدخال مفتاح، ولم يظهر له في الإعدادات.
+  aiKey: '',
+  aiModel: 'gpt-4o-mini',
   ...SERVER_DEFAULTS,
 });
 

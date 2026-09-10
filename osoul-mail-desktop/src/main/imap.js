@@ -14,6 +14,7 @@
 
 const { EventEmitter } = require('events');
 const { ImapFlow } = require('imapflow');
+const labels = require('./labels');
 
 /** ترتيب المجلدات المميزة في الشريط الجانبي. */
 const SPECIAL_ORDER = ['inbox', 'starred', 'drafts', 'sent', 'archive', 'junk', 'trash'];
@@ -253,6 +254,7 @@ class MailSession extends EventEmitter {
         if (filter === 'unread') query.seen = false;
         if (filter === 'starred') query.flagged = true;
         if (filter === 'attachments') query.header = { 'content-type': 'multipart/mixed' };
+        if (filter.startsWith('label:')) query.keyword = labels.keyword(filter.slice(6));
         if (search) {
           query.or = [
             { from: search },
@@ -437,6 +439,53 @@ class MailSession extends EventEmitter {
     return this.move(folder, list, trash);
   }
 
+  /**
+   * وضع تصنيف على رسائل (أو إزالته بتمرير slug فارغ).
+   * الرسالة تحمل تصنيفًا واحدًا كما في نسخة الويب، فنزيل الباقي أولًا.
+   */
+  async setLabel(folder, uids, slug) {
+    const list = (Array.isArray(uids) ? uids : [uids]).filter(Boolean);
+    if (!list.length) return { ok: true };
+    const range = list.join(',');
+    const target = slug ? labels.keyword(slug) : '';
+    const others = labels.allKeywords().filter((k) => k !== target);
+
+    return this._inFolder(folder, async (client) => {
+      if (others.length) {
+        // خادم لا يدعم الكلمات المفتاحية يرفض العملية — لا نُفشل الطلب كله.
+        await client.messageFlagsRemove(range, others, { uid: true }).catch(() => {});
+      }
+      if (target) await client.messageFlagsAdd(range, [target], { uid: true });
+      return { ok: true, label: slug || '' };
+    });
+  }
+
+  /** عدد الرسائل في كل تصنيف داخل مجلد. */
+  async labelCounts(folder) {
+    return this._inFolder(folder || 'INBOX', async (client) => {
+      const counts = {};
+      for (const def of labels.LABELS) {
+        try {
+          const uids = await client.search({ keyword: labels.keyword(def.slug) }, { uid: true });
+          counts[def.slug] = (uids || []).length;
+        } catch (_) {
+          counts[def.slug] = 0; // الخادم لا يدعم البحث بالكلمات المفتاحية
+        }
+      }
+      return counts;
+    });
+  }
+
+  /** هل يقبل هذا المجلد كلمات مفتاحية مخصصة؟ (\* في PERMANENTFLAGS) */
+  async supportsKeywords(folder) {
+    return this._inFolder(folder || 'INBOX', async (_client, mailbox) => {
+      const perm = mailbox && mailbox.permanentFlags;
+      if (!perm) return false;
+      const list = perm instanceof Set ? [...perm] : Array.isArray(perm) ? perm : [];
+      return list.some((f) => String(f) === '\\*');
+    });
+  }
+
   /** إضافة رسالة إلى مجلد (نسخة المرسل / حفظ مسودة). */
   async append(path, raw, flags) {
     return this._run((client) => client.append(path, raw, flags || ['\\Seen'], new Date()));
@@ -478,6 +527,7 @@ function shapeHeader(msg) {
     date: date ? new Date(date).toISOString() : '',
     ts: date ? new Date(date).getTime() : 0,
     size: Number(msg.size) || 0,
+    label: labels.fromFlags(flags),
     hasAttachments: structureHasAttachment(msg.bodyStructure),
   };
 }

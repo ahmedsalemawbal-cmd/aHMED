@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('osoul', {
   boot: () => invoke('app:boot'),
   login: (payload) => invoke('auth:login', payload),
   resume: () => invoke('auth:resume'),
+  changePassword: (payload) => invoke('auth:changePassword', payload),
   logout: (payload) => invoke('auth:logout', payload || {}),
 
   /* صندوق البريد */
@@ -31,6 +32,16 @@ contextBridge.exposeInMainWorld('osoul', {
   unseen: (folder) => invoke('mail:unseen', { folder }),
   quota: () => invoke('mail:quota'),
   createFolder: (name) => invoke('mail:folderCreate', { name }),
+
+  /* التصنيفات وجهات الاتصال */
+  setLabel: (payload) => invoke('mail:setLabel', payload),
+  labelCounts: (folder) => invoke('mail:labelCounts', { folder }),
+  labelsSupported: (folder) => invoke('mail:labelsSupported', { folder }),
+  contacts: (force) => invoke('mail:contacts', { force: !!force }),
+
+  /* مساعد الكتابة */
+  aiGenerate: (payload) => invoke('ai:generate', payload),
+  setAiKey: (payload) => invoke('ai:setKey', payload),
 
   /* الإرسال والمرفقات */
   send: (payload) => invoke('mail:send', payload),
