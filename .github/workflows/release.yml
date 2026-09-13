@@ -101,9 +101,21 @@ jobs:
         run: |
           # الوسم من رقم نسخة التطبيق، فيبقى رابط التنزيل مقروءًا ومتوقعًا.
           TAG="v$(node -p "require('./osoul-mail-desktop/package.json').version")"
+          REPO="${{ github.repository }}"
+
+          # عطل في واجهة GitHub قد يترك إصدارًا نصف مُنشأ: مسودة بلا وسم،
+          # ملفاتها مرفوعة لكن روابطها لا تعمل ولا تظهر لأحد. ننظّفها أولًا
+          # وإلا تراكمت مسودات ميتة وبقي الرابط الذي ينتظره الموظفون معطّلًا.
+          gh api "repos/$REPO/releases" --paginate \
+            --jq '.[] | select(.draft and (.tag_name | startswith("untagged"))) | .id' \
+            | while read -r id; do
+                [ -n "$id" ] && gh api -X DELETE "repos/$REPO/releases/$id" || true
+              done
+
           # إعادة تشغيل البناء لنفس النسخة تستبدل الملفات بدل أن تفشل.
-          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            gh release upload "$TAG" --repo "${{ github.repository }}" --clobber artifacts/*
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" --repo "$REPO" --clobber artifacts/*
+            gh release edit "$TAG" --repo "$REPO" --draft=false
             exit 0
           fi
           gh release create "$TAG" \
@@ -127,3 +139,16 @@ jobs:
           EOF
           )" \
             artifacts/*
+
+          # الإصدار قد يُنشأ مسودةً رغم نجاح الأمر. لا ينفع الوثوق بالنجاح
+          # وحده: الموظف يحتاج رابطًا يعمل، فنتحقق منه قبل إنهاء البناء.
+          gh release edit "$TAG" --repo "$REPO" --draft=false || true
+
+          URL="https://github.com/$REPO/releases/download/$TAG/OsoulMail-Setup-${TAG#v}.exe"
+          for i in 1 2 3 4 5 6; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' -L "$URL")
+            [ "$CODE" = "200" ] && { echo "رابط التنزيل يعمل: $URL"; exit 0; }
+            sleep 10
+          done
+          echo "::error::الإصدار $TAG نُشر لكن رابط التنزيل لا يعمل (HTTP $CODE)"
+          exit 1
