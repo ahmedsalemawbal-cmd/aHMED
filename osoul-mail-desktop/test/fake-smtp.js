@@ -6,6 +6,8 @@ function startSmtp(opts) {
   const options = opts || {};
   return new Promise((resolve) => {
     const captured = [];
+    // كلمة يقبلها IMAP ويرفضها SMTP — لاختبار "الاستقبال يعمل والإرسال لا".
+    const rejects = (pass) => pass === 'wrongpass' || (options.rejectAuth && pass === options.rejectAuth);
     const server = net.createServer((socket) => {
       let buf = '';
       let inData = false;
@@ -44,7 +46,7 @@ function startSmtp(opts) {
             const mech = (parts[1] || '').toUpperCase();
             if (mech === 'PLAIN') {
               const creds = Buffer.from(parts[2] || '', 'base64').toString().split('\0');
-              write(creds[2] === 'wrongpass'
+              write(rejects(creds[2])
                 ? '535 5.7.8 Authentication credentials invalid'
                 : '235 2.7.0 Authentication successful');
             } else { write('334 VXNlcm5hbWU6'); socket.authStep = 1; }
@@ -54,7 +56,7 @@ function startSmtp(opts) {
           } else if (socket.authStep === 2) {
             socket.authStep = 0;
             const pass = Buffer.from(line, 'base64').toString();
-            if (pass === 'wrongpass') write('535 5.7.8 Authentication credentials invalid');
+            if (rejects(pass)) write('535 5.7.8 Authentication credentials invalid');
             else write('235 2.7.0 Authentication successful');
           } else if (cmd === 'MAIL') {
             msg.from = /FROM:\s*<([^>]*)>/i.exec(line)?.[1] || '';

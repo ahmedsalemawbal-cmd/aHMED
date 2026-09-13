@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('osoul', {
   boot: () => invoke('app:boot'),
   login: (payload) => invoke('auth:login', payload),
   resume: () => invoke('auth:resume'),
+  diagnose: (payload) => invoke('auth:diagnose', payload),
   changePassword: (payload) => invoke('auth:changePassword', payload),
   logout: (payload) => invoke('auth:logout', payload || {}),
 

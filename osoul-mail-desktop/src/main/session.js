@@ -4,10 +4,11 @@
  * البوابة تتحقق من ثلاث طبقات قبل فتح صندوق البريد:
  *   1) النطاق  — بريد الشركة فقط (الموظفون المعتمدون)، قابل للضبط في policy.json
  *   2) كشف الموظفين — نداء اختياري لخادم الشركة إن ضُبط rosterUrl
- *   3) IMAP + SMTP — التحقق الحقيقي: لا دخول إلا ببيانات صندوق بريد فعّال
+ *   3) IMAP — التحقق الحقيقي: لا دخول إلا ببيانات صندوق بريد فعّال
  *
  * الطبقة الثالثة هي الحاسمة: إن أوقف المسؤول صندوق البريد على الخادم يفشل
- * الدخول فورًا دون أي إجراء داخل التطبيق.
+ * الدخول فورًا دون أي إجراء داخل التطبيق. أما الإرسال (SMTP) فيُجرَّب ويُبلَّغ
+ * عنه ولا يمنع الدخول: موظف يقرأ بريده ولا يرسل أفضل من موظف بلا بريد.
  */
 
 'use strict';
@@ -22,7 +23,6 @@ const ERRORS = {
   NOT_APPROVED: { code: 'NOT_APPROVED', ar: 'هذا الحساب غير معتمد للدخول. راجع مسؤول النظام.', en: 'This account is not approved. Contact your administrator.' },
   AUTH: { code: 'AUTH', ar: 'البريد أو كلمة المرور غير صحيحة.', en: 'Incorrect email or password.' },
   NETWORK: { code: 'NETWORK', ar: 'تعذّر الوصول إلى خادم البريد. تحقّق من اتصال الإنترنت.', en: 'Could not reach the mail server. Check your connection.' },
-  SMTP: { code: 'SMTP', ar: 'تم التحقق من الاستقبال، لكن الإرسال مرفوض. راجع مسؤول النظام.', en: 'Receiving works, but sending was refused. Contact your administrator.' },
   UNKNOWN: { code: 'UNKNOWN', ar: 'تعذّر تسجيل الدخول. حاول مرة أخرى.', en: 'Sign-in failed. Please try again.' },
 };
 
@@ -170,20 +170,212 @@ async function login(input, policy) {
     throw classify(err);
   }
 
-  // الاستقبال يعمل. نتحقق من الإرسال أيضًا حتى لا يكتشف الموظف العطل
-  // لاحقًا وهو يكتب رسالة.
+  // الاستقبال يعمل ⇒ الموظف داخل. نجرّب الإرسال لنُنبّهه مبكرًا إن كان
+  // معطّلًا، لكنه لا يمنع الدخول: نسخة الويب تفتح البريد بـ IMAP وحده،
+  // وفشل مصادقة SMTP (حدّ إرسال، أو حظر مؤقت للمنفذ) يترك الموظف بلا بريد
+  // إطلاقًا بدل أن يقرأ رسائله ويؤجّل الإرسال.
+  session.warnings = [];
   try {
     await smtp.verify(account);
   } catch (err) {
     const c = classify(err);
-    if (c.osoul.code === 'AUTH') {
-      await session.close().catch(() => {});
-      throw fail('SMTP', c.osoul.detail);
-    }
-    // عطل شبكي عابر في SMTP لا يمنع قراءة البريد.
+    session.warnings.push({
+      code: c.osoul.code === 'AUTH' ? 'SMTP_AUTH' : 'SMTP_NETWORK',
+      ar: c.osoul.code === 'AUTH'
+        ? 'الاستقبال يعمل، لكن خادم الإرسال رفض كلمة المرور. القراءة متاحة والإرسال قد يفشل.'
+        : 'الاستقبال يعمل، لكن تعذّر الوصول لخادم الإرسال. القراءة متاحة والإرسال قد يفشل.',
+      en: c.osoul.code === 'AUTH'
+        ? 'Receiving works, but the sending server refused the password. You can read mail; sending may fail.'
+        : 'Receiving works, but the sending server could not be reached. You can read mail; sending may fail.',
+      detail: c.osoul.detail || '',
+    });
   }
 
   return session;
+}
+
+/* =========================================================================
+ *  فحص الاتصال
+ *
+ *  حين يفشل الدخول لا يكفي "البريد أو كلمة المرور غير صحيحة": قد يكون
+ *  المنفذ محجوبًا بجدار حماية، أو الاسم لا يُترجم، أو الخادم يرفض المصادقة.
+ *  هذا الفحص يفصل المراحل ويعيد نتيجة كل مرحلة مع ردّ الخادم الحرفي، فيُرسل
+ *  الموظف صورة واحدة تكفي لمعرفة السبب بدل جولات تخمين.
+ * ====================================================================== */
+
+const net = require('net');
+const tls = require('tls');
+const dns = require('dns').promises;
+
+const STEP_TIMEOUT = 12000;
+
+function step(id, ar, en) {
+  return { id, ar, en, ok: false, detail: '', skipped: false };
+}
+
+/** فتح المقبس وقراءة أول سطر ترحيب. مشفّر أو صريح حسب إعداد الخادم. */
+function greet(host, port, timeoutMs, secure) {
+  return new Promise((resolve, reject) => {
+    const socket = secure
+      ? tls.connect({ host, port, servername: host, timeout: timeoutMs })
+      : net.connect({ host, port, timeout: timeoutMs });
+    let done = false;
+    const finish = (err, line) => {
+      if (done) return;
+      done = true;
+      socket.destroy();
+      if (err) reject(err); else resolve(line);
+    };
+    socket.setTimeout(timeoutMs, () => finish(new Error('timeout')));
+    socket.once('error', (e) => finish(e));
+    socket.once('data', (buf) => finish(null, String(buf).split(/\r?\n/)[0]));
+  });
+}
+
+/** اتصال TCP خام — يفصل "المنفذ محجوب" عن "TLS فشل". */
+function reach(host, port, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const socket = net.connect({ host, port, timeout: timeoutMs });
+    let done = false;
+    const finish = (err) => {
+      if (done) return;
+      done = true;
+      socket.destroy();
+      if (err) reject(err); else resolve(true);
+    };
+    socket.setTimeout(timeoutMs, () => finish(new Error('timeout')));
+    socket.once('error', (e) => finish(e));
+    socket.once('connect', () => finish(null));
+  });
+}
+
+/**
+ * فحص كامل بلا فتح جلسة. كلمة المرور اختيارية: بدونها نفحص الشبكة فقط.
+ *
+ * @returns {Promise<{steps:Array, verdict:string}>}
+ */
+async function diagnose(input, policy) {
+  const email = String(input.email || '').trim().toLowerCase();
+  const password = String(input.password || '');
+  const imapHost = input.imapHost || policy.imapHost;
+  const imapPort = Number(input.imapPort) || policy.imapPort;
+  const smtpHost = input.smtpHost || policy.smtpHost;
+  const smtpPort = Number(input.smtpPort) || policy.smtpPort;
+
+  const steps = [
+    step('domain', 'نطاق البريد معتمد', 'Email domain allowed'),
+    step('dns', `ترجمة اسم الخادم (${imapHost})`, `Resolving mail server (${imapHost})`),
+    step('tcp', `فتح المنفذ ${imapPort}`, `Opening port ${imapPort}`),
+    step('tls', policy.imapSecure !== false ? 'تشفير الاتصال' : 'ردّ الخادم',
+      policy.imapSecure !== false ? 'Securing the connection' : 'Server greeting'),
+    step('imap', 'تسجيل الدخول للاستقبال (IMAP)', 'Signing in to receive (IMAP)'),
+    step('smtp', `الإرسال (SMTP ${smtpPort})`, `Sending (SMTP ${smtpPort})`),
+  ];
+  const at = (id) => steps.find((x) => x.id === id);
+
+  /**
+   * حين يتعذّر الوصول إلى الخادم الافتراضي، نفحص أسماء الخوادم الأخرى
+   * المعروفة لنفس المزوّد ونفس النطاق — فحص وصول فقط: مقبس يُفتح ويُغلق.
+   *
+   * لا نجرّب كلمة المرور على أي خادم لم يضبطه مسؤول النظام: خادم غير مُتحقَّق
+   * منه لا يجوز أن يرى سرّ الموظف. النتيجة هنا دليل يسلّمه للمسؤول لا أكثر.
+   */
+  async function probeAlternates(verdict) {
+    const domain = email.split('@')[1] || '';
+    const others = ['imap.hostinger.com', 'imap.titan.email', `mail.${domain}`]
+      .filter((h, i, all) => h && h !== imapHost && all.indexOf(h) === i);
+
+    const reachable = [];
+    for (const host of others) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await reach(host, imapPort, STEP_TIMEOUT);
+        reachable.push(host);
+      } catch (_) { /* اسم غير موجود أو منفذ مغلق — ليس بديلًا */ }
+    }
+    if (!reachable.length) return { steps, verdict };
+
+    const st = step('alt', 'خادم آخر لنفس النطاق يستجيب', 'Another server for this domain answers');
+    st.ok = true;
+    st.detail = reachable.join(', ');
+    steps.push(st);
+    return { steps, verdict: 'ALT_HOST' };
+  }
+
+  /* 1) النطاق */
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    at('domain').detail = 'BAD_EMAIL';
+    return { steps, verdict: 'BAD_EMAIL' };
+  }
+  at('domain').ok = checkDomain(email, policy);
+  if (!at('domain').ok) {
+    at('domain').detail = (policy.allowedDomains || []).join(', ');
+    return { steps, verdict: 'DOMAIN' };
+  }
+
+  /* 2) DNS */
+  try {
+    const found = await dns.lookup(imapHost, { all: true });
+    at('dns').ok = true;
+    at('dns').detail = found.map((a) => a.address).join(', ');
+  } catch (err) {
+    at('dns').detail = String(err.code || err.message);
+    return probeAlternates('DNS');
+  }
+
+  /* 3) المنفذ */
+  try {
+    await reach(imapHost, imapPort, STEP_TIMEOUT);
+    at('tcp').ok = true;
+  } catch (err) {
+    at('tcp').detail = String(err.code || err.message);
+    return probeAlternates('BLOCKED');
+  }
+
+  /* 4) TLS + ترحيب الخادم */
+  try {
+    at('tls').detail = await greet(imapHost, imapPort, STEP_TIMEOUT, policy.imapSecure !== false);
+    at('tls').ok = true;
+  } catch (err) {
+    at('tls').detail = String(err.code || err.message);
+    return probeAlternates('TLS');
+  }
+
+  /* 5) IMAP */
+  if (!password) {
+    at('imap').skipped = true;
+    at('smtp').skipped = true;
+    return { steps, verdict: 'NETWORK_OK' };
+  }
+
+  const account = {
+    email, password,
+    imapHost, imapPort, imapSecure: policy.imapSecure !== false,
+    smtpHost, smtpPort, smtpSecure: policy.smtpSecure !== false,
+    fromName: deriveName(email),
+  };
+
+  const probe = new MailSession(account);
+  try {
+    await probe.connect();
+    at('imap').ok = true;
+  } catch (err) {
+    at('imap').detail = String((err && (err.responseText || err.message)) || err).slice(0, 200);
+    await probe.close().catch(() => {});
+    return { steps, verdict: classify(err).osoul.code === 'AUTH' ? 'IMAP_AUTH' : 'IMAP_FAIL' };
+  }
+  await probe.close().catch(() => {});
+
+  /* 6) SMTP — يُبلَّغ عنه ولا يمنع الدخول */
+  try {
+    await smtp.verify(account);
+    at('smtp').ok = true;
+  } catch (err) {
+    at('smtp').detail = String((err && (err.response || err.message)) || err).slice(0, 200);
+    return { steps, verdict: 'SMTP_ONLY' };
+  }
+
+  return { steps, verdict: 'OK' };
 }
 
 /** "ahmed.ali@osoulalbinaa.com" → "Ahmed Ali" — اسم مرسل معقول بلا إعداد. */
@@ -196,4 +388,4 @@ function deriveName(email) {
     .join(' ') || local;
 }
 
-module.exports = { login, EmployeeSession, ERRORS, deriveName, classify };
+module.exports = { login, diagnose, EmployeeSession, ERRORS, deriveName, classify };

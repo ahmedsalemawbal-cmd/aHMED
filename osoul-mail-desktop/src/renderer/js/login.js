@@ -8,7 +8,7 @@
 
 import { icon } from './icons.js';
 import { $, on, esc, call, errText } from './util.js';
-import { t, getLang, setLang, otherLangName } from './i18n.js';
+import { t, getLang, setLang, otherLangName, pick } from './i18n.js';
 
 /**
  * رسم البوابة وانتظار دخول ناجح.
@@ -67,6 +67,9 @@ export function renderLogin(boot, onSuccess) {
         <span class="lbl">${esc(t('signIn'))}</span>
       </button>
 
+      <button type="button" class="link-btn" id="lg-check">${icon('shield', 'sm')}<span>${esc(t('runCheck'))}</span></button>
+      <div class="diag" id="lg-diag" hidden></div>
+
       ${policy.allowAdvancedServers ? advancedHTML(policy) : ''}
 
       <div class="foot">
@@ -100,8 +103,9 @@ export function renderLogin(boot, onSuccess) {
     pass.focus();
   });
 
-  function showError(text) {
-    errBox.innerHTML = `${icon('alert', 'sm')}<span>${esc(text)}</span>`;
+  function showError(text, detail) {
+    errBox.innerHTML = `${icon('alert', 'sm')}<span>${esc(text)}</span>`
+      + (detail ? `<details class="tech"><summary>${esc(t('techDetails'))}</summary><code dir="ltr">${esc(detail)}</code></details>` : '');
     errBox.hidden = false;
   }
 
@@ -141,15 +145,94 @@ export function renderLogin(boot, onSuccess) {
       // نُبقي زر الدخول مشغولًا: الشاشة على وشك التبدّل.
       onSuccess(data);
     } catch (err) {
-      showError(errText(err));
+      showError(errText(err), err && err.info && err.info.detail ? String(err.info.detail).slice(0, 300) : '');
       setBusy(go, false, t('signIn'));
       busy = false;
       pass.select();
     }
   });
 
+
+  /* فحص الاتصال — يعمل ولو لم يُكتب سوى البريد، فيفصل عطل الشبكة عن كلمة
+   * المرور. النتيجة صورة واحدة تكفي مسؤول النظام. */
+  const diagBox = $('#lg-diag', root);
+  const checkBtn = $('#lg-check', root);
+  let checking = false;
+
+  on(checkBtn, 'click', async () => {
+    if (checking) return;
+    const addr = email.value.trim();
+    if (!addr) { showError(t('enterEmail')); email.focus(); return; }
+
+    checking = true;
+    clearError();
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = `<span class="spinner sm"></span><span>${esc(t('checkRunning'))}</span>`;
+    diagBox.hidden = false;
+    diagBox.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+
+    try {
+      const res = await call(window.osoul.diagnose, {
+        email: addr,
+        password: pass.value,
+        imapHost: advValue('#lg-imap-host'),
+        imapPort: advValue('#lg-imap-port'),
+        smtpHost: advValue('#lg-smtp-host'),
+        smtpPort: advValue('#lg-smtp-port'),
+      });
+      diagBox.innerHTML = diagHTML(res);
+    } catch (err) {
+      diagBox.innerHTML = `<div class="verdict bad">${esc(errText(err))}</div>`;
+    } finally {
+      checking = false;
+      checkBtn.disabled = false;
+      checkBtn.innerHTML = `${icon('shield', 'sm')}<span>${esc(t('runCheck'))}</span>`;
+    }
+  });
+
+  function advValue(sel) {
+    const adv = $('#lg-adv', root);
+    const el = adv && adv.open ? $(sel, root) : null;
+    return el ? el.value.trim() : '';
+  }
+
+
   root.hidden = false;
   setTimeout(() => (saved && saved.email ? pass : email).focus(), 60);
+}
+
+
+/** رمز الحكم ← مفتاح النص. صريح حتى يمسك فحص الترجمة أي نقص. */
+const VERDICT_KEY = {
+  OK: 'verdictOk',
+  NETWORK_OK: 'verdictNetworkOk',
+  BAD_EMAIL: 'verdictBadEmail',
+  DOMAIN: 'verdictDomain',
+  DNS: 'verdictDns',
+  BLOCKED: 'verdictBlocked',
+  TLS: 'verdictTls',
+  IMAP_AUTH: 'verdictImapAuth',
+  IMAP_FAIL: 'verdictImapFail',
+  SMTP_ONLY: 'verdictSmtpOnly',
+  ALT_HOST: 'verdictAltHost',
+};
+
+/** نتيجة الفحص: سطر لكل مرحلة، ثم حكم واحد يقول ماذا يفعل الموظف. */
+function diagHTML(res) {
+  const rows = (res.steps || []).map((st) => {
+    const state = st.skipped ? 'skip' : st.ok ? 'ok' : 'bad';
+    const mark = st.skipped ? '—' : st.ok ? '✓' : '✕';
+    return `
+      <div class="dstep ${state}">
+        <span class="m">${mark}</span>
+        <span class="n">${esc(pick(st))}</span>
+        ${st.detail ? `<code dir="ltr">${esc(String(st.detail).slice(0, 160))}</code>` : ''}
+      </div>`;
+  }).join('');
+
+  const good = res.verdict === 'OK' || res.verdict === 'NETWORK_OK';
+  const key = VERDICT_KEY[res.verdict] || 'verdictImapFail';
+  return `${rows}<div class="verdict ${good ? 'good' : 'bad'}">${esc(t(key))}</div>`;
 }
 
 function advancedHTML(policy) {

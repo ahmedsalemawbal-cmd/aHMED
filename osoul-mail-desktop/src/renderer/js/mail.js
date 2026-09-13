@@ -13,7 +13,7 @@ import {
 import { openCompose } from './compose.js';
 import { openSettings } from './settings.js';
 import { ringBell, stopBell, unlock as unlockSound } from './sound.js';
-import { t, getLang, setLang, folderName, otherLangShort, labelName } from './i18n.js';
+import { t, getLang, setLang, folderName, otherLangShort, labelName, pick } from './i18n.js';
 
 /** حالة التطبيق. مصدر واحد للحقيقة، وكل رسم يقرأ منه. */
 export const S = {
@@ -86,6 +86,9 @@ export function startMail(data, boot) {
   $('#login').hidden = true;
   $('#boot').hidden = true;
   $('#app').hidden = false;
+
+  // الاستقبال يعمل والإرسال لا: الموظف يجب أن يعرف قبل أن يكتب رسالة.
+  for (const w of data.warnings || []) toast(pick(w) || t('warnSendMaybe'), 'err');
 }
 
 /* ===================================================================

@@ -35,7 +35,7 @@ function check(name, cond, detail) {
 
 (async () => {
   const imap = await startImap({ port: IMAP_PORT });
-  const smtp = await startSmtp({ port: SMTP_PORT });
+  const smtp = await startSmtp({ port: SMTP_PORT, rejectAuth: 'smtp-blocked' });
   const rendererErrors = [];
 
   await app.whenReady();
@@ -59,6 +59,27 @@ function check(name, cond, detail) {
     check('gate.visible', await run(`!document.getElementById('login').hidden`));
 
     /* 2) دخول حقيقي عبر الواجهة (نملأ الحقول ونضغط الزر) */
+    /* 2) زر فحص الاتصال في البوابة نفسها */
+    const gateCheck = await run(`(async () => {
+      document.getElementById('lg-email').value = 'ahmed@osoulalbinaa.com';
+      document.getElementById('lg-check').click();
+      for (let i = 0; i < 60 && !document.querySelector('#lg-diag .verdict'); i++) {
+        await new Promise(r => setTimeout(r, 200));
+      }
+      const box = document.getElementById('lg-diag');
+      return {
+        shown: !box.hidden,
+        steps: box.querySelectorAll('.dstep').length,
+        green: box.querySelectorAll('.dstep.ok').length,
+        skipped: box.querySelectorAll('.dstep.skip').length,
+        verdict: (box.querySelector('.verdict') || {}).textContent || '',
+        good: !!box.querySelector('.verdict.good'),
+      };
+    })()`);
+    check('gate.checkButtonRuns', gateCheck.shown && gateCheck.steps === 6, gateCheck);
+    check('gate.checkShowsProgress', gateCheck.green === 4 && gateCheck.skipped === 2, gateCheck);
+    check('gate.checkVerdictReadable', gateCheck.good && /كلمة المرور/.test(gateCheck.verdict), gateCheck.verdict);
+
     const login = await run(`(async () => {
       document.getElementById('lg-email').value = 'ahmed@osoulalbinaa.com';
       document.getElementById('lg-pass').value = 'secret';
@@ -479,6 +500,56 @@ function check(name, cond, detail) {
     await run(`window.osoul.logout({ forget: true })`);
     await new Promise((r) => setTimeout(r, 400));
     check('logout.clearsCredentials', !fs.existsSync(path.join(userData, 'credentials.dat')));
+
+
+    /* 16) الإرسال المرفوض لا يمنع الدخول، والفحص يقول أين العطل بالضبط */
+    const smtpWarn = await run(`(async () => {
+      const r = await window.osoul.login({
+        email: 'ahmed@osoulalbinaa.com', password: 'smtp-blocked', remember: false });
+      const w = (r.ok && r.data.warnings) || [];
+      const folders = r.ok ? r.data.folders.length : 0;
+      await window.osoul.logout({ forget: true });
+      return { ok: r.ok, codes: w.map(x => x.code), text: w.map(x => x.ar).join(' '), folders };
+    })()`);
+    check('smtp.doesNotBlockSignIn', smtpWarn.ok === true, smtpWarn);
+    check('smtp.mailboxStillOpens', smtpWarn.folders === 6, smtpWarn.folders);
+    check('smtp.warnsInstead', smtpWarn.codes.join() === 'SMTP_AUTH', smtpWarn);
+    check('smtp.warningIsReadable', /الإرسال/.test(smtpWarn.text), smtpWarn.text);
+
+    const diag = await run(`(async () => {
+      const pick = (r, k) => (r.ok ? r.data[k] : 'CALL_FAILED');
+      const good = await window.osoul.diagnose({ email: 'ahmed@osoulalbinaa.com', password: 'secret' });
+      const bad = await window.osoul.diagnose({ email: 'ahmed@osoulalbinaa.com', password: 'wrongpass' });
+      const netOnly = await window.osoul.diagnose({ email: 'ahmed@osoulalbinaa.com', password: '' });
+      const offDomain = await window.osoul.diagnose({ email: 'someone@gmail.com', password: 'x' });
+      const sendOnly = await window.osoul.diagnose({ email: 'ahmed@osoulalbinaa.com', password: 'smtp-blocked' });
+      const badHost = await window.osoul.diagnose({
+        email: 'ahmed@osoulalbinaa.com', password: 'secret',
+        imapHost: 'no-such-host.osoulalbinaa.invalid', imapPort: 993 });
+      return {
+        good: pick(good, 'verdict'),
+        goodSteps: good.ok ? good.data.steps.map(s => s.id + (s.skipped ? '-' : s.ok ? '+' : '!')).join(' ') : '',
+        greeting: good.ok ? (good.data.steps.find(s => s.id === 'tls') || {}).detail : '',
+        dnsDetail: good.ok ? (good.data.steps.find(s => s.id === 'dns') || {}).detail : '',
+        bad: pick(bad, 'verdict'),
+        badDetail: bad.ok ? (bad.data.steps.find(s => s.id === 'imap') || {}).detail : '',
+        netOnly: pick(netOnly, 'verdict'),
+        netSkips: netOnly.ok ? netOnly.data.steps.filter(s => s.skipped).map(s => s.id).join() : '',
+        offDomain: pick(offDomain, 'verdict'),
+        sendOnly: pick(sendOnly, 'verdict'),
+        badHost: pick(badHost, 'verdict'),
+      };
+    })()`);
+    check('diag.allGreen', diag.good === 'OK', diag);
+    check('diag.everyStageRan', diag.goodSteps === 'domain+ dns+ tcp+ tls+ imap+ smtp+', diag.goodSteps);
+    check('diag.showsServerGreeting', /^\* OK/.test(diag.greeting || ''), diag.greeting);
+    check('diag.showsResolvedIp', /127\.0\.0\.1/.test(diag.dnsDetail || ''), diag.dnsDetail);
+    check('diag.namesWrongPassword', diag.bad === 'IMAP_AUTH', diag.bad);
+    check('diag.quotesServerReply', /AUTHENTICATIONFAILED|Invalid credentials/i.test(diag.badDetail || ''), diag.badDetail);
+    check('diag.networkOnlyWithoutPassword', diag.netOnly === 'NETWORK_OK' && diag.netSkips === 'imap,smtp', diag);
+    check('diag.catchesOutsideDomain', diag.offDomain === 'DOMAIN', diag.offDomain);
+    check('diag.isolatesSendingFault', diag.sendOnly === 'SMTP_ONLY', diag.sendOnly);
+    check('diag.catchesUnknownHost', diag.badHost === 'DNS', diag.badHost);
 
   } catch (e) {
     out.EXCEPTION = `${e.message}\n${e.stack}`;

@@ -14,7 +14,7 @@ const os = require('os');
 const { ipcMain, dialog, shell, app, Notification, nativeImage, nativeTheme, Menu } = require('electron');
 
 const store = require('./store');
-const { login } = require('./session');
+const { login, diagnose } = require('./session');
 const { sanitizeHTML, textToHTML, htmlToSnippet } = require('./sanitize');
 const { WINDOW_BG } = require('./theme');
 const { s: T, setLang: setMainLang } = require('./strings');
@@ -155,6 +155,9 @@ function registerIPC(ctx) {
 
     return buildBootPayload(session);
   }));
+
+  /** فحص الاتصال من بوابة الدخول — يعمل بلا جلسة. */
+  ipcMain.handle('auth:diagnose', wrap(async (p) => diagnose(p, policy)));
 
   /** دخول صامت ببيانات محفوظة عند فتح التطبيق. */
   ipcMain.handle('auth:resume', wrap(async () => {
@@ -511,6 +514,7 @@ async function buildBootPayload(session) {
     folders,
     inbox: inboxPage,
     quota,
+    warnings: session.warnings || [],
   };
 }
 
