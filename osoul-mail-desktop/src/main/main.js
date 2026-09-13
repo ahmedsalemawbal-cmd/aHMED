@@ -46,6 +46,9 @@ function bootstrap() {
     // معرّف ثابت حتى تظهر الإشعارات باسم التطبيق لا باسم Electron.
     app.setAppUserModelId('com.osoulalbinaa.mail');
 
+    // قراءة جذور النظام مرة واحدة الآن، فلا تتأخّر أول محاولة دخول بها.
+    try { require('./ca').bundle(); } catch (_) { /* نكمل بجذور Node وحدها */ }
+
     registerProtocol();
 
     const policy = loadPolicy(app.getPath('userData'));

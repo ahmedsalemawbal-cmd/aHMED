@@ -211,6 +211,7 @@ const VERDICT_KEY = {
   DNS: 'verdictDns',
   BLOCKED: 'verdictBlocked',
   TLS: 'verdictTls',
+  CERT: 'verdictCert',
   IMAP_AUTH: 'verdictImapAuth',
   IMAP_FAIL: 'verdictImapFail',
   SMTP_ONLY: 'verdictSmtpOnly',

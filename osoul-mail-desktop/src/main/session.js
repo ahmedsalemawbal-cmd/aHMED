@@ -15,6 +15,7 @@
 
 const { MailSession } = require('./imap');
 const smtp = require('./smtp');
+const ca = require('./ca');
 
 /** رسائل خطأ مفهومة للموظف بدل نصوص الخادم الخام. */
 const ERRORS = {
@@ -23,6 +24,7 @@ const ERRORS = {
   NOT_APPROVED: { code: 'NOT_APPROVED', ar: 'هذا الحساب غير معتمد للدخول. راجع مسؤول النظام.', en: 'This account is not approved. Contact your administrator.' },
   AUTH: { code: 'AUTH', ar: 'البريد أو كلمة المرور غير صحيحة.', en: 'Incorrect email or password.' },
   NETWORK: { code: 'NETWORK', ar: 'تعذّر الوصول إلى خادم البريد. تحقّق من اتصال الإنترنت.', en: 'Could not reach the mail server. Check your connection.' },
+  CERT: { code: 'CERT', ar: 'برنامج الحماية أو جدار الحماية يعترض الاتصال المشفّر بشهادة لا يقبلها التطبيق. أوقف فحص SSL/HTTPS في برنامج الحماية، أو راجع مسؤول النظام.', en: 'Security software or a firewall is intercepting the encrypted connection with a certificate the app cannot accept. Turn off SSL/HTTPS scanning in your antivirus, or contact your administrator.' },
   UNKNOWN: { code: 'UNKNOWN', ar: 'تعذّر تسجيل الدخول. حاول مرة أخرى.', en: 'Sign-in failed. Please try again.' },
 };
 
@@ -39,6 +41,11 @@ function classify(err) {
   const code = String((err && (err.code || err.authenticationFailed)) || '');
   if (/AUTHENTICATIONFAILED|Invalid credentials|LOGIN failed|auth.*fail|535|534/i.test(raw) || err?.authenticationFailed) {
     return fail('AUTH', raw);
+  }
+  // اعتراض TLS: شهادة لا تنتهي إلى جذر موثوق. يسبقه فحص الشبكة لأن نصّه
+  // قد يحمل ESOCKET أيضًا، فيُصنَّف خطأً على أنه انقطاع اتصال.
+  if (/SELF_SIGNED|self.signed|UNABLE_TO_(GET|VERIFY)|DEPTH_ZERO|CERT_(HAS_EXPIRED|UNTRUSTED)|ERR_TLS|altnames/i.test(raw + code)) {
+    return fail('CERT', raw);
   }
   if (/ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|ECONNRESET|ESOCKET|timeout|getaddrinfo/i.test(raw + code)) {
     return fail('NETWORK', raw);
@@ -217,7 +224,7 @@ function step(id, ar, en) {
 function greet(host, port, timeoutMs, secure) {
   return new Promise((resolve, reject) => {
     const socket = secure
-      ? tls.connect({ host, port, servername: host, timeout: timeoutMs })
+      ? tls.connect({ host, port, servername: host, timeout: timeoutMs, ca: ca.bundle() })
       : net.connect({ host, port, timeout: timeoutMs });
     let done = false;
     const finish = (err, line) => {
@@ -338,7 +345,7 @@ async function diagnose(input, policy) {
     at('tls').ok = true;
   } catch (err) {
     at('tls').detail = String(err.code || err.message);
-    return probeAlternates('TLS');
+    return probeAlternates(/SELF_SIGNED|self.signed|UNABLE_TO_|CERT_/i.test(at('tls').detail) ? 'CERT' : 'TLS');
   }
 
   /* 5) IMAP */

@@ -10,6 +10,7 @@
 
 const nodemailer = require('nodemailer');
 const MailComposer = require('nodemailer/lib/mail-composer');
+const ca = require('./ca');
 
 /** إنشاء ناقل SMTP لحساب موظف. */
 function createTransport(account) {
@@ -21,6 +22,8 @@ function createTransport(account) {
     connectionTimeout: 25 * 1000,
     greetingTimeout: 20 * 1000,
     socketTimeout: 120 * 1000,
+    // نفس ثقة الاستقبال: جذور النظام تُضاف لجذور Node.
+    tls: { ca: ca.bundle() },
     // اتصال واحد يُعاد استخدامه بدل فتح جلسة SMTP لكل رسالة.
     pool: true,
     maxConnections: 1,

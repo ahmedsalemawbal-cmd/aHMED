@@ -14,6 +14,7 @@
 
 const { EventEmitter } = require('events');
 const { ImapFlow } = require('imapflow');
+const ca = require('./ca');
 const labels = require('./labels');
 
 /** ترتيب المجلدات المميزة في الشريط الجانبي. */
@@ -70,6 +71,9 @@ class MailSession extends EventEmitter {
       socketTimeout: 90 * 1000,
       greetingTimeout: 20 * 1000,
       connectionTimeout: 25 * 1000,
+      // برامج الحماية تعترض الاتصال بشهادتها؛ نثق بجذور النظام كما يفعل
+      // المتصفح، فلا يُرفض الاتصال على جهاز سليم.
+      tls: { ca: ca.bundle() },
     });
 
     client.on('error', (err) => {
