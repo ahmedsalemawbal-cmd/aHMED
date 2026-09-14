@@ -13,7 +13,7 @@ import {
 import { openCompose } from './compose.js';
 import { openSettings } from './settings.js';
 import { ringBell, stopBell, unlock as unlockSound } from './sound.js';
-import { t, getLang, setLang, folderName, otherLangShort, labelName, pick } from './i18n.js';
+import { t, getLang, setLang, folderName, otherLangShort, labelName, pick, isRTL } from './i18n.js';
 
 /** حالة التطبيق. مصدر واحد للحقيقة، وكل رسم يقرأ منه. */
 export const S = {
@@ -39,6 +39,7 @@ export const S = {
   labelsOk: true,
   screen: 'mail',
   contacts: null,
+  directory: [],
   contactsBusy: false,
   contactQuery: '',
   contactPick: '',
@@ -63,6 +64,7 @@ export function startMail(data, boot) {
   S.settings = boot.settings || {};
   S.policy = boot.policy || {};
   S.labels = boot.labels || [];
+  S.directory = data.directory || [];
   S.aiReady = !!boot.aiReady;
   S.aiManaged = !!boot.aiManaged;
   S.aiKeyMask = boot.aiKeyMask || '';
@@ -81,7 +83,11 @@ export function startMail(data, boot) {
   bindEvents();
   scheduleRefresh();
   unlockSound();
-  loadLabelCounts();
+
+  // عدّادات التصنيفات خمسة أوامر بحث على نفس اتصال IMAP، وطابور الاتصال
+  // تسلسلي: تشغيلها فورًا يؤخّر أول رسالة يفتحها الموظف. نؤجّلها حتى تهدأ
+  // الشاشة، فهي رقم بجانب اسم لا شيء ينتظره أحد.
+  setTimeout(() => { if (S.account) loadLabelCounts(); }, 1500);
 
   $('#login').hidden = true;
   $('#boot').hidden = true;
@@ -784,13 +790,22 @@ async function openContacts(force) {
 
   if (S.contacts && !force) return;
 
-  S.contactsBusy = true;
-  paintContacts();
+  // الدليل حاضر منذ الإقلاع: نعرضه فورًا بدل شاشة انتظار، ثم يحلّ محله
+  // الدفتر الكامل حين ينتهي مسح الصندوق في الخلفية.
+  if (!S.contacts && S.directory.length) {
+    S.contacts = seeded();
+    paintContacts();
+  } else {
+    S.contactsBusy = true;
+    paintContacts();
+  }
   try {
     const data = await call(window.osoul.contacts, !!force);
     S.contacts = data.contacts || [];
   } catch (err) {
-    S.contacts = [];
+    // فشل مسح الصندوق لا يعني دفترًا فارغًا: دليل الشركة معروض أصلًا
+    // ويكفي لمراسلة أي زميل. نُبقيه ونكتفي بالتنبيه.
+    if (!S.contacts || !S.contacts.length) S.contacts = seeded();
     toast(errText(err), 'err');
   } finally {
     S.contactsBusy = false;
@@ -798,12 +813,19 @@ async function openContacts(force) {
   }
 }
 
+/** دليل الشركة على هيئة جهات اتصال — يُعرض قبل أن يُمسح الصندوق. */
+function seeded() {
+  return S.directory.map((d) => ({ ...d, count: 0, lastTs: 0, outgoing: false }));
+}
+
 /** الدفتر بعد تصفيته بما كُتب في مربع البحث. */
 function contactsShown() {
   const all = S.contacts || [];
   const q = S.contactQuery.trim().toLowerCase();
   if (!q) return all;
-  return all.filter((c) => c.email.includes(q) || String(c.name).toLowerCase().includes(q));
+  return all.filter((c) => c.email.includes(q)
+    || String(c.name).toLowerCase().includes(q)
+    || String(c.nameAr || '').includes(S.contactQuery.trim()));
 }
 
 function paintContacts() {
@@ -845,17 +867,28 @@ function contactRowsHTML(list) {
   return list.map(contactRow).join('');
 }
 
+/** الاسم بلغة الواجهة حين يتوفّر الاسمان. */
+function personName(c) {
+  const ar = String((c && c.nameAr) || '').trim();
+  const en = String((c && c.name) || '').trim();
+  if (isRTL() && ar) return ar;
+  return en || ar || (c && c.email) || '';
+}
+
 function contactRow(c) {
   return `
     <div class="row contact ${c.email === S.contactPick ? 'on' : ''}" data-contact="${esc(c.email)}">
-      ${avatarHTML(c.name, c.email, 'av')}
+      ${avatarHTML(personName(c), c.email, 'av')}
       <div class="body">
         <div class="line1">
-          <span class="who">${esc(c.name || c.email)}</span>
+          <span class="who">${esc(personName(c))}</span>
           <span class="when num">${esc(c.lastTs ? fmtWhen(c.lastTs) : '')}</span>
         </div>
         <div class="subject">${esc(c.email)}</div>
-        <div class="meta"><span class="num">${esc(t('msgCount', { n: c.count }))}</span></div>
+        <div class="meta">
+          ${c.dept ? `<span class="rc-dept">${esc(pick(c.dept))}</span>` : ''}
+          <span class="num">${esc(t('msgCount', { n: c.count }))}</span>
+        </div>
       </div>
       <button class="icon-btn" data-write="${esc(c.email)}" title="${esc(t('message'))}">${icon('send', 'sm')}</button>
     </div>`;
@@ -883,9 +916,10 @@ function paintContactCard() {
     <div class="scroll">
       <div class="doc">
         <div class="contact-card">
-          ${avatarHTML(c.name, c.email, 'big')}
-          <h2>${esc(c.name || c.email)}</h2>
+          ${avatarHTML(personName(c), c.email, 'big')}
+          <h2>${esc(personName(c))}</h2>
           <div class="e">${esc(c.email)}</div>
+          ${c.dept ? `<div class="sub">${esc(pick(c.dept))}</div>` : ''}
           <div class="sub num">${esc(t('msgCount', { n: c.count }))}${c.lastTs ? ` · ${esc(fmtFull(c.lastTs))}` : ''}</div>
           <div class="acts">
             <button class="btn primary" id="k-write">${icon('send', 'sm')}<span>${esc(t('message'))}</span></button>

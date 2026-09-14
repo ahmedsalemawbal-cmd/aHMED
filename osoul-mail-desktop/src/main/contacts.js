@@ -36,9 +36,10 @@ function betterName(current, candidate, email) {
  *
  * @param {import('./imap').MailSession} session
  * @param {string} me بريد الموظف — يُستبعد من دفتره
+ * @param {Array<{email:string,name:string,dept:object}>} [directoryList] دليل الشركة
  * @returns {Promise<Array<{email:string,name:string,count:number,lastTs:number,outgoing:boolean}>>}
  */
-async function build(session, me) {
+async function build(session, me, directoryList) {
   const folders = await session.folders();
   const inbox = folders.find((f) => f.special === 'inbox');
   const sent = folders.find((f) => f.special === 'sent');
@@ -82,9 +83,37 @@ async function build(session, me) {
     }
   }
 
+  // دليل الشركة: زملاء الموظف حاضرون من أول تشغيل ولو لم يراسلهم قط.
+  // ما جاء من الصندوق أدقّ (اسم كتبه صاحبه) فيبقى، ويأخذ القسم من الدليل.
+  for (const person of directoryList || []) {
+    const email = key(person.email);
+    if (!email || email === mine) continue;
+    const found = map.get(email);
+    if (found) {
+      found.name = found.name || person.name;
+      found.nameAr = person.nameAr || '';
+      found.dept = person.dept || null;
+      found.directory = true;
+    } else {
+      map.set(email, {
+        email,
+        name: person.name || email,
+        nameAr: person.nameAr || '',
+        dept: person.dept || null,
+        directory: true,
+        count: 0,
+        lastTs: 0,
+        outgoing: false,
+      });
+    }
+  }
+
   const list = [...map.values()];
-  // من راسلتَه أولًا، ثم الأكثر تكرارًا، ثم الأحدث.
-  list.sort((a, b) => (Number(b.outgoing) - Number(a.outgoing)) || (b.count - a.count) || (b.lastTs - a.lastTs));
+  // من راسلتَه أولًا، ثم الأكثر تكرارًا، ثم الأحدث، ثم بقية الزملاء أبجديًا.
+  list.sort((a, b) => (Number(b.outgoing) - Number(a.outgoing))
+    || (b.count - a.count)
+    || (b.lastTs - a.lastTs)
+    || String(a.name).localeCompare(String(b.name)));
   return list;
 }
 

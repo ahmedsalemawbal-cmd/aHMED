@@ -121,6 +121,11 @@ function createWindow() {
       sandbox: true,
       webviewTag: false,
       spellcheck: true,
+      // كود الواجهة يُترجم مرة ويُخزَّن مترجمًا، فالإقلاع الثاني أسرع من الأول.
+      v8CacheOptions: 'bypassHeatCheckAndEagerCompile',
+      // البريد يصل والنافذة في الخلفية: بلا هذا يخنق Chromium المؤقتات
+      // فيتأخّر التحديث والجرس حتى يعود الموظف إلى النافذة.
+      backgroundThrottling: false,
       // إطار عرض الرسالة يحتاج أصلًا مشتركًا لقياس ارتفاعه واعتراض روابطه.
       allowRunningInsecureContent: false,
     },

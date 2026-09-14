@@ -8,6 +8,7 @@
 import { icon } from './icons.js';
 import { $, on, delegate, esc, call, errText, toast, menu, fmtBytes, ask } from './util.js';
 import { t, getLang } from './i18n.js';
+import { attachRecipients } from './recipients.js';
 
 /** الحد الذي تقبله معظم الخوادم للرسالة الواحدة بمرفقاتها. */
 const MAX_TOTAL = 24 * 1024 * 1024;
@@ -120,6 +121,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   /* ---- الإغلاق ---- */
   function close() {
     open = false;
+    detach.forEach((off) => off());
     back.remove();
     document.removeEventListener('keydown', keys);
   }
@@ -129,7 +131,12 @@ export function openCompose(draft, state, onSent, onSaved) {
     close();
   }
   function keys(e) {
-    if (e.key === 'Escape') { e.preventDefault(); tryClose(); }
+    if (e.key === 'Escape') {
+      // لوح الاقتراحات مفتوح؟ هو من يبتلع Escape، لا نافذة الإنشاء.
+      if (back.querySelector('.rc-pop:not([hidden])')) return;
+      e.preventDefault();
+      tryClose();
+    }
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doSend(); }
   }
   on(document, 'keydown', keys);
@@ -138,6 +145,9 @@ export function openCompose(draft, state, onSent, onSaved) {
   on(back, 'mousedown', (e) => { if (e.target === back) tryClose(); });
 
   /* ---- المستلمون ---- */
+  // الاسم يكفي: الإكمال يترجمه إلى عنوان من دليل الشركة ودفتر العناوين.
+  const detach = ['#c-to', '#c-cc', '#c-bcc'].map((sel) => attachRecipients($(sel, back), state));
+
   on($('#c-cc-btn', back), 'click', () => toggleRow('#c-cc-row', '#c-cc-btn', '#c-cc'));
   on($('#c-bcc-btn', back), 'click', () => toggleRow('#c-bcc-row', '#c-bcc-btn', '#c-bcc'));
 

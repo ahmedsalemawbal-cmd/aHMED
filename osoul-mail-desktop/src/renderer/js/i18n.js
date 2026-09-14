@@ -153,6 +153,7 @@ const DICT = {
 
     /* جهات الاتصال */
     contacts: 'جهات الاتصال', contactsCount: '{n} جهة',
+    pickHint: '↑↓ للتنقل · Enter للاختيار', directoryTitle: 'دليل الشركة', department: 'القسم',
     contactsEmpty: 'لا توجد جهات اتصال بعد',
     contactsEmptyHint: 'يمتلئ الدفتر تلقائيًا ممّن تراسلهم.',
     contactsHint: 'مبني تلقائيًا من الوارد والمرسل.',
@@ -308,6 +309,7 @@ const DICT = {
     lblQuality: 'Quality & safety', lblHr: 'HR', lblFinance: 'Finance',
 
     contacts: 'Contacts', contactsCount: '{n} contacts',
+    pickHint: '↑↓ to move · Enter to pick', directoryTitle: 'Company directory', department: 'Department',
     contactsEmpty: 'No contacts yet',
     contactsEmptyHint: 'The book fills itself from the people you write to.',
     contactsHint: 'Built automatically from your Inbox and Sent mail.',

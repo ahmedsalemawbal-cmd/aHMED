@@ -21,6 +21,7 @@ const { s: T, setLang: setMainLang } = require('./strings');
 const ai = require('./ai');
 const labelDefs = require('./labels');
 const contacts = require('./contacts');
+const directory = require('./directory');
 
 /** الجلسة الحالية (موظف واحد لكل نافذة). */
 let current = null;
@@ -423,7 +424,7 @@ function registerIPC(ctx) {
   ipcMain.handle('mail:contacts', wrap(async (p) => {
     const s = requireSession();
     if (!contactsCache || p.force) {
-      contactsCache = await contacts.build(s.mail, s.account.email);
+      contactsCache = await contacts.build(s.mail, s.account.email, directory.build(policy));
     }
     return { contacts: contactsCache };
   }));
@@ -511,6 +512,9 @@ async function buildBootPayload(session) {
 
   return {
     account: { email: session.account.email, fromName: settings.fromName || session.account.fromName },
+    // الدليل يصل مع الإقلاع: الإكمال التلقائي يجب أن يعمل من أول حرف،
+    // قبل أن يُمسح الصندوق لبناء دفتر العناوين.
+    directory: directory.build(policy).filter((p) => p.email !== session.account.email),
     folders,
     inbox: inboxPage,
     quota,

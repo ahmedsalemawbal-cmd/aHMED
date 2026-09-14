@@ -475,6 +475,119 @@ function check(name, cond, detail) {
     check('lang.noArabicLeftBehind', lang.en.arabicLeft === false, lang.en);
     check('lang.switchesBack', lang.ar.lang === 'ar' && lang.ar.dir === 'rtl' && lang.ar.inbox === 'البريد الوارد', lang.ar);
 
+    /* 9) اختيار المستلم بالاسم */
+    const picker = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const compose = await import('./js/compose.js');
+      compose.openCompose({ mode: 'new' }, mail.S, null, null);
+      await new Promise(r => setTimeout(r, 250));
+
+      const to = document.getElementById('c-to');
+      const type = async (text) => {
+        to.value = text;
+        to.setSelectionRange(text.length, text.length);
+        to.dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise(r => setTimeout(r, 120));
+      };
+      const rows = () => Array.from(document.querySelectorAll('.rc-pop:not([hidden]) .rc-row'));
+      const names = () => rows().map(r => r.querySelector('.rc-name').textContent.trim());
+
+      await type('omar');
+      const english = names();
+
+      await type('عمر');
+      const arabic = names();
+
+      await type('المبيعات');
+      const byDept = names();
+
+      await type('purchase');
+      const byMailbox = rows().map(r => r.querySelector('.rc-mail').textContent.trim());
+
+      await type('zzzznobody');
+      const noMatch = document.querySelectorAll('.rc-pop:not([hidden])').length;
+
+      // اختيار بلوحة المفاتيح
+      await type('omar');
+      const marked = rows().filter(r => r.classList.contains('on')).length;
+      to.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await new Promise(r => setTimeout(r, 150));
+      const afterEnter = to.value;
+      const closed = document.querySelectorAll('.rc-pop:not([hidden])').length === 0;
+
+      // مستلم ثانٍ بعد الفاصلة، ولا يُقترح من أُضيف
+      await type(afterEnter + 'reham');
+      const second = names();
+      const excludesPicked = !names().some(n => /Omar/i.test(n));
+      to.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await new Promise(r => setTimeout(r, 150));
+      const bothValue = to.value;
+
+      // النقر بالفأرة يختار أيضًا
+      await type(bothValue + 'tariq');
+      const row = document.querySelector('.rc-pop:not([hidden]) .rc-row');
+      row.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      await new Promise(r => setTimeout(r, 150));
+      const afterClick = to.value;
+
+      const close = document.getElementById('c-close');
+      if (close) close.click();
+      await new Promise(r => setTimeout(r, 200));
+      return {
+        english, arabic, byDept, byMailbox, noMatch, marked,
+        afterEnter, closed, second, excludesPicked, bothValue, afterClick,
+        popGone: document.querySelectorAll('.rc-pop').length === 0,
+      };
+    })()`);
+
+    check('picker.findsByEnglishName', picker.english.some(n => /Omar Helmy/i.test(n)), picker.english);
+    check('picker.findsByArabicName', picker.arabic.some(n => /عمر/.test(n)), picker.arabic);
+    check('picker.findsByDepartment', picker.byDept.length >= 3, picker.byDept);
+    check('picker.findsByMailbox',
+      picker.byMailbox.some(e => e === 'purchase@osoulalbinaa.com'), picker.byMailbox);
+    check('picker.hidesWhenNoMatch', picker.noMatch === 0, picker.noMatch);
+    check('picker.highlightsFirstRow', picker.marked === 1, picker.marked);
+    check('picker.enterInsertsNameAndAddress',
+      /^Omar Helmy <dpd@osoulalbinaa\.com>, $/.test(picker.afterEnter), picker.afterEnter);
+    check('picker.closesAfterPick', picker.closed, picker);
+    check('picker.suggestsSecondRecipient', picker.second.some(n => /Reham/i.test(n)), picker.second);
+    check('picker.skipsAlreadyAdded', picker.excludesPicked, picker.second);
+    check('picker.keepsFirstRecipient',
+      /Omar Helmy <dpd@osoulalbinaa\.com>, Reham AlShemrani <sep\.hr@osoulalbinaa\.com>, $/.test(picker.bothValue),
+      picker.bothValue);
+    check('picker.mouseClickPicks', /purchase@osoulalbinaa\.com/.test(picker.afterClick), picker.afterClick);
+    check('picker.cleansUpOnClose', picker.popGone, picker);
+
+    /* 10) دليل الشركة حاضر لكل موظف */
+    const dirCheck = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const inState = mail.S.directory.length;
+      const self = mail.S.directory.some(p => p.email === mail.S.account.email);
+      mail.S.contacts = null;
+      document.getElementById('s-contacts').click();
+      await new Promise(r => setTimeout(r, 60));
+      const immediate = document.querySelectorAll('#list .row.contact').length;
+      await new Promise(r => setTimeout(r, 2200));
+      const afterScan = document.querySelectorAll('#list .row.contact').length;
+      const depts = document.querySelectorAll('#list .row.contact .rc-dept').length;
+      const find = document.getElementById('k-find');
+      find.value = 'طارق';
+      find.dispatchEvent(new Event('input'));
+      await new Promise(r => setTimeout(r, 150));
+      const arabicHits = document.querySelectorAll('#list .row.contact').length;
+      find.value = '';
+      find.dispatchEvent(new Event('input'));
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 300));
+      return { inState, self, immediate, afterScan, depts, arabicHits };
+    })()`);
+    check('directory.reachesRenderer', dirCheck.inState >= 32, dirCheck.inState);
+    check('directory.excludesSelf', dirCheck.self === false, dirCheck);
+    check('directory.showsWithoutWaitingForScan', dirCheck.immediate >= 32, dirCheck);
+    check('directory.searchFindsArabicName', dirCheck.arabicHits >= 1, dirCheck);
+    check('directory.mergesWithMailboxContacts', dirCheck.afterScan > dirCheck.inState, dirCheck);
+    check('directory.showsDepartments', dirCheck.depts >= 20, dirCheck.depts);
+
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح
     // سطح المكتب في لينكس. بلا حلقة مفاتيح لا يحفظ التطبيق كلمة المرور
@@ -550,6 +663,7 @@ function check(name, cond, detail) {
     check('diag.catchesOutsideDomain', diag.offDomain === 'DOMAIN', diag.offDomain);
     check('diag.isolatesSendingFault', diag.sendOnly === 'SMTP_ONLY', diag.sendOnly);
     check('diag.catchesUnknownHost', diag.badHost === 'DNS', diag.badHost);
+
 
   } catch (e) {
     out.EXCEPTION = `${e.message}\n${e.stack}`;
