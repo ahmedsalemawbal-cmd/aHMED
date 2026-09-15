@@ -59,6 +59,36 @@ jobs:
           # (ad-hoc) يتم في build/after-pack.js لأن أجهزة Apple Silicon
           # ترفض تشغيل ثنائي arm64 بلا أي توقيع.
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          # توقيع ويندوز: يعمل وحده متى وُضعت الشهادة في أسرار المستودع،
+          # ويبقى البناء ناجحًا بدونها. electron-builder يقرأ هذين
+          # المتغيّرين تلقائيًا ويتخطّى التوقيع إن كانا فارغين.
+          #
+          # ويندوز 11 فيه "التحكم الذكي في التطبيقات" (Smart App Control)
+          # يحظر كل ملف غير موقّع بلا زر تجاوز — فالتوقيع ليس تحسينًا
+          # تجميليًا بل شرط تشغيل على أجهزة كثيرة.
+          CSC_LINK: ${{ matrix.os == 'windows-latest' && secrets.WINDOWS_CERT_BASE64 || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.os == 'windows-latest' && secrets.WINDOWS_CERT_PASSWORD || '' }}
+          # البديل الأرخص: خدمة التوقيع من Microsoft بدل شهادة على رمز صلب.
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      # التوقيع يفشل صامتًا حين تنتهي الشهادة أو يُخطئ أحد في السرّ، فيخرج
+      # مثبّت يحظره ويندوز — وهو ما لا يُكتشف إلا عند موظف يحاول التثبيت.
+      - name: التحقق من توقيع مثبّت ويندوز
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        working-directory: osoul-mail-desktop
+        run: |
+          $exe = (Get-ChildItem dist/*.exe | Select-Object -First 1).FullName
+          $sig = Get-AuthenticodeSignature $exe
+          Write-Host "التوقيع: $($sig.Status) — $($sig.SignerCertificate.Subject)"
+          if ('${{ secrets.WINDOWS_CERT_BASE64 }}' -eq '' -and '${{ secrets.AZURE_CLIENT_ID }}' -eq '') {
+            Write-Host "::warning::لا توجد شهادة توقيع. ويندوز 11 سيحظر المثبّت عبر Smart App Control."
+          } elseif ($sig.Status -ne 'Valid') {
+            Write-Error "الشهادة مضبوطة لكن التوقيع غير صالح ($($sig.Status)). المثبّت سيُحظر."
+            exit 1
+          }
 
       # نسخة ماك بلا توقيع لا تعمل على Apple Silicon إطلاقًا، وهذا العطل
       # لا يظهر إلا على جهاز المستخدم — فنفشل هنا بدل أن ننشره.

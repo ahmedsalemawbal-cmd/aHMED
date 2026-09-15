@@ -13,7 +13,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "dist": "electron-builder --win --x64",
+    "dist": "node build/win-dist.js",
     "dist:both": "electron-builder --win --x64 --ia32",
     "pack": "electron-builder --win --x64 --dir",
     "test:imap": "node test/imap-test.js",
