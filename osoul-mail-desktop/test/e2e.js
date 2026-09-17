@@ -115,7 +115,16 @@ function check(name, cond, detail) {
     check('ui.folderArabic', ui.folderLabels[0] === 'البريد الوارد', ui.folderLabels);
     check('ui.pageSizeApplied', ui.rows === 10, ui.rows);
     check('ui.pager', ui.pager === '1 / 2', ui.pager);
-    check('ui.quota', /700\.0 م\.ب/.test(ui.quota || ''), ui.quota);
+    // الحصة خرجت من مسار الإقلاع لتسريعه، فتصل بعد أول رسم لا معه.
+    const quotaLate = await run(`(async () => {
+      for (let i = 0; i < 40; i++) {
+        const el = document.querySelector('.quota .num');
+        if (el && el.textContent.trim()) return el.textContent;
+        await new Promise(r => setTimeout(r, 200));
+      }
+      return '';
+    })()`);
+    check('ui.quota', /700\.0 م\.ب/.test(quotaLate || ''), quotaLate);
     check('ui.account', ui.account === 'ahmed@osoulalbinaa.com', ui.account);
 
     /* 4) فتح رسالة متعددة الأجزاء وقراءة جسمها من داخل الإطار */
@@ -634,13 +643,82 @@ function check(name, cond, detail) {
     check('password.explainsWhy', /مزوّد/.test(pwUI.note), pwUI.note);
     check('password.formStillThere', pwUI.fields, pwUI);
 
+    const { safeStorage } = require('electron');
+    const canEncrypt = safeStorage.isEncryptionAvailable();
+    out._encryptionAvailable = canEncrypt;
+
+    /* 13) اللقطة: الصندوق يُرسم قبل أن يردّ الخادم */
+    const snap = await run(`(async () => {
+      const r = await window.osoul.boot();
+      const c = r.ok ? r.data.cached : null;
+      return {
+        present: !!c,
+        account: c && c.account && c.account.email,
+        folders: c ? c.folders.length : 0,
+        messages: c && c.inbox ? c.inbox.messages.length : 0,
+        hasDirectory: c ? (c.directory || []).length : 0,
+        // اللقطة ترويسات فقط: لا نص رسالة يُكتب على القرص
+        noBodies: c && c.inbox ? c.inbox.messages.every(m => m.body === undefined && m.html === undefined) : false,
+        noWarnings: c ? (c.warnings || []).length === 0 : false,
+        savedAt: c ? typeof c.cachedAt : 'none',
+      };
+    })()`);
+    if (canEncrypt) {
+      check('snapshot.saved', snap.present, snap);
+      check('snapshot.isThisMailbox', snap.account === 'ahmed@osoulalbinaa.com', snap.account);
+      check('snapshot.hasFolders', snap.folders === 6, snap.folders);
+      check('snapshot.hasFirstPage', snap.messages === 10, snap.messages);
+      check('snapshot.carriesDirectory', snap.hasDirectory >= 33, snap.hasDirectory);
+      check('snapshot.headersOnly', snap.noBodies, snap);
+      check('snapshot.dropsSessionWarnings', snap.noWarnings, snap);
+      check('snapshot.stamped', snap.savedAt === 'number', snap.savedAt);
+
+      const stored = fs.readFileSync(path.join(userData, 'mailbox.dat'), 'utf8');
+      check('snapshot.encryptedOnDisk',
+        !/ahmed@osoulalbinaa\.com|INBOX/.test(stored), stored.slice(0, 80));
+    } else {
+      for (const k of ['snapshot.saved', 'snapshot.isThisMailbox', 'snapshot.hasFolders',
+        'snapshot.hasFirstPage', 'snapshot.carriesDirectory', 'snapshot.headersOnly',
+        'snapshot.dropsSessionWarnings', 'snapshot.stamped', 'snapshot.encryptedOnDisk']) {
+        out[k] = 'SKIP (لا تشفير على هذا النظام)';
+      }
+      // بلا تشفير لا تُكتب لقطة إطلاقًا: السرعة لا تبرّر بريدًا صريحًا.
+      check('snapshot.notWrittenWithoutEncryption', !fs.existsSync(path.join(userData, 'mailbox.dat')));
+    }
+
+
+    // اللقطة تُرسم ثم تُستبدل ببيانات الخادم: نفس الرسم مرّتين. مستمعات
+    // العملية الرئيسية يجب ألا تتراكم، وإلا رنّ الجرس مرّتين لكل رسالة.
+    const twice = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const boot = await window.osoul.boot();
+      const data = {
+        account: mail.S.account,
+        folders: mail.S.folders,
+        inbox: { folder: 'INBOX', total: mail.S.total, page: 0, messages: mail.S.messages },
+        quota: mail.S.quota,
+        directory: mail.S.directory,
+        warnings: [],
+      };
+      mail.startMail(data, boot.data);
+      await new Promise(r => setTimeout(r, 200));
+      mail.startMail(data, boot.data);
+      await new Promise(r => setTimeout(r, 400));
+      return {
+        shell: !!document.getElementById('t-refresh'),
+        folders: document.querySelectorAll('#side [data-folder]').length,
+        rows: document.querySelectorAll('#list .row').length,
+        appVisible: !document.getElementById('app').hidden,
+      };
+    })()`);
+    check('rerender.shellIntact', twice.shell && twice.appVisible, twice);
+    check('rerender.noDuplicateFolders', twice.folders === 6, twice.folders);
+    check('rerender.listStillRendered', twice.rows > 0, twice.rows);
+
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح
     // سطح المكتب في لينكس. بلا حلقة مفاتيح لا يحفظ التطبيق كلمة المرور
     // إطلاقًا — وهو السلوك الصحيح — فنتخطى هذه الفحوص بدل تسجيل فشل كاذب.
-    const { safeStorage } = require('electron');
-    const canEncrypt = safeStorage.isEncryptionAvailable();
-    out._encryptionAvailable = canEncrypt;
 
     if (canEncrypt) {
       check('credentials.saved', fs.existsSync(path.join(userData, 'credentials.dat')));

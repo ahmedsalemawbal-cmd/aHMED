@@ -133,6 +133,7 @@ const DICT = {
     signOutBtn: 'خروج', confirmSignOut: 'تسجيل الخروج ومسح بيانات الدخول من هذا الجهاز؟',
     version: 'بريد أصول البناء — الإصدار {v}',
     /* الاتصال */
+    offlineSnapshot: 'تعذّر الاتصال — هذه آخر نسخة محفوظة من صندوقك.',
     disconnected: 'انقطع الاتصال بخادم البريد — جارٍ إعادة الاتصال…',
     reconnected: 'عاد الاتصال.',
     sessionEnded: 'انتهت الجلسة. سجل الدخول من جديد.',
@@ -281,6 +282,7 @@ const DICT = {
     signOut: 'Sign out', signOutHint: 'Clears the saved credentials on this computer.',
     signOutBtn: 'Sign out', confirmSignOut: 'Sign out and clear saved credentials on this computer?',
     version: 'Osoul Albinaa Mail — version {v}',
+    offlineSnapshot: 'Could not connect — this is the last saved copy of your mailbox.',
     disconnected: 'Lost the connection to the mail server — reconnecting…',
     reconnected: 'Back online.',
     sessionEnded: 'Session ended. Please sign in again.',

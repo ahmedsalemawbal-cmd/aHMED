@@ -1,8 +1,11 @@
 /**
  * Osoul Mail — إقلاع الواجهة.
  *
- * المسار: قراءة الإعدادات → محاولة استئناف جلسة محفوظة بصمت →
- * إمّا صندوق البريد مباشرة، وإمّا بوابة الدخول.
+ * المسار: قراءة الإعدادات → رسم آخر لقطة محفوظة فورًا إن وُجدت →
+ * استئناف الجلسة في الخلفية → استبدال اللقطة ببيانات الخادم.
+ *
+ * اللقطة هي ما يجعل الفتح فوريًا: بدونها يقف الموظف أمام شاشة انتظار حتى
+ * يتم اتصال IMAP ويردّ الخادم بالمجلدات وأول صفحة.
  */
 
 import { $, toast } from './util.js';
@@ -24,29 +27,47 @@ async function main() {
   document.documentElement.dataset.theme = boot.settings.theme === 'light' ? 'light' : 'dark';
   setLang(boot.settings.lang);
 
-  if (boot.saved) {
-    const resumed = await window.osoul.resume();
-    if (resumed.ok && resumed.data && resumed.data.resumed) {
-      S.version = boot.version;
-      startMail(resumed.data, boot);
-      return;
-    }
-    // بيانات محفوظة لم تعد صالحة (تغيّرت كلمة المرور أو أُوقف الحساب).
-    if (resumed.ok === false && resumed.error && resumed.error.code !== 'NETWORK') {
-      showLogin(resumed.error.ar);
-      return;
-    }
-    showLogin(resumed.ok ? '' : (resumed.error && resumed.error.ar) || '');
+  if (!boot.saved) {
+    showLogin('');
     return;
   }
 
-  showLogin('');
+  // اللقطة أولًا: صندوق كامل على الشاشة قبل أن تبدأ الشبكة.
+  let painted = false;
+  if (boot.cached) {
+    S.version = boot.version;
+    S.stale = true;
+    startMail(boot.cached, boot);
+    painted = true;
+  }
+
+  const resumed = await window.osoul.resume();
+  if (resumed.ok && resumed.data && resumed.data.resumed) {
+    S.version = boot.version;
+    S.stale = false;
+    startMail(resumed.data, boot);
+    return;
+  }
+
+  // البيانات المحفوظة لم تعد صالحة: لا نترك لقطة قديمة تبدو حيّة.
+  const message = (resumed.error && resumed.error.ar) || '';
+  if (painted) {
+    if (resumed.ok === false && resumed.error && resumed.error.code === 'NETWORK') {
+      // عطل شبكي مؤقت: اللقطة تبقى معروضة ويُخبَر الموظف أنها غير محدّثة.
+      S.conn = 'offline';
+      toast(t('offlineSnapshot'), 'err');
+      return;
+    }
+    $('#app').hidden = true;
+  }
+  showLogin(resumed.ok ? '' : message);
 }
 
 function showLogin(message) {
   $('#boot').hidden = true;
   renderLogin(boot, (data) => {
     S.version = boot.version;
+    S.stale = false;
     startMail(data, boot);
   });
   if (message) {

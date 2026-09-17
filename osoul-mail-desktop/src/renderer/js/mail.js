@@ -88,6 +88,8 @@ export function startMail(data, boot) {
   // تسلسلي: تشغيلها فورًا يؤخّر أول رسالة يفتحها الموظف. نؤجّلها حتى تهدأ
   // الشاشة، فهي رقم بجانب اسم لا شيء ينتظره أحد.
   setTimeout(() => { if (S.account) loadLabelCounts(); }, 1500);
+  // الحصة بعد أن يستقرّ الرسم — تملأ مكانها في الشريط السفلي حين تصل.
+  setTimeout(() => { if (S.account) loadQuota(); }, 700);
 
   $('#login').hidden = true;
   $('#boot').hidden = true;
@@ -194,6 +196,16 @@ function labelRow(l) {
       <span class="name">${esc(labelName(l.slug))}</span>
       ${count ? `<span class="count num">${count}</span>` : ''}
     </button>`;
+}
+
+/** الحصة — رقم متأخر لا يمنع العمل، فيُطلب بعد أن تظهر الشاشة. */
+async function loadQuota() {
+  try {
+    const data = await call(window.osoul.quota);
+    if (!data || !data.quota) return;
+    S.quota = data.quota;
+    paintSidebar();
+  } catch (_) { /* الخادم لا يدعم الحصة أو تعذّرت — الشريط يعرض البريد فقط */ }
 }
 
 /** عدّادات التصنيفات — تُطلب بهدوء ولا تُعطّل فتح التطبيق. */
@@ -1043,7 +1055,22 @@ function bindEvents() {
   delegate(list, 'click', '#p-prev', () => loadList({ page: S.page - 1 }));
   delegate(list, 'click', '#p-next', () => loadList({ page: S.page + 1 }));
 
-  /* --- أحداث العملية الرئيسية --- */
+  bindMainEvents();
+  bindKeys();
+}
+
+/**
+ * أحداث العملية الرئيسية — مرّة واحدة لعمر التطبيق.
+ *
+ * الواجهة تُعاد بنيتها عند تبديل اللغة وعند وصول بيانات الخادم فوق اللقطة
+ * المحفوظة، وتسجيل هذه المستمعات مع كل إعادة بناء يعني جرسين ثم ثلاثة.
+ */
+let mainEventsBound = false;
+
+function bindMainEvents() {
+  if (mainEventsBound) return;
+  mainEventsBound = true;
+
   window.osoul.on('mail:new', async () => {
     // الجرس أولًا: التحديث قد يستغرق ثانية على اتصال بطيء، والتنبيه لا ينتظر.
     if (S.settings.sound !== false) ringBell(S.settings.soundSeconds || 5);
@@ -1054,8 +1081,6 @@ function bindEvents() {
   window.osoul.on('mail:changed', () => refreshFolders());
   window.osoul.on('mail:open', (p) => { if (p && p.uid) openMessage(p.uid, p.folder); });
   window.osoul.on('conn:state', (p) => setConn(p.state));
-
-  bindKeys();
 }
 
 /** الأحداث داخل القارئ — تُربط بعد كل إعادة رسم. */

@@ -147,6 +147,8 @@ function registerIPC(ctx) {
         passwordChangeUrl: policy.passwordChangeUrl || '',
       },
       saved: saved ? { email: saved.email, fromName: saved.fromName || '' } : null,
+      // ما رآه الموظف آخر مرة — يُرسم فورًا ريثما يردّ الخادم.
+      cached: saved ? store.loadCache(saved.email) : null,
     };
   }));
 
@@ -271,7 +273,7 @@ function registerIPC(ctx) {
   }));
 
   ipcMain.handle('auth:logout', wrap(async (p) => {
-    if (p.forget !== false) store.clearAccount();
+    if (p.forget !== false) { store.clearAccount(); store.clearCache(); }
     if (current) { await current.close().catch(() => {}); current = null; }
     return { ok: true };
   }));
@@ -530,10 +532,12 @@ async function buildBootPayload(session) {
   const inboxPage = inbox
     ? await session.mail.list({ folder: inbox.raw, page: 0, pageSize: policy.pageSize })
     : { folder: '', total: 0, page: 0, pageSize: policy.pageSize, messages: [] };
-  const quota = await session.mail.quota().catch(() => null);
+  // الحصة رقم في أسفل الشريط لا ينتظره أحد، وجلبها جولة IMAP كاملة على
+  // طابور تسلسلي. نتركها لطلب لاحق بعد أن يرى الموظف صندوقه.
+  const quota = null;
   const settings = store.getSettings();
 
-  return {
+  const payload = {
     account: { email: session.account.email, fromName: settings.fromName || session.account.fromName },
     // الدليل يصل مع الإقلاع: الإكمال التلقائي يجب أن يعمل من أول حرف،
     // قبل أن يُمسح الصندوق لبناء دفتر العناوين.
@@ -543,6 +547,10 @@ async function buildBootPayload(session) {
     quota,
     warnings: session.warnings || [],
   };
+
+  // لقطة للفتح القادم. التحذيرات لا تُحفظ: تخصّ هذه الجلسة وحدها.
+  store.saveCache({ ...payload, warnings: [], cachedAt: Date.now() });
+  return payload;
 }
 
 function applyTheme(theme) {

@@ -31,6 +31,13 @@ if (!gotLock) {
 }
 
 function bootstrap() {
+  // الحزمة تحمل ترجمتَي Chromium فقط (ar و en-US) توفيرًا لأربعين ميجابايت،
+  // فنثبّت لغة العرض على واحدة منهما بدل ترك Chromium يطلب لغة النظام
+  // ويجد ملفها محذوفًا. لا أثر لهذا على لغة التطبيق: نصوصه من عندنا.
+  try {
+    app.commandLine.appendSwitch('lang', store.getSettings().lang === 'ar' ? 'ar' : 'en-US');
+  } catch (_) { /* الإعدادات تالفة — الافتراضي يكفي */ }
+
   protocol.registerSchemesAsPrivileged([
     { scheme: SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: false } },
   ]);

@@ -111,7 +111,62 @@ function isIntermediateArchBuild(appOutDir) {
   return /-temp$/.test(appOutDir);
 }
 
+/* ---------------------------------------------------------- تقليم اللغات
+ *
+ * Electron يشحن خمسًا وخمسين ترجمة لواجهة Chromium بأربعين ميجابايت،
+ * والتطبيق بلغتين. الفرق يدفعه كل موظف مرةً في التنزيل ومرةً على القرص.
+ *
+ * خيار electronLanguages في electron-builder يعمل على ماك ولينكس ويُتجاهل
+ * على ويندوز، فنقلّم هنا بأنفسنا للمنصّتين معًا.
+ *
+ * en-US يبقى دائمًا: هو ما يرجع إليه Chromium حين لا يجد لغة النظام،
+ * والتطبيق يُثبّت لغة العرض صراحةً في main.js فلا يطلب ملفًا محذوفًا.
+ */
+const KEEP_PAK = new Set(['ar.pak', 'en-US.pak']);
+const KEEP_LPROJ = new Set(['ar.lproj', 'en.lproj', 'en_GB.lproj', 'en-US.lproj']);
+
+function localeDirs(appOutDir, platform) {
+  if (platform === 'darwin') {
+    const name = fs.readdirSync(appOutDir).find((f) => f.endsWith('.app'));
+    if (!name) return [];
+    return [path.join(appOutDir, name, 'Contents', 'Frameworks',
+      'Electron Framework.framework', 'Versions', 'A', 'Resources')];
+  }
+  return [path.join(appOutDir, 'locales')];
+}
+
+function sizeOf(target) {
+  const stat = fs.statSync(target);
+  if (!stat.isDirectory()) return stat.size;
+  return fs.readdirSync(target).reduce((sum, f) => sum + sizeOf(path.join(target, f)), 0);
+}
+
+function pruneLocales(appOutDir, platform) {
+  let removed = 0;
+  let freed = 0;
+  for (const dir of localeDirs(appOutDir, platform)) {
+    if (!fs.existsSync(dir)) continue;
+    for (const entry of fs.readdirSync(dir)) {
+      const drop = (entry.endsWith('.pak') && !KEEP_PAK.has(entry))
+        || (entry.endsWith('.lproj') && !KEEP_LPROJ.has(entry));
+      if (!drop) continue;
+      const full = path.join(dir, entry);
+      freed += sizeOf(full);
+      fs.rmSync(full, { recursive: true, force: true });
+      removed++;
+    }
+  }
+  if (removed) {
+    console.log(`  • حُذفت ${removed} ترجمة غير مستعملة (${(freed / 1048576).toFixed(1)} م.ب)`);
+  }
+  return { removed, freed };
+}
+
 exports.default = async function afterPack(context) {
+  if (!isIntermediateArchBuild(context.appOutDir)) {
+    pruneLocales(context.appOutDir, context.electronPlatformName);
+  }
+
   if (context.electronPlatformName !== 'darwin') return;
   if (isIntermediateArchBuild(context.appOutDir)) {
     console.log(`  • تخطّي التوقيع للنسخة المؤقتة ${context.appOutDir}`);
@@ -137,3 +192,5 @@ exports.default = async function afterPack(context) {
 exports.collectTargets = collectTargets;
 exports.isBundleMainExecutable = isBundleMainExecutable;
 exports.isIntermediateArchBuild = isIntermediateArchBuild;
+exports.pruneLocales = pruneLocales;
+exports.KEEP_PAK = KEEP_PAK;

@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const { app, safeStorage } = require('electron');
 
-const FILES = { creds: 'credentials.dat', settings: 'settings.json', ai: 'ai-key.dat' };
+const FILES = { creds: 'credentials.dat', settings: 'settings.json', ai: 'ai-key.dat', cache: 'mailbox.dat' };
 
 function filePath(name) {
   return path.join(app.getPath('userData'), name);
@@ -116,6 +116,52 @@ function clearAccount() {
   }
 }
 
+
+/* ------------------------------------------------------- لقطة الصندوق
+ *
+ * فتح التطبيق كان ينتظر الشبكة: اتصال IMAP، ثم المجلدات، ثم أول صفحة، ثم
+ * الحصة — أربع جولات قبل أن يرى الموظف شيئًا. نحفظ آخر ما رآه ونرسمه فور
+ * الفتح، ثم نستبدله بما يصل من الخادم.
+ *
+ * اللقطة ترويسات فقط (مرسل وموضوع وتاريخ) بلا أي نص رسالة، ومع ذلك تُشفَّر
+ * بنفس تشفير كلمة المرور: بريد الشركة لا يُترك نصًّا صريحًا على القرص. وبلا
+ * تشفير متاح لا نحفظ شيئًا — سرعةٌ لا تستحق تسريبًا.
+ */
+
+/** حفظ لقطة الصندوق. صامت: فشل الحفظ يعني فتحًا أبطأ لا عطلًا. */
+function saveCache(payload) {
+  if (!canEncrypt()) return false;
+  try {
+    const blob = safeStorage.encryptString(JSON.stringify(payload)).toString('base64');
+    fs.mkdirSync(app.getPath('userData'), { recursive: true });
+    fs.writeFileSync(filePath(FILES.cache), blob, { mode: 0o600 });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/** استرجاع اللقطة، أو null إن غابت أو تلفت أو تغيّر صاحب الصندوق. */
+function loadCache(email) {
+  if (!canEncrypt()) return null;
+  try {
+    const blob = fs.readFileSync(filePath(FILES.cache), 'utf8');
+    const data = JSON.parse(safeStorage.decryptString(Buffer.from(blob, 'base64')));
+    if (!data || !data.account || !Array.isArray(data.folders)) return null;
+    // لقطة موظف آخر على نفس الجهاز لا تُعرض لهذا الموظف.
+    if (email && String(data.account.email).toLowerCase() !== String(email).toLowerCase()) return null;
+    return data;
+  } catch (_) {
+    return null;
+  }
+}
+
+function clearCache() {
+  try {
+    fs.unlinkSync(filePath(FILES.cache));
+  } catch (_) { /* غير موجود أصلًا */ }
+}
+
 /* ----------------------------------------------------- مفتاح الذكاء الاصطناعي
  *
  * مفتاح OpenAI يُخزَّن بنفس تشفير كلمة المرور (DPAPI في ويندوز): سرّ قابل
@@ -154,6 +200,9 @@ function loadAiKey(policyKey) {
 }
 
 module.exports = {
+  saveCache,
+  loadCache,
+  clearCache,
   saveAiKey,
   loadAiKey,
   getSettings,
