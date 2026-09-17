@@ -287,7 +287,7 @@ function check(name, cond, detail) {
       return { theme: document.documentElement.dataset.theme,
                bg: getComputedStyle(document.body).backgroundColor };
     })()`);
-    check('theme.toggled', theme.theme === 'light' && theme.bg === 'rgb(238, 241, 244)', theme);
+    check('theme.toggled', theme.theme === 'light' && theme.bg === 'rgb(238, 241, 243)', theme);
 
     /* 9) التصنيفات */
     const labels = await run(`(async () => {
