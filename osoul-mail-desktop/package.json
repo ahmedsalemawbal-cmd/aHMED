@@ -1,7 +1,7 @@
 {
   "name": "osoul-mail-desktop",
   "productName": "Osoul Mail",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "بريد أصول البناء — تطبيق البريد الإلكتروني للموظفين على ويندوز",
   "author": {
     "name": "Osoul Albinaa Industrial Co.",
@@ -27,7 +27,8 @@
     "test:sign": "node test/sign-order-test.js",
     "test:i18n": "node test/i18n-test.js",
     "test:ca": "node test/ca-test.js",
-    "test:dir": "node test/directory-test.js"
+    "test:dir": "node test/directory-test.js",
+    "shots": "electron test/shot.js"
   },
   "dependencies": {
     "imapflow": "1.7.8",

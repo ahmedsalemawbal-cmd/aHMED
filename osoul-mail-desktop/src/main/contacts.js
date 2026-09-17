@@ -109,11 +109,15 @@ async function build(session, me, directoryList) {
   }
 
   const list = [...map.values()];
-  // من راسلتَه أولًا، ثم الأكثر تكرارًا، ثم الأحدث، ثم بقية الزملاء أبجديًا.
-  list.sort((a, b) => (Number(b.outgoing) - Number(a.outgoing))
-    || (b.count - a.count)
-    || (b.lastTs - a.lastTs)
-    || String(a.name).localeCompare(String(b.name)));
+  // زملاء الشركة أولًا وبترتيب أبجدي ثابت: هم من يُراسَل يوميًا، ودفتر
+  // يفتح على مرسل إعلانات خارجي دفتر لا يُستعمل. ومن خارج الشركة بعدهم
+  // مرتّبين بمن راسلتَه ثم الأكثر تكرارًا ثم الأحدث.
+  list.sort((a, b) => (Number(!!b.directory) - Number(!!a.directory))
+    || (a.directory
+      ? String(a.name).localeCompare(String(b.name))
+      : (Number(b.outgoing) - Number(a.outgoing))
+        || (b.count - a.count)
+        || (b.lastTs - a.lastTs)));
   return list;
 }
 

@@ -278,7 +278,7 @@ function check(name, cond, detail) {
       return { theme: document.documentElement.dataset.theme,
                bg: getComputedStyle(document.body).backgroundColor };
     })()`);
-    check('theme.toggled', theme.theme === 'light' && theme.bg === 'rgb(238, 241, 243)', theme);
+    check('theme.toggled', theme.theme === 'light' && theme.bg === 'rgb(238, 241, 244)', theme);
 
     /* 9) التصنيفات */
     const labels = await run(`(async () => {
@@ -587,6 +587,52 @@ function check(name, cond, detail) {
     check('directory.searchFindsArabicName', dirCheck.arabicHits >= 1, dirCheck);
     check('directory.mergesWithMailboxContacts', dirCheck.afterScan > dirCheck.inState, dirCheck);
     check('directory.showsDepartments', dirCheck.depts >= 20, dirCheck.depts);
+
+
+    /* 11) اسم الزميل يظهر ولو لم يضبط المرسل اسمه */
+    const names = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const dir = mail.S.directory;
+      const has = (e) => dir.some(p => p.email === e);
+      // رسالة مباشرة من الخادم: العنوان بلا اسم في الترويسة
+      const res = await window.osoul.list({ folder: 'INBOX', page: 0, search: '', filter: '' });
+      const rows = res.ok ? res.data.messages : [];
+      return {
+        techDepL: has('tech.depl@osoulalbinaa.com'),
+        techDep1: has('tech.dep1@osoulalbinaa.com'),
+        sEng: (dir.find(p => p.email === 's.eng@osoulalbinaa.com') || {}).name,
+        everyFromShaped: rows.every(m => m.from && typeof m.from.email === 'string'),
+        outside: rows.filter(m => !m.from.email.endsWith('@osoulalbinaa.com'))
+          .map(m => m.from.name),
+      };
+    })()`);
+    check('names.coversBothSpellings', names.techDepL && names.techDep1, names);
+    check('names.knowsBareMailbox', names.sEng === 'Mohammed Latif', names.sEng);
+    check('names.listStillShaped', names.everyFromShaped, names);
+    // اسم كتبه صاحب الرسالة عن نفسه لا يُستبدل، ومن خارج الشركة لا يُخترع له اسم.
+    check('names.leavesOutsidersAlone',
+      names.outside.length > 0 && names.outside.every(n => n === '' || /^Sender \d+$/.test(n)),
+      names.outside);
+
+    /* 12) قسم كلمة المرور صار خطوتين مرقّمتين */
+    const pwUI = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const settings = await import('./js/settings.js');
+      settings.openSettings(mail.S, { onChange: mail.applySettings, onLogout: () => {} });
+      await new Promise(r => setTimeout(r, 250));
+      const steps = document.querySelectorAll('.sheet .steps li').length;
+      const numbers = Array.from(document.querySelectorAll('.sheet .steps .n')).map(n => n.textContent.trim());
+      const openBtn = !!document.getElementById('st-pw-open');
+      const note = (document.querySelector('.sheet .note') || {}).textContent || '';
+      const fields = ['st-pw-now', 'st-pw-new', 'st-pw-new2'].every(id => !!document.getElementById(id));
+      const close = document.getElementById('st-close');
+      if (close) close.click();
+      return { steps, numbers, openBtn, note, fields };
+    })()`);
+    check('password.twoNumberedSteps', pwUI.steps === 2 && pwUI.numbers.join() === '1,2', pwUI);
+    check('password.providerButtonFirst', pwUI.openBtn, pwUI);
+    check('password.explainsWhy', /مزوّد/.test(pwUI.note), pwUI.note);
+    check('password.formStillThere', pwUI.fields, pwUI);
 
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح

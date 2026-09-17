@@ -138,30 +138,37 @@ export function openSettings(state, handlers) {
 
         <div class="group">
           <h4>${esc(t('passwordTitle'))}</h4>
-          <div class="opt">
-            <div class="lab">
-              <div>${esc(t('pwOnServer'))}</div>
-              <div class="d">${esc(t('pwOnServerHint'))}</div>
-            </div>
-            ${state.policy && state.policy.passwordChangeUrl
-              ? `<button class="btn" id="st-pw-open">${icon('lock', 'sm')}<span>${esc(t('pwOpenProvider'))}</span></button>`
-              : ''}
-          </div>
-          <div class="opt" style="display:block">
-            <div class="lab" style="margin-bottom:8px">
-              <div>${esc(t('pwUpdateHere'))}</div>
-              <div class="d">${esc(t('pwUpdateHereHint'))}</div>
-            </div>
-            <div class="pw-form">
-              <input type="password" id="st-pw-now" dir="ltr" autocomplete="current-password"
-                     placeholder="${esc(t('pwCurrent'))}">
-              <input type="password" id="st-pw-new" dir="ltr" autocomplete="new-password"
-                     placeholder="${esc(t('pwNew'))}">
-              <input type="password" id="st-pw-new2" dir="ltr" autocomplete="new-password"
-                     placeholder="${esc(t('pwConfirm'))}">
-              <button class="btn primary" id="st-pw-save">${icon('check', 'sm')}<span>${esc(t('pwSave'))}</span></button>
-            </div>
-          </div>
+          <p class="note">${esc(t('pwWhy'))}</p>
+
+          <ol class="steps">
+            <li>
+              <span class="n">1</span>
+              <div class="body">
+                <div class="t">${esc(t('pwStep1'))}</div>
+                <div class="d">${esc(t('pwStep1Hint'))}</div>
+                ${state.policy && state.policy.passwordChangeUrl ? `
+                  <button class="btn primary" id="st-pw-open">
+                    ${icon('lock', 'sm')}<span>${esc(t('pwOpenProvider'))}</span>
+                  </button>` : ''}
+              </div>
+            </li>
+            <li>
+              <span class="n">2</span>
+              <div class="body">
+                <div class="t">${esc(t('pwStep2'))}</div>
+                <div class="d">${esc(t('pwStep2Hint'))}</div>
+                <div class="pw-form">
+                  <input type="password" id="st-pw-now" dir="ltr" autocomplete="current-password"
+                         placeholder="${esc(t('pwCurrent'))}">
+                  <input type="password" id="st-pw-new" dir="ltr" autocomplete="new-password"
+                         placeholder="${esc(t('pwNew'))}">
+                  <input type="password" id="st-pw-new2" dir="ltr" autocomplete="new-password"
+                         placeholder="${esc(t('pwConfirm'))}">
+                  <button class="btn" id="st-pw-save">${icon('check', 'sm')}<span>${esc(t('pwSave'))}</span></button>
+                </div>
+              </div>
+            </li>
+          </ol>
         </div>
 
         <div class="group">

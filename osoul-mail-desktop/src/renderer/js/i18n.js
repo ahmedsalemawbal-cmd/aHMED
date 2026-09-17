@@ -8,7 +8,6 @@
  * كل نص ظاهر للمستخدم يمرّ من هنا. النصوص القادمة من العملية الرئيسية
  * (رسائل الأخطاء) تصل بلغتين معًا، وتختار الواجهة منها حسب اللغة الحالية.
  */
-
 const DICT = {
   ar: {
     /* عام */
@@ -21,7 +20,6 @@ const DICT = {
     appBootFailed: 'تعذّر تشغيل التطبيق. أعد فتحه من جديد.',
     unitB: 'بايت', unitKB: 'ك.ب', unitMB: 'م.ب', unitGB: 'ج.ب',
     listSep: '، ',
-
     /* بوابة الدخول */
     email: 'البريد الإلكتروني', password: 'كلمة المرور',
     keepSignedIn: 'إبقائي مسجلًا للدخول',
@@ -34,13 +32,11 @@ const DICT = {
     gateNote: 'الدخول مقصور على الموظفين المعتمدين.',
     gateHelp: 'للحصول على حساب أو إعادة تعيين كلمة المرور راجع مسؤول النظام.',
     booting: 'جارٍ فتح صندوق البريد…',
-
     /* المجلدات */
     inbox: 'البريد الوارد', sent: 'المرسل', drafts: 'المسودات',
     trash: 'المحذوفات', junk: 'المزعج', archive: 'الأرشيف',
     foldersTitle: 'مجلدات', newFolder: 'مجلد جديد', newFolderPrompt: 'اسم المجلد الجديد:',
     newFolderExample: 'مثال: العروض', folderCreated: 'أُنشئ المجلد',
-
     /* القائمة */
     compose: 'رسالة جديدة',
     filterAll: 'الكل', filterUnread: 'غير المقروء', filterStarred: 'المميّز',
@@ -50,7 +46,6 @@ const DICT = {
     emptySearch: 'لا نتائج لهذا البحث', emptySearchHint: 'جرّب كلمة أخرى أو ابحث في مجلد مختلف.',
     emptyUnread: 'لا توجد رسائل غير مقروءة', emptyUnreadHint: 'قرأت كل شيء في هذا المجلد.',
     newest: 'أحدث', oldest: 'أقدم',
-
     /* القارئ */
     pickMessage: 'اختر رسالة لقراءتها', pickMessageHint: 'أو اضغط "رسالة جديدة" للكتابة.',
     to: 'إلى', andOthers: 'و{n} آخرين',
@@ -64,7 +59,6 @@ const DICT = {
     deletedForever: 'حُذفت نهائيًا', movedTo: 'نُقلت إلى {folder}',
     saving: 'جارٍ الحفظ…', opening: 'جارٍ الفتح…',
     attachmentSaved: 'حُفظ المرفق', noAppForFile: 'لا يوجد برنامج يفتح هذا الملف',
-
     /* الكتابة */
     newMessage: 'رسالة جديدة',
     cc: 'نسخة', bcc: 'مخفية', subject: 'الموضوع',
@@ -90,7 +84,6 @@ const DICT = {
     quotedOn: 'في {date}، كتب {who}:',
     forwardedHeader: '---------- رسالة ممرّرة ----------',
     fwdFrom: 'من', fwdDate: 'التاريخ', fwdSubject: 'الموضوع', fwdTo: 'إلى',
-
     /* الإعدادات */
     account: 'الحساب', appearance: 'المظهر', signature: 'التوقيع',
     mailSection: 'البريد', session: 'الجلسة', language: 'اللغة',
@@ -121,12 +114,13 @@ const DICT = {
     verdictSmtpOnly: 'الاستقبال يعمل — الإرسال فقط مرفوض. يمكنك الدخول وقراءة بريدك.',
     verdictAltHost: 'الخادم الافتراضي لا يستجيب، لكن خادمًا آخر لنفس النطاق يستجيب. أرسل هذه النتيجة لمسؤول النظام ليضبط الخادم الصحيح من "إعدادات متقدمة".',
     warnSendMaybe: 'تنبيه: القراءة تعمل، والإرسال قد لا يعمل.',
+    pwWhy: 'كلمة مرور صندوق البريد يملكها مزوّد البريد لا هذا التطبيق، فتُغيَّر عنده أولًا ثم تُحدَّث هنا.',
+    pwStep1: 'غيّرها عند مزوّد البريد',
+    pwStep1Hint: 'يفتح موقع البريد في المتصفح. ادخل ببريدك، ثم الإعدادات ← كلمة المرور.',
+    pwStep2: 'حدّثها في التطبيق',
+    pwStep2Hint: 'بعد تغييرها هناك، اكتب القديمة والجديدة هنا ليتابع التطبيق عمله بلا تسجيل خروج.',
     passwordTitle: 'كلمة المرور',
-    pwOnServer: 'تغيير كلمة المرور عند مزوّد البريد',
-    pwOnServerHint: 'كلمة مرور صندوق البريد تُغيَّر في صفحة المزوّد، ثم تُحدَّث هنا.',
     pwOpenProvider: 'فتح صفحة المزوّد',
-    pwUpdateHere: 'تحديث كلمة المرور في التطبيق',
-    pwUpdateHereHint: 'بعد تغييرها عند المزوّد، اكتبها هنا ليتابع التطبيق عمله بلا تسجيل خروج.',
     pwCurrent: 'كلمة المرور الحالية',
     pwNew: 'كلمة المرور الجديدة',
     pwConfirm: 'تأكيد كلمة المرور الجديدة',
@@ -138,28 +132,24 @@ const DICT = {
     signOut: 'تسجيل الخروج', signOutHint: 'يمسح بيانات الدخول المحفوظة على هذا الجهاز.',
     signOutBtn: 'خروج', confirmSignOut: 'تسجيل الخروج ومسح بيانات الدخول من هذا الجهاز؟',
     version: 'بريد أصول البناء — الإصدار {v}',
-
     /* الاتصال */
     disconnected: 'انقطع الاتصال بخادم البريد — جارٍ إعادة الاتصال…',
     reconnected: 'عاد الاتصال.',
     sessionEnded: 'انتهت الجلسة. سجل الدخول من جديد.',
-
     /* التصنيفات */
     labels: 'التصنيفات', labelNone: 'بلا تصنيف', labelSet: 'صُنّفت: {name}',
     labelRemoved: 'أُزيل التصنيف', labelPick: 'التصنيف',
     labelsUnsupported: 'خادم البريد لا يدعم التصنيفات.',
     lblProjects: 'مشاريع', lblProcurement: 'مشتريات',
     lblQuality: 'جودة وسلامة', lblHr: 'موارد بشرية', lblFinance: 'مالية',
-
     /* جهات الاتصال */
     contacts: 'جهات الاتصال', contactsCount: '{n} جهة',
-    pickHint: '↑↓ للتنقل · Enter للاختيار', directoryTitle: 'دليل الشركة', department: 'القسم',
+    pickHint: '↑↓ للتنقل · Enter للاختيار', contactSearch: 'ابحث بالاسم أو البريد', directoryTitle: 'دليل الشركة', department: 'القسم',
     contactsEmpty: 'لا توجد جهات اتصال بعد',
     contactsEmptyHint: 'يمتلئ الدفتر تلقائيًا ممّن تراسلهم.',
     contactsHint: 'مبني تلقائيًا من الوارد والمرسل.',
     message: 'رسالة', copyEmail: 'نسخ البريد', copied: 'نُسخ',
     backToInbox: 'رجوع للوارد', msgCount: '{n} رسالة',
-
     /* الذكاء الاصطناعي */
     ai: 'الذكاء الاصطناعي',
     aiDraft: 'اكتب لي الرسالة', aiImprove: 'حسّن الصياغة',
@@ -175,7 +165,6 @@ const DICT = {
     aiManagedHint: 'المفتاح مضبوط مركزيًا؛ لا حاجة لإدخال شيء.',
     aiOn: 'مفعّل',
   },
-
   en: {
     appName: 'Osoul Albinaa Mail',
     appTagline: 'OSOUL ALBINAA MAIL',
@@ -186,7 +175,6 @@ const DICT = {
     appBootFailed: 'The app could not start. Please open it again.',
     unitB: 'B', unitKB: 'KB', unitMB: 'MB', unitGB: 'GB',
     listSep: ', ',
-
     email: 'Email address', password: 'Password',
     keepSignedIn: 'Keep me signed in',
     signIn: 'Sign in to my mail', checking: 'Checking…',
@@ -198,12 +186,10 @@ const DICT = {
     gateNote: 'Sign-in is limited to approved employees.',
     gateHelp: 'For an account or a password reset, contact your administrator.',
     booting: 'Opening your mailbox…',
-
     inbox: 'Inbox', sent: 'Sent', drafts: 'Drafts',
     trash: 'Trash', junk: 'Spam', archive: 'Archive',
     foldersTitle: 'Folders', newFolder: 'New folder', newFolderPrompt: 'Name of the new folder:',
     newFolderExample: 'e.g. Quotes', folderCreated: 'Folder created',
-
     compose: 'New message',
     filterAll: 'All', filterUnread: 'Unread', filterStarred: 'Starred',
     noSubject: '(no subject)', noSender: '(no sender)',
@@ -212,7 +198,6 @@ const DICT = {
     emptySearch: 'No results', emptySearchHint: 'Try another word, or search a different folder.',
     emptyUnread: 'No unread messages', emptyUnreadHint: 'You have read everything in this folder.',
     newest: 'Newer', oldest: 'Older',
-
     pickMessage: 'Select a message to read', pickMessageHint: 'Or hit “New message” to write one.',
     to: 'To', andOthers: 'and {n} others',
     reply: 'Reply', replyAll: 'Reply all', forward: 'Forward',
@@ -225,7 +210,6 @@ const DICT = {
     deletedForever: 'Deleted permanently', movedTo: 'Moved to {folder}',
     saving: 'Saving…', opening: 'Opening…',
     attachmentSaved: 'Attachment saved', noAppForFile: 'No app can open this file type',
-
     newMessage: 'New message',
     cc: 'Cc', bcc: 'Bcc', subject: 'Subject',
     bodyPlaceholder: 'Write your message…',
@@ -250,7 +234,6 @@ const DICT = {
     quotedOn: 'On {date}, {who} wrote:',
     forwardedHeader: '---------- Forwarded message ----------',
     fwdFrom: 'From', fwdDate: 'Date', fwdSubject: 'Subject', fwdTo: 'To',
-
     account: 'Account', appearance: 'Appearance', signature: 'Signature',
     mailSection: 'Mail', session: 'Session', language: 'Language',
     dark: 'Dark', light: 'Light',
@@ -280,12 +263,13 @@ const DICT = {
     verdictSmtpOnly: 'Receiving works — only sending was refused. You can sign in and read your mail.',
     verdictAltHost: 'The default server does not answer, but another server for this domain does. Send this result to your administrator so they can set the right server under “Advanced”.',
     warnSendMaybe: 'Heads-up: reading works, sending may not.',
+    pwWhy: 'Your mailbox password belongs to the mail provider, not this app, so it is changed there first and updated here.',
+    pwStep1: 'Change it at the provider',
+    pwStep1Hint: 'Opens the mail site in your browser. Sign in, then Settings → Password.',
+    pwStep2: 'Update it in the app',
+    pwStep2Hint: 'Once changed there, enter the old and new password here so the app keeps working without signing out.',
     passwordTitle: 'Password',
-    pwOnServer: 'Change it at your mail provider',
-    pwOnServerHint: 'A mailbox password is changed on the provider’s page, then updated here.',
     pwOpenProvider: 'Open provider page',
-    pwUpdateHere: 'Update the password in this app',
-    pwUpdateHereHint: 'After changing it at the provider, type it here so the app keeps working without signing out.',
     pwCurrent: 'Current password',
     pwNew: 'New password',
     pwConfirm: 'Confirm new password',
@@ -297,25 +281,21 @@ const DICT = {
     signOut: 'Sign out', signOutHint: 'Clears the saved credentials on this computer.',
     signOutBtn: 'Sign out', confirmSignOut: 'Sign out and clear saved credentials on this computer?',
     version: 'Osoul Albinaa Mail — version {v}',
-
     disconnected: 'Lost the connection to the mail server — reconnecting…',
     reconnected: 'Back online.',
     sessionEnded: 'Session ended. Please sign in again.',
-
     labels: 'Labels', labelNone: 'No label', labelSet: 'Labelled: {name}',
     labelRemoved: 'Label removed', labelPick: 'Label',
     labelsUnsupported: 'This mail server does not support labels.',
     lblProjects: 'Projects', lblProcurement: 'Procurement',
     lblQuality: 'Quality & safety', lblHr: 'HR', lblFinance: 'Finance',
-
     contacts: 'Contacts', contactsCount: '{n} contacts',
-    pickHint: '↑↓ to move · Enter to pick', directoryTitle: 'Company directory', department: 'Department',
+    pickHint: '↑↓ to move · Enter to pick', contactSearch: 'Search by name or address', directoryTitle: 'Company directory', department: 'Department',
     contactsEmpty: 'No contacts yet',
     contactsEmptyHint: 'The book fills itself from the people you write to.',
     contactsHint: 'Built automatically from your Inbox and Sent mail.',
     message: 'Message', copyEmail: 'Copy address', copied: 'Copied',
     backToInbox: 'Back to Inbox', msgCount: '{n} messages',
-
     ai: 'AI assistant',
     aiDraft: 'Write this for me', aiImprove: 'Improve the wording',
     aiWorking: 'Writing…',
@@ -331,19 +311,15 @@ const DICT = {
     aiOn: 'On',
   },
 };
-
 let lang = 'ar';
-
 /** اللغة الحالية. */
 export function getLang() {
   return lang;
 }
-
 /** هل الواجهة من اليمين لليسار؟ */
 export function isRTL() {
   return lang === 'ar';
 }
-
 /** ضبط اللغة وقلب اتجاه الصفحة. لا يعيد الرسم — المتصل مسؤول عن ذلك. */
 export function setLang(next) {
   lang = next === 'en' ? 'en' : 'ar';
@@ -352,7 +328,6 @@ export function setLang(next) {
   html.dir = isRTL() ? 'rtl' : 'ltr';
   return lang;
 }
-
 /**
  * ترجمة مفتاح مع استبدال المتغيّرات: t('movedTo', { folder: 'المرسل' }).
  * مفتاح غير موجود يعود بالعربية ثم بالمفتاح نفسه، فلا تظهر الواجهة فارغة أبدًا.
@@ -365,13 +340,11 @@ export function t(key, vars) {
   if (!vars) return text;
   return String(text).replace(/\{(\w+)\}/g, (m, name) => (vars[name] == null ? m : String(vars[name])));
 }
-
 /** نص خطأ قادم من العملية الرئيسية — يصل بلغتين فنختار المناسبة. */
 export function pick(obj) {
   if (!obj) return t('unexpected');
   return (lang === 'en' ? obj.en : obj.ar) || obj.ar || obj.en || t('unexpected');
 }
-
 /** اسم مجلد مميّز باللغة الحالية، أو الاسم كما جاء من الخادم. */
 export function folderName(folder) {
   if (!folder) return '';
@@ -383,34 +356,28 @@ export function folderName(folder) {
   if (key) return t(key);
   return (folder.display && (lang === 'en' ? folder.display.en : folder.display.ar)) || folder.name || folder.raw;
 }
-
 /** اسم تصنيف باللغة الحالية. */
 export function labelName(slug) {
   const key = { projects: 'lblProjects', procurement: 'lblProcurement',
     quality: 'lblQuality', hr: 'lblHr', finance: 'lblFinance' }[slug];
   return key ? t(key) : slug;
 }
-
 /* أسماء اللغات تُكتب دائمًا بلغتها هي: زر التبديل يجب أن يقرأه من لا يعرف
    اللغة الحالية، فالإنجليزي يرى "English" والعربي يرى "العربية". */
 const LANG_NAMES = { ar: 'العربية', en: 'English' };
 const LANG_SHORT = { ar: 'ع', en: 'EN' };
-
 /** اسم اللغة الأخرى بلغتها — نص زر التبديل. */
 export function otherLangName() {
   return LANG_NAMES[lang === 'ar' ? 'en' : 'ar'];
 }
-
 /** اختصار اللغة الأخرى — لزر ضيّق في الشريط العلوي. */
 export function otherLangShort() {
   return LANG_SHORT[lang === 'ar' ? 'en' : 'ar'];
 }
-
 /** اسم لغة بعينها بلغتها — لأزرار الاختيار في الإعدادات. */
 export function langName(which) {
   return LANG_NAMES[which] || which;
 }
-
 /** الوسم المناسب للتنسيق (التواريخ والأرقام). */
 export function locale() {
   return lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn-ca-gregory';

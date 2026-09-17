@@ -30,6 +30,27 @@ let policy = null;
 /** دفتر العناوين يُبنى مرة لكل جلسة: مسح الصندوق مكلف ولا يتغيّر كل دقيقة. */
 let contactsCache = null;
 
+/**
+ * ملء أسماء الزملاء الناقصة من دليل الشركة.
+ *
+ * رسالة من زميل لم يضبط اسم المرسل تصل بعنوان عارٍ، فيرى الموظف
+ * "s.eng@osoulalbinaa.com" لا "محمد لطيف". نعرف من هو، فنكمل الاسم عند
+ * العرض — في القائمة والقارئ والإشعار معًا، لأن المرور من هنا واحد.
+ */
+let namedAddress = null;
+
+function withNames(message) {
+  if (!message || !namedAddress) return message;
+  const list = (arr) => (Array.isArray(arr) ? arr.map(namedAddress) : arr);
+  return {
+    ...message,
+    from: message.from ? namedAddress(message.from) : message.from,
+    to: list(message.to),
+    cc: list(message.cc),
+    bcc: list(message.bcc),
+  };
+}
+
 /** رد موحد: لا نرمي استثناءات عبر IPC، بل نعيد { ok, error }. */
 function wrap(handler) {
   return async (_event, payload) => {
@@ -98,6 +119,7 @@ function attachSessionEvents(session) {
 function registerIPC(ctx) {
   mainWindow = ctx.win;
   policy = ctx.policy;
+  namedAddress = directory.resolver(policy);
 
   /* ---- الإقلاع ---- */
   ipcMain.handle('app:boot', wrap(async () => {
@@ -262,19 +284,20 @@ function registerIPC(ctx) {
 
   ipcMain.handle('mail:list', wrap(async (p) => {
     const s = requireSession();
-    return s.mail.list({
+    const page = await s.mail.list({
       folder: p.folder,
       page: p.page,
       pageSize: p.pageSize || policy.pageSize,
       search: p.search,
       filter: p.filter,
     });
+    return { ...page, messages: (page.messages || []).map(withNames) };
   }));
 
   ipcMain.handle('mail:message', wrap(async (p) => {
     const s = requireSession();
     const allowRemote = p.allowRemote != null ? !!p.allowRemote : !!store.getSettings().showRemoteImages;
-    const msg = await s.mail.message(p.folder, p.uid, { allowRemote });
+    const msg = withNames(await s.mail.message(p.folder, p.uid, { allowRemote }));
 
     let html;
     let blockedImages = 0;
@@ -516,7 +539,7 @@ async function buildBootPayload(session) {
     // قبل أن يُمسح الصندوق لبناء دفتر العناوين.
     directory: directory.build(policy).filter((p) => p.email !== session.account.email),
     folders,
-    inbox: inboxPage,
+    inbox: { ...inboxPage, messages: (inboxPage.messages || []).map(withNames) },
     quota,
     warnings: session.warnings || [],
   };

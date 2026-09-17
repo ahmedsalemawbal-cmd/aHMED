@@ -842,7 +842,7 @@ function paintContacts() {
     </div>
     <div class="filters">
       <input class="c-find" id="k-find" type="search" spellcheck="false" autocomplete="off"
-             placeholder="${esc(t('search'))}" value="${esc(S.contactQuery)}">
+             placeholder="${esc(t('contactSearch'))}" value="${esc(S.contactQuery)}">
     </div>
     <div class="rows" id="k-rows">${contactRowsHTML(contactsShown())}</div>
     <div class="pager"><span class="hint">${esc(t('contactsHint'))}</span></div>

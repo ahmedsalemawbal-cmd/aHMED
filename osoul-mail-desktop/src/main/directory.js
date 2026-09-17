@@ -31,6 +31,7 @@ const DEPARTMENTS = {
   's.eng': { ar: 'الهندسة', en: 'Engineering' },
   'tech.dep': { ar: 'القسم الفني', en: 'Technical' },
   'tech.dep1': { ar: 'القسم الفني', en: 'Technical' },
+  'tech.depl': { ar: 'القسم الفني', en: 'Technical' },
   'hr.dep': { ar: 'الموارد البشرية', en: 'Human Resources' },
   hr1: { ar: 'الموارد البشرية', en: 'Human Resources' },
   'sep.hr': { ar: 'الموارد البشرية', en: 'Human Resources' },
@@ -63,6 +64,7 @@ const PEOPLE = [
   ['MOHAMMED LATIF', 's.eng@osoulalbinaa.com', 'محمد لطيف'],
   ['MOHMMED IBRAHIM', 'tech.dep@osoulalbinaa.com', 'محمد إبراهيم'],
   ['MOHAMMED RAFIQ', 'tech.dep1@osoulalbinaa.com', 'محمد رفيق'],
+  ['MOHAMMED RAFIQ', 'tech.depl@osoulalbinaa.com', 'محمد رفيق'],
   ['ABDULHAMED HASHEED', 'fin@osoulalbinaa.com', 'عبدالحميد حشيد'],
   ['WEJDAN AQEL', 'qc@osoulalbinaa.com', 'وجدان عقل'],
   ['Tariq AlAmoudi', 'purchase@osoulalbinaa.com', 'طارق العمودي'],
@@ -151,4 +153,32 @@ function build(policy) {
   return [...byEmail.values()];
 }
 
-module.exports = { build, PEOPLE, DEPARTMENTS, titleCase };
+
+/**
+ * باحث عن الاسم بالعنوان.
+ *
+ * كثير من الزملاء لا يضبطون اسم المرسل في برامجهم، فتصل رسائلهم بعنوان
+ * عارٍ مثل s.eng@ — والموظف يرى صندوقًا لا شخصًا. الدليل يعرف من هو، فنملأ
+ * الاسم الناقص من عندنا عند العرض.
+ *
+ * لا نستبدل اسمًا موجودًا: ما كتبه صاحب الرسالة عن نفسه أولى بالثقة.
+ *
+ * @param {object} policy
+ * @returns {(address: {name?:string, email?:string}) => {name:string, email:string}}
+ */
+function resolver(policy) {
+  const index = new Map(build(policy).map((p) => [p.email, p]));
+
+  return function named(address) {
+    const a = address || {};
+    const email = String(a.email || '').trim();
+    const name = String(a.name || '').trim();
+    if (name && name.toLowerCase() !== email.toLowerCase()) {
+      return { name, email };
+    }
+    const found = index.get(email.toLowerCase());
+    return { name: found ? found.name : name, email, nameAr: found ? found.nameAr : '' };
+  };
+}
+
+module.exports = { build, resolver, PEOPLE, DEPARTMENTS, titleCase };

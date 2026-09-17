@@ -36,24 +36,35 @@
 
 :root,
 :root[data-theme='dark'] {
-  --bg: #0b1216; --panel: #111c22; --panel2: #16242c; --panel3: #1b2f38;
-  --line: rgba(255,255,255,.075); --line2: rgba(255,255,255,.14);
-  --text: #e9f0f3; --text2: #9fb2bc; --text3: #6f8590;
-  --brand: #0a5c86; --brand2: #1683bd; --brand3: #35a7e0;
-  --brandSoft: rgba(22,131,189,.16); --brandLine: rgba(22,131,189,.42);
-  --shadow: 0 18px 46px rgba(0,0,0,.5); --hover: rgba(255,255,255,.045);
-  --mailBg: #0f1a20; --mailText: #dbe6eb;
-  --ok: #2f9a6d; --warn: #c9922f; --err: #d0483f;
+  --bg: #080f13; --panel: #0e181e; --panel2: #142129; --panel3: #1a2c35;
+  --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13);
+  --text: #eaf1f4; --text2: #9db0ba; --text3: #6b8189;
+  --brand: #0a5c86; --brand2: #1683bd; --brand3: #45b3e8;
+  --brandSoft: rgba(22,131,189,.15); --brandLine: rgba(22,131,189,.4);
+  --hover: rgba(255,255,255,.04);
+  --mailBg: #0d171d; --mailText: #dce7ec;
+  --ok: #34a878; --warn: #d0a03b; --err: #dd5a50;
+  /* حافة فاتحة أعلى الأسطح: توحي بضوء قادم من فوق فتبدو الطبقات مرتّبة */
+  --edge: inset 0 1px 0 rgba(255,255,255,.04);
+  --elev1: 0 1px 2px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.24);
+  --elev2: 0 4px 12px rgba(0,0,0,.42), 0 12px 32px rgba(0,0,0,.34);
+  --shadow: 0 20px 52px rgba(0,0,0,.56), 0 2px 8px rgba(0,0,0,.4);
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--brand2);
 }
 :root[data-theme='light'] {
-  --bg: #eef1f3; --panel: #ffffff; --panel2: #f6f8f9; --panel3: #eaeff2;
-  --line: #e2e8eb; --line2: #d2dade;
-  --text: #0f2129; --text2: #5a707c; --text3: #8a9ca5;
+  --bg: #eef1f4; --panel: #ffffff; --panel2: #f7f9fa; --panel3: #ebeff2;
+  --line: #e3e9ec; --line2: #cfd8dd;
+  --text: #0e2029; --text2: #566c78; --text3: #8598a2;
   --brand: #0a5c86; --brand2: #0d6f9f; --brand3: #0a5c86;
-  --brandSoft: rgba(10,92,134,.08); --brandLine: rgba(10,92,134,.28);
-  --shadow: 0 14px 40px rgba(15,33,41,.12); --hover: rgba(10,92,134,.045);
-  --mailBg: #ffffff; --mailText: #22333c;
-  --ok: #2f9a6d; --warn: #c9922f; --err: #d0483f;
+  --brandSoft: rgba(10,92,134,.075); --brandLine: rgba(10,92,134,.26);
+  --hover: rgba(10,92,134,.04);
+  --mailBg: #ffffff; --mailText: #1f333d;
+  --ok: #248a5f; --warn: #a97a1c; --err: #c33f36;
+  --edge: inset 0 1px 0 rgba(255,255,255,.7);
+  --elev1: 0 1px 2px rgba(15,33,41,.06), 0 2px 8px rgba(15,33,41,.05);
+  --elev2: 0 4px 12px rgba(15,33,41,.08), 0 12px 30px rgba(15,33,41,.07);
+  --shadow: 0 18px 48px rgba(15,33,41,.14), 0 2px 8px rgba(15,33,41,.06);
+  --ring: 0 0 0 2px var(--panel), 0 0 0 4px var(--brand2);
 }
 
 * { box-sizing: border-box; }
@@ -774,3 +785,134 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
   .rc-pop { inset-inline: 0; }
   .rc-dept { display: none; }
 }
+
+/* =========================================================================
+ *  طبقة الصقل
+ *
+ *  التطبيق يُفتح طوال يوم العمل، فالفروق الصغيرة تتراكم: حافة تفصل لوحًا
+ *  عن لوح، حلقة تركيز تُرى بلوحة المفاتيح، ضغطة زر يُحسّ بها. هذه الطبقة
+ *  تأتي أخيرًا لتصقل ما بُني، لا لتعيد بناءه.
+ * ====================================================================== */
+
+::selection { background: var(--brandSoft); color: var(--text); }
+
+/* شريط تمرير رفيع يذوب في السطح بدل شريط النظام العريض */
+* { scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--line2); border-radius: 99px;
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text3); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* حلقة التركيز للوحة المفاتيح وحدها: الفأرة لا تحتاجها ووجودها معها ضوضاء */
+:focus { outline: none; }
+:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 8px; }
+.row:focus-visible, .folder:focus-visible { box-shadow: var(--ring); }
+
+/* ------------------------------------------------------------- الأسطح */
+
+.titlebar, .side, .list .head, .list .filters, .reader .bar, .pager, .toolbar {
+  box-shadow: var(--edge);
+}
+.titlebar { border-bottom: 1px solid var(--line); }
+
+/* ------------------------------------------------------------- الأزرار */
+
+.btn {
+  transition: background .14s, color .14s, border-color .14s, transform .08s;
+  box-shadow: var(--edge);
+}
+.btn:active:not([disabled]) { transform: translateY(1px); }
+.btn.primary {
+  box-shadow: var(--elev1), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.btn.primary:active:not([disabled]) { transform: translateY(1px); box-shadow: var(--elev1); }
+
+.icon-btn { transition: background .14s, color .14s, transform .08s; }
+.icon-btn:active:not([disabled]) { transform: scale(.94); }
+
+/* ------------------------------------------------- الشريط الجانبي */
+
+.folder { position: relative; }
+/* شريط رفيع عند الحافة يُعلّم المجلد المفتوح — أوضح من لون خلفية وحده */
+.folder.on::before {
+  content: ''; position: absolute; inset-inline-start: 0; top: 50%;
+  transform: translateY(-50%); width: 3px; height: 18px;
+  border-radius: 0 3px 3px 0; background: var(--brand2);
+}
+html[dir='ltr'] .folder.on::before { border-radius: 3px 0 0 3px; }
+.side .sec:first-of-type { padding-top: 10px; }
+
+/* --------------------------------------------------- قائمة الرسائل */
+
+.row { transition: background .12s; }
+.row .subject { letter-spacing: -.005em; }
+.row.unread .who { color: var(--text); }
+/* نقطة غير المقروء تُضيء قليلًا فتُلتقط بطرف العين وسط قائمة طويلة */
+.row.unread .meta .dot { box-shadow: 0 0 0 3px var(--brandSoft); }
+.group-label {
+  position: sticky; top: 0; z-index: 2;
+  background: linear-gradient(var(--bg) 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* ---------------------------------------------------------- القارئ */
+
+.reader .doc { animation: fade .2s both; }
+.msg-head h2 { letter-spacing: -.015em; line-height: 1.45; }
+.msg-from {
+  padding: 14px; border-radius: 14px;
+  background: var(--panel2); border: 1px solid var(--line);
+  box-shadow: var(--edge);
+}
+.mail-frame { border-radius: 12px; }
+
+/* ------------------------------------------------------- الإعدادات */
+
+.sheet .group { box-shadow: var(--edge); }
+.sheet .note {
+  margin: 0 0 14px; font-size: 12px; line-height: 1.8; color: var(--text2);
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--brandSoft); border: 1px solid var(--brandLine);
+}
+
+/* خطوات مرقّمة: الترتيب نفسه هو الشرح، فلا يحتاج الموظف نصًّا يشرح الترتيب */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.steps li { display: flex; gap: 12px; align-items: flex-start; }
+.steps .n {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  background: var(--brand); color: #fff; margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.steps .body { flex: 1; min-width: 0; }
+.steps .t { font-size: 13px; font-weight: 700; }
+.steps .d { font-size: 11.5px; color: var(--text3); line-height: 1.75; margin: 3px 0 10px; }
+.steps .btn { width: 100%; justify-content: center; }
+.pw-form .btn { width: 100%; justify-content: center; align-self: stretch; }
+
+/* --------------------------------------------------------- التنبيهات */
+
+.toast { box-shadow: var(--elev2); }
+
+/* ------------------------------------------------- تفضيل تقليل الحركة */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* السمة الفاتحة: الشريط الجانبي واللوح الأبيض يذوبان معًا بلا تمييز،
+   فنعطي الشريط لونًا أهدأ قليلًا ليُقرأ كعمود تنقّل لا كامتداد للقائمة. */
+:root[data-theme='light'] .side { background: var(--panel2); }
+:root[data-theme='light'] .titlebar { background: var(--panel); }
+:root[data-theme='light'] .list { background: var(--panel); }
+
+/* مربع بحث الدفتر يملأ الشريط، فيبدو حقلًا لا شريحة تصفية */
+.list .filters:has(.c-find) { padding: 9px 10px; }
