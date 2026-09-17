@@ -166,6 +166,7 @@ export function openSettings(state, handlers) {
                          placeholder="${esc(t('pwConfirm'))}">
                   <button class="btn" id="st-pw-save">${icon('check', 'sm')}<span>${esc(t('pwSave'))}</span></button>
                 </div>
+                <div class="d" style="margin:8px 0 0">${esc(t('pwRules'))}</div>
               </div>
             </li>
           </ol>
@@ -234,8 +235,24 @@ export function openSettings(state, handlers) {
   });
 
   /* كلمة المرور */
-  on($('#st-pw-open', back), 'click', () => {
-    window.osoul.openExternal(state.policy.passwordChangeUrl);
+  // الصفحة تُفتح داخل التطبيق، وحين يغلقها الموظف نضعه مباشرة أمام الحقول
+  // بدل أن يبحث عن الخطوة التالية بنفسه.
+  on($('#st-pw-open', back), 'click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      await call(window.osoul.providerPage);
+    } catch (_) {
+      window.osoul.openExternal(state.policy.passwordChangeUrl);
+    } finally {
+      btn.disabled = false;
+    }
+    const now = $('#st-pw-now', back);
+    if (now) {
+      now.scrollIntoView({ block: 'center' });
+      now.focus();
+      toast(t('pwNowUpdateHere'), 'ok');
+    }
   });
 
   on($('#st-pw-save', back), 'click', async () => {

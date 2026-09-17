@@ -22,6 +22,7 @@ const ai = require('./ai');
 const labelDefs = require('./labels');
 const contacts = require('./contacts');
 const directory = require('./directory');
+const provider = require('./provider');
 
 /** الجلسة الحالية (موظف واحد لكل نافذة). */
 let current = null;
@@ -270,6 +271,13 @@ function registerIPC(ctx) {
     }
 
     return { ok: true, remembered };
+  }));
+
+  /** صفحة تغيير كلمة المرور عند المزوّد — داخل التطبيق لا في المتصفح. */
+  ipcMain.handle('auth:providerPage', wrap(async () => {
+    const url = policy.passwordChangeUrl || '';
+    if (!url) return { opened: false };
+    return provider.openPasswordPage(mainWindow, url, T('providerWindow'));
   }));
 
   ipcMain.handle('auth:logout', wrap(async (p) => {

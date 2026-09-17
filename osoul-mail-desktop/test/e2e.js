@@ -632,16 +632,20 @@ function check(name, cond, detail) {
       const steps = document.querySelectorAll('.sheet .steps li').length;
       const numbers = Array.from(document.querySelectorAll('.sheet .steps .n')).map(n => n.textContent.trim());
       const openBtn = !!document.getElementById('st-pw-open');
+      const rules = /8|٨/.test(document.querySelector('.sheet .steps li:last-child .d:last-of-type')?.textContent || '');
+      const bridge = typeof window.osoul.providerPage === 'function';
       const note = (document.querySelector('.sheet .note') || {}).textContent || '';
       const fields = ['st-pw-now', 'st-pw-new', 'st-pw-new2'].every(id => !!document.getElementById(id));
       const close = document.getElementById('st-close');
       if (close) close.click();
-      return { steps, numbers, openBtn, note, fields };
+      return { steps, numbers, openBtn, note, fields, rules, bridge };
     })()`);
     check('password.twoNumberedSteps', pwUI.steps === 2 && pwUI.numbers.join() === '1,2', pwUI);
     check('password.providerButtonFirst', pwUI.openBtn, pwUI);
     check('password.explainsWhy', /مزوّد/.test(pwUI.note), pwUI.note);
     check('password.formStillThere', pwUI.fields, pwUI);
+    check('password.opensProviderInApp', pwUI.bridge, pwUI);
+    check('password.showsProviderRules', pwUI.rules, pwUI);
 
     const { safeStorage } = require('electron');
     const canEncrypt = safeStorage.isEncryptionAvailable();

@@ -23,6 +23,7 @@ const STRINGS = {
     newMessageFallback: 'رسالة جديدة',
     noSubject: '(بدون موضوع)',
     unreadBadge: '{n} رسالة غير مقروءة',
+    providerWindow: 'تغيير كلمة المرور — موقع البريد',
   },
   en: {
     windowTitle: 'Osoul Albinaa Mail',
@@ -36,6 +37,7 @@ const STRINGS = {
     newMessageFallback: 'New message',
     noSubject: '(no subject)',
     unreadBadge: '{n} unread message(s)',
+    providerWindow: 'Change password — mail provider',
   },
 };
 
