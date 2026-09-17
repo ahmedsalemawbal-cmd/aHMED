@@ -52,6 +52,45 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: npm run test:sign && npm run test:imap && npm run test:smtp
 
+      # الشهادة تُضبط هنا لا في env البناء: متغيّر مضبوط بقيمة فارغة ليس
+      # كمتغيّر غير مضبوط — electron-builder يقرأ CSC_LINK الفارغ كمسار ملف
+      # ويفشل بحثًا عنه، وهو ما عطّل بناء ماك بينما لا شهادة أصلًا.
+      - name: تجهيز شهادة ويندوز إن وُجدت
+        shell: bash
+        env:
+          CERT: ${{ secrets.WINDOWS_CERT_BASE64 }}
+          CERT_PW: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+          AZ_TENANT: ${{ secrets.AZURE_TENANT_ID }}
+          AZ_CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
+          AZ_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZ_ACCOUNT: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT }}
+          AZ_PROFILE: ${{ secrets.AZURE_CERT_PROFILE }}
+        run: |
+          if [ "${{ matrix.os }}" != "windows-latest" ]; then
+            echo "ماك — لا توقيع ويندوز هنا."
+            exit 0
+          fi
+          if [ -n "$CERT" ]; then
+            {
+              echo "CSC_LINK<<OSOUL_EOF"
+              echo "$CERT"
+              echo "OSOUL_EOF"
+              echo "CSC_KEY_PASSWORD=$CERT_PW"
+            } >> "$GITHUB_ENV"
+            echo "التوقيع: شهادة PFX"
+          elif [ -n "$AZ_CLIENT" ] && [ -n "$AZ_ACCOUNT" ] && [ -n "$AZ_PROFILE" ]; then
+            {
+              echo "AZURE_TENANT_ID=$AZ_TENANT"
+              echo "AZURE_CLIENT_ID=$AZ_CLIENT"
+              echo "AZURE_CLIENT_SECRET=$AZ_SECRET"
+              echo "AZURE_CODE_SIGNING_ACCOUNT=$AZ_ACCOUNT"
+              echo "AZURE_CERT_PROFILE=$AZ_PROFILE"
+            } >> "$GITHUB_ENV"
+            echo "التوقيع: خدمة Microsoft Trusted Signing"
+          else
+            echo "::warning::لا شهادة توقيع — ويندوز 11 سيحظر المثبّت عبر Smart App Control."
+          fi
+
       - name: البناء
         run: ${{ matrix.command }}
         env:
@@ -59,19 +98,6 @@ jobs:
           # (ad-hoc) يتم في build/after-pack.js لأن أجهزة Apple Silicon
           # ترفض تشغيل ثنائي arm64 بلا أي توقيع.
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          # توقيع ويندوز: يعمل وحده متى وُضعت الشهادة في أسرار المستودع،
-          # ويبقى البناء ناجحًا بدونها. electron-builder يقرأ هذين
-          # المتغيّرين تلقائيًا ويتخطّى التوقيع إن كانا فارغين.
-          #
-          # ويندوز 11 فيه "التحكم الذكي في التطبيقات" (Smart App Control)
-          # يحظر كل ملف غير موقّع بلا زر تجاوز — فالتوقيع ليس تحسينًا
-          # تجميليًا بل شرط تشغيل على أجهزة كثيرة.
-          CSC_LINK: ${{ matrix.os == 'windows-latest' && secrets.WINDOWS_CERT_BASE64 || '' }}
-          CSC_KEY_PASSWORD: ${{ matrix.os == 'windows-latest' && secrets.WINDOWS_CERT_PASSWORD || '' }}
-          # البديل الأرخص: خدمة التوقيع من Microsoft بدل شهادة على رمز صلب.
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       # التوقيع يفشل صامتًا حين تنتهي الشهادة أو يُخطئ أحد في السرّ، فيخرج
       # مثبّت يحظره ويندوز — وهو ما لا يُكتشف إلا عند موظف يحاول التثبيت.
@@ -82,12 +108,13 @@ jobs:
         run: |
           $exe = (Get-ChildItem dist/*.exe | Select-Object -First 1).FullName
           $sig = Get-AuthenticodeSignature $exe
-          Write-Host "التوقيع: $($sig.Status) — $($sig.SignerCertificate.Subject)"
-          if ('${{ secrets.WINDOWS_CERT_BASE64 }}' -eq '' -and '${{ secrets.AZURE_CLIENT_ID }}' -eq '') {
-            Write-Host "::warning::لا توجد شهادة توقيع. ويندوز 11 سيحظر المثبّت عبر Smart App Control."
-          } elseif ($sig.Status -ne 'Valid') {
-            Write-Error "الشهادة مضبوطة لكن التوقيع غير صالح ($($sig.Status)). المثبّت سيُحظر."
-            exit 1
+          Write-Host "التوقيع: $($sig.Status)"
+          if ($env:CSC_LINK -or $env:AZURE_CLIENT_ID) {
+            if ($sig.Status -ne 'Valid') {
+              Write-Error "الشهادة مضبوطة لكن التوقيع غير صالح ($($sig.Status)). المثبّت سيُحظر."
+              exit 1
+            }
+            Write-Host "موقّع بـ: $($sig.SignerCertificate.Subject)"
           }
 
       # نسخة ماك بلا توقيع لا تعمل على Apple Silicon إطلاقًا، وهذا العطل
