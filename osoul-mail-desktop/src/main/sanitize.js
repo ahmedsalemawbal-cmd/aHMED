@@ -38,6 +38,39 @@ function cleanCSS(css) {
     .replace(/(javascript|vbscript)\s*:/gi, 'x:');
 }
 
+
+/* ------------------------------------------------------ ورقة أنماط مسرَّبة
+ *
+ * بعض العملاء يحوّلون كتلة <style> إلى نصّ عادي حين يُقتبس في ردّ، فتُرسل
+ * قواعد CSS كما هي ويراها المستلم سطورًا من كود أعلى الرسالة. وما إن تدخل
+ * سلسلة ردود حتى تتكرّر في كل ردّ بعدها.
+ *
+ * نحذفها عند العرض. الشرط ضيّق عمدًا — ثلاث قواعد فأكثر داخل نصّ واحد، مع
+ * خاصيّتين معروفتين على الأقل — فنصٌّ عادي لا يجتمع فيه هذا.
+ */
+const CSS_RULE = /[^{}<>]{1,160}\{[^{}<>]{0,900}\}/g;
+const CSS_HINTS = [
+  'font-family', 'line-height', 'max-width', 'white-space', 'background',
+  'margin', 'padding', 'border', 'overflow-wrap', 'word-wrap',
+];
+
+function looksLikeStylesheet(text) {
+  const rules = text.match(CSS_RULE);
+  if (!rules || rules.length < 3) return false;
+  const hits = CSS_HINTS.filter((h) => text.includes(h)).length;
+  return hits >= 2;
+}
+
+/** حذف قواعد CSS التي تسرّبت إلى نصّ الرسالة. */
+function dropLeakedCSS(html) {
+  // نعالج ما بين الوسوم فقط، فلا نمسّ خصائص الوسوم ولا محتوى <style> الحقيقي.
+  return String(html || '').replace(/>([^<]+)</g, (match, text) => {
+    if (!looksLikeStylesheet(text)) return match;
+    const cleaned = text.replace(CSS_RULE, ' ').replace(/\s{2,}/g, ' ').trim();
+    return `>${cleaned}<`;
+  });
+}
+
 /**
  * تنظيف رسالة HTML.
  *
@@ -54,6 +87,9 @@ function sanitizeHTML(html, allowRemote) {
 
   // تعليقات HTML الشرطية تُستعمل أحيانًا لإخفاء وسوم — نزيلها.
   out = out.replace(/<!--[\s\S]*?-->/g, '');
+
+  // قواعد CSS تسرّبت إلى النصّ في سلسلة ردود سابقة.
+  out = dropLeakedCSS(out);
 
   // تنظيف محتوى <style> المتبقي.
   out = out.replace(/<style\b([^>]*)>([\s\S]*?)<\/style\s*>/gi, (m, attrs, css) => `<style>${cleanCSS(css)}</style>`);
@@ -141,4 +177,4 @@ function htmlToSnippet(html, max) {
   return text.length > limit ? text.slice(0, limit) + '…' : text;
 }
 
-module.exports = { sanitizeHTML, textToHTML, htmlToSnippet, escapeHTML };
+module.exports = { sanitizeHTML, dropLeakedCSS, looksLikeStylesheet, textToHTML, htmlToSnippet, escapeHTML };

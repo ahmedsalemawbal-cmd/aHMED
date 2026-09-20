@@ -168,6 +168,45 @@ export function openCompose(draft, state, onSent, onSaved) {
     if (dirty && !window.confirm(t('confirmDiscard'))) return;
     close();
   }
+
+  /**
+   * تجاهل: حذف المسودة لا مجرد إغلاق النافذة.
+   *
+   * إغلاق نافذة مسودة محفوظة يُبقيها في مجلد المسودات — وهذا هو المقصود من
+   * زر الإغلاق. أما "تجاهل" فمعناه التخلّص منها، فيحذفها من الخادم أيضًا،
+   * وإلا بقيت رسالة تخلّى عنها صاحبها تملأ المجلد.
+   */
+  async function discard() {
+    if (sending) return;
+    const saved = d.replaces;
+    const hasContent = dirty || !!saved;
+    if (hasContent && !window.confirm(saved ? t('confirmDeleteDraft') : t('confirmDiscard'))) return;
+
+    if (saved) {
+      const btn = $('#c-discard', back);
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner sm"></span><span>${esc(t('deleting'))}</span>`;
+      try {
+        await call(window.osoul.remove, {
+          folder: saved.folder, uids: [saved.uid], permanent: true,
+        });
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = `${icon('trash', 'sm')}<span>${esc(t('discard'))}</span>`;
+        toast(errText(err), 'err');
+        return;
+      }
+      dirty = false;
+      close();
+      toast(t('draftDeleted'), 'ok');
+      if (onSaved) onSaved();
+      return;
+    }
+
+    dirty = false;
+    close();
+  }
+
   function keys(e) {
     if (e.key === 'Escape') {
       // لوح الاقتراحات مفتوح؟ هو من يبتلع Escape، لا نافذة الإنشاء.
@@ -179,7 +218,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   }
   on(document, 'keydown', keys);
   on($('#c-close', back), 'click', tryClose);
-  on($('#c-discard', back), 'click', tryClose);
+  on($('#c-discard', back), 'click', discard);
   on(back, 'mousedown', (e) => { if (e.target === back && mode === 'max') tryClose(); });
 
   /* ---- المستلمون ---- */
@@ -372,6 +411,20 @@ export function openCompose(draft, state, onSent, onSaved) {
     sizeEl.style.color = total > MAX_TOTAL ? 'var(--err)' : 'var(--text3)';
   }
 
+
+  /**
+   * ما يخرج من المحرّر قبل إرساله أو حفظه.
+   *
+   * كتلة <style> قد تصل إلى المحرّر ملتصقة باقتباس قديم. إرسالها يعني أن
+   * يراها المستلم سطور كود، فنُسقطها — الرسالة نصّها وتنسيقه المباشر، لا
+   * ورقة أنماط.
+   */
+  function outgoingHTML() {
+    return body.innerHTML
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
+      .replace(/<link\b[^>]*>/gi, '');
+  }
+
   /* ---- الإرسال ---- */
   on($('#c-send', back), 'click', doSend);
 
@@ -403,7 +456,7 @@ export function openCompose(draft, state, onSent, onSaved) {
     try {
       const res = await call(window.osoul.send, {
         to, cc, bcc, subject,
-        html: body.innerHTML,
+        html: outgoingHTML(),
         attachments: files.map((f) => ({ path: f.path, filename: f.filename })),
         inReplyTo: d.inReplyTo || '',
         references: d.references || '',
@@ -436,7 +489,7 @@ export function openCompose(draft, state, onSent, onSaved) {
         cc: $('#c-cc', back).value.trim(),
         bcc: $('#c-bcc', back).value.trim(),
         subject: $('#c-subject', back).value.trim(),
-        html: body.innerHTML,
+        html: outgoingHTML(),
         attachments: files.map((f) => ({ path: f.path, filename: f.filename })),
         inReplyTo: d.inReplyTo || '',
         references: d.references || '',

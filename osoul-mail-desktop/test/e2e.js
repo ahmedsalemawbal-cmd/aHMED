@@ -764,12 +764,22 @@ function check(name, cond, detail) {
       document.getElementById('c-max').click();
       await new Promise(r => setTimeout(r, 120));
 
-      const close = document.getElementById('c-close');
-      if (close) close.click();
-      await new Promise(r => setTimeout(r, 250));
+      // "تجاهل" على مسودة محفوظة يحذفها من المجلد، لا يكتفي بإغلاق النافذة.
+      const realConfirm = window.confirm;
+      window.confirm = () => true;
+      document.getElementById('c-discard').click();
+      await new Promise(r => setTimeout(r, 1200));
+      window.confirm = realConfirm;
+      const closedAfterDiscard = !document.querySelector('.compose-back');
+
+      await mail.loadList({ folder: drafts.raw, search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 600));
+      const rowsAfterDiscard = document.querySelectorAll('#list .row').length;
+
       await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
       await new Promise(r => setTimeout(r, 300));
-      return { rowsInDrafts, composer, reader, title, to, subject, bodyText, docked, minimised, maximised };
+      return { rowsInDrafts, composer, reader, title, to, subject, bodyText,
+        docked, minimised, maximised, closedAfterDiscard, rowsAfterDiscard };
     })()`);
 
     check('draft.appearsInFolder', draftEdit.rowsInDrafts > 0, draftEdit.rowsInDrafts);
@@ -781,6 +791,9 @@ function check(name, cond, detail) {
     check('compose.docksToCorner', draftEdit.docked, draftEdit);
     check('compose.minimises', draftEdit.minimised, draftEdit);
     check('compose.maximises', draftEdit.maximised, draftEdit);
+    check('draft.discardClosesWindow', draftEdit.closedAfterDiscard, draftEdit);
+    check('draft.discardRemovesIt',
+      draftEdit.rowsAfterDiscard === draftEdit.rowsInDrafts - 1, draftEdit);
 
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح

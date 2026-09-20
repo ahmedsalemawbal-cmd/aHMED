@@ -62,6 +62,7 @@ const DICT = {
     /* الكتابة */
     newMessage: 'رسالة جديدة',
     editDraft: 'تعديل المسودة', minimise: 'تصغير', maximise: 'تكبير', restore: 'استعادة',
+    confirmDeleteDraft: 'حذف هذه المسودة نهائيًا؟', draftDeleted: 'حُذفت المسودة', deleting: 'جارٍ الحذف…',
     draftAttachmentLost: 'تعذّر تحميل المرفق {name} — أعد إرفاقه.',
     cc: 'نسخة', bcc: 'مخفية', subject: 'الموضوع',
     bodyPlaceholder: 'اكتب رسالتك…',
@@ -217,6 +218,7 @@ const DICT = {
     attachmentSaved: 'Attachment saved', noAppForFile: 'No app can open this file type',
     newMessage: 'New message',
     editDraft: 'Edit draft', minimise: 'Minimise', maximise: 'Maximise', restore: 'Restore',
+    confirmDeleteDraft: 'Delete this draft permanently?', draftDeleted: 'Draft deleted', deleting: 'Deleting…',
     draftAttachmentLost: 'Could not load the attachment {name} — please attach it again.',
     cc: 'Cc', bcc: 'Bcc', subject: 'Subject',
     bodyPlaceholder: 'Write your message…',

@@ -509,6 +509,12 @@ function fillFrame(m) {
     pre,.om-plain{white-space:pre-wrap;font-family:inherit;margin:0;}
     ::selection{background:rgba(22,131,189,.35);}
     *{max-width:100%;}
+    /* رسالة تضع عناصرها بموضع مطلق ترسم سطورها فوق بعضها داخل إطار بعرض
+       مختلف عن عرض مُرسِلها، فتصير غير مقروءة. نُعيدها إلى التدفّق الطبيعي
+       كما تفعل عملاء البريد الكبرى. */
+    body *{position:static!important;}
+    /* جدول أعرض من الإطار يُمرَّر أفقيًا بدل أن يمدّ الرسالة كلها. */
+    body{overflow-x:auto;}
   `;
 
   frame.srcdoc = `<!doctype html><html dir="auto"><head><meta charset="utf-8">
@@ -724,13 +730,26 @@ async function handleAttachment(index, save) {
  *  الردود
  * ================================================================ */
 
+/**
+ * تنظيف جسم رسالة قبل اقتباسه في ردّ.
+ *
+ * كتلة <style> داخل محرّر نصّ قابل للتحرير تظهر كنصّ يُقرأ ويُرسل، فتتحوّل
+ * أنماط الرسالة الأصلية إلى سطور كود في الردّ ثم في كل ردّ بعده. الاقتباس
+ * يحتاج نصّ الرسالة لا أنماطها.
+ */
+function quotable(html) {
+  return String(html || '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
+    .replace(/<link\b[^>]*>/gi, '');
+}
+
 function replyPayload(mode) {
   const m = S.message;
   if (!m) return null;
 
   const me = S.account.email.toLowerCase();
   const quoteHeader = esc(t('quotedOn', { date: fmtFull(m.ts), who: who(m.from) || m.from.email }));
-  const quoted = `<div class="quoted"><br><br><div>${quoteHeader}</div><blockquote>${m.body}</blockquote></div>`;
+  const quoted = `<div class="quoted"><br><br><div>${quoteHeader}</div><blockquote>${quotable(m.body)}</blockquote></div>`;
 
   if (mode === 'forward') {
     return {
@@ -742,7 +761,7 @@ function replyPayload(mode) {
         <div>${esc(t('fwdFrom'))}: ${esc(who(m.from))} &lt;${esc(m.from.email)}&gt;</div>
         <div>${esc(t('fwdDate'))}: ${esc(fmtFull(m.ts))}</div>
         <div>${esc(t('fwdSubject'))}: ${esc(m.subject)}</div>
-        <div>${esc(t('fwdTo'))}: ${esc(recipientsText(m))}</div><br>${m.body}</div>`,
+        <div>${esc(t('fwdTo'))}: ${esc(recipientsText(m))}</div><br>${quotable(m.body)}</div>`,
       inReplyTo: '',
       references: '',
     };
@@ -824,7 +843,7 @@ async function openDraft(uid, folder) {
     cc: addressLine(msg.cc),
     bcc: addressLine(msg.bcc),
     subject: msg.subject || '',
-    body: msg.body || '',
+    body: quotable(msg.body || ''),
     files,
     inReplyTo: msg.inReplyTo || '',
     references: msg.references || '',

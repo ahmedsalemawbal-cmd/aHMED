@@ -171,6 +171,26 @@ function parseList(text) {
   return String(text || '').split(',').map(parseAddr).filter(Boolean);
 }
 
+
+/**
+ * تعليم رسائل بالحذف ثم إزالتها عند EXPUNGE.
+ *
+ * الخادم الوهمي كان يردّ OK على الحذف ولا يحذف، فمرّ خطأ "تجاهل المسودة
+ * لا يحذفها" دون أن يمسكه فحص. الحذف هنا حقيقي كما في خادم فعلي.
+ */
+function markDeleted(folder, uids) {
+  for (const msg of stored(folder)) {
+    if (uids.includes(msg.uid) && !msg.flags.includes('\\Deleted')) msg.flags.push('\\Deleted');
+  }
+}
+
+function expunge(folder) {
+  const kept = stored(folder).filter((m) => !m.flags.includes('\\Deleted'));
+  kept.forEach((m, i) => { m.seq = i + 1; });
+  APPENDED.set(folder, kept);
+  return kept;
+}
+
 /**
  * تفكيك رسالة مضافة إلى أقسامها.
  *
@@ -499,7 +519,15 @@ function startServer(opts) {
               break;
             }
 
-            if (sub === 'STORE') { write(`${tag} OK STORE done`); break; }
+            if (sub === 'STORE') {
+              const args = body.replace(/^STORE\s+/i, '');
+              const range = args.split(' ')[0];
+              if (/\+FLAGS/i.test(args) && /\\Deleted/i.test(args)) {
+                markDeleted(selected, pick(range, isUid).map((m) => m.uid));
+              }
+              write(`${tag} OK STORE done`);
+              break;
+            }
             if (sub === 'SEARCH') {
               const hits = selected === 'INBOX' ? [101, 103] : stored(selected).map((m) => m.uid);
               write(`* SEARCH ${hits.join(' ')}`);
@@ -507,7 +535,13 @@ function startServer(opts) {
               break;
             }
             if (sub === 'MOVE' || sub === 'COPY') { write(`${tag} OK MOVE done`); break; }
-            if (sub === 'EXPUNGE') { write(`${tag} OK EXPUNGE done`); break; }
+            if (sub === 'EXPUNGE') {
+              const before = stored(selected).length;
+              expunge(selected);
+              for (let i = before; i > stored(selected).length; i--) write(`* ${i} EXPUNGE`);
+              write(`${tag} OK EXPUNGE done`);
+              break;
+            }
             write(`${tag} OK done`);
             break;
           }
@@ -518,7 +552,13 @@ function startServer(opts) {
             break;
 
           case 'STORE': write(`${tag} OK STORE done`); break;
-          case 'EXPUNGE': write(`${tag} OK EXPUNGE done`); break;
+          case 'EXPUNGE': {
+            const before = stored(selected).length;
+            expunge(selected);
+            for (let i = before; i > stored(selected).length; i--) write(`* ${i} EXPUNGE`);
+            write(`${tag} OK EXPUNGE done`);
+            break;
+          }
           case 'CREATE': write(`${tag} OK CREATE done`); break;
           case 'APPEND': {
             const lit = /\{(\d+)(\+?)\}$/.exec(rest);
