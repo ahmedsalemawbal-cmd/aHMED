@@ -517,13 +517,22 @@ function fillFrame(m) {
     body{overflow-x:auto;}
   `;
 
-  frame.srcdoc = `<!doctype html><html dir="auto"><head><meta charset="utf-8">
-    <style>${css}</style></head><body>${m.body}</body></html>`;
+  // الأنماط لا تُكتب داخل الترميز.
+  //
+  // كتابة <style> في نصّ الوثيقة تجعل ظهورها رهينةً بكيفية تحليل ذلك النصّ،
+  // وقد ظهرت قواعد العارض نفسها نصًّا مقروءًا أعلى الرسائل على أجهزة
+  // الموظفين. عنصر يُنشأ بـ createElement لا يمرّ بمحلّل الترميز أصلًا،
+  // فلا يمكن أن يُعرض محتواه.
+  frame.srcdoc = `<!doctype html><html dir="auto"><head><meta charset="utf-8"></head><body>${m.body}</body></html>`;
 
   frame.onload = () => {
     let doc;
     try { doc = frame.contentDocument; } catch (_) { frame.style.height = '520px'; return; }
     if (!doc) { frame.style.height = '520px'; return; }
+
+    const sheet = doc.createElement('style');
+    sheet.textContent = css;
+    (doc.head || doc.documentElement).appendChild(sheet);
 
     const fit = () => {
       const h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);

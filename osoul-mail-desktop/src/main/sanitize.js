@@ -61,14 +61,26 @@ function looksLikeStylesheet(text) {
   return hits >= 2;
 }
 
-/** حذف قواعد CSS التي تسرّبت إلى نصّ الرسالة. */
+/**
+ * حذف قواعد CSS التي تسرّبت إلى نصّ الرسالة.
+ *
+ * محتوى <style> الحقيقي يُستثنى: هو قواعد بطبيعته، وتفريغه يُفقد الرسالة
+ * تنسيقها كاملًا. نحمي الكتلة أولًا ثم نعيدها بعد التنظيف.
+ */
 function dropLeakedCSS(html) {
-  // نعالج ما بين الوسوم فقط، فلا نمسّ خصائص الوسوم ولا محتوى <style> الحقيقي.
-  return String(html || '').replace(/>([^<]+)</g, (match, text) => {
+  const kept = [];
+  const guarded = String(html || '').replace(
+    /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi,
+    (block) => `\u0000STYLE${kept.push(block) - 1}\u0000`,
+  );
+
+  const cleaned = guarded.replace(/>([^<]+)</g, (match, text) => {
     if (!looksLikeStylesheet(text)) return match;
-    const cleaned = text.replace(CSS_RULE, ' ').replace(/\s{2,}/g, ' ').trim();
-    return `>${cleaned}<`;
+    const stripped = text.replace(CSS_RULE, ' ').replace(/\s{2,}/g, ' ').trim();
+    return `>${stripped}<`;
   });
+
+  return cleaned.replace(/\u0000STYLE(\d+)\u0000/g, (_m, i) => kept[Number(i)]);
 }
 
 /**

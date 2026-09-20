@@ -795,6 +795,28 @@ function check(name, cond, detail) {
     check('draft.discardRemovesIt',
       draftEdit.rowsAfterDiscard === draftEdit.rowsInDrafts - 1, draftEdit);
 
+
+    /* أنماط العارض لا تُعرض نصًّا داخل الرسالة أبدًا */
+    const frameStyle = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 400));
+      await mail.openMessage(101, 'INBOX');
+      await new Promise(r => setTimeout(r, 1200));
+      const f = document.getElementById('r-frame');
+      const d = f.contentDocument;
+      const text = (d.body.innerText || '').replace(/\s+/g, ' ');
+      return {
+        showsCss: /html\s*,\s*body\s*\{|position:static|max-width:100%/.test(text),
+        styled: getComputedStyle(d.body).paddingLeft,
+        styleIsElement: !!d.querySelector('style'),
+        bodyText: text.slice(0, 60),
+      };
+    })()`);
+    check('viewer.cssNotShownAsText', frameStyle.showsCss === false, frameStyle);
+    check('viewer.cssActuallyApplied', frameStyle.styled === '18px', frameStyle);
+    check('viewer.styleIsRealElement', frameStyle.styleIsElement, frameStyle);
+
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح
     // سطح المكتب في لينكس. بلا حلقة مفاتيح لا يحفظ التطبيق كلمة المرور
