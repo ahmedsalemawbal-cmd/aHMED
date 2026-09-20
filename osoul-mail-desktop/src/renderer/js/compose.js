@@ -32,14 +32,17 @@ export function openCompose(draft, state, onSent, onSaved) {
   const sigHTML = signature
     ? `<div class="sig"><br><br>--<br>${esc(signature).replace(/\n/g, '<br>')}</div>`
     : '';
-  const title = { reply: t('reply'), replyAll: t('replyAll'), forward: t('forward') }[d.mode] || t('newMessage');
+  const title = { reply: t('reply'), replyAll: t('replyAll'), forward: t('forward'), draft: t('editDraft') }[d.mode]
+    || t('newMessage');
 
   const back = document.createElement('div');
   back.className = 'compose-back';
   back.innerHTML = `
     <div class="compose" role="dialog" aria-label="${esc(title)}">
-      <div class="head">
+      <div class="head" id="c-head">
         <div class="t">${esc(title)}</div>
+        <button class="icon-btn" id="c-min" title="${esc(t('minimise'))}">${icon('down', 'sm')}</button>
+        <button class="icon-btn" id="c-max" title="${esc(t('maximise'))}">${icon('expand', 'sm')}</button>
         <button class="icon-btn" id="c-close" title="${esc(t('close'))} (Esc)">${icon('x', 'sm')}</button>
       </div>
 
@@ -114,9 +117,44 @@ export function openCompose(draft, state, onSent, onSaved) {
   document.body.appendChild(back);
 
   const body = $('#c-body', back);
-  const files = [];
+  const files = Array.isArray(d.files) ? [...d.files] : [];
   let sending = false;
   let dirty = false;
+
+
+  /* ---- حالة اللوح ----
+   *
+   * ملتصق بالزاوية كصندوق البريد على الويب: الموظف يكتب ويقرأ الرسالة
+   * التي يردّ عليها في الوقت نفسه. التصغير يُبقيه مفتوحًا على شكل شريط،
+   * والتكبير لمن يكتب رسالة طويلة.
+   */
+  const panel = $('.compose', back);
+  let mode = 'dock';
+
+  function setMode(next) {
+    mode = next;
+    back.classList.toggle('docked', next !== 'max');
+    panel.classList.toggle('min', next === 'min');
+    panel.classList.toggle('max', next === 'max');
+    const maxBtn = $('#c-max', back);
+    if (maxBtn) {
+      maxBtn.innerHTML = icon(next === 'max' ? 'collapse' : 'expand', 'sm');
+      maxBtn.title = next === 'max' ? t('restore') : t('maximise');
+    }
+    const minBtn = $('#c-min', back);
+    if (minBtn) {
+      minBtn.innerHTML = icon(next === 'min' ? 'up' : 'down', 'sm');
+      minBtn.title = next === 'min' ? t('restore') : t('minimise');
+    }
+  }
+  setMode('dock');
+
+  on($('#c-min', back), 'click', () => setMode(mode === 'min' ? 'dock' : 'min'));
+  on($('#c-max', back), 'click', () => setMode(mode === 'max' ? 'dock' : 'max'));
+  // النقر على الترويسة وهي مصغَّرة يعيد فتح اللوح — كما يتوقّع أي أحد.
+  on($('#c-head', back), 'click', (e) => {
+    if (mode === 'min' && !e.target.closest('.icon-btn')) setMode('dock');
+  });
 
   /* ---- الإغلاق ---- */
   function close() {
@@ -142,7 +180,7 @@ export function openCompose(draft, state, onSent, onSaved) {
   on(document, 'keydown', keys);
   on($('#c-close', back), 'click', tryClose);
   on($('#c-discard', back), 'click', tryClose);
-  on(back, 'mousedown', (e) => { if (e.target === back) tryClose(); });
+  on(back, 'mousedown', (e) => { if (e.target === back && mode === 'max') tryClose(); });
 
   /* ---- المستلمون ---- */
   // الاسم يكفي: الإكمال يترجمه إلى عنوان من دليل الشركة ودفتر العناوين.
@@ -370,6 +408,7 @@ export function openCompose(draft, state, onSent, onSaved) {
         inReplyTo: d.inReplyTo || '',
         references: d.references || '',
         priority: important ? 'high' : 'normal',
+        replaces: d.replaces || null,
       });
       close();
       toast(res.filed ? t('sentFiled') : t('sentOk'), 'ok');
@@ -402,6 +441,7 @@ export function openCompose(draft, state, onSent, onSaved) {
         inReplyTo: d.inReplyTo || '',
         references: d.references || '',
         priority: important ? 'high' : 'normal',
+        replaces: d.replaces || null,
       });
       dirty = false;
       close();
@@ -413,6 +453,8 @@ export function openCompose(draft, state, onSent, onSaved) {
       btn.innerHTML = `${icon('draft', 'sm')}<span>${esc(t('saveDraft'))}</span>`;
     }
   });
+
+  if (files.length) paintFiles();
 
   /* ---- التركيز الأول ---- */
   setTimeout(() => {

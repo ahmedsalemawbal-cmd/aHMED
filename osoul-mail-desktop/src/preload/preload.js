@@ -12,7 +12,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const invoke = (channel, payload) => ipcRenderer.invoke(channel, payload);
 
 /** الأحداث التي ترسلها العملية الرئيسية إلى الواجهة. */
-const EVENTS = ['conn:state', 'conn:warning', 'mail:new', 'mail:changed', 'mail:open'];
+const EVENTS = ['conn:state', 'conn:warning', 'mail:new', 'mail:changed', 'mail:open', 'ui:search'];
 
 contextBridge.exposeInMainWorld('osoul', {
   /* إقلاع ودخول */
@@ -47,6 +47,7 @@ contextBridge.exposeInMainWorld('osoul', {
 
   /* الإرسال والمرفقات */
   send: (payload) => invoke('mail:send', payload),
+  attachmentTemp: (payload) => invoke('mail:attachmentTemp', payload),
   saveDraft: (payload) => invoke('mail:saveDraft', payload),
   pickFiles: () => invoke('compose:pickFiles'),
   saveAttachment: (payload) => invoke('mail:attachmentSave', payload),

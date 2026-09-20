@@ -368,10 +368,20 @@ function registerIPC(ctx) {
   }));
 
   /* ---- الإرسال ---- */
+  /** حذف المسودة التي حُرِّرت، إن كانت هذه الرسالة بديلًا عنها. */
+  async function replaceDraft(s, replaces) {
+    if (!replaces || !replaces.folder || !replaces.uid) return;
+    try {
+      await s.mail.remove(replaces.folder, [replaces.uid], true);
+    } catch (_) {
+      // فشل الحذف لا يُفشل الحفظ: المسودة الجديدة محفوظة، والقديمة تبقى.
+    }
+  }
+
   ipcMain.handle('mail:send', wrap(async (p) => {
     const s = requireSession();
     const settings = store.getSettings();
-    return s.send({
+    const sent = await s.send({
       fromName: settings.fromName || s.account.fromName,
       to: p.to,
       cc: p.cc,
@@ -384,6 +394,9 @@ function registerIPC(ctx) {
       references: p.references,
       priority: p.priority,
     });
+    // أُرسلت المسودة ⇒ لم تعد مسودة.
+    await replaceDraft(s, p.replaces);
+    return sent;
   }));
 
   ipcMain.handle('mail:saveDraft', wrap(async (p) => {
@@ -396,6 +409,9 @@ function registerIPC(ctx) {
       attachments: p.attachments,
       inReplyTo: p.inReplyTo, references: p.references, priority: p.priority,
     });
+    // تحرير مسودة يُنشئ رسالة جديدة: نحذف القديمة وإلا امتلأ المجلد بنسخ
+    // متتابعة من رسالة واحدة.
+    await replaceDraft(s, p.replaces);
     s.mail.folders(true).catch(() => {});
     return res;
   }));
@@ -435,6 +451,22 @@ function registerIPC(ctx) {
     fs.writeFileSync(file, att.buffer);
     const err = await shell.openPath(file);
     return { opened: !err, error: err || '' };
+  }));
+
+  /**
+   * استخراج مرفق إلى ملف مؤقت.
+   *
+   * فتح مسودة للتحرير يعني إعادة بناء رسالتها من الصفر، والإرسال يقرأ
+   * المرفقات من القرص. فنُنزل مرفقات المسودة إلى ملفات مؤقتة ونعيد مساراتها،
+   * فتُرسل الرسالة بمرفقاتها كما حُفظت لا بنصّها وحده.
+   */
+  ipcMain.handle('mail:attachmentTemp', wrap(async (p) => {
+    const s = requireSession();
+    const att = await s.mail.attachment(p.folder, p.uid, p.part);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'osoul-draft-'));
+    const file = path.join(dir, safeName(p.filename));
+    fs.writeFileSync(file, att.buffer);
+    return { path: file, filename: safeName(p.filename), size: att.buffer.length };
   }));
 
   /* ---- التصنيفات ---- */

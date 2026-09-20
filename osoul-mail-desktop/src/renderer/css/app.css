@@ -794,3 +794,51 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
 .steps .d { font-size: 11.5px; color: var(--text3); line-height: 1.75; margin: 3px 0 10px; }
 .steps .btn { width: 100%; justify-content: center; }
 .pw-form .btn { width: 100%; justify-content: center; align-self: stretch; }
+
+/* ==================================================================
+ *  لوح الإنشاء الملتصق
+ *
+ *  نافذة منتصف الشاشة تحجب الرسالة التي يردّ عليها الموظف، فيُغلقها
+ *  ليقرأ ثم يفتحها ليكتب. اللوح يلتصق بالزاوية كما في بريد الويب:
+ *  يكتب وهو يرى، ويصغّره أو يكبّره كما يشاء.
+ * ================================================================ */
+
+.compose-back.docked {
+  display: block; padding: 0; background: transparent; animation: none;
+  /* الخلفية تمرّر النقر: الموظف يفتح رسالة أخرى واللوح مفتوح. */
+  pointer-events: none;
+}
+.compose-back.docked .compose {
+  pointer-events: auto;
+  position: absolute; inset-block-end: 0; inset-inline-end: 22px;
+  width: min(620px, calc(100vw - 44px)); max-width: none;
+  height: min(620px, calc(100vh - 78px));
+  border-radius: 14px 14px 0 0;
+  border-bottom: none;
+  animation: dockUp .2s cubic-bezier(.22,.8,.3,1) both;
+}
+@keyframes dockUp { from { transform: translateY(18px); opacity: 0; } }
+
+/* مصغَّر: يبقى شريط الترويسة وحده، والكتابة محفوظة كما هي. */
+.compose-back.docked .compose.min {
+  height: 46px; min-height: 46px; box-shadow: var(--shadow);
+}
+.compose.min .fields,
+.compose.min .editor,
+.compose.min .chips,
+.compose.min .toolbar,
+.compose.min .foot { display: none; }
+.compose.min .head { cursor: pointer; }
+
+/* ملء الشاشة: للرسائل الطويلة وللمراجعة قبل الإرسال. */
+.compose-back:not(.docked) { pointer-events: auto; }
+.compose.max { max-width: 1020px; height: min(88vh, 900px); }
+
+.compose .head .icon-btn { width: 28px; height: 28px; }
+.compose .head .t { letter-spacing: -.01em; }
+
+@media (max-width: 900px) {
+  .compose-back.docked .compose {
+    inset-inline: 0; width: 100%; height: min(78vh, 620px); border-radius: 14px 14px 0 0;
+  }
+}

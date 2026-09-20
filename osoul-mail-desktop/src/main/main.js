@@ -17,6 +17,7 @@ const { loadPolicy } = require('./config');
 const { registerIPC, teardownSession } = require('./ipc');
 const { WINDOW_BG } = require('./theme');
 const { s: T, setLang: setMainLang } = require('./strings');
+const contextMenu = require('./context-menu');
 
 const RENDERER_DIR = path.join(__dirname, '..', 'renderer');
 const SCHEME = 'osoul';
@@ -139,6 +140,9 @@ function createWindow() {
   });
 
   if (bounds.maximized) win.maximize();
+
+  // الزر الأيمن: النسخ من الرسالة ومن الحقول، وفتح الروابط ونسخها.
+  contextMenu.attach(win.webContents);
 
   win.once('ready-to-show', () => win.show());
   win.loadURL(`${SCHEME}://app/index.html`);

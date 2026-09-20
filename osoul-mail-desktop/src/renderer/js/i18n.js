@@ -61,6 +61,8 @@ const DICT = {
     attachmentSaved: 'حُفظ المرفق', noAppForFile: 'لا يوجد برنامج يفتح هذا الملف',
     /* الكتابة */
     newMessage: 'رسالة جديدة',
+    editDraft: 'تعديل المسودة', minimise: 'تصغير', maximise: 'تكبير', restore: 'استعادة',
+    draftAttachmentLost: 'تعذّر تحميل المرفق {name} — أعد إرفاقه.',
     cc: 'نسخة', bcc: 'مخفية', subject: 'الموضوع',
     bodyPlaceholder: 'اكتب رسالتك…',
     send: 'إرسال', sending: 'جارٍ الإرسال…', attach: 'إرفاق',
@@ -214,6 +216,8 @@ const DICT = {
     saving: 'Saving…', opening: 'Opening…',
     attachmentSaved: 'Attachment saved', noAppForFile: 'No app can open this file type',
     newMessage: 'New message',
+    editDraft: 'Edit draft', minimise: 'Minimise', maximise: 'Maximise', restore: 'Restore',
+    draftAttachmentLost: 'Could not load the attachment {name} — please attach it again.',
     cc: 'Cc', bcc: 'Bcc', subject: 'Subject',
     bodyPlaceholder: 'Write your message…',
     send: 'Send', sending: 'Sending…', attach: 'Attach',

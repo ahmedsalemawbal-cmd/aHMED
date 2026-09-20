@@ -137,6 +137,134 @@ function addrList(list) {
   return '(' + list.map((a) => `(${nil(a[0])} ${nil(a[1])} ${nil(a[2])} ${nil(a[3])})`).join(' ') + ')';
 }
 
+
+/* ---------- الرسائل المضافة بـ APPEND ----------
+ *
+ * الخادم الوهمي كان يقبل APPEND ويرمي البايتات. المسودة التي يحفظها الموظف
+ * تُضاف بـ APPEND ثم تُقرأ من مجلد المسودات، وبلا تخزين لا يمكن اختبار
+ * الدورة التي انكسرت فعلًا عند المستخدم.
+ */
+const APPENDED = new Map();
+
+function stored(folder) {
+  return APPENDED.get(folder) || [];
+}
+
+/** استخراج ترويسة من نص الرسالة الخام. */
+function header(raw, name) {
+  const m = new RegExp(`^${name}:[ \t]*(.*(?:\r?\n[ \t]+.*)*)`, 'im').exec(raw);
+  return m ? m[1].replace(/\r?\n[ \t]+/g, ' ').trim() : '';
+}
+
+/** "الاسم <bريد>" → ['الاسم', null, 'محلي', 'نطاق'] */
+function parseAddr(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+  // "الاسم <محلي@نطاق>" أولًا، ثم "محلي@نطاق" وحده.
+  const angled = /^"?([^"<]*?)"?\s*<([^\s<>@]+)@([^\s<>]+)>$/.exec(raw);
+  if (angled) return [angled[1].trim() || null, null, angled[2], angled[3]];
+  const bare = /^<?([^\s<>@]+)@([^\s<>]+)>?$/.exec(raw);
+  return bare ? [null, null, bare[1], bare[2]] : null;
+}
+
+function parseList(text) {
+  return String(text || '').split(',').map(parseAddr).filter(Boolean);
+}
+
+/**
+ * تفكيك رسالة مضافة إلى أقسامها.
+ *
+ * MailComposer يبني multipart/alternative (نص عادي ثم HTML)، فإعلان بنية
+ * من قسم واحد يجعل العميل يطلب القسم الأول ويستلم الكتلة كاملة — وهو ما
+ * يجعل المسودة تُفتح بنصّ MIME خام بدل ما كتبه صاحبها.
+ */
+function splitParts(rawBytes, body) {
+  const boundary = (/boundary="?([^";\r\n]+)"?/i.exec(rawBytes) || [])[1];
+  const fallback = {
+    1: { type: 'TEXT', sub: 'HTML', encoding: '7BIT', body, headers: 'Content-Type: text/html\r\n' },
+  };
+  if (!boundary) return fallback;
+
+  const chunks = String(body).split(`--${boundary}`)
+    .map((c) => c.replace(/^\r?\n/, ''))
+    .filter((c) => c.trim() && !c.startsWith('--'));
+
+  const out = {};
+  chunks.forEach((chunk, i) => {
+    const cut = chunk.search(/\r?\n\r?\n/);
+    const head = cut === -1 ? chunk : chunk.slice(0, cut);
+    const text = cut === -1 ? '' : chunk.slice(cut).replace(/^\r?\n\r?\n/, '');
+    const ctype = (/Content-Type:\s*([^;\r\n]+)/i.exec(head) || [])[1] || 'text/plain';
+    const enc = ((/Content-Transfer-Encoding:\s*([^\r\n]+)/i.exec(head) || [])[1] || '7bit').trim();
+    const [type, sub] = ctype.trim().toUpperCase().split('/');
+    out[String(i + 1)] = {
+      type: type || 'TEXT',
+      sub: sub || 'PLAIN',
+      encoding: enc.toUpperCase(),
+      // العميل يقرأ Content-Transfer-Encoding من ترويسات القسم نفسه
+      // (BODY[n.MIME])، فبلا حفظها يستلم نصًّا مشفّرًا ولا يفكّه.
+      headers: head.replace(/\r?\n$/, '') + '\r\n',
+      body: text.replace(/\r?\n$/, ''),
+    };
+  });
+  return Object.keys(out).length ? out : fallback;
+}
+
+/** بنية BODYSTRUCTURE مبنية من الأقسام الحقيقية للرسالة المضافة. */
+function appendedStructure(msg) {
+  const parts = msg.parts || {};
+  const keys = Object.keys(parts);
+  const one = (p) => `("${p.type}" "${p.sub}" ("CHARSET" "UTF-8") NIL NIL "${p.encoding}" `
+    + `${p.body.length} ${p.body.split(/\n/).length} NIL NIL NIL NIL)`;
+  if (keys.length <= 1) {
+    return one(parts[keys[0]] || { type: 'TEXT', sub: 'HTML', encoding: '7BIT', body: '' });
+  }
+  return `(${keys.map((k) => one(parts[k])).join(' ')} "ALTERNATIVE" ("BOUNDARY" "b") NIL NIL NIL)`;
+}
+
+/**
+ * تحويل رسالة خام مضافة إلى الشكل الذي تفهمه بقية أوامر الخادم.
+ *
+ * البايتات تُحفظ كما وصلت (latin1) لا كنصّ UTF-8: الخادم يكتب ردوده بترميز
+ * 'binary'، فنصٌّ عربي مخزَّن كسلسلة JS يخرج مشوّهًا. الترويسات تُقرأ من
+ * نسخة UTF-8، أما الموضوع فيبقى بصيغته المشفّرة (=?UTF-8?B?…?=) لأن ذلك
+ * ما يرسله خادم حقيقي والعميل هو من يفكّه.
+ */
+function appendMessage(folder, rawBytes, flags) {
+  const list = APPENDED.get(folder) || [];
+  const uid = 900 + list.length + 1;
+  const raw = Buffer.from(rawBytes, 'binary').toString('utf8');
+  const subject = header(raw, 'Subject');
+  const body = rawBytes.split(/\r?\n\r?\n/).slice(1).join('\r\n\r\n');
+  const parts = splitParts(rawBytes, body);
+
+  const msg = {
+    uid,
+    seq: list.length + 1,
+    flags: flags && flags.length ? flags : ['\\Seen'],
+    internalDate: '16-Sep-2026 11:10:00 +0300',
+    size: rawBytes.length,
+    structure: 'appended',
+    raw: rawBytes,
+    body,
+    parts,
+    envelope: {
+      date: 'Wed, 16 Sep 2026 11:10:00 +0300',
+      subject,
+      from: parseList(header(raw, 'From')),
+      to: parseList(header(raw, 'To')),
+      cc: parseList(header(raw, 'Cc')),
+      bcc: [],
+      replyTo: [],
+      inReplyTo: header(raw, 'In-Reply-To') || null,
+      messageId: header(raw, 'Message-ID') || null,
+    },
+  };
+  list.push(msg);
+  APPENDED.set(folder, list);
+  return msg;
+}
+
 function envelopeStr(e) {
   return `(${q(e.date)} ${nil(e.subject)} ${addrList(e.from)} ${addrList(e.from)} ` +
     `${addrList(e.replyTo.length ? e.replyTo : e.from)} ${addrList(e.to)} ${addrList(e.cc)} ${addrList(e.bcc)} ` +
@@ -148,6 +276,9 @@ const TEXT_PART = (sub, enc, len, lines) =>
 
 const STRUCTURES = {
   'text-only': TEXT_PART('PLAIN', '7BIT', 14, 1),
+
+  // رسالة أُضيفت بـ APPEND: نصّها HTML كما بناه التطبيق.
+  appended: `("TEXT" "HTML" ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 200 5 NIL NIL NIL NIL)`,
 
   alternative:
     `(${TEXT_PART('PLAIN', '7BIT', 14, 1)} ` +
@@ -169,6 +300,18 @@ const TOP_HEADERS = 'Reply-To: sales@alfahd.com\r\nX-Priority: 3\r\n\r\n';
 
 /** محتوى جزء مطلوب (بعد الترميز، كما يرسله الخادم). */
 function partSection(msg, section) {
+  if (msg.structure === 'appended') {
+    const upper2 = section.toUpperCase();
+    if (upper2.startsWith('HEADER')) return msg.raw.split(/\r?\n\r?\n/)[0] + '\r\n\r\n';
+    if (upper2 === '' || upper2 === 'TEXT') return msg.body;
+    const mime = /^(.+)\.MIME$/i.exec(section);
+    if (mime) {
+      const p = (msg.parts || {})[mime[1]];
+      return p ? p.headers : '';
+    }
+    const part = (msg.parts || {})[section.replace(/\.TEXT$/i, '')];
+    return part ? part.body : msg.body;
+  }
   const table = PARTS[msg.structure];
   const upper = section.toUpperCase();
 
@@ -203,6 +346,10 @@ function startServer(opts) {
       let idleTag = '';
       let pendingLiteral = 0;   // بايتات حرفي APPEND المتبقية
       let pendingTag = '';
+      let pendingFolder = '';   // المجلد الذي يُضاف إليه
+      let pendingFlags = [];
+      let pendingRaw = '';      // بايتات الرسالة المضافة
+      let selected = 'INBOX';   // المجلد المفتوح حاليًا
 
       const write = (s) => socket.write(s + '\r\n', 'binary');
       write('* OK [CAPABILITY IMAP4rev1 UIDPLUS MOVE LITERAL+ QUOTA] Fake IMAP ready');
@@ -213,11 +360,18 @@ function startServer(opts) {
         for (;;) {
           if (pendingLiteral > 0) {
             const take = Math.min(pendingLiteral, buffer.length);
+            pendingRaw += buffer.slice(0, take);
             buffer = buffer.slice(take);
             pendingLiteral -= take;
             if (pendingLiteral > 0) return;
             if (buffer.startsWith('\r\n')) buffer = buffer.slice(2);
-            write(`${pendingTag} OK [APPENDUID 1757000000 200] APPEND done`);
+            const added = appendMessage(
+              pendingFolder,
+              Buffer.from(pendingRaw, 'binary').toString('utf8'),
+              pendingFlags,
+            );
+            pendingRaw = '';
+            write(`${pendingTag} OK [APPENDUID 1757000000 ${added.uid}] APPEND done`);
             continue;
           }
           const idx = buffer.indexOf('\r\n');
@@ -280,7 +434,8 @@ function startServer(opts) {
           case 'STATUS': {
             const name = (rest.match(/STATUS\s+"?([^"\s]+)"?/i) || [])[1] || 'INBOX';
             const isInbox = name === 'INBOX';
-            write(`* STATUS ${q(name)} (MESSAGES ${isInbox ? MESSAGES.length : 0} UNSEEN ${isInbox ? 1 : 0})`);
+            const count = isInbox ? MESSAGES.length : stored(name).length;
+            write(`* STATUS ${q(name)} (MESSAGES ${count} UNSEEN ${isInbox ? 1 : 0})`);
             write(`${tag} OK STATUS done`);
             break;
           }
@@ -288,7 +443,8 @@ function startServer(opts) {
           case 'SELECT':
           case 'EXAMINE': {
             const name = (rest.match(/(?:SELECT|EXAMINE)\s+"?([^"\s]+)"?/i) || [])[1];
-            const n = name === 'INBOX' ? MESSAGES.length : 0;
+            selected = name;
+            const n = name === 'INBOX' ? MESSAGES.length : stored(name).length;
             write('* FLAGS (\\Seen \\Answered \\Flagged \\Deleted \\Draft)');
             write('* OK [PERMANENTFLAGS (\\Seen \\Answered \\Flagged \\Deleted \\Draft \\*)] limited');
             write(`* ${n} EXISTS`);
@@ -317,7 +473,10 @@ function startServer(opts) {
                 if (/\bENVELOPE\b/i.test(query)) items.push(`ENVELOPE ${envelopeStr(msg.envelope)}`);
                 if (/RFC822\.SIZE/i.test(query)) items.push(`RFC822.SIZE ${msg.size}`);
                 if (/\bINTERNALDATE\b/i.test(query)) items.push(`INTERNALDATE "${msg.internalDate}"`);
-                if (/\bBODYSTRUCTURE\b/i.test(query)) items.push(`BODYSTRUCTURE ${STRUCTURES[msg.structure]}`);
+                if (/\bBODYSTRUCTURE\b/i.test(query)) {
+                  items.push(`BODYSTRUCTURE ${msg.structure === 'appended'
+                    ? appendedStructure(msg) : STRUCTURES[msg.structure]}`);
+                }
 
                 // كل أقسام BODY المطلوبة، لا الأول فقط.
                 const re = /BODY(?:\.PEEK)?\[([^\]]*)\](?:<(\d+)(?:\.(\d+))?>)?/gi;
@@ -341,7 +500,12 @@ function startServer(opts) {
             }
 
             if (sub === 'STORE') { write(`${tag} OK STORE done`); break; }
-            if (sub === 'SEARCH') { write('* SEARCH 101 103'); write(`${tag} OK SEARCH done`); break; }
+            if (sub === 'SEARCH') {
+              const hits = selected === 'INBOX' ? [101, 103] : stored(selected).map((m) => m.uid);
+              write(`* SEARCH ${hits.join(' ')}`);
+              write(`${tag} OK SEARCH done`);
+              break;
+            }
             if (sub === 'MOVE' || sub === 'COPY') { write(`${tag} OK MOVE done`); break; }
             if (sub === 'EXPUNGE') { write(`${tag} OK EXPUNGE done`); break; }
             write(`${tag} OK done`);
@@ -359,6 +523,9 @@ function startServer(opts) {
           case 'APPEND': {
             const lit = /\{(\d+)(\+?)\}$/.exec(rest);
             if (lit) {
+              pendingFolder = (rest.match(/^APPEND\s+"?([^"\s]+)"?/i) || [])[1] || selected;
+              pendingFlags = ((rest.match(/\(([^)]*)\)/) || [])[1] || '')
+                .split(/\s+/).filter(Boolean);
               pendingLiteral = Number(lit[1]);
               pendingTag = tag;
               if (!lit[2]) write('+ Ready for literal data');
@@ -400,7 +567,8 @@ function startServer(opts) {
           const [a, b] = spec.split(':');
           const lo = a === '*' ? Infinity : Number(a);
           const hi = b === undefined ? lo : (b === '*' ? Infinity : Number(b));
-          for (const msg of MESSAGES) {
+          const pool = selected === 'INBOX' ? MESSAGES : stored(selected);
+          for (const msg of pool) {
             const key = isUid ? msg.uid : msg.seq;
             if (key >= Math.min(lo, hi) && key <= Math.max(lo, hi)) out.push(msg);
           }

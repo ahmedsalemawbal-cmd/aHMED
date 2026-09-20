@@ -24,6 +24,9 @@ const STRINGS = {
     noSubject: '(بدون موضوع)',
     unreadBadge: '{n} رسالة غير مقروءة',
     providerWindow: 'تغيير كلمة المرور — موقع البريد',
+    ctxOpenLink: 'فتح الرابط', ctxCopyLink: 'نسخ الرابط', ctxCopyImage: 'نسخ الصورة',
+    ctxPastePlain: 'لصق بلا تنسيق', ctxNoSuggestions: 'لا اقتراحات',
+    ctxAddToDictionary: 'أضف إلى القاموس', ctxSearchMail: 'ابحث في البريد عن "{text}"',
   },
   en: {
     windowTitle: 'Osoul Albinaa Mail',
@@ -38,6 +41,9 @@ const STRINGS = {
     noSubject: '(no subject)',
     unreadBadge: '{n} unread message(s)',
     providerWindow: 'Change password — mail provider',
+    ctxOpenLink: 'Open link', ctxCopyLink: 'Copy link', ctxCopyImage: 'Copy image',
+    ctxPastePlain: 'Paste without formatting', ctxNoSuggestions: 'No suggestions',
+    ctxAddToDictionary: 'Add to dictionary', ctxSearchMail: 'Search mail for “{text}”',
   },
 };
 

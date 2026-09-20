@@ -543,6 +543,14 @@ export async function openMessage(uid, folder) {
   stopBell();
   S.screen = 'mail';
   const f = folder || S.folder;
+
+  // المسودة تُكتب لا تُقرأ: فتحها في القارئ يعني رسالة لا يستطيع صاحبها
+  // تعديلها ولا إتمامها — وهو ما يلغي فائدة الحفظ كمسودة أصلًا.
+  const box = S.folders.find((x) => x.raw === f);
+  if (box && box.special === 'drafts') {
+    openDraft(uid, f);
+    return;
+  }
   S.openUid = uid;
   S.msgBusy = true;
   paintList();
@@ -758,6 +766,71 @@ function replyPayload(mode) {
     inReplyTo: m.messageId,
     references: [m.inReplyTo, m.messageId].filter(Boolean).join(' '),
   };
+}
+
+
+/** "محمد غالب <gm@…>, فرح <sales.co@…>" من قائمة عناوين. */
+function addressLine(list) {
+  return (list || [])
+    .filter((a) => a && a.email)
+    .map((a) => (a.name && a.name !== a.email ? `${a.name} <${a.email}>` : a.email))
+    .join(', ');
+}
+
+/**
+ * فتح مسودة محفوظة في نافذة الإنشاء بكل ما فيها.
+ *
+ * المرفقات تُستخرج إلى ملفات مؤقتة لأن الإرسال يقرأ من القرص: بدونها تُرسل
+ * المسودة بنصّها وقد فقدت ما أُرفق بها.
+ */
+async function openDraft(uid, folder) {
+  S.openUid = uid;
+  S.msgBusy = true;
+  paintList();
+  paintReader();
+
+  let msg;
+  try {
+    msg = await call(window.osoul.message, { folder, uid });
+  } catch (err) {
+    S.msgBusy = false;
+    paintReader();
+    toast(errText(err), 'err');
+    return;
+  }
+
+  S.msgBusy = false;
+  S.openUid = 0;
+  S.message = null;
+  paintList();
+  paintReader();
+
+  const files = [];
+  for (const att of msg.attachments || []) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const file = await call(window.osoul.attachmentTemp, {
+        folder, uid, part: att.part, filename: att.filename,
+      });
+      files.push(file);
+    } catch (_) {
+      toast(t('draftAttachmentLost', { name: att.filename }), 'err');
+    }
+  }
+
+  openCompose({
+    mode: 'draft',
+    to: addressLine(msg.to),
+    cc: addressLine(msg.cc),
+    bcc: addressLine(msg.bcc),
+    subject: msg.subject || '',
+    body: msg.body || '',
+    files,
+    inReplyTo: msg.inReplyTo || '',
+    references: msg.references || '',
+    // ما يُحفظ أو يُرسل بعد التحرير يحلّ محلّ هذه الرسالة.
+    replaces: { folder, uid },
+  }, S, afterDraftSaved, afterDraftSaved);
 }
 
 /** بعد حفظ مسودة: نحدّث العدادات، والقائمة إن كنّا واقفين في المسودات. */
@@ -1081,6 +1154,21 @@ function bindMainEvents() {
   window.osoul.on('mail:changed', () => refreshFolders());
   window.osoul.on('mail:open', (p) => { if (p && p.uid) openMessage(p.uid, p.folder); });
   window.osoul.on('conn:state', (p) => setConn(p.state));
+  // "ابحث في البريد عن…" من قائمة الزر الأيمن.
+  window.osoul.on('ui:search', (p) => {
+    const text = (p && p.text) || '';
+    if (!text) return;
+    const box = $('#t-search');
+    if (box) {
+      box.value = text;
+      const clear = $('#t-clear');
+      const kbd = $('#t-kbd');
+      if (clear) clear.hidden = false;
+      if (kbd) kbd.hidden = true;
+    }
+    S.screen = 'mail';
+    loadList({ search: text });
+  });
 }
 
 /** الأحداث داخل القارئ — تُربط بعد كل إعادة رسم. */

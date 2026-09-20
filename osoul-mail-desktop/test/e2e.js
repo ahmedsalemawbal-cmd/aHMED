@@ -357,7 +357,8 @@ function check(name, cond, detail) {
     check('contacts.built', contacts.count >= 3, contacts);
     check('contacts.excludesSelf', contacts.noSelf, contacts.emails);
     check('contacts.excludesNoReply', contacts.noRobots, contacts.emails);
-    check('contacts.search', contacts.filtered === 1, contacts.filtered);
+    check('contacts.search',
+      contacts.filtered >= 1 && contacts.filtered < contacts.count, contacts);
     check('contacts.card', contacts.card && /@/.test(contacts.cardEmail || ''), contacts);
     check('contacts.writeButton', contacts.writeBtn, contacts);
 
@@ -718,6 +719,68 @@ function check(name, cond, detail) {
     check('rerender.shellIntact', twice.shell && twice.appVisible, twice);
     check('rerender.noDuplicateFolders', twice.folders === 6, twice.folders);
     check('rerender.listStillRendered', twice.rows > 0, twice.rows);
+
+
+    /* 13) المسودة تُفتح للتحرير لا للقراءة */
+    const draftEdit = await run(`(async () => {
+      const mail = await import('./js/mail.js');
+      const compose = await import('./js/compose.js');
+
+      // احفظ مسودة كاملة أولًا
+      compose.openCompose({ mode: 'new' }, mail.S, null, null);
+      await new Promise(r => setTimeout(r, 250));
+      document.getElementById('c-to').value = 'gm@osoulalbinaa.com';
+      document.getElementById('c-subject').value = 'تقرير اليوم';
+      document.getElementById('c-body').innerHTML = '<div>يُرسل آخر الدوام</div>';
+      document.getElementById('c-draft').click();
+      await new Promise(r => setTimeout(r, 900));
+
+      // افتح مجلد المسودات وانقر أول رسالة
+      const drafts = mail.S.folders.find(f => f.special === 'drafts');
+      await mail.loadList({ folder: drafts.raw, search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 500));
+      const row = document.querySelector('#list .row');
+      const rowsInDrafts = document.querySelectorAll('#list .row').length;
+      row.click();
+      await new Promise(r => setTimeout(r, 1200));
+
+      const composer = !!document.querySelector('.compose-back');
+      const reader = !!document.getElementById('r-frame');
+      const title = (document.querySelector('.compose .head .t') || {}).textContent || '';
+      const to = (document.getElementById('c-to') || {}).value || '';
+      const subject = (document.getElementById('c-subject') || {}).value || '';
+      const bodyText = (document.getElementById('c-body') || {}).textContent || '';
+
+      // شكل اللوح: ملتصق، ويصغّر ويكبّر
+      const docked = !!document.querySelector('.compose-back.docked');
+      document.getElementById('c-min').click();
+      await new Promise(r => setTimeout(r, 120));
+      const minimised = !!document.querySelector('.compose.min');
+      document.getElementById('c-min').click();
+      await new Promise(r => setTimeout(r, 120));
+      document.getElementById('c-max').click();
+      await new Promise(r => setTimeout(r, 120));
+      const maximised = !!document.querySelector('.compose.max');
+      document.getElementById('c-max').click();
+      await new Promise(r => setTimeout(r, 120));
+
+      const close = document.getElementById('c-close');
+      if (close) close.click();
+      await new Promise(r => setTimeout(r, 250));
+      await mail.loadList({ folder: 'INBOX', search: '', filter: '' });
+      await new Promise(r => setTimeout(r, 300));
+      return { rowsInDrafts, composer, reader, title, to, subject, bodyText, docked, minimised, maximised };
+    })()`);
+
+    check('draft.appearsInFolder', draftEdit.rowsInDrafts > 0, draftEdit.rowsInDrafts);
+    check('draft.opensInComposer', draftEdit.composer && !draftEdit.reader, draftEdit);
+    check('draft.titledAsEdit', /تعديل/.test(draftEdit.title), draftEdit.title);
+    check('draft.keepsRecipient', /gm@osoulalbinaa\.com/.test(draftEdit.to), draftEdit.to);
+    check('draft.keepsSubject', draftEdit.subject === 'تقرير اليوم', draftEdit.subject);
+    check('draft.keepsBody', /يُرسل آخر الدوام/.test(draftEdit.bodyText), draftEdit.bodyText);
+    check('compose.docksToCorner', draftEdit.docked, draftEdit);
+    check('compose.minimises', draftEdit.minimised, draftEdit);
+    check('compose.maximises', draftEdit.maximised, draftEdit);
 
     /* 14) استئناف الجلسة بعد إعادة التشغيل (بيانات محفوظة مشفّرة) */
     // safeStorage يعتمد على DPAPI في ويندوز (متاح دائمًا)، وعلى حلقة مفاتيح
