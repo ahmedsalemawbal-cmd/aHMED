@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>اليوم — الداشبورد</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="min-height: 1000px; display: flex; flex-wrap: wrap; align-items: stretch; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+<div style="flex: 1 1 264px; max-width: 100%; display: flex; flex-direction: column;">
+<dc-import name="DeskSidebar" active="today" hint-size="100%,1000px"></dc-import>
+</div>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column;">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 40px; border-bottom: 1px solid var(--line); background: var(--surface-raised);">
+<div style="flex-grow: 1; display: flex; flex-direction: column;">
+<h1 style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 700;">صباح الخير، أحمد</h1>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">الأربعاء 7 أكتوبر · 5 متابعات تنتظرك</span>
+</div>
+<label style="position: relative; display: block; flex: 0 1 320px; min-width: 200px;">
+<span style="position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); display: flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg></span>
+<input type="search" aria-label="بحث" placeholder="ابحث عن محل أو رقم" class="md-input" style="min-height: 40px; font-size: 15px; padding-inline-start: 38px;">
+</label>
+<a href="NewLead1.dc.html" class="md-btn md-btn-primary md-btn-sm" style="text-decoration: none;">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+<span>عميل جديد</span>
+</a>
+</header>
+
+<main style="width: 100%; max-width: 1200px; box-sizing: border-box; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 28px;">
+
+<section aria-label="أرقام اليوم" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">زيارات اليوم</span>
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">4</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">آخرها مطعم ريدان 10:45 ص</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">رسائل أُرسلت</span>
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">3</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">رسالة واحدة لم تُرسل بعد</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">متابعات مستحقة</span>
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">5</span>
+<span style="font-size: 13px; line-height: 20px; font-weight: 700; color: var(--warning);">منها 1 متأخرة</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">هدف الأسبوع</span>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);"><b style="font-size: 32px; line-height: 40px; color: var(--ink);">14</b> من 20 زيارة</span>
+<div style="height: 8px; border-radius: 999px; background: var(--surface-sunken); overflow: hidden;"><div style="width: 70%; height: 100%; background: var(--action); border-radius: 999px;"></div></div>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+<div style="flex: 2 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 24px;">
+
+<section aria-labelledby="d-late" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 16px 20px; background: var(--warning-soft); border: 1.5px solid var(--warning); border-radius: 16px;">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--warning); flex: none;"><path d="M12 8v5M12 16.5v.5M10.3 3.9L2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+<div style="flex: 1 1 240px; display: flex; flex-direction: column;">
+<h2 id="d-late" style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 700;">متأخرة: أرسل الرسالة الأولى لكافيه نسمة الحمدانية</h2>
+<span style="font-size: 14px; line-height: 22px; color: var(--warning); font-weight: 700;">كان موعدها الاثنين 5 أكتوبر</span>
+</div>
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+<x-import component-from-global-scope="Maidani.Button" variant="secondary" size="sm">أجّل</x-import>
+</section>
+
+<section aria-labelledby="d-today" style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line);">
+<h2 id="d-today" style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">متابعات اليوم · 4</h2>
+<a href="Tasks.dc.html" style="font-size: 14px; line-height: 22px; font-weight: 700; color: var(--ink); text-underline-offset: 4px;">كل المهام</a>
+</div>
+<div style="overflow-x: auto;">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; line-height: 22px;">
+<thead>
+<tr style="text-align: right; color: var(--ink-muted); font-size: 13px;">
+<th scope="col" style="padding: 10px 20px; font-weight: 700;">المحل</th>
+<th scope="col" style="padding: 10px 12px; font-weight: 700;">المرحلة</th>
+<th scope="col" style="padding: 10px 12px; font-weight: 700;">المتابعة</th>
+<th scope="col" style="padding: 10px 12px; font-weight: 700;">الموعد</th>
+<th scope="col" style="padding: 10px 20px;"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">إجراء</span></th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+<tr style="border-top: 1px solid var(--line);">
+<td style="padding: 12px 20px;"><a href="DeskLead.dc.html" style="font-weight: 700; color: var(--ink); text-decoration: none; font-size: 15px;">{{r.name}}</a><div style="color: var(--ink-muted); font-size: 13px; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{r.preview}}</div></td>
+<td style="padding: 12px;"><x-import component-from-global-scope="Maidani.StageBadge" stage="{{r.stage}}" size="sm"></x-import></td>
+<td style="padding: 12px; color: var(--ink);">{{r.kind}}</td>
+<td style="padding: 12px; color: var(--ink-muted); white-space: nowrap;">{{r.time}}</td>
+<td style="padding: 12px 20px; text-align: left;"><x-import component-from-global-scope="Maidani.Button" variant="{{r.variant}}" size="sm" icon="{{r.icon}}">{{r.action}}</x-import></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 24px;">
+<section aria-labelledby="d-hot" style="display: flex; flex-direction: column; gap: 12px;">
+<h2 id="d-hot" style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">عملاء حارّون</h2>
+<x-import component-from-global-scope="Maidani.LeadCard" business-name="مجمع ابتسامة لطب الأسنان" activity="مركز أسنان" contact-name="د. ريم" stage="replied" score="{{s44}}" priority="hot" last-contact="فتح التقرير قبل ساعة" next-action="حدد اجتماعاً" next-action-at="لم يُتابَع بعد" on-whats-app="{{noop}}" on-click="{{noop}}"></x-import>
+<x-import component-from-global-scope="Maidani.LeadCard" business-name="كوفي بلاك روز" activity="كافيه" contact-name="أ. نواف" stage="proposal" score="{{s39}}" priority="hot" last-contact="فتح العرض مرتين" next-action="تابع رد العرض" next-action-at="الجمعة 9 أكتوبر" on-whats-app="{{noop}}" on-click="{{noop}}"></x-import>
+</section>
+
+<section aria-labelledby="d-week" style="display: flex; flex-direction: column; gap: 14px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<h2 id="d-week" style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">هذا الأسبوع</h2>
+<sc-for list="{{funnel}}" as="f" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<div style="display: flex; justify-content: space-between; font-size: 14px; line-height: 22px;"><span style="color: var(--ink-muted);">{{f.label}}</span><b>{{f.n}}</b></div>
+<div style="height: 8px; border-radius: 999px; background: var(--surface-sunken);"><div style="{{f.bar}}"></div></div>
+</div>
+</sc-for>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">نسبة الرد على الرسالة الأولى 36%</span>
+</section>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var f = [['زيارات', 14, 'stage-visited'], ['رسائل أُرسلت', 11, 'stage-contacted'], ['ردود', 4, 'stage-replied'], ['اجتماعات', 2, 'stage-meeting'], ['إغلاق', 1, 'stage-won']];
+    return {
+      noop: function () {}, s44: 44, s39: 39,
+      rows: [
+        { name: 'مطعم بيت المندي', preview: 'أستاذ فهد، ما أبي أثقل عليك، لو حاب نكمل الكلام…', stage: 'contacted', kind: 'متابعة ثانية وأخيرة', time: '10:00 ص', variant: 'whatsapp', icon: 'chat', action: 'واتساب' },
+        { name: 'مجمع ابتسامة لطب الأسنان', preview: 'ردّت: «ممكن نتكلم الأسبوع الجاي؟»', stage: 'replied', kind: 'حدد اجتماعاً', time: '12:30 م', variant: 'secondary', icon: 'phone', action: 'اتصال' },
+        { name: 'مركز رواء لطب الأسنان', preview: 'دكتورة نوف، أرسلت لك تقرير الحضور الرقمي للمركز…', stage: 'contacted', kind: 'متابعة أولى', time: '4:00 م', variant: 'whatsapp', icon: 'chat', action: 'واتساب' },
+        { name: 'مطعم الديرة', preview: 'هلا أستاذ سلمان، جهزت لك عينة ريل من تصوير يوم الزيارة…', stage: 'visited', kind: 'أرسل ريل العينة', time: '6:00 م', variant: 'whatsapp', icon: 'chat', action: 'واتساب' }
+      ],
+      funnel: f.map(function (x) { return { label: x[0], n: x[1], bar: 'width: ' + Math.round(x[1] / 14 * 100) + '%; height: 100%; border-radius: 999px; background: var(--' + x[2] + ');' }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

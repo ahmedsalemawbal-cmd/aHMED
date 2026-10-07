@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الدخول</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; padding: 72px 24px 40px; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+<div style="display: flex; flex-direction: column; gap: 40px;">
+<div style="display: flex; flex-direction: column; gap: 16px;">
+<div aria-hidden="true" style="display: flex; align-items: flex-end; gap: 4px; height: 40px;">
+<span style="width: 12px; height: 40px; border-radius: 4px; background: var(--stage-visited);"></span>
+<span style="width: 12px; height: 32px; border-radius: 4px; background: var(--stage-contacted);"></span>
+<span style="width: 12px; height: 25px; border-radius: 4px; background: var(--stage-replied);"></span>
+<span style="width: 12px; height: 18px; border-radius: 4px; background: var(--stage-proposal);"></span>
+<span style="width: 12px; height: 12px; border-radius: 4px; background: var(--stage-won);"></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<h1 style="margin: 0; font-size: 32px; line-height: 44px; font-weight: 700;">ميداني</h1>
+<p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted);">سجّل المحل، أرسل الرسالة، وتابع حتى الإغلاق.</p>
+</div>
+</div>
+<form style="display: flex; flex-direction: column; gap: 20px;">
+<x-import component-from-global-scope="Maidani.TextField" label="البريد الإلكتروني" type="email" ltr="{{yes}}" autocomplete="email" default-value="ahmed@example.com"></x-import>
+<x-import component-from-global-scope="Maidani.TextField" label="كلمة المرور" type="password" autocomplete="current-password" default-value="12345678"></x-import>
+<a href="Main.dc.html" class="md-btn md-btn-primary md-btn-block" style="text-decoration: none; margin-top: 8px;">دخول</a>
+</form>
+</div>
+<p style="margin: 0; text-align: center; font-size: 13px; line-height: 20px; color: var(--ink-muted);">حساب واحد فقط. لا يوجد تسجيل جديد من التطبيق.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { yes: true };
+  }
+}
+</script>
+</body>
+</html>

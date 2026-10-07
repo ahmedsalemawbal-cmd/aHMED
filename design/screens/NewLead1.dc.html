@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عميل جديد — البيانات</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+
+<header style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 12px; background: var(--surface-raised); border-bottom: 1px solid var(--line);">
+<div style="display: flex; align-items: center; justify-content: space-between;">
+<a href="Main.dc.html" aria-label="إغلاق" style="width: 48px; height: 48px; display: grid; place-items: center; color: var(--ink); margin-inline-start: -12px;">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">عميل جديد</h1>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted); min-width: 36px; text-align: left;">1 من 4</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;" aria-hidden="true">
+<span style="height: 4px; border-radius: 999px; background: var(--action);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--surface-sunken);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--surface-sunken);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--surface-sunken);"></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-size: 12px; line-height: 16px; color: var(--ink-muted);">
+<span style="color: var(--ink); font-weight: 700;">البيانات</span><span>التقييم</span><span>الملاحظات</span><span>الخدمات</span>
+</div>
+</header>
+
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 20px 16px 24px;">
+<x-import component-from-global-scope="Maidani.TextField" label="اسم المحل" required="{{yes}}" default-value="مطعم ريدان"></x-import>
+
+<fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 15px; line-height: 22px; font-weight: 700;">نوع النشاط</legend>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
+<sc-for list="{{activities}}" as="a" hint-placeholder-count="4">
+<button type="button" onClick="{{a.pick}}" aria-pressed="{{a.pressed}}" style="{{a.style}}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{a.d}}"></path></svg>
+<span>{{a.label}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+<x-import component-from-global-scope="Maidani.TextField" label="اسم المسؤول" default-value="خالد العتيبي"></x-import>
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">صفته</span>
+<div role="radiogroup" aria-label="صفة المسؤول" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 3px; height: 52px; box-sizing: border-box; background: var(--surface-sunken); border: 1.5px solid var(--line-strong); border-radius: 10px;">
+<sc-for list="{{roles}}" as="r" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{r.checked}}" onClick="{{r.pick}}" style="{{r.style}}">{{r.label}}</button>
+</sc-for>
+</div>
+</div>
+</div>
+
+<x-import component-from-global-scope="Maidani.TextField" label="الجوال" ltr="{{yes}}" input-mode="tel" default-value="0551234567" hint="يُحوَّل تلقائياً إلى 9665… عند الحفظ"></x-import>
+
+<button type="button" role="switch" aria-checked="{{consentAria}}" onClick="{{toggleConsent}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 16px; background: var(--surface-raised); border: 1.5px solid var(--line-strong); border-radius: 10px; font: inherit; color: var(--ink); text-align: right; cursor: pointer;">
+<span style="display: flex; flex-direction: column;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">وافق على رسالة واتساب</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">{{consentText}}</span>
+</span>
+<span style="{{trackStyle}}"><span style="{{knobStyle}}"></span></span>
+</button>
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">أفضل وقت للتواصل</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap;">
+<sc-for list="{{times}}" as="t" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--stage-visited-soft); border-radius: 10px; color: var(--stage-visited);">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+<span style="flex-grow: 1; display: flex; flex-direction: column;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">تم التقاط الموقع</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink);">حي الحمدانية، شارع الأمير متعب</span>
+</span>
+<button type="button" style="font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: none; border: 0; min-height: 48px; padding: 0 4px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer;">أعد الالتقاط</button>
+</div>
+</main>
+
+<footer style="display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 20px; background: var(--surface-raised); border-top: 1px solid var(--line);">
+<a href="NewLead2.dc.html" class="md-btn md-btn-primary md-btn-block" style="text-decoration: none;">التالي: التقييم</a>
+<span style="text-align: center; font-size: 12px; line-height: 18px; color: var(--ink-muted);">حُفظت كمسودة قبل لحظات</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { act: 'restaurant', role: 'owner', consent: true, time: 'evening' }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var acts = [
+      ['restaurant', 'مطعم', 'M7 3v8a2 2 0 0 0 2 2v8M11 3v8M5 3v8M17 3c-1.7 0-3 2.2-3 5s1.3 4 3 4v9'],
+      ['cafe', 'كافيه', 'M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zM17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 3v3M12 3v3'],
+      ['dental', 'أسنان', 'M8 3c-2.5 0-4 2-4 4.5 0 3 1.5 4 2 7 .5 3 1 6.5 2.5 6.5s1.5-5 3.5-5 2 5 3.5 5 2-3.5 2.5-6.5c.5-3 2-4 2-7C20 5 18.5 3 16 3c-1.6 0-2.6 1-4 1S9.6 3 8 3z'],
+      ['other', 'أخرى', 'M4 9.5V20h16V9.5M3 4h18l-1.5 5.5a2.7 2.7 0 0 1-5.2 0 2.7 2.7 0 0 1-5.1 0 2.7 2.7 0 0 1-5.2 0L3 4z']
+    ];
+    var tile = 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 76px; border-radius: 10px; font: inherit; font-size: 14px; line-height: 20px; cursor: pointer; ';
+    var seg = 'border: 0; border-radius: 7px; font: inherit; font-size: 14px; cursor: pointer; ';
+    var chip = 'min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer; ';
+    return {
+      yes: true,
+      activities: acts.map(function (a) {
+        var on = s.act === a[0];
+        return { label: a[1], d: a[2], pressed: on ? 'true' : 'false', pick: function () { self.setState({ act: a[0] }); },
+          style: tile + (on ? 'background: var(--action); color: var(--on-action); border: 1.5px solid var(--action); font-weight: 700;' : 'background: var(--surface-raised); color: var(--ink); border: 1.5px solid var(--line-strong); font-weight: 400;') };
+      }),
+      roles: [['owner', 'مالك'], ['manager', 'مدير'], ['employee', 'موظف']].map(function (r) {
+        var on = s.role === r[0];
+        return { label: r[1], checked: on ? 'true' : 'false', pick: function () { self.setState({ role: r[0] }); },
+          style: seg + (on ? 'background: var(--surface-raised); color: var(--ink); font-weight: 700; box-shadow: var(--shadow-card);' : 'background: transparent; color: var(--ink-muted); font-weight: 400;') };
+      }),
+      times: [['morning', 'الصباح'], ['afternoon', 'بعد العصر'], ['evening', 'المساء']].map(function (t) {
+        var on = s.time === t[0];
+        return { label: t[1], pressed: on ? 'true' : 'false', pick: function () { self.setState({ time: t[0] }); },
+          style: chip + (on ? 'background: var(--ink); color: var(--surface-raised); border: 1.5px solid var(--ink); font-weight: 700;' : 'background: var(--surface-raised); color: var(--ink); border: 1.5px solid var(--line-strong); font-weight: 400;') };
+      }),
+      consentAria: s.consent ? 'true' : 'false',
+      consentText: s.consent ? 'أخذت موافقته شفهياً في الزيارة' : 'لن يظهر زر الواتساب قبل الموافقة',
+      toggleConsent: function () { self.setState({ consent: !s.consent }); },
+      trackStyle: 'flex: none; width: 52px; height: 32px; border-radius: 999px; padding: 3px; box-sizing: border-box; display: flex; ' + (s.consent ? 'background: var(--success); justify-content: flex-end;' : 'background: var(--line-strong); justify-content: flex-start;'),
+      knobStyle: 'width: 26px; height: 26px; border-radius: 999px; background: var(--surface-raised);'
+    };
+  }
+}
+</script>
+</body>
+</html>

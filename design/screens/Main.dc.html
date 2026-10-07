@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>اليوم</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1240px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+<main style="flex-grow: 1; display: flex; flex-direction: column; gap: 24px; padding: 28px 16px 24px; overflow: hidden;">
+
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">الأربعاء 7 أكتوبر</span>
+<h1 style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 700;">صباح الخير، أحمد</h1>
+</div>
+<a href="Leads.dc.html" aria-label="بحث في العملاء" style="width: 48px; height: 48px; border-radius: 999px; background: var(--surface-raised); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink);">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg>
+</a>
+</header>
+
+<section aria-label="أرقام اليوم" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 14px 12px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">4</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">زيارات اليوم</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 14px 12px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">3</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">رسائل أُرسلت</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 14px 12px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span style="font-size: 32px; line-height: 40px; font-weight: 700;">5</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">متابعات مستحقة</span>
+</div>
+</section>
+
+<section aria-label="هدف الأسبوع" style="display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">هدف الأسبوع</span>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);"><b style="font-size: 20px; color: var(--ink);">14</b> من 20 زيارة</span>
+</div>
+<div style="height: 10px; border-radius: 999px; background: var(--surface-sunken); overflow: hidden;">
+<div style="width: 70%; height: 100%; border-radius: 999px; background: var(--action);"></div>
+</div>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">باقي 6 زيارات حتى الخميس</span>
+</section>
+
+<section aria-labelledby="late" style="display: flex; flex-direction: column; gap: 10px;">
+<h2 id="late" style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 17px; line-height: 26px; font-weight: 700; color: var(--warning);">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16.5v.5M10.3 3.9L2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+متأخرة · 1
+</h2>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--warning-soft); border: 1.5px solid var(--warning); border-radius: 16px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+<a href="Lead.dc.html" style="font-size: 16px; line-height: 24px; font-weight: 700; color: var(--ink); text-decoration: none;">كافيه نسمة الحمدانية</a>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink);">أرسل الرسالة الأولى</span>
+<span style="font-size: 13px; line-height: 20px; font-weight: 700; color: var(--warning);">متأخرة منذ يومين</span>
+</div>
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+</div>
+</section>
+
+<section aria-labelledby="today" style="display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<h2 id="today" style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">متابعات اليوم · 3</h2>
+<a href="Tasks.dc.html" style="font-size: 14px; line-height: 22px; font-weight: 700; color: var(--ink); text-underline-offset: 4px; padding: 12px 0;">كل المهام</a>
+</div>
+<div style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line);">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<a href="Lead.dc.html" style="font-size: 16px; line-height: 24px; font-weight: 700; color: var(--ink); text-decoration: none;">مطعم الديرة</a>
+<span style="font-size: 12px; line-height: 18px; color: var(--ink-muted);">متابعة أولى</span>
+</div>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">هلا أستاذ سلمان، جهزت لك عينة ريل من تصوير يوم الزيارة…</span>
+</div>
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line);">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<a href="Lead.dc.html" style="font-size: 16px; line-height: 24px; font-weight: 700; color: var(--ink); text-decoration: none;">مطعم بيت المندي</a>
+<span style="font-size: 12px; line-height: 18px; color: var(--ink-muted);">متابعة ثانية</span>
+</div>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">أستاذ فهد، ما أبي أثقل عليك، لو حاب نكمل الكلام…</span>
+</div>
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<a href="Lead.dc.html" style="font-size: 16px; line-height: 24px; font-weight: 700; color: var(--ink); text-decoration: none;">مركز رواء لطب الأسنان</a>
+<span style="font-size: 12px; line-height: 18px; color: var(--ink-muted);">متابعة أولى</span>
+</div>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">دكتورة نوف، أرسلت لك تقرير الحضور الرقمي للمركز…</span>
+</div>
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="hot" style="display: flex; flex-direction: column; gap: 10px;">
+<h2 id="hot" style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">عملاء حارّون</h2>
+<x-import component-from-global-scope="Maidani.LeadCard" business-name="مجمع ابتسامة لطب الأسنان" activity="مركز أسنان" contact-name="د. ريم" stage="replied" score="{{s1}}" priority="hot" last-contact="فتح التقرير قبل ساعة" next-action="حدد اجتماعاً" next-action-at="لم يُتابَع بعد" on-whats-app="{{noop}}" on-click="{{noop}}"></x-import>
+</section>
+
+</main>
+<dc-import name="BottomNav" active="today" hint-size="390px,72px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { s1: 44, noop: function () {} };
+  }
+}
+</script>
+</body>
+</html>

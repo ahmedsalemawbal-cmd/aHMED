@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الشريط الجانبي</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<aside style="box-sizing: border-box; min-height: 1000px; height: 100%; display: flex; flex-direction: column; gap: 24px; padding: 24px 16px; background: var(--surface-raised); border-inline-end: 1px solid var(--line); font-family: var(--font-sans); color: var(--ink); direction: rtl;">
+<a href="DeskToday.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 0 8px; text-decoration: none; color: var(--ink);">
+<span aria-hidden="true" style="display: flex; align-items: flex-end; gap: 3px; height: 24px;">
+<span style="width: 7px; height: 24px; border-radius: 3px; background: var(--stage-visited);"></span>
+<span style="width: 7px; height: 19px; border-radius: 3px; background: var(--stage-contacted);"></span>
+<span style="width: 7px; height: 15px; border-radius: 3px; background: var(--stage-replied);"></span>
+<span style="width: 7px; height: 11px; border-radius: 3px; background: var(--stage-proposal);"></span>
+<span style="width: 7px; height: 7px; border-radius: 3px; background: var(--stage-won);"></span>
+</span>
+<span style="font-size: 20px; line-height: 28px; font-weight: 700;">ميداني</span>
+</a>
+<nav aria-label="الأقسام" style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+<a href="{{it.href}}" aria-current="{{it.current}}" style="{{it.style}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.d}}"></path></svg>
+<span style="flex-grow: 1;">{{it.label}}</span>
+<sc-if value="{{it.hasCount}}" hint-placeholder-val="{{it.hasCount}}">
+<span style="{{it.countStyle}}">{{it.count}}</span>
+</sc-if>
+</a>
+</sc-for>
+</nav>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid var(--line);">
+<span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 999px; background: var(--action); color: var(--on-action); display: grid; place-items: center; font-weight: 700;">أ</span>
+<span style="display: flex; flex-direction: column; font-size: 14px; line-height: 20px;"><b>أحمد</b><span style="color: var(--ink-muted); font-size: 13px;">[اسم العلامة]</span></span>
+</div>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["today","leads","pipeline","tasks","numbers","quotes","settings"],"default":"today"},"$preview":{"width":264,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var active = this.props.active ?? 'today';
+    var defs = [
+      ['today', 'اليوم', 'DeskToday.dc.html', 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 5, false],
+      ['leads', 'العملاء', 'DeskLeads.dc.html', 'M4 9.5V20h16V9.5M3 4h18l-1.5 5.5a2.7 2.7 0 0 1-5.2 0 2.7 2.7 0 0 1-5.1 0 2.7 2.7 0 0 1-5.2 0L3 4z', 47, false],
+      ['pipeline', 'Pipeline', 'DeskPipeline.dc.html', 'M4 4h4v16H4zM10 4h4v11h-4zM16 4h4v7h-4z', null, false],
+      ['tasks', 'المهام', 'Tasks.dc.html', 'M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11', 1, true],
+      ['numbers', 'لوحة الأرقام', '#', 'M4 20V10M10 20V4M16 20v-7M22 20H2', null, false],
+      ['quotes', 'عروض الأسعار', 'DeskQuote.dc.html', 'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5', null, false],
+      ['settings', 'الإعدادات', 'Settings.dc.html', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z', null, false]
+    ];
+    return {
+      items: defs.map(function (d) {
+        var on = d[0] === active;
+        return { label: d[1], href: d[2], d: d[3], count: d[4], hasCount: d[4] != null, current: on ? 'page' : 'false',
+          style: 'display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; line-height: 22px; ' + (on ? 'background: var(--surface-sunken); color: var(--ink); font-weight: 700;' : 'color: var(--ink-muted); font-weight: 400;'),
+          countStyle: 'font-size: 12px; line-height: 18px; font-weight: 700; padding: 1px 8px; border-radius: 999px; ' + (d[5] ? 'background: var(--warning-soft); color: var(--warning);' : 'background: var(--surface-sunken); color: var(--ink-muted);') };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مطعم ريدان — الداشبورد</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="min-height: 1080px; display: flex; flex-wrap: wrap; align-items: stretch; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+<div style="flex: 1 1 264px; max-width: 100%; display: flex; flex-direction: column;">
+<dc-import name="DeskSidebar" active="leads" hint-size="100%,1080px"></dc-import>
+</div>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column;">
+<header style="display: flex; flex-direction: column; gap: 12px; padding: 20px 40px; border-bottom: 1px solid var(--line); background: var(--surface-raised);">
+<nav aria-label="مسار التنقل" style="font-size: 14px; line-height: 22px; color: var(--ink-muted);"><a href="DeskLeads.dc.html" style="color: var(--ink-muted);">العملاء</a> / <span aria-current="page">مطعم ريدان</span></nav>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px;">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+<h1 style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 700;">مطعم ريدان</h1>
+<x-import component-from-global-scope="Maidani.StageBadge" stage="contacted"></x-import>
+<x-import component-from-global-scope="Maidani.PriorityBadge" priority="hot"></x-import>
+</div>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">مطعم · حي الحمدانية · سُجّل من زيارة ميدانية اليوم 10:30 ص</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px;">
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm">واتساب</x-import>
+<x-import component-from-global-scope="Maidani.Button" variant="secondary" size="sm" icon="phone">اتصال</x-import>
+<a href="DeskQuote.dc.html" class="md-btn md-btn-secondary md-btn-sm" style="text-decoration: none;">عرض سعر</a>
+<x-import component-from-global-scope="Maidani.Button" variant="secondary" size="sm">تغيير المرحلة</x-import>
+</div>
+</div>
+</header>
+
+<main style="width: 100%; max-width: 1240px; box-sizing: border-box; padding: 28px 40px 48px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+
+<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+<section aria-labelledby="dn" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; background: var(--surface-raised); border: 1.5px solid var(--ink); border-radius: 16px;">
+<h2 id="dn" style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 700; color: var(--ink-muted);">الخطوة القادمة</h2>
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 17px; line-height: 26px; font-weight: 700;">متابعة أولى: أرسل عينة الريل</span>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">السبت 10 أكتوبر · بعد 3 أيام</span>
+</div>
+<div style="display: flex; gap: 8px;">
+<x-import component-from-global-scope="Maidani.Button" variant="primary" size="sm">جهّز رسالة المتابعة</x-import>
+<x-import component-from-global-scope="Maidani.Button" variant="ghost" size="sm">أجّل</x-import>
+</div>
+</section>
+
+<section aria-labelledby="ds" style="display: flex; flex-direction: column; gap: 14px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<h2 id="ds" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700;">التقييم</h2>
+<x-import component-from-global-scope="Maidani.ScoreBar" score="{{score}}" label="درجة الحضور الرقمي"></x-import>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 22px;">
+<li style="display: flex; gap: 8px; align-items: center;"><span style="width: 8px; height: 8px; border-radius: 999px; background: var(--danger);"></span>لا ينشر فيديو أو ريلز</li>
+<li style="display: flex; gap: 8px; align-items: center;"><span style="width: 8px; height: 8px; border-radius: 999px; background: var(--danger);"></span>لا يرد على مراجعات قوقل</li>
+<li style="display: flex; gap: 8px; align-items: center;"><span style="width: 8px; height: 8px; border-radius: 999px; background: var(--danger);"></span>بدون رابط طلب أو حجز</li>
+</ul>
+</section>
+
+<section aria-labelledby="dsv" style="display: flex; flex-direction: column; gap: 10px; padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<h2 id="dsv" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700;">الخدمات المقترحة</h2>
+<span style="font-size: 14px; color: var(--ink-muted);"><b style="font-size: 17px; color: var(--ink);">2,500</b> ر.س شهرياً</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px;">
+<span style="padding: 6px 12px; border-radius: 999px; background: var(--surface-sunken); font-size: 14px;">تصوير وإنتاج فيديو وريلز</span>
+<span style="padding: 6px 12px; border-radius: 999px; background: var(--surface-sunken); font-size: 14px;">إدارة ملف خرائط قوقل</span>
+<span style="padding: 6px 12px; border-radius: 999px; background: var(--surface-sunken); font-size: 14px;">صفحة هبوط للطلب</span>
+</div>
+</section>
+
+<section aria-labelledby="dc" style="padding: 20px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<h2 id="dc" style="margin: 0 0 12px; font-size: 15px; line-height: 22px; font-weight: 700;">المسؤول</h2>
+<dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; line-height: 22px;">
+<dt style="color: var(--ink-muted);">الاسم</dt><dd style="margin: 0; font-weight: 700;">خالد العتيبي · مالك</dd>
+<dt style="color: var(--ink-muted);">الجوال</dt><dd style="margin: 0;" dir="ltr">055 123 4567</dd>
+<dt style="color: var(--ink-muted);">أفضل وقت</dt><dd style="margin: 0;">المساء</dd>
+<dt style="color: var(--ink-muted);">واتساب</dt><dd style="margin: 0; color: var(--success); font-weight: 700;">وافق شفهياً في الزيارة</dd>
+<dt style="color: var(--ink-muted);">إنستقرام</dt><dd style="margin: 0;" dir="ltr">[رابط الحساب]</dd>
+</dl>
+</section>
+</div>
+
+<div style="flex: 1.4 1 480px; min-width: 0; display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;">
+<nav aria-label="أقسام العميل" style="display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto;">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</nav>
+<sc-if value="{{isTimeline}}" hint-placeholder-val="{{yes}}">
+<ol style="margin: 0; padding: 24px; list-style: none; display: flex; flex-direction: column;">
+<sc-for list="{{events}}" as="e" hint-placeholder-count="4">
+<li style="display: flex; gap: 14px;">
+<div style="display: flex; flex-direction: column; align-items: center; flex: none; width: 20px;">
+<span style="{{e.dot}}"></span>
+<span style="flex-grow: 1; width: 2px; background: var(--line); min-height: 24px;"></span>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; padding-bottom: 24px; min-width: 0;">
+<div style="display: flex; justify-content: space-between; gap: 12px;"><b style="font-size: 15px; line-height: 22px;">{{e.title}}</b><span style="font-size: 13px; line-height: 20px; color: var(--ink-muted); white-space: nowrap;">{{e.time}}</span></div>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">{{e.body}}</span>
+<sc-if value="{{e.hasQuote}}" hint-placeholder-val="{{e.hasQuote}}">
+<div style="padding: 12px 14px; background: var(--surface-sunken); border-radius: 10px; font-size: 14px; line-height: 23px; white-space: pre-line;">{{e.quote}}</div>
+</sc-if>
+</div>
+</li>
+</sc-for>
+</ol>
+</sc-if>
+<sc-if value="{{isOther}}" hint-placeholder-val="{{no}}">
+<x-import component-from-global-scope="Maidani.EmptyState" icon="clock" title="{{otherTitle}}" message="{{otherMsg}}"></x-import>
+</sc-if>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'timeline' }; }
+  renderVals() {
+    var self = this, tab = this.state.tab;
+    var base = 'flex: none; min-height: 52px; padding: 0 14px; background: none; border: 0; border-bottom: 3px solid transparent; font: inherit; font-size: 15px; cursor: pointer; margin-bottom: -1px; ';
+    var other = { messages: ['رسالة واحدة', 'الرسالة الأولى أُرسلت اليوم 11:20 ص بنبرة ودّية.'], tasks: ['متابعتان قادمتان', 'السبت 10 أكتوبر والأربعاء 14 أكتوبر.'], quotes: ['لا عروض بعد', 'أنشئ العرض من زر «عرض سعر» أعلى الصفحة.'] };
+    var dot = function (c) { return 'width: 12px; height: 12px; border-radius: 999px; margin-top: 5px; background: ' + c + '; box-shadow: 0 0 0 4px var(--surface-raised);'; };
+    return {
+      yes: true, no: false, score: 48,
+      tabs: [['timeline', 'الخط الزمني'], ['messages', 'الرسائل'], ['tasks', 'المهام'], ['quotes', 'العروض']].map(function (d) {
+        var on = tab === d[0];
+        return { label: d[1], pressed: on ? 'true' : 'false', pick: function () { self.setState({ tab: d[0] }); },
+          style: base + (on ? 'color: var(--ink); font-weight: 700; border-bottom-color: var(--ink);' : 'color: var(--ink-muted); font-weight: 400;') };
+      }),
+      isTimeline: tab === 'timeline', isOther: !!other[tab],
+      otherTitle: other[tab] ? other[tab][0] : '', otherMsg: other[tab] ? other[tab][1] : '',
+      events: [
+        { title: 'أُنشئت متابعتان', time: 'اليوم 11:21 ص', body: 'السبت 10 أكتوبر (عينة ريل) والأربعاء 14 أكتوبر (تذكير أخير)', hasQuote: false, quote: '', dot: dot('var(--line-strong)') },
+        { title: 'تم الإرسال · الرسالة الأولى', time: 'اليوم 11:20 ص', body: 'عبر واتساب · نبرة ودّية · قالب «مطاعم — أول تواصل»', hasQuote: true, quote: 'السلام عليكم أستاذ خالد، معك أحمد، زرتكم اليوم في مطعم ريدان.\nلاحظت أن أطباقكم شكلها ممتاز، لكن حسابكم في إنستقرام بدون أي فيديو لها…', dot: dot('var(--stage-contacted)') },
+        { title: 'تمت الزيارة', time: 'اليوم 10:45 ص', body: 'الدرجة 48 · 3 صور وفيديو 0:18 · ملاحظة صوتية 0:24', hasQuote: true, quote: 'الملاحظة الأبرز: أطباقهم شكلها ممتاز لكن حسابهم في إنستقرام بدون أي فيديو', dot: dot('var(--stage-visited)') },
+        { title: 'سُجّل العميل', time: 'اليوم 10:30 ص', body: 'من زيارة ميدانية · حي الحمدانية', hasQuote: false, quote: '', dot: dot('var(--stage-not-visited)') }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عميل جديد — الملاحظات</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+
+<header style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 12px; background: var(--surface-raised); border-bottom: 1px solid var(--line);">
+<div style="display: flex; align-items: center; justify-content: space-between;">
+<a href="NewLead2.dc.html" aria-label="رجوع" style="width: 48px; height: 48px; display: grid; place-items: center; color: var(--ink); margin-inline-start: -12px;">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">ملاحظات الزيارة</h1>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted); min-width: 36px; text-align: left;">3 من 4</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;" aria-hidden="true">
+<span style="height: 4px; border-radius: 999px; background: var(--action);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--action);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--action);"></span>
+<span style="height: 4px; border-radius: 999px; background: var(--surface-sunken);"></span>
+</div>
+</header>
+
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; padding: 20px 16px 24px;">
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<label for="key" style="font-size: 15px; line-height: 22px; font-weight: 700;">الملاحظة الأبرز <span style="color: var(--danger);" aria-hidden="true">*</span></label>
+<input id="key" class="md-input" value="{{keyNote}}" onChange="{{editKey}}" maxlength="90" aria-describedby="key-help">
+<div id="key-help" style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 20px; color: var(--ink-muted);">
+<span>سطر واحد محدد يدخل في الرسالة، ليس مدحاً عاماً</span>
+<span dir="ltr">{{keyCount}}/90</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">ملاحظة صوتية</span>
+<sc-if value="{{recording}}" hint-placeholder-val="{{no}}">
+<button type="button" onClick="{{toggleRec}}" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 16px 8px 8px; background: var(--danger-soft); border: 1.5px solid var(--danger); border-radius: 16px; font: inherit; color: var(--danger); cursor: pointer;">
+<span style="width: 48px; height: 48px; border-radius: 999px; background: var(--danger); color: var(--surface-raised); display: grid; place-items: center; flex: none;">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect></svg>
+</span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; text-align: right;">
+<span style="font-size: 16px; line-height: 24px; font-weight: 700;">جارٍ التسجيل · 0:07</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink);">اضغط للإيقاف، وسيتحول الكلام إلى نص</span>
+</span>
+</button>
+</sc-if>
+<sc-if value="{{notRecording}}" hint-placeholder-val="{{yes}}">
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<button type="button" aria-label="تشغيل الملاحظة الصوتية" style="width: 44px; height: 44px; border-radius: 999px; background: var(--surface-sunken); border: 0; display: grid; place-items: center; color: var(--ink); cursor: pointer; flex: none;">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 5v14L6 12z" fill="currentColor"></path></svg>
+</button>
+<div aria-hidden="true" style="flex-grow: 1; display: flex; align-items: center; gap: 3px; height: 28px;">
+<sc-for list="{{wave}}" as="w" hint-placeholder-count="24"><span style="{{w}}"></span></sc-for>
+</div>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);" dir="ltr">0:24</span>
+</div>
+<p style="margin: 0; padding: 10px 12px; background: var(--surface-sunken); border-radius: 10px; font-size: 14px; line-height: 22px; color: var(--ink-muted);"><b style="color: var(--ink);">النص:</b> المالك متجاوب، الزحمة وقت العشاء، يبي يوصل لسكان الحي الجدد، جربوا مصور قبل وما عجبهم.</p>
+</div>
+<button type="button" onClick="{{toggleRec}}" class="md-btn md-btn-secondary md-btn-block">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>
+<span>سجّل ملاحظة أخرى</span>
+</button>
+</sc-if>
+</div>
+
+<x-import component-from-global-scope="Maidani.TextField" label="ملاحظات حرة" multiline="{{yes}}" rows="{{three}}" default-value="الطاولات الخارجية ممتلئة بعد المغرب. المنيو الورقي قديم وبدون صور."></x-import>
+
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 700;">صور وفيديو</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">3 ملفات · تُرفع عند توفر الشبكة</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
+<button type="button" aria-label="إضافة صورة أو فيديو" style="aspect-ratio: 1; border-radius: 10px; border: 1.5px dashed var(--line-strong); background: var(--surface-raised); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: inherit; font-size: 12px; cursor: pointer;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+إضافة
+</button>
+<div style="aspect-ratio: 1; border-radius: 10px; background: var(--surface-sunken); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--ink-muted); font-size: 11px;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM4 15l4-4 5 5 3-3 4 4"></path></svg>
+[صورة الواجهة]
+</div>
+<div style="aspect-ratio: 1; border-radius: 10px; background: var(--surface-sunken); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--ink-muted); font-size: 11px;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM4 15l4-4 5 5 3-3 4 4"></path></svg>
+[صورة طبق]
+</div>
+<div style="aspect-ratio: 1; border-radius: 10px; background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--surface-raised); font-size: 11px;">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg>
+<span dir="ltr">0:18</span>
+</div>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 20px; color: var(--ink-muted);">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>
+رفعت فيديو، فستُنشأ مهمة «أرسل ريل العينة خلال 24 ساعة».
+</p>
+</div>
+</main>
+
+<footer style="display: flex; gap: 8px; padding: 12px 16px 20px; background: var(--surface-raised); border-top: 1px solid var(--line);">
+<a href="NewLead2.dc.html" class="md-btn md-btn-secondary" style="text-decoration: none;">السابق</a>
+<a href="NewLead4.dc.html" class="md-btn md-btn-primary" style="text-decoration: none; flex-grow: 1;">التالي: الخدمات</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { key: 'أطباقهم شكلها ممتاز لكن حسابهم في إنستقرام بدون أي فيديو', rec: false }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var hs = [8, 14, 22, 12, 26, 18, 10, 20, 28, 16, 8, 12, 24, 18, 14, 22, 10, 16, 26, 12, 8, 18, 14, 10];
+    return {
+      yes: true, no: false, three: 3,
+      keyNote: s.key, keyCount: s.key.length,
+      editKey: function (e) { self.setState({ key: e.target.value }); },
+      recording: s.rec, notRecording: !s.rec,
+      toggleRec: function () { self.setState({ rec: !s.rec }); },
+      wave: hs.map(function (h, i) { return 'flex: 1; height: ' + h + 'px; border-radius: 2px; background: ' + (i < 9 ? 'var(--ink)' : 'var(--line-strong)') + ';'; })
+    };
+  }
+}
+</script>
+</body>
+</html>

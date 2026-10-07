@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الإعدادات</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; padding: 24px 16px;">
+<h1 style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 700;">المزيد</h1>
+
+<section style="display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<span aria-hidden="true" style="width: 56px; height: 56px; border-radius: 999px; background: var(--action); color: var(--on-action); display: grid; place-items: center; font-size: 22px; font-weight: 700; flex: none;">أ</span>
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+<span style="font-size: 17px; line-height: 26px; font-weight: 700;">أحمد</span>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">[اسم العلامة] · نبرة افتراضية: ودّي</span>
+</div>
+<button type="button" class="md-btn md-btn-secondary md-btn-sm">تعديل</button>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px;">
+<h2 style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 700; color: var(--ink-muted);">العمل</h2>
+<div style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;">
+<sc-for list="{{work}}" as="r" hint-placeholder-count="4">
+<button type="button" style="{{r.style}}">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: var(--surface-sunken); display: grid; place-items: center; flex: none; color: var(--ink);">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.d}}"></path></svg>
+</span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; text-align: right;">
+<span style="font-size: 16px; line-height: 24px; font-weight: 700; color: var(--ink);">{{r.label}}</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">{{r.sub}}</span>
+</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--ink-muted); flex: none;"><path d="M15 6l-6 6 6 6"></path></svg>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px;">
+<h2 style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 700; color: var(--ink-muted);">المظهر</h2>
+<div role="radiogroup" aria-label="المظهر" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface-sunken); border: 1.5px solid var(--line-strong); border-radius: 10px;">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{t.checked}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px;">
+<h2 style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 700; color: var(--ink-muted);">البيانات</h2>
+<div style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;">
+<button type="button" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 16px; background: none; border: 0; font: inherit; cursor: pointer; color: var(--ink);">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: var(--surface-sunken); display: grid; place-items: center; flex: none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg></span>
+<span style="flex-grow: 1; text-align: right; font-size: 16px; line-height: 24px; font-weight: 700;">تصدير البيانات CSV</span>
+</button>
+</div>
+</section>
+
+<button type="button" class="md-btn md-btn-danger md-btn-block">تسجيل الخروج</button>
+</main>
+<dc-import name="BottomNav" active="more" hint-size="390px,72px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { theme: 'auto' }; }
+  renderVals() {
+    var self = this, th = this.state.theme;
+    var row = 'display: flex; align-items: center; gap: 12px; min-height: 68px; padding: 10px 16px; background: none; border: 0; font: inherit; cursor: pointer; ';
+    var rows = [
+      ['الخدمات', '6 خدمات · ربط كل خدمة بالأنشطة', 'M4 7h16M4 12h16M4 17h10'],
+      ['الأنشطة وبنود التقييم', '4 أنشطة · 13 بنداً بأوزانها', 'M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11'],
+      ['قوالب الرسائل', '9 قوالب · أفضلها 38% رد', 'M4 19.5l1.4-3.6A8 8 0 1 1 8.2 18.7L4 19.5z'],
+      ['الهدف الأسبوعي', '20 زيارة في الأسبوع', 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z']
+    ];
+    var seg = 'min-height: 44px; border: 0; border-radius: 7px; font: inherit; font-size: 15px; cursor: pointer; ';
+    return {
+      work: rows.map(function (r, i) { return { label: r[0], sub: r[1], d: r[2], style: row + (i > 0 ? 'border-top: 1px solid var(--line);' : '') }; }),
+      themes: [['light', 'فاتح'], ['dark', 'داكن'], ['auto', 'تلقائي']].map(function (t) {
+        var on = th === t[0];
+        return { label: t[1], checked: on ? 'true' : 'false', pick: function () { self.setState({ theme: t[0] }); },
+          style: seg + (on ? 'background: var(--surface-raised); color: var(--ink); font-weight: 700; box-shadow: var(--shadow-card);' : 'background: transparent; color: var(--ink-muted); font-weight: 400;') };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

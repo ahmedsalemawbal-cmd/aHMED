@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Pipeline</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+
+<header style="display: flex; flex-direction: column; gap: 14px; padding: 24px 16px 12px;">
+<h1 style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 700;">Pipeline</h1>
+<div role="tablist" aria-label="المراحل" style="display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px 4px;">
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="6">
+<button type="button" role="tab" aria-selected="{{s.selected}}" onClick="{{s.pick}}" style="{{s.style}}">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 700; color: {{s.color}};"><span style="width: 8px; height: 8px; border-radius: 999px; background: currentColor;"></span>{{s.label}}</span>
+<span style="font-size: 22px; line-height: 28px; font-weight: 700; color: var(--ink);">{{s.count}}</span>
+</button>
+</sc-for>
+</div>
+</header>
+
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 16px 24px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; line-height: 22px; color: var(--ink-muted);">
+<span>{{current.label}} · {{current.count}} عملاء</span>
+<span>قيمة متوقعة <b style="font-size: 17px; color: var(--ink);">{{current.value}}</b> ر.س</span>
+</div>
+<sc-for list="{{cards}}" as="c" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 0;">
+<x-import component-from-global-scope="Maidani.LeadCard" variant="compact" business-name="{{c.name}}" activity="{{c.activity}}" value="{{c.value}}" days-in-stage="{{c.days}}" stale="{{c.stale}}" on-click="{{c.noop}}"></x-import>
+</div>
+</sc-for>
+<p style="margin: 4px 0 0; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 20px; color: var(--ink-muted);">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 11v6M12 7.5v.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path></svg>
+اضغط مطولاً على بطاقة لتغيير مرحلتها. البطاقة بحد التحذير: أكثر من 7 أيام بدون حركة.
+</p>
+</main>
+<dc-import name="BottomNav" active="pipeline" hint-size="390px,72px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { st: 'contacted' }; }
+  renderVals() {
+    var self = this, st = this.state.st, noop = function () {};
+    var data = {
+      not_visited: ['لم يُزر', 'stage-not-visited', '—', [['صيدلية النهدي فرع الحمدانية', 'صيدلية', '—', 0, false], ['مغسلة الحي', 'مغسلة', '—', 0, false]], 14],
+      visited: ['تمت الزيارة', 'stage-visited', '9,000', [['كافيه نسمة الحمدانية', 'كافيه', '1,800 ر.س', 4, false], ['مطعم الديرة', 'مطعم', '2,200 ر.س', 1, false]], 9],
+      contacted: ['تم الإرسال', 'stage-contacted', '28,500', [['مطعم ريدان', 'مطعم', '2,500 ر.س', 0, false], ['مطعم بيت المندي', 'مطعم', '2,000 ر.س', 7, false], ['مركز رواء لطب الأسنان', 'مركز أسنان', '4,500 ر.س', 3, false], ['حلويات السنبلة', 'حلويات', '1,500 ر.س', 9, true]], 12],
+      replied: ['رد', 'stage-replied', '12,000', [['مجمع ابتسامة لطب الأسنان', 'مركز أسنان', '4,000 ر.س', 1, false]], 5],
+      meeting: ['اجتماع', 'stage-meeting', '6,300', [['مخبز الحي', 'مخبز', '1,500 ر.س', 2, false]], 3],
+      proposal: ['عرض سعر', 'stage-proposal', '10,800', [['كوفي بلاك روز', 'كافيه', '2,700 ر.س', 3, false], ['مطعم شاورما الركن', 'مطعم', '2,000 ر.س', 11, true]], 4],
+      won: ['تم الإغلاق', 'stage-won', '7,400', [['كافيه سحابة', 'كافيه', '1,900 ر.س', 0, false]], 3]
+    };
+    var order = ['not_visited', 'visited', 'contacted', 'replied', 'meeting', 'proposal', 'won'];
+    var cur = data[st];
+    return {
+      stages: order.map(function (k) {
+        var d = data[k], on = k === st;
+        return { label: d[0], count: d[4], color: 'var(--' + d[1] + ')', selected: on ? 'true' : 'false', pick: function () { self.setState({ st: k }); },
+          style: 'flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 104px; min-height: 64px; padding: 8px 12px; border-radius: 12px; font: inherit; cursor: pointer; text-align: right; ' +
+            (on ? 'background: var(--' + d[1] + '-soft); border: 2px solid var(--' + d[1] + ');' : 'background: var(--surface-raised); border: 1px solid var(--line);') };
+      }),
+      current: { label: cur[0], count: cur[4], value: cur[2] },
+      cards: cur[3].map(function (c) { return { name: c[0], activity: c[1], value: c[2], days: c[3], stale: c[4], noop: noop }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

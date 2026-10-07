@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>المهام</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+
+<header style="display: flex; align-items: center; gap: 4px; padding: 20px 16px 8px;">
+<a href="Main.dc.html" aria-label="رجوع إلى اليوم" style="width: 48px; height: 48px; display: grid; place-items: center; color: var(--ink); margin-inline-start: -12px;">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+</a>
+<h1 style="margin: 0; flex-grow: 1; font-size: 24px; line-height: 34px; font-weight: 700;">المهام</h1>
+<span style="font-size: 14px; line-height: 22px; color: var(--ink-muted);">{{doneCount}} منجزة اليوم</span>
+</header>
+
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; padding: 8px 16px 24px;">
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="3">
+<section style="display: flex; flex-direction: column; gap: 10px;">
+<h2 style="{{sec.headStyle}}">{{sec.title}} · {{sec.count}}</h2>
+<div style="{{sec.boxStyle}}">
+<sc-for list="{{sec.tasks}}" as="t" hint-placeholder-count="2">
+<div style="{{t.rowStyle}}">
+<button type="button" role="checkbox" aria-checked="{{t.checked}}" aria-label="{{t.checkLabel}}" onClick="{{t.toggle}}" style="width: 48px; height: 48px; flex: none; display: grid; place-items: center; background: none; border: 0; cursor: pointer; margin-inline-start: -10px;">
+<span style="{{t.boxStyle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{t.tickStyle}}"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+</button>
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+<span style="{{t.titleStyle}}">{{t.title}}</span>
+<span style="font-size: 14px; line-height: 20px; color: var(--ink-muted);">{{t.shop}} · <span style="{{t.whenStyle}}">{{t.when}}</span></span>
+</div>
+<sc-if value="{{t.isWa}}" hint-placeholder-val="{{t.isWa}}">
+<x-import component-from-global-scope="Maidani.Button" variant="whatsapp" size="sm" aria-label="{{t.waLabel}}">واتساب</x-import>
+</sc-if>
+<sc-if value="{{t.isCall}}" hint-placeholder-val="{{t.isCall}}">
+<x-import component-from-global-scope="Maidani.Button" variant="secondary" size="sm" icon="phone" aria-label="{{t.callLabel}}">اتصال</x-import>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+<p style="margin: 0; font-size: 13px; line-height: 20px; color: var(--ink-muted); text-align: center;">اسحب المهمة يساراً للإنجاز، ويميناً للتأجيل: غداً، بعد 3 أيام، أو تاريخ محدد.</p>
+</main>
+<dc-import name="BottomNav" active="today" hint-size="390px,72px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { done: { t5: true } }; }
+  renderVals() {
+    var self = this, done = this.state.done;
+    var defs = [
+      ['late', 'متأخرة', [['t1', 'أرسل الرسالة الأولى', 'كافيه نسمة الحمدانية', 'منذ يومين', 'wa']]],
+      ['today', 'اليوم', [['t2', 'متابعة ثانية وأخيرة', 'مطعم بيت المندي', '10:00 ص', 'wa'], ['t3', 'حدد اجتماعاً', 'مجمع ابتسامة لطب الأسنان', '12:30 م', 'call'], ['t4', 'متابعة أولى: رابط التقرير', 'مركز رواء لطب الأسنان', '4:00 م', 'wa'], ['t5', 'أرسل ريل العينة خلال 24 ساعة', 'مطعم الديرة', '9:00 ص', 'wa']]],
+      ['next', 'قادمة', [['t6', 'اجتماع في المحل', 'مخبز الحي', 'الخميس 4:30 م', 'call'], ['t7', 'متابعة أولى: عينة الريل', 'مطعم ريدان', 'السبت 10 أكتوبر', 'wa'], ['t8', 'تابع رد العرض', 'كوفي بلاك روز', 'الجمعة 9 أكتوبر', 'wa']]]
+    ];
+    var doneCount = 0;
+    var sections = defs.map(function (sd) {
+      var late = sd[0] === 'late';
+      var tasks = sd[2].map(function (d, i) {
+        var on = !!done[d[0]]; if (on) doneCount++;
+        return {
+          title: d[1], shop: d[2], when: d[3], isWa: d[4] === 'wa' && !on, isCall: d[4] === 'call' && !on,
+          waLabel: 'واتساب ' + d[2], callLabel: 'اتصال ب' + d[2],
+          checked: on ? 'true' : 'false', checkLabel: (on ? 'إلغاء إنجاز ' : 'إنجاز ') + d[1],
+          toggle: function () { var n = Object.assign({}, self.state.done); n[d[0]] = !on; self.setState({ done: n }); },
+          rowStyle: 'display: flex; align-items: center; gap: 8px; padding: 10px 14px; min-height: 64px; box-sizing: border-box;' + (i > 0 ? ' border-top: 1px solid ' + (late ? 'var(--warning)' : 'var(--line)') + ';' : ''),
+          boxStyle: 'width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; box-sizing: border-box; ' + (on ? 'background: var(--success); color: var(--surface-raised); border: 0;' : 'background: var(--surface-raised); border: 2px solid var(--line-strong); color: transparent;'),
+          tickStyle: on ? 'display: block;' : 'display: none;',
+          titleStyle: 'font-size: 16px; line-height: 24px; font-weight: 700; ' + (on ? 'color: var(--ink-muted); text-decoration: line-through;' : 'color: var(--ink);'),
+          whenStyle: late ? 'color: var(--warning); font-weight: 700;' : ''
+        };
+      });
+      return {
+        title: sd[1], count: tasks.length, tasks: tasks,
+        headStyle: 'margin: 0; font-size: 17px; line-height: 26px; font-weight: 700; color: ' + (late ? 'var(--warning)' : 'var(--ink)') + ';',
+        boxStyle: 'display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; ' + (late ? 'background: var(--warning-soft); border: 1.5px solid var(--warning);' : 'background: var(--surface-raised); border: 1px solid var(--line);')
+      };
+    });
+    return { sections: sections, doneCount: doneCount };
+  }
+}
+</script>
+</body>
+</html>

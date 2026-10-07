@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عرض سعر جديد</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/maidani/tokens.css">
+<link rel="stylesheet" href="ds/maidani/components/bundle.css">
+<script src="ds/maidani/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1100px; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: var(--font-sans); direction: rtl;">
+
+<header style="display: flex; align-items: center; gap: 4px; padding: 16px 16px 12px; background: var(--surface-raised); border-bottom: 1px solid var(--line);">
+<a href="Lead.dc.html" aria-label="رجوع إلى صفحة العميل" style="width: 48px; height: 48px; display: grid; place-items: center; color: var(--ink); margin-inline-start: -12px;">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+</a>
+<div style="flex-grow: 1; display: flex; flex-direction: column;">
+<h1 style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 700;">عرض سعر جديد</h1>
+<span style="font-size: 14px; line-height: 20px; color: var(--ink-muted);">مطعم ريدان · أ. خالد العتيبي</span>
+</div>
+<span style="font-size: 12px; line-height: 18px; color: var(--ink-muted);">حُفظ كمسودة</span>
+</header>
+
+<main style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; padding: 20px 16px 24px;">
+
+<section aria-labelledby="q-items" style="display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<h2 id="q-items" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700;">الخدمات</h2>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">من الخدمات المقترحة للعميل</span>
+</div>
+<sc-for list="{{items}}" as="it" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px;">
+<div style="display: flex; align-items: flex-start; gap: 8px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column;">
+<span style="font-size: 16px; line-height: 24px; font-weight: 700;">{{it.name}}</span>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">{{it.billingLabel}}</span>
+</div>
+<button type="button" onClick="{{it.remove}}" aria-label="{{it.removeLabel}}" style="width: 44px; height: 44px; margin: -8px -8px 0 0; display: grid; place-items: center; background: none; border: 0; color: var(--ink-muted); cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+</div>
+<div style="display: flex; align-items: flex-end; gap: 10px;">
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<span style="font-size: 13px; line-height: 20px; font-weight: 700;">الكمية</span>
+<div style="display: flex; align-items: center; height: 44px; border: 1.5px solid var(--line-strong); border-radius: 10px; overflow: hidden;">
+<button type="button" onClick="{{it.dec}}" aria-label="إنقاص" style="width: 40px; height: 100%; border: 0; background: var(--surface-sunken); font: inherit; font-size: 20px; color: var(--ink); cursor: pointer;">−</button>
+<span style="min-width: 36px; text-align: center; font-weight: 700;">{{it.qty}}</span>
+<button type="button" onClick="{{it.inc}}" aria-label="زيادة" style="width: 40px; height: 100%; border: 0; background: var(--surface-sunken); font: inherit; font-size: 20px; color: var(--ink); cursor: pointer;">+</button>
+</div>
+</div>
+<label style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
+<span style="font-size: 13px; line-height: 20px; font-weight: 700;">سعر الوحدة (ر.س)</span>
+<input class="md-input" dir="ltr" inputmode="numeric" value="{{it.price}}" onChange="{{it.setPrice}}" style="min-height: 44px; text-align: right;">
+</label>
+</div>
+<div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; line-height: 22px;">
+<span style="color: var(--ink-muted);">المجموع</span><b>{{it.total}}</b>
+</div>
+</div>
+</sc-for>
+<button type="button" class="md-btn md-btn-ghost md-btn-block" style="border: 1.5px dashed var(--line-strong);">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+<span>أضف خدمة من الكتالوج</span>
+</button>
+</section>
+
+<section aria-labelledby="q-disc" style="display: flex; flex-direction: column; gap: 8px;">
+<h2 id="q-disc" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700;">الخصم</h2>
+<div role="radiogroup" aria-labelledby="q-disc" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface-sunken); border: 1.5px solid var(--line-strong); border-radius: 10px;">
+<sc-for list="{{discounts}}" as="d" hint-placeholder-count="4">
+<button type="button" role="radio" aria-checked="{{d.checked}}" onClick="{{d.pick}}" style="{{d.style}}">{{d.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="q-valid" style="display: flex; flex-direction: column; gap: 8px;">
+<h2 id="q-valid" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700;">صلاحية العرض</h2>
+<div style="display: flex; gap: 8px;">
+<sc-for list="{{validity}}" as="v" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{v.pressed}}" onClick="{{v.pick}}" style="{{v.style}}">{{v.label}}</button>
+</sc-for>
+</div>
+<span style="font-size: 13px; line-height: 20px; color: var(--ink-muted);">صالح حتى {{validUntil}}</span>
+</section>
+
+<x-import component-from-global-scope="Maidani.TextField" label="ملاحظات تظهر في العرض" multiline="{{yes}}" rows="{{three}}" default-value="يشمل: 4 ريلز شهرياً، وجلسة تصوير في المطعم كل أسبوعين، والرد على المراجعات خلال 24 ساعة."></x-import>
+</main>
+
+<footer style="display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 20px; background: var(--surface-raised); border-top: 1px solid var(--line);">
+<div style="display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 22px;">
+<div style="display: flex; justify-content: space-between;"><span style="color: var(--ink-muted);">شهرياً</span><span><b style="font-size: 20px;">{{monthly}}</b> ر.س</span></div>
+<div style="display: flex; justify-content: space-between;"><span style="color: var(--ink-muted);">مرة واحدة</span><span><b style="font-size: 17px;">{{once}}</b> ر.س</span></div>
+<sc-if value="{{hasDiscount}}" hint-placeholder-val="{{yes}}"><div style="display: flex; justify-content: space-between; color: var(--success); font-weight: 700;"><span>بعد خصم {{discountLabel}}</span><span>توفير {{saving}} ر.س</span></div></sc-if>
+</div>
+<a href="QuotePreview.dc.html" class="md-btn md-btn-primary md-btn-block" style="text-decoration: none;">معاينة العرض PDF</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { disc: 10, valid: 14, items: [
+      { id: 'video', name: 'تصوير وإنتاج فيديو وريلز', billing: 'monthly', qty: 1, price: 1500 },
+      { id: 'maps', name: 'إدارة ملف خرائط قوقل والمراجعات', billing: 'monthly', qty: 1, price: 800 },
+      { id: 'landing', name: 'صفحة هبوط للطلب', billing: 'once', qty: 1, price: 2000 }
+    ] };
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+    var upd = function (id, fn) { self.setState({ items: self.state.items.map(function (i) { return i.id === id ? fn(Object.assign({}, i)) : i; }) }); };
+    var m = 0, o = 0;
+    var items = s.items.map(function (i) {
+      var t = i.qty * i.price; if (i.billing === 'monthly') m += t; else o += t;
+      return { name: i.name, billingLabel: i.billing === 'monthly' ? 'اشتراك شهري' : 'مرة واحدة', qty: i.qty, price: String(i.price), total: fmt(t) + ' ر.س' + (i.billing === 'monthly' ? ' / شهرياً' : ''),
+        removeLabel: 'حذف ' + i.name,
+        remove: function () { self.setState({ items: self.state.items.filter(function (x) { return x.id !== i.id; }) }); },
+        inc: function () { upd(i.id, function (x) { x.qty++; return x; }); },
+        dec: function () { upd(i.id, function (x) { x.qty = Math.max(1, x.qty - 1); return x; }); },
+        setPrice: function (e) { var v = parseInt(String(e.target.value).replace(/[^0-9]/g, ''), 10) || 0; upd(i.id, function (x) { x.price = v; return x; }); } };
+    });
+    var f = 1 - s.disc / 100;
+    var seg = 'min-height: 44px; border: 0; border-radius: 7px; font: inherit; font-size: 15px; cursor: pointer; ';
+    var chip = 'flex: 1; min-height: 44px; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer; ';
+    var base = new Date(2026, 9, 7);
+    var until = new Date(base.getTime() + s.valid * 86400000);
+    var months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return {
+      yes: true, three: 3, items: items,
+      discounts: [0, 5, 10, 15].map(function (d) {
+        var on = s.disc === d;
+        return { label: d ? d + '%' : 'بدون', checked: on ? 'true' : 'false', pick: function () { self.setState({ disc: d }); },
+          style: seg + (on ? 'background: var(--surface-raised); color: var(--ink); font-weight: 700; box-shadow: var(--shadow-card);' : 'background: transparent; color: var(--ink-muted); font-weight: 400;') };
+      }),
+      validity: [7, 14, 30].map(function (v) {
+        var on = s.valid === v;
+        return { label: v + ' يوم', pressed: on ? 'true' : 'false', pick: function () { self.setState({ valid: v }); },
+          style: chip + (on ? 'background: var(--ink); color: var(--surface-raised); border: 1.5px solid var(--ink); font-weight: 700;' : 'background: var(--surface-raised); color: var(--ink); border: 1.5px solid var(--line-strong); font-weight: 400;') };
+      }),
+      validUntil: until.getDate() + ' ' + months[until.getMonth()] + ' ' + until.getFullYear(),
+      monthly: fmt(m * f), once: fmt(o * f), hasDiscount: s.disc > 0, discountLabel: s.disc + '%', saving: fmt((m + o) * (1 - f))
+    };
+  }
+}
+</script>
+</body>
+</html>
