@@ -79,11 +79,18 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 - `tests-api/rls.test.ts`: اختبار RLS على مشروع Supabase نفسه عبر الـ API بمستخدمَين حقيقيين (`npm run test:rls`).
 - بيانات تجريبية للعملاء على كل المراحل تُضاف مع 1b لحساب الاختبار فقط.
 
-### 1.6 ما أُضيف أثناء المرحلة 0 (بدون تغيير في المعنى)
+### 1.6 ما أُضيف أثناء التنفيذ (بدون تغيير في المعنى)
 - `message_templates.kind` (`first, followup_3, followup_7, custom`) لاختيار القالب الاحتياطي لكل نوع رسالة.
 - `messages.generated_by` يقبل أيضاً `manual` (رسالة كتبها المستخدم).
 - `profiles` بلا سياسة إنشاء أو حذف: يُنشأ بالـ trigger عند إنشاء الحساب.
 - مشروع Supabase: `maidani` (eu-central-1). الهجرات مطبّقة بنفس ملفات `supabase/migrations/`.
+- Realtime على `leads, tasks, messages, visits, quotes` (هجرة 6) لظهور العميل فوراً في الداشبورد.
+- «عملاء حارّون» = أولوية `hot` في المراحل `replied, meeting, proposal` (يطابق Main و DeskToday بعد حذف «فتح التقرير»).
+- الأسبوع يبدأ الأحد بتوقيت الرياض، و«حتى الخميس» نهاية أسبوع العمل.
+- المتابعات في أفضل وقت للتواصل: الصباح 10:00، بعد العصر 16:00، المساء 19:00، وبدونه 10:00.
+- الخدمات المقترحة: من نقاط الضعف أولاً ثم خدمات النشاط المعتادة، وأول 3 محددة مسبقاً (كما في NewLead4).
+- الأحجام بالبكسل الموجودة في ملفات التصميم نفسها (مثل 56px لزر «عميل جديد»، 15px لبعض النصوص) تُستخدم كما هي؛ الألوان كلها من tokens فقط ويفحصها `npm run lint`.
+- `bundle.css` في طبقة CSS `components` حتى تستطيع أدوات Tailwind تعديله؛ شكله لم يتغيّر.
 
 ---
 
@@ -144,18 +151,18 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 0.9 | seed بأنشطة وخدمات وبنود تقييم | `…04_bootstrap.sql` (trigger على auth.users) | R: 4 أنشطة، 13 بنداً مجموعها 100، 6 خدمات، 3 قوالب | ☑ |
 | 0.10 | الدخول ببريد وكلمة مرور بدون تسجيل جديد، وحماية الصفحات | `src/routes/Login.tsx`, `src/auth/*` | E: التحويل إلى /login، النصوص والترتيب، 48px، خطأ التحقق، بدون اتصال، رسالة تعذّر الاتصال ☑؛ الدخول الفعلي ☐ بانتظار فتح الشبكة | ◐ |
 | 0.11 | PWA قابل للتثبيت | `vite-plugin-pwa`, `public/icons/*` (`scripts/make-icons.mjs`) | E: manifest (ar/rtl/standalone/192/512/maskable) و`sw.js` | ☑ |
-| 1a | 10 مكونات بنفس props و`bundle.css` | `src/components/ui/*` | U (سلوك: TriSelect بالأسهم، BottomSheet بـ Escape، Toast يختفي بعد 4 ث) + V في `/dev/ui` فاتح وداكن | ☐ |
-| 1b.1 | شريط سفلي 5 عناصر / شريط جانبي يميناً | `BottomNav.tsx`, `DeskSidebar.tsx`, `AppShell.tsx` | V + E | ☐ |
-| 1b.2 | اليوم: 3 عدادات، هدف الأسبوع، متأخرة warning، متابعات اليوم بواتساب، عملاء حارّون | `src/routes/Today.tsx`, `src/data/today.ts` | V(Main, DeskToday) + S + E | ☐ |
-| 1b.3 | الحالة الفارغة «انزل للميدان» + «عميل جديد» | `Today.tsx` | S | ☐ |
+| 1a | 10 مكونات بنفس props و`bundle.css` | `src/components/ui/*`، `src/components/app/toast/*`، `src/styles/app.css`، `/dev/ui` | U: تطابق مع `bundle.js` (59 حالة تقارن HTML بعد توحيد المعرّفات) + سلوك (TriSelect، BottomSheet وتركيزها، TextField، Toast 4 ث والأخطاء لا تُحذف) ☑ · E: الأسهم، Escape وعودة التركيز، الألوان في الوضعين، 48px مع اختبار ذاتي يثبت أن الفحص يكتشف الصغير ☑ · مراجعة متعددة الوكلاء (28 وكيلاً): 15 ملاحظة مؤكدة أُصلحت كلها | ☑ |
+| 1b.1 | شريط سفلي 5 عناصر / شريط جانبي يميناً | `BottomNav.tsx`, `DeskSidebar.tsx`, `AppShell.tsx`, `DeskHeader.tsx` | E: العناصر الخمسة بالترتيب والعنصر الحالي؛ الشريط الجانبي يمين الشاشة بالعدّادات واسم المستخدم والعلامة ☑ | ☑ |
+| 1b.2 | اليوم: 3 عدادات، هدف الأسبوع، متأخرة warning، متابعات اليوم بواتساب، عملاء حارّون | `src/routes/Today.tsx`, `src/data/today.ts`, `src/lib/dates.ts`, `src/lib/postpone.ts`, `src/data/realtime.ts` | U: منطق التقسيم والتواريخ والجمع العربي ☑ · E (Supabase مُحاكى): ترتيب الأقسام والنصوص، واتساب/اتصال، التأجيل، الجدول لا يفيض عند 1440، 48px، لا تمرير أفقي ☑ · الحالات الخمس ☑ · بيانات حقيقية ☐ بانتظار الشبكة | ◐ |
+| 1b.3 | الحالة الفارغة «انزل للميدان» + «عميل جديد» | `Today.tsx` | E ☑ | ☑ |
 | 1c.1 | معالج 4 خطوات بشريط تقدم، و«التالي» ثابت أسفل الشاشة | `src/routes/new-lead/*` | V(NewLead1–4) + E | ☐ |
 | 1c.2 | حفظ مسودة تلقائي عند كل خطوة | `src/lib/draft.ts` (localStorage) | U + E (إعادة تحميل تحفظ البيانات) | ☐ |
-| 1c.3 | تحويل 05 ← 9665 ورسالة الرقم غير الصحيح | `src/lib/phone.ts` | U | ☐ |
-| 1c.4 | كشف التكرار (الرقم، أو الاسم في نفس الموقع) | `src/lib/duplicates.ts` + استعلام | U + E | ☐ |
-| 1c.5 | الدرجة مباشرة: نعم = الوزن، جزئي = النصف، لا = 0 | `src/lib/scoring.ts` | U | ☐ |
-| 1c.6 | البنود الخاصة ثنائية ولا تدخل في الدرجة | `scoring.ts`, `TriSelect binary` | U | ☐ |
-| 1c.7 | نقاط الضعف واقتراح الخدمات مع السبب | `src/lib/suggest.ts` | U | ☐ |
-| 1c.8 | الأولوية حسب القواعد | `src/lib/priority.ts` | U | ☐ |
+| 1c.3 | تحويل 05 ← 9665 ورسالة الرقم غير الصحيح | `src/lib/phone.ts` | U ☑ (الأرقام العربية، +966، 00966، المسافات) | ◐ |
+| 1c.4 | كشف التكرار (الرقم، أو الاسم في نفس الموقع) | `src/lib/duplicates.ts` + استعلام | U ☑ (150 م، توحيد الإملاء العربي) · E ☐ | ◐ |
+| 1c.5 | الدرجة مباشرة: نعم = الوزن، جزئي = النصف، لا = 0 | `src/lib/scoring.ts` | U ☑ (مثال NewLead2 = 48) | ◐ |
+| 1c.6 | البنود الخاصة ثنائية ولا تدخل في الدرجة | `scoring.ts`, `TriSelect binary` | U ☑ | ◐ |
+| 1c.7 | نقاط الضعف واقتراح الخدمات مع السبب | `src/lib/scoring.ts`, `src/lib/suggest.ts` | U ☑ | ◐ |
+| 1c.8 | الأولوية حسب القواعد | `src/lib/priority.ts` | U ☑ | ◐ |
 | 1c.9 | التقاط الموقع (lat, lng) | `useGeolocation.ts` | E (geolocation مزيّف) | ☐ |
 | 1c.10 | رفع صور وفيديو إلى Storage خاص | `src/lib/media.ts` | R (سياسات Storage) + E | ☐ |
 | 1c.11 | الإدخال الصوتي معطّل «قريباً» | `NewLeadNotes.tsx` | V | ☐ |
@@ -164,9 +171,9 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1d.2 | قالب احتياطي عند الفشل مع رسالة «تعذّر توليد الرسالة. استخدمنا القالب الجاهز بدلاً منها.» | نفس الدالة + `src/lib/template.ts` | U + E (الدالة معطّلة) | ☐ |
 | 1d.3 | النبرة، عدّاد الأسطر، أعد الصياغة، نسخ | `src/routes/Message.tsx` | V(Message) + S | ☐ |
 | 1d.4 | تنبيه عند غياب موافقة الواتساب، وإخفاء الزر مع `do_not_contact` | `Message.tsx`, `Button` | E + U | ☐ |
-| 1d.5 | رابط wa.me فقط | `src/lib/whatsapp.ts` | U | ☐ |
+| 1d.5 | رابط wa.me فقط | `src/lib/whatsapp.ts` | U ☑ | ◐ |
 | 1d.6 | «هل أرسلت؟» بعد العودة؛ `sent_at` بعد التأكيد فقط | `SentConfirmSheet.tsx` (`visibilitychange`) | E | ☐ |
-| 1d.7 | المرحلة `contacted` ومتابعتان بعد 3 و7 أيام | RPC `confirm_message_sent` | U (التواريخ) + R + E | ☐ |
+| 1d.7 | المرحلة `contacted` ومتابعتان بعد 3 و7 أيام | RPC `confirm_message_sent`, `src/lib/followups.ts` | U (التواريخ) ☑ + R + E | ◐ |
 | 1e.1 | قائمة: بحث بالاسم أو الرقم، شرائح المراحل بالعدد، فلاتر، ترتيب | `src/routes/Leads.tsx` | V(Leads) + S + E | ☐ |
 | 1e.2 | جدول ديسكتوب بأعمدة قابلة للترتيب وتحديد متعدد (تغيير مرحلة، تصدير) | `DeskLeadsTable.tsx` | V(DeskLeads) | ☐ |
 | 1e.3 | سحب البطاقة على الجوال (واتساب، زيارة جديدة) | `SwipeActions.tsx` | E (لمس) | ☐ |
@@ -181,10 +188,10 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1f.3 | تمييز الراكد أكثر من 7 أيام | `src/lib/stale.ts` | U | ☐ |
 | 1f.4 | كل تغيير مرحلة يُسجَّل في `stage_history` | trigger | R | ☐ |
 | 1f.5 | المهام: متأخرة / اليوم / قادمة، إنجاز، زر الإجراء المناسب | `src/routes/Tasks.tsx` | V(Tasks) + S | ☐ |
-| 1f.6 | التأجيل: غداً، بعد 3 أيام، تاريخ | `PostponeSheet`, `src/lib/dates.ts` | U | ☐ |
-| 1f.7 | بعد متابعة اليوم السابع بلا رد: اقتراح تأجيل 30 يوماً أو خسارة | `src/lib/followups.ts` | U | ☐ |
+| 1f.6 | التأجيل: غداً، بعد 3 أيام، تاريخ | `PostponeSheet`, `src/lib/postpone.ts` | U ☑ + E (من «اليوم» على الديسكتوب) ☑ | ◐ |
+| 1f.7 | بعد متابعة اليوم السابع بلا رد: اقتراح تأجيل 30 يوماً أو خسارة | `src/lib/followups.ts` | U ☑ | ◐ |
 | 1g.1 | الخدمات من الكتالوج، كمية، سعر، خصم 0/5/10/15، صلاحية 7/14/30، ملاحظات | `src/routes/QuoteEditor.tsx` | V(Quote, DeskQuote) | ☐ |
-| 1g.2 | مجموع شهري ومرة واحدة مباشرة، والضريبة إعداد غير مفعّل افتراضياً | `src/lib/quote.ts` | U | ☐ |
+| 1g.2 | مجموع شهري ومرة واحدة مباشرة، والضريبة إعداد غير مفعّل افتراضياً | `src/lib/quote.ts` | U ☑ (مثال Quote.dc.html: 2,070 / 1,800 / 430) | ◐ |
 | 1g.3 | رقم `Q-YYYY-NNN` | trigger + `quote.ts` | U + R | ☐ |
 | 1g.4 | PDF عربي RTL في المتصفح | `src/lib/pdf.ts` **[Q13]** | E (حجم الملف > 0، صفحة واحدة) + V(QuotePreview) | ☐ |
 | 1g.5 | مشاركة عبر `navigator.share({ files })` وتنزيل بديل | `QuotePreview.tsx` | E (share مزيّف) | ☐ |
@@ -196,7 +203,7 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1h.5 | تصدير CSV (UTF-8 BOM ليفتح العربي في Excel) | `src/lib/csv.ts` | U | ☐ |
 | X.1 | التدفق الكامل 390px: الدخول ← عميل جديد ← التقييم ← الرسالة ← تأكيد ← القائمة بمرحلة contacted | `e2e/main-flow.spec.ts` | E **[Q14]** | ☐ |
 | X.2 | الحالات الخمس لكل شاشة | `Skeleton`, `EmptyState`, `ErrorRetry`, `OfflineBanner`, `Toast` | `e2e/states.spec.ts` (اعتراض الشبكة) | ☐ |
-| X.3 | مساحة لمس 48px | كل الأزرار | `e2e/touch-targets.spec.ts` يقيس كل عنصر تفاعلي ≥ 48px على 390 | ☐ |
+| X.3 | مساحة لمس 48px | كل الأزرار، `app.css` (توسيع منطقة اللمس دون تغيير الشكل) | `e2e/helpers.ts` `expectTouchTargets` على كل شاشة + اختبار ذاتي | ◐ |
 | X.4 | معيار المرحلة 1: عميل ورسالته في أقل من دقيقتين، وظهوره فوراً في الداشبورد | E + Supabase Realtime على `leads` | قياس زمن التدفق في E | ☐ |
 
 ---
