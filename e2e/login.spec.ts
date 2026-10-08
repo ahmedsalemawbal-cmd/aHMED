@@ -1,0 +1,89 @@
+import { expect, test } from '@playwright/test';
+import { expectTouchTargets, login } from './helpers';
+
+test.describe('الدخول', () => {
+  test('protected pages redirect to /login', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/login$/);
+  });
+
+  test('matches Login.dc.html: texts, order, RTL, tokens, touch', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('ميداني');
+    await expect(page.getByText('سجّل المحل، أرسل الرسالة، وتابع حتى الإغلاق.')).toBeVisible();
+    await expect(page.getByText('حساب واحد فقط. لا يوجد تسجيل جديد من التطبيق.')).toBeVisible();
+
+    // order: email, password, submit
+    const labels = await page.locator('label').allTextContents();
+    expect(labels.map((l) => l.trim())).toEqual(['البريد الإلكتروني', 'كلمة المرور']);
+    const email = page.getByLabel('البريد الإلكتروني');
+    await expect(email).toHaveAttribute('dir', 'ltr');
+    await expect(email).toHaveAttribute('type', 'email');
+
+    // no sign-up anywhere
+    await expect(page.getByText(/تسجيل جديد|إنشاء حساب/).filter({ hasNot: page.getByText('لا يوجد') })).toHaveCount(0);
+
+    // tokens: font, 16px inputs, primary button colours resolve from tokens.css
+    const styles = await page.evaluate(() => {
+      const input = document.querySelector('input');
+      const btn = document.querySelector('button[type=submit]');
+      if (!input || !btn) throw new Error('login form not rendered');
+      const root = getComputedStyle(document.documentElement);
+      return {
+        font: getComputedStyle(document.body).fontFamily,
+        inputSize: getComputedStyle(input).fontSize,
+        btnBg: getComputedStyle(btn).backgroundColor,
+        radius: root.getPropertyValue('--radius-md').trim(),
+        btnRadius: getComputedStyle(btn).borderTopLeftRadius,
+      };
+    });
+    expect(styles.font).toContain('IBM Plex Sans Arabic');
+    expect(styles.inputSize).toBe('16px');
+    expect(styles.btnBg).toBe('rgb(20, 23, 31)'); // --action (light)
+    expect(styles.radius).toBe('10px');
+    expect(styles.btnRadius).toBe('10px');
+
+    await expectTouchTargets(page);
+  });
+
+  test('validation: says what happened and how to fix it', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByRole('button', { name: 'دخول' }).click();
+    await expect(page.getByText('البريد غير مكتمل. اكتبه بصيغة name@example.com')).toBeVisible();
+  });
+
+  test('offline shows the top bar', async ({ page, context }) => {
+    await page.goto('/login');
+    await context.setOffline(true);
+    await expect(page.getByText('بدون اتصال. سنحفظ ونزامن عند عودة الشبكة.')).toBeVisible();
+    await context.setOffline(false);
+    await expect(page.getByText('بدون اتصال. سنحفظ ونزامن عند عودة الشبكة.')).toHaveCount(0);
+  });
+
+  test('wrong password shows an error, right password signs in', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByLabel('البريد الإلكتروني').fill('e2e-a@maidani.test');
+    await page.getByLabel('كلمة المرور').fill('wrong-password');
+    await page.getByRole('button', { name: 'دخول' }).click();
+    await expect(page.getByText('البريد أو كلمة المرور غير صحيحة. تأكد منهما وحاول مرة أخرى.')).toBeVisible();
+
+    await login(page, 'A');
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test('PWA manifest is installable', async ({ request }) => {
+    const res = await request.get('/manifest.webmanifest');
+    expect(res.ok()).toBe(true);
+    const m = (await res.json()) as { name: string; display: string; dir: string; lang: string; icons: { sizes: string; purpose?: string }[] };
+    expect(m.name).toBe('ميداني');
+    expect(m.display).toBe('standalone');
+    expect(m.dir).toBe('rtl');
+    expect(m.lang).toBe('ar');
+    expect(m.icons.map((i) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
+    expect(m.icons.some((i) => i.purpose === 'maskable')).toBe(true);
+    const sw = await request.get('/sw.js');
+    expect(sw.ok()).toBe(true);
+  });
+});

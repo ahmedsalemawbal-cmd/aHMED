@@ -75,7 +75,15 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 - `0002_rls.sql`: RLS والسياسات وسياسات Storage.
 - `0003_triggers.sql`: `updated_at`، وسجل المراحل، وفحص تطابق المالك، وترقيم العروض.
 - `0004_bootstrap.sql`: دالة `bootstrap_owner()` (security definer) تُنشئ للمستخدم الجديد ملفه الشخصي وأنشطته الأربعة (مطعم، كافيه، مركز أسنان، أخرى) ببنود التقييم الـ 13 وأوزانها والبنود الخاصة، وخدمات الكتالوج الست من brief بأسعار تجريبية، وقالباً احتياطياً لكل نوع رسالة.
-- `supabase/seed.sql`: مستخدمان تجريبيان محلياً (لاختبار RLS) وعملاء على كل المراحل بأسماء التصاميم.
+- `tests-db/supabase-stub.sql` + `tests-db/rls.sql`: اختبار المخطط و RLS على Postgres محلي (`npm run test:db`).
+- `tests-api/rls.test.ts`: اختبار RLS على مشروع Supabase نفسه عبر الـ API بمستخدمَين حقيقيين (`npm run test:rls`).
+- بيانات تجريبية للعملاء على كل المراحل تُضاف مع 1b لحساب الاختبار فقط.
+
+### 1.6 ما أُضيف أثناء المرحلة 0 (بدون تغيير في المعنى)
+- `message_templates.kind` (`first, followup_3, followup_7, custom`) لاختيار القالب الاحتياطي لكل نوع رسالة.
+- `messages.generated_by` يقبل أيضاً `manual` (رسالة كتبها المستخدم).
+- `profiles` بلا سياسة إنشاء أو حذف: يُنشأ بالـ trigger عند إنشاء الحساب.
+- مشروع Supabase: `maidani` (eu-central-1). الهجرات مطبّقة بنفس ملفات `supabase/migrations/`.
 
 ---
 
@@ -125,17 +133,17 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 
 | # | المتطلب | الملف المنفّذ | التحقق | الحالة |
 |---|---|---|---|---|
-| 0.1 | Vite + React + TS strict + Tailwind | `package.json`, `tsconfig.json`, `vite.config.ts`, `tailwind.config.ts` | `npm run typecheck && lint && build` بلا تحذيرات | ☐ |
-| 0.2 | RTL و`lang="ar"`، خصائص منطقية فقط | `index.html`، قاعدة ESLint تمنع `left/right/ml/mr/pl/pr` | قاعدة lint + V | ☐ |
-| 0.3 | خط IBM Plex Sans Arabic 400/700 | `index.html` | V | ☐ |
-| 0.4 | tokens.css مصدر الألوان، وTailwind مربوط بالمتغيرات، ولا hex في المكونات | `src/styles/tokens.css`, `tailwind.config.ts` | فحص lint/سكربت يمنع `#hex` و`rgb(` في `src/` عدا tokens.css | ☐ |
-| 0.5 | أرقام لاتينية و`tabular-nums` | `src/lib/format.ts` (`Intl` بـ `en-US` / `ar-SA-u-nu-latn`) | U | ☐ |
-| 0.6 | عميل Supabase من متغيرات البيئة، و`.env.example` فارغ | `src/lib/supabase.ts`, `.env.example` | build + grep على الأسرار | ☐ |
-| 0.7 | كل الجداول والقيم المغلقة بعد decisions | `supabase/migrations/0001_schema.sql` | R: إدراج قيمة خارج القائمة يفشل | ☐ |
-| 0.8 | RLS على كل جدول `owner_id = auth.uid()` | `0002_rls.sql` | R: المستخدم ب لا يقرأ ولا يعدّل ولا يحذف ولا يربط بسجلات أ، لكل جدول وللـ Storage | ☐ |
-| 0.9 | seed بأنشطة وخدمات وبنود تقييم | `0004_bootstrap.sql`, `seed.sql` | R: مستخدم جديد يحصل على 4 أنشطة و13 بنداً مجموع أوزانها 100 | ☐ |
-| 0.10 | الدخول ببريد وكلمة مرور بدون تسجيل جديد، وحماية الصفحات | `src/routes/Login.tsx`, `RequireAuth.tsx` | E + V(Login) + S | ☐ |
-| 0.11 | PWA قابل للتثبيت | `vite-plugin-pwa`, `public/manifest.webmanifest`، أيقونات | Lighthouse installable / فحص manifest في E | ☐ |
+| 0.1 | Vite + React + TS strict + Tailwind | `package.json`, `tsconfig.*.json`, `vite.config.ts`, `src/styles/index.css` (Tailwind 4 `@theme inline`) | `npm run typecheck && lint && build` بلا تحذيرات | ☑ |
+| 0.2 | RTL و`lang="ar"`، خصائص منطقية فقط | `index.html`، `scripts/check-design-rules.mjs` (جزء من `npm run lint`) | قاعدة lint + E (`login.spec`: dir/lang) | ☑ |
+| 0.3 | خط IBM Plex Sans Arabic 400/700 | `index.html` | E: الخط المحسوب على body | ☑ |
+| 0.4 | tokens.css مصدر الألوان، وTailwind مربوط بالمتغيرات، ولا hex في المكونات | `src/styles/tokens.css`, `src/styles/components.css` (= bundle.css), `src/styles/index.css` | `check-design-rules.mjs` يمنع hex/rgb + E: لون الزر و`--radius-md` من tokens | ☑ |
+| 0.5 | أرقام لاتينية و`tabular-nums` | `components.css` (body tabular-nums)؛ `src/lib/format.ts` في 1b | U | ◐ |
+| 0.6 | عميل Supabase من متغيرات البيئة، و`.env.example` فارغ | `src/lib/supabase.ts`, `src/lib/env.ts`, `src/lib/database.types.ts`, `.env.example` | build + `.env.local` في `.gitignore` (تحقق `git check-ignore`) | ☑ |
+| 0.7 | كل الجداول والقيم المغلقة بعد decisions | `supabase/migrations/20261007000001_schema.sql` | R: `qr`، `05…`، خصم 20%، إجابة خارج القائمة كلها ترفض | ☑ |
+| 0.8 | RLS على كل جدول `owner_id = auth.uid()` | `…02_rls.sql`, `…03_triggers.sql` (تطابق المالك), `…05_indexes.sql` | R محلياً ☑ (`npm run test:db`، واختبار طفرة يثبت أنه يكشف التسريب). على Supabase: 51 سياسة ومستشار الأمان بلا ملاحظات RLS ☑؛ اختبار API بمستخدمَين (`npm run test:rls`) ☐ بانتظار فتح الشبكة | ◐ |
+| 0.9 | seed بأنشطة وخدمات وبنود تقييم | `…04_bootstrap.sql` (trigger على auth.users) | R: 4 أنشطة، 13 بنداً مجموعها 100، 6 خدمات، 3 قوالب | ☑ |
+| 0.10 | الدخول ببريد وكلمة مرور بدون تسجيل جديد، وحماية الصفحات | `src/routes/Login.tsx`, `src/auth/*` | E: التحويل إلى /login، النصوص والترتيب، 48px، خطأ التحقق، بدون اتصال، رسالة تعذّر الاتصال ☑؛ الدخول الفعلي ☐ بانتظار فتح الشبكة | ◐ |
+| 0.11 | PWA قابل للتثبيت | `vite-plugin-pwa`, `public/icons/*` (`scripts/make-icons.mjs`) | E: manifest (ar/rtl/standalone/192/512/maskable) و`sw.js` | ☑ |
 | 1a | 10 مكونات بنفس props و`bundle.css` | `src/components/ui/*` | U (سلوك: TriSelect بالأسهم، BottomSheet بـ Escape، Toast يختفي بعد 4 ث) + V في `/dev/ui` فاتح وداكن | ☐ |
 | 1b.1 | شريط سفلي 5 عناصر / شريط جانبي يميناً | `BottomNav.tsx`, `DeskSidebar.tsx`, `AppShell.tsx` | V + E | ☐ |
 | 1b.2 | اليوم: 3 عدادات، هدف الأسبوع، متأخرة warning، متابعات اليوم بواتساب، عملاء حارّون | `src/routes/Today.tsx`, `src/data/today.ts` | V(Main, DeskToday) + S + E | ☐ |

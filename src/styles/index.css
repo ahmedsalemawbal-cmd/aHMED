@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './components.css';
+
+/* Tailwind reads the design tokens only. No raw colours in components. */
+@theme inline {
+  --color-*: initial;
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-scrim: var(--scrim);
+  --color-action: var(--action);
+  --color-action-pressed: var(--action-pressed);
+  --color-on-action: var(--on-action);
+  --color-focus: var(--focus);
+  --color-whatsapp: var(--whatsapp);
+  --color-on-whatsapp: var(--on-whatsapp);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-stage-not-visited: var(--stage-not-visited);
+  --color-stage-not-visited-soft: var(--stage-not-visited-soft);
+  --color-stage-visited: var(--stage-visited);
+  --color-stage-visited-soft: var(--stage-visited-soft);
+  --color-stage-contacted: var(--stage-contacted);
+  --color-stage-contacted-soft: var(--stage-contacted-soft);
+  --color-stage-replied: var(--stage-replied);
+  --color-stage-replied-soft: var(--stage-replied-soft);
+  --color-stage-meeting: var(--stage-meeting);
+  --color-stage-meeting-soft: var(--stage-meeting-soft);
+  --color-stage-proposal: var(--stage-proposal);
+  --color-stage-proposal-soft: var(--stage-proposal-soft);
+  --color-stage-won: var(--stage-won);
+  --color-stage-won-soft: var(--stage-won-soft);
+  --color-stage-lost: var(--stage-lost);
+  --color-stage-lost-soft: var(--stage-lost-soft);
+  --color-priority-hot: var(--priority-hot);
+  --color-priority-warm: var(--priority-warm);
+  --color-priority-cold: var(--priority-cold);
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-12: var(--space-12);
+  --spacing-touch: var(--touch-min);
+  --spacing-control: var(--control-h);
+  --spacing-control-sm: var(--control-h-sm);
+  --spacing-nav: var(--bottom-nav-h);
+  --spacing-sidebar: var(--sidebar-w);
+
+  --radius-*: initial;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  --shadow-*: initial;
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
+  --shadow-sheet: var(--shadow-sheet);
+
+  --font-sans: var(--font-sans);
+
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desk: 1024px;
+  --breakpoint-wide: 1440px;
+
+  --text-*: initial;
+  --text-display: 32px;
+  --text-display--line-height: 40px;
+  --text-title-1: 24px;
+  --text-title-1--line-height: 34px;
+  --text-title-2: 20px;
+  --text-title-2--line-height: 30px;
+  --text-title-3: 17px;
+  --text-title-3--line-height: 26px;
+  --text-body: 16px;
+  --text-body--line-height: 26px;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 22px;
+  --text-label: 16px;
+  --text-label--line-height: 24px;
+  --text-label-sm: 13px;
+  --text-label-sm--line-height: 20px;
+  --text-caption: 12px;
+  --text-caption--line-height: 18px;
+}
+
+html { background: var(--surface); }
+body { min-height: 100dvh; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}

@@ -2,3 +2,8 @@ node_modules
 dist
 .env.local
 .env
+dev-dist
+test-results
+playwright-report
+blob-report
+*.tsbuildinfo
