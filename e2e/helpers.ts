@@ -31,6 +31,8 @@ export async function findSmallTargets(page: Page, scope = 'body', min = 48): Pr
       return Array.from(root.querySelectorAll<HTMLElement>(sel))
         .filter((el) => {
           if (el.closest('[data-desktop-only]')) return false;
+          // not reachable by the user (e.g. the hidden file input behind «إضافة»)
+          if (el.closest('[aria-hidden="true"]')) return false;
           // a radio/checkbox inside a label is judged through its label
           if (el instanceof HTMLInputElement && (el.type === 'radio' || el.type === 'checkbox') && el.closest('label')) return false;
           const r0 = el.getBoundingClientRect();

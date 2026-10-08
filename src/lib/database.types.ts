@@ -633,6 +633,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       assessment_answers_valid: { Args: { a: Json }; Returns: boolean };
+      create_lead_from_visit: { Args: { p: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

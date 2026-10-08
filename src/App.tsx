@@ -9,6 +9,7 @@ import Login from '@/routes/Login';
 
 const Today = lazy(() => import('@/routes/Today'));
 const Placeholder = lazy(() => import('@/routes/Placeholder'));
+const NewLead = lazy(() => import('@/features/new-lead/NewLead'));
 const DevUi = lazy(() => import('@/routes/dev/DevUi'));
 
 /** /dev/ui exists only in development, or in test builds with VITE_DEV_UI=1. Never in production. */
@@ -29,7 +30,7 @@ export default function App() {
                 <Route path="/login" element={<Login />} />
                 {devUiEnabled ? <Route path="/dev/ui" element={<DevUi />} /> : null}
                 <Route path="/" element={<Private><Today /></Private>} />
-                <Route path="/leads/new" element={<Private><Placeholder section="leads" title="عميل جديد" phase="1c" /></Private>} />
+                <Route path="/leads/new" element={<Private><NewLead /></Private>} />
                 <Route path="/leads/:id/message" element={<Private><Placeholder section="leads" title="الرسالة" phase="1d" /></Private>} />
                 <Route path="/leads/:id" element={<Private><Placeholder section="leads" title="صفحة العميل" phase="1e" /></Private>} />
                 <Route path="/leads" element={<Private><Placeholder section="leads" title="العملاء" phase="1e" /></Private>} />

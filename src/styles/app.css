@@ -45,3 +45,18 @@
 .app-row { position: relative; }
 .app-stretched::after { content: ''; position: absolute; inset: 0; }
 .app-row-action { position: relative; z-index: 1; }
+
+/* Segmented options are 44px inside a 52px frame (NewLead1, Message): widen to 48. */
+.app-seg { position: relative; cursor: pointer; }
+.app-seg::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: var(--touch-min);
+  translate: 0 -50%;
+}
+/* Wizard step change: the only motion besides the sheet (design-system.md). */
+@keyframes app-step-in { from { opacity: 0; transform: translateX(-12px); } }
+[dir='rtl'] .app-step-in { animation: app-step-in 0.16s ease-out; }
+@media (prefers-reduced-motion: reduce) { .app-step-in { animation: none !important; } }
