@@ -1,0 +1,47 @@
+/*
+ * Additions on top of bundle.css that do not change how anything looks:
+ * they only widen the touch area to --touch-min where the approved designs
+ * use a smaller visual control (Button size="sm" inside LeadCard and lists,
+ * TriSelect options at 44px inside the 52px frame).
+ */
+.md-btn-sm { position: relative; }
+.md-btn-sm::before,
+.md-tri-opt::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: var(--touch-min);
+  translate: 0 -50%;
+}
+
+/* Toasts: above the bottom nav on mobile, top-left (inline-end in RTL) on desktop. */
+.app-toasts {
+  position: fixed;
+  z-index: 60;
+  inset-inline: var(--space-4);
+  bottom: calc(var(--bottom-nav-h) + var(--space-4) + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: stretch;
+  pointer-events: none;
+}
+.app-toasts > * { pointer-events: auto; }
+@media (min-width: 1024px) {
+  .app-toasts { bottom: auto; top: var(--space-6); inset-inline-start: auto; inset-inline-end: var(--space-6); width: 420px; }
+}
+.app-toasts.no-nav { bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); }
+
+/* BottomSheet on desktop: the same content in a centred dialog (BottomSheet.md). */
+@media (min-width: 1024px) {
+  .md-sheet-layer { justify-content: center; align-items: center; }
+  .md-sheet { width: min(480px, 90vw); border-radius: var(--radius-lg); }
+  .md-sheet-grip { display: none; }
+}
+
+/* Stretched link: the shop name opens the lead from anywhere on its row, so the
+   whole row is the touch target; actions in the row sit above it. */
+.app-row { position: relative; }
+.app-stretched::after { content: ''; position: absolute; inset: 0; }
+.app-row-action { position: relative; z-index: 1; }

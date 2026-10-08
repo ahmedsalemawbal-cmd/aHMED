@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import './tokens.css';
-@import './components.css';
+/* bundle.css and its additions live in the components layer, so Tailwind utilities can adjust them. */
+@import './components.css' layer(components);
+@import './app.css' layer(components);
 
 /* Tailwind reads the design tokens only. No raw colours in components. */
 @theme inline {

@@ -1,11 +1,10 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react';
+import { useId, type ChangeEventHandler, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
-type NativeInput = Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
-  Pick<TextareaHTMLAttributes<HTMLTextAreaElement>, 'rows'>;
+type Field = HTMLInputElement | HTMLTextAreaElement;
 
-export interface TextFieldProps extends NativeInput {
+export interface TextFieldProps extends Omit<InputHTMLAttributes<Field>, 'onChange'> {
   label: ReactNode;
   hint?: ReactNode;
   /** replaces the hint; says what happened and how to fix it */
@@ -16,44 +15,33 @@ export interface TextFieldProps extends NativeInput {
   suffix?: ReactNode;
   /** left-to-right input for phone numbers and URLs */
   ltr?: boolean;
-  onChange?: (event: { target: { value: string } }) => void;
+  /** React's handler types are bivariant, so ChangeEvent<HTMLInputElement> handlers are accepted */
+  onChange?: ChangeEventHandler<Field>;
 }
 
-export function TextField({ label, hint, error, multiline, rows, suffix, ltr, className, id, required, onChange, ...rest }: TextFieldProps) {
+export function TextField({ label, hint, error, multiline, rows, suffix, ltr, className, id, onChange, type, ...rest }: TextFieldProps) {
   const autoId = useId();
-  const fieldId = id ?? `md-f-${autoId}`;
+  const fieldId = id || `md-f-${autoId}`;
   const describedBy = error || hint ? `${fieldId}-d` : undefined;
   const common = {
     id: fieldId,
     className: 'md-input',
     dir: ltr ? 'ltr' : undefined,
-    required,
     'aria-invalid': error ? true : undefined,
     'aria-describedby': describedBy,
   } as const;
 
   const input = multiline ? (
-    <textarea
-      {...common}
-      rows={rows ?? 3}
-      name={rest.name}
-      value={rest.value}
-      defaultValue={rest.defaultValue}
-      placeholder={rest.placeholder}
-      maxLength={rest.maxLength}
-      disabled={rest.disabled}
-      autoComplete={rest.autoComplete}
-      onChange={onChange}
-    />
+    <textarea rows={rows || 3} {...rest} {...common} onChange={onChange} />
   ) : (
-    <input {...rest} {...common} onChange={onChange} />
+    <input type={type} {...rest} {...common} onChange={onChange} />
   );
 
   return (
     <div className={cx('md-field', Boolean(error) && 'has-error', className)}>
       <label className="md-field-label" htmlFor={fieldId}>
         {label}
-        {required ? (
+        {rest.required ? (
           <span className="md-req" aria-hidden="true">
             {' *'}
           </span>
@@ -70,7 +58,7 @@ export function TextField({ label, hint, error, multiline, rows, suffix, ltr, cl
       {describedBy ? (
         <p id={describedBy} className="md-field-help">
           {error ? <Icon name="alert" size={16} /> : null}
-          {error ?? hint}
+          {error || hint}
         </p>
       ) : null}
     </div>

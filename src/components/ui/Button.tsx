@@ -27,7 +27,7 @@ export function Button({
   type = 'button',
   ...rest
 }: ButtonProps) {
-  const glyph = icon ?? (variant === 'whatsapp' ? 'chat' : undefined);
+  const glyph = icon || (variant === 'whatsapp' ? 'chat' : undefined);
   return (
     <button
       type={type}

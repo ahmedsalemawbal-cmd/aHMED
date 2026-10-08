@@ -13,22 +13,53 @@ export function e2eEnv(key: string): string {
   throw new Error(`Missing ${key} in environment or .env.local`);
 }
 
-/** Every visible interactive element must offer a 48px touch target (design-system.md). */
-export async function expectTouchTargets(page: Page, min = 48) {
-  const small = await page.evaluate((minSize) => {
-    const sel = 'button, a[href], input:not([type=hidden]), select, textarea, [role=button], [role=radio], [role=checkbox], [role=switch], [role=tab]';
-    return Array.from(document.querySelectorAll<HTMLElement>(sel))
-      .filter((el) => {
-        const r = el.getBoundingClientRect();
-        const style = getComputedStyle(el);
-        if (r.width === 0 || r.height === 0 || style.visibility === 'hidden') return false;
-        // radio inputs inside a labelled option are covered by their label
-        if (el instanceof HTMLInputElement && (el.type === 'radio' || el.type === 'checkbox') && el.closest('label')) return false;
-        return r.height < minSize - 0.5 || r.width < minSize - 0.5;
-      })
-      .map((el) => `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute('aria-label') || '').trim()}" ${Math.round(el.getBoundingClientRect().width).toString()}x${Math.round(el.getBoundingClientRect().height).toString()}`);
-  }, min);
-  expect(small, `touch targets under ${min.toString()}px`).toEqual([]);
+/**
+ * Every visible interactive element must offer a 48px touch target (design-system.md).
+ * A control may look smaller if its hit area is widened (app.css). We probe the
+ * points (min/2 − 0.5)px from its centre: each must hit the control itself or a
+ * descendant (a ::before hit reports the control). TriSelect options are judged
+ * by their label. Elements inside [data-desktop-only] are skipped.
+ */
+export async function findSmallTargets(page: Page, scope = 'body', min = 48): Promise<string[]> {
+  return page.evaluate(
+    ({ scopeSel, minSize }) => {
+      const sel =
+        'button, a[href], input:not([type=hidden]), select, textarea, [role=button], [role=radio], [role=checkbox], [role=switch], [role=tab], label:has(> input[type=radio]), label:has(> input[type=checkbox])';
+      const root = document.querySelector(scopeSel);
+      if (!root) return ['scope not found'];
+      const half = minSize / 2 - 0.5;
+      return Array.from(root.querySelectorAll<HTMLElement>(sel))
+        .filter((el) => {
+          if (el.closest('[data-desktop-only]')) return false;
+          // a radio/checkbox inside a label is judged through its label
+          if (el instanceof HTMLInputElement && (el.type === 'radio' || el.type === 'checkbox') && el.closest('label')) return false;
+          const r0 = el.getBoundingClientRect();
+          const style = getComputedStyle(el);
+          if (r0.width === 0 || r0.height === 0 || style.visibility === 'hidden') return false;
+          if (r0.height >= minSize - 0.5 && r0.width >= minSize - 0.5) return false;
+          el.scrollIntoView({ block: 'center', inline: 'center' });
+          const b = el.getBoundingClientRect();
+          const cx = b.left + b.width / 2;
+          const cy = b.top + b.height / 2;
+          const hits = (x: number, y: number) => {
+            const at = document.elementFromPoint(x, y);
+            return !!at && (at === el || el.contains(at));
+          };
+          const tallEnough = b.height >= minSize - 0.5 || (hits(cx, cy - half) && hits(cx, cy + half));
+          const wideEnough = b.width >= minSize - 0.5 || (hits(cx - half, cy) && hits(cx + half, cy));
+          return !(tallEnough && wideEnough);
+        })
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}" ${Math.round(r.width).toString()}x${Math.round(r.height).toString()}`;
+        });
+    },
+    { scopeSel: scope, minSize: min },
+  );
+}
+
+export async function expectTouchTargets(page: Page, scope = 'body', min = 48) {
+  expect(await findSmallTargets(page, scope, min), `touch targets under ${min.toString()}px`).toEqual([]);
 }
 
 export async function login(page: Page, who: 'A' | 'B' = 'A') {
