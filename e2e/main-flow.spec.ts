@@ -1,5 +1,5 @@
 // Gate 3 · the main flow against the real Supabase project (no mocks):
-// login → new lead → assessment → message → «هل أرسلت؟» → stage contacted.
+// login → new lead → assessment → message → «هل أرسلت؟» → in the list at «تم الإرسال».
 // Needs network access to *.supabase.co and the E2E_USER_A_* accounts.
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { e2eEnv, login } from './helpers';
@@ -58,6 +58,12 @@ test('main flow at 390: new lead → message → confirm → contacted with two 
   await page.getByRole('dialog', { name: 'هل أرسلت الرسالة؟' }).getByRole('button', { name: 'نعم، أرسلتها' }).click();
   await expect(page.getByText('المرحلة الآن: تم الإرسال')).toBeVisible();
   expect(Date.now() - started).toBeLessThan(LIMIT_MS);
+
+  // the lead is in the list at «تم الإرسال»
+  await page.goto(`/leads?q=${encodeURIComponent(name)}`);
+  const card = page.locator('article', { hasText: name });
+  await expect(card).toHaveCount(1);
+  await expect(card.locator('.md-stage')).toHaveText('تم الإرسال');
 
   const token = await accessToken(page);
   const [lead] = await rest<{ stage: string; last_contact_at: string | null }[]>(request, token, `leads?id=eq.${leadId}&select=stage,last_contact_at`);

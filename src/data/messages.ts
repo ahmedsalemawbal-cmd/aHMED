@@ -5,6 +5,7 @@ import type { ContactTime } from '@/lib/followups';
 import { parseChecklist } from '@/lib/scoring';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_TEMPLATES, templateDrafts, TONES, type Drafts, type MessageKind, type Tone } from '../../supabase/functions/_shared/message';
+import { refreshAll } from './refresh';
 import { isTaskKind, type TaskKind } from './tasks-meta';
 
 export type { Drafts, MessageKind, Tone };
@@ -326,21 +327,12 @@ export async function undoSent(r: SentResult): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/**
- * Refresh everything except the open message screen: it keeps its editing
- * state and leaves right after, and the next visit loads fresh data.
- */
-function refreshAfterWrite(qc: ReturnType<typeof useQueryClient>) {
-  void qc.invalidateQueries({ queryKey: ['message-context'], refetchType: 'none' });
-  void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'message-context' });
-}
-
 export function useConfirmSent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: confirmSent,
     onSuccess: () => {
-      refreshAfterWrite(qc);
+      refreshAll(qc);
     },
   });
 }
@@ -354,7 +346,7 @@ export function useRecordConsent() {
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
-      refreshAfterWrite(qc);
+      refreshAll(qc);
     },
   });
 }

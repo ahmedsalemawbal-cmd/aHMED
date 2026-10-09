@@ -7,3 +7,5 @@ test-results
 playwright-report
 blob-report
 *.tsbuildinfo
+dist-e2e-*
+test-results-*

@@ -636,6 +636,12 @@ export type Database = {
       create_lead_from_visit: { Args: { p: Json }; Returns: Json };
       confirm_message_sent: { Args: { p: Json }; Returns: Json };
       undo_message_sent: { Args: { p: Json }; Returns: Json };
+      refresh_next_action: { Args: { p_lead: string }; Returns: undefined };
+      mark_replied: { Args: { p: Json }; Returns: Json };
+      set_meeting: { Args: { p: Json }; Returns: Json };
+      mark_won: { Args: { p: Json }; Returns: Json };
+      mark_lost: { Args: { p: Json }; Returns: Json };
+      set_stage: { Args: { p: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

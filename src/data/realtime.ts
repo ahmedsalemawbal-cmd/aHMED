@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { refreshAll } from './refresh';
 
 /**
  * A lead saved on the phone must appear on the desktop at once (brief.md):
@@ -13,7 +14,7 @@ export function useRealtimeRefresh(enabled: boolean) {
     const channel = supabase.channel('maidani-changes');
     for (const table of ['leads', 'tasks', 'messages', 'visits', 'quotes'] as const) {
       channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-        void qc.invalidateQueries();
+        refreshAll(qc);
       });
     }
     channel.subscribe();
