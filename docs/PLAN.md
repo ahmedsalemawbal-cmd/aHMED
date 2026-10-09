@@ -96,6 +96,11 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 - العميل الجديد يحصل على مهمة «أرسل الرسالة الأولى» بموعد الحفظ، فيظهر في «اليوم» حتى تُرسل.
 - مهمة «أرسل ريل العينة خلال 24 ساعة» مؤجلة للمرحلة 2 كما في المستند (C3)؛ لا تظهر في الخطوة 3.
 - بطاقة الموقع تعرض الدقة بدل العنوان: لا مزود عناوين بلا خرائط (decisions §3).
+- تأكيد الإرسال عبر RPC `confirm_message_sent` في معاملة واحدة (هجرة 8): الرسالة `sent`، إغلاق مهمة الرسالة، المرحلة `contacted` للأولى فقط، المتابعتان، `last_contact_at`. و`undo_message_sent` لزر «تراجع» يلغي المتابعات (`cancelled_at`) ولا يحذفها.
+- «هل أرسلت؟» تظهر عند العودة للتطبيق (`visibilitychange` أو `blur/focus`)، أو بعد 2.5 ثانية إن لم تغادر الصفحة، وتُتذكَّر 12 ساعة إن أُغلق التطبيق في الأثناء.
+- المسودة تُحفظ عند مغادرة المحرر ونسخها وفتح الواتساب، فتظهر معدّلة في «اليوم» وتعود عند فتح الشاشة مرة أخرى بدل توليد جديد.
+- حدّ الأسطر في العدّاد حسب النوع: الأولى 5، المتابعة الأولى 4، الثانية 3، والرسالة الحرة بلا حد.
+- مزود الذكاء الاصطناعي: محوّل Anthropic فقط، لا يعمل إلا بالأسرار `AI_PROVIDER=anthropic` و`AI_API_KEY` (النموذج الافتراضي `claude-opus-5-5`، ويمكن تغييره بـ `AI_MODEL`). بدونها القالب الاحتياطي دائماً **[Q4]**.
 
 ---
 
@@ -128,7 +133,7 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 
 ### المكونات
 - **نظام التصميم** (`src/components/ui/`، مطابقة لـ `index.d.ts` و`bundle.css`): `Button`, `TextField`, `StageBadge` + `STAGES`, `PriorityBadge`, `LeadCard`, `ScoreBar`, `TriSelect`, `BottomSheet`, `Toast`, `EmptyState`, و`Icon` الداخلي.
-- **مكونات التطبيق** (`src/components/app/`): `AppShell`, `BottomNav`, `DeskSidebar`, `OfflineBanner`, `ToastHost`, `Skeleton`, `ErrorRetry`, `WizardHeader` (تقدم 4 خطوات), `StickyFooter`, `SegmentedControl`, `ChipGroup`, `ActivityGrid`, `ServiceCheckCard`, `StageStrip`, `KanbanColumn`, `TaskRow`, `PostponeSheet`, `ChangeStageSheet`, `LostSheet`, `RepliedSheet`, `MeetingSheet`, `WonSheet`, `SentConfirmSheet`, `QuoteSheetPreview`, `Timeline`.
+- **مكونات التطبيق** (`src/components/app/`): `AppShell`, `BottomNav`, `DeskSidebar`, `OfflineBanner`, `ToastHost`, `Skeleton`, `ErrorRetry`, `WizardHeader` (تقدم 4 خطوات), `StickyFooter`, `SegmentedControl`, `ChipGroup`, `ActivityGrid`, `ServiceCheckCard`, `StageStrip`, `KanbanColumn`, `TaskRow`, `PostponeSheet`, `ChangeStageSheet`, `LostSheet`, `RepliedSheet`, `MeetingSheet`, `WonSheet`, `SentConfirmSheet` (في `src/features/message/`)، `QuoteSheetPreview`, `Timeline`.
 
 ### Edge Functions
 | الدالة | المدخل | العمل | الأسرار |
@@ -172,13 +177,13 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1c.10 | رفع صور وفيديو إلى Storage خاص | `src/data/create-lead.ts` | R (سياسات Storage) ☑ · E: الرفع إلى `{owner}/{visit}/…` وصف `visit_media` ☑ · رفع حقيقي ☐ بانتظار الشبكة | ◐ |
 | 1c.11 | الإدخال الصوتي معطّل «قريباً» | `Step3Notes.tsx` | E (الزر معطّل) ☑ | ☑ |
 | 1c.12 | الحفظ: العميل + الزيارة + التقييم + الخدمات، والمرحلة `visited` | RPC `create_lead_from_visit` (هجرة 7)، `src/data/create-lead.ts` | R: معاملة واحدة، مهمة «أرسل الرسالة الأولى»، لا تكرار عند الإعادة، رفض الرقم الخاطئ، عزل المستخدم الآخر ☑ · E: محتوى الطلب، الحفظ المؤجل بدون اتصال، الخطأ وإعادة المحاولة بنفس المعرّف ☑ · حفظ حقيقي ☐ بانتظار الشبكة | ◐ |
-| 1d.1 | `generate-message` بمدخلات وقواعد المستند، والمفتاح من الأسرار | `supabase/functions/generate-message/*` | اختبار Deno لبناء الطلب والتحقق من الأسطر + اختبار الاحتياطي | ☐ |
-| 1d.2 | قالب احتياطي عند الفشل مع رسالة «تعذّر توليد الرسالة. استخدمنا القالب الجاهز بدلاً منها.» | نفس الدالة + `src/lib/template.ts` | U + E (الدالة معطّلة) | ☐ |
-| 1d.3 | النبرة، عدّاد الأسطر، أعد الصياغة، نسخ | `src/routes/Message.tsx` | V(Message) + S | ☐ |
-| 1d.4 | تنبيه عند غياب موافقة الواتساب، وإخفاء الزر مع `do_not_contact` | `Message.tsx`, `Button` | E + U | ☐ |
-| 1d.5 | رابط wa.me فقط | `src/lib/whatsapp.ts` | U ☑ | ◐ |
-| 1d.6 | «هل أرسلت؟» بعد العودة؛ `sent_at` بعد التأكيد فقط | `SentConfirmSheet.tsx` (`visibilitychange`) | E | ☐ |
-| 1d.7 | المرحلة `contacted` ومتابعتان بعد 3 و7 أيام | RPC `confirm_message_sent`, `src/lib/followups.ts` | U (التواريخ) ☑ + R + E | ◐ |
+| 1d.1 | `generate-message` بمدخلات وقواعد المستند، والمفتاح من الأسرار | `supabase/functions/generate-message/index.ts`, `supabase/functions/_shared/message.ts` | U ☑ (`message.test.ts`: الطلب، التحقق من الأسطر والأسعار والإيموجي والروابط والسؤال، القوالب) + `deno check`/`deno lint` ☑ + منشورة (v1) | ◐ (توليد حقيقي ينتظر الأسرار [Q4]) |
+| 1d.2 | قالب احتياطي عند الفشل مع رسالة «تعذّر توليد الرسالة. استخدمنا القالب الجاهز بدلاً منها.» | الدالة + `src/data/messages.ts` (`localDrafts` عند تعذّر الوصول للدالة) | U ☑ + E ☑ (الدالة معطّلة، وبدون اتصال) | ☑ |
+| 1d.3 | النبرة، عدّاد الأسطر، أعد الصياغة، نسخ | `src/features/message/Message.tsx`, `text.ts` | V(Message) ☑ + S ☑ + E ☑ + U ☑ | ☑ |
+| 1d.4 | تنبيه عند غياب موافقة الواتساب، وإخفاء الزر مع `do_not_contact` | `Message.tsx` (C6: «سجّلت موافقته») | E ☑ (بلا موافقة، طلب عدم التواصل، بلا رقم) | ☑ |
+| 1d.5 | رابط wa.me فقط | `src/lib/whatsapp.ts`, `Message.tsx` | U ☑ + E ☑ (`href` بالنص المعدّل) | ☑ |
+| 1d.6 | «هل أرسلت؟» بعد العودة؛ `sent_at` بعد التأكيد فقط | `src/features/message/SentConfirmSheet.tsx`, `useReturnPrompt.ts` | U ☑ (العودة، الاحتياط، التذكّر) + E ☑ («ليس بعد» لا يسجّل شيئاً، إعادة الفتح) + R ☑ | ☑ |
+| 1d.7 | المرحلة `contacted` ومتابعتان بعد 3 و7 أيام | RPC `confirm_message_sent` / `undo_message_sent`, `src/lib/followups.ts` | U ☑ + R ☑ (`tests-db/rpc_message_sent.sql`) + E ☑ (مواعيد المتابعتين، «تراجع») | ☑ |
 | 1e.1 | قائمة: بحث بالاسم أو الرقم، شرائح المراحل بالعدد، فلاتر، ترتيب | `src/routes/Leads.tsx` | V(Leads) + S + E | ☐ |
 | 1e.2 | جدول ديسكتوب بأعمدة قابلة للترتيب وتحديد متعدد (تغيير مرحلة، تصدير) | `DeskLeadsTable.tsx` | V(DeskLeads) | ☐ |
 | 1e.3 | سحب البطاقة على الجوال (واتساب، زيارة جديدة) | `SwipeActions.tsx` | E (لمس) | ☐ |
@@ -206,7 +211,7 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1h.3 | الأنشطة: إضافة نشاط وتعديل بنوده وأوزانها | `settings/Activities.tsx` | U (مجموع الأوزان) + S | ☐ |
 | 1h.4 | الهدف الأسبوعي، المظهر (فاتح/داكن/تلقائي) | `settings/Goal.tsx`, `src/lib/theme.ts` | U + V | ☐ |
 | 1h.5 | تصدير CSV (UTF-8 BOM ليفتح العربي في Excel) | `src/lib/csv.ts` | U | ☐ |
-| X.1 | التدفق الكامل 390px: الدخول ← عميل جديد ← التقييم ← الرسالة ← تأكيد ← القائمة بمرحلة contacted | `e2e/main-flow.spec.ts` | E **[Q14]** | ☐ |
+| X.1 | التدفق الكامل 390px: الدخول ← عميل جديد ← التقييم ← الرسالة ← تأكيد ← القائمة بمرحلة contacted | `e2e/main-flow.spec.ts` (يتحقق من المرحلة والمهام عبر API حتى تُبنى القائمة في 1e) | E على Supabase الحقيقي **[Q14]**: مكتوب، يفشل هنا عند الدخول لأن الشبكة تمنع `*.supabase.co` | ◐ |
 | X.2 | الحالات الخمس لكل شاشة | `Skeleton`, `EmptyState`, `ErrorRetry`, `OfflineBanner`, `Toast` | `e2e/states.spec.ts` (اعتراض الشبكة) | ☐ |
 | X.3 | مساحة لمس 48px | كل الأزرار، `app.css` (توسيع منطقة اللمس دون تغيير الشكل) | `e2e/helpers.ts` `expectTouchTargets` على كل شاشة + اختبار ذاتي | ◐ |
 | X.4 | معيار المرحلة 1: عميل ورسالته في أقل من دقيقتين، وظهوره فوراً في الداشبورد | E + Supabase Realtime على `leads` | قياس زمن التدفق في E | ☐ |

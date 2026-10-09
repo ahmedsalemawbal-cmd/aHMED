@@ -634,6 +634,8 @@ export type Database = {
     Functions: {
       assessment_answers_valid: { Args: { a: Json }; Returns: boolean };
       create_lead_from_visit: { Args: { p: Json }; Returns: Json };
+      confirm_message_sent: { Args: { p: Json }; Returns: Json };
+      undo_message_sent: { Args: { p: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
