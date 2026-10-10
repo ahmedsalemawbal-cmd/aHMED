@@ -1,0 +1,1 @@
+import{o as e}from"./react-BB3M23rb.js";import{t}from"./Placeholder-B8wcNGd0.js";var n=e();function r(){return(0,n.jsx)(t,{section:`quotes`,title:`عروض الأسعار`,phase:`1g`})}export{r as default};

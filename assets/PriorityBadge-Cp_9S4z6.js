@@ -1,0 +1,1 @@
+import{o as e}from"./react-BB3M23rb.js";import{c as t,d as n}from"./index-DThR6ikG.js";import{r}from"./BottomSheet-D1xI5m8g.js";var i=e();function a({priority:e,size:a,className:o}){let s=r[e];return(0,i.jsxs)(`span`,{className:n(`md-badge`,`md-prio`,`md-prio-${e}`,a===`sm`&&`md-badge-sm`,o),children:[(0,i.jsx)(t,{name:s.icon,size:14}),s.label]})}export{a as t};
