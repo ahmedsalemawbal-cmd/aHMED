@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
+import { InstallApp } from '@/components/app/InstallApp';
 import { LogoMark } from '@/components/app/LogoMark';
 import { OfflineBanner } from '@/components/app/OfflineBanner';
 import { env } from '@/lib/env';
@@ -92,7 +93,10 @@ export default function Login() {
             </Button>
           </form>
         </div>
-        <p className="m-0 mt-8 text-center text-label-sm font-normal text-ink-muted">حساب واحد فقط. لا يوجد تسجيل جديد من التطبيق.</p>
+        <div className="mt-8 flex flex-col gap-4">
+          <InstallApp />
+          <p className="m-0 text-center text-label-sm font-normal text-ink-muted">حساب واحد فقط. لا يوجد تسجيل جديد من التطبيق.</p>
+        </div>
       </main>
     </div>
   );

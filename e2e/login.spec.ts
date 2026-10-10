@@ -94,3 +94,42 @@ test.describe('الدخول', () => {
     expect(sw.ok()).toBe(true);
   });
 });
+
+test.describe('تثبيت التطبيق', () => {
+  test('Chrome offers installation: one tap opens the native dialog', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('button', { name: 'ثبّت التطبيق على جوالك' })).toHaveCount(0);
+    await page.evaluate(() => {
+      const e = new Event('beforeinstallprompt', { cancelable: true });
+      Object.assign(e, {
+        prompt: () => {
+          document.body.dataset.prompted = 'yes';
+          return Promise.resolve();
+        },
+        userChoice: Promise.resolve({ outcome: 'accepted', platform: 'web' }),
+      });
+      window.dispatchEvent(e);
+    });
+    const install = page.getByRole('button', { name: 'ثبّت التطبيق على جوالك' });
+    await expect(install).toBeVisible();
+    await expectTouchTargets(page);
+    await install.click();
+    await expect(page.locator('body')).toHaveAttribute('data-prompted', 'yes');
+    await expect(page.getByText('جارٍ تثبيت ميداني على جوالك.')).toBeVisible();
+    await expect(install).toHaveCount(0);
+  });
+
+  test('no install offer and not an iPhone: nothing is shown', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('button', { name: 'دخول' })).toBeVisible();
+    await expect(page.getByText('للتثبيت على الآيفون', { exact: false })).toHaveCount(0);
+  });
+});
+
+test.describe('تثبيت التطبيق · آيفون', () => {
+  test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
+  test('iPhone shows the Share-menu steps', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByText('للتثبيت على الآيفون: افتح الرابط في Safari، ثم اضغط زر المشاركة واختر «إضافة إلى الشاشة الرئيسية».')).toBeVisible();
+  });
+});
