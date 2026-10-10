@@ -104,9 +104,13 @@
   --text-caption--line-height: 18px;
 }
 
-html { background: var(--surface); }
-body { min-height: 100dvh; }
-a { color: inherit; }
+/* Base element rules sit in the base layer so components and utilities win over them
+   (an unlayered `a { color: inherit }` overrode .md-btn-primary on links). */
+@layer base {
+  html { background: var(--surface); }
+  body { min-height: 100dvh; }
+  a { color: inherit; }
+}
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; }
