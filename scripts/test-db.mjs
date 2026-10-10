@@ -7,7 +7,9 @@ import pg from 'pg';
 
 const root = new URL('..', import.meta.url).pathname;
 const base = process.env.TEST_DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/postgres';
-const dbName = 'maidani_test';
+// parallel runs (several agents on one machine) each use their own database
+const dbName = process.env.TEST_DB_NAME ?? 'maidani_test';
+if (!/^[a-z_][a-z0-9_]*$/.test(dbName)) throw new Error(`Bad TEST_DB_NAME: ${dbName}`);
 
 const admin = new pg.Client({ connectionString: base });
 await admin.connect();
