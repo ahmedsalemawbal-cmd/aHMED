@@ -11,6 +11,10 @@ const Today = lazy(() => import('@/routes/Today'));
 const Placeholder = lazy(() => import('@/routes/Placeholder'));
 const NewLead = lazy(() => import('@/features/new-lead/NewLead'));
 const Message = lazy(() => import('@/features/message/Message'));
+const Leads = lazy(() => import('@/routes/Leads'));
+const Lead = lazy(() => import('@/routes/Lead'));
+const LeadEdit = lazy(() => import('@/routes/LeadEdit'));
+const NewVisit = lazy(() => import('@/routes/NewVisit'));
 const DevUi = lazy(() => import('@/routes/dev/DevUi'));
 
 /** /dev/ui exists only in development, or in test builds with VITE_DEV_UI=1. Never in production. */
@@ -33,8 +37,11 @@ export default function App() {
                 <Route path="/" element={<Private><Today /></Private>} />
                 <Route path="/leads/new" element={<Private><NewLead /></Private>} />
                 <Route path="/leads/:id/message" element={<Private><Message /></Private>} />
-                <Route path="/leads/:id" element={<Private><Placeholder section="leads" title="صفحة العميل" phase="1e" /></Private>} />
-                <Route path="/leads" element={<Private><Placeholder section="leads" title="العملاء" phase="1e" /></Private>} />
+                <Route path="/leads/:id/edit" element={<Private><LeadEdit /></Private>} />
+                <Route path="/leads/:id/visit" element={<Private><NewVisit /></Private>} />
+                <Route path="/leads/:id/quotes/new" element={<Private><Placeholder section="leads" title="عرض سعر" phase="1g" /></Private>} />
+                <Route path="/leads/:id" element={<Private><Lead /></Private>} />
+                <Route path="/leads" element={<Private><Leads /></Private>} />
                 <Route path="/pipeline" element={<Private><Placeholder section="pipeline" title="Pipeline" phase="1f" /></Private>} />
                 <Route path="/tasks" element={<Private><Placeholder section="tasks" title="المهام" phase="1f" /></Private>} />
                 <Route path="/quotes" element={<Private><Placeholder section="quotes" title="عروض الأسعار" phase="1g" /></Private>} />
