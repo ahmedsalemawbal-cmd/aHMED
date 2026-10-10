@@ -1,15 +1,18 @@
+import { useId, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { ScoreBar } from '@/components/ui/ScoreBar';
 import type { LeadDetail, LeadService } from '@/data/lead';
 import { formatNumber } from '@/lib/format';
 import { formatPhone } from '@/lib/phone';
-import { consentView, contactNameText, instagramView, moreWeaknessesText, TIME_LABEL, WEAKNESSES_SHOWN } from './text';
+import { consentView, contactNameText, instagramView, moreWeaknessesLabel, TIME_LABEL, WEAKNESSES_SHOWN } from './text';
 
 const CARD = 'flex flex-col rounded-lg border border-line bg-surface-raised';
 
-/** «درجة الحضور الرقمي» and the weaknesses that cost the most points. */
+/** «درجة الحضور الرقمي» and the weaknesses that cost the most points; the rest on request. */
 export function ScoreCard({ score, weaknesses, desktop }: { score: number | null; weaknesses: string[]; desktop: boolean }) {
-  const shown = weaknesses.slice(0, WEAKNESSES_SHOWN);
+  const listId = useId();
+  const [all, setAll] = useState(false);
+  const shown = all ? weaknesses : weaknesses.slice(0, WEAKNESSES_SHOWN);
   const more = weaknesses.length - shown.length;
   return (
     <section aria-labelledby="lead-score" className={`${CARD} ${desktop ? 'gap-[14px] p-5' : 'gap-[14px] p-4'}`}>
@@ -22,15 +25,15 @@ export function ScoreCard({ score, weaknesses, desktop }: { score: number | null
         <>
           <ScoreBar score={score} label="درجة الحضور الرقمي" />
           {shown.length ? (
-            <ul aria-label="نقاط الضعف" className={`m-0 flex list-none flex-col p-0 ${desktop ? 'gap-[6px] text-body-sm' : 'gap-2 text-[15px] leading-[22px]'}`}>
-              {shown.map((w) =>
+            <ul id={listId} aria-label="نقاط الضعف" className={`m-0 flex list-none flex-col p-0 ${desktop ? 'gap-[6px] text-body-sm' : 'gap-2 text-[15px] leading-[22px]'}`}>
+              {shown.map((w, i) =>
                 desktop ? (
-                  <li key={w} className="flex items-center gap-2">
+                  <li key={`${i.toString()}:${w}`} className="flex items-center gap-2">
                     <span aria-hidden="true" className="size-2 flex-none rounded-full bg-danger" />
                     {w}
                   </li>
                 ) : (
-                  <li key={w} className="flex items-center gap-[10px]">
+                  <li key={`${i.toString()}:${w}`} className="flex items-center gap-[10px]">
                     <span aria-hidden="true" className="grid size-6 flex-none place-items-center rounded-full bg-danger-soft text-danger">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                         <path d="M6 6l12 12M18 6L6 18" />
@@ -44,25 +47,40 @@ export function ScoreCard({ score, weaknesses, desktop }: { score: number | null
           ) : (
             <p className="m-0 text-body-sm text-ink-muted">لا نقاط ضعف في آخر تقييم.</p>
           )}
-          {more > 0 ? <p className="m-0 text-body-sm text-ink-muted">{moreWeaknessesText(more)}</p> : null}
+          {more > 0 ? (
+            <button
+              type="button"
+              aria-expanded={false}
+              aria-controls={listId}
+              onClick={() => {
+                setAll(true);
+              }}
+              className={`-my-3 flex min-h-touch items-center self-start border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4 ${desktop ? 'text-body-sm' : 'text-[15px] leading-[22px]'}`}
+            >
+              {moreWeaknessesLabel(more)}
+            </button>
+          ) : null}
         </>
       )}
     </section>
   );
 }
 
-/** «الخدمات المقترحة» with the expected monthly value (NewLead4: «القيمة المتوقعة … ر.س / شهرياً»). */
+/**
+ * «الخدمات المقترحة» with the expected value, labelled and monthly as it is
+ * entered in NewLead4 («القيمة المتوقعة … ر.س / شهرياً»).
+ */
 export function ServicesCard({ services, expectedValue, desktop }: { services: LeadService[]; expectedValue: number | null; desktop: boolean }) {
   const suggested = services.filter((s) => s.status === 'suggested');
   return (
     <section aria-labelledby="lead-services" className={`${CARD} ${desktop ? 'gap-[10px] p-5' : 'gap-3 p-4'}`}>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <h2 id="lead-services" className="m-0 text-[15px] font-bold leading-[22px]">
           الخدمات المقترحة
         </h2>
         {expectedValue !== null ? (
           <span className="whitespace-nowrap text-body-sm text-ink-muted">
-            <span className="sr-only">القيمة المتوقعة: </span>
+            {'القيمة المتوقعة '}
             <b className="text-title-3 text-ink tabular-nums">{formatNumber(expectedValue)}</b> ر.س شهرياً
           </span>
         ) : null}
@@ -116,7 +134,7 @@ export function ContactCard({ lead, desktop }: { lead: LeadDetail; desktop: bool
             <dt className="text-ink-muted">إنستقرام</dt>
             <dd className="m-0 min-w-0">
               {insta.href ? (
-                <a href={insta.href} target="_blank" rel="noopener noreferrer" dir="ltr" className="flex min-h-touch min-w-0 items-center justify-end text-ink underline-offset-4">
+                <a href={insta.href} target="_blank" rel="noopener noreferrer" dir="ltr" className="flex min-h-touch min-w-0 items-center justify-end text-ink underline underline-offset-4">
                   <span className="truncate">{insta.text}</span>
                 </a>
               ) : (

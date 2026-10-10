@@ -16,7 +16,7 @@ import { LeadTabs } from '@/features/lead/LeadTabs';
 import { NextStep } from '@/features/lead/NextStep';
 import { ContactCard, ScoreCard, ServicesCard } from '@/features/lead/Overview';
 import { MessagesPanel, QuotesPanel, TasksPanel, TimelinePanel } from '@/features/lead/Panels';
-import { canMarkReplied, leadTabs, tabFromParam, weaknessTexts, type LeadTab } from '@/features/lead/text';
+import { canMarkReplied, isLeadId, leadTabs, tabFromParam, weaknessTexts, whatsappPath, type LeadTab } from '@/features/lead/text';
 import { useLeadActions } from '@/features/lead/useLeadActions';
 
 /** Screen 6 · صفحة العميل — design/screens/Lead.dc.html (390, full screen) and DeskLead.dc.html (two columns). */
@@ -28,7 +28,22 @@ export default function LeadRoute() {
   useRealtimeRefresh(!desktop);
 
   let body: ReactNode;
-  if (q.data) {
+  if (!isLeadId(id) || (q.isSuccess && !q.data)) {
+    body = (
+      <Frame desktop={desktop} header={desktop ? <DeskHeaderStub title="العميل" /> : <MobileHeaderStub loading={false} />}>
+        <EmptyState
+          icon="store"
+          title="لم نجد هذا العميل"
+          message="ربما حُذف أو الرابط ناقص. ارجع للعملاء واختره من القائمة."
+          action={
+            <Link to="/leads" className="md-btn md-btn-secondary no-underline">
+              ارجع للعملاء
+            </Link>
+          }
+        />
+      </Frame>
+    );
+  } else if (q.data) {
     // relative times («اليوم»، «بعد 3 أيام») are read at the last fetch, so a refresh keeps them right
     body = <LeadScreen key={q.data.lead.id} data={q.data} desktop={desktop} now={new Date(q.dataUpdatedAt)} />;
   } else if (q.isError) {
@@ -42,25 +57,10 @@ export default function LeadRoute() {
         />
       </Frame>
     );
-  } else if (q.isPending) {
+  } else {
     body = (
       <Frame desktop={desktop} header={desktop ? <DeskHeaderStub title={null} /> : <MobileHeaderStub loading />}>
         <PageSkeleton desktop={desktop} />
-      </Frame>
-    );
-  } else {
-    body = (
-      <Frame desktop={desktop} header={desktop ? <DeskHeaderStub title="العميل" /> : <MobileHeaderStub loading={false} />}>
-        <EmptyState
-          icon="store"
-          title="لم نجد هذا العميل"
-          message="ربما حُذف أو الرابط ناقص. ارجع للعملاء واختره من القائمة."
-          action={
-            <Link to="/leads" className="md-btn md-btn-secondary no-underline">
-              ارجع للعملاء
-            </Link>
-          }
-        />
       </Frame>
     );
   }
@@ -145,7 +145,8 @@ function LeadScreen({ data, desktop, now }: { data: LeadData; desktop: boolean; 
 
   let panel: ReactNode;
   if (tab === 'timeline') panel = <TimelinePanel events={buildTimeline(data)} now={now} desktop={desktop} />;
-  else if (tab === 'messages') panel = <MessagesPanel leadId={lead.id} messages={data.messages} now={now} desktop={desktop} doNotContact={lead.doNotContact} />;
+  else if (tab === 'messages')
+    panel = <MessagesPanel leadId={lead.id} messages={data.messages} now={now} desktop={desktop} doNotContact={lead.doNotContact} composeTo={whatsappPath(lead.id, next)} />;
   else if (tab === 'tasks') panel = <TasksPanel tasks={data.tasks} now={now} desktop={desktop} completing={act.completing} onComplete={act.completeTask} onPostpone={act.postpone} />;
   else if (tab === 'quotes') panel = <QuotesPanel quotes={data.quotes} now={now} desktop={desktop} />;
   else

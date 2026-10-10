@@ -12,14 +12,24 @@ import { followupsWord, LOST_REASON_LABEL } from '@/lib/timeline';
 
 /* ------------------------------------------------------------------ times */
 
-/** Timeline, message and task times: «اليوم 11:20 ص»، «أمس 3:10 م»، «السبت 10 أكتوبر · 11:20 ص». */
+const RIYADH_OFFSET_MS = 3 * 3_600_000;
+
+function riyadhYear(d: Date): number {
+  return new Date(d.getTime() + RIYADH_OFFSET_MS).getUTCFullYear();
+}
+
+/**
+ * Timeline, message and task times: «اليوم 11:20 ص»، «أمس 3:10 م»، «السبت 10 أكتوبر · 11:20 ص».
+ * Another year adds the year: «الأحد 13 ديسمبر 2026 · 11:20 ص».
+ */
 export function eventTime(at: Date, now: Date): string {
   const days = calendarDaysBetween(at, now);
   const time = formatTime(at);
   if (days === 0) return `اليوم ${time}`;
   if (days === 1) return `أمس ${time}`;
   if (days === -1) return `غداً ${time}`;
-  return `${formatDayLong(at)} · ${time}`;
+  const year = riyadhYear(at);
+  return `${formatDayLong(at)}${year === riyadhYear(now) ? '' : ` ${year.toString()}`} · ${time}`;
 }
 
 /** Mobile header: «سُجّل اليوم»، «سُجّل أمس»، «سُجّل قبل 3 أيام». */
@@ -56,15 +66,21 @@ export function dueText(due: Date, now: Date): { text: string; overdue: boolean 
 
 /* -------------------------------------------------------------- next step */
 
+/** What each follow-up carries (brief.md «سلسلة المتابعة», QUESTIONS C2). */
 const STEP_HINT: Partial<Record<TaskKind, string>> = { followup_3: 'أرسل عينة الريل', followup_7: 'تذكير أخير بدون ضغط' };
+/** Kinds whose label says something the title may not: which follow-up, or that it is a meeting. */
+const LABELLED = new Set<TaskKind>(['followup_3', 'followup_7', 'meeting']);
 
-/** «متابعة أولى: أرسل عينة الريل»: the task title, with its kind when that adds meaning. */
+/**
+ * «متابعة أولى: أرسل عينة الريل»: the task title, prefixed by its kind when
+ * that adds meaning. A follow-up still named after its kind shows what it carries.
+ */
 export function taskHeadline(t: Pick<LeadTask, 'kind' | 'title'>): string {
   const label = TASK_KIND_LABEL[t.kind];
   const title = t.title.trim() || label;
   const hint = STEP_HINT[t.kind];
   if (hint && title.startsWith(label)) return `${label}: ${hint}`;
-  if (t.kind === 'meeting' && !title.includes('اجتماع')) return `${label}: ${title}`;
+  if (LABELLED.has(t.kind) && !title.includes(label)) return `${label}: ${title}`;
   return title;
 }
 
@@ -151,7 +167,9 @@ export interface ToastText {
 
 export function repliedToast(r: RepliedResult): ToastText {
   const title = r.stageBefore && MOVES_TO_REPLIED.has(r.stageBefore) ? 'المرحلة الآن: رد' : 'سُجّل رد العميل';
-  const message = [r.cancelledTaskIds.length > 0 ? 'أُلغيت المتابعات الباقية.' : null, r.taskId ? 'حدد اجتماعاً.' : null].filter(Boolean).join(' ');
+  const n = r.cancelledTaskIds.length;
+  const cancelled = n === 0 ? null : n === 1 ? 'أُلغيت المتابعة الباقية.' : 'أُلغيت المتابعات الباقية.';
+  const message = [cancelled, r.taskId ? 'حدد اجتماعاً.' : null].filter(Boolean).join(' ');
   return message ? { title, message } : { title };
 }
 
@@ -198,14 +216,15 @@ export function weaknessTexts(ids: string[], checklist: Checklist): string[] {
   });
 }
 
-/** Overview shows the three that cost the most; the rest as a count. */
+/** Overview shows the three that cost the most (Lead.dc.html); the rest open on request. */
 export const WEAKNESSES_SHOWN = 3;
 
-export function moreWeaknessesText(n: number): string {
-  if (n === 1) return 'ونقطة ضعف أخرى';
-  if (n === 2) return 'ونقطتا ضعف أخريان';
-  if (n <= 10) return `و${n.toString()} نقاط ضعف أخرى`;
-  return `و${n.toString()} نقطة ضعف أخرى`;
+/** The button that shows the rest: «اعرض 4 نقاط ضعف أخرى». */
+export function moreWeaknessesLabel(n: number): string {
+  if (n === 1) return 'اعرض نقطة ضعف أخرى';
+  if (n === 2) return 'اعرض نقطتي ضعف أخريين';
+  if (n <= 10) return `اعرض ${n.toString()} نقاط ضعف أخرى`;
+  return `اعرض ${n.toString()} نقطة ضعف أخرى`;
 }
 
 export const ROLE_LABEL: Record<Role, string> = { owner: 'مالك', manager: 'مدير', employee: 'موظف' };
@@ -222,10 +241,27 @@ export function consentView(lead: Pick<LeadDetail, 'waConsent' | 'doNotContact'>
   return { text: 'لم يوافق بعد', tone: 'muted' };
 }
 
-/** Instagram link only for http(s) URLs; shown without the scheme. */
-export function instagramView(url: string): { href: string | null; text: string } {
-  const safe = /^https?:\/\//i.test(url);
-  return { href: safe ? url : null, text: url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/+$/, '') };
+const IG_HANDLE = /^@?([A-Za-z0-9._]{1,30})$/;
+
+/**
+ * The Instagram field as typed: a full link, a link without https, or a handle
+ * («@raydan.rest»). Links open only over http(s); anything else is plain text.
+ */
+export function instagramView(raw: string): { href: string | null; text: string } {
+  const v = raw.trim();
+  const short = (u: string) => u.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '');
+  if (/^https?:\/\/\S+$/i.test(v)) return { href: v, text: short(v) };
+  if (/^(www\.)?instagram\.com\/\S+$/i.test(v)) return { href: `https://${v}`, text: short(v) };
+  const handle = IG_HANDLE.exec(v)?.[1];
+  if (handle && !/^\.|\.$|\.\./.test(handle)) return { href: `https://www.instagram.com/${handle}/`, text: `@${handle}` };
+  return { href: null, text: v };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A cut or mistyped link is «not found», not a load error to retry. */
+export function isLeadId(id: string): boolean {
+  return UUID.test(id);
 }
 
 /* ------------------------------------------------------------------- tabs */

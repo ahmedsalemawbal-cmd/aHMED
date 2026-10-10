@@ -73,7 +73,7 @@ test.describe('صفحة العميل · 390', () => {
     await expect(page.getByRole('tabpanel')).toContainText('48 / 100 · فرصة عالية');
     await expect(page.getByRole('list', { name: 'نقاط الضعف' }).getByRole('listitem')).toHaveText(['لا ينشر فيديو أو ريلز', 'لا يرد على مراجعات قوقل', 'بدون رابط طلب أو حجز']);
     const services = page.getByRole('region', { name: 'الخدمات المقترحة' });
-    await expect(services).toContainText('2,500 ر.س شهرياً');
+    await expect(services).toContainText('القيمة المتوقعة 2,500 ر.س شهرياً');
     await expect(services.getByRole('listitem')).toHaveText(['إدارة ملف خرائط قوقل والمراجعات', 'تصوير وإنتاج فيديو وريلز']);
     const contact = page.getByRole('region', { name: 'المسؤول' });
     await expect(contact).toContainText('خالد العتيبي · مالك');
@@ -354,12 +354,44 @@ test.describe('صفحة العميل · 390', () => {
     await expect(nextStep(page).getByRole('button', { name: 'غيّر المرحلة' })).toBeVisible();
   });
 
+  test('more than three weaknesses open on request; empty messages offer one', async ({ page }) => {
+    const db = leadDb(new Date(), { instagram_url: '@raydan.rest' });
+    db.assessments = [{ visit_id: 'v1', score: 48, weaknesses: ['s3', 'g3', 'web', 'ad', 'wa'], created_at: new Date().toISOString() }];
+    db.messages = [];
+    await open(page, db);
+    const items = page.getByRole('list', { name: 'نقاط الضعف' }).getByRole('listitem');
+    await expect(items).toHaveCount(3);
+    const more = page.getByRole('button', { name: 'اعرض نقطتي ضعف أخريين' });
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+    await expectTouchTargets(page);
+    await more.click();
+    await expect(items).toHaveText(['لا ينشر فيديو أو ريلز', 'لا يرد على مراجعات قوقل', 'بدون رابط طلب أو حجز', 'لا يعلن حالياً', 'لا يستخدم واتساب أعمال']);
+    await expect(more).toHaveCount(0);
+
+    // a handle typed instead of a link still opens the account
+    const contact = page.getByRole('region', { name: 'المسؤول' });
+    await expect(contact.getByRole('link', { name: '@raydan.rest' })).toHaveAttribute('href', 'https://www.instagram.com/raydan.rest/');
+
+    await tab(page, 'الرسائل').click();
+    await expect(page.getByRole('tabpanel')).toContainText('لا رسائل بعد');
+    await expect(page.getByRole('tabpanel').getByRole('link', { name: 'اكتب رسالة' })).toHaveAttribute('href', `/leads/${LEAD_ID}/message?task=${TASK_F3}`);
+    await expectTouchTargets(page);
+  });
+
   test('not found: says so with a way back', async ({ page }) => {
     await open(page, { ...leadDb(), leads: [] });
     await expect(page.getByRole('heading', { name: 'لم نجد هذا العميل' })).toBeVisible();
     await expectTouchTargets(page);
     await page.getByRole('link', { name: 'ارجع للعملاء' }).click();
     await expect(page).toHaveURL(/\/leads$/);
+  });
+
+  test('a cut link is «not found», not a load error to retry', async ({ page }) => {
+    // PostgREST refuses a malformed uuid with 400
+    await open(page, leadDb(), { leadStatus: () => 400 }, `/leads/${LEAD_ID.slice(0, 20)}`);
+    await expect(page.getByRole('heading', { name: 'لم نجد هذا العميل' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'ارجع للعملاء' })).toBeVisible();
+    await expect(page.getByRole('alert')).toHaveCount(0);
   });
 
   test('loading: skeletons in the shape of the page', async ({ page }) => {

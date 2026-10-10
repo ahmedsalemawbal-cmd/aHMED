@@ -190,7 +190,7 @@ export function useLeadActions(data: LeadData, desktop: boolean) {
     },
     completeTask,
     /** id of the task being marked done */
-    completing: complete.isPending ? (complete.variables.id) : null,
+    completing: complete.isPending ? complete.variables.id : null,
     sheets,
   };
 }

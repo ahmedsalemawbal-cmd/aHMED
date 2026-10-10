@@ -61,13 +61,35 @@ export function TimelinePanel({ events, now, desktop }: { events: TimelineEvent[
 const STATUS_TONE = { draft: 'bg-warning-soft text-warning', sent: 'bg-stage-contacted-soft text-stage-contacted', replied: 'bg-stage-replied-soft text-stage-replied' } as const;
 
 /** «الرسائل»: every message, newest first; a draft can be finished (copied when there is no phone). */
-export function MessagesPanel({ leadId, messages, now, desktop, doNotContact }: { leadId: string; messages: LeadMessage[]; now: Date; desktop: boolean; doNotContact: boolean }) {
+export function MessagesPanel({
+  leadId,
+  messages,
+  now,
+  desktop,
+  doNotContact,
+  composeTo,
+}: {
+  leadId: string;
+  messages: LeadMessage[];
+  now: Date;
+  desktop: boolean;
+  doNotContact: boolean;
+  /** the message screen for this lead's next message */
+  composeTo: string;
+}) {
   if (messages.length === 0) {
-    return (
+    return doNotContact ? (
+      <EmptyState icon="chat" title="لا رسائل بعد" message="طلب عدم التواصل. لا رسائل ولا متابعات." />
+    ) : (
       <EmptyState
         icon="chat"
         title="لا رسائل بعد"
-        message={doNotContact ? 'طلب عدم التواصل. لا رسائل ولا متابعات.' : 'تظهر هنا الرسائل التي تجهّزها وترسلها.'}
+        message="تظهر هنا الرسائل التي تجهّزها وترسلها."
+        action={
+          <Link to={composeTo} className={`md-btn md-btn-secondary no-underline ${desktop ? 'md-btn-sm' : ''}`}>
+            اكتب رسالة
+          </Link>
+        }
       />
     );
   }

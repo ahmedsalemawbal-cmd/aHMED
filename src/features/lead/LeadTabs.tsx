@@ -47,7 +47,8 @@ export function LeadTabs({
               type="button"
               role="tab"
               aria-selected={on}
-              aria-controls={`lead-panel-${t.id}`}
+              // only the shown panel is in the page; a reference to a missing id is invalid
+              aria-controls={on ? `lead-panel-${t.id}` : undefined}
               tabIndex={on ? 0 : -1}
               onClick={() => {
                 onChange(t.id);

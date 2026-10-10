@@ -12,12 +12,13 @@ import {
   hasOpenMeetingTask,
   headerSub,
   instagramView,
+  isLeadId,
   leadTabs,
   lostToast,
   meetingAt,
   meetingToast,
   messageStatus,
-  moreWeaknessesText,
+  moreWeaknessesLabel,
   nextAction,
   noTaskView,
   openFollowupCount,
@@ -51,6 +52,9 @@ describe('times (Lead.dc.html)', () => {
     expect(eventTime(at('2026-10-06T12:10:00Z'), NOW)).toBe('أمس 3:10 م');
     expect(eventTime(at('2026-10-03T08:20:00Z'), NOW)).toBe('السبت 3 أكتوبر · 11:20 ص');
     expect(eventTime(at('2026-10-08T07:00:00Z'), NOW)).toBe('غداً 10:00 ص');
+    // another year (in Riyadh) says which: 31 Dec 2025 22:30 UTC is already 1 Jan 2026 there
+    expect(eventTime(at('2025-12-13T08:20:00Z'), NOW)).toBe('السبت 13 ديسمبر 2025 · 11:20 ص');
+    expect(eventTime(at('2025-12-31T22:30:00Z'), NOW)).toBe('الخميس 1 يناير · 1:30 ص');
   });
 
   it('registered: mobile short form and desktop long form', () => {
@@ -88,6 +92,10 @@ describe('next step', () => {
     expect(taskHeadline({ kind: 'meeting', title: 'مع المالك في الفرع' })).toBe('اجتماع: مع المالك في الفرع');
     expect(taskHeadline({ kind: 'custom', title: 'اطبع المنيو' })).toBe('اطبع المنيو');
     expect(taskHeadline({ kind: 'custom', title: '  ' })).toBe('مهمة');
+    // a follow-up with its own title keeps it, after the kind that says which one
+    expect(taskHeadline({ kind: 'followup_3', title: 'أرسل فيديو الأطباق' })).toBe('متابعة أولى: أرسل فيديو الأطباق');
+    expect(taskHeadline({ kind: 'retry', title: 'أعد المحاولة' })).toBe('أعد المحاولة');
+    expect(taskHeadline({ kind: 'quote_followup', title: 'تابع رد العرض' })).toBe('تابع رد العرض');
   });
 
   it('action by kind', () => {
@@ -147,6 +155,8 @@ describe('stage actions', () => {
 
   it('success toasts', () => {
     expect(repliedToast({ stageBefore: 'contacted', cancelledTaskIds: ['a', 'b'], taskId: 'm' })).toEqual({ title: 'المرحلة الآن: رد', message: 'أُلغيت المتابعات الباقية. حدد اجتماعاً.' });
+    expect(repliedToast({ stageBefore: 'visited', cancelledTaskIds: ['a'], taskId: 'm' })).toEqual({ title: 'المرحلة الآن: رد', message: 'أُلغيت المتابعة الباقية. حدد اجتماعاً.' });
+    expect(repliedToast({ stageBefore: 'proposal', cancelledTaskIds: [], taskId: 'm' })).toEqual({ title: 'سُجّل رد العميل', message: 'حدد اجتماعاً.' });
     expect(repliedToast({ stageBefore: 'meeting', cancelledTaskIds: [], taskId: null })).toEqual({ title: 'سُجّل رد العميل' });
     expect(meetingToast(at('2026-10-08T13:30:00Z'))).toEqual({ title: 'حُدد الاجتماع', message: 'الخميس 8 أكتوبر · 4:30 م' });
     expect(wonToast(2500, 'monthly')).toEqual({ title: 'تم الإغلاق', message: '2,500 ر.س شهرياً' });
@@ -185,10 +195,10 @@ describe('overview', () => {
 
   it('weakness phrases from the checklist, label as fallback, unknown ids skipped', () => {
     expect(weaknessTexts(['s3', 'g3', 'zz'], checklist)).toEqual(['لا ينشر فيديو أو ريلز', 'يرد على المراجعات']);
-    expect(moreWeaknessesText(1)).toBe('ونقطة ضعف أخرى');
-    expect(moreWeaknessesText(2)).toBe('ونقطتا ضعف أخريان');
-    expect(moreWeaknessesText(4)).toBe('و4 نقاط ضعف أخرى');
-    expect(moreWeaknessesText(11)).toBe('و11 نقطة ضعف أخرى');
+    expect(moreWeaknessesLabel(1)).toBe('اعرض نقطة ضعف أخرى');
+    expect(moreWeaknessesLabel(2)).toBe('اعرض نقطتي ضعف أخريين');
+    expect(moreWeaknessesLabel(4)).toBe('اعرض 4 نقاط ضعف أخرى');
+    expect(moreWeaknessesLabel(11)).toBe('اعرض 11 نقطة ضعف أخرى');
   });
 
   it('contact data (DeskLead.dc.html «المسؤول»)', () => {
@@ -199,6 +209,20 @@ describe('overview', () => {
     expect(consentView({ waConsent: true, doNotContact: true })).toEqual({ text: 'طلب عدم التواصل', tone: 'danger' });
     expect(instagramView('https://www.instagram.com/raydan.rest/')).toEqual({ href: 'https://www.instagram.com/raydan.rest/', text: 'instagram.com/raydan.rest' });
     expect(instagramView('javascript:alert(1)').href).toBeNull();
+    // typed without https, or as a handle
+    expect(instagramView('instagram.com/raydan.rest')).toEqual({ href: 'https://instagram.com/raydan.rest', text: 'instagram.com/raydan.rest' });
+    expect(instagramView(' @raydan.rest ')).toEqual({ href: 'https://www.instagram.com/raydan.rest/', text: '@raydan.rest' });
+    expect(instagramView('raydan_rest')).toEqual({ href: 'https://www.instagram.com/raydan_rest/', text: '@raydan_rest' });
+    expect(instagramView('مطعم ريدان')).toEqual({ href: null, text: 'مطعم ريدان' });
+    expect(instagramView('raydan..rest').href).toBeNull();
+  });
+
+  it('a malformed id is not looked up', () => {
+    expect(isLeadId('feed0000-0000-4000-8000-00000000100a')).toBe(true);
+    expect(isLeadId('FEED0000-0000-4000-8000-00000000100A')).toBe(true);
+    expect(isLeadId('feed0000-0000-4000-8000-00000000100')).toBe(false);
+    expect(isLeadId('new')).toBe(false);
+    expect(isLeadId('')).toBe(false);
   });
 });
 
