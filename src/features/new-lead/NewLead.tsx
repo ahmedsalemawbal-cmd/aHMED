@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorRetry } from '@/components/app/ErrorRetry';
-import { OfflineBanner } from '@/components/app/OfflineBanner';
+import { FlowFrame } from '@/components/app/FlowFrame';
 import { Skeleton } from '@/components/app/Skeleton';
 import { useToast } from '@/components/app/toast/context';
 import { Button } from '@/components/ui/Button';
@@ -157,14 +157,13 @@ export default function NewLead() {
   const unanswered = total - answered;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[560px] flex-col bg-surface text-ink">
-      <OfflineBanner />
+    <FlowFrame section="leads">
       <WizardHeader step={draft.step} title={title} onLead={back}>
         {draft.step === 1 ? <StepLabels step={1} /> : null}
         {draft.step === 2 ? <ScoreBar score={x.score} label={`الدرجة · ${answered.toString()} من ${total.toString()} بنود`} /> : null}
       </WizardHeader>
 
-      <main key={draft.step} className="app-step-in flex grow flex-col px-4 pb-6 pt-5">
+      <main key={draft.step} className="app-step-in flex grow flex-col px-4 pb-6 pt-5 desk:px-8 desk:pb-8 desk:pt-6">
         {catalog.isError ? (
           <ErrorRetry
             title="تعذّر تحميل الأنشطة والخدمات"
@@ -229,6 +228,6 @@ export default function NewLead() {
           {create.isPending ? 'جارٍ الحفظ' : NEXT_LABEL[draft.step]}
         </Button>
       </WizardFooter>
-    </div>
+    </FlowFrame>
   );
 }

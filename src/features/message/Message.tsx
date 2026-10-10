@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ErrorRetry } from '@/components/app/ErrorRetry';
-import { OfflineBanner } from '@/components/app/OfflineBanner';
+import { FlowFrame } from '@/components/app/FlowFrame';
 import { Segmented } from '@/components/app/Segmented';
 import { Skeleton } from '@/components/app/Skeleton';
 import { StickyFooter } from '@/components/app/StickyFooter';
@@ -66,12 +66,11 @@ function useGoBack() {
 
 function Frame({ header, children, footer }: { header: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[560px] flex-col bg-surface text-ink">
-      <OfflineBanner />
+    <FlowFrame section="leads">
       {header}
-      <main className="flex grow flex-col gap-4 p-4">{children}</main>
+      <main className="flex grow flex-col gap-4 p-4 desk:px-6 desk:py-5">{children}</main>
       {footer}
-    </div>
+    </FlowFrame>
   );
 }
 

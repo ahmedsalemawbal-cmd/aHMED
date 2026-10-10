@@ -642,6 +642,7 @@ export type Database = {
       mark_won: { Args: { p: Json }; Returns: Json };
       mark_lost: { Args: { p: Json }; Returns: Json };
       set_stage: { Args: { p: Json }; Returns: Json };
+      add_visit: { Args: { p: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

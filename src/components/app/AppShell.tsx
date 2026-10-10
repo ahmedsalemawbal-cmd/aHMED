@@ -54,7 +54,8 @@ export function AppShell({ section, children }: { section: Section; children: Re
   return (
     <div className="min-h-dvh bg-surface text-ink">
       <OfflineBanner />
-      <div className="pb-[calc(var(--bottom-nav-h)+var(--space-6)+env(safe-area-inset-bottom,0px))]">{children}</div>
+      {/* tablets in portrait keep the phone layout, centred at a readable width */}
+      <div className="mx-auto w-full pb-[calc(var(--bottom-nav-h)+var(--space-6)+env(safe-area-inset-bottom,0px))] tablet:max-w-[760px]">{children}</div>
       <BottomNav active={MOBILE[section]} />
     </div>
   );

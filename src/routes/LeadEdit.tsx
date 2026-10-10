@@ -1,6 +1,2 @@
-import Placeholder from './Placeholder';
-
-/** Phase 1e: being built. */
-export default function LeadEdit() {
-  return <Placeholder section="leads" title="تعديل البيانات" phase="1e" />;
-}
+/** «تعديل البيانات»: src/features/lead-edit/LeadEdit.tsx */
+export { default } from '@/features/lead-edit/LeadEdit';

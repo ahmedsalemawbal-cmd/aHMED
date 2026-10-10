@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ActivityGrid } from '@/components/app/ActivityGrid';
 import { Segmented } from '@/components/app/Segmented';
 import { TextField } from '@/components/ui/TextField';
 import type { ActivityType, LeadIndexRow } from '@/data/catalog';
 import { duplicateMessage } from '@/lib/duplicates';
 import type { ContactTime } from '@/lib/followups';
-import { activityPath } from './activity-icons';
 import type { NewLeadDraft, Role } from './draft';
 import { step1Problems } from './helpers';
 
@@ -85,37 +85,15 @@ export function Step1Details({
         }}
       />
 
-      <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-        <legend className="mb-2 p-0 text-[15px] font-bold leading-[22px]">
-          نوع النشاط <span className="text-danger" aria-hidden="true">*</span>
-        </legend>
-        <div className="grid grid-cols-4 gap-2">
-          {activities.map((a) => {
-            const on = draft.activityTypeId === a.id;
-            return (
-              <button
-                key={a.id}
-                type="button"
-                aria-pressed={on}
-                onClick={() => {
-                  update({ activityTypeId: a.id });
-                }}
-                className={`flex min-h-[76px] flex-col items-center justify-center gap-1 rounded-md border-[1.5px] text-body-sm ${on ? 'border-action bg-action font-bold text-on-action' : 'border-line-strong bg-surface-raised font-normal text-ink'}`}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d={activityPath(a.icon)} />
-                </svg>
-                <span>{a.name}</span>
-              </button>
-            );
-          })}
-        </div>
-        {errors.activity ? (
-          <p className="m-0 text-label-sm text-danger" role="alert">
-            {errors.activity}
-          </p>
-        ) : null}
-      </fieldset>
+      <ActivityGrid
+        activities={activities}
+        value={draft.activityTypeId}
+        required
+        error={errors.activity}
+        onChange={(id) => {
+          update({ activityTypeId: id });
+        }}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <TextField

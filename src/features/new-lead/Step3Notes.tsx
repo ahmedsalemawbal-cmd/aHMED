@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import type { NewLeadDraft } from './draft';
 
 export const KEY_MAX = 90;
 const MIC = 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3';
@@ -16,18 +15,27 @@ function filesWord(n: number) {
   return `${n.toString()} ملفاً`;
 }
 
+/** The two text fields of the notes step (the new-lead draft and the visit draft both have them). */
+export interface NotesFields {
+  keyObservation: string;
+  notes: string;
+}
+
 export function Step3Notes({
   draft,
   update,
   media,
   setMedia,
   keyError,
+  uploadNote = 'يُرفع الملف إلى مجلد خاص بك عند حفظ العميل، ولا يراه أحد غيرك.',
 }: {
-  draft: NewLeadDraft;
-  update: (patch: Partial<NewLeadDraft>) => void;
+  draft: NotesFields;
+  update: (patch: Partial<NotesFields>) => void;
   media: File[];
   setMedia: (files: File[]) => void;
   keyError?: string;
+  /** body of the file sheet: when and where the file is uploaded */
+  uploadNote?: string;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<number | null>(null);
@@ -172,7 +180,7 @@ export function Step3Notes({
           </>
         }
       >
-        يُرفع الملف إلى مجلد خاص بك عند حفظ العميل، ولا يراه أحد غيرك.
+        {uploadNote}
       </BottomSheet>
     </div>
   );

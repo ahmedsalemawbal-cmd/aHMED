@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
+import { latinDigits } from '@/lib/leads-list';
 import type { CatalogService } from '@/lib/suggest';
 import { priceText } from './helpers';
 import type { Derived } from './payload';
@@ -23,6 +24,7 @@ export function Step4Services({
   onToggle,
   onAdd,
   onExpected,
+  intro,
 }: {
   x: Derived;
   catalog: CatalogService[];
@@ -30,6 +32,8 @@ export function Step4Services({
   onToggle: (serviceId: string, selected: boolean) => void;
   onAdd: (serviceId: string) => void;
   onExpected: (v: string) => void;
+  /** the line above the list; defaults to the new-lead wording (NewLead4.dc.html) */
+  intro?: string;
 }) {
   const [adding, setAdding] = useState(false);
   const selectedCount = x.shown.filter((s) => s.selected).length;
@@ -40,7 +44,7 @@ export function Step4Services({
         <svg className="mt-[1px] flex-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d={INFO} />
         </svg>
-        <span>{`اخترناها من نقاط ضعف التقييم ونشاط «${x.activity?.name ?? ''}». ألغِ أو أضف ما يناسب.`}</span>
+        <span>{intro ?? `اخترناها من نقاط ضعف التقييم ونشاط «${x.activity?.name ?? ''}». ألغِ أو أضف ما يناسب.`}</span>
       </p>
 
       <div role="group" aria-label="الخدمات" className="flex flex-col gap-[10px]">
@@ -94,7 +98,8 @@ export function Step4Services({
         value={expectedValue ?? (x.expected ? x.expected.toString() : '')}
         hint={`${servicesWord(selectedCount)} · تدخل أول خدمتين في الرسالة`}
         onChange={(e) => {
-          onExpected(e.target.value.replace(/[^\d٠-٩]/g, ''));
+          // the keyboard may type Arabic-Indic digits; numbers are always Latin (CLAUDE.md)
+          onExpected(latinDigits(e.target.value).replace(/\D/g, ''));
         }}
       />
 

@@ -1,3 +1,4 @@
+import { latinDigits } from '@/lib/leads-list';
 import { normalizePhone } from '@/lib/phone';
 import { computePriority, defaultDecisionMaker } from '@/lib/priority';
 import { computeScore, weaknesses as findWeaknesses, type Checklist } from '@/lib/scoring';
@@ -36,6 +37,14 @@ export function derive(d: NewLeadDraft, activities: ActivityType[], services: Ca
   return { activity, checklist, score, weaknesses: weak, suggestions, shown, expected };
 }
 
+/** «2,500» or «٢٥٠٠» as typed → 2500; empty → null (no expected value). */
+export function parseExpected(typed: string): number | null {
+  const digits = latinDigits(typed).replace(/[^\d.]/g, '');
+  if (!digits) return null;
+  const n = Number(digits);
+  return Number.isFinite(n) ? n : null;
+}
+
 export type LeadPayload = { [key: string]: Json };
 export type PayloadResult = { ok: true; payload: LeadPayload } | { ok: false; step: 1 | 3; error: string };
 
@@ -48,7 +57,7 @@ export function buildPayload(d: NewLeadDraft, x: Derived): PayloadResult {
   if (!phone.ok) return { ok: false, step: 1, error: phone.error };
   if (!d.keyObservation.trim()) return { ok: false, step: 3, error: 'اكتب الملاحظة الأبرز. سطر واحد محدد من الزيارة.' };
   const dm = defaultDecisionMaker(d.contactRole);
-  const expectedRaw = d.expectedValue === null ? x.expected : Number(d.expectedValue.replace(/[^\d.]/g, ''));
+  const expectedRaw = d.expectedValue === null ? x.expected : parseExpected(d.expectedValue);
   return {
     ok: true,
     payload: {
@@ -65,7 +74,7 @@ export function buildPayload(d: NewLeadDraft, x: Derived): PayloadResult {
       lng: d.location?.lng ?? null,
       score: x.score,
       priority: computePriority(x.score, dm),
-      expected_value: Number.isFinite(expectedRaw) ? expectedRaw : null,
+      expected_value: expectedRaw,
       key_observation: d.keyObservation.trim(),
       notes: d.notes.trim(),
       answers: d.answers,
