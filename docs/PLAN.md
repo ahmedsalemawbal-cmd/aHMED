@@ -189,15 +189,17 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | 1d.5 | رابط wa.me فقط | `src/lib/whatsapp.ts`, `Message.tsx` | U ☑ + E ☑ (`href` بالنص المعدّل) | ☑ |
 | 1d.6 | «هل أرسلت؟» بعد العودة؛ `sent_at` بعد التأكيد فقط | `src/features/message/SentConfirmSheet.tsx`, `useReturnPrompt.ts` | U ☑ (العودة، الاحتياط، التذكّر) + E ☑ («ليس بعد» لا يسجّل شيئاً، إعادة الفتح) + R ☑ | ☑ |
 | 1d.7 | المرحلة `contacted` ومتابعتان بعد 3 و7 أيام | RPC `confirm_message_sent` / `undo_message_sent`, `src/lib/followups.ts` | U ☑ + R ☑ (`tests-db/rpc_message_sent.sql`) + E ☑ (مواعيد المتابعتين، «تراجع») | ☑ |
-| 1e.1 | قائمة: بحث بالاسم أو الرقم، شرائح المراحل بالعدد، فلاتر، ترتيب | `src/routes/Leads.tsx` | V(Leads) + S + E | ☐ |
-| 1e.2 | جدول ديسكتوب بأعمدة قابلة للترتيب وتحديد متعدد (تغيير مرحلة، تصدير) | `DeskLeadsTable.tsx` | V(DeskLeads) | ☐ |
-| 1e.3 | سحب البطاقة على الجوال (واتساب، زيارة جديدة) | `SwipeActions.tsx` | E (لمس) | ☐ |
-| 1e.4 | صفحة العميل: رأس، الخطوة القادمة، تبويبات، عمودان على الديسكتوب | `src/routes/Lead.tsx` | V(Lead, DeskLead) + S | ☐ |
-| 1e.5 | الخط الزمني من الزيارات والرسائل و`stage_history` | `src/data/timeline.ts` | U (الدمج والترتيب) | ☐ |
-| 1e.6 | العميل رد: يلغي المتابعات، `hot`، ويقترح «حدد اجتماعاً» | RPC `mark_replied` | R + U | ☐ |
-| 1e.7 | اجتماع بتاريخ ← مهمة تذكير | RPC `set_meeting` | R | ☐ |
-| 1e.8 | الإغلاق بقيمة ونوع | `WonSheet` | R | ☐ |
-| 1e.9 | خسارة بسبب وتاريخ «أعد المحاولة» ← مهمة مؤجلة | `LostSheet`, RPC `mark_lost` | R + E | ☐ |
+| 1e.1 | قائمة: بحث بالاسم أو الرقم، شرائح المراحل بالعدد، فلاتر، ترتيب | `src/routes/Leads.tsx`, `src/features/leads/*`, `src/lib/leads-list.ts` | U ☑ + V(Leads) ☑ + S ☑ + E ☑ (`e2e/leads.spec.ts`) | ☑ |
+| 1e.2 | جدول ديسكتوب بأعمدة قابلة للترتيب وتحديد متعدد (تغيير مرحلة، تصدير) | `DeskLeads.tsx`, `DeskLeadsTable.tsx`, `useSelectionActions.tsx`, `src/lib/csv.ts` | V(DeskLeads) ☑ + U ☑ (CSV) + E ☑ (تغيير مرحلة، خسارة، تصدير) | ☑ |
+| 1e.3 | سحب البطاقة على الجوال (واتساب، زيارة جديدة) | `src/features/leads/SwipeActions.tsx`, `swipe.ts` | U ☑ + E ☑ (لمس) | ☑ |
+| 1e.4 | صفحة العميل: رأس، الخطوة القادمة، تبويبات، عمودان على الديسكتوب | `src/routes/Lead.tsx`, `src/features/lead/*` | V(Lead, DeskLead) ☑ + S ☑ + E ☑ (`e2e/lead.spec.ts`) | ☑ |
+| 1e.5 | الخط الزمني من الزيارات والرسائل و`stage_history` | `src/lib/timeline.ts` | U ☑ (الدمج والترتيب وعدم التكرار) | ☑ |
+| 1e.6 | العميل رد: يلغي المتابعات، `hot`، ويقترح «حدد اجتماعاً» | RPC `mark_replied` (هجرة 9), `RepliedSheet` | R ☑ + E ☑ | ☑ |
+| 1e.7 | اجتماع بتاريخ ← مهمة تذكير | RPC `set_meeting`, `MeetingSheet` | R ☑ + E ☑ | ☑ |
+| 1e.8 | الإغلاق بقيمة ونوع | RPC `mark_won`, `WonSheet` | R ☑ + E ☑ | ☑ |
+| 1e.9 | خسارة بسبب وتاريخ «أعد المحاولة» ← مهمة مؤجلة | `LostSheet`, RPC `mark_lost` | R ☑ + E ☑ | ☑ |
+| 1e.10 | تعديل بيانات العميل (منها صاحب القرار وطلب عدم التواصل) | `src/features/lead-edit/*`, `src/data/update-lead.ts`, trigger `leads_dnc_cancel_tasks` | U ☑ + E ☑ (`e2e/lead-edit.spec.ts`) + R ☑ | ☑ |
+| 1e.11 | زيارة جديدة لعميل مسجّل: تقييم وملاحظات وخدمات | `src/features/new-visit/*`, RPC `add_visit` (هجرة 10) | U ☑ + R ☑ (`tests-db/rpc_add_visit.sql`) + E ☑ (`e2e/new-visit.spec.ts`) | ☑ |
 | 1f.1 | كانبان بسحب وإفلات، عدد ومجموع لكل عمود، الخسارة مطوية | `src/routes/Pipeline.tsx` | V(DeskPipeline) | ☐ |
 | 1f.2 | الجوال: شريط مراحل وقائمة المرحلة وتغيير المرحلة من نافذة سفلية | `Pipeline.tsx` | V(Pipeline) + E | ☐ |
 | 1f.3 | تمييز الراكد أكثر من 7 أيام | `src/lib/stale.ts` | U | ☐ |
@@ -220,6 +222,7 @@ RLS مفعّل على كل جدول، و4 سياسات (select/insert/update/del
 | X.2 | الحالات الخمس لكل شاشة | `Skeleton`, `EmptyState`, `ErrorRetry`, `OfflineBanner`, `Toast` | `e2e/states.spec.ts` (اعتراض الشبكة) | ☐ |
 | X.3 | مساحة لمس 48px | كل الأزرار، `app.css` (توسيع منطقة اللمس دون تغيير الشكل) | `e2e/helpers.ts` `expectTouchTargets` على كل شاشة + اختبار ذاتي | ◐ |
 | X.4 | معيار المرحلة 1: عميل ورسالته في أقل من دقيقتين، وظهوره فوراً في الداشبورد | E + Supabase Realtime على `leads` | قياس زمن التدفق في E | ☐ |
+| X.5 | متناسق مع الجوال والآيباد والكمبيوتر: الشريط الجانبي على الديسكتوب في كل الصفحات حتى «عميل جديد» | `src/components/app/FlowFrame.tsx`, `AppShell.tsx` | E ☑ (`e2e/responsive.spec.ts`: 390، 820، 1024، 1440) | ☑ |
 
 ---
 
