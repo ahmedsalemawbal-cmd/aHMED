@@ -29,7 +29,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ToastProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.BASE_URL}>
             <Suspense fallback={<div className="min-h-dvh bg-surface" aria-busy="true" />}>
               <Routes>
                 <Route path="/login" element={<Login />} />

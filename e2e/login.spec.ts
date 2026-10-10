@@ -76,13 +76,20 @@ test.describe('الدخول', () => {
   test('PWA manifest is installable', async ({ request }) => {
     const res = await request.get('/manifest.webmanifest');
     expect(res.ok()).toBe(true);
-    const m = (await res.json()) as { name: string; display: string; dir: string; lang: string; icons: { sizes: string; purpose?: string }[] };
+    const m = (await res.json()) as { name: string; display: string; dir: string; lang: string; start_url: string; scope: string; icons: { src: string; sizes: string; purpose?: string }[] };
     expect(m.name).toBe('ميداني');
     expect(m.display).toBe('standalone');
     expect(m.dir).toBe('rtl');
     expect(m.lang).toBe('ar');
     expect(m.icons.map((i) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
     expect(m.icons.some((i) => i.purpose === 'maskable')).toBe(true);
+    // relative to the manifest, so the same build also installs under a sub-path (GitHub Pages)
+    expect(m.start_url).toBe('./');
+    expect(m.scope).toBe('./');
+    for (const icon of m.icons) {
+      expect(icon.src.startsWith('/')).toBe(false);
+      expect((await request.get(new URL(icon.src, res.url()).toString())).ok()).toBe(true);
+    }
     const sw = await request.get('/sw.js');
     expect(sw.ok()).toBe(true);
   });
