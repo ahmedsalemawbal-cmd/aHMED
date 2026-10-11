@@ -1,0 +1,1 @@
+function e(e,t,n=10){let r=Math.abs(e),i=Math.abs(t);return r<n&&i<n?null:r>i?`x`:`y`}function t(e,t,n,r){let i=n?t:-t;return Math.min(r,Math.max(0,e+i))}function n(e,t,n){return n<=0?0:e>(t>=n?2/3*n:n/3)?n:0}export{e as n,n as r,t};

@@ -1,0 +1,1 @@
+var e=new Intl.NumberFormat(`en-US`,{maximumFractionDigits:0});function t(t){return e.format(t)}function n(e){return`${t(e)} ر.س`}function r(e){return(e??``).trim().split(/\s+/)[0]??``}function i(e){return Number(new Intl.DateTimeFormat(`en-US`,{timeZone:`Asia/Riyadh`,hour:`numeric`,hourCycle:`h23`}).format(e))<12?`صباح الخير`:`مساء الخير`}export{i,t as n,n as r,r as t};

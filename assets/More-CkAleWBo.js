@@ -1,0 +1,1 @@
+import{o as e}from"./react-BB3M23rb.js";import{t}from"./Placeholder-WmKC1w3c.js";var n=e();function r(){return(0,n.jsx)(t,{section:`more`,title:`المزيد`,phase:`1h`})}export{r as default};
