@@ -26,6 +26,7 @@ export function LostSheet({
   open,
   title,
   busy,
+  initialReason,
   onClose,
   onSubmit,
 }: {
@@ -33,11 +34,13 @@ export function LostSheet({
   /** «نقل مطعم ريدان إلى خسارة» or «نقل 3 عملاء إلى خسارة» */
   title: string;
   busy?: boolean;
+  /** preselected reason, e.g. «لم يرد» after the last follow-up (flow 2.4) */
+  initialReason?: LostReason;
   onClose: () => void;
   onSubmit: (input: LostInput) => void;
 }) {
   const [now] = useState(() => new Date());
-  const [reason, setReason] = useState<LostReason | null>(null);
+  const [reason, setReason] = useState<LostReason | null>(initialReason ?? null);
   const [note, setNote] = useState('');
   const [retry, setRetry] = useState<RetryOption>('none');
   const [date, setDate] = useState(() => toDateInput(new Date(now.getTime() + 30 * 86_400_000)));

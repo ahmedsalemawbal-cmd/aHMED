@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { NavIcon } from './NavIcon';
 import type { NavIconName } from './nav-icons';
 
@@ -18,7 +18,8 @@ export function BottomNav({ active }: { active: MobileSection | null }) {
   const item = (it: (typeof LEFT)[number]) => {
     const on = it.id === active;
     return (
-      <NavLink
+      // the active item comes from the screen (/tasks is under «اليوم»), not from the URL
+      <Link
         key={it.id}
         to={it.to}
         aria-current={on ? 'page' : undefined}
@@ -26,7 +27,7 @@ export function BottomNav({ active }: { active: MobileSection | null }) {
       >
         <NavIcon name={it.icon} />
         <span className="leading-4">{it.label}</span>
-      </NavLink>
+      </Link>
     );
   };
   return (
