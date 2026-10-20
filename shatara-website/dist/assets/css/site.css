@@ -5,7 +5,7 @@
 
 /* ---------- Base ---------- */
 html { scroll-behavior: smooth; scroll-padding-top: 110px; }
-body { margin: 0; background: #F6F9FA; color: #0E2A36; font-family: 'Cairo', sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: #F6F9FA; color: #0E2A36; font-family: 'Cairo', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
 :where(a) { color: #0B4F6C; }
 :where(a):hover { color: #8C7530; }
 input, select, textarea, button { font-family: inherit; }
