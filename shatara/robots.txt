@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ahmedsalemawbal-cmd.github.io/aHMED/shatara/sitemap.xml
