@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>طلب استقدام جديد | شركة شطارة للاستقدام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+body{margin:0;background:#F6F9FA;color:#0E2A36;font-family:'Cairo',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0B4F6C}a:hover{color:#8C7530}
+input,select,textarea,button{font-family:inherit}
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'Cairo',sans-serif;background:#F6F9FA;color:#0E2A36;min-height:100vh;">
+  <dc-import name="Header" active="request" hint-size="100%,120px"></dc-import>
+
+  <section data-screen-label="Request" style="padding:clamp(36px,5vw,64px) clamp(20px,3vw,40px) clamp(64px,8vw,104px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(24px,3vw,40px);">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6B808A;"><a href="Home.dc.html" style="color:#6B808A;text-decoration:none;">الرئيسية</a><i class="ph ph-caret-left" style="font-size:12px;"></i><span style="color:#0B4F6C;">طلب استقدام جديد</span></div>
+        <h1 style="margin:0;font-size:clamp(30px,3.6vw,46px);font-weight:700;color:#0B4F6C;">طلب استقدام جديد</h1>
+        <p style="margin:0;font-size:clamp(15px,1.25vw,18px);line-height:1.9;color:#516874;max-width:640px;">املأ البيانات التالية، وسيتواصل معك أحد مستشارينا لاستكمال طلبك</p>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">
+        <div style="flex:2 1 560px;min-width:0;background:#fff;border:1px solid #E3EBEE;border-radius:24px;padding:clamp(22px,3vw,40px);box-shadow:0 8px 24px rgba(11,79,108,0.05);">
+          <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+            <form onSubmit="{{ submit }}" style="display:flex;flex-direction:column;gap:28px;">
+              <sc-if value="{{ hasCv }}">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:#F7F1DE;color:#5B4B16;font-size:14px;"><i class="ph ph-identification-card" style="font-size:22px;"></i>السيرة الذاتية المختارة: <strong dir="ltr" style="font-family:ui-monospace,Menlo,monospace;">{{ cv }}</strong></div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="font-size:17px;font-weight:700;color:#0E2A36;display:flex;align-items:center;gap:10px;"><span style="width:28px;height:28px;border-radius:50%;background:#0B4F6C;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;">1</span>بياناتك</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;">
+                  <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">الاسم الكامل<input required type="text" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+                  <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">رقم الجوال<input required type="tel" placeholder="05xxxxxxxx" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;text-align:right;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+                  <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">المدينة<input required type="text" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+                </div>
+              </div>
+              <div style="border-top:1px solid #EEF3F5;padding-top:24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="font-size:17px;font-weight:700;color:#0E2A36;display:flex;align-items:center;gap:10px;"><span style="width:28px;height:28px;border-radius:50%;background:#0B4F6C;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;">2</span>تفاصيل الطلب</div>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">نوع الطلب
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <sc-for list="{{ types }}" as="t" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ t.pick }}" style="height:56px;border-radius:12px;border:1.5px solid {{ t.border }};background:{{ t.bg }};color:#0E2A36;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;"><i class="{{ t.icon }}" style="font-size:22px;color:#0B4F6C;"></i>{{ t.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;">
+                  <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">المهنة المطلوبة
+                    <select required style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background-color:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22><path d=%22M2 4l4 4 4-4%22 fill=%22none%22 stroke=%22%230B4F6C%22 stroke-width=%221.5%22/></svg>');background-repeat:no-repeat;background-position:left 14px center;" style-focus="border-color:#0B4F6C;">
+                      <option value="">اختر المهنة</option>
+                      <sc-for list="{{ jobs }}" as="j"><option>{{ j }}</option></sc-for>
+                    </select>
+                  </label>
+                  <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">الدولة المفضلة
+                    <select style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background-color:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22><path d=%22M2 4l4 4 4-4%22 fill=%22none%22 stroke=%22%230B4F6C%22 stroke-width=%221.5%22/></svg>');background-repeat:no-repeat;background-position:left 14px center;" style-focus="border-color:#0B4F6C;">
+                      <option value="">بدون تفضيل</option>
+                      <sc-for list="{{ countries }}" as="c"><option>{{ c }}</option></sc-for>
+                    </select>
+                  </label>
+                  <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">العدد
+                    <div style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;display:grid;grid-template-columns:50px 1fr 50px;align-items:center;">
+                      <button type="button" onClick="{{ inc }}" aria-label="زيادة" style="height:100%;border:0;background:transparent;color:#0B4F6C;font-size:18px;cursor:pointer;"><i class="ph ph-plus"></i></button>
+                      <span style="text-align:center;font-size:16px;font-weight:600;color:#0E2A36;">{{ count }}</span>
+                      <button type="button" onClick="{{ dec }}" aria-label="إنقاص" style="height:100%;border:0;background:transparent;color:#0B4F6C;font-size:18px;cursor:pointer;"><i class="ph ph-minus"></i></button>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">هل لديك تأشيرة؟
+                    <div style="height:50px;border-radius:12px;background:#F1F6F8;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;box-sizing:border-box;">
+                      <sc-for list="{{ visa }}" as="v" hint-placeholder-count="2">
+                        <button type="button" onClick="{{ v.pick }}" style="border:0;border-radius:9px;background:{{ v.bg }};color:{{ v.color }};font-size:15px;font-weight:600;cursor:pointer;box-shadow:{{ v.shadow }};">{{ v.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+                <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">ملاحظات وتفضيلات<textarea rows="4" placeholder="مثال: العمر المفضل، اللغة، الخبرة في رعاية الأطفال…" style="border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:12px 14px;font-size:15px;color:#0E2A36;outline:none;resize:vertical;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></textarea></label>
+              </div>
+              <button type="submit" style="height:56px;border:0;border-radius:14px;background:#BCA24E;color:#1A1608;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 20px rgba(188,162,78,0.3);" style-hover="background:#AD9442;"><i class="ph ph-paper-plane-tilt" style="font-size:20px;"></i>إرسال الطلب</button>
+            </form>
+          </sc-if>
+          <sc-if value="{{ sent }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding:clamp(40px,6vw,80px) 12px;">
+              <span style="width:84px;height:84px;border-radius:50%;background:#EEF7F1;color:#1C7A43;display:flex;align-items:center;justify-content:center;font-size:42px;"><i class="ph ph-check-circle"></i></span>
+              <p style="margin:0;font-size:clamp(18px,1.6vw,21px);line-height:1.9;color:#0E2A36;font-weight:600;max-width:460px;">شكراً لك! استلمنا طلبك، وسيتواصل معك أحد مستشارينا قريباً.</p>
+              <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">
+                <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;border:1px solid #CBD9DF;color:#0B4F6C;text-decoration:none;font-size:15px;font-weight:600;">الرئيسية</a>
+                <a href="CVs.dc.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;background:#0B4F6C;color:#fff;text-decoration:none;font-size:15px;font-weight:600;">تصفّح السير الذاتية</a>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <aside style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;">
+          <div style="background:#0B4F6C;border-radius:24px;padding:clamp(22px,2.6vw,30px);color:#fff;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden;">
+            <img src="assets/logo-white.png" alt="" style="position:absolute;left:-30px;bottom:-40px;height:200px;opacity:0.06;">
+            <h2 style="margin:0;font-size:19px;font-weight:700;">خطوات الاستقدام مع شطارة</h2>
+            <div style="position:relative;display:flex;flex-direction:column;">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;">
+                    <span style="width:32px;height:32px;flex-shrink:0;border-radius:50%;background:#BCA24E;color:#1A1608;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">{{ s.n }}</span>
+                    <sc-if value="{{ s.notLast }}"><span style="flex:1;width:1.5px;min-height:14px;background:rgba(255,255,255,0.25);margin:4px 0;"></span></sc-if>
+                  </div>
+                  <span style="padding:5px 0 18px;font-size:15px;color:#E3EEF2;">{{ s.t }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:12px;">
+            <span style="font-size:15px;font-weight:600;color:#0E2A36;">تفضّل التواصل مباشرة؟</span>
+            <a href="https://wa.me/966533420302" style="height:50px;border-radius:12px;background:#1FA855;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:15px;font-weight:600;"><i class="ph ph-whatsapp-logo" style="font-size:22px;"></i>تواصل عبر واتساب</a>
+            <a href="tel:0533420302" style="height:50px;border-radius:12px;border:1px solid #CBD9DF;color:#0B4F6C;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:15px;font-weight:600;"><i class="ph ph-phone" style="font-size:20px;"></i>خدمة العملاء: <span dir="ltr">0533420302</span></a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:0 6px;font-size:13px;color:#6B808A;line-height:1.7;"><i class="ph ph-lock-simple" style="font-size:18px;color:#0B4F6C;"></i>نحافظ على سرّية بياناتك ولا نشاركها إلا لإتمام طلبك.</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <dc-import name="Footer" hint-size="100%,420px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { type: 'ind', count: 1, visa: 'no', sent: false, cv: '' };
+  componentDidMount() { const cv = new URLSearchParams(location.search).get('cv'); if (cv) this.setState({ cv }); }
+  renderVals() {
+    const st = this.state;
+    return {
+      notSent: !st.sent, sent: st.sent, hasCv: !!st.cv, cv: st.cv,
+      types: [{ k: 'ind', label: 'أفراد', icon: 'ph ph-house-line' }, { k: 'biz', label: 'قطاع أعمال', icon: 'ph ph-buildings' }]
+        .map(t => ({ ...t, border: st.type === t.k ? '#0B4F6C' : '#D5E1E6', bg: st.type === t.k ? '#EEF5F8' : '#fff', pick: () => this.setState({ type: t.k }) })),
+      jobs: ['عاملة منزلية', 'عامل منزلي', 'سائق خاص', 'طبّاخ / طبّاخة', 'مربية أطفال', 'ممرضة منزلية', 'مرافق / مرافقة لكبار السن', 'حارس', 'مزارع / بستاني', 'عمالة فنية ومهنية'],
+      countries: ['الفلبين', 'كينيا', 'أوغندا', 'إثيوبيا', 'بوروندي', 'غانا', 'بنغلاديش', 'الهند', 'سريلانكا'],
+      count: st.count, inc: () => this.setState(s => ({ count: s.count + 1 })), dec: () => this.setState(s => ({ count: Math.max(1, s.count - 1) })),
+      visa: [{ k: 'yes', label: 'نعم' }, { k: 'no', label: 'لا' }].map(v => ({ ...v, bg: st.visa === v.k ? '#fff' : 'transparent', color: st.visa === v.k ? '#0B4F6C' : '#516874', shadow: st.visa === v.k ? '0 1px 3px rgba(11,79,108,0.15)' : 'none', pick: () => this.setState({ visa: v.k }) })),
+      steps: ['اختر السيرة الذاتية', 'أكّد طلبك', 'التعاقد عبر مساند', 'التأشيرة والسفر', 'الوصول والاستلام'].map((t, i, a) => ({ n: i + 1, t, notLast: i < a.length - 1 })),
+      submit: e => { e.preventDefault(); this.setState({ sent: true }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

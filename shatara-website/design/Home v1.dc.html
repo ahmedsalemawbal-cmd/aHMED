@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>شركة شطارة للاستقدام | استقدام عمالة منزلية ومهنية في [المدينة]</title>
+<meta name="description" content="شركة شطارة للاستقدام، شركة سعودية مرخّصة لاستقدام العاملات المنزليات والسائقين والعمالة المهنية للأفراد والمنشآت، بتعاقد إلكتروني عبر مساند ومتابعة حتى الوصول.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{margin:0;background:#F6F9FA;color:#0E2A36;font-family:'IBM Plex Sans Arabic',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0B4F6C}a:hover{color:#8C7530}
+input,select,textarea,button{font-family:inherit}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;background:#F6F9FA;color:#0E2A36;min-height:100vh;">
+  <dc-import name="Header" active="home" hint-size="100%,120px"></dc-import>
+
+  <!-- Hero slider -->
+  <section data-screen-label="Hero" style="padding:clamp(16px,2.5vw,32px) clamp(12px,2.5vw,32px) 0;">
+    <div style="max-width:1376px;margin:0 auto;background:#0B4F6C;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;position:relative;">
+      <img src="assets/logo-white.png" alt="" style="position:absolute;left:-60px;bottom:-120px;height:520px;opacity:0.05;pointer-events:none;">
+      <div style="position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));align-items:stretch;min-height:clamp(480px,44vw,600px);">
+        <div style="padding:clamp(32px,5vw,72px) clamp(24px,5vw,72px);display:flex;flex-direction:column;justify-content:center;gap:clamp(18px,2vw,26px);">
+          <span style="display:inline-flex;align-items:center;gap:10px;color:#D9C68A;font-size:14px;font-weight:500;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>{{ slideLabel }}</span>
+          <h1 style="margin:0;color:#fff;font-size:clamp(32px,4.2vw,58px);line-height:1.3;font-weight:700;text-wrap:balance;">{{ cur.title }}</h1>
+          <p style="margin:0;color:#CFE0E7;font-size:clamp(16px,1.35vw,19px);line-height:1.9;max-width:540px;text-wrap:pretty;">{{ cur.text }}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;">
+            <sc-for list="{{ cur.primary }}" as="b" hint-placeholder-count="1">
+              <a href="{{ b.href }}" style="display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:14px;background:#BCA24E;color:#1A1608;text-decoration:none;font-size:16px;font-weight:700;" style-hover="background:#C9B062;color:#1A1608;"><i class="{{ b.icon }}" style="font-size:20px;"></i>{{ b.label }}</a>
+            </sc-for>
+            <sc-for list="{{ cur.secondary }}" as="b" hint-placeholder-count="1">
+              <a href="{{ b.href }}" style="display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:14px;border:1px solid rgba(255,255,255,0.35);color:#fff;text-decoration:none;font-size:16px;font-weight:600;" style-hover="background:rgba(255,255,255,0.08);color:#fff;"><i class="{{ b.icon }}" style="font-size:20px;"></i>{{ b.label }}</a>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;margin-top:clamp(8px,2vw,28px);">
+            <button onClick="{{ prev }}" aria-label="السابق" style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;" style-hover="background:rgba(255,255,255,0.1);"><i class="ph ph-arrow-right"></i></button>
+            <div style="display:flex;gap:8px;">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
+                <button onClick="{{ d.go }}" aria-label="{{ d.aria }}" style="height:6px;width:{{ d.w }};border-radius:6px;border:0;padding:0;cursor:pointer;background:{{ d.bg }};transition:all .3s;"></button>
+              </sc-for>
+            </div>
+            <button onClick="{{ next }}" aria-label="التالي" style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;" style-hover="background:rgba(255,255,255,0.1);"><i class="ph ph-arrow-left"></i></button>
+          </div>
+        </div>
+        <div style="padding:clamp(0px,1.4vw,20px);padding-top:0;display:flex;">
+          <div style="flex:1;min-height:300px;margin:clamp(0px,1.4vw,20px) 0;border-radius:clamp(16px,2vw,24px);background:repeating-linear-gradient(135deg,rgba(255,255,255,0.07) 0 10px,rgba(255,255,255,0.03) 10px 20px);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:flex-end;justify-content:flex-start;padding:20px;">
+            <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#E3EEF2;background:rgba(8,59,81,0.75);padding:7px 12px;border-radius:8px;">{{ cur.img }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust bar -->
+  <section style="padding:clamp(20px,2.5vw,32px) clamp(12px,2.5vw,32px) 0;">
+    <div style="max-width:1240px;margin:0 auto;background:#fff;border:1px solid #E3EBEE;border-radius:20px;box-shadow:0 8px 24px rgba(11,79,108,0.05);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));">
+      <sc-for list="{{ trust }}" as="t" hint-placeholder-count="4">
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:clamp(18px,2vw,26px);">
+          <span style="flex-shrink:0;width:46px;height:46px;border-radius:12px;background:#EEF5F8;color:#0B4F6C;display:flex;align-items:center;justify-content:center;font-size:24px;"><i class="{{ t.icon }}"></i></span>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <strong style="font-size:16px;font-weight:600;color:#0E2A36;">{{ t.title }}</strong>
+            <span style="font-size:13.5px;line-height:1.7;color:#516874;text-wrap:pretty;">{{ t.text }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" data-screen-label="About" style="padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(32px,5vw,80px);align-items:center;">
+      <div style="position:relative;aspect-ratio:5/4;border-radius:24px;background:repeating-linear-gradient(135deg,#E6EDF0 0 10px,#EFF4F6 10px 20px);display:flex;align-items:flex-end;padding:20px;">
+        <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#5E7480;background:rgba(255,255,255,0.9);padding:7px 12px;border-radius:8px;">صورة: فريق شطارة يستقبل أسرة في المكتب</span>
+        <div style="position:absolute;top:clamp(-24px,-2vw,-16px);left:clamp(-24px,-2vw,-12px);width:clamp(96px,10vw,132px);aspect-ratio:1;border-radius:22px;background:#fff;box-shadow:0 16px 40px rgba(11,79,108,0.12);display:flex;align-items:center;justify-content:center;">
+          <img src="assets/logo-gold.png" alt="" style="height:70%;width:auto;">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>من نحن</span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);line-height:1.35;font-weight:700;color:#0B4F6C;text-wrap:balance;">شريكك الموثوق في الاستقدام</h2>
+        <p style="margin:0;font-size:clamp(16px,1.25vw,18px);line-height:2;color:#3D5560;text-wrap:pretty;">شركة شطارة للاستقدام شركة سعودية مرخّصة، تعمل في استقدام العمالة المنزلية والمهنية للأفراد والمنشآت وفق الأنظمة واللوائح الصادرة عن وزارة الموارد البشرية والتنمية الاجتماعية. نؤمن أن الاستقدام ليس مجرد معاملة، بل قرار يمسّ راحة أسرتك واستقرار عملك؛ لذلك نختار بعناية، ونوضّح لك كل خطوة، ونبقى معك حتى بعد وصول العامل.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;">
+          <a href="About.dc.html" style="display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;background:#0B4F6C;color:#fff;text-decoration:none;font-size:15px;font-weight:600;" style-hover="background:#083B51;color:#fff;">اعرف أكثر عنا<i class="ph ph-arrow-left"></i></a>
+          <a href="#" style="display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;border:1px solid #CBD9DF;color:#0B4F6C;text-decoration:none;font-size:15px;font-weight:600;background:#fff;" style-hover="border-color:#0B4F6C;"><i class="ph ph-file-pdf" style="font-size:20px;"></i>تحميل الملف التعريفي</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services" data-screen-label="Services" style="padding:0 clamp(20px,3vw,40px) clamp(64px,8vw,112px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>خدماتنا<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">خدماتنا</h2>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">حلول استقدام متكاملة تناسب احتياج الأسرة والمنشأة</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px;">
+        <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:20px;padding:28px 26px;display:flex;flex-direction:column;gap:16px;transition:all .25s;" style-hover="box-shadow:0 18px 40px rgba(11,79,108,0.1);transform:translateY(-3px);border-color:#D2E0E6;">
+            <span style="width:56px;height:56px;border-radius:16px;background:#0B4F6C;color:#BCA24E;display:flex;align-items:center;justify-content:center;font-size:28px;"><i class="{{ s.icon }}"></i></span>
+            <h3 style="margin:0;font-size:20px;font-weight:700;color:#0E2A36;">{{ s.title }}</h3>
+            <p style="margin:0;font-size:15px;line-height:1.9;color:#516874;flex:1;text-wrap:pretty;">{{ s.text }}</p>
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:#0B4F6C;font-weight:600;font-size:15px;text-decoration:none;" style-hover="color:#8C7530;">اقرأ المزيد<i class="ph ph-arrow-left"></i></a>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we offer -->
+  <section data-screen-label="Offer" style="background:#0B4F6C;padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);position:relative;overflow:hidden;">
+    <img src="assets/logo-white.png" alt="" style="position:absolute;right:-80px;top:-60px;height:460px;opacity:0.04;pointer-events:none;">
+    <div style="position:relative;max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <span style="display:inline-flex;align-items:center;gap:10px;color:#D9C68A;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>التزاماتنا</span>
+          <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#fff;">ماذا نقدّم لك؟</h2>
+        </div>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#CFE0E7;">ستة التزامات نعمل بها مع كل عميل</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.12);border-radius:22px;overflow:hidden;">
+        <sc-for list="{{ offers }}" as="o" hint-placeholder-count="6">
+          <div style="background:#0B4F6C;padding:clamp(24px,2.6vw,36px);display:flex;flex-direction:column;gap:12px;" style-hover="background:#0D5877;">
+            <span style="font-size:15px;font-weight:600;color:#BCA24E;letter-spacing:1px;font-variant-numeric:tabular-nums;">{{ o.n }}</span>
+            <h3 style="margin:0;font-size:20px;font-weight:600;color:#fff;">{{ o.title }}</h3>
+            <p style="margin:0;font-size:15px;line-height:1.9;color:#CFE0E7;text-wrap:pretty;">{{ o.text }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs -->
+  <section id="jobs" data-screen-label="Jobs" style="padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px) 0;">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>المهن</span>
+          <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">العمالة المتوفرة</h2>
+          <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">اختر المهنة التي تحتاجها وتصفّح السير الذاتية المتاحة</p>
+        </div>
+        <a href="CVs.dc.html" style="display:inline-flex;align-items:center;gap:8px;color:#0B4F6C;font-weight:600;font-size:15px;text-decoration:none;" style-hover="color:#8C7530;">كل السير الذاتية<i class="ph ph-arrow-left"></i></a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(46%,220px),1fr));gap:clamp(12px,1.6vw,20px);">
+        <sc-for list="{{ jobs }}" as="j" hint-placeholder-count="9">
+          <a href="CVs.dc.html" style="background:#fff;border:1px solid #E3EBEE;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:all .25s;" style-hover="box-shadow:0 18px 40px rgba(11,79,108,0.1);transform:translateY(-3px);">
+            <div style="aspect-ratio:4/3;background:repeating-linear-gradient(135deg,#E6EDF0 0 10px,#EFF4F6 10px 20px);display:flex;align-items:flex-end;padding:10px;">
+              <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5E7480;background:rgba(255,255,255,0.9);padding:5px 8px;border-radius:6px;">صورة: {{ j }}</span>
+            </div>
+            <div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;">
+              <h3 style="margin:0;font-size:17px;font-weight:600;color:#0E2A36;">{{ j }}</h3>
+              <span style="display:inline-flex;align-items:center;gap:6px;color:#0B4F6C;font-size:14px;font-weight:600;">عرض السير الذاتية<i class="ph ph-arrow-left"></i></span>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Countries -->
+  <section id="countries" data-screen-label="Countries" style="padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>الدول<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">الدول المتاحة</h2>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">نتعامل مع مكاتب استقدام معتمدة في عدة دول حول العالم</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(46%,200px),1fr));gap:clamp(12px,1.6vw,16px);">
+        <sc-for list="{{ countries }}" as="c" hint-placeholder-count="9">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:18px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;" style-hover="border-color:#BCA24E;box-shadow:0 12px 30px rgba(11,79,108,0.08);">
+            <img src="{{ c.flag }}" alt="{{ c.name }}" style="width:64px;height:44px;object-fit:cover;border-radius:8px;box-shadow:0 0 0 1px #E3EBEE;">
+            <strong style="font-size:17px;font-weight:600;color:#0E2A36;">{{ c.name }}</strong>
+            <a href="CVs.dc.html" style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;background:#F1F6F8;color:#0B4F6C;text-decoration:none;font-size:14px;font-weight:600;" style-hover="background:#0B4F6C;color:#fff;">السير الذاتية</a>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Steps -->
+  <section data-screen-label="Steps" style="background:#fff;border-top:1px solid #E3EBEE;border-bottom:1px solid #E3EBEE;padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(32px,4vw,56px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>الرحلة<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">خطوات الاستقدام مع شطارة</h2>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">رحلة واضحة من الاختيار حتى الوصول</p>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:24px;">
+          <div style="position:absolute;top:27px;right:10%;left:10%;height:2px;background:repeating-linear-gradient(to left,#BCA24E 0 8px,transparent 8px 14px);"></div>
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+            <div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;">
+              <span style="width:56px;height:56px;border-radius:50%;background:#0B4F6C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;box-shadow:0 0 0 8px #fff,0 0 0 9px #E3EBEE;">{{ s.n }}</span>
+              <i class="{{ s.icon }}" style="font-size:26px;color:#BCA24E;margin-top:6px;"></i>
+              <h3 style="margin:0;font-size:18px;font-weight:600;color:#0E2A36;">{{ s.title }}</h3>
+              <p style="margin:0;font-size:14.5px;line-height:1.85;color:#516874;text-wrap:pretty;">{{ s.text }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ narrow }}">
+        <div style="display:flex;flex-direction:column;">
+          <sc-for list="{{ steps }}" as="s">
+            <div style="display:grid;grid-template-columns:52px 1fr;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <span style="width:48px;height:48px;flex-shrink:0;border-radius:50%;background:#0B4F6C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;">{{ s.n }}</span>
+                <sc-if value="{{ s.notLast }}"><span style="flex:1;width:2px;min-height:24px;background:repeating-linear-gradient(to bottom,#BCA24E 0 6px,transparent 6px 11px);margin:6px 0;"></span></sc-if>
+              </div>
+              <div style="padding:8px 0 28px;display:flex;flex-direction:column;gap:6px;">
+                <h3 style="margin:0;font-size:17px;font-weight:600;color:#0E2A36;display:flex;align-items:center;gap:8px;"><i class="{{ s.icon }}" style="font-size:20px;color:#BCA24E;"></i>{{ s.title }}</h3>
+                <p style="margin:0;font-size:15px;line-height:1.85;color:#516874;">{{ s.text }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <!-- Why -->
+  <section data-screen-label="Why" style="padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(32px,5vw,72px);align-items:start;">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>لماذا شطارة؟</span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);line-height:1.35;font-weight:700;color:#0B4F6C;">لماذا تختار شطارة؟</h2>
+        <div style="aspect-ratio:4/3;border-radius:22px;background:repeating-linear-gradient(135deg,#E6EDF0 0 10px,#EFF4F6 10px 20px);display:flex;align-items:flex-end;padding:16px;">
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#5E7480;background:rgba(255,255,255,0.9);padding:7px 12px;border-radius:8px;">صورة: أم سعودية مع عاملة منزلية في بيئة محترمة</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px;">
+        <sc-for list="{{ why }}" as="w" hint-placeholder-count="8">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:16px;padding:20px;display:flex;gap:14px;align-items:flex-start;">
+            <span style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:#F7F1DE;color:#8C7530;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="ph ph-check"></i></span>
+            <p style="margin:0;font-size:15.5px;line-height:1.85;color:#24414D;text-wrap:pretty;">{{ w }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Licenses -->
+  <section data-screen-label="Licenses" style="padding:0 clamp(20px,3vw,40px) clamp(64px,8vw,112px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>الاعتمادات<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">تراخيصنا واعتماداتنا</h2>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">نعمل بشكل نظامي وموثّق، وهذه أبرز تراخيصنا</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px;">
+        <sc-for list="{{ licenses }}" as="l" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:14px;">
+            <div style="height:72px;border-radius:12px;border:1px dashed #CBD9DF;display:flex;align-items:center;justify-content:center;gap:8px;color:#7A8E97;font-family:ui-monospace,Menlo,monospace;font-size:11px;"><i class="{{ l.icon }}" style="font-size:24px;color:#0B4F6C;"></i>شعار الجهة</div>
+            <h3 style="margin:0;font-size:17px;font-weight:600;color:#0E2A36;line-height:1.6;">{{ l.title }}</h3>
+            <p style="margin:0;font-size:14.5px;line-height:1.85;color:#516874;flex:1;">{{ l.text }}</p>
+            <sc-if value="{{ l.btn }}">
+              <a href="#" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:12px;border:1px solid #CBD9DF;color:#0B4F6C;text-decoration:none;font-size:14px;font-weight:600;" style-hover="background:#0B4F6C;color:#fff;border-color:#0B4F6C;"><i class="ph ph-seal-check" style="font-size:18px;"></i>{{ l.btn }}</a>
+            </sc-if>
+            <sc-if value="{{ l.noBtn }}">
+              <span style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:12px;background:#EEF7F1;color:#1C7A43;font-size:14px;font-weight:600;"><i class="ph ph-check-circle" style="font-size:18px;"></i>معتمدة</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partners -->
+  <section data-screen-label="Partners" style="background:#fff;border-top:1px solid #E3EBEE;border-bottom:1px solid #E3EBEE;padding:clamp(48px,6vw,72px) 0;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 clamp(20px,3vw,40px);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;">
+      <h2 style="margin:0;font-size:clamp(24px,2.6vw,34px);font-weight:700;color:#0B4F6C;">شركاء النجاح</h2>
+      <p style="margin:0;font-size:clamp(15px,1.2vw,17px);color:#516874;">نعتزّ بثقة الشركات والجهات التي تعاملت معنا</p>
+    </div>
+    <div style="margin-top:32px;overflow:hidden;direction:ltr;-webkit-mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);">{{ marquee }}</div>
+  </section>
+
+  <!-- Reviews -->
+  <section data-screen-label="Reviews" style="padding:clamp(64px,8vw,112px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,40px);">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>آراء العملاء</span>
+          <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">ماذا يقول عملاؤنا</h2>
+          <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">تقييمات حقيقية من عملائنا على Google</p>
+        </div>
+        <a href="#" style="display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:14px;background:#fff;border:1px solid #CBD9DF;color:#0E2A36;text-decoration:none;font-size:15px;font-weight:600;" style-hover="border-color:#0B4F6C;"><i class="ph ph-google-logo" style="font-size:20px;color:#0B4F6C;"></i>قيّمنا على Google</a>
+      </div>
+      <div style="border:1.5px dashed #CBD9DF;border-radius:22px;padding:clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:16px;background:rgba(255,255,255,0.5);">
+        <span style="align-self:flex-start;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#5E7480;background:#EEF3F5;padding:6px 10px;border-radius:8px;">[ أداة عرض تقييمات Google الفعلية تُربط هنا ]</span>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;">
+          <sc-for list="{{ reviewSlots }}" as="r" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #E3EBEE;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="width:42px;height:42px;border-radius:50%;background:#EEF3F5;"></span>
+                <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+                  <span style="height:10px;width:50%;border-radius:6px;background:#E3EBEE;"></span>
+                  <span style="display:flex;gap:2px;color:#BCA24E;font-size:14px;"><i class="ph ph-star"></i><i class="ph ph-star"></i><i class="ph ph-star"></i><i class="ph ph-star"></i><i class="ph ph-star"></i></span>
+                </div>
+                <i class="ph ph-google-logo" style="font-size:20px;color:#9AAEB7;"></i>
+              </div>
+              <span style="height:9px;width:100%;border-radius:6px;background:#EEF3F5;"></span>
+              <span style="height:9px;width:88%;border-radius:6px;background:#EEF3F5;"></span>
+              <span style="height:9px;width:62%;border-radius:6px;background:#EEF3F5;"></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" data-screen-label="FAQ" style="padding:0 clamp(20px,3vw,40px) clamp(64px,8vw,112px);">
+    <div style="max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,40px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>استفسارات<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">الأسئلة الشائعة</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:16px;overflow:hidden;">
+            <button onClick="{{ f.toggle }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;background:transparent;border:0;cursor:pointer;text-align:right;font-size:clamp(15.5px,1.2vw,17px);font-weight:600;color:#0E2A36;">
+              {{ f.q }}
+              <span style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:#F1F6F8;color:#0B4F6C;display:flex;align-items:center;justify-content:center;font-size:16px;"><i class="{{ f.icon }}"></i></span>
+            </button>
+            <sc-if value="{{ f.open }}">
+              <p style="margin:0;padding:0 22px 22px;font-size:15.5px;line-height:1.95;color:#516874;animation:fadeUp .25s ease;">{{ f.a }}</p>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <a href="#" style="align-self:center;display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:14px;border:1px solid #CBD9DF;background:#fff;color:#0B4F6C;text-decoration:none;font-size:15px;font-weight:600;" style-hover="border-color:#0B4F6C;">كل الأسئلة<i class="ph ph-arrow-left"></i></a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding:0 clamp(12px,2.5vw,32px) clamp(64px,8vw,112px);">
+    <div style="max-width:1240px;margin:0 auto;background:#0B4F6C;border-radius:clamp(20px,2.4vw,28px);padding:clamp(36px,5vw,64px) clamp(24px,5vw,72px);position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px;">
+      <img src="assets/logo-gold.png" alt="" style="position:absolute;left:clamp(-40px,2vw,40px);top:50%;transform:translateY(-50%);height:240px;opacity:0.18;pointer-events:none;">
+      <div style="position:relative;display:flex;flex-direction:column;gap:12px;max-width:620px;">
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#fff;">جاهز تبدأ طلبك؟</h2>
+        <p style="margin:0;font-size:clamp(15px,1.25vw,18px);line-height:1.9;color:#CFE0E7;">فريق شطارة جاهز للإجابة عن أسئلتك ومساعدتك في اختيار الأنسب لك.</p>
+      </div>
+      <div style="position:relative;display:flex;flex-wrap:wrap;gap:12px;">
+        <a href="https://wa.me/966533420302" style="display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:14px;background:#1FA855;color:#fff;text-decoration:none;font-size:16px;font-weight:600;" style-hover="background:#1B964C;color:#fff;"><i class="ph ph-whatsapp-logo" style="font-size:22px;"></i>تواصل عبر واتساب</a>
+        <a href="tel:0533420302" style="display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:14px;background:#BCA24E;color:#1A1608;text-decoration:none;font-size:16px;font-weight:700;" style-hover="background:#C9B062;color:#1A1608;"><i class="ph ph-phone" style="font-size:20px;"></i>اتصل بنا: <span dir="ltr">0533420302</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" data-screen-label="Contact" style="padding:0 clamp(20px,3vw,40px) clamp(64px,8vw,112px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,40px);">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>تواصل</span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">تواصل معنا</h2>
+        <p style="margin:0;font-size:clamp(15px,1.2vw,18px);color:#516874;">يسعدنا استقبال استفساراتك عبر النموذج أو وسائل التواصل التالية</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:24px;align-items:start;">
+        <div style="background:#fff;border:1px solid #E3EBEE;border-radius:22px;padding:clamp(22px,3vw,36px);box-shadow:0 8px 24px rgba(11,79,108,0.05);">
+          <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+            <form onSubmit="{{ submit }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;">
+              <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">الاسم الكامل<input required type="text" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+              <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">رقم الجوال<input required type="tel" placeholder="05xxxxxxxx" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;text-align:right;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+              <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">البريد الإلكتروني (اختياري)<input type="email" style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></label>
+              <label style="display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">نوع الخدمة
+                <select required style="height:50px;border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:0 14px;font-size:15px;color:#0E2A36;outline:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22><path d=%22M2 4l4 4 4-4%22 fill=%22none%22 stroke=%22%230B4F6C%22 stroke-width=%221.5%22/></svg>');background-repeat:no-repeat;background-position:left 14px center;" style-focus="border-color:#0B4F6C;">
+                  <option value="">اختر نوع الخدمة</option>
+                  <option>استقدام للأفراد</option><option>قطاع الأعمال</option><option>نقل خدمات</option><option>تأجير عمالة</option><option>استفسار عام</option>
+                </select>
+              </label>
+              <label style="grid-column:1/-1;display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#24414D;">رسالتك<textarea rows="5" style="border-radius:12px;border:1px solid #D5E1E6;background:#F9FBFC;padding:12px 14px;font-size:15px;color:#0E2A36;outline:none;resize:vertical;" style-focus="border-color:#0B4F6C;background:#fff;box-shadow:0 0 0 3px rgba(11,79,108,0.1);"></textarea></label>
+              <button type="submit" style="grid-column:1/-1;height:54px;border:0;border-radius:14px;background:#0B4F6C;color:#fff;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;" style-hover="background:#083B51;"><i class="ph ph-paper-plane-tilt" style="font-size:20px;"></i>إرسال</button>
+            </form>
+          </sc-if>
+          <sc-if value="{{ sent }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:40px 12px;">
+              <span style="width:72px;height:72px;border-radius:50%;background:#EEF7F1;color:#1C7A43;display:flex;align-items:center;justify-content:center;font-size:36px;"><i class="ph ph-check-circle"></i></span>
+              <p style="margin:0;font-size:18px;line-height:1.9;color:#0E2A36;font-weight:500;max-width:420px;">شكراً لتواصلك مع شطارة! استلمنا رسالتك وسيتواصل معك فريقنا في أقرب وقت.</p>
+              <button onClick="{{ reset }}" style="border:0;background:transparent;color:#0B4F6C;font-size:14px;font-weight:600;cursor:pointer;">إرسال رسالة أخرى</button>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="6">
+            <a href="{{ c.href }}" style="background:#fff;border:1px solid #E3EBEE;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;text-decoration:none;" style-hover="border-color:#BCA24E;">
+              <span style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:#EEF5F8;color:#0B4F6C;display:flex;align-items:center;justify-content:center;font-size:22px;"><i class="{{ c.icon }}"></i></span>
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                <span style="font-size:13px;color:#6B808A;">{{ c.label }}</span>
+                <span style="font-size:15.5px;font-weight:600;color:#0E2A36;word-break:break-word;">{{ c.value }}</span>
+              </span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dc-import name="Footer" hint-size="100%,420px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { slide: 0, faq: 0, sent: false, w: typeof window !== 'undefined' ? window.innerWidth : 1440 };
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('resize', this.onR);
+    this.startTimer();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); clearInterval(this.t); }
+  startTimer() { clearInterval(this.t); this.t = setInterval(() => this.setState(s => ({ slide: (s.slide + 1) % 3 })), 7000); }
+  go(i) { this.setState({ slide: (i + 3) % 3 }); this.startTimer(); }
+  renderVals() {
+    const slides = [
+      { title: 'شطارة في الاختيار.. وراحة في بيتك', text: 'شركة سعودية مرخّصة لاستقدام العمالة المنزلية والمهنية. نختار لك الكفاءة المناسبة بعناية، ونتابع معك حتى وصولها.', img: 'صورة: أسرة سعودية في منزلها',
+        primary: [{ label: 'تصفّح السير الذاتية', href: 'CVs.dc.html', icon: 'ph ph-identification-card' }], secondary: [{ label: 'اطلب الآن', href: 'Request.dc.html', icon: 'ph ph-file-plus' }] },
+      { title: 'استقدام نظامي عبر منصة مساند', text: 'تعاقد إلكتروني موثّق وفق أنظمة وزارة الموارد البشرية والتنمية الاجتماعية، بإجراءات واضحة ورسوم معلنة.', img: 'صورة: توقيع عقد إلكتروني مع مستشار شطارة',
+        primary: [{ label: 'ابدأ طلبك', href: 'Request.dc.html', icon: 'ph ph-file-plus' }], secondary: [] },
+      { title: 'تحتاج عمالة لفترة مؤقتة؟', text: 'خدمة تأجير العمالة بعقود شهرية مرنة، تلبّي احتياجك بسرعة ودون انتظار إجراءات الاستقدام.', img: 'صورة: عاملة منزلية في بيئة عمل محترمة',
+        primary: [{ label: 'تواصل عبر واتساب', href: 'https://wa.me/966533420302', icon: 'ph ph-whatsapp-logo' }], secondary: [] }
+    ];
+    const labels = ['شركة سعودية مرخّصة', 'عبر منصة مساند', 'تأجير العمالة'];
+    const i = this.state.slide;
+    const wide = this.state.w >= 900;
+    const steps = [
+      ['اختر السيرة الذاتية', 'تصفّح السير الذاتية حسب المهنة والدولة، أو اطلب منا ترشيحاً يناسبك.', 'ph ph-identification-card'],
+      ['أكّد طلبك', 'نتواصل معك لمراجعة التفاصيل والإجابة عن جميع استفساراتك.', 'ph ph-chats-circle'],
+      ['التعاقد عبر مساند', 'توقيع العقد إلكترونياً وسداد الرسوم عبر منصة مساند بشكل آمن وموثّق.', 'ph ph-signature'],
+      ['التأشيرة والسفر', 'نتابع الإجراءات مع المكتب الخارجي، ونطلعك على كل مستجد أولاً بأول.', 'ph ph-airplane-tilt'],
+      ['الوصول والاستلام', 'نبلغك بموعد الوصول، ونبقى معك طوال فترة الضمان.', 'ph ph-house-line']
+    ].map(([title, text, icon], k, a) => ({ n: k + 1, title, text, icon, notLast: k < a.length - 1 }));
+    const faqData = [
+      ['كم المدة المتوقعة لوصول العامل؟', 'تختلف المدة حسب الدولة والمهنة وإجراءات التأشيرة، ونوضّح لك المدة التقريبية عند تقديم الطلب، ونطلعك على كل مرحلة.'],
+      ['كيف يتم التعاقد؟', 'يتم التعاقد إلكترونياً عبر منصة مساند، حيث يُوثّق العقد وتُسدَّد الرسوم بشكل آمن يحفظ حقوق جميع الأطراف.'],
+      ['هل يوجد ضمان بعد الوصول؟', 'نعم، يشمل العقد فترة ضمان [مدة الضمان]، وإن ظهرت أي ملاحظة نتابعها معك ونقدّم الحل المناسب من استبدال أو استرجاع وفق شروط العقد.'],
+      ['هل أستطيع اختيار العاملة بنفسي؟', 'نعم، تستطيع تصفّح السير الذاتية والحجز مباشرة من الموقع، أو ترك احتياجك لنا لنرشّح لك الأنسب.']
+    ];
+    const logos = Array.from({ length: 8 }, (_, k) => k);
+    const item = k => React.createElement('div', { key: k, style: { flexShrink: 0, width: 168, height: 72, margin: '0 10px', borderRadius: 14, border: '1px dashed #CBD9DF', background: '#F9FBFC', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11, color: '#7A8E97' } }, '[ شعار شريك ' + (k + 1) + ' ]');
+    const marquee = React.createElement('div', { style: { display: 'flex', width: 'max-content', animation: 'marquee 40s linear infinite' } }, [...logos, ...logos].map((k, idx) => item(k + (idx >= 8 ? 0 : 0))).map((el, idx) => React.cloneElement(el, { key: idx })));
+    return {
+      cur: slides[i], slideLabel: labels[i],
+      dots: slides.map((_, k) => ({ go: () => this.go(k), aria: 'الشريحة ' + (k + 1), w: k === i ? '28px' : '8px', bg: k === i ? '#BCA24E' : 'rgba(255,255,255,0.35)' })),
+      prev: () => this.go(i - 1), next: () => this.go(i + 1),
+      trust: [
+        { icon: 'ph ph-shield-check', title: 'مرخّصة رسمياً', text: 'من وزارة الموارد البشرية والتنمية الاجتماعية — ترخيص رقم [ ]' },
+        { icon: 'ph ph-seal-check', title: 'معتمدة على مساند', text: 'جميع العقود عبر المنصة الرسمية للاستقدام' },
+        { icon: 'ph ph-file-text', title: 'عقود موثّقة', text: 'تعاقد إلكتروني يحفظ حقوق جميع الأطراف' },
+        { icon: 'ph ph-hand-heart', title: 'متابعة بعد الوصول', text: 'نبقى معك طوال فترة الضمان' }
+      ],
+      services: [
+        { icon: 'ph ph-house-line', title: 'قطاع الأفراد', text: 'استقدام العمالة المنزلية للأسر: عاملات منزليات، سائقون خاصون، طبّاخون، مربيات أطفال وغيرهم، باختيار دقيق ومتابعة مستمرة.' },
+        { icon: 'ph ph-buildings', title: 'قطاع الأعمال', text: 'توفير الأيدي العاملة المهنية والفنية للشركات والمؤسسات، بحسب التخصص والعدد الذي تحتاجه منشأتك.' },
+        { icon: 'ph ph-arrows-left-right', title: 'نقل الخدمات', text: 'نقل خدمات العمالة المنزلية بين أصحاب العمل بطريقة نظامية وميسّرة، مع سير ذاتية جاهزة للنقل داخل المملكة.' },
+        { icon: 'ph ph-calendar-check', title: 'تأجير العمالة', text: 'عقود تأجير شهرية مرنة للمواسم والاحتياجات المؤقتة، والعمالة تحت إشراف الشركة.' }
+      ],
+      offers: [
+        ['اختيار دقيق', 'نفرز السير الذاتية ونرشّح لك الأنسب لاحتياجك وطبيعة منزلك أو عملك.'],
+        ['نفهم احتياجك أولاً', 'نستمع لتفاصيل طلبك قبل أي ترشيح، لنوفّر وقتك ونسرّع الإجراءات.'],
+        ['أسعار واضحة', 'رسوم معلنة وتكلفة منافسة، بلا مفاجآت ولا مبالغ مخفية.'],
+        ['ننجز الإجراءات عنك', 'نتولّى المعاملات من التعاقد حتى الوصول، لتتفرّغ لأسرتك وأعمالك.'],
+        ['خيارات من دول متعددة', 'نتعامل مع مكاتب معتمدة في عدة دول، لنوفّر لك خيارات أوسع.'],
+        ['متابعة بعد الوصول', 'نبقى على تواصل معك خلال فترة الضمان، ونعالج أي ملاحظة بسرعة.']
+      ].map(([title, text], k) => ({ n: '0' + (k + 1), title, text })),
+      jobs: ['عاملة منزلية', 'عامل منزلي', 'سائق خاص', 'طبّاخ / طبّاخة', 'مربية أطفال', 'ممرضة منزلية', 'مرافق / مرافقة لكبار السن', 'حارس', 'مزارع / بستاني'],
+      countries: [['الفلبين', 'ph'], ['كينيا', 'ke'], ['أوغندا', 'ug'], ['إثيوبيا', 'et'], ['بوروندي', 'bi'], ['غانا', 'gh'], ['بنغلاديش', 'bd'], ['الهند', 'in'], ['سريلانكا', 'lk']]
+        .map(([name, c]) => ({ name, flag: 'https://flagcdn.com/w160/' + c + '.png' })),
+      steps, wide, narrow: !wide,
+      why: ['ترخيص رسمي والتزام كامل بأنظمة العمل في المملكة.', 'مصداقية في التعامل؛ ما نعد به ننفّذه.', 'شفافية في الأسعار والمدد والإجراءات من البداية.', 'مرونة في تلبية احتياجات الأفراد والمنشآت.', 'فريق خبير بأنظمة الاستقدام ومتطلبات كل دولة.', 'سرعة في الرد والمتابعة عبر الهاتف والواتساب.', 'حلول عند الحاجة: استبدال أو استرجاع وفق شروط العقد والضمان.', 'حماية بيانات العملاء والحفاظ على سرّيتها.'],
+      licenses: [
+        { icon: 'ph ph-bank', title: 'وزارة الموارد البشرية والتنمية الاجتماعية', text: 'شركة استقدام مرخّصة برقم ترخيص [ ].', btn: 'عرض الترخيص' },
+        { icon: 'ph ph-seal-check', title: 'منصة مساند', text: 'شركة معتمدة لتقديم خدمات الاستقدام عبر منصة مساند.', btn: null, noBtn: true },
+        { icon: 'ph ph-storefront', title: 'السجل التجاري', text: 'سجل تجاري رقم [ ] صادر من وزارة التجارة.', btn: 'عرض السجل' },
+        { icon: 'ph ph-certificate', title: 'شهادات إضافية (اختياري)', text: 'شهادات الجودة أو عضوية الغرفة التجارية إن وجدت.', btn: 'عرض الشهادة' }
+      ],
+      marquee, reviewSlots: [1, 2, 3],
+      faqs: faqData.map(([q, a], k) => ({ q, a, open: this.state.faq === k, icon: this.state.faq === k ? 'ph ph-minus' : 'ph ph-plus', toggle: () => this.setState(s => ({ faq: s.faq === k ? -1 : k })) })),
+      sent: this.state.sent, notSent: !this.state.sent,
+      submit: e => { e.preventDefault(); this.setState({ sent: true }); },
+      reset: () => this.setState({ sent: false }),
+      contacts: [
+        { icon: 'ph ph-headset', label: 'خدمة العملاء', value: '0533420302', href: 'tel:0533420302' },
+        { icon: 'ph ph-whatsapp-logo', label: 'الجوال / واتساب', value: '0533420302', href: 'https://wa.me/966533420302' },
+        { icon: 'ph ph-phone', label: 'الإدارة', value: '0505627753 • 0533213031', href: 'tel:0505627753' },
+        { icon: 'ph ph-envelope-simple', label: 'البريد الإلكتروني', value: 'shatara.recruitment@gmail.com', href: 'mailto:shatara.recruitment@gmail.com' },
+        { icon: 'ph ph-map-pin', label: 'العنوان', value: '[ العنوان والمدينة + رابط خرائط Google ]', href: '#' },
+        { icon: 'ph ph-clock', label: 'ساعات العمل', value: '[ ساعات العمل ]', href: '#' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

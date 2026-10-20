@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>من نحن | شركة شطارة للاستقدام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<style>
+body{margin:0;background:#F6F9FA;color:#0E2A36;font-family:'Cairo',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0B4F6C}a:hover{color:#8C7530}
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'Cairo',sans-serif;background:#F6F9FA;color:#0E2A36;min-height:100vh;">
+  <dc-import name="Header" active="about" hint-size="100%,120px"></dc-import>
+
+  <section data-screen-label="About intro" style="padding:clamp(36px,5vw,64px) clamp(20px,3vw,40px) clamp(56px,7vw,96px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,4vw,48px);">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6B808A;"><a href="Home.dc.html" style="color:#6B808A;text-decoration:none;">الرئيسية</a><i class="ph ph-caret-left" style="font-size:12px;"></i><span style="color:#0B4F6C;">من نحن</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(32px,5vw,80px);align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:22px;">
+          <h1 style="margin:0;font-size:clamp(34px,4.2vw,56px);font-weight:700;color:#0B4F6C;">من نحن</h1>
+          <p style="margin:0;font-size:clamp(16px,1.35vw,19px);line-height:2.05;color:#3D5560;text-wrap:pretty;">تأسست شركة شطارة للاستقدام لتقدّم تجربة استقدام مختلفة: واضحة من أول خطوة، وموثوقة حتى آخرها. نعمل بترخيص رسمي من وزارة الموارد البشرية والتنمية الاجتماعية، ونقدّم خدماتنا للأفراد والأسر والمنشآت عبر منصة مساند، بالتعاون مع مكاتب استقدام معتمدة في عدة دول. اسمنا يعبّر عن طريقتنا: الشطارة عندنا تعني حسن الاختيار، ودقة الإجراءات، وسرعة الحل.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;">
+            <a href="#" style="display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;background:#0B4F6C;color:#fff;text-decoration:none;font-size:15px;font-weight:600;" style-hover="background:#083B51;color:#fff;"><i class="ph ph-file-pdf" style="font-size:20px;"></i>تحميل الملف التعريفي</a>
+            <a href="Home.dc.html#contact" style="display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;border:1px solid #CBD9DF;background:#fff;color:#0B4F6C;text-decoration:none;font-size:15px;font-weight:600;" style-hover="border-color:#0B4F6C;">تواصل معنا<i class="ph ph-arrow-left"></i></a>
+          </div>
+        </div>
+        <div style="position:relative;display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:1fr 1fr;gap:14px;aspect-ratio:6/5;">
+          <div style="grid-row:1/3;border-radius:22px;background:repeating-linear-gradient(135deg,#E6EDF0 0 10px,#EFF4F6 10px 20px);display:flex;align-items:flex-end;padding:14px;"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5E7480;background:rgba(255,255,255,0.9);padding:6px 10px;border-radius:7px;">صورة: مكتب شطارة واستقبال العملاء</span></div>
+          <div style="border-radius:22px;background:#0B4F6C;display:flex;align-items:center;justify-content:center;"><img src="assets/logo-gold.png" alt="شعار شطارة" style="height:72%;width:auto;"></div>
+          <div style="border-radius:22px;background:repeating-linear-gradient(135deg,#E6EDF0 0 10px,#EFF4F6 10px 20px);display:flex;align-items:flex-end;padding:14px;"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5E7480;background:rgba(255,255,255,0.9);padding:6px 10px;border-radius:7px;">صورة: فريق العمل</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Vision & mission" style="background:#fff;border-top:1px solid #E3EBEE;border-bottom:1px solid #E3EBEE;padding:clamp(56px,7vw,96px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:20px;">
+      <div style="background:#0B4F6C;border-radius:24px;padding:clamp(28px,3.4vw,44px);display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;">
+        <img src="assets/logo-white.png" alt="" style="position:absolute;left:-30px;bottom:-60px;height:240px;opacity:0.06;">
+        <span style="width:56px;height:56px;border-radius:16px;background:rgba(188,162,78,0.18);color:#BCA24E;display:flex;align-items:center;justify-content:center;font-size:28px;"><i class="ph ph-eye"></i></span>
+        <h2 style="margin:0;font-size:clamp(24px,2.4vw,30px);font-weight:700;color:#fff;">رؤيتنا</h2>
+        <p style="position:relative;margin:0;font-size:clamp(16px,1.3vw,18px);line-height:2;color:#D7E4EA;text-wrap:pretty;">أن نكون الخيار الأول للأسر والمنشآت في المملكة عند التفكير في الاستقدام، بفضل الثقة والجودة والوضوح.</p>
+      </div>
+      <div style="background:#F6F9FA;border:1px solid #E3EBEE;border-radius:24px;padding:clamp(28px,3.4vw,44px);display:flex;flex-direction:column;gap:16px;">
+        <span style="width:56px;height:56px;border-radius:16px;background:#F7F1DE;color:#8C7530;display:flex;align-items:center;justify-content:center;font-size:28px;"><i class="ph ph-compass"></i></span>
+        <h2 style="margin:0;font-size:clamp(24px,2.4vw,30px);font-weight:700;color:#0B4F6C;">رسالتنا</h2>
+        <p style="margin:0;font-size:clamp(16px,1.3vw,18px);line-height:2;color:#3D5560;text-wrap:pretty;">تقديم خدمات استقدام نظامية وموثوقة، تختصر على العميل الوقت والجهد، وتوفّر له عمالة مؤهلة تناسب احتياجه، مع متابعة صادقة في كل مرحلة.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Values" style="padding:clamp(56px,7vw,96px) clamp(20px,3vw,40px);">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(28px,3.5vw,44px);">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:10px;color:#8C7530;font-size:14px;font-weight:600;"><span style="width:28px;height:1.5px;background:#BCA24E;"></span>ما نؤمن به<span style="width:28px;height:1.5px;background:#BCA24E;"></span></span>
+        <h2 style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:700;color:#0B4F6C;">قيمنا</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(46%,200px),1fr));gap:14px;">
+        <sc-for list="{{ values }}" as="v" hint-placeholder-count="5">
+          <div style="background:#fff;border:1px solid #E3EBEE;border-radius:20px;padding:28px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;" style-hover="border-color:#BCA24E;">
+            <span style="width:60px;height:60px;border-radius:50%;background:#EEF5F8;color:#0B4F6C;display:flex;align-items:center;justify-content:center;font-size:28px;"><i class="{{ v.icon }}"></i></span>
+            <strong style="font-size:17px;font-weight:600;color:#0E2A36;">{{ v.label }}</strong>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(12px,2.5vw,32px) clamp(64px,8vw,104px);">
+    <div style="max-width:1240px;margin:0 auto;background:#0B4F6C;border-radius:clamp(20px,2.4vw,28px);padding:clamp(36px,5vw,56px) clamp(24px,5vw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;">
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;">
+        <h2 style="margin:0;font-size:clamp(26px,3vw,38px);font-weight:700;color:#fff;">جاهز تبدأ طلبك؟</h2>
+        <p style="margin:0;font-size:clamp(15px,1.25vw,18px);line-height:1.9;color:#CFE0E7;">فريق شطارة جاهز للإجابة عن أسئلتك ومساعدتك في اختيار الأنسب لك.</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <a href="https://wa.me/966533420302" style="display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:14px;background:#1FA855;color:#fff;text-decoration:none;font-size:16px;font-weight:600;"><i class="ph ph-whatsapp-logo" style="font-size:22px;"></i>تواصل عبر واتساب</a>
+        <a href="Request.dc.html" style="display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:14px;background:#BCA24E;color:#1A1608;text-decoration:none;font-size:16px;font-weight:700;"><i class="ph ph-file-plus" style="font-size:20px;"></i>طلب استقدام</a>
+      </div>
+    </div>
+  </section>
+
+  <dc-import name="Footer" hint-size="100%,420px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      values: [
+        { label: 'الأمانة', icon: 'ph-duotone ph-handshake' }, { label: 'الشفافية', icon: 'ph-duotone ph-eye' }, { label: 'الإتقان', icon: 'ph-duotone ph-medal' },
+        { label: 'سرعة الاستجابة', icon: 'ph-duotone ph-lightning' }, { label: 'احترام حقوق الجميع', icon: 'ph-duotone ph-scales' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

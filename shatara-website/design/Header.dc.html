@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+</helmet>
+<div dir="rtl" style="font-family:'Cairo',sans-serif;position:sticky;top:0;z-index:50;">
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="background:#083B51;color:#D7E4EA;font-size:13px;">
+      <div style="max-width:1240px;margin:0 auto;padding:9px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+        <div style="display:flex;align-items:center;gap:28px;">
+          <span style="display:flex;align-items:center;gap:8px;"><i class="ph ph-map-pin" style="font-size:16px;color:#BCA24E;"></i>[العنوان والمدينة]</span>
+          <a href="mailto:shatara.recruitment@gmail.com" style="display:flex;align-items:center;gap:8px;color:#D7E4EA;text-decoration:none;"><i class="ph ph-envelope-simple" style="font-size:16px;color:#BCA24E;"></i>shatara.recruitment@gmail.com</a>
+          <a href="tel:0533420302" style="display:flex;align-items:center;gap:8px;color:#D7E4EA;text-decoration:none;"><i class="ph ph-phone" style="font-size:16px;color:#BCA24E;"></i>خدمة العملاء: <span dir="ltr">0533420302</span></a>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;font-size:17px;">
+          <a href="#" aria-label="Instagram" style="color:#D7E4EA;display:flex;"><i class="ph ph-instagram-logo"></i></a>
+          <a href="#" aria-label="X" style="color:#D7E4EA;display:flex;"><i class="ph ph-x-logo"></i></a>
+          <a href="#" aria-label="Snapchat" style="color:#D7E4EA;display:flex;"><i class="ph ph-snapchat-logo"></i></a>
+          <a href="#" aria-label="TikTok" style="color:#D7E4EA;display:flex;"><i class="ph ph-tiktok-logo"></i></a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <div style="background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid #E3EBEE;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,40px);height:clamp(68px,7vw,84px);display:flex;align-items:center;justify-content:space-between;gap:20px;">
+      <a href="Home.dc.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;">
+        <img src="assets/logo-gold.png" alt="شعار شطارة" style="height:clamp(44px,4.4vw,56px);width:auto;display:block;">
+        <span style="display:flex;flex-direction:column;line-height:1.25;">
+          <span style="font-size:clamp(15px,1.4vw,18px);font-weight:700;color:#0B4F6C;">شطارة للاستقدام</span>
+          <span style="font-size:11px;color:#6B808A;letter-spacing:0.5px;">Shatara Recruitment</span>
+        </span>
+      </a>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <nav style="display:flex;align-items:center;gap:4px;">
+          <sc-for list="{{ nav }}" as="item" hint-placeholder-count="7">
+            <div style="position:relative;" onMouseEnter="{{ item.enter }}" onMouseLeave="{{ item.leave }}">
+              <a href="{{ item.href }}" style="display:flex;align-items:center;gap:4px;padding:10px 11px;font-size:15px;font-weight:600;white-space:nowrap;color:#1D3A46;text-decoration:none;border-radius:10px;" style-hover="color:#0B4F6C;background:#F1F6F8;">
+                {{ item.label }}
+                <sc-if value="{{ item.hasMenu }}"><i class="ph ph-caret-down" style="font-size:13px;"></i></sc-if>
+              </a>
+              <sc-if value="{{ item.active }}"><span style="position:absolute;bottom:-1px;right:12px;left:12px;height:2px;border-radius:2px;background:#BCA24E;"></span></sc-if>
+              <sc-if value="{{ item.menuOpen }}">
+                <div style="position:absolute;top:100%;right:0;padding-top:8px;">
+                  <div style="background:#fff;border:1px solid #E3EBEE;border-radius:14px;box-shadow:0 16px 40px rgba(11,79,108,0.12);padding:8px;min-width:220px;display:flex;flex-direction:column;">
+                    <sc-for list="{{ services }}" as="s">
+                      <a href="Home.dc.html#services" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#1D3A46;text-decoration:none;font-size:14px;" style-hover="background:#F1F6F8;color:#0B4F6C;"><i class="{{ s.icon }}" style="font-size:18px;color:#0B4F6C;"></i>{{ s.label }}</a>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </nav>
+      </sc-if>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;background:#F1F6F8;border-radius:999px;padding:3px;font-size:12px;font-weight:600;">
+          <button onClick="{{ setAr }}" style="border:0;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:999px;background:{{ arBg }};color:{{ arColor }};font-size:12px;font-weight:600;">عربي</button>
+          <button onClick="{{ setEn }}" style="border:0;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:999px;background:{{ enBg }};color:{{ enColor }};font-size:12px;font-weight:600;">EN</button>
+        </div>
+        
+        <a href="Request.dc.html" style="display:flex;align-items:center;gap:8px;padding:clamp(9px,1vw,12px) clamp(12px,1.4vw,20px);border-radius:12px;background:#BCA24E;color:#1A1608;text-decoration:none;font-size:clamp(13px,1.1vw,15px);font-weight:700;box-shadow:0 6px 16px rgba(188,162,78,0.35);white-space:nowrap;" style-hover="background:#AD9442;"><i class="ph ph-file-plus" style="font-size:18px;"></i>طلب استقدام</a>
+        <sc-if value="{{ isMobile }}">
+          <button onClick="{{ toggleMenu }}" aria-label="القائمة" style="width:44px;height:44px;border-radius:12px;border:1px solid #D5E1E6;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#0B4F6C;font-size:22px;"><i class="{{ menuIcon }}"></i></button>
+        </sc-if>
+      </div>
+    </div>
+    <sc-if value="{{ enNotice }}">
+      <div style="background:#FBF7EA;border-top:1px solid #EFE5C5;color:#5B4B16;font-size:13px;text-align:center;padding:8px 16px;">English version will be available after the Arabic content is approved.</div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ mobileOpen }}">
+    <div style="background:#fff;border-bottom:1px solid #E3EBEE;box-shadow:0 20px 40px rgba(11,79,108,0.12);padding:8px 16px 20px;display:flex;flex-direction:column;max-height:calc(100vh - 70px);overflow:auto;">
+      <sc-for list="{{ nav }}" as="item">
+        <a href="{{ item.href }}" onClick="{{ closeMenu }}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid #EEF3F5;font-size:16px;font-weight:500;color:#1D3A46;text-decoration:none;">{{ item.label }}<i class="ph ph-caret-left" style="color:#9AAEB7;"></i></a>
+      </sc-for>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 0 4px;">
+        <sc-for list="{{ services }}" as="s">
+          <a href="Home.dc.html#services" onClick="{{ closeMenu }}" style="display:flex;align-items:center;gap:8px;padding:12px;border-radius:12px;background:#F6F9FA;color:#0B4F6C;text-decoration:none;font-size:14px;"><i class="{{ s.icon }}" style="font-size:18px;"></i>{{ s.label }}</a>
+        </sc-for>
+      </div>
+      
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:200},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;about&quot;,&quot;services&quot;,&quot;cvs&quot;,&quot;countries&quot;,&quot;faq&quot;,&quot;contact&quot;,&quot;request&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, open: null, mobileOpen: false, lang: 'ar' };
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() {
+    const active = this.props.active ?? 'home';
+    const isMobile = this.state.w < 1100;
+    const items = [
+      ['home', 'الرئيسية', 'Home.dc.html'], ['about', 'من نحن', 'About.dc.html'], ['services', 'خدماتنا', 'Home.dc.html#services', true],
+      ['countries', 'الدول المتاحة', 'Home.dc.html#countries'], ['faq', 'الأسئلة الشائعة', 'Home.dc.html#faq'], ['contact', 'اتصل بنا', 'Home.dc.html#contact']
+    ];
+    const nav = items.map(([k, label, href, hasMenu]) => ({
+      label, href, hasMenu: !!hasMenu, active: k === active, menuOpen: hasMenu && this.state.open === k,
+      enter: () => hasMenu && this.setState({ open: k }), leave: () => this.setState({ open: null })
+    }));
+    const en = this.state.lang === 'en';
+    return {
+      nav, isMobile, isDesktop: !isMobile,
+      services: [
+        { label: 'قطاع الأفراد', icon: 'ph ph-house-line' }, { label: 'قطاع الأعمال', icon: 'ph ph-buildings' },
+        { label: 'نقل الخدمات', icon: 'ph ph-arrows-left-right' }, { label: 'تأجير العمالة', icon: 'ph ph-calendar-check' }
+      ],
+      mobileOpen: isMobile && this.state.mobileOpen,
+      menuIcon: this.state.mobileOpen ? 'ph ph-x' : 'ph ph-list',
+      toggleMenu: () => this.setState(s => ({ mobileOpen: !s.mobileOpen })),
+      closeMenu: () => this.setState({ mobileOpen: false }),
+      arBg: en ? 'transparent' : '#0B4F6C', arColor: en ? '#516874' : '#fff',
+      enBg: en ? '#0B4F6C' : 'transparent', enColor: en ? '#fff' : '#516874',
+      setAr: () => this.setState({ lang: 'ar' }), setEn: () => this.setState({ lang: 'en' }), enNotice: en
+    };
+  }
+}
+</script>
+</body>
+</html>

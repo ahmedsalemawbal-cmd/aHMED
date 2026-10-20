@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9EEF0;font-family:'Cairo',sans-serif}a{color:#0B4F6C}a:hover{color:#8C7530}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:96px;" dir="rtl">
+  <sc-for list="{{ pages }}" as="p" hint-placeholder-count="4">
+    <section style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <h2 style="margin:0;font-size:32px;font-weight:700;color:#0B4F6C;">{{ p.title }}</h2>
+        <a href="{{ p.file }}" style="font-size:15px;font-weight:600;">فتح الصفحة ↗</a>
+      </div>
+      <div style="display:flex;gap:48px;align-items:flex-start;" dir="ltr">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:15px;color:#516874;font-weight:600;">كمبيوتر — 1440px</span>
+          <iframe src="{{ p.file }}" title="desktop" style="width:1440px;height:900px;border:0;border-radius:14px;background:#fff;box-shadow:0 20px 60px rgba(11,79,108,0.15);"></iframe>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:15px;color:#516874;font-weight:600;">جوال — 390px</span>
+          <iframe src="{{ p.file }}" title="mobile" style="width:390px;height:844px;border:0;border-radius:36px;background:#fff;box-shadow:0 0 0 10px #0E2A36,0 20px 60px rgba(11,79,108,0.2);"></iframe>
+        </div>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { pages: [
+      { title: 'الصفحة الرئيسية', file: 'Home.dc.html' },
+      { title: 'السير الذاتية', file: 'CVs.dc.html' },
+      { title: 'طلب استقدام جديد', file: 'Request.dc.html' },
+      { title: 'من نحن', file: 'About.dc.html' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

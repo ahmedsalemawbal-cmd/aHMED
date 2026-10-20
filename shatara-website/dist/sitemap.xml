@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://shatara.example/</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/en/</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/about.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/about.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/about.html"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/en/about.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/about.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/about.html"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/cvs.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/cvs.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/cvs.html"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/en/cvs.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/cvs.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/cvs.html"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/request.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/request.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/request.html"/>
+  </url>
+  <url>
+    <loc>https://shatara.example/en/request.html</loc>
+    <lastmod>2026-10-20</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://shatara.example/request.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://shatara.example/en/request.html"/>
+  </url>
+</urlset>
